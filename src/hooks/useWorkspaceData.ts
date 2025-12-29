@@ -7,19 +7,39 @@ export function useWorkspaceActions(workspaceId: string | undefined) {
     queryFn: async () => {
       if (!workspaceId) return [];
       
-      const { data, error } = await supabase
+      // First get action items
+      const { data: actions, error } = await supabase
         .from('action_items')
-        .select(`
-          *,
-          owner:profiles!action_items_owner_user_id_fkey(id, full_name, avatar_url)
-        `)
+        .select('*')
         .eq('workspace_id', workspaceId)
         .in('status', ['pending', 'in_progress'])
         .order('due_date', { ascending: true, nullsFirst: false })
         .limit(10);
 
       if (error) throw error;
-      return data || [];
+      if (!actions || actions.length === 0) return [];
+
+      // Get unique owner IDs
+      const ownerIds = [...new Set(actions.filter(a => a.owner_user_id).map(a => a.owner_user_id))];
+      
+      // Fetch profiles separately if there are owners
+      let profilesMap: Record<string, any> = {};
+      if (ownerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', ownerIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+        }
+      }
+
+      // Combine data
+      return actions.map(action => ({
+        ...action,
+        owner: action.owner_user_id ? profilesMap[action.owner_user_id] || null : null,
+      }));
     },
     enabled: !!workspaceId,
   });
@@ -92,7 +112,8 @@ export function useWorkspaceMeetings(workspaceId: string | undefined) {
     queryFn: async () => {
       if (!workspaceId) return null;
       
-      const { data, error } = await supabase
+      // First check for meetings
+      const { data: meeting } = await supabase
         .from('meetings')
         .select('*')
         .eq('workspace_id', workspaceId)
@@ -101,8 +122,32 @@ export function useWorkspaceMeetings(workspaceId: string | undefined) {
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
-      return data;
+      if (meeting) {
+        return { type: 'meeting', ...meeting };
+      }
+
+      // If no meeting, check for upcoming sessions
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .gte('scheduled_at', new Date().toISOString())
+        .order('scheduled_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (session) {
+        return {
+          type: 'session',
+          id: session.id,
+          title: session.title,
+          starts_at: session.scheduled_at,
+          ends_at: new Date(new Date(session.scheduled_at).getTime() + (session.duration || 60) * 60000).toISOString(),
+          join_url: null,
+        };
+      }
+
+      return null;
     },
     enabled: !!workspaceId,
   });
