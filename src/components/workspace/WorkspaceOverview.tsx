@@ -1,16 +1,10 @@
-import { Link } from 'react-router-dom';
 import { format, isPast, isToday } from 'date-fns';
 import { 
-  ArrowLeft, 
   Calendar, 
   CheckCircle2, 
-  Clock, 
   Target, 
   TrendingUp, 
   TrendingDown,
-  Minus,
-  AlertTriangle,
-  Play,
   FileText,
   Plus,
   Video,
@@ -31,10 +25,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceMeetings, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
+import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { StartupStage, HealthScore } from '@/types/database';
+import type { Database } from '@/integrations/supabase/types';
 
 interface WorkspaceOverviewProps {
   workspace: {
@@ -287,11 +283,20 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                       Join
                     </a>
                   </Button>
-                )}
+            )}
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Health Score Panel */}
+        <HealthScorePanel
+          workspaceId={workspace.id}
+          healthScore={(workspace.health_score_override || workspace.health_score) as Database['public']['Enums']['health_score'] | null}
+          healthStatus={workspace.health_status}
+          healthNotes={workspace.health_notes}
+          canWrite={canWrite}
+        />
       </div>
 
       {/* Recent Sessions - Full Width */}
