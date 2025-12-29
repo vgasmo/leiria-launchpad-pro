@@ -237,13 +237,13 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </CardContent>
         </Card>
 
-        {/* Next Meeting */}
+        {/* Next Meeting/Session */}
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5 text-primary" />
-                Next Meeting
+                Upcoming
               </CardTitle>
               {canWrite && (
                 <Button variant="outline" size="sm">
@@ -259,7 +259,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             ) : !nextMeeting ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No upcoming meetings</p>
+                <p>No upcoming meetings or sessions</p>
               </div>
             ) : (
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -273,7 +273,12 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium">{nextMeeting.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{nextMeeting.title}</p>
+                      <Badge variant="secondary" className="text-xs">
+                        {nextMeeting.type === 'session' ? 'Session' : 'Meeting'}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(nextMeeting.starts_at), 'h:mm a')} - {format(new Date(nextMeeting.ends_at), 'h:mm a')}
                     </p>
@@ -286,7 +291,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                       Join
                     </a>
                   </Button>
-            )}
+                )}
               </div>
             )}
           </CardContent>
