@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
   Building2, 
   AlertTriangle, 
-  CheckCircle2, 
-  Clock,
+  X,
+  ChevronLeft,
   ChevronRight,
-  X
+  ChevronsLeft,
+  ChevronsRight,
+  Calendar,
+  TrendingUp
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -32,28 +36,57 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWorkspaces, WorkspaceWithDetails } from '@/hooks/useWorkspaces';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { useWorkspaces, usePrograms, WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { StartupStage, HealthScore } from '@/types/database';
 
 const stages: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const healthScores: HealthScore[] = ['critical', 'at_risk', 'stable', 'healthy', 'thriving'];
+const PAGE_SIZE = 15;
 
 export default function MyWorkspaces() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [programFilter, setProgramFilter] = useState<string>('all');
   const [stageFilter, setStageFilter] = useState<StartupStage | 'all'>('all');
   const [healthFilter, setHealthFilter] = useState<HealthScore | 'all'>('all');
   const [missingKpi, setMissingKpi] = useState(false);
   const [overdueActions, setOverdueActions] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const { data: programs } = usePrograms();
   const { data: workspaces, isLoading, error } = useWorkspaces({
     search,
+    programId: programFilter,
     stage: stageFilter,
     health: healthFilter,
     missingKpi,
     overdueActions,
   });
 
+  // Pagination
+  const totalItems = workspaces?.length || 0;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedWorkspaces = useMemo(() => {
+    if (!workspaces) return [];
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return workspaces.slice(start, start + PAGE_SIZE);
+  }, [workspaces, currentPage]);
+
+  // Reset to first page when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+  };
+
   const activeFiltersCount = [
+    programFilter !== 'all',
     stageFilter !== 'all',
     healthFilter !== 'all',
     missingKpi,
@@ -61,33 +94,74 @@ export default function MyWorkspaces() {
   ].filter(Boolean).length;
 
   const clearFilters = () => {
+    setProgramFilter('all');
     setStageFilter('all');
     setHealthFilter('all');
     setMissingKpi(false);
     setOverdueActions(false);
+    handleFilterChange();
+  };
+
+  const handleRowClick = (workspaceId: string) => {
+    navigate(`/workspace/${workspaceId}`);
+  };
+
+  const formatKpiMonth = (dateStr: string | null) => {
+    if (!dateStr) return <span className="text-muted-foreground">Never</span>;
+    try {
+      return format(new Date(dateStr), 'MMM yyyy');
+    } catch {
+      return <span className="text-muted-foreground">-</span>;
+    }
+  };
+
+  const formatMeetingDate = (dateStr: string | null) => {
+    if (!dateStr) return <span className="text-muted-foreground">None scheduled</span>;
+    try {
+      return format(new Date(dateStr), 'MMM d, yyyy');
+    } catch {
+      return <span className="text-muted-foreground">-</span>;
+    }
   };
 
   return (
     <AppLayout 
       title="My Workspaces"
-      subtitle={`${workspaces?.length || 0} startups across your programs`}
+      subtitle={`${totalItems} startups across your programs`}
     >
       {/* Filters */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="mb-6 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search startups..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); handleFilterChange(); }}
             className="pl-10"
           />
         </div>
 
         <div className="flex gap-2 flex-wrap">
           <Select 
+            value={programFilter} 
+            onValueChange={(v) => { setProgramFilter(v); handleFilterChange(); }}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              {programs?.map(program => (
+                <SelectItem key={program.id} value={program.id}>
+                  {program.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
             value={stageFilter} 
-            onValueChange={(v) => setStageFilter(v as StartupStage | 'all')}
+            onValueChange={(v) => { setStageFilter(v as StartupStage | 'all'); handleFilterChange(); }}
           >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Stage" />
@@ -104,7 +178,7 @@ export default function MyWorkspaces() {
 
           <Select 
             value={healthFilter} 
-            onValueChange={(v) => setHealthFilter(v as HealthScore | 'all')}
+            onValueChange={(v) => { setHealthFilter(v as HealthScore | 'all'); handleFilterChange(); }}
           >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Health" />
@@ -123,7 +197,7 @@ export default function MyWorkspaces() {
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Filter className="h-4 w-4" />
-                Filters
+                More
                 {activeFiltersCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
                     {activeFiltersCount}
@@ -137,7 +211,7 @@ export default function MyWorkspaces() {
                   <Checkbox 
                     id="missing-kpi" 
                     checked={missingKpi}
-                    onCheckedChange={(v) => setMissingKpi(!!v)}
+                    onCheckedChange={(v) => { setMissingKpi(!!v); handleFilterChange(); }}
                   />
                   <Label htmlFor="missing-kpi" className="text-sm cursor-pointer">
                     Missing KPI this month
@@ -147,7 +221,7 @@ export default function MyWorkspaces() {
                   <Checkbox 
                     id="overdue-actions" 
                     checked={overdueActions}
-                    onCheckedChange={(v) => setOverdueActions(!!v)}
+                    onCheckedChange={(v) => { setOverdueActions(!!v); handleFilterChange(); }}
                   />
                   <Label htmlFor="overdue-actions" className="text-sm cursor-pointer">
                     Overdue action items
@@ -161,7 +235,7 @@ export default function MyWorkspaces() {
                     onClick={clearFilters}
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Clear Filters
+                    Clear All Filters
                   </Button>
                 )}
               </div>
@@ -170,23 +244,17 @@ export default function MyWorkspaces() {
         </div>
       </div>
 
-      {/* Workspace List */}
+      {/* Workspace Table */}
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardContent className="p-6">
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2 mb-4" />
-                <div className="flex gap-2 mb-4">
-                  <Skeleton className="h-5 w-20" />
-                  <Skeleton className="h-5 w-16" />
-                </div>
-                <Skeleton className="h-4 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <div className="p-6 space-y-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : error ? (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-center gap-3 p-6">
@@ -209,67 +277,170 @@ export default function MyWorkspaces() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {workspaces?.map((workspace) => (
-            <WorkspaceCard key={workspace.id} workspace={workspace} />
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[250px]">Startup</TableHead>
+                  <TableHead>Program</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead>Health</TableHead>
+                  <TableHead>Last KPI</TableHead>
+                  <TableHead className="text-center">Overdue</TableHead>
+                  <TableHead>Next Meeting</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedWorkspaces.map((workspace) => (
+                  <WorkspaceRow 
+                    key={workspace.id} 
+                    workspace={workspace} 
+                    onClick={() => handleRowClick(workspace.id)}
+                    formatKpiMonth={formatKpiMonth}
+                    formatMeetingDate={formatMeetingDate}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, totalItems)} of {totalItems} workspaces
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-1 mx-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => setCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
     </AppLayout>
   );
 }
 
-function WorkspaceCard({ workspace }: { workspace: WorkspaceWithDetails }) {
+interface WorkspaceRowProps {
+  workspace: WorkspaceWithDetails;
+  onClick: () => void;
+  formatKpiMonth: (date: string | null) => React.ReactNode;
+  formatMeetingDate: (date: string | null) => React.ReactNode;
+}
+
+function WorkspaceRow({ workspace, onClick, formatKpiMonth, formatMeetingDate }: WorkspaceRowProps) {
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
 
   return (
-    <Link to={`/workspace/${workspace.id}`}>
-      <Card className="group overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-primary/30 cursor-pointer animate-fade-in">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-heading text-lg font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                {workspace.startup?.name || 'Unnamed Startup'}
-              </h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {workspace.program?.name}
-              </p>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1" />
+    <TableRow 
+      className="cursor-pointer hover:bg-accent/50 transition-colors"
+      onClick={onClick}
+    >
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Building2 className="h-4 w-4 text-primary" />
           </div>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            <StageBadge stage={workspace.stage} />
-            <HealthBadge score={effectiveHealth} />
+          <div className="min-w-0">
+            <p className="font-semibold truncate">{workspace.startup?.name || 'Unnamed'}</p>
           </div>
-
-          <div className="flex items-center gap-4 text-sm">
-            {workspace.overdueActionsCount > 0 ? (
-              <div className="flex items-center gap-1.5 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <span>{workspace.overdueActionsCount} overdue</span>
-              </div>
-            ) : workspace.pendingActionsCount > 0 ? (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>{workspace.pendingActionsCount} pending</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-health-healthy">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>All caught up</span>
-              </div>
-            )}
-
-            {!workspace.hasCurrentMonthKpi && (
-              <div className="flex items-center gap-1.5 text-health-at-risk">
-                <AlertTriangle className="h-4 w-4" />
-                <span>Missing KPI</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge variant="outline" className="font-normal">
+          {workspace.program?.name || '-'}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <StageBadge stage={workspace.stage} />
+      </TableCell>
+      <TableCell>
+        <HealthBadge score={effectiveHealth} />
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className={!workspace.hasCurrentMonthKpi ? 'text-health-at-risk font-medium' : ''}>
+            {formatKpiMonth(workspace.lastKpiMonth)}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell className="text-center">
+        {workspace.overdueActionsCount > 0 ? (
+          <Badge variant="destructive" className="min-w-[2rem]">
+            {workspace.overdueActionsCount}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">0</span>
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+          {formatMeetingDate(workspace.nextMeetingDate)}
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
