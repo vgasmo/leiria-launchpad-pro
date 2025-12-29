@@ -16,13 +16,14 @@ export type Database = {
     Tables: {
       action_items: {
         Row: {
-          assigned_to: string | null
           completed_at: string | null
           created_at: string
           created_by: string | null
           description: string | null
           due_date: string | null
           id: string
+          owner_user_id: string | null
+          priority: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["action_status"]
           title: string
@@ -30,13 +31,14 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
-          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          owner_user_id?: string | null
+          priority?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title: string
@@ -44,13 +46,14 @@ export type Database = {
           workspace_id: string
         }
         Update: {
-          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          owner_user_id?: string | null
+          priority?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title?: string
@@ -67,59 +70,6 @@ export type Database = {
           },
           {
             foreignKeyName: "action_items_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      calendar_events: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          end_time: string
-          google_calendar_id: string | null
-          google_event_id: string | null
-          id: string
-          location: string | null
-          start_time: string
-          title: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_time: string
-          google_calendar_id?: string | null
-          google_event_id?: string | null
-          id?: string
-          location?: string | null
-          start_time: string
-          title: string
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_time?: string
-          google_calendar_id?: string | null
-          google_event_id?: string | null
-          id?: string
-          location?: string | null
-          start_time?: string
-          title?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -179,8 +129,10 @@ export type Database = {
       }
       kpi_definitions: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
+          direction: string | null
           id: string
           is_global: boolean
           name: string
@@ -188,8 +140,10 @@ export type Database = {
           unit: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
+          direction?: string | null
           id?: string
           is_global?: boolean
           name: string
@@ -197,8 +151,10 @@ export type Database = {
           unit?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
+          direction?: string | null
           id?: string
           is_global?: boolean
           name?: string
@@ -215,14 +171,14 @@ export type Database = {
           },
         ]
       }
-      kpi_entries: {
+      kpi_values: {
         Row: {
           created_at: string
           created_by: string | null
           id: string
           kpi_definition_id: string
-          month: string
           notes: string | null
+          period_month: string
           target_value: number | null
           updated_at: string
           value: number | null
@@ -233,8 +189,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           kpi_definition_id: string
-          month: string
           notes?: string | null
+          period_month: string
           target_value?: number | null
           updated_at?: string
           value?: number | null
@@ -245,8 +201,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           kpi_definition_id?: string
-          month?: string
           notes?: string | null
+          period_month?: string
           target_value?: number | null
           updated_at?: string
           value?: number | null
@@ -269,6 +225,62 @@ export type Database = {
           },
         ]
       }
+      meetings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          join_url: string | null
+          location: string | null
+          provider: string | null
+          provider_event_id: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          join_url?: string | null
+          location?: string | null
+          provider?: string | null
+          provider_event_id?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          join_url?: string | null
+          location?: string | null
+          provider?: string | null
+          provider_event_id?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestones: {
         Row: {
           completed_at: string | null
@@ -276,6 +288,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          position: number | null
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string | null
           title: string
@@ -288,6 +301,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          position?: number | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title: string
@@ -300,6 +314,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          position?: number | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title?: string
@@ -378,34 +393,40 @@ export type Database = {
       }
       sessions: {
         Row: {
+          agenda: string | null
           created_at: string
           created_by: string | null
-          duration_minutes: number | null
+          decisions: string | null
+          duration: number | null
           id: string
           notes: string | null
-          session_date: string
+          scheduled_at: string
           title: string
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          agenda?: string | null
           created_at?: string
           created_by?: string | null
-          duration_minutes?: number | null
+          decisions?: string | null
+          duration?: number | null
           id?: string
           notes?: string | null
-          session_date: string
+          scheduled_at: string
           title: string
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          agenda?: string | null
           created_at?: string
           created_by?: string | null
-          duration_minutes?: number | null
+          decisions?: string | null
+          duration?: number | null
           id?: string
           notes?: string | null
-          session_date?: string
+          scheduled_at?: string
           title?: string
           updated_at?: string
           workspace_id?: string
@@ -416,6 +437,41 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stages: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          position: number
+          program_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          position?: number
+          program_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          position?: number
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stages_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
@@ -453,10 +509,57 @@ export type Database = {
         }
         Relationships: []
       }
+      template_instances: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_json: Json | null
+          id: string
+          status: string
+          template_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_json?: Json | null
+          id?: string
+          status?: string
+          template_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_json?: Json | null
+          id?: string
+          status?: string
+          template_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_instances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       templates: {
         Row: {
           category: string | null
-          content: Json | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -464,11 +567,11 @@ export type Database = {
           is_global: boolean
           name: string
           program_id: string | null
+          schema_json: Json | null
           updated_at: string
         }
         Insert: {
           category?: string | null
-          content?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -476,11 +579,11 @@ export type Database = {
           is_global?: boolean
           name: string
           program_id?: string | null
+          schema_json?: Json | null
           updated_at?: string
         }
         Update: {
           category?: string | null
-          content?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -488,6 +591,7 @@ export type Database = {
           is_global?: boolean
           name?: string
           program_id?: string | null
+          schema_json?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -521,8 +625,57 @@ export type Database = {
         }
         Relationships: []
       }
-      workspace_members: {
+      workspace_kpis: {
         Row: {
+          active: boolean
+          created_at: string
+          id: string
+          kpi_definition_id: string
+          required: boolean
+          target_value: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kpi_definition_id: string
+          required?: boolean
+          target_value?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kpi_definition_id?: string
+          required?: boolean
+          target_value?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_kpis_kpi_definition_id_fkey"
+            columns: ["kpi_definition_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_kpis_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_users: {
+        Row: {
+          active: boolean
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
@@ -530,6 +683,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
@@ -537,6 +691,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
@@ -561,9 +716,12 @@ export type Database = {
           health_score_override:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_status: string | null
           id: string
+          last_checkin_at: string | null
           program_id: string
           stage: Database["public"]["Enums"]["startup_stage"]
+          stage_id: string | null
           startup_id: string
           updated_at: string
         }
@@ -574,9 +732,12 @@ export type Database = {
           health_score_override?:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_status?: string | null
           id?: string
+          last_checkin_at?: string | null
           program_id: string
           stage?: Database["public"]["Enums"]["startup_stage"]
+          stage_id?: string | null
           startup_id: string
           updated_at?: string
         }
@@ -587,9 +748,12 @@ export type Database = {
           health_score_override?:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_status?: string | null
           id?: string
+          last_checkin_at?: string | null
           program_id?: string
           stage?: Database["public"]["Enums"]["startup_stage"]
+          stage_id?: string | null
           startup_id?: string
           updated_at?: string
         }
@@ -599,6 +763,13 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspaces_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
             referencedColumns: ["id"]
           },
           {
