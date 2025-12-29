@@ -1,0 +1,366 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+// Programs
+export function usePrograms() {
+  return useQuery({
+    queryKey: ['admin-programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateProgram() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (program: { name: string; description?: string; start_date?: string; end_date?: string }) => {
+      const { data, error } = await supabase.from('programs').insert(program).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      toast.success('Program created');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useUpdateProgram() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; start_date?: string; end_date?: string; is_active?: boolean }) => {
+      const { data, error } = await supabase.from('programs').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      toast.success('Program updated');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useDeleteProgram() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('programs').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      toast.success('Program deleted');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+// Stages
+export function useStages(programId: string | undefined) {
+  return useQuery({
+    queryKey: ['admin-stages', programId],
+    queryFn: async () => {
+      if (!programId) return [];
+      const { data, error } = await supabase
+        .from('stages')
+        .select('*')
+        .eq('program_id', programId)
+        .order('position', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!programId,
+  });
+}
+
+export function useCreateStage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (stage: { name: string; program_id: string; position: number; description?: string }) => {
+      const { data, error } = await supabase.from('stages').insert(stage).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stages', vars.program_id] });
+      toast.success('Stage created');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useUpdateStage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, program_id, ...updates }: { id: string; program_id: string; name?: string; position?: number; description?: string }) => {
+      const { data, error } = await supabase.from('stages').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stages', vars.program_id] });
+      toast.success('Stage updated');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useDeleteStage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, program_id }: { id: string; program_id: string }) => {
+      const { error } = await supabase.from('stages').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stages', vars.program_id] });
+      toast.success('Stage deleted');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+// Profiles (Users)
+export function useProfiles() {
+  return useQuery({
+    queryKey: ['admin-profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('full_name', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+// User Roles
+export function useUserRoles() {
+  return useQuery({
+    queryKey: ['admin-user-roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAddUserRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ user_id, role }: { user_id: string; role: 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member' }) => {
+      const { data, error } = await supabase.from('user_roles').insert({ user_id, role }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-user-roles'] });
+      toast.success('Role added');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useRemoveUserRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('user_roles').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-user-roles'] });
+      toast.success('Role removed');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+// Workspace Users
+export function useWorkspaceUsers() {
+  return useQuery({
+    queryKey: ['admin-workspace-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspace_users')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAddWorkspaceUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspace_id, user_id, role, active = true }: { workspace_id: string; user_id: string; role: 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member'; active?: boolean }) => {
+      const { data, error } = await supabase.from('workspace_users').insert({ workspace_id, user_id, role, active }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      toast.success('User assigned to workspace');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useUpdateWorkspaceUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, role, active }: { id: string; role?: 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member'; active?: boolean }) => {
+      const { data, error } = await supabase.from('workspace_users').update({ role, active }).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      toast.success('Assignment updated');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useRemoveWorkspaceUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('workspace_users').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      toast.success('User removed from workspace');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+// All workspaces (for admin)
+export function useAllWorkspaces() {
+  return useQuery({
+    queryKey: ['admin-all-workspaces'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select(`
+          id,
+          startup:startups(id, name),
+          program:programs(id, name)
+        `)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+// KPI Definitions
+export function useKpiDefinitions() {
+  return useQuery({
+    queryKey: ['admin-kpi-definitions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kpi_definitions')
+        .select('*')
+        .order('category', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateKpiDefinition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (kpi: { name: string; description?: string; unit?: string; category?: string; direction?: string; is_global?: boolean; program_id?: string }) => {
+      const { data, error } = await supabase.from('kpi_definitions').insert(kpi).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-kpi-definitions'] });
+      toast.success('KPI definition created');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useUpdateKpiDefinition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; unit?: string; category?: string; direction?: string; is_global?: boolean }) => {
+      const { data, error } = await supabase.from('kpi_definitions').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-kpi-definitions'] });
+      toast.success('KPI definition updated');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+export function useDeleteKpiDefinition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('kpi_definitions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-kpi-definitions'] });
+      toast.success('KPI definition deleted');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
+
+// Workspace KPIs (required KPIs per workspace)
+export function useWorkspaceKpis() {
+  return useQuery({
+    queryKey: ['admin-workspace-kpis'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspace_kpis')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpsertWorkspaceKpi() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspace_id, kpi_definition_id, required, target_value, active }: { workspace_id: string; kpi_definition_id: string; required?: boolean; target_value?: number; active?: boolean }) => {
+      const { data, error } = await supabase
+        .from('workspace_kpis')
+        .upsert({ workspace_id, kpi_definition_id, required, target_value, active }, { onConflict: 'workspace_id,kpi_definition_id' })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-kpis'] });
+      toast.success('Workspace KPI updated');
+    },
+    onError: (e) => toast.error(`Failed: ${e.message}`),
+  });
+}
