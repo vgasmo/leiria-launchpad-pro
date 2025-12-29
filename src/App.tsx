@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
@@ -33,7 +34,12 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
     return <Navigate to="/my-workspaces" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SessionTimeoutWarning timeoutMs={30 * 60 * 1000} warningTimeMs={5 * 60 * 1000} />
+      {children}
+    </>
+  );
 }
 
 function AppRoutes() {
