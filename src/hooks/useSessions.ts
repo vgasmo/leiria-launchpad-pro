@@ -1,0 +1,202 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface SessionFormData {
+  title: string;
+  scheduled_at: string;
+  duration: number;
+  agenda: string | null;
+  notes: string | null;
+  decisions: string | null;
+}
+
+export function useSessions(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ['sessions', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      
+      const { data, error } = await supabase
+        .from('sessions')
+        .select(`
+          *,
+          creator:profiles!sessions_created_by_fkey(id, full_name, avatar_url)
+        `)
+        .eq('workspace_id', workspaceId)
+        .order('scheduled_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!workspaceId,
+  });
+}
+
+export function useCreateSession(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (session: SessionFormData) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('sessions')
+        .insert({
+          workspace_id: workspaceId,
+          title: session.title,
+          scheduled_at: session.scheduled_at,
+          duration: session.duration,
+          agenda: session.agenda,
+          notes: session.notes,
+          decisions: session.decisions,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
+    },
+  });
+}
+
+export function useUpdateSession(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<SessionFormData> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
+    },
+  });
+}
+
+export function useDeleteSession(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      const { error } = await supabase
+        .from('sessions')
+        .delete()
+        .eq('id', sessionId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
+    },
+  });
+}
+
+export function useSessionActionItems(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: ['session-action-items', sessionId],
+    queryFn: async () => {
+      if (!sessionId) return [];
+      
+      const { data, error } = await supabase
+        .from('action_items')
+        .select(`
+          *,
+          owner:profiles!action_items_owner_user_id_fkey(id, full_name, avatar_url)
+        `)
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!sessionId,
+  });
+}
+
+export function useCreateActionItem(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (actionItem: {
+      title: string;
+      description?: string;
+      due_date?: string;
+      priority?: string;
+      session_id?: string;
+      owner_user_id?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('action_items')
+        .insert({
+          workspace_id: workspaceId,
+          title: actionItem.title,
+          description: actionItem.description || null,
+          due_date: actionItem.due_date || null,
+          priority: actionItem.priority || 'medium',
+          session_id: actionItem.session_id || null,
+          owner_user_id: actionItem.owner_user_id || null,
+          created_by: user?.id,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      if (variables.session_id) {
+        queryClient.invalidateQueries({ queryKey: ['session-action-items', variables.session_id] });
+      }
+    },
+  });
+}
+
+export function useWorkspaceMembers(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ['workspace-members', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      
+      const { data: members, error } = await supabase
+        .from('workspace_users')
+        .select('id, user_id, role, active')
+        .eq('workspace_id', workspaceId)
+        .eq('active', true);
+
+      if (error) throw error;
+      if (!members) return [];
+
+      // Fetch profiles separately
+      const userIds = members.map(m => m.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, avatar_url')
+        .in('id', userIds);
+
+      // Combine data
+      return members.map(member => ({
+        ...member,
+        profile: profiles?.find(p => p.id === member.user_id) || null,
+      }));
+    },
+    enabled: !!workspaceId,
+  });
+}

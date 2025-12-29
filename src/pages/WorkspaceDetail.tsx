@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
+import { SessionsTab } from '@/components/workspace/SessionsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -93,7 +94,7 @@ export default function WorkspaceDetail() {
         </TabsContent>
 
         <TabsContent value="sessions">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Sessions management coming soon.</CardContent></Card>
+          <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="actions">
           <Card><CardContent className="py-12 text-center text-muted-foreground">Action items management coming soon.</CardContent></Card>
