@@ -11,7 +11,9 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  ArrowUpDown,
+  FileText
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -45,8 +47,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useWorkspaces, usePrograms, WorkspaceWithDetails } from '@/hooks/useWorkspaces';
+import { useWorkspaces, usePrograms, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
 import { StartupStage, HealthScore } from '@/types/database';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const stages: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const healthScores: HealthScore[] = ['critical', 'at_risk', 'stable', 'healthy', 'thriving'];
@@ -60,6 +67,7 @@ export default function MyWorkspaces() {
   const [healthFilter, setHealthFilter] = useState<HealthScore | 'all'>('all');
   const [missingKpi, setMissingKpi] = useState(false);
   const [overdueActions, setOverdueActions] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('urgency');
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: programs } = usePrograms();
@@ -70,6 +78,7 @@ export default function MyWorkspaces() {
     health: healthFilter,
     missingKpi,
     overdueActions,
+    sortBy,
   });
 
   // Pagination
@@ -143,6 +152,22 @@ export default function MyWorkspaces() {
         </div>
 
         <div className="flex gap-2 flex-wrap">
+          <Select 
+            value={sortBy} 
+            onValueChange={(v) => { setSortBy(v as SortOption); handleFilterChange(); }}
+          >
+            <SelectTrigger className="w-[150px]">
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="urgency">By Urgency</SelectItem>
+              <SelectItem value="meeting">By Next Meeting</SelectItem>
+              <SelectItem value="name">By Name</SelectItem>
+              <SelectItem value="updated">Last Updated</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Select 
             value={programFilter} 
             onValueChange={(v) => { setProgramFilter(v); handleFilterChange(); }}
@@ -283,13 +308,12 @@ export default function MyWorkspaces() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[250px]">Startup</TableHead>
+                  <TableHead className="w-[200px]">Startup</TableHead>
                   <TableHead>Program</TableHead>
-                  <TableHead>Stage</TableHead>
                   <TableHead>Health</TableHead>
-                  <TableHead>Last KPI</TableHead>
                   <TableHead className="text-center">Overdue</TableHead>
                   <TableHead>Next Meeting</TableHead>
+                  <TableHead className="w-[200px]">Last Session</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -298,7 +322,6 @@ export default function MyWorkspaces() {
                     key={workspace.id} 
                     workspace={workspace} 
                     onClick={() => handleRowClick(workspace.id)}
-                    formatKpiMonth={formatKpiMonth}
                     formatMeetingDate={formatMeetingDate}
                   />
                 ))}
@@ -386,12 +409,16 @@ export default function MyWorkspaces() {
 interface WorkspaceRowProps {
   workspace: WorkspaceWithDetails;
   onClick: () => void;
-  formatKpiMonth: (date: string | null) => React.ReactNode;
   formatMeetingDate: (date: string | null) => React.ReactNode;
 }
 
-function WorkspaceRow({ workspace, onClick, formatKpiMonth, formatMeetingDate }: WorkspaceRowProps) {
+function WorkspaceRow({ workspace, onClick, formatMeetingDate }: WorkspaceRowProps) {
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
+
+  const truncateNotes = (notes: string | null, maxLength = 60) => {
+    if (!notes) return null;
+    return notes.length > maxLength ? notes.slice(0, maxLength) + '...' : notes;
+  };
 
   return (
     <TableRow 
@@ -417,18 +444,7 @@ function WorkspaceRow({ workspace, onClick, formatKpiMonth, formatMeetingDate }:
         </Badge>
       </TableCell>
       <TableCell>
-        <StageBadge stage={workspace.stage} />
-      </TableCell>
-      <TableCell>
         <HealthBadge score={effectiveHealth} />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-1.5">
-          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className={!workspace.hasCurrentMonthKpi ? 'text-health-at-risk font-medium' : ''}>
-            {formatKpiMonth(workspace.lastKpiMonth)}
-          </span>
-        </div>
       </TableCell>
       <TableCell className="text-center">
         {workspace.overdueActionsCount > 0 ? (
@@ -444,6 +460,29 @@ function WorkspaceRow({ workspace, onClick, formatKpiMonth, formatMeetingDate }:
           <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
           {formatMeetingDate(workspace.nextMeetingDate)}
         </div>
+      </TableCell>
+      <TableCell>
+        {workspace.lastSession ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5 max-w-[180px]">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate text-sm">{workspace.lastSession.title}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-[300px]">
+              <p className="font-medium">{workspace.lastSession.title}</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {format(new Date(workspace.lastSession.scheduled_at), 'MMM d, yyyy')}
+              </p>
+              {workspace.lastSession.notes && (
+                <p className="text-xs">{truncateNotes(workspace.lastSession.notes, 150)}</p>
+              )}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <span className="text-muted-foreground text-sm">No sessions</span>
+        )}
       </TableCell>
     </TableRow>
   );
