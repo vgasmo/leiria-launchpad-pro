@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,6 +38,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
   const reorderMilestones = useReorderMilestones(workspaceId);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Milestone | null>(null);
   const [newMilestone, setNewMilestone] = useState({
     title: '',
     description: '',
@@ -71,11 +73,12 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     }
   };
 
-  const handleDelete = async (milestone: Milestone) => {
-    if (!canWrite) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget || !canWrite) return;
     try {
-      await deleteMilestone.mutateAsync(milestone.id);
+      await deleteMilestone.mutateAsync(deleteTarget.id);
       toast.success('Milestone deleted');
+      setDeleteTarget(null);
     } catch {
       toast.error('Failed to delete milestone');
     }
@@ -164,7 +167,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
                 total={sortedMilestones.length}
                 canWrite={canWrite}
                 onStatusChange={handleStatusChange}
-                onDelete={handleDelete}
+                onDelete={(m) => setDeleteTarget(m)}
                 onMoveUp={handleMoveUp}
                 onMoveDown={handleMoveDown}
               />
@@ -223,6 +226,24 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Milestone</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
