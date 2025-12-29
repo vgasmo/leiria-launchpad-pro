@@ -16,17 +16,31 @@ export function useSessions(workspaceId: string | undefined) {
     queryFn: async () => {
       if (!workspaceId) return [];
       
-      const { data, error } = await supabase
+      const { data: sessions, error } = await supabase
         .from('sessions')
-        .select(`
-          *,
-          creator:profiles!sessions_created_by_fkey(id, full_name, avatar_url)
-        `)
+        .select('*')
         .eq('workspace_id', workspaceId)
         .order('scheduled_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      if (!sessions || sessions.length === 0) return [];
+
+      // Fetch creator profiles separately
+      const creatorIds = [...new Set(sessions.map(s => s.created_by).filter(Boolean))];
+      let profiles: { id: string; full_name: string | null; avatar_url: string | null }[] = [];
+      
+      if (creatorIds.length > 0) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', creatorIds);
+        profiles = data || [];
+      }
+
+      return sessions.map(session => ({
+        ...session,
+        creator: profiles.find(p => p.id === session.created_by) || null,
+      }));
     },
     enabled: !!workspaceId,
   });
