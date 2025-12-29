@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Building2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,15 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AccessDenied } from '@/components/ui/AccessDenied';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data: workspace, isLoading } = useWorkspace(id);
+  const { data: workspace, isLoading, error } = useWorkspace(id);
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <AppLayout title="Loading...">
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-[400px] w-full" />
@@ -24,18 +25,14 @@ export default function WorkspaceDetail() {
     );
   }
 
-  if (!workspace) {
+  // Handle access denied or workspace not found
+  if (!workspace || error) {
     return (
-      <AppLayout>
-        <Card className="bg-muted/50">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="font-heading text-lg font-semibold mb-2">Workspace not found</h3>
-            <Link to="/my-workspaces">
-              <Button variant="outline">Back to Workspaces</Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <AppLayout title="Workspace">
+        <AccessDenied 
+          title="Workspace Not Accessible"
+          message="This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator."
+        />
       </AppLayout>
     );
   }
