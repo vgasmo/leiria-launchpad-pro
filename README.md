@@ -1,73 +1,117 @@
-# Welcome to your Lovable project
+# Startup Leiria Mentorship Platform
 
-## Project info
+A comprehensive mentorship platform for startups built with React, TypeScript, and Supabase (via Lovable Cloud).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Multi-program Support**: Startups can participate in multiple programs with separate workspaces
+- **Role-based Access**: Admin, Consultor, Mentor Externo, Founder, Team Member roles
+- **Workspace Management**: Sessions, Action Items, Milestones, KPIs, Templates, Documents
+- **Health Scoring**: Track startup health with customizable metrics
+- **Document Storage**: Secure file uploads with workspace-level access control
+- **Admin Panel**: Manage programs, stages, users, KPIs, and templates
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Edge Functions)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router v6
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ and npm
+- A Supabase project (or use Lovable Cloud)
 
-**Use your preferred IDE**
+## Environment Variables
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Copy `.env.example` to `.env` and fill in your values:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+cp .env.example .env
+```
 
-Follow these steps:
+Required variables:
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon/public key
+- `VITE_SUPABASE_PROJECT_ID` - Your Supabase project ID
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Local Development
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Building for Production
 
-**Use GitHub Codespaces**
+```bash
+# Build the app
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Preview production build
+npm run preview
+```
 
-## What technologies are used for this project?
+## Database Setup
 
-This project is built with:
+If setting up a new Supabase project, run the migrations in order from `supabase/migrations/`.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Key tables:
+- `profiles` - User profiles
+- `programs` - Mentorship programs
+- `stages` - Program stages
+- `startups` - Startup companies
+- `workspaces` - Program-startup combinations
+- `workspace_users` - User assignments to workspaces
+- `sessions`, `action_items`, `milestones` - Workspace activities
+- `kpi_definitions`, `kpi_values`, `workspace_kpis` - KPI tracking
+- `templates`, `template_instances` - Reusable templates
+- `documents` - File metadata
 
-## How can I deploy this project?
+## Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```
+src/
+├── components/
+│   ├── admin/        # Admin panel components
+│   ├── layout/       # App layout, sidebar, topbar
+│   ├── ui/           # shadcn/ui components
+│   └── workspace/    # Workspace tab components
+├── contexts/         # React contexts (Auth)
+├── hooks/            # Custom hooks (data fetching, state)
+├── integrations/     # Supabase client & types
+├── pages/            # Route pages
+└── types/            # TypeScript types
+```
 
-## Can I connect a custom domain to my Lovable project?
+## Available Scripts
 
-Yes, you can!
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Lovable
+Click the "Publish" button in the Lovable editor.
+
+### Other Platforms
+Build the project and deploy the `dist/` folder to any static hosting:
+- Vercel
+- Netlify
+- Cloudflare Pages
+- AWS S3 + CloudFront
+
+Ensure environment variables are configured in your hosting platform.
+
+## License
+
+Private - All rights reserved.
