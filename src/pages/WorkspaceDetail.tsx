@@ -2,24 +2,31 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { HealthBadge } from '@/components/ui/HealthBadge';
-import { StageBadge } from '@/components/ui/StageBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
+import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
 import { useWorkspace } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: workspace, isLoading, error } = useWorkspace(id);
+  const { isAdmin, isConsultor, isMentor } = useAuth();
+
+  // Determine if user can write to this workspace
+  const canWrite = isAdmin || isConsultor || isMentor;
 
   if (isLoading) {
     return (
       <AppLayout title="Loading...">
         <div className="space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-[400px] w-full" />
+          <Skeleton className="h-32 w-full" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
         </div>
       </AppLayout>
     );
@@ -39,7 +46,6 @@ export default function WorkspaceDetail() {
 
   const startup = workspace.startup as { name: string; description: string | null } | null;
   const program = workspace.program as { name: string } | null;
-  const effectiveHealth = workspace.health_score_override || workspace.health_score;
 
   return (
     <AppLayout
@@ -54,12 +60,6 @@ export default function WorkspaceDetail() {
         </Link>
       }
     >
-      {/* Status badges */}
-      <div className="flex gap-3 mb-6">
-        <StageBadge stage={workspace.stage} />
-        <HealthBadge score={effectiveHealth} />
-      </div>
-
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="bg-muted/50">
@@ -74,30 +74,22 @@ export default function WorkspaceDetail() {
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader><CardTitle>About</CardTitle></CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {startup?.description || 'No description available.'}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle>Health Notes</CardTitle></CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {workspace.health_notes || 'No health notes recorded.'}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle>Quick Stats</CardTitle></CardHeader>
-              <CardContent className="text-muted-foreground">
-                Coming soon: action items, sessions, KPI summaries.
-              </CardContent>
-            </Card>
-          </div>
+          <WorkspaceOverview 
+            workspace={{
+              id: workspace.id,
+              startup_id: workspace.startup_id,
+              program_id: workspace.program_id,
+              stage: workspace.stage,
+              stage_id: workspace.stage_id || null,
+              health_score: workspace.health_score,
+              health_score_override: workspace.health_score_override,
+              health_status: workspace.health_status || null,
+              health_notes: workspace.health_notes,
+              startup: startup,
+              program: program,
+            }}
+            canWrite={canWrite}
+          />
         </TabsContent>
 
         <TabsContent value="sessions">

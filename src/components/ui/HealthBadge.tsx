@@ -2,7 +2,8 @@ import { cn } from '@/lib/utils';
 import { HealthScore } from '@/types/database';
 
 interface HealthBadgeProps {
-  score: HealthScore | null;
+  score: HealthScore | null | undefined;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -14,11 +15,18 @@ const healthConfig: Record<HealthScore, { label: string; className: string }> = 
   thriving: { label: 'Thriving', className: 'bg-health-thriving/10 text-health-thriving border-health-thriving/30' },
 };
 
-export function HealthBadge({ score, className }: HealthBadgeProps) {
+export function HealthBadge({ score, size = 'md', className }: HealthBadgeProps) {
+  const sizeClasses = {
+    sm: 'text-xs px-2 py-0.5',
+    md: 'text-xs px-2.5 py-1',
+    lg: 'text-sm px-3 py-1.5 font-medium',
+  };
+
   if (!score) {
     return (
       <span className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+        "inline-flex items-center rounded-full border font-medium",
+        sizeClasses[size],
         "bg-muted text-muted-foreground border-border",
         className
       )}>
@@ -31,10 +39,20 @@ export function HealthBadge({ score, className }: HealthBadgeProps) {
   
   return (
     <span className={cn(
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+      "inline-flex items-center rounded-full border font-medium",
+      sizeClasses[size],
       config.className,
       className
     )}>
+      <span className={cn(
+        'rounded-full mr-1.5',
+        size === 'lg' ? 'h-2.5 w-2.5' : 'h-2 w-2',
+        score === 'critical' && 'bg-health-critical',
+        score === 'at_risk' && 'bg-health-at-risk',
+        score === 'stable' && 'bg-health-stable',
+        score === 'healthy' && 'bg-health-healthy',
+        score === 'thriving' && 'bg-health-thriving',
+      )} />
       {config.label}
     </span>
   );
