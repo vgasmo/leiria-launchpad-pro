@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, type ActionItem } from '@/hooks/useActionItems';
@@ -50,6 +51,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     priority: 'all',
   });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ActionItem | null>(null);
   const [newAction, setNewAction] = useState({
     title: '',
     description: '',
@@ -120,11 +122,12 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     }
   };
 
-  const handleDelete = async (item: ActionItem) => {
-    if (!canWrite) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget || !canWrite) return;
     try {
-      await deleteAction.mutateAsync(item.id);
+      await deleteAction.mutateAsync(deleteTarget.id);
       toast.success('Action item deleted');
+      setDeleteTarget(null);
     } catch {
       toast.error('Failed to delete action item');
     }
@@ -249,7 +252,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           onStatusChange={handleStatusChange}
           onDueDateChange={handleDueDateChange}
           onOwnerChange={handleOwnerChange}
-          onDelete={handleDelete}
+          onDelete={(item) => setDeleteTarget(item)}
         />
         <KanbanColumn
           title="Doing"
@@ -261,7 +264,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           onStatusChange={handleStatusChange}
           onDueDateChange={handleDueDateChange}
           onOwnerChange={handleOwnerChange}
-          onDelete={handleDelete}
+          onDelete={(item) => setDeleteTarget(item)}
         />
         <KanbanColumn
           title="Done"
@@ -273,7 +276,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           onStatusChange={handleStatusChange}
           onDueDateChange={handleDueDateChange}
           onOwnerChange={handleOwnerChange}
-          onDelete={handleDelete}
+          onDelete={(item) => setDeleteTarget(item)}
         />
       </div>
 
@@ -359,6 +362,24 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Action Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

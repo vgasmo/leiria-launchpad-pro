@@ -60,10 +60,11 @@ export function AdminUsersManager() {
   const isLoading = loadingProfiles || loadingRoles || loadingWsUsers;
 
   const filteredProfiles = useMemo(() => {
-    if (!profiles) return [];
-    if (!searchTerm.trim()) return profiles;
+    const profileList = profiles?.data || [];
+    if (!profileList.length) return [];
+    if (!searchTerm.trim()) return profileList;
     const term = searchTerm.toLowerCase();
-    return profiles.filter(p => 
+    return profileList.filter(p => 
       p.full_name?.toLowerCase().includes(term) || 
       p.email.toLowerCase().includes(term)
     );
