@@ -59,7 +59,8 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   // Check if user can edit KPIs (founder or admin)
   const canEditKpis = isAdmin || userRole === 'founder';
-  const canConfigureKpis = isAdmin;
+  // Admins, consultors, and mentors can configure which KPIs are tracked
+  const canConfigureKpis = isAdmin || userRole === 'consultor' || userRole === 'mentor_externo';
 
   const selectedMonthStr = format(selectedMonth, 'yyyy-MM-dd');
 
