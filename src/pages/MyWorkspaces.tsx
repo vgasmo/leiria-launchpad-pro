@@ -16,10 +16,9 @@ import {
   FileText,
   Users,
   AlertCircle,
-  CheckCircle2,
   Clock
 } from 'lucide-react';
-import { format, isPast, isThisWeek } from 'date-fns';
+import { format, isPast, isThisWeek, isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
+import { Sparkline } from '@/components/ui/Sparkline';
+import { ViewToggle, ViewMode } from '@/components/ui/ViewToggle';
+import { QuickFilterChips, QuickFilter } from '@/components/ui/QuickFilterChips';
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+import { WorkspaceCard } from '@/components/dashboard/WorkspaceCard';
 import {
   Select,
   SelectContent,
@@ -52,6 +56,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useWorkspaces, usePrograms, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
+import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { StartupStage, HealthScore } from '@/types/database';
 import {
   Tooltip,
@@ -75,6 +80,11 @@ export default function MyWorkspaces() {
   const [overdueActions, setOverdueActions] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('urgency');
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [quickFilters, setQuickFilters] = useState<Record<string, boolean>>({});
+
+  // Enable realtime updates
+  useRealtimeWorkspaces();
 
   // Show dashboard overview for consultors/mentors/admins
   const showDashboard = isConsultor || isMentor || isAdmin;
@@ -103,11 +113,14 @@ export default function MyWorkspaces() {
     };
     
     let upcomingMeetingsCount = 0;
+    let meetingsTodayCount = 0;
     let needsAttentionCount = 0;
+    let overdueCount = 0;
+    let missingKpiCount = 0;
     
     workspaces.forEach(w => {
       // Count health scores
-      const health = w.health_score || 'stable';
+      const health = w.health_score_override || w.health_score || 'stable';
       if (health in healthCounts) {
         healthCounts[health as keyof typeof healthCounts]++;
       }
@@ -117,9 +130,24 @@ export default function MyWorkspaces() {
         upcomingMeetingsCount++;
       }
       
+      // Count meetings today
+      if (w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))) {
+        meetingsTodayCount++;
+      }
+      
       // Count startups needing attention (critical or at_risk)
       if (health === 'critical' || health === 'at_risk') {
         needsAttentionCount++;
+      }
+
+      // Count overdue
+      if (w.overdueActionsCount > 0) {
+        overdueCount++;
+      }
+
+      // Count missing KPI
+      if (!w.hasCurrentMonthKpi) {
+        missingKpiCount++;
       }
     });
     
@@ -127,22 +155,97 @@ export default function MyWorkspaces() {
       total: workspaces.length,
       healthCounts,
       upcomingMeetingsCount,
+      meetingsTodayCount,
       needsAttentionCount,
+      overdueCount,
+      missingKpiCount,
     };
   }, [workspaces]);
 
+  // Quick filter chips data
+  const quickFilterChips: QuickFilter[] = useMemo(() => {
+    if (!dashboardStats) return [];
+    return [
+      {
+        id: 'critical',
+        label: 'Critical',
+        icon: <AlertCircle className="h-3.5 w-3.5" />,
+        count: dashboardStats.healthCounts.critical,
+        variant: 'destructive' as const,
+        active: quickFilters.critical || false,
+      },
+      {
+        id: 'at_risk',
+        label: 'At Risk',
+        icon: <AlertTriangle className="h-3.5 w-3.5" />,
+        count: dashboardStats.healthCounts.at_risk,
+        variant: 'warning' as const,
+        active: quickFilters.at_risk || false,
+      },
+      {
+        id: 'overdue',
+        label: 'Overdue Actions',
+        icon: <Clock className="h-3.5 w-3.5" />,
+        count: dashboardStats.overdueCount,
+        variant: 'destructive' as const,
+        active: quickFilters.overdue || false,
+      },
+      {
+        id: 'meetings_today',
+        label: 'Meetings Today',
+        icon: <Calendar className="h-3.5 w-3.5" />,
+        count: dashboardStats.meetingsTodayCount,
+        variant: 'default' as const,
+        active: quickFilters.meetings_today || false,
+      },
+    ];
+  }, [dashboardStats, quickFilters]);
+
+  // Apply quick filters to workspaces
+  const filteredWorkspaces = useMemo(() => {
+    if (!workspaces) return [];
+    
+    let filtered = [...workspaces];
+
+    if (quickFilters.critical) {
+      filtered = filtered.filter(w => 
+        (w.health_score_override || w.health_score) === 'critical'
+      );
+    }
+    if (quickFilters.at_risk) {
+      filtered = filtered.filter(w => 
+        (w.health_score_override || w.health_score) === 'at_risk'
+      );
+    }
+    if (quickFilters.overdue) {
+      filtered = filtered.filter(w => w.overdueActionsCount > 0);
+    }
+    if (quickFilters.meetings_today) {
+      filtered = filtered.filter(w => 
+        w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))
+      );
+    }
+
+    return filtered;
+  }, [workspaces, quickFilters]);
+
   // Pagination
-  const totalItems = workspaces?.length || 0;
+  const totalItems = filteredWorkspaces?.length || 0;
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
   const paginatedWorkspaces = useMemo(() => {
-    if (!workspaces) return [];
+    if (!filteredWorkspaces) return [];
     const start = (currentPage - 1) * PAGE_SIZE;
-    return workspaces.slice(start, start + PAGE_SIZE);
-  }, [workspaces, currentPage]);
+    return filteredWorkspaces.slice(start, start + PAGE_SIZE);
+  }, [filteredWorkspaces, currentPage]);
 
   // Reset to first page when filters change
   const handleFilterChange = () => {
     setCurrentPage(1);
+  };
+
+  const handleQuickFilterToggle = (id: string) => {
+    setQuickFilters(prev => ({ ...prev, [id]: !prev[id] }));
+    handleFilterChange();
   };
 
   const activeFiltersCount = [
@@ -153,12 +256,15 @@ export default function MyWorkspaces() {
     overdueActions,
   ].filter(Boolean).length;
 
+  const activeQuickFiltersCount = Object.values(quickFilters).filter(Boolean).length;
+
   const clearFilters = () => {
     setProgramFilter('all');
     setStageFilter('all');
     setHealthFilter('all');
     setMissingKpi(false);
     setOverdueActions(false);
+    setQuickFilters({});
     handleFilterChange();
   };
 
@@ -166,19 +272,14 @@ export default function MyWorkspaces() {
     navigate(`/workspace/${workspaceId}`);
   };
 
-  const formatKpiMonth = (dateStr: string | null) => {
-    if (!dateStr) return <span className="text-muted-foreground">Never</span>;
-    try {
-      return format(new Date(dateStr), 'MMM yyyy');
-    } catch {
-      return <span className="text-muted-foreground">-</span>;
-    }
-  };
-
   const formatMeetingDate = (dateStr: string | null) => {
     if (!dateStr) return <span className="text-muted-foreground">None scheduled</span>;
     try {
-      return format(new Date(dateStr), 'MMM d, yyyy');
+      const date = new Date(dateStr);
+      if (isToday(date)) {
+        return <span className="text-primary font-medium">Today</span>;
+      }
+      return format(date, 'MMM d, yyyy');
     } catch {
       return <span className="text-muted-foreground">-</span>;
     }
@@ -194,98 +295,115 @@ export default function MyWorkspaces() {
     >
       {/* Dashboard Overview for Consultors/Mentors */}
       {showDashboard && dashboardStats && !isLoading && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Startups
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats.total}</div>
-              <p className="text-xs text-muted-foreground">
-                Across {programs?.length || 0} program{(programs?.length || 0) !== 1 ? 's' : ''}
-              </p>
-            </CardContent>
-          </Card>
+        <div className="mb-6 grid gap-6 lg:grid-cols-4">
+          <div className="lg:col-span-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="animate-fade-in">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Startups
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dashboardStats.total}</div>
+                <p className="text-xs text-muted-foreground">
+                  Across {programs?.length || 0} program{(programs?.length || 0) !== 1 ? 's' : ''}
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className={dashboardStats.needsAttentionCount > 0 ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' : ''}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Needs Attention
-              </CardTitle>
-              <AlertCircle className={`h-4 w-4 ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
-                {dashboardStats.needsAttentionCount}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Critical or at-risk
-              </p>
-            </CardContent>
-          </Card>
+            <Card className={`animate-fade-in ${dashboardStats.needsAttentionCount > 0 ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' : ''}`} style={{ animationDelay: '50ms' }}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Needs Attention
+                </CardTitle>
+                <AlertCircle className={`h-4 w-4 ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
+                  {dashboardStats.needsAttentionCount}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Critical or at-risk
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Meetings This Week
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats.upcomingMeetingsCount}</div>
-              <p className="text-xs text-muted-foreground">
-                Sessions scheduled
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Meetings This Week
+                </CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dashboardStats.upcomingMeetingsCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  {dashboardStats.meetingsTodayCount} today
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Health Distribution
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-1 h-6">
-                {Object.entries(dashboardStats.healthCounts).map(([health, count]) => {
-                  if (count === 0) return null;
-                  const colors: Record<string, string> = {
-                    critical: 'bg-red-500',
-                    at_risk: 'bg-amber-500',
-                    stable: 'bg-blue-500',
-                    healthy: 'bg-green-500',
-                    thriving: 'bg-emerald-500',
-                  };
-                  const width = (count / dashboardStats.total) * 100;
-                  return (
-                    <Tooltip key={health}>
-                      <TooltipTrigger asChild>
-                        <div 
-                          className={`${colors[health]} rounded h-full cursor-pointer`}
-                          style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <span className="capitalize">{health.replace('_', ' ')}: {count}</span>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-              <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
-                {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving > 0 && (
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving} healthy
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Health Distribution
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1 h-6">
+                  {Object.entries(dashboardStats.healthCounts).map(([health, count]) => {
+                    if (count === 0) return null;
+                    const colors: Record<string, string> = {
+                      critical: 'bg-health-critical',
+                      at_risk: 'bg-health-at-risk',
+                      stable: 'bg-health-stable',
+                      healthy: 'bg-health-healthy',
+                      thriving: 'bg-health-thriving',
+                    };
+                    const width = (count / dashboardStats.total) * 100;
+                    return (
+                      <Tooltip key={health}>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className={`${colors[health]} rounded h-full cursor-pointer transition-all hover:opacity-80`}
+                            style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span className="capitalize">{health.replace('_', ' ')}: {count}</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
+                  {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-health-healthy" />
+                      {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving} healthy
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Activity Feed */}
+          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <ActivityFeed />
+          </div>
+        </div>
+      )}
+
+      {/* Quick Filter Chips */}
+      {showDashboard && dashboardStats && !isLoading && (
+        <div className="mb-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
+          <QuickFilterChips 
+            filters={quickFilterChips} 
+            onToggle={handleQuickFilterToggle}
+          />
         </div>
       )}
 
@@ -301,7 +419,9 @@ export default function MyWorkspaces() {
           />
         </div>
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <ViewToggle view={viewMode} onChange={setViewMode} />
+
           <Select 
             value={sortBy} 
             onValueChange={(v) => { setSortBy(v as SortOption); handleFilterChange(); }}
@@ -403,7 +523,7 @@ export default function MyWorkspaces() {
                     Overdue action items
                   </Label>
                 </div>
-                {activeFiltersCount > 0 && (
+                {(activeFiltersCount > 0 || activeQuickFiltersCount > 0) && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -420,11 +540,11 @@ export default function MyWorkspaces() {
         </div>
       </div>
 
-      {/* Workspace Table */}
+      {/* Workspace Display */}
       {isLoading ? (
         <Card>
-          <CardContent className="p-0">
-            <div className="p-6 space-y-4">
+          <CardContent className="p-6">
+            <div className="space-y-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
@@ -438,7 +558,7 @@ export default function MyWorkspaces() {
             <p className="text-destructive">Failed to load workspaces. Please try again.</p>
           </CardContent>
         </Card>
-      ) : workspaces?.length === 0 ? (
+      ) : filteredWorkspaces?.length === 0 ? (
         <Card className="bg-muted/50">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -446,13 +566,30 @@ export default function MyWorkspaces() {
               No workspaces found
             </h3>
             <p className="text-muted-foreground text-center max-w-sm">
-              {search || activeFiltersCount > 0
+              {search || activeFiltersCount > 0 || activeQuickFiltersCount > 0
                 ? "Try adjusting your search or filters"
                 : "You don't have access to any workspaces yet"}
             </p>
+            {(activeFiltersCount > 0 || activeQuickFiltersCount > 0) && (
+              <Button variant="outline" size="sm" className="mt-4" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+            )}
           </CardContent>
         </Card>
+      ) : viewMode === 'card' ? (
+        /* Card View */
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {paginatedWorkspaces.map((workspace) => (
+            <WorkspaceCard
+              key={workspace.id}
+              workspace={workspace}
+              onClick={() => handleRowClick(workspace.id)}
+            />
+          ))}
+        </div>
       ) : (
+        /* Table View */
         <Card>
           <CardContent className="p-0">
             <Table>
@@ -551,6 +688,33 @@ export default function MyWorkspaces() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Card view pagination */}
+      {viewMode === 'card' && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground px-4">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
       )}
     </AppLayout>
   );
