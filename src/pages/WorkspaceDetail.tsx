@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
 import { TemplatesTab } from '@/components/workspace/TemplatesTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
+import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -50,8 +51,11 @@ export default function WorkspaceDetail() {
     );
   }
 
-  const startup = workspace.startup as { name: string; description: string | null } | null;
+  const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null } | null;
   const program = workspace.program as { name: string } | null;
+  
+  // Check if user is a founder (can edit startup profile)
+  const isFounder = true; // For now allow all workspace members to see settings; actual edit permissions checked in component
 
   return (
     <AppLayout
@@ -68,15 +72,19 @@ export default function WorkspaceDetail() {
     >
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-muted/50">
+        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="actions">Action Items</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
           <TabsTrigger value="kpis">KPIs</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1">
+            <Settings className="h-3.5 w-3.5" />
+            Settings
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -118,6 +126,16 @@ export default function WorkspaceDetail() {
         </TabsContent>
         <TabsContent value="documents">
           <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
+        </TabsContent>
+        <TabsContent value="settings">
+          {startup && (
+            <StartupSettingsTab
+              workspaceId={workspace.id}
+              startupId={workspace.startup_id}
+              startup={startup}
+              canEdit={canWrite}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </AppLayout>
