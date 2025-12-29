@@ -10,7 +10,8 @@ import {
   Edit,
   Trash2,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Mail
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -493,9 +494,70 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   const [notes, setNotes] = useState(session.notes || '');
   const [decisions, setDecisions] = useState(session.decisions || '');
   const [showActionDialog, setShowActionDialog] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const updateMutation = useUpdateSession(workspaceId);
   const { data: actionItems, isLoading: actionsLoading } = useSessionActionItems(session.id);
+  const { data: members } = useWorkspaceMembers(workspaceId);
+
+  const handleResendInvites = async () => {
+    const recipientEmails = members
+      ?.filter(m => m.profile?.email)
+      .map(m => m.profile!.email) || [];
+
+    if (recipientEmails.length === 0) {
+      toast.error('No workspace members with email addresses');
+      return;
+    }
+
+    setIsResending(true);
+    try {
+      // Get workspace info
+      const { data: workspaceInfo } = await supabase
+        .from('workspaces')
+        .select(`startup:startups(name)`)
+        .eq('id', workspaceId)
+        .maybeSingle();
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      let organizerName = 'Mentor';
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
+        organizerName = profile?.full_name || profile?.email || 'Mentor';
+      }
+
+      const { error } = await supabase.functions.invoke('send-session-invite', {
+        body: {
+          sessionId: session.id,
+          workspaceId,
+          title: session.title,
+          scheduledAt: session.scheduled_at,
+          duration: session.duration || 60,
+          agenda: session.agenda || undefined,
+          recipientEmails,
+          organizerName,
+          startupName: (workspaceInfo?.startup as { name: string } | null)?.name || 'Startup',
+        },
+      });
+
+      if (error) {
+        console.error('Failed to resend invites:', error);
+        toast.error('Failed to resend invites');
+      } else {
+        toast.success(`Sent ${recipientEmails.length} invite(s)`);
+      }
+    } catch (error) {
+      console.error('Resend error:', error);
+      toast.error('Failed to resend invites');
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -525,6 +587,30 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
           </DialogHeader>
 
           <div className="space-y-6">
+            {/* Resend Invites */}
+            {canWrite && (
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Calendar Invites</p>
+                    <p className="text-xs text-muted-foreground">
+                      {members?.filter(m => m.profile?.email).length || 0} workspace members
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleResendInvites}
+                  disabled={isResending}
+                >
+                  <Mail className="h-4 w-4 mr-1" />
+                  {isResending ? 'Sending...' : 'Resend Invites'}
+                </Button>
+              </div>
+            )}
+
             {/* Agenda */}
             {session.agenda && (
               <div>
