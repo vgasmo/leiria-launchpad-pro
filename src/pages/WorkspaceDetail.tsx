@@ -12,6 +12,7 @@ import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
 import { TemplatesTab } from '@/components/workspace/TemplatesTab';
+import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -116,7 +117,7 @@ export default function WorkspaceDetail() {
           <Card><CardContent className="py-12 text-center text-muted-foreground">Calendar with Google sync coming soon.</CardContent></Card>
         </TabsContent>
         <TabsContent value="documents">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Documents and links coming soon.</CardContent></Card>
+          <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
       </Tabs>
     </AppLayout>
