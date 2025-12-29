@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, subMonths, format } from 'date-fns';
+import type { Database } from '@/integrations/supabase/types';
+
+type StartupStage = Database['public']['Enums']['startup_stage'];
 
 export interface KpiDefinition {
   id: string;
@@ -219,6 +222,145 @@ export function useMarkCheckinComplete(workspaceId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    },
+  });
+}
+
+// Fetch all available KPI definitions
+export function useAllKpiDefinitions() {
+  return useQuery({
+    queryKey: ['all-kpi-definitions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kpi_definitions')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as KpiDefinition[];
+    },
+  });
+}
+
+// Fetch stage KPI defaults
+export function useStageKpiDefaults(stage: string | undefined) {
+  return useQuery({
+    queryKey: ['stage-kpi-defaults', stage],
+    queryFn: async () => {
+      if (!stage) return [];
+      
+      const { data, error } = await supabase
+        .from('stage_kpi_defaults')
+        .select('*, kpi_definition:kpi_definitions(*)')
+        .eq('stage', stage as StartupStage);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!stage,
+  });
+}
+
+// Add KPI to workspace
+export function useAddWorkspaceKpi(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      kpi_definition_id,
+      required = false,
+      target_value = null,
+    }: {
+      kpi_definition_id: string;
+      required?: boolean;
+      target_value?: number | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('workspace_kpis')
+        .insert({
+          workspace_id: workspaceId,
+          kpi_definition_id,
+          required,
+          target_value,
+          active: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-kpi-definitions', workspaceId] });
+    },
+  });
+}
+
+// Remove KPI from workspace
+export function useRemoveWorkspaceKpi(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (workspaceKpiId: string) => {
+      const { error } = await supabase
+        .from('workspace_kpis')
+        .delete()
+        .eq('id', workspaceKpiId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-kpi-definitions', workspaceId] });
+    },
+  });
+}
+
+// Apply stage defaults to workspace
+export function useApplyStageDefaults(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (stage: string) => {
+      // Get stage defaults
+      const { data: defaults, error: defaultsError } = await supabase
+        .from('stage_kpi_defaults')
+        .select('kpi_definition_id, required')
+        .eq('stage', stage as StartupStage);
+
+      if (defaultsError) throw defaultsError;
+      if (!defaults?.length) return [];
+
+      // Get existing workspace KPIs
+      const { data: existing } = await supabase
+        .from('workspace_kpis')
+        .select('kpi_definition_id')
+        .eq('workspace_id', workspaceId);
+
+      const existingIds = new Set(existing?.map(e => e.kpi_definition_id) || []);
+      
+      // Only add KPIs that don't exist yet
+      const toAdd = defaults.filter(d => !existingIds.has(d.kpi_definition_id));
+
+      if (toAdd.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from('workspace_kpis')
+        .insert(
+          toAdd.map(d => ({
+            workspace_id: workspaceId,
+            kpi_definition_id: d.kpi_definition_id,
+            required: d.required,
+            active: true,
+          }))
+        )
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-kpi-definitions', workspaceId] });
     },
   });
 }

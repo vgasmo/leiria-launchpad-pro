@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { format, startOfMonth, subMonths, addMonths, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save } from 'lucide-react';
+import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
   useWorkspaceKpiDefinitions, 
@@ -15,10 +23,15 @@ import {
   useUserWorkspaceRole,
   useUpsertKpiValue,
   useMarkCheckinComplete,
+  useAllKpiDefinitions,
+  useAddWorkspaceKpi,
+  useRemoveWorkspaceKpi,
+  useApplyStageDefaults,
   type WorkspaceKpi,
   type KpiValue,
 } from '@/hooks/useKpis';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 
 interface KpisTabProps {
@@ -28,18 +41,25 @@ interface KpisTabProps {
 
 export function KpisTab({ workspaceId }: KpisTabProps) {
   const { isAdmin } = useAuth();
+  const { data: workspace } = useWorkspace(workspaceId);
   const { data: workspaceKpis, isLoading: loadingKpis } = useWorkspaceKpiDefinitions(workspaceId);
   const { data: kpiValues, isLoading: loadingValues } = useKpiValues(workspaceId, 12);
+  const { data: allKpis } = useAllKpiDefinitions();
   const { data: userRole } = useUserWorkspaceRole(workspaceId);
   const upsertKpi = useUpsertKpiValue(workspaceId);
   const markCheckin = useMarkCheckinComplete(workspaceId);
+  const addKpi = useAddWorkspaceKpi(workspaceId);
+  const removeKpi = useRemoveWorkspaceKpi(workspaceId);
+  const applyDefaults = useApplyStageDefaults(workspaceId);
 
   const [selectedMonth, setSelectedMonth] = useState(() => startOfMonth(new Date()));
   const [editedValues, setEditedValues] = useState<Record<string, { value: string; notes: string }>>({});
   const [savingKpis, setSavingKpis] = useState<Set<string>>(new Set());
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
 
   // Check if user can edit KPIs (founder or admin)
   const canEditKpis = isAdmin || userRole === 'founder';
+  const canConfigureKpis = isAdmin;
 
   const selectedMonthStr = format(selectedMonth, 'yyyy-MM-dd');
 
@@ -156,7 +176,43 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
     }
   };
 
+  const handleApplyDefaults = async () => {
+    if (!workspace?.stage) return;
+    try {
+      const result = await applyDefaults.mutateAsync(workspace.stage);
+      if (result.length > 0) {
+        toast.success(`Added ${result.length} default KPIs for ${workspace.stage} stage`);
+      } else {
+        toast.info('All default KPIs are already configured');
+      }
+    } catch {
+      toast.error('Failed to apply defaults');
+    }
+  };
+
+  const handleAddKpi = async (kpiDefId: string) => {
+    try {
+      await addKpi.mutateAsync({ kpi_definition_id: kpiDefId });
+      toast.success('KPI added');
+    } catch {
+      toast.error('Failed to add KPI');
+    }
+  };
+
+  const handleRemoveKpi = async (workspaceKpiId: string) => {
+    try {
+      await removeKpi.mutateAsync(workspaceKpiId);
+      toast.success('KPI removed');
+    } catch {
+      toast.error('Failed to remove KPI');
+    }
+  };
+
   const isLoading = loadingKpis || loadingValues;
+
+  // Get available KPIs (not yet added to workspace)
+  const assignedKpiIds = new Set(workspaceKpis?.map(wk => wk.kpi_definition_id) || []);
+  const availableKpis = allKpis?.filter(k => !assignedKpiIds.has(k.id)) || [];
 
   if (isLoading) {
     return (
@@ -173,9 +229,51 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   if (!workspaceKpis?.length) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          No KPIs configured for this workspace. Ask an admin to set up KPIs for tracking.
+        <CardContent className="py-12 text-center">
+          <TrendingUp className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+          <p className="text-muted-foreground mb-4">
+            No KPIs configured for this workspace.
+          </p>
+          {canConfigureKpis && (
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button onClick={handleApplyDefaults} disabled={applyDefaults.isPending}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Apply {workspace?.stage} Stage Defaults
+              </Button>
+              <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Configure Manually
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add KPIs</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {availableKpis.map(kpi => (
+                      <div key={kpi.id} className="flex items-center justify-between p-2 rounded border">
+                        <div>
+                          <p className="font-medium text-sm">{kpi.name}</p>
+                          <p className="text-xs text-muted-foreground">{kpi.category} • {kpi.unit}</p>
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {availableKpis.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">All KPIs already added</p>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+          {!canConfigureKpis && (
+            <p className="text-sm text-muted-foreground">Ask an admin to set up KPIs for tracking.</p>
+          )}
         </CardContent>
       </Card>
     );
@@ -207,16 +305,67 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
           </Button>
         </div>
 
-        {canEditKpis && (
-          <Button 
-            variant="outline" 
-            onClick={handleMarkCheckin}
-            disabled={markCheckin.isPending}
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Mark Check-in Complete
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {canConfigureKpis && (
+            <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Configure
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Configure KPIs</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Current KPIs</h4>
+                    <div className="space-y-2">
+                      {workspaceKpis.map(wk => (
+                        <div key={wk.id} className="flex items-center justify-between p-2 rounded border">
+                          <span className="text-sm">{wk.definition?.name}</span>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleRemoveKpi(wk.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {availableKpis.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Add KPIs</h4>
+                      <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                        {availableKpis.map(kpi => (
+                          <div key={kpi.id} className="flex items-center justify-between p-2 rounded border">
+                            <div>
+                              <p className="text-sm">{kpi.name}</p>
+                              <p className="text-xs text-muted-foreground">{kpi.category}</p>
+                            </div>
+                            <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+          {canEditKpis && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleMarkCheckin}
+              disabled={markCheckin.isPending}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Mark Check-in
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* KPI Cards */}
