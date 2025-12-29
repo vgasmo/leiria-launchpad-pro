@@ -2,13 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { StartupStage, HealthScore } from '@/types/database';
 
-interface WorkspaceFilters {
+export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name';
+
+export interface WorkspaceFilters {
   search?: string;
   programId?: string | 'all';
   stage?: StartupStage | 'all';
   health?: HealthScore | 'all';
   missingKpi?: boolean;
   overdueActions?: boolean;
+  sortBy?: SortOption;
 }
 
 export interface WorkspaceWithDetails {
@@ -36,6 +39,12 @@ export interface WorkspaceWithDetails {
   hasCurrentMonthKpi: boolean;
   lastKpiMonth: string | null;
   nextMeetingDate: string | null;
+  lastSession: {
+    id: string;
+    title: string;
+    scheduled_at: string;
+    notes: string | null;
+  } | null;
 }
 
 export function useWorkspaces(filters: WorkspaceFilters = {}) {
@@ -81,7 +90,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
       
       if (workspaceIds.length === 0) return [];
 
-      const [actionItemsResult, kpiValuesResult, lastKpiResult, meetingsResult] = await Promise.all([
+      const [actionItemsResult, kpiValuesResult, lastKpiResult, meetingsResult, sessionsResult] = await Promise.all([
         // Fetch pending/in-progress action items
         supabase
           .from('action_items')
@@ -109,13 +118,22 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           .select('workspace_id, starts_at')
           .in('workspace_id', workspaceIds)
           .gte('starts_at', new Date().toISOString())
-          .order('starts_at', { ascending: true })
+          .order('starts_at', { ascending: true }),
+
+        // Fetch last session per workspace (past sessions only)
+        supabase
+          .from('sessions')
+          .select('id, workspace_id, title, scheduled_at, notes')
+          .in('workspace_id', workspaceIds)
+          .lt('scheduled_at', new Date().toISOString())
+          .order('scheduled_at', { ascending: false })
       ]);
 
       const { data: actionItems } = actionItemsResult;
       const { data: kpiValues } = kpiValuesResult;
       const { data: lastKpiData } = lastKpiResult;
       const { data: meetings } = meetingsResult;
+      const { data: sessions } = sessionsResult;
 
       // Build lookup maps
       const lastKpiMap = new Map<string, string>();
@@ -132,6 +150,13 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         }
       });
 
+      const lastSessionMap = new Map<string, { id: string; title: string; scheduled_at: string; notes: string | null }>();
+      sessions?.forEach(s => {
+        if (!lastSessionMap.has(s.workspace_id)) {
+          lastSessionMap.set(s.workspace_id, { id: s.id, title: s.title, scheduled_at: s.scheduled_at, notes: s.notes });
+        }
+      });
+
       // Build result with counts
       const today = new Date().toISOString().split('T')[0];
       
@@ -144,6 +169,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         const hasCurrentMonthKpi = kpiValues?.some(k => k.workspace_id === w.id) || false;
         const lastKpiMonth = lastKpiMap.get(w.id) || null;
         const nextMeetingDate = nextMeetingMap.get(w.id) || null;
+        const lastSession = lastSessionMap.get(w.id) || null;
 
         return {
           ...w,
@@ -154,6 +180,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           hasCurrentMonthKpi,
           lastKpiMonth,
           nextMeetingDate,
+          lastSession,
         };
       });
 
@@ -175,6 +202,41 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
       if (filters.overdueActions) {
         filtered = filtered.filter(w => w.overdueActionsCount > 0);
       }
+
+      // Apply sorting
+      const healthPriority: Record<string, number> = {
+        critical: 0,
+        at_risk: 1,
+        stable: 2,
+        healthy: 3,
+        thriving: 4,
+      };
+
+      const sortBy = filters.sortBy || 'updated';
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'urgency': {
+            // Sort by health (critical first), then overdue count
+            const aHealth = a.health_score_override || a.health_score || 'stable';
+            const bHealth = b.health_score_override || b.health_score || 'stable';
+            const healthDiff = healthPriority[aHealth] - healthPriority[bHealth];
+            if (healthDiff !== 0) return healthDiff;
+            return b.overdueActionsCount - a.overdueActionsCount;
+          }
+          case 'meeting': {
+            // Sort by next meeting (soonest first, null last)
+            if (!a.nextMeetingDate && !b.nextMeetingDate) return 0;
+            if (!a.nextMeetingDate) return 1;
+            if (!b.nextMeetingDate) return -1;
+            return new Date(a.nextMeetingDate).getTime() - new Date(b.nextMeetingDate).getTime();
+          }
+          case 'name':
+            return (a.startup?.name || '').localeCompare(b.startup?.name || '');
+          case 'updated':
+          default:
+            return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        }
+      });
 
       return filtered;
     },
