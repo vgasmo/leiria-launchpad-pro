@@ -13,13 +13,17 @@ import {
   Calendar,
   TrendingUp,
   ArrowUpDown,
-  FileText
+  FileText,
+  Users,
+  AlertCircle,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isPast, isThisWeek } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
@@ -54,6 +58,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useAuth } from '@/contexts/AuthContext';
 
 const stages: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const healthScores: HealthScore[] = ['critical', 'at_risk', 'stable', 'healthy', 'thriving'];
@@ -61,6 +66,7 @@ const PAGE_SIZE = 15;
 
 export default function MyWorkspaces() {
   const navigate = useNavigate();
+  const { isConsultor, isMentor, isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [stageFilter, setStageFilter] = useState<StartupStage | 'all'>('all');
@@ -69,6 +75,9 @@ export default function MyWorkspaces() {
   const [overdueActions, setOverdueActions] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('urgency');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Show dashboard overview for consultors/mentors/admins
+  const showDashboard = isConsultor || isMentor || isAdmin;
 
   const { data: programs } = usePrograms();
   const { data: workspaces, isLoading, error } = useWorkspaces({
@@ -80,6 +89,47 @@ export default function MyWorkspaces() {
     overdueActions,
     sortBy,
   });
+
+  // Calculate dashboard stats
+  const dashboardStats = useMemo(() => {
+    if (!workspaces) return null;
+    
+    const healthCounts = {
+      critical: 0,
+      at_risk: 0,
+      stable: 0,
+      healthy: 0,
+      thriving: 0,
+    };
+    
+    let upcomingMeetingsCount = 0;
+    let needsAttentionCount = 0;
+    
+    workspaces.forEach(w => {
+      // Count health scores
+      const health = w.health_score || 'stable';
+      if (health in healthCounts) {
+        healthCounts[health as keyof typeof healthCounts]++;
+      }
+      
+      // Count upcoming meetings this week
+      if (w.nextMeetingDate && isThisWeek(new Date(w.nextMeetingDate))) {
+        upcomingMeetingsCount++;
+      }
+      
+      // Count startups needing attention (critical or at_risk)
+      if (health === 'critical' || health === 'at_risk') {
+        needsAttentionCount++;
+      }
+    });
+    
+    return {
+      total: workspaces.length,
+      healthCounts,
+      upcomingMeetingsCount,
+      needsAttentionCount,
+    };
+  }, [workspaces]);
 
   // Pagination
   const totalItems = workspaces?.length || 0;
@@ -136,9 +186,109 @@ export default function MyWorkspaces() {
 
   return (
     <AppLayout 
-      title="My Workspaces"
-      subtitle={`${totalItems} startups across your programs`}
+      title={showDashboard ? "Portfolio Overview" : "My Workspaces"}
+      subtitle={showDashboard 
+        ? `Managing ${totalItems} startup${totalItems !== 1 ? 's' : ''}`
+        : `${totalItems} workspace${totalItems !== 1 ? 's' : ''}`
+      }
     >
+      {/* Dashboard Overview for Consultors/Mentors */}
+      {showDashboard && dashboardStats && !isLoading && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Startups
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.total}</div>
+              <p className="text-xs text-muted-foreground">
+                Across {programs?.length || 0} program{(programs?.length || 0) !== 1 ? 's' : ''}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={dashboardStats.needsAttentionCount > 0 ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' : ''}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Needs Attention
+              </CardTitle>
+              <AlertCircle className={`h-4 w-4 ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
+                {dashboardStats.needsAttentionCount}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Critical or at-risk
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Meetings This Week
+              </CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.upcomingMeetingsCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Sessions scheduled
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Health Distribution
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-1 h-6">
+                {Object.entries(dashboardStats.healthCounts).map(([health, count]) => {
+                  if (count === 0) return null;
+                  const colors: Record<string, string> = {
+                    critical: 'bg-red-500',
+                    at_risk: 'bg-amber-500',
+                    stable: 'bg-blue-500',
+                    healthy: 'bg-green-500',
+                    thriving: 'bg-emerald-500',
+                  };
+                  const width = (count / dashboardStats.total) * 100;
+                  return (
+                    <Tooltip key={health}>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className={`${colors[health]} rounded h-full cursor-pointer`}
+                          style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span className="capitalize">{health.replace('_', ' ')}: {count}</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+              <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
+                {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving > 0 && (
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
+                    {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving} healthy
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="mb-6 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1 max-w-md">
