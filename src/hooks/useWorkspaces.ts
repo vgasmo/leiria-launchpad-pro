@@ -77,12 +77,12 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         .in('workspace_id', workspaceIds)
         .in('status', ['pending', 'in_progress']);
 
-      // Fetch KPI entries for current month
-      const { data: kpiEntries } = await supabase
-        .from('kpi_entries')
+      // Fetch KPI values for current month
+      const { data: kpiValues } = await supabase
+        .from('kpi_values')
         .select('workspace_id')
         .in('workspace_id', workspaceIds)
-        .eq('month', currentMonth);
+        .eq('period_month', currentMonth);
 
       // Build result with counts
       const today = new Date().toISOString().split('T')[0];
@@ -93,7 +93,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         const overdueActionsCount = wsActionItems.filter(
           a => a.due_date && a.due_date < today
         ).length;
-        const hasCurrentMonthKpi = kpiEntries?.some(k => k.workspace_id === w.id) || false;
+        const hasCurrentMonthKpi = kpiValues?.some(k => k.workspace_id === w.id) || false;
 
         return {
           ...w,
