@@ -56,6 +56,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const [editedValues, setEditedValues] = useState<Record<string, { value: string; notes: string }>>({});
   const [savingKpis, setSavingKpis] = useState<Set<string>>(new Set());
   const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [pendingTargets, setPendingTargets] = useState<Record<string, string>>({});
 
   // Check if user can edit KPIs (founder or admin)
   const canEditKpis = isAdmin || userRole === 'founder';
@@ -193,7 +194,17 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   const handleAddKpi = async (kpiDefId: string) => {
     try {
-      await addKpi.mutateAsync({ kpi_definition_id: kpiDefId });
+      const targetStr = pendingTargets[kpiDefId];
+      const target_value = targetStr ? parseFloat(targetStr) : null;
+      await addKpi.mutateAsync({ 
+        kpi_definition_id: kpiDefId,
+        target_value: target_value && !isNaN(target_value) ? target_value : null,
+      });
+      setPendingTargets(prev => {
+        const next = { ...prev };
+        delete next[kpiDefId];
+        return next;
+      });
       toast.success('KPI added');
     } catch {
       toast.error('Failed to add KPI');
@@ -252,16 +263,28 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                   <DialogHeader>
                     <DialogTitle>Add KPIs</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
                     {availableKpis.map(kpi => (
-                      <div key={kpi.id} className="flex items-center justify-between p-2 rounded border">
-                        <div>
-                          <p className="font-medium text-sm">{kpi.name}</p>
-                          <p className="text-xs text-muted-foreground">{kpi.category} • {kpi.unit}</p>
+                      <div key={kpi.id} className="p-3 rounded border space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium text-sm">{kpi.name}</p>
+                            <p className="text-xs text-muted-foreground">{kpi.category} • {kpi.unit}</p>
+                          </div>
+                          <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
+                            <Plus className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-xs text-muted-foreground whitespace-nowrap">Target:</Label>
+                          <Input
+                            type="number"
+                            placeholder={`Target ${kpi.unit || 'value'}`}
+                            className="h-7 text-sm"
+                            value={pendingTargets[kpi.id] || ''}
+                            onChange={(e) => setPendingTargets(prev => ({ ...prev, [kpi.id]: e.target.value }))}
+                          />
+                        </div>
                       </div>
                     ))}
                     {availableKpis.length === 0 && (
@@ -336,16 +359,28 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                   {availableKpis.length > 0 && (
                     <div>
                       <h4 className="font-medium text-sm mb-2">Add KPIs</h4>
-                      <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      <div className="space-y-3 max-h-[200px] overflow-y-auto">
                         {availableKpis.map(kpi => (
-                          <div key={kpi.id} className="flex items-center justify-between p-2 rounded border">
-                            <div>
-                              <p className="text-sm">{kpi.name}</p>
-                              <p className="text-xs text-muted-foreground">{kpi.category}</p>
+                          <div key={kpi.id} className="p-3 rounded border space-y-2">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-sm">{kpi.name}</p>
+                                <p className="text-xs text-muted-foreground">{kpi.category} • {kpi.unit}</p>
+                              </div>
+                              <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
+                                <Plus className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
-                              <Plus className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs text-muted-foreground whitespace-nowrap">Target:</Label>
+                              <Input
+                                type="number"
+                                placeholder={`Target ${kpi.unit || 'value'}`}
+                                className="h-7 text-sm"
+                                value={pendingTargets[kpi.id] || ''}
+                                onChange={(e) => setPendingTargets(prev => ({ ...prev, [kpi.id]: e.target.value }))}
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
