@@ -1,0 +1,270 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
+
+export interface TemplateField {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'checklist';
+  placeholder?: string;
+  options?: string[];
+  required?: boolean;
+  rows?: number;
+}
+
+export interface TemplateSection {
+  title: string;
+  description?: string;
+  fields: TemplateField[];
+}
+
+export interface TemplateSchema {
+  sections: TemplateSection[];
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  schema_json: TemplateSchema | null;
+  is_global: boolean;
+  program_id: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+}
+
+export interface TemplateInstance {
+  id: string;
+  workspace_id: string;
+  template_id: string;
+  data_json: Record<string, unknown> | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  template?: Template;
+}
+
+// Fetch all global templates
+export function useTemplates() {
+  return useQuery({
+    queryKey: ['templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return (data || []).map(t => ({
+        ...t,
+        schema_json: t.schema_json as unknown as TemplateSchema | null,
+      })) as Template[];
+    },
+  });
+}
+
+// Admin: Create template
+export function useCreateTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (template: {
+      name: string;
+      description?: string;
+      category?: string;
+      schema_json?: TemplateSchema;
+      is_global?: boolean;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('templates')
+        .insert({
+          name: template.name,
+          description: template.description || null,
+          category: template.category || null,
+          schema_json: template.schema_json as unknown as Json,
+          is_global: template.is_global ?? true,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+}
+
+// Admin: Update template
+export function useUpdateTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: {
+      id: string;
+      name?: string;
+      description?: string | null;
+      category?: string | null;
+      schema_json?: TemplateSchema;
+      is_global?: boolean;
+    }) => {
+      const updateData: Record<string, unknown> = { ...updates };
+      if (updates.schema_json) {
+        updateData.schema_json = updates.schema_json as unknown as Json;
+      }
+
+      const { data, error } = await supabase
+        .from('templates')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+}
+
+// Admin: Delete template
+export function useDeleteTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('templates')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+}
+
+// Workspace: Get template instances
+export function useTemplateInstances(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ['template-instances', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      
+      const { data, error } = await supabase
+        .from('template_instances')
+        .select('*')
+        .eq('workspace_id', workspaceId);
+
+      if (error) throw error;
+      
+      // Get template details
+      const templateIds = [...new Set(data?.map(ti => ti.template_id) || [])];
+      let templates: Template[] = [];
+      
+      if (templateIds.length > 0) {
+        const { data: templatesData } = await supabase
+          .from('templates')
+          .select('*')
+          .in('id', templateIds);
+        templates = (templatesData || []).map(t => ({
+          ...t,
+          schema_json: t.schema_json as unknown as TemplateSchema | null,
+        })) as Template[];
+      }
+
+      return (data || []).map(ti => ({
+        ...ti,
+        data_json: ti.data_json as Record<string, unknown> | null,
+        template: templates.find(t => t.id === ti.template_id),
+      })) as TemplateInstance[];
+    },
+    enabled: !!workspaceId,
+  });
+}
+
+// Workspace: Create or update template instance
+export function useUpsertTemplateInstance(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      template_id,
+      data_json,
+      existingId,
+    }: {
+      template_id: string;
+      data_json: Record<string, unknown>;
+      existingId?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (existingId) {
+        const { data, error } = await supabase
+          .from('template_instances')
+          .update({
+            data_json: data_json as unknown as Json,
+            status: 'in_progress',
+          })
+          .eq('id', existingId)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('template_instances')
+          .insert({
+            workspace_id: workspaceId,
+            template_id,
+            data_json: data_json as unknown as Json,
+            status: 'in_progress',
+            created_by: user?.id,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+    },
+  });
+}
+
+// Mark template instance as complete
+export function useCompleteTemplateInstance(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (instanceId: string) => {
+      const { data, error } = await supabase
+        .from('template_instances')
+        .update({ status: 'completed' })
+        .eq('id', instanceId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+    },
+  });
+}

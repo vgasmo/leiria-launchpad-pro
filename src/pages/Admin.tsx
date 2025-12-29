@@ -1,7 +1,8 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, Settings, FileText, BarChart3 } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3 } from 'lucide-react';
+import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 
 export default function Admin() {
   return (
@@ -60,14 +61,7 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="templates">
-          <Card>
-            <CardHeader>
-              <CardTitle>Templates Library</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              Manage reusable templates for sessions, milestones, and documents. Coming soon.
-            </CardContent>
-          </Card>
+          <AdminTemplatesManager />
         </TabsContent>
       </Tabs>
     </AppLayout>

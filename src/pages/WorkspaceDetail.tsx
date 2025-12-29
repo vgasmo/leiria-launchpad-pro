@@ -11,6 +11,7 @@ import { SessionsTab } from '@/components/workspace/SessionsTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
+import { TemplatesTab } from '@/components/workspace/TemplatesTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -109,7 +110,7 @@ export default function WorkspaceDetail() {
           <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="templates">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Templates library coming soon.</CardContent></Card>
+          <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="calendar">
           <Card><CardContent className="py-12 text-center text-muted-foreground">Calendar with Google sync coming soon.</CardContent></Card>
