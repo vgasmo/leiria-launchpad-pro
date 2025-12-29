@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -45,6 +46,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSessionActionItems, useCreateActionItem, useWorkspaceMembers } from '@/hooks/useSessions';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Select,
@@ -277,8 +279,36 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const [scheduledAt, setScheduledAt] = useState('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
+  const [sendInvites, setSendInvites] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
   const createMutation = useCreateSession(workspaceId);
+  const { data: members } = useWorkspaceMembers(workspaceId);
+
+  // Get workspace and startup info for the email
+  const getWorkspaceInfo = async () => {
+    const { data } = await supabase
+      .from('workspaces')
+      .select(`
+        id,
+        startup:startups(name),
+        program:programs(name)
+      `)
+      .eq('id', workspaceId)
+      .maybeSingle();
+    return data;
+  };
+
+  const getCurrentUserProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .maybeSingle();
+    return data;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,8 +317,9 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
       return;
     }
 
+    setIsSending(true);
     try {
-      await createMutation.mutateAsync({
+      const session = await createMutation.mutateAsync({
         title: title.trim(),
         scheduled_at: new Date(scheduledAt).toISOString(),
         duration: parseInt(duration),
@@ -296,11 +327,57 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
         notes: null,
         decisions: null,
       });
-      toast.success('Session created');
+
+      // Send email invites if enabled
+      if (sendInvites && members && members.length > 0) {
+        try {
+          const [workspaceInfo, currentUser] = await Promise.all([
+            getWorkspaceInfo(),
+            getCurrentUserProfile(),
+          ]);
+
+          const recipientEmails = members
+            .filter(m => m.profile?.email)
+            .map(m => m.profile!.email);
+
+          if (recipientEmails.length > 0) {
+            const { error } = await supabase.functions.invoke('send-session-invite', {
+              body: {
+                sessionId: session.id,
+                workspaceId,
+                title: title.trim(),
+                scheduledAt: new Date(scheduledAt).toISOString(),
+                duration: parseInt(duration),
+                agenda: agenda.trim() || undefined,
+                recipientEmails,
+                organizerName: currentUser?.full_name || currentUser?.email || 'Mentor',
+                startupName: (workspaceInfo?.startup as { name: string } | null)?.name || 'Startup',
+              },
+            });
+
+            if (error) {
+              console.error('Failed to send invites:', error);
+              toast.success('Session created, but invites failed to send');
+            } else {
+              toast.success(`Session created and ${recipientEmails.length} invite(s) sent`);
+            }
+          } else {
+            toast.success('Session created');
+          }
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
+          toast.success('Session created, but invites failed');
+        }
+      } else {
+        toast.success('Session created');
+      }
+
       onOpenChange(false);
       resetForm();
     } catch (error) {
       toast.error('Failed to create session');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -309,7 +386,10 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     setScheduledAt('');
     setDuration('60');
     setAgenda('');
+    setSendInvites(true);
   };
+
+  const memberCount = members?.filter(m => m.profile?.email).length || 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -369,12 +449,32 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               rows={3}
             />
           </div>
+          
+          {/* Email invite option */}
+          <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
+            <Checkbox
+              id="send-invites"
+              checked={sendInvites}
+              onCheckedChange={(checked) => setSendInvites(!!checked)}
+            />
+            <div className="flex-1">
+              <Label htmlFor="send-invites" className="cursor-pointer font-medium">
+                Send calendar invites
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {memberCount > 0 
+                  ? `Email ${memberCount} workspace member${memberCount > 1 ? 's' : ''} with calendar invite`
+                  : 'No workspace members to invite'}
+              </p>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create Session'}
+            <Button type="submit" disabled={createMutation.isPending || isSending}>
+              {(createMutation.isPending || isSending) ? 'Creating...' : 'Create Session'}
             </Button>
           </DialogFooter>
         </form>
