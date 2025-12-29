@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
 import { StartupStage } from '@/types/database';
 
-interface StageBadgeProps {
+export interface StageBadgeProps {
   stage: StartupStage;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -14,12 +15,19 @@ const stageConfig: Record<StartupStage, { label: string; className: string }> = 
   scale: { label: 'Scale', className: 'bg-stage-scale/10 text-stage-scale border-stage-scale/30' },
 };
 
-export function StageBadge({ stage, className }: StageBadgeProps) {
+const sizeStyles = {
+  sm: 'px-2 py-0.5 text-[10px]',
+  md: 'px-2.5 py-0.5 text-xs',
+  lg: 'px-3 py-1 text-sm',
+};
+
+export function StageBadge({ stage, size = 'md', className }: StageBadgeProps) {
   const config = stageConfig[stage];
   
   return (
     <span className={cn(
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+      "inline-flex items-center rounded-full font-medium border",
+      sizeStyles[size],
       config.className,
       className
     )}>
