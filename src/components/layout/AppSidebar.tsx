@@ -1,15 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
   Settings, 
   LogOut, 
-  Building2,
-  User
+  Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 const navigation = [
   { name: 'My Workspaces', href: '/my-workspaces', icon: Building2 },
@@ -34,16 +33,12 @@ export function AppSidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 gradient-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 px-6 border-b border-sidebar-border">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-            <LayoutDashboard className="h-5 w-5 text-sidebar-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="font-heading text-sm font-semibold text-sidebar-foreground">
-              Startup Leiria
-            </h1>
-            <p className="text-xs text-sidebar-foreground/60">Mentorship</p>
-          </div>
+        <div className="flex h-16 items-center gap-3 px-4 border-b border-sidebar-border">
+          <img 
+            src={startupLeiriaLogo} 
+            alt="Startup Leiria" 
+            className="h-10 w-auto"
+          />
         </div>
 
         {/* Navigation */}

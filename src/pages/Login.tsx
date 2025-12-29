@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }),
@@ -99,22 +100,43 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left side - branding */}
-      <div className="hidden lg:flex lg:flex-1 gradient-primary items-center justify-center p-12">
-        <div className="max-w-md text-center animate-fade-in">
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-foreground/10 backdrop-blur">
-            <LayoutDashboard className="h-10 w-10 text-primary-foreground" />
+      {/* Left side - branding with logo */}
+      <div className="hidden lg:flex lg:flex-1 bg-foreground relative overflow-hidden items-center justify-center p-12">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-accent/20 blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-primary/20 blur-3xl" />
+        </div>
+        
+        <div className="relative z-10 max-w-lg text-center animate-fade-in">
+          <div className="mb-10 flex justify-center">
+            <img 
+              src={startupLeiriaLogo} 
+              alt="Startup Leiria" 
+              className="h-20 w-auto drop-shadow-lg"
+            />
           </div>
-          <h1 className="font-heading text-4xl font-bold text-primary-foreground mb-4">
-            Startup Leiria
-          </h1>
-          <p className="text-xl text-primary-foreground/80 mb-6">
+          <h1 className="font-heading text-3xl font-bold text-background mb-4">
             Mentorship Platform
-          </p>
-          <p className="text-primary-foreground/60">
+          </h1>
+          <p className="text-lg text-background/70 mb-8 leading-relaxed">
             Empowering startups through structured mentorship, 
             milestone tracking, and actionable insights.
           </p>
+          <div className="flex justify-center gap-4">
+            <div className="flex items-center gap-2 text-background/60 text-sm">
+              <div className="w-2 h-2 rounded-full bg-accent" />
+              Track Progress
+            </div>
+            <div className="flex items-center gap-2 text-background/60 text-sm">
+              <div className="w-2 h-2 rounded-full bg-primary" />
+              Manage Sessions
+            </div>
+            <div className="flex items-center gap-2 text-background/60 text-sm">
+              <div className="w-2 h-2 rounded-full bg-accent" />
+              Achieve Goals
+            </div>
+          </div>
         </div>
       </div>
 
@@ -123,12 +145,11 @@ export default function Login() {
         <div className="w-full max-w-md animate-slide-up">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl gradient-primary">
-              <LayoutDashboard className="h-7 w-7 text-primary-foreground" />
-            </div>
-            <h1 className="font-heading text-2xl font-bold text-foreground">
-              Startup Leiria
-            </h1>
+            <img 
+              src={startupLeiriaLogo} 
+              alt="Startup Leiria" 
+              className="h-14 w-auto mx-auto mb-4"
+            />
           </div>
 
           <Card className="shadow-card border-border/50">
