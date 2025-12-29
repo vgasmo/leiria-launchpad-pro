@@ -338,6 +338,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          phone: string | null
           updated_at: string
         }
         Insert: {
@@ -346,6 +347,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -354,6 +356,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -510,32 +513,38 @@ export type Database = {
       }
       startups: {
         Row: {
+          address: string | null
           created_at: string
           description: string | null
           founded_date: string | null
           id: string
           logo_url: string | null
           name: string
+          phone: string | null
           updated_at: string
           website: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
           description?: string | null
           founded_date?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          phone?: string | null
           updated_at?: string
           website?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
           description?: string | null
           founded_date?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          phone?: string | null
           updated_at?: string
           website?: string | null
         }

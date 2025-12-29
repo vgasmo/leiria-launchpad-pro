@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Lock, Mail, Camera, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -20,6 +20,7 @@ export default function Settings() {
   // Profile state
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
+  const [phone, setPhone] = useState((profile as any)?.phone || '');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   
   // Email state
@@ -50,6 +51,7 @@ export default function Settings() {
         .update({
           full_name: fullName.trim() || null,
           avatar_url: avatarUrl.trim() || null,
+          phone: phone.trim() || null,
         })
         .eq('id', user.id);
 
@@ -194,6 +196,21 @@ export default function Settings() {
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Your full name"
                     />
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+351 912 345 678"
+                        className="pl-9"
+                      />
+                    </div>
                   </div>
 
                   {/* Email (read-only) */}
