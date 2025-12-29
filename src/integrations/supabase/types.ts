@@ -790,6 +790,7 @@ export type Database = {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
+      can_write_workspace: { Args: { _workspace_id: string }; Returns: boolean }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -801,11 +802,16 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_workspace_access: {
-        Args: { _user_id: string; _workspace_id: string }
-        Returns: boolean
-      }
-      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      has_workspace_access:
+        | {
+            Args: { _user_id: string; _workspace_id: string }
+            Returns: boolean
+          }
+        | { Args: { _workspace_id: string }; Returns: boolean }
+      is_admin:
+        | { Args: never; Returns: boolean }
+        | { Args: { _user_id: string }; Returns: boolean }
+      is_founder: { Args: { _workspace_id: string }; Returns: boolean }
     }
     Enums: {
       action_status: "pending" | "in_progress" | "completed" | "cancelled"
