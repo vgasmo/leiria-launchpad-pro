@@ -1,8 +1,10 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Building2, FileText, BarChart3 } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
+import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
+import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
+import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 
 export default function Admin() {
   return (
@@ -15,7 +17,7 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" />
-            User Assignments
+            User Management
           </TabsTrigger>
           <TabsTrigger value="kpis" className="gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -28,36 +30,15 @@ export default function Admin() {
         </TabsList>
 
         <TabsContent value="programs">
-          <Card>
-            <CardHeader>
-              <CardTitle>Programs Management</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              Create, edit, and manage incubation programs. Coming soon.
-            </CardContent>
-          </Card>
+          <AdminProgramsManager />
         </TabsContent>
 
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Assignments</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              Assign users to workspaces with specific roles. Coming soon.
-            </CardContent>
-          </Card>
+          <AdminUsersManager />
         </TabsContent>
 
         <TabsContent value="kpis">
-          <Card>
-            <CardHeader>
-              <CardTitle>KPI Definitions</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              Define global and program-specific KPIs for startups to track. Coming soon.
-            </CardContent>
-          </Card>
+          <AdminKpisManager />
         </TabsContent>
 
         <TabsContent value="templates">
