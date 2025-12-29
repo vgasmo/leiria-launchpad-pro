@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Building2, Upload, Loader2, Globe, Calendar } from 'lucide-react';
+import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StartupSettingsTabProps {
@@ -19,6 +19,8 @@ interface StartupSettingsTabProps {
     website: string | null;
     logo_url: string | null;
     founded_date: string | null;
+    phone: string | null;
+    address: string | null;
   };
   canEdit: boolean;
 }
@@ -32,6 +34,8 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     description: startup.description || '',
     website: startup.website || '',
     founded_date: startup.founded_date || '',
+    phone: startup.phone || '',
+    address: startup.address || '',
   });
 
   const updateMutation = useMutation({
@@ -43,6 +47,8 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           description: data.description || null,
           website: data.website || null,
           founded_date: data.founded_date || null,
+          phone: data.phone || null,
+          address: data.address || null,
         })
         .eq('id', startupId);
       if (error) throw error;
@@ -217,15 +223,45 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
             </div>
           </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+351 912 345 678"
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="founded_date">Founded Date</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="founded_date"
+                  type="date"
+                  value={formData.founded_date}
+                  onChange={(e) => setFormData({ ...formData, founded_date: e.target.value })}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="founded_date">Founded Date</Label>
-            <div className="relative max-w-xs">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="founded_date"
-                type="date"
-                value={formData.founded_date}
-                onChange={(e) => setFormData({ ...formData, founded_date: e.target.value })}
+            <Label htmlFor="address">Address</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Rua do Exemplo, 123, 2400-000 Leiria"
+                rows={2}
                 className="pl-9"
               />
             </div>

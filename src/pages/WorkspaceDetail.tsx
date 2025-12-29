@@ -51,7 +51,7 @@ export default function WorkspaceDetail() {
     );
   }
 
-  const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null } | null;
+  const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null } | null;
   const program = workspace.program as { name: string } | null;
   
   // Check if user is a founder (can edit startup profile)
