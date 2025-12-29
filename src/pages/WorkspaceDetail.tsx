@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
 import { SessionsTab } from '@/components/workspace/SessionsTab';
+import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -97,7 +98,7 @@ export default function WorkspaceDetail() {
           <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="actions">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Action items management coming soon.</CardContent></Card>
+          <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="milestones">
           <Card><CardContent className="py-12 text-center text-muted-foreground">Milestones tracking coming soon.</CardContent></Card>
