@@ -4,6 +4,7 @@ import { StartupStage, HealthScore } from '@/types/database';
 
 interface WorkspaceFilters {
   search?: string;
+  programId?: string | 'all';
   stage?: StartupStage | 'all';
   health?: HealthScore | 'all';
   missingKpi?: boolean;
@@ -33,6 +34,8 @@ export interface WorkspaceWithDetails {
   pendingActionsCount: number;
   overdueActionsCount: number;
   hasCurrentMonthKpi: boolean;
+  lastKpiMonth: string | null;
+  nextMeetingDate: string | null;
 }
 
 export function useWorkspaces(filters: WorkspaceFilters = {}) {
@@ -54,6 +57,11 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         query = query.eq('stage', filters.stage);
       }
 
+      // Apply program filter
+      if (filters.programId && filters.programId !== 'all') {
+        query = query.eq('program_id', filters.programId);
+      }
+
       // Apply health filter
       if (filters.health && filters.health !== 'all') {
         query = query.or(`health_score.eq.${filters.health},health_score_override.eq.${filters.health}`);
@@ -71,18 +79,58 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
       // Fetch action items for counts
       const workspaceIds = workspaces.map(w => w.id);
       
-      const { data: actionItems } = await supabase
-        .from('action_items')
-        .select('workspace_id, status, due_date')
-        .in('workspace_id', workspaceIds)
-        .in('status', ['pending', 'in_progress']);
+      if (workspaceIds.length === 0) return [];
 
-      // Fetch KPI values for current month
-      const { data: kpiValues } = await supabase
-        .from('kpi_values')
-        .select('workspace_id')
-        .in('workspace_id', workspaceIds)
-        .eq('period_month', currentMonth);
+      const [actionItemsResult, kpiValuesResult, lastKpiResult, meetingsResult] = await Promise.all([
+        // Fetch pending/in-progress action items
+        supabase
+          .from('action_items')
+          .select('workspace_id, status, due_date')
+          .in('workspace_id', workspaceIds)
+          .in('status', ['pending', 'in_progress']),
+        
+        // Fetch KPI values for current month
+        supabase
+          .from('kpi_values')
+          .select('workspace_id')
+          .in('workspace_id', workspaceIds)
+          .eq('period_month', currentMonth),
+        
+        // Fetch last KPI entry per workspace
+        supabase
+          .from('kpi_values')
+          .select('workspace_id, period_month')
+          .in('workspace_id', workspaceIds)
+          .order('period_month', { ascending: false }),
+        
+        // Fetch next meeting per workspace
+        supabase
+          .from('meetings')
+          .select('workspace_id, starts_at')
+          .in('workspace_id', workspaceIds)
+          .gte('starts_at', new Date().toISOString())
+          .order('starts_at', { ascending: true })
+      ]);
+
+      const { data: actionItems } = actionItemsResult;
+      const { data: kpiValues } = kpiValuesResult;
+      const { data: lastKpiData } = lastKpiResult;
+      const { data: meetings } = meetingsResult;
+
+      // Build lookup maps
+      const lastKpiMap = new Map<string, string>();
+      lastKpiData?.forEach(k => {
+        if (!lastKpiMap.has(k.workspace_id)) {
+          lastKpiMap.set(k.workspace_id, k.period_month);
+        }
+      });
+
+      const nextMeetingMap = new Map<string, string>();
+      meetings?.forEach(m => {
+        if (!nextMeetingMap.has(m.workspace_id)) {
+          nextMeetingMap.set(m.workspace_id, m.starts_at);
+        }
+      });
 
       // Build result with counts
       const today = new Date().toISOString().split('T')[0];
@@ -94,6 +142,8 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           a => a.due_date && a.due_date < today
         ).length;
         const hasCurrentMonthKpi = kpiValues?.some(k => k.workspace_id === w.id) || false;
+        const lastKpiMonth = lastKpiMap.get(w.id) || null;
+        const nextMeetingDate = nextMeetingMap.get(w.id) || null;
 
         return {
           ...w,
@@ -102,6 +152,8 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           pendingActionsCount,
           overdueActionsCount,
           hasCurrentMonthKpi,
+          lastKpiMonth,
+          nextMeetingDate,
         };
       });
 
@@ -143,11 +195,27 @@ export function useWorkspace(id: string | undefined) {
           program:programs(*)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
     },
     enabled: !!id,
+  });
+}
+
+export function usePrograms() {
+  return useQuery({
+    queryKey: ['programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
   });
 }
