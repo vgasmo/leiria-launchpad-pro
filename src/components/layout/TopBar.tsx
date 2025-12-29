@@ -1,4 +1,5 @@
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 export function TopBar() {
+  const navigate = useNavigate();
   const { profile, roles, isAdmin, signOut } = useAuth();
 
   const initials = profile?.full_name
@@ -76,6 +78,10 @@ export function TopBar() {
               <span className="text-xs text-muted-foreground">No roles assigned</span>
             )}
           </div>
+          <DropdownMenuItem onClick={() => navigate('/settings')}>
+            <Settings className="h-4 w-4 mr-2" />
+            Account Settings
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
             <LogOut className="h-4 w-4 mr-2" />
