@@ -36,6 +36,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -399,9 +400,12 @@ function WorkspaceRow({ workspace, onClick, formatKpiMonth, formatMeetingDate }:
     >
       <TableCell className="font-medium">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Building2 className="h-4 w-4 text-primary" />
-          </div>
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
+            <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+              {workspace.startup?.name?.slice(0, 2).toUpperCase() || '?'}
+            </AvatarFallback>
+          </Avatar>
           <div className="min-w-0">
             <p className="font-semibold truncate">{workspace.startup?.name || 'Unnamed'}</p>
           </div>

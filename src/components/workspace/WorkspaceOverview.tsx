@@ -43,7 +43,7 @@ interface WorkspaceOverviewProps {
     health_score_override: string | null;
     health_status: string | null;
     health_notes: string | null;
-    startup: { name: string; description: string | null } | null;
+    startup: { name: string; description: string | null; logo_url?: string | null } | null;
     program: { name: string } | null;
   };
   canWrite: boolean;
@@ -89,9 +89,12 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         <CardContent className="py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Target className="h-7 w-7 text-primary" />
-              </div>
+              <Avatar className="h-14 w-14 rounded-xl">
+                <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
+                <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-lg font-semibold">
+                  {workspace.startup?.name?.slice(0, 2).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
               <div>
                 <h2 className="font-heading text-2xl font-bold">{workspace.startup?.name}</h2>
                 <p className="text-muted-foreground">{workspace.program?.name}</p>
