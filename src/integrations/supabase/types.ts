@@ -441,6 +441,38 @@ export type Database = {
           },
         ]
       }
+      stage_kpi_defaults: {
+        Row: {
+          created_at: string
+          id: string
+          kpi_definition_id: string
+          required: boolean
+          stage: Database["public"]["Enums"]["startup_stage"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kpi_definition_id: string
+          required?: boolean
+          stage: Database["public"]["Enums"]["startup_stage"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kpi_definition_id?: string
+          required?: boolean
+          stage?: Database["public"]["Enums"]["startup_stage"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_kpi_defaults_kpi_definition_id_fkey"
+            columns: ["kpi_definition_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stages: {
         Row: {
           created_at: string
