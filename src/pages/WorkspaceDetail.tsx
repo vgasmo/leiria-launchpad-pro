@@ -9,6 +9,7 @@ import { AccessDenied } from '@/components/ui/AccessDenied';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
 import { SessionsTab } from '@/components/workspace/SessionsTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
+import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -101,7 +102,7 @@ export default function WorkspaceDetail() {
           <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="milestones">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Milestones tracking coming soon.</CardContent></Card>
+          <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="kpis">
           <Card><CardContent className="py-12 text-center text-muted-foreground">Monthly KPI check-ins coming soon.</CardContent></Card>
