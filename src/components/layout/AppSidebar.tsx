@@ -167,17 +167,20 @@ export function AppSidebar() {
 
         {/* Notifications */}
         {notificationCount > 0 && (
-          <div className={cn(
-            "mx-3 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20 transition-all duration-300",
-            collapsed ? "p-2" : "p-3"
-          )}>
+          <Link
+            to="/my-workspaces?filter=attention"
+            className={cn(
+              "mx-3 mb-3 rounded-lg bg-destructive/10 border border-destructive/20 transition-all duration-300 block hover:bg-destructive/20 cursor-pointer",
+              collapsed ? "p-2" : "p-3"
+            )}
+          >
             {collapsed ? (
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <div className="flex justify-center">
                     <div className="relative">
-                      <AlertCircle className="h-5 w-5 text-amber-500" />
-                      <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
+                      <AlertCircle className="h-5 w-5 text-destructive" />
+                      <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
                         {notificationCount}
                       </span>
                     </div>
@@ -189,15 +192,15 @@ export function AppSidebar() {
               </Tooltip>
             ) : (
               <div className="flex items-center gap-3 animate-fade-in">
-                <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
+                <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-amber-500">
+                  <p className="text-xs font-medium text-destructive">
                     {notificationCount} items need attention
                   </p>
                 </div>
               </div>
             )}
-          </div>
+          </Link>
         )}
 
         {/* User section */}
