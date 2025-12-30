@@ -316,6 +316,39 @@ export type Database = {
           },
         ]
       }
+      mentor_connections: {
+        Row: {
+          created_at: string
+          founder_id: string
+          id: string
+          mentor_id: string
+          message: string | null
+          responded_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          founder_id: string
+          id?: string
+          mentor_id: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          founder_id?: string
+          id?: string
+          mentor_id?: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       milestones: {
         Row: {
           completed_at: string | null
@@ -369,28 +402,37 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           email: string
+          expertise: string[] | null
           full_name: string | null
           id: string
+          linkedin_url: string | null
           phone: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email: string
+          expertise?: string[] | null
           full_name?: string | null
           id: string
+          linkedin_url?: string | null
           phone?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email?: string
+          expertise?: string[] | null
           full_name?: string | null
           id?: string
+          linkedin_url?: string | null
           phone?: string | null
           updated_at?: string
         }
