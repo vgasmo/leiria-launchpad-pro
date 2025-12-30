@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -71,6 +71,7 @@ const PAGE_SIZE = 15;
 
 export default function MyWorkspaces() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isConsultor, isMentor, isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -82,6 +83,17 @@ export default function MyWorkspaces() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [quickFilters, setQuickFilters] = useState<Record<string, boolean>>({});
+
+  // Handle URL filter parameter (e.g., ?filter=attention)
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'attention') {
+      // Set filters for items needing attention (critical, at_risk, or overdue)
+      setQuickFilters({ critical: true, at_risk: true, overdue: true });
+      // Clear the URL param after applying
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Enable realtime updates
   useRealtimeWorkspaces();
