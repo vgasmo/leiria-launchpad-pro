@@ -163,6 +163,177 @@ export type Database = {
           },
         ]
       }
+      cap_table_entries: {
+        Row: {
+          cliff_months: number | null
+          created_at: string
+          funding_round_id: string | null
+          holder_name: string
+          holder_type: string
+          id: string
+          investment_amount: number | null
+          notes: string | null
+          share_type: string
+          shares: number
+          startup_id: string
+          updated_at: string
+          vesting_months: number | null
+          vesting_start: string | null
+        }
+        Insert: {
+          cliff_months?: number | null
+          created_at?: string
+          funding_round_id?: string | null
+          holder_name: string
+          holder_type?: string
+          id?: string
+          investment_amount?: number | null
+          notes?: string | null
+          share_type?: string
+          shares?: number
+          startup_id: string
+          updated_at?: string
+          vesting_months?: number | null
+          vesting_start?: string | null
+        }
+        Update: {
+          cliff_months?: number | null
+          created_at?: string
+          funding_round_id?: string | null
+          holder_name?: string
+          holder_type?: string
+          id?: string
+          investment_amount?: number | null
+          notes?: string | null
+          share_type?: string
+          shares?: number
+          startup_id?: string
+          updated_at?: string
+          vesting_months?: number | null
+          vesting_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cap_table_entries_funding_round_id_fkey"
+            columns: ["funding_round_id"]
+            isOneToOne: false
+            referencedRelation: "funding_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cap_table_entries_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_notes: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          is_private: boolean
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_private?: boolean
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_private?: boolean
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_notes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          id: string
+          joined_at: string
+          last_read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          is_group: boolean
+          title: string | null
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_group?: boolean
+          title?: string | null
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_group?: boolean
+          title?: string | null
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: string | null
@@ -212,6 +383,109 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_rounds: {
+        Row: {
+          announced_at: string | null
+          closed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          raised_amount: number | null
+          round_type: string
+          startup_id: string
+          status: string
+          target_amount: number | null
+          updated_at: string
+          valuation: number | null
+        }
+        Insert: {
+          announced_at?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          raised_amount?: number | null
+          round_type: string
+          startup_id: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+          valuation?: number | null
+        }
+        Update: {
+          announced_at?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          raised_amount?: number | null
+          round_type?: string
+          startup_id?: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+          valuation?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_rounds_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investors: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          startup_id: string
+          status: string
+          type: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          startup_id: string
+          status?: string
+          type?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          startup_id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investors_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
             referencedColumns: ["id"]
           },
         ]
@@ -370,6 +644,86 @@ export type Database = {
           },
         ]
       }
+      mentor_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          mentor_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          mentor_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          mentor_id?: string
+          start_time?: string
+        }
+        Relationships: []
+      }
+      mentor_bookings: {
+        Row: {
+          created_at: string
+          founder_id: string
+          id: string
+          mentor_id: string
+          message: string | null
+          requested_date: string
+          requested_end_time: string
+          requested_start_time: string
+          status: string
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          founder_id: string
+          id?: string
+          mentor_id: string
+          message?: string | null
+          requested_date: string
+          requested_end_time: string
+          requested_start_time: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          founder_id?: string
+          id?: string
+          mentor_id?: string
+          message?: string | null
+          requested_date?: string
+          requested_end_time?: string
+          requested_start_time?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_bookings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_connections: {
         Row: {
           created_at: string
@@ -402,6 +756,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       milestones: {
         Row: {
