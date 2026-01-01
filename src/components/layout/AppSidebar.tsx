@@ -7,7 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
-  AlertCircle
+  AlertCircle,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,7 +32,8 @@ const adminNavigation = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { profile, isAdmin, signOut } = useAuth();
+  const { profile, isAdmin, isMentor, roles, signOut } = useAuth();
+  const isFounder = roles.includes('founder');
   const [collapsed, setCollapsed] = useState(false);
 
   const initials = profile?.full_name
@@ -123,6 +125,45 @@ export function AppSidebar() {
             }
             return NavItem;
           })}
+
+          {/* Find Mentors - visible to founders and mentors */}
+          {(isFounder || isMentor) && (
+            <>
+              <div className="my-4 h-px bg-sidebar-border" />
+              {(() => {
+                const isActive = location.pathname === '/mentors';
+                const NavItem = (
+                  <Link
+                    to="/mentors"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                      collapsed && "justify-center px-2"
+                    )}
+                  >
+                    <Users className="h-5 w-5 shrink-0" />
+                    {!collapsed && (
+                      <span className="animate-fade-in">Find Mentors</span>
+                    )}
+                  </Link>
+                );
+
+                if (collapsed) {
+                  return (
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
+                      <TooltipContent side="right" className="font-medium">
+                        Find Mentors
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+                return NavItem;
+              })()}
+            </>
+          )}
 
           {isAdmin && (
             <>
