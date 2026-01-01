@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { startupSchema } from '@/lib/validations';
 
-interface StartupFormData {
+interface FormState {
   name: string;
   description: string;
   website: string;
@@ -20,8 +21,9 @@ interface StartupFormData {
 export function AdminStartupsManager() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingStartup, setEditingStartup] = useState<{ id: string } & StartupFormData | null>(null);
-  const [formData, setFormData] = useState<StartupFormData>({ name: '', description: '', website: '' });
+  const [editingStartup, setEditingStartup] = useState<{ id: string } & FormState | null>(null);
+  const [formData, setFormData] = useState<FormState>({ name: '', description: '', website: '' });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { data: startups, isLoading } = useQuery({
     queryKey: ['admin-startups'],
@@ -36,8 +38,8 @@ export function AdminStartupsManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: StartupFormData) => {
-      const { error } = await supabase.from('startups').insert(data);
+    mutationFn: async (data: { name: string; description?: string | null; website?: string | null }) => {
+      const { error } = await supabase.from('startups').insert([data]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -49,7 +51,7 @@ export function AdminStartupsManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: string } & StartupFormData) => {
+    mutationFn: async ({ id, ...data }: { id: string; name: string; description?: string | null; website?: string | null }) => {
       const { error } = await supabase.from('startups').update(data).eq('id', id);
       if (error) throw error;
     },
@@ -76,15 +78,33 @@ export function AdminStartupsManager() {
   const resetForm = () => {
     setFormData({ name: '', description: '', website: '' });
     setEditingStartup(null);
+    setValidationErrors({});
     setIsDialogOpen(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors({});
+
+    const parseResult = startupSchema.safeParse(formData);
+    
+    if (!parseResult.success) {
+      const errors: Record<string, string> = {};
+      parseResult.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0].toString()] = err.message;
+        }
+      });
+      setValidationErrors(errors);
+      toast.error(parseResult.error.errors[0]?.message || 'Validation error');
+      return;
+    }
+
+    const validData = parseResult.data as { name: string; description?: string | null; website?: string | null };
     if (editingStartup) {
-      updateMutation.mutate({ id: editingStartup.id, ...formData });
+      updateMutation.mutate({ id: editingStartup.id, ...validData });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(validData);
     }
   };
 
@@ -109,15 +129,40 @@ export function AdminStartupsManager() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                <Input 
+                  id="name" 
+                  value={formData.name} 
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                  maxLength={100}
+                  required 
+                />
+                {validationErrors.name && (
+                  <p className="text-sm text-destructive mt-1">{validationErrors.name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                <Textarea 
+                  id="description" 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                  maxLength={2000}
+                />
+                {validationErrors.description && (
+                  <p className="text-sm text-destructive mt-1">{validationErrors.description}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="website">Website</Label>
-                <Input id="website" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} placeholder="https://..." />
+                <Input 
+                  id="website" 
+                  value={formData.website} 
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })} 
+                  placeholder="https://..." 
+                />
+                {validationErrors.website && (
+                  <p className="text-sm text-destructive mt-1">{validationErrors.website}</p>
+                )}
               </div>
               <Button type="submit" className="w-full">{editingStartup ? 'Update' : 'Create'}</Button>
             </form>
