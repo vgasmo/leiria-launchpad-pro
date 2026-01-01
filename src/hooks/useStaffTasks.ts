@@ -167,6 +167,14 @@ export function useCreateStaffTask() {
         .single();
 
       if (error) throw error;
+      
+      // Send email notification to assignee (fire and forget)
+      if (result && data.assignee_id !== user?.id) {
+        supabase.functions.invoke('send-task-notification', {
+          body: { type: 'assigned', taskId: result.id }
+        }).catch(err => console.error('Failed to send task notification:', err));
+      }
+      
       return result;
     },
     onSuccess: () => {
