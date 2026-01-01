@@ -165,7 +165,7 @@ serve(async (req: Request) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Startup Leiria <onboarding@resend.dev>",
+            from: "Startup Leiria <noreply@startupleiria.com>",
             to: [digestData.email],
             subject: `Weekly Digest: ${digestData.overdueActions} items need attention`,
             html: emailHtml,
