@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { format, isPast, isToday } from 'date-fns';
 import { 
   Calendar, 
@@ -8,7 +9,8 @@ import {
   FileText,
   Plus,
   Video,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceMeetings, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
 import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
+import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -57,8 +60,16 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const { data: nextMeeting, isLoading: meetingLoading } = useWorkspaceMeetings(workspace.id);
   const { data: sessions, isLoading: sessionsLoading } = useWorkspaceSessions(workspace.id);
   const { data: stages } = useStages(workspace.program_id);
+  
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
+  
+  // Check if workspace is "empty" and should show onboarding prompt
+  const isWorkspaceEmpty = !kpisLoading && !milestonesLoading && !meetingLoading &&
+    (kpiData?.current.length === 0) && 
+    (milestones?.length === 0) && 
+    !nextMeeting;
 
   const handleStageChange = async (newStage: StartupStage) => {
     const { error } = await supabase
@@ -84,6 +95,40 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Wizard */}
+      <WorkspaceOnboardingWizard
+        open={showOnboardingWizard}
+        onOpenChange={setShowOnboardingWizard}
+        workspaceId={workspace.id}
+        stage={workspace.stage}
+        startupName={workspace.startup?.name || 'Workspace'}
+      />
+      
+      {/* Onboarding CTA for empty workspaces */}
+      {isWorkspaceEmpty && canWrite && (
+        <Card className="border-dashed border-primary/50 bg-primary/5">
+          <CardContent className="py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Get started with your workspace</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Set up KPIs, milestones, and schedule your first meeting.
+                  </p>
+                </div>
+              </div>
+              <Button onClick={() => setShowOnboardingWizard(true)}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Run Setup Wizard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {/* Header */}
       <Card>
         <CardContent className="py-6">
