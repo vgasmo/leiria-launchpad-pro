@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 const loginSchema = z.object({
@@ -117,7 +119,12 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      {/* Language and Theme Selectors */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+        <LanguageSelector />
+        <ThemeToggle />
+      </div>
       {/* Left side - branding with logo */}
       <div className="hidden lg:flex lg:flex-1 bg-foreground relative overflow-hidden items-center justify-center p-12">
         {/* Animated decorative elements */}
