@@ -6,15 +6,15 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Bell,
   AlertCircle,
   Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAttentionCount } from '@/hooks/useAttentionCount';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
@@ -36,15 +36,16 @@ export function AppSidebar() {
   const isFounder = roles.includes('founder');
   const [collapsed, setCollapsed] = useState(false);
 
+  // Real notification count from database
+  const { data: attentionStats, isLoading: attentionLoading } = useAttentionCount();
+  const notificationCount = attentionStats?.totalAttention || 0;
+
   const initials = profile?.full_name
     ?.split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'U';
-
-  // Mock notification count - in production this would come from a hook
-  const notificationCount = 3;
 
   return (
     <aside 
@@ -207,7 +208,11 @@ export function AppSidebar() {
         </nav>
 
         {/* Notifications */}
-        {notificationCount > 0 && (
+        {attentionLoading ? (
+          <div className={cn("mx-3 mb-3", collapsed ? "p-2" : "p-3")}>
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : notificationCount > 0 ? (
           <Link
             to="/my-workspaces?filter=attention"
             className={cn(
@@ -222,13 +227,13 @@ export function AppSidebar() {
                     <div className="relative">
                       <AlertCircle className="h-5 w-5 text-destructive" />
                       <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-                        {notificationCount}
+                        {notificationCount > 9 ? '9+' : notificationCount}
                       </span>
                     </div>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  {notificationCount} items need attention
+                  {notificationCount} item{notificationCount !== 1 ? 's' : ''} need attention
                 </TooltipContent>
               </Tooltip>
             ) : (
@@ -236,13 +241,22 @@ export function AppSidebar() {
                 <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-destructive">
-                    {notificationCount} items need attention
+                    {notificationCount} item{notificationCount !== 1 ? 's' : ''} need attention
                   </p>
+                  {attentionStats && (
+                    <p className="text-[10px] text-destructive/70 truncate">
+                      {[
+                        attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} critical`,
+                        attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} at risk`,
+                        attentionStats.overdueCount > 0 && `${attentionStats.overdueCount} overdue`,
+                      ].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
           </Link>
-        )}
+        ) : null}
 
         {/* User section */}
         <div className="border-t border-sidebar-border p-3">
