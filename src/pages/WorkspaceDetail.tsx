@@ -179,7 +179,7 @@ export default function WorkspaceDetail() {
           <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="templates">
-          <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} />
+          <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
         </TabsContent>
         <TabsContent value="calendar">
           <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />

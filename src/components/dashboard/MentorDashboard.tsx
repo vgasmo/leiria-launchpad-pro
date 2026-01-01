@@ -17,6 +17,7 @@ import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 
@@ -100,6 +101,9 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6">
+      {/* My Tasks */}
+      <StaffTasksPanel />
+
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="animate-fade-in">
