@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { format, isPast, isToday } from 'date-fns';
 import { 
   Calendar, 
@@ -53,6 +54,7 @@ interface WorkspaceOverviewProps {
 }
 
 export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProps) {
+  const [, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { data: actions, isLoading: actionsLoading } = useWorkspaceActions(workspace.id);
   const { data: kpiData, isLoading: kpisLoading } = useWorkspaceKpis(workspace.id);
@@ -291,7 +293,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 Upcoming
               </CardTitle>
               {canWrite && (
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSearchParams({ tab: 'calendar' })}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   Schedule
                 </Button>
