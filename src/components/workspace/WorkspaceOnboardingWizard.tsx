@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { useApplyStageDefaults } from '@/hooks/useKpis';
 import { useCreateMilestone } from '@/hooks/useMilestones';
 import { useCreateActionItemFull } from '@/hooks/useActionItems';
-import { useMeetings } from '@/hooks/useMeetings';
+import { useCreateSession } from '@/hooks/useSessions';
 import { toast } from 'sonner';
 import type { StartupStage } from '@/types/database';
 
@@ -297,7 +297,7 @@ export function WorkspaceOnboardingWizard({
   const applyDefaults = useApplyStageDefaults(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
-  const { createMeeting } = useMeetings(workspaceId);
+  const createSession = useCreateSession(workspaceId);
 
   const stageMilestones = STAGE_MILESTONES[stage];
 
@@ -357,30 +357,31 @@ export function WorkspaceOnboardingWizard({
     }
   };
 
-  const handleScheduleMeeting = async () => {
+  const handleScheduleSession = async () => {
     if (!meetingTitle.trim()) {
-      toast.error('Please enter a meeting title');
+      toast.error('Please enter a session title');
       return;
     }
     
     setIsProcessing(true);
     try {
       const startsAt = new Date(`${meetingDate}T${meetingTime}`);
-      const endsAt = new Date(startsAt.getTime() + parseInt(meetingDuration) * 60000);
+      const duration = parseInt(meetingDuration);
       
-      await createMeeting.mutateAsync({
+      await createSession.mutateAsync({
         title: meetingTitle,
-        description: 'Initial kickoff meeting to align on goals and next steps.',
-        workspace_id: workspaceId,
-        starts_at: startsAt.toISOString(),
-        ends_at: endsAt.toISOString(),
+        agenda: 'Initial kickoff session to align on goals and next steps.',
+        scheduled_at: startsAt.toISOString(),
+        duration: duration,
+        notes: null,
+        decisions: null,
       });
       
       setMeetingScheduled(true);
-      toast.success('Meeting scheduled');
+      toast.success('Session scheduled');
       setCurrentStep('complete');
     } catch {
-      toast.error('Failed to schedule meeting');
+      toast.error('Failed to schedule session');
     } finally {
       setIsProcessing(false);
     }
@@ -685,9 +686,9 @@ export function WorkspaceOnboardingWizard({
               <Button variant="outline" onClick={() => setCurrentStep('complete')} disabled={isProcessing}>
                 Skip
               </Button>
-              <Button onClick={handleScheduleMeeting} disabled={isProcessing || meetingScheduled}>
+              <Button onClick={handleScheduleSession} disabled={isProcessing || meetingScheduled}>
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                {meetingScheduled ? 'Scheduled' : 'Schedule Meeting'}
+                {meetingScheduled ? 'Scheduled' : 'Schedule Session'}
               </Button>
             </div>
           )}

@@ -106,27 +106,12 @@ export function useWorkspaceMilestones(workspaceId: string | undefined) {
   });
 }
 
-export function useWorkspaceMeetings(workspaceId: string | undefined) {
+export function useWorkspaceNextSession(workspaceId: string | undefined) {
   return useQuery({
-    queryKey: ['workspace-meetings', workspaceId],
+    queryKey: ['workspace-next-session', workspaceId],
     queryFn: async () => {
       if (!workspaceId) return null;
       
-      // First check for meetings
-      const { data: meeting } = await supabase
-        .from('meetings')
-        .select('*')
-        .eq('workspace_id', workspaceId)
-        .gte('starts_at', new Date().toISOString())
-        .order('starts_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (meeting) {
-        return { type: 'meeting', ...meeting };
-      }
-
-      // If no meeting, check for upcoming sessions
       const { data: session } = await supabase
         .from('sessions')
         .select('*')
@@ -138,12 +123,12 @@ export function useWorkspaceMeetings(workspaceId: string | undefined) {
 
       if (session) {
         return {
-          type: 'session',
           id: session.id,
           title: session.title,
           starts_at: session.scheduled_at,
           ends_at: new Date(new Date(session.scheduled_at).getTime() + (session.duration || 60) * 60000).toISOString(),
-          join_url: null,
+          join_url: session.join_url,
+          location: session.location,
         };
       }
 

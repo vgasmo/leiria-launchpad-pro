@@ -1,6 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+export interface Session {
+  id: string;
+  workspace_id: string;
+  title: string;
+  scheduled_at: string;
+  duration: number | null;
+  agenda: string | null;
+  notes: string | null;
+  decisions: string | null;
+  location: string | null;
+  join_url: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  creator?: { id: string; full_name: string | null; avatar_url: string | null } | null;
+}
+
 export interface SessionFormData {
   title: string;
   scheduled_at: string;
@@ -8,6 +25,8 @@ export interface SessionFormData {
   agenda: string | null;
   notes: string | null;
   decisions: string | null;
+  location?: string | null;
+  join_url?: string | null;
 }
 
 export function useSessions(workspaceId: string | undefined) {
@@ -40,7 +59,26 @@ export function useSessions(workspaceId: string | undefined) {
       return sessions.map(session => ({
         ...session,
         creator: profiles.find(p => p.id === session.created_by) || null,
-      }));
+      })) as Session[];
+    },
+    enabled: !!workspaceId,
+  });
+}
+
+export function useCalendarSessions(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ['calendar-sessions', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      
+      const { data: sessions, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+      return (sessions || []) as Session[];
     },
     enabled: !!workspaceId,
   });
@@ -63,16 +101,19 @@ export function useCreateSession(workspaceId: string) {
           agenda: session.agenda,
           notes: session.notes,
           decisions: session.decisions,
+          location: session.location || null,
+          join_url: session.join_url || null,
           created_by: user?.id,
         })
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Session;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
     },
   });
@@ -91,10 +132,11 @@ export function useUpdateSession(workspaceId: string) {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Session;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
     },
   });
@@ -114,6 +156,7 @@ export function useDeleteSession(workspaceId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
     },
   });

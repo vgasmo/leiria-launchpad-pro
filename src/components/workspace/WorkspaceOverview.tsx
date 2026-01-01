@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceMeetings, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
+import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceNextSession, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
 import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
@@ -60,7 +60,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const { data: actions, isLoading: actionsLoading } = useWorkspaceActions(workspace.id);
   const { data: kpiData, isLoading: kpisLoading } = useWorkspaceKpis(workspace.id);
   const { data: milestones, isLoading: milestonesLoading } = useWorkspaceMilestones(workspace.id);
-  const { data: nextMeeting, isLoading: meetingLoading } = useWorkspaceMeetings(workspace.id);
+  const { data: nextSession, isLoading: sessionLoading } = useWorkspaceNextSession(workspace.id);
   const { data: sessions, isLoading: sessionsLoading } = useWorkspaceSessions(workspace.id);
   const { data: stages } = useStages(workspace.program_id);
   
@@ -69,10 +69,10 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   
   // Check if workspace is "empty" and should show onboarding prompt
-  const isWorkspaceEmpty = !kpisLoading && !milestonesLoading && !meetingLoading &&
+  const isWorkspaceEmpty = !kpisLoading && !milestonesLoading && !sessionLoading &&
     (kpiData?.current.length === 0) && 
     (milestones?.length === 0) && 
-    !nextMeeting;
+    !nextSession;
 
   const handleStageChange = async (newStage: StartupStage) => {
     const { error } = await supabase
@@ -311,39 +311,34 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             </div>
           </CardHeader>
           <CardContent>
-            {meetingLoading ? (
+            {sessionLoading ? (
               <Skeleton className="h-20" />
-            ) : !nextMeeting ? (
+            ) : !nextSession ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No upcoming meetings or sessions</p>
+                <p>No upcoming sessions</p>
               </div>
             ) : (
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
                     <span className="text-xs text-primary font-medium">
-                      {format(new Date(nextMeeting.starts_at), 'MMM')}
+                      {format(new Date(nextSession.starts_at), 'MMM')}
                     </span>
                     <span className="text-lg font-bold text-primary leading-none">
-                      {format(new Date(nextMeeting.starts_at), 'd')}
+                      {format(new Date(nextSession.starts_at), 'd')}
                     </span>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{nextMeeting.title}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {nextMeeting.type === 'session' ? 'Session' : 'Meeting'}
-                      </Badge>
-                    </div>
+                    <p className="font-medium">{nextSession.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(nextMeeting.starts_at), 'h:mm a')} - {format(new Date(nextMeeting.ends_at), 'h:mm a')}
+                      {format(new Date(nextSession.starts_at), 'h:mm a')} - {format(new Date(nextSession.ends_at), 'h:mm a')}
                     </p>
                   </div>
                 </div>
-                {nextMeeting.join_url && (
+                {nextSession.join_url && (
                   <Button variant="outline" size="sm" asChild>
-                    <a href={nextMeeting.join_url} target="_blank" rel="noopener noreferrer">
+                    <a href={nextSession.join_url} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Join
                     </a>
