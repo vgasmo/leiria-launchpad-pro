@@ -318,170 +318,98 @@ export default function MyWorkspaces() {
     }
   };
 
+  // Get appropriate title based on role
+  const getPageTitle = () => {
+    if (showDetailedView) return "All Startups";
+    if (showConsultorDashboard) return "Portfolio Overview";
+    if (showMentorDashboard) return "My Mentorships";
+    if (showFounderDashboard) return "My Startup";
+    return "My Workspaces";
+  };
+
+  const getPageSubtitle = () => {
+    if (showDetailedView) return `${totalItems} startup${totalItems !== 1 ? 's' : ''}`;
+    if (showConsultorDashboard) return `Managing ${workspaces?.length || 0} startups`;
+    if (showMentorDashboard) return `${workspaces?.length || 0} active mentorship${(workspaces?.length || 0) !== 1 ? 's' : ''}`;
+    return undefined;
+  };
+
   return (
     <AppLayout 
-      title={showDashboard ? "Portfolio Overview" : "My Workspaces"}
-      subtitle={showDashboard 
-        ? `Managing ${totalItems} startup${totalItems !== 1 ? 's' : ''}`
-        : `${totalItems} workspace${totalItems !== 1 ? 's' : ''}`
-      }
+      title={getPageTitle()}
+      subtitle={getPageSubtitle()}
       actions={
-        isFounder && !showDashboard ? (
-          <Button onClick={() => setShowCreateStartup(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Startup
-          </Button>
-        ) : undefined
+        <div className="flex items-center gap-2">
+          {/* Toggle between dashboard and list view */}
+          {(showConsultorDashboard || showMentorDashboard) && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDetailedView(true)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              View All
+            </Button>
+          )}
+          {showDetailedView && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDetailedView(false)}
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Dashboard
+            </Button>
+          )}
+          {isFounder && !showConsultorDashboard && !showMentorDashboard && (
+            <Button onClick={() => setShowCreateStartup(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Startup
+            </Button>
+          )}
+        </div>
       }
     >
       {/* Create Startup Dialog */}
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
 
-      {/* Pending Applications Banner for Founders */}
-      {isFounder && pendingWorkspaces && pendingWorkspaces.length > 0 && (
-        <div className="mb-6">
-          <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-amber-600 mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-medium text-amber-800 dark:text-amber-200">
-                    Pending Approval
-                  </h3>
-                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                    Your application{pendingWorkspaces.length > 1 ? 's are' : ' is'} being reviewed by our team.
-                  </p>
-                  <div className="mt-3 space-y-2">
-                    {pendingWorkspaces.map((pw) => (
-                      <div key={pw.id} className="flex items-center gap-2 text-sm">
-                        <Rocket className="h-4 w-4 text-amber-600" />
-                        <span className="font-medium">{pw.startup?.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {pw.program?.name}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Role-Specific Dashboards */}
+      {showConsultorDashboard && (
+        <ConsultorDashboard 
+          workspaces={workspaces || []}
+          isLoading={isLoading}
+          programsCount={programs?.length || 0}
+        />
       )}
 
-      {/* Dashboard Overview for Consultors/Mentors */}
-      {showDashboard && dashboardStats && !isLoading && (
-        <div className="mb-6 grid gap-6 lg:grid-cols-4">
-          <div className="lg:col-span-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="animate-fade-in">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Startups
-                </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardStats.total}</div>
-                <p className="text-xs text-muted-foreground">
-                  Across {programs?.length || 0} program{(programs?.length || 0) !== 1 ? 's' : ''}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className={`animate-fade-in ${dashboardStats.needsAttentionCount > 0 ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' : ''}`} style={{ animationDelay: '50ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Needs Attention
-                </CardTitle>
-                <AlertCircle className={`h-4 w-4 ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${dashboardStats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
-                  {dashboardStats.needsAttentionCount}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Critical or at-risk
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Meetings This Week
-                </CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardStats.upcomingMeetingsCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  {dashboardStats.meetingsTodayCount} today
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Health Distribution
-                </CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-1 h-6">
-                  {Object.entries(dashboardStats.healthCounts).map(([health, count]) => {
-                    if (count === 0) return null;
-                    const colors: Record<string, string> = {
-                      critical: 'bg-health-critical',
-                      at_risk: 'bg-health-at-risk',
-                      stable: 'bg-health-stable',
-                      healthy: 'bg-health-healthy',
-                      thriving: 'bg-health-thriving',
-                    };
-                    const width = (count / dashboardStats.total) * 100;
-                    return (
-                      <Tooltip key={health}>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className={`${colors[health]} rounded h-full cursor-pointer transition-all hover:opacity-80`}
-                            style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span className="capitalize">{health.replace('_', ' ')}: {count}</span>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
-                  {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving > 0 && (
-                    <span className="flex items-center gap-1">
-                      <span className="h-2 w-2 rounded-full bg-health-healthy" />
-                      {dashboardStats.healthCounts.healthy + dashboardStats.healthCounts.thriving} healthy
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Activity Feed */}
-          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <ActivityFeed />
-          </div>
-        </div>
+      {showMentorDashboard && (
+        <MentorDashboard 
+          workspaces={workspaces || []}
+          isLoading={isLoading}
+        />
       )}
 
-      {/* Quick Filter Chips */}
-      {showDashboard && dashboardStats && !isLoading && (
-        <div className="mb-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
-          <QuickFilterChips 
-            filters={quickFilterChips} 
-            onToggle={handleQuickFilterToggle}
-          />
-        </div>
+      {showFounderDashboard && (
+        <FounderDashboard 
+          workspaces={workspaces || []}
+          pendingWorkspaces={pendingWorkspaces || []}
+          isLoading={isLoading}
+          onCreateStartup={() => setShowCreateStartup(true)}
+        />
       )}
+
+      {/* Detailed List View (for filtering/searching) */}
+      {showDetailedView && (
+        <>
+          {/* Quick Filter Chips */}
+          {dashboardStats && !isLoading && (
+            <div className="mb-4 animate-fade-in">
+              <QuickFilterChips 
+                filters={quickFilterChips} 
+                onToggle={handleQuickFilterToggle}
+              />
+            </div>
+          )}
 
       {/* Filters */}
       <div className="mb-6 flex flex-col lg:flex-row gap-4">
@@ -791,6 +719,8 @@ export default function MyWorkspaces() {
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
+      )}
+        </>
       )}
     </AppLayout>
   );
