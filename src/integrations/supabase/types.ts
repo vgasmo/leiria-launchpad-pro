@@ -490,6 +490,50 @@ export type Database = {
           },
         ]
       }
+      key_results: {
+        Row: {
+          created_at: string
+          current_value: number | null
+          id: string
+          objective_id: string
+          status: string
+          target_value: number
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number | null
+          id?: string
+          objective_id: string
+          status?: string
+          target_value: number
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number | null
+          id?: string
+          objective_id?: string
+          status?: string
+          target_value?: number
+          title?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_results_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kpi_definitions: {
         Row: {
           category: string | null
@@ -842,6 +886,86 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          digest_day: number | null
+          digest_frequency: string | null
+          email_digest_enabled: boolean | null
+          id: string
+          last_digest_sent_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_day?: number | null
+          digest_frequency?: string | null
+          email_digest_enabled?: boolean | null
+          id?: string
+          last_digest_sent_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_day?: number | null
+          digest_frequency?: string | null
+          email_digest_enabled?: boolean | null
+          id?: string
+          last_digest_sent_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      objectives: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          progress: number | null
+          quarter: string | null
+          status: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          progress?: number | null
+          quarter?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          progress?: number | null
+          quarter?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objectives_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -914,6 +1038,59 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_path: string | null
+          id: string
+          is_global: boolean | null
+          program_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path?: string | null
+          id?: string
+          is_global?: boolean | null
+          program_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path?: string | null
+          id?: string
+          is_global?: boolean | null
+          program_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_filters: {
         Row: {
           created_at: string
@@ -943,6 +1120,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      session_feedback: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          is_public: boolean | null
+          rating: number
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_public?: boolean | null
+          rating: number
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_public?: boolean | null
+          rating?: number
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_feedback_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sessions: {
         Row: {
@@ -1100,6 +1315,65 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          is_founder: boolean | null
+          joined_at: string | null
+          left_at: string | null
+          linkedin_url: string | null
+          phone: string | null
+          role: string
+          startup_id: string
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          is_founder?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          role?: string
+          startup_id: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_founder?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          role?: string
+          startup_id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_instances: {
         Row: {
           created_at: string
@@ -1191,6 +1465,50 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          category: string | null
+          created_at: string
+          date: string
+          description: string | null
+          hours: number
+          id: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          hours: number
+          id?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          hours?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
