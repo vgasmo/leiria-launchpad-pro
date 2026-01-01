@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -247,8 +248,9 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* My Tasks Section - Read-only overview */}
-      <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+      {/* Pending Reviews & Tasks Section */}
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <PendingTemplateReviews />
         <StaffTasksPanel />
       </div>
 

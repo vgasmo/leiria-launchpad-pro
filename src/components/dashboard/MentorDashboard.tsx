@@ -18,6 +18,7 @@ import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 
@@ -101,8 +102,11 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6">
-      {/* My Tasks - Read-only overview */}
-      <StaffTasksPanel />
+      {/* Pending Reviews & Tasks */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PendingTemplateReviews />
+        <StaffTasksPanel />
+      </div>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-3">
