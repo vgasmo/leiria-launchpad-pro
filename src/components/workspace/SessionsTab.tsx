@@ -11,7 +11,8 @@ import {
   Trash2,
   CheckCircle2,
   AlertTriangle,
-  Mail
+  Mail,
+  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSessionActionItems, useCreateActionItem, useWorkspaceMembers } from '@/hooks/useSessions';
+import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -71,6 +73,17 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
 
   const { data: sessions, isLoading } = useSessions(workspaceId);
   const deleteMutation = useDeleteSession(workspaceId);
+  const { refetch: fetchExportData } = useExportSessions(workspaceId);
+
+  const handleExport = async () => {
+    const { data } = await fetchExportData();
+    if (data && data.length > 0) {
+      exportSessionsToCsv(data, `sessions-${workspaceId}`);
+      toast.success('Exported sessions to CSV');
+    } else {
+      toast.error('No data to export');
+    }
+  };
 
   const filteredSessions = sessions?.filter(session =>
     session.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -102,12 +115,18 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
             className="pl-10"
           />
         </div>
-        {canWrite && (
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Session
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
           </Button>
-        )}
+          {canWrite && (
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Session
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Sessions List */}

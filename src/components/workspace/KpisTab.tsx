@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,7 @@ import {
   type WorkspaceKpi,
   type KpiValue,
 } from '@/hooks/useKpis';
+import { useExportKpis, exportToCsv } from '@/hooks/useExportData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
@@ -51,6 +52,17 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const addKpi = useAddWorkspaceKpi(workspaceId);
   const removeKpi = useRemoveWorkspaceKpi(workspaceId);
   const applyDefaults = useApplyStageDefaults(workspaceId);
+  const { refetch: fetchExportData } = useExportKpis(workspaceId);
+
+  const handleExport = async () => {
+    const { data } = await fetchExportData();
+    if (data && data.length > 0) {
+      exportToCsv(data, `kpis-${workspaceId}`);
+      toast.success('Exported KPIs to CSV');
+    } else {
+      toast.error('No data to export');
+    }
+  };
 
   const [selectedMonth, setSelectedMonth] = useState(() => startOfMonth(new Date()));
   const [editedValues, setEditedValues] = useState<Record<string, { value: string; notes: string }>>({});
@@ -330,6 +342,10 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         </div>
 
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
           {canConfigureKpis && (
             <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
               <DialogTrigger asChild>

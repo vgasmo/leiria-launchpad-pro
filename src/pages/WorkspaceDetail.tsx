@@ -1,10 +1,11 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, Copy } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
 import { SessionsTab } from '@/components/workspace/SessionsTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
@@ -16,6 +17,7 @@ import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -63,19 +65,38 @@ export default function WorkspaceDetail() {
     setSearchParams({ tab: value });
   };
 
+  const copyWorkspaceLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard');
+  };
+
   return (
     <AppLayout
       title={startup?.name || 'Workspace'}
       subtitle={program?.name}
       actions={
-        <Link to="/my-workspaces">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={copyWorkspaceLink}>
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Link
           </Button>
-        </Link>
+          <Link to="/my-workspaces">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+        </div>
       }
     >
+      {/* Breadcrumbs */}
+      <Breadcrumbs 
+        className="mb-4"
+        items={[
+          { label: 'Workspaces', href: '/my-workspaces' },
+          { label: startup?.name || 'Workspace' },
+        ]}
+      />
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">

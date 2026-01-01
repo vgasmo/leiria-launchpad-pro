@@ -90,7 +90,7 @@ export function AppSidebar() {
         </Button>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3 overflow-y-auto scrollbar-thin">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto scrollbar-thin" data-tour="workspaces">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href || 
               (item.href !== '/' && location.pathname.startsWith(item.href));
@@ -219,6 +219,7 @@ export function AppSidebar() {
               "mx-3 mb-3 rounded-lg bg-destructive/10 border border-destructive/20 transition-all duration-300 block hover:bg-destructive/20 cursor-pointer",
               collapsed ? "p-2" : "p-3"
             )}
+            data-tour="notifications"
           >
             {collapsed ? (
               <Tooltip delayDuration={0}>
