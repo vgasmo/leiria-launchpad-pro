@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { format, isPast, isToday } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Plus,
   CheckCircle2,
@@ -291,6 +293,7 @@ function CreateStaffTaskDialog({
   assigneeId: string;
 }) {
   const createMutation = useCreateStaffTask();
+  const { data: workspaces, isLoading: loadingWorkspaces } = useUserWorkspaces();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -298,6 +301,7 @@ function CreateStaffTaskDialog({
     task_type: 'general',
     priority: 'medium',
     due_date: '',
+    workspace_id: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -306,6 +310,13 @@ function CreateStaffTaskDialog({
       toast.error('Please enter a task title');
       return;
     }
+    if (!formData.workspace_id) {
+      toast.error('Please select a startup');
+      return;
+    }
+
+    // Get the startup_id from the selected workspace
+    const selectedWorkspace = workspaces?.find(w => w.id === formData.workspace_id);
 
     try {
       await createMutation.mutateAsync({
@@ -315,6 +326,8 @@ function CreateStaffTaskDialog({
         priority: formData.priority,
         due_date: formData.due_date || null,
         assignee_id: assigneeId,
+        workspace_id: formData.workspace_id,
+        related_startup_id: selectedWorkspace?.startup_id || null,
       });
       toast.success('Task created');
       onOpenChange(false);
@@ -324,6 +337,7 @@ function CreateStaffTaskDialog({
         task_type: 'general',
         priority: 'medium',
         due_date: '',
+        workspace_id: '',
       });
     } catch {
       toast.error('Failed to create task');
@@ -337,6 +351,27 @@ function CreateStaffTaskDialog({
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="startup">Startup *</Label>
+            <Select
+              value={formData.workspace_id}
+              onValueChange={(v) => setFormData((p) => ({ ...p, workspace_id: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingWorkspaces ? "Loading..." : "Select a startup"} />
+              </SelectTrigger>
+              <SelectContent>
+                {workspaces?.map((workspace) => (
+                  <SelectItem key={workspace.id} value={workspace.id}>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      {workspace.startup?.name || 'Unknown Startup'}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
             <Input
@@ -406,7 +441,7 @@ function CreateStaffTaskDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" disabled={createMutation.isPending || !formData.workspace_id}>
               {createMutation.isPending ? 'Creating...' : 'Create Task'}
             </Button>
           </DialogFooter>
@@ -414,4 +449,29 @@ function CreateStaffTaskDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+// Hook to get workspaces the user has access to
+function useUserWorkspaces() {
+  return useQuery({
+    queryKey: ['user-workspaces-for-tasks'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select(`
+          id,
+          startup_id,
+          startup:startups(id, name)
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Array<{
+        id: string;
+        startup_id: string;
+        startup: { id: string; name: string } | null;
+      }>;
+    },
+  });
 }
