@@ -8,7 +8,8 @@ import {
   Clock,
   AlertTriangle,
   ArrowRight,
-  Activity
+  Activity,
+  ClipboardList
 } from 'lucide-react';
 import { isToday, isThisWeek, format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,7 @@ import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -245,10 +247,15 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
+      {/* My Tasks Section */}
+      <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <StaffTasksPanel />
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Needs Attention Column */}
-        <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -307,7 +314,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
 
         {/* Activity Feed */}
-        <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
           <ActivityFeed />
         </div>
       </div>
