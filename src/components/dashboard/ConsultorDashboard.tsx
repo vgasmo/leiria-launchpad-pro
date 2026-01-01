@@ -247,7 +247,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* My Tasks Section */}
+      {/* My Tasks Section - Read-only overview */}
       <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
         <StaffTasksPanel />
       </div>

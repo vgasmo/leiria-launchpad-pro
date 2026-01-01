@@ -112,6 +112,45 @@ export function useMyStaffTasks() {
   });
 }
 
+// Get tasks for a specific workspace
+export function useWorkspaceStaffTasks(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ['workspace-staff-tasks', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      
+      const { data, error } = await supabase
+        .from('staff_tasks')
+        .select(`
+          *,
+          startup:startups(name),
+          workspace:workspaces(id, startup:startups(name))
+        `)
+        .eq('workspace_id', workspaceId)
+        .order('status', { ascending: true })
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('priority', { ascending: false });
+
+      if (error) throw error;
+      
+      // Fetch assignee profiles
+      const assigneeIds = [...new Set(data.map(t => t.assignee_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, avatar_url')
+        .in('id', assigneeIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      
+      return data.map(task => ({
+        ...task,
+        assignee: profileMap.get(task.assignee_id) || null,
+      })) as StaffTask[];
+    },
+    enabled: !!workspaceId,
+  });
+}
+
 export function useCreateStaffTask() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -133,6 +172,7 @@ export function useCreateStaffTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-staff-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-staff-tasks'] });
     },
   });
 }
@@ -155,6 +195,7 @@ export function useUpdateStaffTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-staff-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-staff-tasks'] });
     },
   });
 }
@@ -180,6 +221,7 @@ export function useCompleteStaffTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-staff-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-staff-tasks'] });
     },
   });
 }
@@ -199,6 +241,7 @@ export function useDeleteStaffTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-staff-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-staff-tasks'] });
     },
   });
 }

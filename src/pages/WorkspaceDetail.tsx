@@ -16,7 +16,7 @@ import { CalendarTab } from '@/components/workspace/CalendarTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
-import { ConsultantNotesTab } from '@/components/workspace/ConsultantNotesTab';
+import { NotesAndTasksTab } from '@/components/workspace/NotesAndTasksTab';
 import { TeamTab } from '@/components/workspace/TeamTab';
 import { OkrsTab } from '@/components/workspace/OkrsTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
@@ -129,17 +129,19 @@ export default function WorkspaceDetail() {
               Funding
             </TabsTrigger>
           )}
-          {(isAdmin || isConsultor) && (
+          {(isAdmin || isConsultor || isMentor) && (
             <>
               <TabsTrigger value="notes" className="gap-1">
                 <StickyNote className="h-3.5 w-3.5" />
-                Notes
-              </TabsTrigger>
-              <TabsTrigger value="time" className="gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                Time
+                Notes & Tasks
               </TabsTrigger>
             </>
+          )}
+          {(isAdmin || isConsultor) && (
+            <TabsTrigger value="time" className="gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              Time
+            </TabsTrigger>
           )}
           <TabsTrigger value="settings" className="gap-1">
             <Settings className="h-3.5 w-3.5" />
@@ -200,15 +202,15 @@ export default function WorkspaceDetail() {
             <FundingTrackerTab startupId={startup.id} />
           </TabsContent>
         )}
+        {(isAdmin || isConsultor || isMentor) && (
+          <TabsContent value="notes">
+            <NotesAndTasksTab workspaceId={workspace.id} startupId={startup?.id} />
+          </TabsContent>
+        )}
         {(isAdmin || isConsultor) && (
-          <>
-            <TabsContent value="notes">
-              <ConsultantNotesTab workspaceId={workspace.id} />
-            </TabsContent>
-            <TabsContent value="time">
-              <TimeTrackingTab workspaceId={workspace.id} />
-            </TabsContent>
-          </>
+          <TabsContent value="time">
+            <TimeTrackingTab workspaceId={workspace.id} />
+          </TabsContent>
         )}
         <TabsContent value="settings">
           {startup && (
