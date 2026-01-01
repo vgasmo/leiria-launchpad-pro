@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -20,7 +21,8 @@ import {
   FileVideo,
   FileAudio,
   FileSpreadsheet,
-  Presentation
+  Presentation,
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -74,6 +76,10 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   const [linkName, setLinkName] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // External link confirmation state
+  const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
+  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,7 +121,9 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   const handleDownload = async (doc: Document) => {
     if (doc.external_url) {
-      window.open(doc.external_url, '_blank');
+      // Show confirmation dialog for external links
+      setPendingExternalUrl(doc.external_url);
+      setExternalLinkConfirmOpen(true);
       return;
     }
 
@@ -127,6 +135,19 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
         toast.error('Failed to generate download link');
       }
     }
+  };
+  
+  const confirmOpenExternalLink = () => {
+    if (pendingExternalUrl) {
+      window.open(pendingExternalUrl, '_blank', 'noopener,noreferrer');
+    }
+    setExternalLinkConfirmOpen(false);
+    setPendingExternalUrl(null);
+  };
+  
+  const cancelOpenExternalLink = () => {
+    setExternalLinkConfirmOpen(false);
+    setPendingExternalUrl(null);
   };
 
   const handleDelete = async (doc: Document) => {
@@ -158,6 +179,33 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* External Link Confirmation Dialog */}
+      <AlertDialog open={externalLinkConfirmOpen} onOpenChange={setExternalLinkConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Opening External Link
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>You are about to open an external website:</p>
+              <p className="font-mono text-sm bg-muted p-2 rounded break-all">
+                {pendingExternalUrl}
+              </p>
+              <p className="text-amber-600 dark:text-amber-400">
+                This link leads to an external site. Make sure you trust this destination before proceeding.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelOpenExternalLink}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmOpenExternalLink}>
+              Open Link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       {canWrite && (
         <div className="flex gap-2">
           <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>

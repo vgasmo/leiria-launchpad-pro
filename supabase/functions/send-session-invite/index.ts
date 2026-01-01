@@ -21,6 +21,86 @@ interface SessionInviteRequest {
   startupName: string;
 }
 
+// HTML escape function to prevent XSS
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+}
+
+// Escape special characters for ICS format
+function escapeIcs(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '');
+}
+
+// Input validation
+function validateInput(payload: SessionInviteRequest): { valid: boolean; error?: string } {
+  // Validate sessionId and workspaceId are valid UUIDs
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  
+  if (!payload.sessionId || !uuidRegex.test(payload.sessionId)) {
+    return { valid: false, error: "Invalid session ID" };
+  }
+  
+  if (!payload.workspaceId || !uuidRegex.test(payload.workspaceId)) {
+    return { valid: false, error: "Invalid workspace ID" };
+  }
+  
+  // Validate title
+  if (!payload.title || typeof payload.title !== 'string' || payload.title.length > 200) {
+    return { valid: false, error: "Title is required and must be less than 200 characters" };
+  }
+  
+  // Validate scheduledAt is a valid date
+  if (!payload.scheduledAt || isNaN(Date.parse(payload.scheduledAt))) {
+    return { valid: false, error: "Invalid scheduled date" };
+  }
+  
+  // Validate duration
+  if (typeof payload.duration !== 'number' || payload.duration < 1 || payload.duration > 480) {
+    return { valid: false, error: "Duration must be between 1 and 480 minutes" };
+  }
+  
+  // Validate agenda if provided
+  if (payload.agenda && (typeof payload.agenda !== 'string' || payload.agenda.length > 2000)) {
+    return { valid: false, error: "Agenda must be less than 2000 characters" };
+  }
+  
+  // Validate organizerName
+  if (!payload.organizerName || typeof payload.organizerName !== 'string' || payload.organizerName.length > 100) {
+    return { valid: false, error: "Organizer name is required and must be less than 100 characters" };
+  }
+  
+  // Validate startupName
+  if (!payload.startupName || typeof payload.startupName !== 'string' || payload.startupName.length > 100) {
+    return { valid: false, error: "Startup name is required and must be less than 100 characters" };
+  }
+  
+  // Validate recipient emails
+  if (!Array.isArray(payload.recipientEmails) || payload.recipientEmails.length > 50) {
+    return { valid: false, error: "Recipient emails must be an array with max 50 entries" };
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  for (const email of payload.recipientEmails) {
+    if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 255) {
+      return { valid: false, error: `Invalid email address: ${email}` };
+    }
+  }
+  
+  return { valid: true };
+}
+
 function generateICS(session: {
   title: string;
   scheduledAt: string;
@@ -39,6 +119,12 @@ function generateICS(session: {
   const uid = `session-${Date.now()}@lovable.app`;
   const now = formatDate(new Date());
   
+  // Escape all user-controlled content for ICS format
+  const safeTitle = escapeIcs(session.title);
+  const safeStartupName = escapeIcs(session.startupName);
+  const safeOrganizerName = escapeIcs(session.organizerName);
+  const safeAgenda = escapeIcs(session.agenda || 'Mentoring session');
+  
   const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Startup Mentor Platform//EN
@@ -49,9 +135,9 @@ UID:${uid}
 DTSTAMP:${now}
 DTSTART:${formatDate(startDate)}
 DTEND:${formatDate(endDate)}
-SUMMARY:${session.title} - ${session.startupName}
-DESCRIPTION:${session.agenda || 'Mentoring session'}\\n\\nOrganized by: ${session.organizerName}
-ORGANIZER;CN=${session.organizerName}:mailto:noreply@resend.dev
+SUMMARY:${safeTitle} - ${safeStartupName}
+DESCRIPTION:${safeAgenda}\\n\\nOrganized by: ${safeOrganizerName}
+ORGANIZER;CN=${safeOrganizerName}:mailto:noreply@resend.dev
 STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT
@@ -68,12 +154,96 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    // Extract and validate JWT from Authorization header
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized: No authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Create client with user's token to verify authentication
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    });
+    
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) {
+      console.error("Authentication failed:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized: Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    console.log(`Authenticated user: ${user.id}`);
 
     const payload: SessionInviteRequest = await req.json();
     
+    // Validate input
+    const validation = validateInput(payload);
+    if (!validation.valid) {
+      console.error("Validation failed:", validation.error);
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Verify user has access to the workspace using service role client
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data: hasAccess, error: accessError } = await supabaseService.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: payload.workspaceId
+    });
+    
+    if (accessError) {
+      console.error("Error checking workspace access:", accessError.message);
+      return new Response(
+        JSON.stringify({ error: "Failed to verify workspace access" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    if (!hasAccess) {
+      console.error(`User ${user.id} does not have access to workspace ${payload.workspaceId}`);
+      return new Response(
+        JSON.stringify({ error: "Forbidden: No access to this workspace" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Verify session exists and belongs to the workspace
+    const { data: session, error: sessionError } = await supabaseService
+      .from('sessions')
+      .select('id, workspace_id')
+      .eq('id', payload.sessionId)
+      .eq('workspace_id', payload.workspaceId)
+      .single();
+    
+    if (sessionError || !session) {
+      console.error("Session not found or doesn't belong to workspace:", sessionError?.message);
+      return new Response(
+        JSON.stringify({ error: "Session not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     console.log("Sending session invite:", {
+      userId: user.id,
+      sessionId: payload.sessionId,
+      workspaceId: payload.workspaceId,
       title: payload.title,
       recipients: payload.recipientEmails.length,
       scheduledAt: payload.scheduledAt,
@@ -87,7 +257,7 @@ serve(async (req) => {
       );
     }
 
-    // Generate ICS file
+    // Generate ICS file with sanitized content
     const icsContent = generateICS({
       title: payload.title,
       scheduledAt: payload.scheduledAt,
@@ -109,25 +279,31 @@ serve(async (req) => {
       minute: '2-digit',
     });
 
+    // Escape HTML in all user-controlled content
+    const safeTitle = escapeHtml(payload.title);
+    const safeStartupName = escapeHtml(payload.startupName);
+    const safeOrganizerName = escapeHtml(payload.organizerName);
+    const safeAgenda = payload.agenda ? escapeHtml(payload.agenda) : '';
+
     // Send email to each recipient
     const emailPromises = payload.recipientEmails.map(async (email) => {
       try {
         const result = await resend.emails.send({
           from: "Sessions <onboarding@resend.dev>",
           to: [email],
-          subject: `Session Scheduled: ${payload.title} - ${payload.startupName}`,
+          subject: `Session Scheduled: ${safeTitle} - ${safeStartupName}`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 8px;">📅 Session Scheduled</h1>
               <p style="color: #666; margin-bottom: 24px;">You've been invited to a mentoring session.</p>
               
               <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 16px 0;">${payload.title}</h2>
-                <p style="color: #666; margin: 0 0 8px 0;"><strong>Startup:</strong> ${payload.startupName}</p>
-                <p style="color: #666; margin: 0 0 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
-                <p style="color: #666; margin: 0 0 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
+                <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 16px 0;">${safeTitle}</h2>
+                <p style="color: #666; margin: 0 0 8px 0;"><strong>Startup:</strong> ${safeStartupName}</p>
+                <p style="color: #666; margin: 0 0 8px 0;"><strong>Date:</strong> ${escapeHtml(formattedDate)}</p>
+                <p style="color: #666; margin: 0 0 8px 0;"><strong>Time:</strong> ${escapeHtml(formattedTime)}</p>
                 <p style="color: #666; margin: 0 0 8px 0;"><strong>Duration:</strong> ${payload.duration || 60} minutes</p>
-                ${payload.agenda ? `<p style="color: #666; margin: 16px 0 0 0;"><strong>Agenda:</strong><br/>${payload.agenda}</p>` : ''}
+                ${safeAgenda ? `<p style="color: #666; margin: 16px 0 0 0;"><strong>Agenda:</strong><br/>${safeAgenda.replace(/\n/g, '<br/>')}</p>` : ''}
               </div>
               
               <p style="color: #666; font-size: 14px;">
@@ -136,7 +312,7 @@ serve(async (req) => {
               
               <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
               <p style="color: #999; font-size: 12px;">
-                Organized by ${payload.organizerName}
+                Organized by ${safeOrganizerName}
               </p>
             </div>
           `,
@@ -159,7 +335,7 @@ serve(async (req) => {
     const results = await Promise.all(emailPromises);
     const successCount = results.filter(r => r.success).length;
 
-    console.log(`Sent ${successCount}/${payload.recipientEmails.length} emails`);
+    console.log(`Sent ${successCount}/${payload.recipientEmails.length} emails by user ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
