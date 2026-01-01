@@ -25,6 +25,7 @@ import { WorkspaceFilters } from '@/components/workspace/WorkspaceFilters';
 import { WorkspaceTable } from '@/components/workspace/WorkspaceTable';
 import { WorkspacePagination } from '@/components/workspace/WorkspacePagination';
 import { WorkspaceEmptyState } from '@/components/workspace/WorkspaceEmptyState';
+import { OnboardingTour } from '@/components/ui/OnboardingTour';
 import { useWorkspaces, usePrograms, useMyPendingWorkspaces, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
 import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { StartupStage, HealthScore } from '@/types/database';
@@ -216,7 +217,7 @@ export default function MyWorkspaces() {
             </Button>
           )}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (
-            <Button onClick={() => setShowCreateStartup(true)} className="gap-2">
+            <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
               Create Startup
             </Button>
@@ -224,6 +225,7 @@ export default function MyWorkspaces() {
         </div>
       }
     >
+      <OnboardingTour />
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
 
       {/* Role-Specific Dashboards */}
@@ -253,28 +255,30 @@ export default function MyWorkspaces() {
           )}
 
           {/* Filters */}
-          <WorkspaceFilters
-            search={search}
-            onSearchChange={(v) => { setSearch(v); handleFilterChange(); }}
-            programFilter={programFilter}
-            onProgramFilterChange={(v) => { setProgramFilter(v); handleFilterChange(); }}
-            stageFilter={stageFilter}
-            onStageFilterChange={(v) => { setStageFilter(v); handleFilterChange(); }}
-            healthFilter={healthFilter}
-            onHealthFilterChange={(v) => { setHealthFilter(v); handleFilterChange(); }}
-            missingKpi={missingKpi}
-            onMissingKpiChange={(v) => { setMissingKpi(v); handleFilterChange(); }}
-            overdueActions={overdueActions}
-            onOverdueActionsChange={(v) => { setOverdueActions(v); handleFilterChange(); }}
-            sortBy={sortBy}
-            onSortByChange={(v) => { setSortBy(v); handleFilterChange(); }}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            programs={programs || []}
-            activeFiltersCount={activeFiltersCount}
-            activeQuickFiltersCount={activeQuickFiltersCount}
-            onClearFilters={clearFilters}
-          />
+          <div data-tour="filters">
+            <WorkspaceFilters
+              search={search}
+              onSearchChange={(v) => { setSearch(v); handleFilterChange(); }}
+              programFilter={programFilter}
+              onProgramFilterChange={(v) => { setProgramFilter(v); handleFilterChange(); }}
+              stageFilter={stageFilter}
+              onStageFilterChange={(v) => { setStageFilter(v); handleFilterChange(); }}
+              healthFilter={healthFilter}
+              onHealthFilterChange={(v) => { setHealthFilter(v); handleFilterChange(); }}
+              missingKpi={missingKpi}
+              onMissingKpiChange={(v) => { setMissingKpi(v); handleFilterChange(); }}
+              overdueActions={overdueActions}
+              onOverdueActionsChange={(v) => { setOverdueActions(v); handleFilterChange(); }}
+              sortBy={sortBy}
+              onSortByChange={(v) => { setSortBy(v); handleFilterChange(); }}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              programs={programs || []}
+              activeFiltersCount={activeFiltersCount}
+              activeQuickFiltersCount={activeQuickFiltersCount}
+              onClearFilters={clearFilters}
+            />
+          </div>
 
           {/* Content */}
           {isLoading ? (
