@@ -301,6 +301,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const [scheduledAt, setScheduledAt] = useState('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
+  const [location, setLocation] = useState('');
+  const [joinUrl, setJoinUrl] = useState('');
   const [sendInvites, setSendInvites] = useState(true);
   const [isSending, setIsSending] = useState(false);
 
@@ -348,6 +350,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
         agenda: agenda.trim() || null,
         notes: null,
         decisions: null,
+        location: location.trim() || null,
+        join_url: joinUrl.trim() || null,
       });
 
       // Send email invites if enabled
@@ -371,6 +375,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                 scheduledAt: new Date(scheduledAt).toISOString(),
                 duration: parseInt(duration),
                 agenda: agenda.trim() || undefined,
+                location: location.trim() || undefined,
+                joinUrl: joinUrl.trim() || undefined,
                 recipientEmails,
                 organizerName: currentUser?.full_name || currentUser?.email || 'Mentor',
                 startupName: (workspaceInfo?.startup as { name: string } | null)?.name || 'Startup',
@@ -408,6 +414,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     setScheduledAt('');
     setDuration('60');
     setAgenda('');
+    setLocation('');
+    setJoinUrl('');
     setSendInvites(true);
   };
 
@@ -417,7 +425,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Session</DialogTitle>
+          <DialogTitle>Schedule Session</DialogTitle>
           <DialogDescription>
             Schedule a new mentoring session
           </DialogDescription>
@@ -445,7 +453,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (min)</Label>
+              <Label htmlFor="duration">Duration</Label>
               <Select value={duration} onValueChange={setDuration}>
                 <SelectTrigger>
                   <SelectValue />
@@ -468,7 +476,25 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
               placeholder="Topics to discuss..."
-              rows={3}
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Meeting room or address"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="joinUrl">Meeting Link</Label>
+            <Input
+              id="joinUrl"
+              value={joinUrl}
+              onChange={(e) => setJoinUrl(e.target.value)}
+              placeholder="https://meet.google.com/..."
             />
           </div>
           
@@ -496,7 +522,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               Cancel
             </Button>
             <Button type="submit" disabled={createMutation.isPending || isSending}>
-              {(createMutation.isPending || isSending) ? 'Creating...' : 'Create Session'}
+              {(createMutation.isPending || isSending) ? 'Scheduling...' : 'Schedule Session'}
             </Button>
           </DialogFooter>
         </form>
