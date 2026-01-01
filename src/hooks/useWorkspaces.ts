@@ -83,106 +83,53 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
       if (error) throw error;
       if (!workspaces) return [];
 
-      // Get current month for KPI check
-      const now = new Date();
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-
-      // Fetch action items for counts
+      // Get workspace IDs for server-side aggregation
       const workspaceIds = workspaces.map(w => w.id);
       
       if (workspaceIds.length === 0) return [];
 
-      const [actionItemsResult, kpiValuesResult, lastKpiResult, meetingsResult, sessionsResult] = await Promise.all([
-        // Fetch pending/in-progress action items
-        supabase
-          .from('action_items')
-          .select('workspace_id, status, due_date')
-          .in('workspace_id', workspaceIds)
-          .in('status', ['pending', 'in_progress']),
-        
-        // Fetch KPI values for current month
-        supabase
-          .from('kpi_values')
-          .select('workspace_id')
-          .in('workspace_id', workspaceIds)
-          .eq('period_month', currentMonth),
-        
-        // Fetch last KPI entry per workspace
-        supabase
-          .from('kpi_values')
-          .select('workspace_id, period_month')
-          .in('workspace_id', workspaceIds)
-          .order('period_month', { ascending: false }),
-        
-        // Fetch next meeting per workspace
-        supabase
-          .from('meetings')
-          .select('workspace_id, starts_at')
-          .in('workspace_id', workspaceIds)
-          .gte('starts_at', new Date().toISOString())
-          .order('starts_at', { ascending: true }),
+      // Use server-side aggregation function
+      const { data: stats, error: statsError } = await supabase
+        .rpc('get_workspace_stats', { workspace_ids: workspaceIds });
 
-        // Fetch last session per workspace (past sessions only)
-        supabase
-          .from('sessions')
-          .select('id, workspace_id, title, scheduled_at, notes')
-          .in('workspace_id', workspaceIds)
-          .lt('scheduled_at', new Date().toISOString())
-          .order('scheduled_at', { ascending: false })
-      ]);
+      if (statsError) {
+        console.error('Failed to get workspace stats:', statsError);
+      }
 
-      const { data: actionItems } = actionItemsResult;
-      const { data: kpiValues } = kpiValuesResult;
-      const { data: lastKpiData } = lastKpiResult;
-      const { data: meetings } = meetingsResult;
-      const { data: sessions } = sessionsResult;
+      // Build lookup map for stats
+      const statsMap = new Map(
+        (stats || []).map((s: {
+          workspace_id: string;
+          pending_actions_count: number;
+          overdue_actions_count: number;
+          has_current_month_kpi: boolean;
+          last_kpi_month: string | null;
+          next_meeting_date: string | null;
+          last_session_id: string | null;
+          last_session_title: string | null;
+          last_session_scheduled_at: string | null;
+          last_session_notes: string | null;
+        }) => [s.workspace_id, s])
+      );
 
-      // Build lookup maps
-      const lastKpiMap = new Map<string, string>();
-      lastKpiData?.forEach(k => {
-        if (!lastKpiMap.has(k.workspace_id)) {
-          lastKpiMap.set(k.workspace_id, k.period_month);
-        }
-      });
-
-      const nextMeetingMap = new Map<string, string>();
-      meetings?.forEach(m => {
-        if (!nextMeetingMap.has(m.workspace_id)) {
-          nextMeetingMap.set(m.workspace_id, m.starts_at);
-        }
-      });
-
-      const lastSessionMap = new Map<string, { id: string; title: string; scheduled_at: string; notes: string | null }>();
-      sessions?.forEach(s => {
-        if (!lastSessionMap.has(s.workspace_id)) {
-          lastSessionMap.set(s.workspace_id, { id: s.id, title: s.title, scheduled_at: s.scheduled_at, notes: s.notes });
-        }
-      });
-
-      // Build result with counts
-      const today = new Date().toISOString().split('T')[0];
-      
+      // Build result with stats
       const result = workspaces.map(w => {
-        const wsActionItems = actionItems?.filter(a => a.workspace_id === w.id) || [];
-        const pendingActionsCount = wsActionItems.length;
-        const overdueActionsCount = wsActionItems.filter(
-          a => a.due_date && a.due_date < today
-        ).length;
-        const hasCurrentMonthKpi = kpiValues?.some(k => k.workspace_id === w.id) || false;
-        const lastKpiMonth = lastKpiMap.get(w.id) || null;
-        const nextMeetingDate = nextMeetingMap.get(w.id) || null;
-        const lastSession = lastSessionMap.get(w.id) || null;
-
+        const stat = statsMap.get(w.id);
         return {
           ...w,
           startup: w.startup as WorkspaceWithDetails['startup'],
           program: w.program as WorkspaceWithDetails['program'],
-          pendingActionsCount,
-          overdueActionsCount,
-          hasCurrentMonthKpi,
-          lastKpiMonth,
-          nextMeetingDate,
-          lastSession,
+          pendingActionsCount: stat?.pending_actions_count || 0,
+          overdueActionsCount: stat?.overdue_actions_count || 0,
+          hasCurrentMonthKpi: stat?.has_current_month_kpi || false,
+          lastKpiMonth: stat?.last_kpi_month || null,
+          nextMeetingDate: stat?.next_meeting_date || null,
+          lastSession: stat?.last_session_id ? {
+            id: stat.last_session_id,
+            title: stat.last_session_title || '',
+            scheduled_at: stat.last_session_scheduled_at || '',
+            notes: stat.last_session_notes || null,
+          } : null,
         };
       });
 

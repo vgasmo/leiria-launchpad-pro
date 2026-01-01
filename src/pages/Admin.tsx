@@ -1,6 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -8,6 +8,7 @@ import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 import { AdminStartupsManager } from '@/components/admin/AdminStartupsManager';
 import { AdminWorkspacesManager } from '@/components/admin/AdminWorkspacesManager';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
+import { ActivityLogViewer } from '@/components/admin/ActivityLogViewer';
 
 export default function Admin() {
   return (
@@ -42,6 +43,10 @@ export default function Admin() {
             <FileText className="h-4 w-4" />
             Templates
           </TabsTrigger>
+          <TabsTrigger value="activity" className="gap-2">
+            <Activity className="h-4 w-4" />
+            Activity Log
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
@@ -70,6 +75,10 @@ export default function Admin() {
 
         <TabsContent value="templates">
           <AdminTemplatesManager />
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <ActivityLogViewer maxHeight="600px" />
         </TabsContent>
       </Tabs>
     </AppLayout>
