@@ -1,4 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { toast } from 'sonner';
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   const { data: workspace, isLoading, error } = useWorkspace(id);
   const { isAdmin, isConsultor, isMentor, isFounder } = useAuth();
 
@@ -36,7 +38,7 @@ export default function WorkspaceDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout title="Loading...">
+      <AppLayout title={t('common.loading')}>
         <div className="space-y-6">
           <Skeleton className="h-32 w-full" />
           <div className="grid gap-6 md:grid-cols-2">
@@ -53,8 +55,8 @@ export default function WorkspaceDetail() {
     return (
       <AppLayout title="Workspace">
         <AccessDenied 
-          title="Workspace Not Accessible"
-          message="This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator."
+          title={t('workspace.notAccessible')}
+          message={t('workspace.noPermission')}
         />
       </AppLayout>
     );
@@ -72,7 +74,7 @@ export default function WorkspaceDetail() {
 
   const copyWorkspaceLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success('Link copied to clipboard');
+    toast.success(t('common.linkCopied'));
   };
 
   return (
@@ -83,12 +85,12 @@ export default function WorkspaceDetail() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={copyWorkspaceLink}>
             <Copy className="h-4 w-4 mr-2" />
-            Copy Link
+            {t('common.copyLink')}
           </Button>
           <Link to="/my-workspaces">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t('common.back')}
             </Button>
           </Link>
         </div>
@@ -98,54 +100,54 @@ export default function WorkspaceDetail() {
       <Breadcrumbs 
         className="mb-4"
         items={[
-          { label: 'Workspaces', href: '/my-workspaces' },
+          { label: t('nav.workspaces'), href: '/my-workspaces' },
           { label: startup?.name || 'Workspace' },
         ]}
       />
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="actions">Actions</TabsTrigger>
-          <TabsTrigger value="milestones">Milestones</TabsTrigger>
-          <TabsTrigger value="kpis">KPIs</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="overview">{t('workspace.overview')}</TabsTrigger>
+          <TabsTrigger value="sessions">{t('workspace.sessions')}</TabsTrigger>
+          <TabsTrigger value="actions">{t('workspace.actions')}</TabsTrigger>
+          <TabsTrigger value="milestones">{t('workspace.milestones')}</TabsTrigger>
+          <TabsTrigger value="kpis">{t('workspace.kpis')}</TabsTrigger>
+          <TabsTrigger value="templates">{t('workspace.templates')}</TabsTrigger>
+          <TabsTrigger value="calendar">{t('workspace.calendar')}</TabsTrigger>
+          <TabsTrigger value="documents">{t('workspace.documents')}</TabsTrigger>
           {isFounder && startup && (
             <TabsTrigger value="team" className="gap-1">
               <Users className="h-3.5 w-3.5" />
-              Team
+              {t('workspace.team')}
             </TabsTrigger>
           )}
           <TabsTrigger value="okrs" className="gap-1">
             <Target className="h-3.5 w-3.5" />
-            OKRs
+            {t('workspace.okrs')}
           </TabsTrigger>
           {isFounder && (
             <TabsTrigger value="funding" className="gap-1">
               <DollarSign className="h-3.5 w-3.5" />
-              Funding
+              {t('workspace.funding')}
             </TabsTrigger>
           )}
           {(isAdmin || isConsultor || isMentor) && (
             <>
               <TabsTrigger value="notes" className="gap-1">
                 <StickyNote className="h-3.5 w-3.5" />
-                Notes & Tasks
+                {t('workspace.notesAndTasks')}
               </TabsTrigger>
             </>
           )}
           {(isAdmin || isConsultor) && (
             <TabsTrigger value="time" className="gap-1">
               <Clock className="h-3.5 w-3.5" />
-              Time
+              {t('workspace.time')}
             </TabsTrigger>
           )}
           <TabsTrigger value="settings" className="gap-1">
             <Settings className="h-3.5 w-3.5" />
-            Settings
+            {t('workspace.settings')}
           </TabsTrigger>
         </TabsList>
 
