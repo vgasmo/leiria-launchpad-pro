@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useConversations, useMessages, useSendMessage, useCreateConversation, useMarkConversationRead, Conversation } from '@/hooks/useMessaging';
+import { useConversations, useMessages, useSendMessage, useMarkConversationRead, Conversation } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageCircle, Send, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Send, ArrowLeft, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { NewConversationDialog } from './NewConversationDialog';
 
 interface MessagingPanelProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface MessagingPanelProps {
 export function MessagingPanel({ open, onOpenChange }: MessagingPanelProps) {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [showNewConversation, setShowNewConversation] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -102,10 +104,16 @@ export function MessagingPanel({ open, onOpenChange }: MessagingPanelProps) {
         ) : (
           <>
             <SheetHeader className="p-4 border-b">
-              <SheetTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Messages
-              </SheetTitle>
+              <div className="flex items-center justify-between">
+                <SheetTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Messages
+                </SheetTitle>
+                <Button size="sm" onClick={() => setShowNewConversation(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  New
+                </Button>
+              </div>
             </SheetHeader>
             <ScrollArea className="flex-1">
               {loadingConvs ? (
@@ -139,6 +147,12 @@ export function MessagingPanel({ open, onOpenChange }: MessagingPanelProps) {
                 </div>
               )}
             </ScrollArea>
+
+            <NewConversationDialog
+              open={showNewConversation}
+              onOpenChange={setShowNewConversation}
+              onConversationCreated={(conv) => setSelectedConversation(conv)}
+            />
           </>
         )}
       </SheetContent>
