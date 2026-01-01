@@ -33,6 +33,9 @@ import { ViewToggle, ViewMode } from '@/components/ui/ViewToggle';
 import { QuickFilterChips, QuickFilter } from '@/components/ui/QuickFilterChips';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { WorkspaceCard } from '@/components/dashboard/WorkspaceCard';
+import { ConsultorDashboard } from '@/components/dashboard/ConsultorDashboard';
+import { MentorDashboard } from '@/components/dashboard/MentorDashboard';
+import { FounderDashboard } from '@/components/dashboard/FounderDashboard';
 import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
 import {
   Select,
@@ -77,6 +80,7 @@ export default function MyWorkspaces() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isConsultor, isMentor, isAdmin, roles } = useAuth();
   const isFounder = roles.includes('founder');
+  const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
   
   const [search, setSearch] = useState('');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -89,6 +93,7 @@ export default function MyWorkspaces() {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [quickFilters, setQuickFilters] = useState<Record<string, boolean>>({});
   const [showCreateStartup, setShowCreateStartup] = useState(false);
+  const [showDetailedView, setShowDetailedView] = useState(false);
 
   // Handle URL filter parameter (e.g., ?filter=attention)
   useEffect(() => {
@@ -96,6 +101,7 @@ export default function MyWorkspaces() {
     if (filterParam === 'attention') {
       // Set filters for items needing attention (critical, at_risk, or overdue)
       setQuickFilters({ critical: true, at_risk: true, overdue: true });
+      setShowDetailedView(true); // Switch to detailed view when filtering
       // Clear the URL param after applying
       setSearchParams({}, { replace: true });
     }
@@ -104,8 +110,14 @@ export default function MyWorkspaces() {
   // Enable realtime updates
   useRealtimeWorkspaces();
 
-  // Show dashboard overview for consultors/mentors/admins
+  // Legacy flag for backward compatibility
   const showDashboard = isConsultor || isMentor || isAdmin;
+
+  // Determine which dashboard to show
+  const showConsultorDashboard = (isConsultor || isAdmin) && !showDetailedView;
+  const showMentorDashboard = isExternalMentor && !showDetailedView;
+  const showFounderDashboard = isFounder && !isConsultor && !isAdmin && !isExternalMentor && !showDetailedView;
+  const showListView = showDetailedView || (!showConsultorDashboard && !showMentorDashboard && !showFounderDashboard);
 
   const { data: programs } = usePrograms();
   const { data: workspaces, isLoading, error } = useWorkspaces({
