@@ -27,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useApplyStageDefaults } from '@/hooks/useKpis';
 import { useCreateMilestone } from '@/hooks/useMilestones';
+import { useCreateActionItemFull } from '@/hooks/useActionItems';
 import { useMeetings } from '@/hooks/useMeetings';
 import { toast } from 'sonner';
 import type { StartupStage } from '@/types/database';
@@ -39,37 +40,229 @@ interface WorkspaceOnboardingWizardProps {
   startupName: string;
 }
 
-// Default milestones by stage
-const STAGE_MILESTONES: Record<StartupStage, { title: string; description: string; weeksOut: number }[]> = {
+// Default milestones by stage with suggested actions
+const STAGE_MILESTONES: Record<StartupStage, { 
+  title: string; 
+  description: string; 
+  weeksOut: number;
+  actions: { title: string; daysOffset: number }[];
+}[]> = {
   ideation: [
-    { title: 'Complete problem validation interviews', description: 'Conduct 10+ customer interviews to validate the problem', weeksOut: 2 },
-    { title: 'Define value proposition', description: 'Document clear value proposition and unique selling points', weeksOut: 3 },
-    { title: 'Create initial business model canvas', description: 'Complete first iteration of BMC', weeksOut: 4 },
-    { title: 'Identify early adopters', description: 'Build list of 50+ potential early adopter contacts', weeksOut: 6 },
+    { 
+      title: 'Complete problem validation interviews', 
+      description: 'Conduct 10+ customer interviews to validate the problem', 
+      weeksOut: 2,
+      actions: [
+        { title: 'Create interview script with key questions', daysOffset: 2 },
+        { title: 'Identify and reach out to 15 potential interviewees', daysOffset: 4 },
+        { title: 'Conduct first 5 interviews', daysOffset: 8 },
+        { title: 'Synthesize findings and document patterns', daysOffset: 12 },
+      ]
+    },
+    { 
+      title: 'Define value proposition', 
+      description: 'Document clear value proposition and unique selling points', 
+      weeksOut: 3,
+      actions: [
+        { title: 'Analyze competitor positioning', daysOffset: 2 },
+        { title: 'Draft value proposition canvas', daysOffset: 5 },
+        { title: 'Test messaging with 5 potential customers', daysOffset: 10 },
+      ]
+    },
+    { 
+      title: 'Create initial business model canvas', 
+      description: 'Complete first iteration of BMC', 
+      weeksOut: 4,
+      actions: [
+        { title: 'Complete customer segments and channels sections', daysOffset: 5 },
+        { title: 'Define revenue streams and cost structure', daysOffset: 10 },
+        { title: 'Review BMC with mentor/advisor', daysOffset: 20 },
+      ]
+    },
+    { 
+      title: 'Identify early adopters', 
+      description: 'Build list of 50+ potential early adopter contacts', 
+      weeksOut: 6,
+      actions: [
+        { title: 'Define early adopter profile and criteria', daysOffset: 3 },
+        { title: 'Research and list 20 potential early adopters', daysOffset: 14 },
+        { title: 'Reach out and qualify interest from 10 contacts', daysOffset: 28 },
+      ]
+    },
   ],
   validation: [
-    { title: 'Launch landing page', description: 'Create and deploy landing page with signup form', weeksOut: 2 },
-    { title: 'Run first experiment', description: 'Design and execute first validation experiment', weeksOut: 3 },
-    { title: 'Collect 100+ signups', description: 'Achieve 100 email signups from landing page', weeksOut: 5 },
-    { title: 'Complete solution interviews', description: 'Validate proposed solution with 20+ prospects', weeksOut: 6 },
+    { 
+      title: 'Launch landing page', 
+      description: 'Create and deploy landing page with signup form', 
+      weeksOut: 2,
+      actions: [
+        { title: 'Write compelling headline and copy', daysOffset: 2 },
+        { title: 'Design and build landing page', daysOffset: 7 },
+        { title: 'Set up analytics and email capture', daysOffset: 10 },
+        { title: 'Launch and share with initial contacts', daysOffset: 12 },
+      ]
+    },
+    { 
+      title: 'Run first experiment', 
+      description: 'Design and execute first validation experiment', 
+      weeksOut: 3,
+      actions: [
+        { title: 'Define hypothesis and success metrics', daysOffset: 2 },
+        { title: 'Design experiment methodology', daysOffset: 5 },
+        { title: 'Execute experiment', daysOffset: 14 },
+        { title: 'Analyze results and document learnings', daysOffset: 18 },
+      ]
+    },
+    { 
+      title: 'Collect 100+ signups', 
+      description: 'Achieve 100 email signups from landing page', 
+      weeksOut: 5,
+      actions: [
+        { title: 'Share landing page on social media', daysOffset: 3 },
+        { title: 'Reach out to communities and groups', daysOffset: 10 },
+        { title: 'Run small paid ad campaign', daysOffset: 20 },
+      ]
+    },
+    { 
+      title: 'Complete solution interviews', 
+      description: 'Validate proposed solution with 20+ prospects', 
+      weeksOut: 6,
+      actions: [
+        { title: 'Create solution mockups or prototype', daysOffset: 5 },
+        { title: 'Schedule interviews with signups', daysOffset: 10 },
+        { title: 'Conduct 10 solution interviews', daysOffset: 25 },
+        { title: 'Document feedback and iterate', daysOffset: 35 },
+      ]
+    },
   ],
   mvp: [
-    { title: 'Define MVP scope', description: 'Document core MVP features and success criteria', weeksOut: 1 },
-    { title: 'Complete MVP development', description: 'Build and deploy minimum viable product', weeksOut: 6 },
-    { title: 'Onboard first 10 users', description: 'Get first paying customers or active users', weeksOut: 8 },
-    { title: 'Collect feedback and iterate', description: 'Document learnings and plan next iteration', weeksOut: 10 },
+    { 
+      title: 'Define MVP scope', 
+      description: 'Document core MVP features and success criteria', 
+      weeksOut: 1,
+      actions: [
+        { title: 'List all potential features', daysOffset: 1 },
+        { title: 'Prioritize to core must-haves only', daysOffset: 3 },
+        { title: 'Define success metrics for MVP', daysOffset: 5 },
+      ]
+    },
+    { 
+      title: 'Complete MVP development', 
+      description: 'Build and deploy minimum viable product', 
+      weeksOut: 6,
+      actions: [
+        { title: 'Set up development environment', daysOffset: 3 },
+        { title: 'Build core feature #1', daysOffset: 14 },
+        { title: 'Build core feature #2', daysOffset: 28 },
+        { title: 'Deploy and test MVP', daysOffset: 38 },
+      ]
+    },
+    { 
+      title: 'Onboard first 10 users', 
+      description: 'Get first paying customers or active users', 
+      weeksOut: 8,
+      actions: [
+        { title: 'Invite early adopters to try MVP', daysOffset: 5 },
+        { title: 'Provide hands-on onboarding support', daysOffset: 15 },
+        { title: 'Collect feedback and fix critical bugs', daysOffset: 40 },
+      ]
+    },
+    { 
+      title: 'Collect feedback and iterate', 
+      description: 'Document learnings and plan next iteration', 
+      weeksOut: 10,
+      actions: [
+        { title: 'Conduct user feedback sessions', daysOffset: 10 },
+        { title: 'Analyze usage data and patterns', daysOffset: 30 },
+        { title: 'Prioritize next iteration features', daysOffset: 50 },
+      ]
+    },
   ],
   growth: [
-    { title: 'Define growth metrics', description: 'Establish key growth KPIs and targets', weeksOut: 1 },
-    { title: 'Launch marketing campaigns', description: 'Execute first paid acquisition campaigns', weeksOut: 3 },
-    { title: 'Achieve 100 active users', description: 'Reach 100 monthly active users milestone', weeksOut: 8 },
-    { title: 'Optimize conversion funnel', description: 'Identify and fix key conversion bottlenecks', weeksOut: 10 },
+    { 
+      title: 'Define growth metrics', 
+      description: 'Establish key growth KPIs and targets', 
+      weeksOut: 1,
+      actions: [
+        { title: 'Identify north star metric', daysOffset: 2 },
+        { title: 'Set up analytics dashboard', daysOffset: 4 },
+        { title: 'Define monthly growth targets', daysOffset: 6 },
+      ]
+    },
+    { 
+      title: 'Launch marketing campaigns', 
+      description: 'Execute first paid acquisition campaigns', 
+      weeksOut: 3,
+      actions: [
+        { title: 'Research target audience and channels', daysOffset: 3 },
+        { title: 'Create ad creatives and copy', daysOffset: 10 },
+        { title: 'Launch and monitor campaigns', daysOffset: 15 },
+        { title: 'Optimize based on performance', daysOffset: 18 },
+      ]
+    },
+    { 
+      title: 'Achieve 100 active users', 
+      description: 'Reach 100 monthly active users milestone', 
+      weeksOut: 8,
+      actions: [
+        { title: 'Implement referral program', daysOffset: 10 },
+        { title: 'Launch content marketing strategy', daysOffset: 25 },
+        { title: 'Optimize onboarding for activation', daysOffset: 40 },
+      ]
+    },
+    { 
+      title: 'Optimize conversion funnel', 
+      description: 'Identify and fix key conversion bottlenecks', 
+      weeksOut: 10,
+      actions: [
+        { title: 'Map full user journey and funnel', daysOffset: 5 },
+        { title: 'Identify biggest drop-off points', daysOffset: 20 },
+        { title: 'Run A/B tests on key pages', daysOffset: 50 },
+      ]
+    },
   ],
   scale: [
-    { title: 'Hire key team members', description: 'Recruit for critical growth positions', weeksOut: 4 },
-    { title: 'Expand to new market/segment', description: 'Launch in second market or customer segment', weeksOut: 8 },
-    { title: 'Implement automation', description: 'Automate key operational processes', weeksOut: 10 },
-    { title: 'Prepare for funding round', description: 'Complete materials for next funding round', weeksOut: 12 },
+    { 
+      title: 'Hire key team members', 
+      description: 'Recruit for critical growth positions', 
+      weeksOut: 4,
+      actions: [
+        { title: 'Define roles and job descriptions', daysOffset: 3 },
+        { title: 'Post jobs and source candidates', daysOffset: 7 },
+        { title: 'Interview and select candidates', daysOffset: 21 },
+      ]
+    },
+    { 
+      title: 'Expand to new market/segment', 
+      description: 'Launch in second market or customer segment', 
+      weeksOut: 8,
+      actions: [
+        { title: 'Research new market opportunity', daysOffset: 10 },
+        { title: 'Adapt product for new segment', daysOffset: 35 },
+        { title: 'Launch and test in new market', daysOffset: 50 },
+      ]
+    },
+    { 
+      title: 'Implement automation', 
+      description: 'Automate key operational processes', 
+      weeksOut: 10,
+      actions: [
+        { title: 'Audit current manual processes', daysOffset: 5 },
+        { title: 'Prioritize automation opportunities', daysOffset: 15 },
+        { title: 'Implement top 3 automations', daysOffset: 55 },
+      ]
+    },
+    { 
+      title: 'Prepare for funding round', 
+      description: 'Complete materials for next funding round', 
+      weeksOut: 12,
+      actions: [
+        { title: 'Update pitch deck', daysOffset: 20 },
+        { title: 'Prepare financial projections', daysOffset: 40 },
+        { title: 'Build investor target list', daysOffset: 60 },
+        { title: 'Start investor outreach', daysOffset: 75 },
+      ]
+    },
   ],
 };
 
@@ -103,6 +296,7 @@ export function WorkspaceOnboardingWizard({
 
   const applyDefaults = useApplyStageDefaults(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
+  const createAction = useCreateActionItemFull(workspaceId);
   const { createMeeting } = useMeetings(workspaceId);
 
   const stageMilestones = STAGE_MILESTONES[stage];
@@ -129,19 +323,32 @@ export function WorkspaceOnboardingWizard({
     setIsProcessing(true);
     try {
       const milestonesToCreate = stageMilestones.filter((_, i) => selectedMilestones.has(i));
+      let totalActionsCreated = 0;
       
       for (let i = 0; i < milestonesToCreate.length; i++) {
         const m = milestonesToCreate[i];
-        await createMilestone.mutateAsync({
+        // Create the milestone first
+        const createdMilestone = await createMilestone.mutateAsync({
           title: m.title,
           description: m.description,
           target_date: format(addWeeks(new Date(), m.weeksOut), 'yyyy-MM-dd'),
           position: i,
         });
+        
+        // Create actions for this milestone
+        for (const action of m.actions) {
+          await createAction.mutateAsync({
+            title: action.title,
+            milestone_id: createdMilestone.id,
+            due_date: format(addDays(new Date(), action.daysOffset), 'yyyy-MM-dd'),
+            priority: 'medium',
+          });
+          totalActionsCreated++;
+        }
       }
       
       setMilestonesCreated(true);
-      toast.success(`Created ${milestonesToCreate.length} milestones`);
+      toast.success(`Created ${milestonesToCreate.length} milestones with ${totalActionsCreated} actions`);
       setCurrentStep('meeting');
     } catch {
       toast.error('Failed to create milestones');
