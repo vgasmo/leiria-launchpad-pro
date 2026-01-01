@@ -49,6 +49,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSessionActionItems, useCreateActionItem, useWorkspaceMembers } from '@/hooks/useSessions';
+import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -305,9 +306,11 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const [joinUrl, setJoinUrl] = useState('');
   const [sendInvites, setSendInvites] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
   const createMutation = useCreateSession(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
+  const { data: sessionTemplates } = useSessionTemplates();
 
   // Get workspace and startup info for the email
   const getWorkspaceInfo = async () => {
@@ -417,6 +420,16 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     setLocation('');
     setJoinUrl('');
     setSendInvites(true);
+    setSelectedTemplate('');
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = sessionTemplates?.find(t => t.id === templateId);
+    if (template) {
+      if (template.name && !title) setTitle(template.name);
+      if (template.agenda_template) setAgenda(template.agenda_template);
+    }
   };
 
   const memberCount = members?.filter(m => m.profile?.email).length || 0;
@@ -431,6 +444,25 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Session Template Selector */}
+          {sessionTemplates && sessionTemplates.length > 0 && (
+            <div className="space-y-2">
+              <Label>Use Template (optional)</Label>
+              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a template..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {sessionTemplates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
             <Input

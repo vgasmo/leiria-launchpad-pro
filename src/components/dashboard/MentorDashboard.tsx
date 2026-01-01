@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
+import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 
@@ -107,6 +108,9 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         <PendingTemplateReviews showEmpty />
         <StaffTasksPanel />
       </div>
+
+      {/* Calendar Widget */}
+      <CalendarWidget />
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-3">

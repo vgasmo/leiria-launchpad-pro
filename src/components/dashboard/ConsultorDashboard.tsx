@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
@@ -256,6 +257,10 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Calendar Widget - Full width on mobile, spans 1 col on desktop */}
+        <div className="lg:col-span-3 animate-fade-in" style={{ animationDelay: '225ms' }}>
+          <CalendarWidget />
+        </div>
         {/* Needs Attention Column */}
         <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <CardHeader className="flex flex-row items-center justify-between">

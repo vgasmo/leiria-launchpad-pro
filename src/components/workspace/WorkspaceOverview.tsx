@@ -30,6 +30,7 @@ import {
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceNextSession, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
 import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
+import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -357,6 +358,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           healthNotes={workspace.health_notes}
           canWrite={canWrite}
         />
+        
+        {/* Progress Timeline */}
+        <ProgressTimeline workspaceId={workspace.id} />
       </div>
 
       {/* Recent Sessions - Full Width */}
