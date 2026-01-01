@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Mail,
   Download,
+  Star,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -719,6 +721,17 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                 </div>
               )}
             </div>
+
+            {/* Session Feedback */}
+            {isPastSession && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Session Feedback
+                </Label>
+                <SessionFeedbackCard sessionId={session.id} sessionTitle={session.title} />
+              </div>
+            )}
           </div>
 
           {canWrite && (

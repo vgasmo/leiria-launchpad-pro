@@ -11,7 +11,9 @@ import {
   Briefcase,
   Send,
   Loader2,
-  Calendar
+  Calendar,
+  BookOpen,
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,6 +38,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { connectionMessageSchema, validateFormData } from '@/lib/validations';
 import { MentorAvailabilitySettings } from '@/components/mentors/MentorAvailabilitySettings';
+import { MentorImpactDashboard } from '@/components/mentors/MentorImpactDashboard';
+import { ResourceLibrary } from '@/components/resources/ResourceLibrary';
 
 interface MentorProfile {
   id: string;
@@ -456,9 +460,17 @@ export default function Mentors() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="availability" className="gap-2">
+          <TabsTrigger value="availability" className="gap-2">
               <Calendar className="h-4 w-4" />
               Availability
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              Resources
+            </TabsTrigger>
+            <TabsTrigger value="impact" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Impact
             </TabsTrigger>
           </TabsList>
 
@@ -605,6 +617,14 @@ export default function Mentors() {
 
           <TabsContent value="availability">
             <MentorAvailabilitySettings />
+          </TabsContent>
+
+          <TabsContent value="resources">
+            <ResourceLibrary />
+          </TabsContent>
+
+          <TabsContent value="impact">
+            <MentorImpactDashboard />
           </TabsContent>
         </Tabs>
       ) : (
