@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, isPast, isToday, parseISO } from 'date-fns';
-import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical, Target, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical, Target, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,9 +15,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, type ActionItem } from '@/hooks/useActionItems';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, useBulkUpdateActions, useBulkDeleteActions, type ActionItem } from '@/hooks/useActionItems';
 import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
+import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
+import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -48,6 +51,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
+  const bulkUpdate = useBulkUpdateActions(workspaceId);
+  const bulkDelete = useBulkDeleteActions(workspaceId);
+  const { refetch: fetchExportData } = useExportActions(workspaceId);
 
   const [filters, setFilters] = useState({
     owner: 'all',
@@ -67,6 +73,41 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     milestone_id: '',
   });
 
+  // Bulk selection
+  const { selectedIds, toggleItem, selectAll, deselectAll, isSelected } = useBulkSelection(
+    actionItems || [],
+    (item) => item.id
+  );
+
+  const handleBulkStatusChange = async (ids: string[], status: string) => {
+    try {
+      await bulkUpdate.mutateAsync({ ids, status: status as ActionStatus });
+      toast.success(`Updated ${ids.length} actions`);
+      deselectAll();
+    } catch {
+      toast.error('Failed to update actions');
+    }
+  };
+
+  const handleBulkDelete = async (ids: string[]) => {
+    try {
+      await bulkDelete.mutateAsync(ids);
+      toast.success(`Deleted ${ids.length} actions`);
+      deselectAll();
+    } catch {
+      toast.error('Failed to delete actions');
+    }
+  };
+
+  const handleExport = async () => {
+    const { data } = await fetchExportData();
+    if (data && data.length > 0) {
+      exportActionsToCsv(data, `actions-${workspaceId}`);
+      toast.success('Exported actions to CSV');
+    } else {
+      toast.error('No data to export');
+    }
+  };
 
   const handleStatusChange = async (item: ActionItem, newStatus: ActionStatus) => {
     if (!canWrite) return;
@@ -274,10 +315,32 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           </Button>
         )}
 
-        <div className="ml-auto text-sm text-muted-foreground">
-          {completedActions}/{totalActions} completed
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            {completedActions}/{totalActions} completed
+          </span>
+          <Button variant="outline" size="sm" className="h-8" onClick={handleExport}>
+            <Download className="h-3 w-3 mr-1" />
+            Export
+          </Button>
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      <BulkActionsBar
+        items={actionItems || []}
+        selectedIds={selectedIds}
+        onSelectAll={selectAll}
+        onDeselectAll={deselectAll}
+        onStatusChange={handleBulkStatusChange}
+        onDelete={handleBulkDelete}
+        statusOptions={[
+          { value: 'pending', label: 'Open' },
+          { value: 'in_progress', label: 'Doing' },
+          { value: 'completed', label: 'Done' },
+        ]}
+        getItemId={(item) => item.id}
+      />
 
       {/* Milestones with nested actions */}
       {(!milestones || milestones.length === 0) ? (
@@ -314,6 +377,8 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 onDueDateChange={handleDueDateChange}
                 onOwnerChange={handleOwnerChange}
                 onDelete={(item) => setDeleteTarget(item)}
+                isSelected={isSelected}
+                onToggleSelect={toggleItem}
               />
             );
           })}
@@ -337,6 +402,8 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     onDueDateChange={handleDueDateChange}
                     onOwnerChange={handleOwnerChange}
                     onDelete={(item) => setDeleteTarget(item)}
+                    isSelected={isSelected(item.id)}
+                    onToggleSelect={toggleItem}
                   />
                 ))}
               </CardContent>
@@ -483,6 +550,8 @@ interface MilestoneActionGroupProps {
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
   onOwnerChange: (item: ActionItem, ownerId: string) => void;
   onDelete: (item: ActionItem) => void;
+  isSelected: (id: string) => boolean;
+  onToggleSelect: (id: string) => void;
 }
 
 function MilestoneActionGroup({
@@ -499,6 +568,8 @@ function MilestoneActionGroup({
   onDueDateChange,
   onOwnerChange,
   onDelete,
+  isSelected,
+  onToggleSelect,
 }: MilestoneActionGroupProps) {
   return (
     <Card>
@@ -558,6 +629,8 @@ function MilestoneActionGroup({
                   onDueDateChange={onDueDateChange}
                   onOwnerChange={onOwnerChange}
                   onDelete={onDelete}
+                  isSelected={isSelected(item.id)}
+                  onToggleSelect={onToggleSelect}
                 />
               ))
             )}
@@ -639,6 +712,8 @@ interface ActionItemCardProps {
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
   onOwnerChange: (item: ActionItem, ownerId: string) => void;
   onDelete: (item: ActionItem) => void;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 function ActionItemCard({ 
@@ -649,6 +724,8 @@ function ActionItemCard({
   onDueDateChange,
   onOwnerChange,
   onDelete,
+  isSelected,
+  onToggleSelect,
 }: ActionItemCardProps) {
   const isOverdue = item.due_date && 
     isPast(parseISO(item.due_date)) && 
@@ -663,9 +740,17 @@ function ActionItemCard({
       group bg-background rounded-lg border p-3 space-y-2 transition-all
       ${isOverdue ? 'border-destructive/50 bg-destructive/5' : ''}
       ${isDueToday ? 'border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-900/10' : ''}
+      ${isSelected ? 'ring-2 ring-primary/50 bg-primary/5' : ''}
     `}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 flex-1 min-w-0">
+          {onToggleSelect && (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => onToggleSelect(item.id)}
+              className="mt-0.5 shrink-0"
+            />
+          )}
           <GripVertical className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
           <span className="text-sm font-medium leading-tight break-words">
             {item.title}
