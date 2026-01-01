@@ -68,7 +68,10 @@
     "noCriticalIssues": "No critical issues at the moment",
     "todaysMeetings": "Today's Meetings",
     "itemsNeedAttention": "{{count}} item needs attention",
-    "itemsNeedAttention_plural": "{{count}} items need attention"
+    "itemsNeedAttention_plural": "{{count}} items need attention",
+    "recentActivity": "Recent Activity",
+    "last7Days": "Last 7 days",
+    "noRecentActivity": "No recent activity"
   },
   "founder": {
     "applicationUnderReview": "Application Under Review",
