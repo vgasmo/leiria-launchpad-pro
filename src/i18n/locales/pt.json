@@ -12,13 +12,28 @@
     "success": "Sucesso",
     "error": "Erro",
     "settings": "Definições",
-    "logout": "Terminar sessão"
+    "logout": "Terminar sessão",
+    "back": "Voltar",
+    "copyLink": "Copiar Link",
+    "linkCopied": "Link copiado para a área de transferência",
+    "viewAll": "Ver todas",
+    "messages": "Mensagens",
+    "close": "Fechar",
+    "submit": "Submeter",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "confirm": "Confirmar",
+    "selectAll": "Selecionar tudo",
+    "clearAll": "Limpar tudo"
   },
   "nav": {
+    "myWorkspaces": "Os Meus Workspaces",
     "workspaces": "Workspaces",
     "mentors": "Mentores",
+    "findMentors": "Encontrar Mentores",
     "settings": "Definições",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminPanel": "Painel de Admin"
   },
   "dashboard": {
     "portfolio": "Visão do Portfólio",
@@ -29,14 +44,28 @@
     "pendingActions": "Ações Pendentes",
     "overdueActions": "Ações Atrasadas",
     "meetingsToday": "Reuniões Hoje",
+    "meetingsThisWeek": "Reuniões Esta Semana",
+    "scheduledForToday": "agendadas para hoje",
     "criticalHealth": "Crítico",
     "atRisk": "Em Risco",
     "healthy": "Saudável",
-    "noWorkspaces": "Nenhum workspace encontrado"
+    "noWorkspaces": "Nenhum workspace encontrado",
+    "totalStartups": "Total de Startups",
+    "acrossPrograms": "Em {{count}} programa",
+    "acrossPrograms_plural": "Em {{count}} programas",
+    "needsAttention": "Precisa de Atenção",
+    "criticalOrAtRisk": "Startups em estado crítico ou em risco",
+    "healthDistribution": "Distribuição de Saúde",
+    "allOnTrack": "Todas as startups estão no caminho certo!",
+    "noCriticalIssues": "Sem problemas críticos de momento",
+    "todaysMeetings": "Reuniões de Hoje",
+    "itemsNeedAttention": "{{count}} item precisa de atenção",
+    "itemsNeedAttention_plural": "{{count}} itens precisam de atenção"
   },
   "sessions": {
     "title": "Sessões",
     "createSession": "Criar Sessão",
+    "newSession": "Nova Sessão",
     "noSessions": "Nenhuma sessão encontrada",
     "needsNotes": "Precisa de notas",
     "duration": "Duração",
@@ -46,11 +75,14 @@
     "export": "Exportar",
     "sendInvites": "Enviar convites por email",
     "location": "Localização",
-    "meetingLink": "Link da Reunião"
+    "meetingLink": "Link da Reunião",
+    "scheduledAt": "Agendado para",
+    "minutes": "minutos"
   },
   "actions": {
     "title": "Ações",
     "createAction": "Criar Ação",
+    "newAction": "Nova Ação",
     "noActions": "Nenhuma ação encontrada",
     "pending": "Pendente",
     "inProgress": "Em Progresso",
@@ -59,17 +91,86 @@
     "overdue": "Atrasada",
     "dueDate": "Data Limite",
     "priority": "Prioridade",
-    "assignee": "Responsável"
+    "assignee": "Responsável",
+    "high": "Alta",
+    "medium": "Média",
+    "low": "Baixa"
   },
   "milestones": {
     "title": "Marcos",
     "createMilestone": "Criar Marco",
+    "newMilestone": "Novo Marco",
     "noMilestones": "Nenhum marco encontrado",
     "notStarted": "Não Iniciado",
     "inProgress": "Em Progresso",
     "completed": "Concluído",
     "delayed": "Atrasado",
     "targetDate": "Data Alvo"
+  },
+  "kpis": {
+    "title": "KPIs",
+    "noKpis": "Nenhum KPI configurado",
+    "addKpi": "Adicionar KPI",
+    "currentMonth": "Mês Atual",
+    "previousMonth": "Mês Anterior",
+    "target": "Meta",
+    "actual": "Real",
+    "trend": "Tendência"
+  },
+  "templates": {
+    "title": "Templates",
+    "noTemplates": "Nenhum template encontrado",
+    "useTemplate": "Usar Template",
+    "submitForReview": "Submeter para Revisão",
+    "pendingReview": "Aguarda Revisão",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado"
+  },
+  "calendar": {
+    "title": "Calendário",
+    "today": "Hoje",
+    "week": "Semana",
+    "month": "Mês",
+    "noEvents": "Sem eventos agendados"
+  },
+  "documents": {
+    "title": "Documentos",
+    "upload": "Carregar",
+    "noDocuments": "Nenhum documento encontrado",
+    "addDocument": "Adicionar Documento",
+    "addLink": "Adicionar Link"
+  },
+  "team": {
+    "title": "Equipa",
+    "addMember": "Adicionar Membro",
+    "noMembers": "Nenhum membro da equipa encontrado"
+  },
+  "okrs": {
+    "title": "OKRs",
+    "objectives": "Objetivos",
+    "keyResults": "Resultados Chave",
+    "addObjective": "Adicionar Objetivo",
+    "noObjectives": "Nenhum objetivo encontrado"
+  },
+  "funding": {
+    "title": "Financiamento",
+    "rounds": "Rondas de Financiamento",
+    "investors": "Investidores",
+    "capTable": "Tabela de Capitalização",
+    "addRound": "Adicionar Ronda"
+  },
+  "notes": {
+    "title": "Notas e Tarefas",
+    "staffNotes": "Notas de Staff",
+    "tasks": "Tarefas",
+    "addNote": "Adicionar Nota",
+    "addTask": "Adicionar Tarefa"
+  },
+  "time": {
+    "title": "Registo de Tempo",
+    "logTime": "Registar Tempo",
+    "totalHours": "Total de Horas",
+    "thisMonth": "Este Mês"
   },
   "notifications": {
     "title": "Notificações",
@@ -87,7 +188,8 @@
     "digestFrequency": "Frequência do Resumo",
     "daily": "Diário",
     "weekly": "Semanal",
-    "dayOfWeek": "Dia da Semana"
+    "dayOfWeek": "Dia da Semana",
+    "startupSettings": "Definições da Startup"
   },
   "stages": {
     "ideation": "Ideação",
@@ -98,7 +200,7 @@
   },
   "health": {
     "critical": "Crítico",
-    "atRisk": "Em Risco",
+    "at_risk": "Em Risco",
     "stable": "Estável",
     "healthy": "Saudável",
     "thriving": "Próspero"
@@ -107,7 +209,36 @@
     "admin": "Admin",
     "consultor": "Consultor",
     "mentor": "Mentor",
+    "mentor_externo": "Mentor Externo",
     "founder": "Fundador",
-    "teamMember": "Membro da Equipa"
+    "team_member": "Membro da Equipa"
+  },
+  "workspace": {
+    "overview": "Visão Geral",
+    "sessions": "Sessões",
+    "actions": "Ações",
+    "milestones": "Marcos",
+    "kpis": "KPIs",
+    "templates": "Templates",
+    "calendar": "Calendário",
+    "documents": "Documentos",
+    "team": "Equipa",
+    "okrs": "OKRs",
+    "funding": "Financiamento",
+    "notesAndTasks": "Notas e Tarefas",
+    "time": "Tempo",
+    "settings": "Definições",
+    "notAccessible": "Workspace Não Acessível",
+    "noPermission": "Este workspace não existe ou não tem permissão para o visualizar. Se acredita que deveria ter acesso, contacte um administrador."
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Registar",
+    "signOut": "Sair",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "forgotPassword": "Esqueceu a palavra-passe?",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?"
   }
 }

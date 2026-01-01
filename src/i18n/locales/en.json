@@ -12,13 +12,28 @@
     "success": "Success",
     "error": "Error",
     "settings": "Settings",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "back": "Back",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard",
+    "viewAll": "View all",
+    "messages": "Messages",
+    "close": "Close",
+    "submit": "Submit",
+    "add": "Add",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "selectAll": "Select all",
+    "clearAll": "Clear all"
   },
   "nav": {
+    "myWorkspaces": "My Workspaces",
     "workspaces": "Workspaces",
     "mentors": "Mentors",
+    "findMentors": "Find Mentors",
     "settings": "Settings",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminPanel": "Admin Panel"
   },
   "dashboard": {
     "portfolio": "Portfolio Overview",
@@ -29,14 +44,28 @@
     "pendingActions": "Pending Actions",
     "overdueActions": "Overdue Actions",
     "meetingsToday": "Meetings Today",
+    "meetingsThisWeek": "Meetings This Week",
+    "scheduledForToday": "scheduled for today",
     "criticalHealth": "Critical",
     "atRisk": "At Risk",
     "healthy": "Healthy",
-    "noWorkspaces": "No workspaces found"
+    "noWorkspaces": "No workspaces found",
+    "totalStartups": "Total Startups",
+    "acrossPrograms": "Across {{count}} program",
+    "acrossPrograms_plural": "Across {{count}} programs",
+    "needsAttention": "Needs Attention",
+    "criticalOrAtRisk": "Critical or at-risk startups",
+    "healthDistribution": "Health Distribution",
+    "allOnTrack": "All startups are on track!",
+    "noCriticalIssues": "No critical issues at the moment",
+    "todaysMeetings": "Today's Meetings",
+    "itemsNeedAttention": "{{count}} item needs attention",
+    "itemsNeedAttention_plural": "{{count}} items need attention"
   },
   "sessions": {
     "title": "Sessions",
     "createSession": "Create Session",
+    "newSession": "New Session",
     "noSessions": "No sessions found",
     "needsNotes": "Needs notes",
     "duration": "Duration",
@@ -46,11 +75,14 @@
     "export": "Export",
     "sendInvites": "Send email invites",
     "location": "Location",
-    "meetingLink": "Meeting Link"
+    "meetingLink": "Meeting Link",
+    "scheduledAt": "Scheduled at",
+    "minutes": "minutes"
   },
   "actions": {
     "title": "Actions",
     "createAction": "Create Action",
+    "newAction": "New Action",
     "noActions": "No actions found",
     "pending": "Pending",
     "inProgress": "In Progress",
@@ -59,17 +91,86 @@
     "overdue": "Overdue",
     "dueDate": "Due Date",
     "priority": "Priority",
-    "assignee": "Assignee"
+    "assignee": "Assignee",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
   },
   "milestones": {
     "title": "Milestones",
     "createMilestone": "Create Milestone",
+    "newMilestone": "New Milestone",
     "noMilestones": "No milestones found",
     "notStarted": "Not Started",
     "inProgress": "In Progress",
     "completed": "Completed",
     "delayed": "Delayed",
     "targetDate": "Target Date"
+  },
+  "kpis": {
+    "title": "KPIs",
+    "noKpis": "No KPIs configured",
+    "addKpi": "Add KPI",
+    "currentMonth": "Current Month",
+    "previousMonth": "Previous Month",
+    "target": "Target",
+    "actual": "Actual",
+    "trend": "Trend"
+  },
+  "templates": {
+    "title": "Templates",
+    "noTemplates": "No templates found",
+    "useTemplate": "Use Template",
+    "submitForReview": "Submit for Review",
+    "pendingReview": "Pending Review",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month",
+    "noEvents": "No events scheduled"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Upload",
+    "noDocuments": "No documents found",
+    "addDocument": "Add Document",
+    "addLink": "Add Link"
+  },
+  "team": {
+    "title": "Team",
+    "addMember": "Add Member",
+    "noMembers": "No team members found"
+  },
+  "okrs": {
+    "title": "OKRs",
+    "objectives": "Objectives",
+    "keyResults": "Key Results",
+    "addObjective": "Add Objective",
+    "noObjectives": "No objectives found"
+  },
+  "funding": {
+    "title": "Funding",
+    "rounds": "Funding Rounds",
+    "investors": "Investors",
+    "capTable": "Cap Table",
+    "addRound": "Add Round"
+  },
+  "notes": {
+    "title": "Notes & Tasks",
+    "staffNotes": "Staff Notes",
+    "tasks": "Tasks",
+    "addNote": "Add Note",
+    "addTask": "Add Task"
+  },
+  "time": {
+    "title": "Time Tracking",
+    "logTime": "Log Time",
+    "totalHours": "Total Hours",
+    "thisMonth": "This Month"
   },
   "notifications": {
     "title": "Notifications",
@@ -87,7 +188,8 @@
     "digestFrequency": "Digest Frequency",
     "daily": "Daily",
     "weekly": "Weekly",
-    "dayOfWeek": "Day of Week"
+    "dayOfWeek": "Day of Week",
+    "startupSettings": "Startup Settings"
   },
   "stages": {
     "ideation": "Ideation",
@@ -98,7 +200,7 @@
   },
   "health": {
     "critical": "Critical",
-    "atRisk": "At Risk",
+    "at_risk": "At Risk",
     "stable": "Stable",
     "healthy": "Healthy",
     "thriving": "Thriving"
@@ -107,7 +209,36 @@
     "admin": "Admin",
     "consultor": "Consultant",
     "mentor": "Mentor",
+    "mentor_externo": "External Mentor",
     "founder": "Founder",
-    "teamMember": "Team Member"
+    "team_member": "Team Member"
+  },
+  "workspace": {
+    "overview": "Overview",
+    "sessions": "Sessions",
+    "actions": "Actions",
+    "milestones": "Milestones",
+    "kpis": "KPIs",
+    "templates": "Templates",
+    "calendar": "Calendar",
+    "documents": "Documents",
+    "team": "Team",
+    "okrs": "OKRs",
+    "funding": "Funding",
+    "notesAndTasks": "Notes & Tasks",
+    "time": "Time",
+    "settings": "Settings",
+    "notAccessible": "Workspace Not Accessible",
+    "noPermission": "This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
   }
 }

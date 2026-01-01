@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   AlertCircle, 
   Calendar, 
@@ -39,6 +40,7 @@ interface ConsultorDashboardProps {
 
 export function ConsultorDashboard({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const stats = useMemo(() => {
     if (!workspaces) return null;
@@ -151,14 +153,14 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <Card className="animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Startups
+              {t('dashboard.totalStartups')}
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
-              Across {programsCount} program{programsCount !== 1 ? 's' : ''}
+              {t('dashboard.acrossPrograms', { count: programsCount })}
             </p>
           </CardContent>
         </Card>
@@ -174,7 +176,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Needs Attention
+              {t('dashboard.needsAttention')}
             </CardTitle>
             <AlertCircle className={`h-4 w-4 ${stats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
           </CardHeader>
@@ -183,7 +185,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               {stats.needsAttentionCount}
             </div>
             <p className="text-xs text-muted-foreground">
-              Critical or at-risk startups
+              {t('dashboard.criticalOrAtRisk')}
             </p>
           </CardContent>
         </Card>
@@ -191,14 +193,14 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Meetings This Week
+              {t('dashboard.meetingsThisWeek')}
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.upcomingMeetingsCount}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.meetingsTodayCount} scheduled for today
+              {stats.meetingsTodayCount} {t('dashboard.scheduledForToday')}
             </p>
           </CardContent>
         </Card>
@@ -206,7 +208,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Health Distribution
+              {t('dashboard.healthDistribution')}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -231,7 +233,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                       />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <span className="capitalize">{health.replace('_', ' ')}: {count}</span>
+                      <span>{t(`health.${health}`)}: {count}</span>
                     </TooltipContent>
                   </Tooltip>
                 );
@@ -241,7 +243,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               {stats.healthCounts.healthy + stats.healthCounts.thriving > 0 && (
                 <span className="flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-health-healthy" />
-                  {stats.healthCounts.healthy + stats.healthCounts.thriving} healthy
+                  {stats.healthCounts.healthy + stats.healthCounts.thriving} {t('dashboard.healthy').toLowerCase()}
                 </span>
               )}
             </div>
@@ -266,11 +268,11 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-600" />
-              <CardTitle>Needs Attention</CardTitle>
+              <CardTitle>{t('dashboard.needsAttention')}</CardTitle>
             </div>
             {attentionStartups.length > 0 && (
               <Button variant="ghost" size="sm" onClick={() => navigate('/my-workspaces?filter=attention')}>
-                View all <ArrowRight className="ml-1 h-4 w-4" />
+                {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             )}
           </CardHeader>
@@ -278,8 +280,8 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             {attentionStartups.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Activity className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p className="font-medium">All startups are on track!</p>
-                <p className="text-sm">No critical issues at the moment</p>
+                <p className="font-medium">{t('dashboard.allOnTrack')}</p>
+                <p className="text-sm">{t('dashboard.noCriticalIssues')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -306,7 +308,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                           <span>{workspace.program?.name}</span>
                           {workspace.overdueActionsCount > 0 && (
                             <Badge variant="destructive" className="text-xs">
-                              {workspace.overdueActionsCount} overdue
+                              {workspace.overdueActionsCount} {t('actions.overdue').toLowerCase()}
                             </Badge>
                           )}
                         </div>
@@ -332,7 +334,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle>Today's Meetings</CardTitle>
+              <CardTitle>{t('dashboard.todaysMeetings')}</CardTitle>
               <Badge variant="secondary">{todaysMeetings.length}</Badge>
             </div>
           </CardHeader>

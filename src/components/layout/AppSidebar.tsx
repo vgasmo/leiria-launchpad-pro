@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Settings, 
   LogOut, 
@@ -24,20 +25,21 @@ import {
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 
-const navigation = [
-  { name: 'My Workspaces', href: '/my-workspaces', icon: Building2 },
-];
-
-const adminNavigation = [
-  { name: 'Admin Panel', href: '/admin', icon: Settings },
-];
-
 export function AppSidebar() {
   const location = useLocation();
+  const { t } = useTranslation();
   const { profile, isAdmin, isMentor, roles, signOut } = useAuth();
   const isFounder = roles.includes('founder');
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
+
+  const navigation = [
+    { name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 },
+  ];
+
+  const adminNavigation = [
+    { name: t('nav.adminPanel'), href: '/admin', icon: Settings },
+  ];
 
   // Real notification count from database
   const { data: attentionStats, isLoading: attentionLoading } = useAttentionCount();
@@ -149,7 +151,7 @@ export function AppSidebar() {
                   >
                     <Users className="h-5 w-5 shrink-0" />
                     {!collapsed && (
-                      <span className="animate-fade-in">Find Mentors</span>
+                      <span className="animate-fade-in">{t('nav.findMentors')}</span>
                     )}
                   </Link>
                 );
@@ -159,7 +161,7 @@ export function AppSidebar() {
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
                       <TooltipContent side="right" className="font-medium">
-                        Find Mentors
+                        {t('nav.findMentors')}
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -237,7 +239,7 @@ export function AppSidebar() {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  {notificationCount} item{notificationCount !== 1 ? 's' : ''} need attention
+                  {t('dashboard.itemsNeedAttention', { count: notificationCount })}
                 </TooltipContent>
               </Tooltip>
             ) : (
@@ -245,14 +247,14 @@ export function AppSidebar() {
                 <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-destructive">
-                    {notificationCount} item{notificationCount !== 1 ? 's' : ''} need attention
+                    {t('dashboard.itemsNeedAttention', { count: notificationCount })}
                   </p>
                   {attentionStats && (
                     <p className="text-[10px] text-destructive/70 truncate">
                       {[
-                        attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} critical`,
-                        attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} at risk`,
-                        attentionStats.overdueCount > 0 && `${attentionStats.overdueCount} overdue`,
+                        attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} ${t('health.critical').toLowerCase()}`,
+                        attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} ${t('health.at_risk').toLowerCase()}`,
+                        attentionStats.overdueCount > 0 && `${attentionStats.overdueCount} ${t('actions.overdue').toLowerCase()}`,
                       ].filter(Boolean).join(', ')}
                     </p>
                   )}
@@ -276,7 +278,7 @@ export function AppSidebar() {
                   <MessageCircle className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">Messages</TooltipContent>
+              <TooltipContent side="right">{t('common.messages')}</TooltipContent>
             </Tooltip>
           ) : (
             <Button
@@ -285,7 +287,7 @@ export function AppSidebar() {
               className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <MessageCircle className="h-5 w-5" />
-              Messages
+              {t('common.messages')}
             </Button>
           )}
         </div>
@@ -338,7 +340,7 @@ export function AppSidebar() {
                   <LogOut className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">Sign out</TooltipContent>
+              <TooltipContent side="right">{t('auth.signOut')}</TooltipContent>
             </Tooltip>
           )}
         </div>
