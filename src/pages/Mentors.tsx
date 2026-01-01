@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { connectionMessageSchema, validateFormData } from '@/lib/validations';
 
 interface MentorProfile {
   id: string;
@@ -211,9 +212,17 @@ export default function Mentors() {
 
   const handleSendRequest = () => {
     if (!selectedMentor) return;
+    
+    // Validate message
+    const result = validateFormData(connectionMessageSchema, { message: connectionMessage }, (msg) => toast.error(msg));
+    
+    if (!result.success) {
+      return;
+    }
+    
     createConnection.mutate({
       mentorId: selectedMentor.id,
-      message: connectionMessage,
+      message: connectionMessage.trim() || '',
     });
   };
 

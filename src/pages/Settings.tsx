@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { profileUpdateSchema, validateFormData } from '@/lib/validations';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -118,18 +119,27 @@ export default function Settings() {
     e.preventDefault();
     if (!user) return;
 
+    // Validate form data
+    const formData = {
+      full_name: fullName,
+      avatar_url: avatarUrl,
+      phone: phone,
+      linkedin_url: linkedinUrl,
+      bio: bio,
+      expertise: expertise,
+    };
+
+    const result = validateFormData(profileUpdateSchema, formData, (msg) => toast.error(msg));
+    
+    if (!result.success) {
+      return;
+    }
+
     setIsUpdatingProfile(true);
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: fullName.trim() || null,
-          avatar_url: avatarUrl.trim() || null,
-          phone: phone.trim() || null,
-          linkedin_url: linkedinUrl.trim() || null,
-          bio: bio.trim() || null,
-          expertise: expertise.length > 0 ? expertise : null,
-        })
+        .update(result.data)
         .eq('id', user.id);
 
       if (error) throw error;
