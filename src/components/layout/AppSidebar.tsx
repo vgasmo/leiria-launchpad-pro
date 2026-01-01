@@ -7,7 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-  Users
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +22,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 
 const navigation = [
   { name: 'My Workspaces', href: '/my-workspaces', icon: Building2 },
@@ -35,6 +37,7 @@ export function AppSidebar() {
   const { profile, isAdmin, isMentor, roles, signOut } = useAuth();
   const isFounder = roles.includes('founder');
   const [collapsed, setCollapsed] = useState(false);
+  const [messagingOpen, setMessagingOpen] = useState(false);
 
   // Real notification count from database
   const { data: attentionStats, isLoading: attentionLoading } = useAttentionCount();
@@ -259,6 +262,34 @@ export function AppSidebar() {
           </Link>
         ) : null}
 
+        {/* Messaging button */}
+        <div className={cn("mx-3 mb-2", collapsed ? "text-center" : "")}>
+          {collapsed ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMessagingOpen(true)}
+                  className="h-10 w-10 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Messages</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={() => setMessagingOpen(true)}
+              className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Messages
+            </Button>
+          )}
+        </div>
+
         {/* User section */}
         <div className="border-t border-sidebar-border p-3">
           <div className={cn(
@@ -312,6 +343,9 @@ export function AppSidebar() {
           )}
         </div>
       </div>
+
+      {/* Messaging Panel */}
+      <MessagingPanel open={messagingOpen} onOpenChange={setMessagingOpen} />
     </aside>
   );
 }

@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Settings, Copy } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,8 @@ import { TemplatesTab } from '@/components/workspace/TemplatesTab';
 import { CalendarTab } from '@/components/workspace/CalendarTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
+import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
+import { ConsultantNotesTab } from '@/components/workspace/ConsultantNotesTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -108,6 +110,18 @@ export default function WorkspaceDetail() {
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          {isFounder && (
+            <TabsTrigger value="funding" className="gap-1">
+              <DollarSign className="h-3.5 w-3.5" />
+              Funding
+            </TabsTrigger>
+          )}
+          {(isAdmin || isConsultor) && (
+            <TabsTrigger value="notes" className="gap-1">
+              <StickyNote className="h-3.5 w-3.5" />
+              Notes
+            </TabsTrigger>
+          )}
           <TabsTrigger value="settings" className="gap-1">
             <Settings className="h-3.5 w-3.5" />
             Settings
@@ -154,6 +168,16 @@ export default function WorkspaceDetail() {
         <TabsContent value="documents">
           <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
+        {isFounder && startup && (
+          <TabsContent value="funding">
+            <FundingTrackerTab startupId={startup.id} />
+          </TabsContent>
+        )}
+        {(isAdmin || isConsultor) && (
+          <TabsContent value="notes">
+            <ConsultantNotesTab workspaceId={workspace.id} />
+          </TabsContent>
+        )}
         <TabsContent value="settings">
           {startup && (
             <StartupSettingsTab
