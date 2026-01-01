@@ -24,7 +24,15 @@
     "remove": "Remove",
     "confirm": "Confirm",
     "selectAll": "Select all",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "today": "Today",
+    "overdue": "overdue",
+    "notScheduled": "Not scheduled",
+    "noEntriesYet": "No entries yet",
+    "upToDate": "Up to date",
+    "needsUpdate": "Needs update",
+    "last": "Last",
+    "creating": "Creating..."
   },
   "nav": {
     "myWorkspaces": "My Workspaces",
@@ -61,6 +69,51 @@
     "todaysMeetings": "Today's Meetings",
     "itemsNeedAttention": "{{count}} item needs attention",
     "itemsNeedAttention_plural": "{{count}} items need attention"
+  },
+  "founder": {
+    "applicationUnderReview": "Application Under Review",
+    "applicationBeingReviewed": "Your startup application is being reviewed by our team. You'll receive access to your workspace once approved.",
+    "pending": "Pending",
+    "responseTime": "We typically respond within 2-3 business days",
+    "startYourJourney": "Start Your Journey",
+    "startYourJourneyDesc": "Create your startup profile to join our mentorship program and get access to expert guidance, resources, and a dedicated workspace.",
+    "createYourStartup": "Create Your Startup",
+    "openWorkspace": "Open Workspace",
+    "nextMeeting": "Next Meeting",
+    "kpiStatus": "KPI Status",
+    "lastSession": "Last Session",
+    "noSessionsYet": "No sessions yet",
+    "quickActions": "Quick Actions",
+    "commonTasks": "Common tasks for your workspace",
+    "updateKpis": "Update KPIs",
+    "viewActions": "View Actions"
+  },
+  "mentor": {
+    "noStartupsAssigned": "No startups assigned yet",
+    "noStartupsAssignedDesc": "You'll see your mentored startups here once you're assigned to workspaces.",
+    "viewConnectionRequests": "View Connection Requests",
+    "myStartups": "My Startups",
+    "activeMentorships": "Active mentorships",
+    "upcomingMeetings": "Upcoming Meetings",
+    "pendingActionsCount": "pending actions",
+    "next": "Next"
+  },
+  "createStartup": {
+    "title": "Create Your Startup",
+    "description": "Submit your startup for the program. An admin will review and approve your application.",
+    "startupName": "Startup Name",
+    "startupNamePlaceholder": "My Awesome Startup",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What does your startup do?",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "https://mystartup.com",
+    "programLabel": "Program",
+    "selectProgram": "Select program",
+    "currentStage": "Current Stage",
+    "submitApplication": "Submit Application",
+    "successMessage": "Startup created! Your application is pending approval.",
+    "mustBeLoggedIn": "You must be logged in to create a startup",
+    "failedToCreate": "Failed to create startup"
   },
   "sessions": {
     "title": "Sessions",

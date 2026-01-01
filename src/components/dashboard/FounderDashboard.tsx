@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
   Target,
@@ -38,6 +39,7 @@ export function FounderDashboard({
   onCreateStartup 
 }: FounderDashboardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Get the primary workspace (founders typically have 1)
   const workspace = workspaces[0];
@@ -72,10 +74,10 @@ export function FounderDashboard({
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
-                  Application Under Review
+                  {t('founder.applicationUnderReview')}
                 </h3>
                 <p className="text-amber-700 dark:text-amber-300 mb-4">
-                  Your startup application is being reviewed by our team. You'll receive access to your workspace once approved.
+                  {t('founder.applicationBeingReviewed')}
                 </p>
                 
                 <div className="space-y-3">
@@ -90,7 +92,7 @@ export function FounderDashboard({
                           <StageBadge stage={pw.stage} size="sm" />
                         </div>
                       </div>
-                      <Badge variant="secondary">Pending</Badge>
+                      <Badge variant="secondary">{t('founder.pending')}</Badge>
                     </div>
                   ))}
                 </div>
@@ -100,7 +102,7 @@ export function FounderDashboard({
         </Card>
         
         <div className="text-center text-muted-foreground">
-          <p>We typically respond within 2-3 business days</p>
+          <p>{t('founder.responseTime')}</p>
         </div>
       </div>
     );
@@ -111,13 +113,13 @@ export function FounderDashboard({
     return (
       <Card className="p-12 text-center">
         <Rocket className="h-16 w-16 mx-auto text-primary mb-6" />
-        <h3 className="text-2xl font-bold mb-2">Start Your Journey</h3>
+        <h3 className="text-2xl font-bold mb-2">{t('founder.startYourJourney')}</h3>
         <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          Create your startup profile to join our mentorship program and get access to expert guidance, resources, and a dedicated workspace.
+          {t('founder.startYourJourneyDesc')}
         </p>
         <Button size="lg" onClick={onCreateStartup}>
           <Plus className="mr-2 h-5 w-5" />
-          Create Your Startup
+          {t('founder.createYourStartup')}
         </Button>
       </Card>
     );
@@ -155,7 +157,7 @@ export function FounderDashboard({
               )}
             </div>
             <Button onClick={() => navigate(`/workspace/${workspace.id}`)}>
-              Open Workspace
+              {t('founder.openWorkspace')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -167,7 +169,7 @@ export function FounderDashboard({
         <Card className="animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Actions
+              {t('dashboard.pendingActions')}
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -176,7 +178,7 @@ export function FounderDashboard({
             {workspace.overdueActionsCount > 0 && (
               <p className="text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                {workspace.overdueActionsCount} overdue
+                {workspace.overdueActionsCount} {t('common.overdue')}
               </p>
             )}
           </CardContent>
@@ -185,7 +187,7 @@ export function FounderDashboard({
         <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Next Meeting
+              {t('founder.nextMeeting')}
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -194,7 +196,7 @@ export function FounderDashboard({
               <>
                 <div className={`text-xl font-bold ${isToday(new Date(workspace.nextMeetingDate)) ? 'text-primary' : ''}`}>
                   {isToday(new Date(workspace.nextMeetingDate)) 
-                    ? 'Today' 
+                    ? t('common.today') 
                     : format(new Date(workspace.nextMeetingDate), 'MMM d')
                   }
                 </div>
@@ -203,7 +205,7 @@ export function FounderDashboard({
                 </p>
               </>
             ) : (
-              <div className="text-lg text-muted-foreground">Not scheduled</div>
+              <div className="text-lg text-muted-foreground">{t('common.notScheduled')}</div>
             )}
           </CardContent>
         </Card>
@@ -211,18 +213,18 @@ export function FounderDashboard({
         <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              KPI Status
+              {t('founder.kpiStatus')}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className={`text-lg font-bold ${workspace.hasCurrentMonthKpi ? 'text-green-600' : 'text-amber-600'}`}>
-              {workspace.hasCurrentMonthKpi ? 'Up to date' : 'Needs update'}
+              {workspace.hasCurrentMonthKpi ? t('common.upToDate') : t('common.needsUpdate')}
             </div>
             <p className="text-xs text-muted-foreground">
               {workspace.lastKpiMonth 
-                ? `Last: ${format(new Date(workspace.lastKpiMonth), 'MMM yyyy')}`
-                : 'No entries yet'
+                ? `${t('common.last')}: ${format(new Date(workspace.lastKpiMonth), 'MMM yyyy')}`
+                : t('common.noEntriesYet')
               }
             </p>
           </CardContent>
@@ -231,7 +233,7 @@ export function FounderDashboard({
         <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Last Session
+              {t('founder.lastSession')}
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -244,7 +246,7 @@ export function FounderDashboard({
                 </p>
               </>
             ) : (
-              <div className="text-lg text-muted-foreground">No sessions yet</div>
+              <div className="text-lg text-muted-foreground">{t('founder.noSessionsYet')}</div>
             )}
           </CardContent>
         </Card>
@@ -253,26 +255,26 @@ export function FounderDashboard({
       {/* Quick Actions */}
       <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks for your workspace</CardDescription>
+          <CardTitle>{t('founder.quickActions')}</CardTitle>
+          <CardDescription>{t('founder.commonTasks')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-4">
             <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=kpis`)}>
               <TrendingUp className="h-5 w-5 text-primary" />
-              <span>Update KPIs</span>
+              <span>{t('founder.updateKpis')}</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=actions`)}>
               <CheckCircle2 className="h-5 w-5 text-primary" />
-              <span>View Actions</span>
+              <span>{t('founder.viewActions')}</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}>
               <Target className="h-5 w-5 text-primary" />
-              <span>Milestones</span>
+              <span>{t('milestones.title')}</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=documents`)}>
               <FileText className="h-5 w-5 text-primary" />
-              <span>Documents</span>
+              <span>{t('documents.title')}</span>
             </Button>
           </div>
         </CardContent>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Rocket, Building2, Globe, Calendar, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -30,6 +31,7 @@ interface CreateStartupDialogProps {
 
 export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: programs, isLoading: loadingPrograms } = usePrograms();
   
@@ -53,7 +55,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     }
 
     if (!user) {
-      setError('You must be logged in to create a startup');
+      setError(t('createStartup.mustBeLoggedIn'));
       return;
     }
 
@@ -99,7 +101,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
 
       if (memberError) throw memberError;
 
-      toast.success('Startup created! Your application is pending approval.');
+      toast.success(t('createStartup.successMessage'));
       onOpenChange(false);
       
       // Reset form
@@ -111,7 +113,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       
     } catch (err: any) {
       console.error('Error creating startup:', err);
-      setError(err.message || 'Failed to create startup');
+      setError(err.message || t('createStartup.failedToCreate'));
     } finally {
       setIsSubmitting(false);
     }
@@ -125,10 +127,10 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
             <div className="p-2 rounded-full bg-primary/10">
               <Rocket className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle>Create Your Startup</DialogTitle>
+            <DialogTitle>{t('createStartup.title')}</DialogTitle>
           </div>
           <DialogDescription>
-            Submit your startup for the program. An admin will review and approve your application.
+            {t('createStartup.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -142,13 +144,13 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           <div className="space-y-2">
             <Label htmlFor="startup-name">
               <Building2 className="h-3.5 w-3.5 inline mr-1.5" />
-              Startup Name *
+              {t('createStartup.startupName')} *
             </Label>
             <Input
               id="startup-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="My Awesome Startup"
+              placeholder={t('createStartup.startupNamePlaceholder')}
               required
             />
           </div>
@@ -156,13 +158,13 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           <div className="space-y-2">
             <Label htmlFor="startup-description">
               <FileText className="h-3.5 w-3.5 inline mr-1.5" />
-              Description
+              {t('createStartup.descriptionLabel')}
             </Label>
             <Textarea
               id="startup-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What does your startup do?"
+              placeholder={t('createStartup.descriptionPlaceholder')}
               rows={3}
             />
           </div>
@@ -170,27 +172,27 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           <div className="space-y-2">
             <Label htmlFor="startup-website">
               <Globe className="h-3.5 w-3.5 inline mr-1.5" />
-              Website
+              {t('createStartup.websiteLabel')}
             </Label>
             <Input
               id="startup-website"
               type="url"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://mystartup.com"
+              placeholder={t('createStartup.websitePlaceholder')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startup-program">Program *</Label>
+              <Label htmlFor="startup-program">{t('createStartup.programLabel')} *</Label>
               <Select value={programId} onValueChange={setProgramId} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select program" />
+                  <SelectValue placeholder={t('createStartup.selectProgram')} />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingPrograms ? (
-                    <SelectItem value="" disabled>Loading...</SelectItem>
+                    <SelectItem value="" disabled>{t('common.loading')}</SelectItem>
                   ) : (
                     programs?.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
@@ -203,17 +205,17 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="startup-stage">Current Stage *</Label>
+              <Label htmlFor="startup-stage">{t('createStartup.currentStage')} *</Label>
               <Select value={stage} onValueChange={(v) => setStage(v as StartupStage)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ideation">Ideation</SelectItem>
-                  <SelectItem value="validation">Validation</SelectItem>
-                  <SelectItem value="mvp">MVP</SelectItem>
-                  <SelectItem value="growth">Growth</SelectItem>
-                  <SelectItem value="scale">Scale</SelectItem>
+                  <SelectItem value="ideation">{t('stages.ideation')}</SelectItem>
+                  <SelectItem value="validation">{t('stages.validation')}</SelectItem>
+                  <SelectItem value="mvp">{t('stages.mvp')}</SelectItem>
+                  <SelectItem value="growth">{t('stages.growth')}</SelectItem>
+                  <SelectItem value="scale">{t('stages.scale')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -221,10 +223,10 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Submit Application'}
+              {isSubmitting ? t('common.creating') : t('createStartup.submitApplication')}
             </Button>
           </DialogFooter>
         </form>
