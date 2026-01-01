@@ -293,10 +293,17 @@ export function useSubmitForReview(workspaceId: string) {
         .single();
 
       if (error) throw error;
+      
+      // Send notification to reviewers (fire and forget)
+      supabase.functions.invoke('send-template-notification', {
+        body: { type: 'submitted', instanceId }
+      }).catch(err => console.error('Failed to send template notification:', err));
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['pending-template-reviews'] });
     },
   });
 }
@@ -331,10 +338,17 @@ export function useReviewTemplateInstance(workspaceId: string) {
         .single();
 
       if (error) throw error;
+      
+      // Send notification to founder about review (fire and forget)
+      supabase.functions.invoke('send-template-notification', {
+        body: { type: 'reviewed', instanceId, review_status, review_notes }
+      }).catch(err => console.error('Failed to send template notification:', err));
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['pending-template-reviews'] });
     },
   });
 }
