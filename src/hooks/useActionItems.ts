@@ -13,6 +13,7 @@ export interface ActionItem {
   due_date: string | null;
   owner_user_id: string | null;
   session_id: string | null;
+  milestone_id: string | null;
   workspace_id: string;
   created_at: string;
   updated_at: string;
@@ -132,6 +133,7 @@ export function useCreateActionItemFull(workspaceId: string) {
       due_date?: string | null;
       priority?: string;
       owner_user_id?: string | null;
+      milestone_id: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -144,6 +146,7 @@ export function useCreateActionItemFull(workspaceId: string) {
           due_date: actionItem.due_date || null,
           priority: actionItem.priority || 'medium',
           owner_user_id: actionItem.owner_user_id || null,
+          milestone_id: actionItem.milestone_id,
           created_by: user?.id,
           status: 'pending',
         })
@@ -153,9 +156,48 @@ export function useCreateActionItemFull(workspaceId: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['milestone-actions', variables.milestone_id] });
+      queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
     },
+  });
+}
+
+export function useActionItemsByMilestone(milestoneId: string | undefined) {
+  return useQuery({
+    queryKey: ['milestone-actions', milestoneId],
+    queryFn: async () => {
+      if (!milestoneId) return [];
+      
+      const { data, error } = await supabase
+        .from('action_items')
+        .select('*')
+        .eq('milestone_id', milestoneId)
+        .order('due_date', { ascending: true, nullsFirst: false });
+
+      if (error) throw error;
+      
+      // Fetch owner profiles separately
+      const ownerIds = [...new Set(data?.filter(a => a.owner_user_id).map(a => a.owner_user_id) || [])];
+      let profiles: { id: string; full_name: string | null; avatar_url: string | null }[] = [];
+      
+      if (ownerIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', ownerIds as string[]);
+        profiles = profilesData || [];
+      }
+
+      return (data || []).map(item => ({
+        ...item,
+        owner: item.owner_user_id 
+          ? profiles.find(p => p.id === item.owner_user_id) || null 
+          : null,
+      })) as ActionItem[];
+    },
+    enabled: !!milestoneId,
   });
 }

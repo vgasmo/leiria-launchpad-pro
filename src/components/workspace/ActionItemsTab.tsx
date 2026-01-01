@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, isPast, isToday, parseISO } from 'date-fns';
-import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical } from 'lucide-react';
+import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical, Target, ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, type ActionItem } from '@/hooks/useActionItems';
+import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
@@ -40,6 +43,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 
 export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: actionItems, isLoading, error } = useActionItems(workspaceId);
+  const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
@@ -50,7 +54,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     overdue: false,
     priority: 'all',
   });
+  const [expandedMilestones, setExpandedMilestones] = useState<Set<string>>(new Set());
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedMilestoneForCreate, setSelectedMilestoneForCreate] = useState<string>('');
   const [deleteTarget, setDeleteTarget] = useState<ActionItem | null>(null);
   const [newAction, setNewAction] = useState({
     title: '',
@@ -58,36 +64,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     due_date: '',
     priority: 'medium',
     owner_user_id: '',
+    milestone_id: '',
   });
 
-  const filteredItems = useMemo(() => {
-    if (!actionItems) return { pending: [], in_progress: [], completed: [] };
-
-    let filtered = [...actionItems];
-
-    if (filters.owner !== 'all') {
-      filtered = filtered.filter(item => item.owner_user_id === filters.owner);
-    }
-
-    if (filters.overdue) {
-      filtered = filtered.filter(item => 
-        item.due_date && 
-        isPast(parseISO(item.due_date)) && 
-        !isToday(parseISO(item.due_date)) &&
-        item.status !== 'completed'
-      );
-    }
-
-    if (filters.priority !== 'all') {
-      filtered = filtered.filter(item => item.priority === filters.priority);
-    }
-
-    return {
-      pending: filtered.filter(i => i.status === 'pending'),
-      in_progress: filtered.filter(i => i.status === 'in_progress'),
-      completed: filtered.filter(i => i.status === 'completed'),
-    };
-  }, [actionItems, filters]);
 
   const handleStatusChange = async (item: ActionItem, newStatus: ActionStatus) => {
     if (!canWrite) return;
@@ -138,6 +117,10 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       toast.error('Title is required');
       return;
     }
+    if (!newAction.milestone_id) {
+      toast.error('Please select a milestone');
+      return;
+    }
     try {
       await createAction.mutateAsync({
         title: newAction.title,
@@ -145,21 +128,74 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         due_date: newAction.due_date || null,
         priority: newAction.priority,
         owner_user_id: newAction.owner_user_id || null,
+        milestone_id: newAction.milestone_id,
       });
       toast.success('Action item created');
       setCreateDialogOpen(false);
-      setNewAction({ title: '', description: '', due_date: '', priority: 'medium', owner_user_id: '' });
+      setNewAction({ title: '', description: '', due_date: '', priority: 'medium', owner_user_id: '', milestone_id: '' });
     } catch {
       toast.error('Failed to create action item');
     }
   };
 
-  if (isLoading) {
+  const openCreateDialogForMilestone = (milestoneId: string) => {
+    setNewAction(prev => ({ ...prev, milestone_id: milestoneId }));
+    setCreateDialogOpen(true);
+  };
+
+  // Group actions by milestone
+  const actionsByMilestone = useMemo(() => {
+    const grouped = new Map<string, ActionItem[]>();
+    const unassigned: ActionItem[] = [];
+    
+    (actionItems || []).forEach(item => {
+      let passesFilters = true;
+      
+      if (filters.owner !== 'all' && item.owner_user_id !== filters.owner) {
+        passesFilters = false;
+      }
+      if (filters.priority !== 'all' && item.priority !== filters.priority) {
+        passesFilters = false;
+      }
+      if (filters.overdue) {
+        const isOverdue = item.due_date && 
+          isPast(parseISO(item.due_date)) && 
+          !isToday(parseISO(item.due_date)) &&
+          item.status !== 'completed';
+        if (!isOverdue) passesFilters = false;
+      }
+      
+      if (!passesFilters) return;
+      
+      if (item.milestone_id) {
+        const existing = grouped.get(item.milestone_id) || [];
+        existing.push(item);
+        grouped.set(item.milestone_id, existing);
+      } else {
+        unassigned.push(item);
+      }
+    });
+    
+    return { grouped, unassigned };
+  }, [actionItems, filters]);
+
+  const toggleMilestoneExpanded = (milestoneId: string) => {
+    setExpandedMilestones(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(milestoneId)) {
+        newSet.delete(milestoneId);
+      } else {
+        newSet.add(milestoneId);
+      }
+      return newSet;
+    });
+  };
+
+  if (isLoading || milestonesLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
-        {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="h-96" />
-        ))}
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
@@ -174,15 +210,14 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     );
   }
 
-  const totalPending = filteredItems.pending.length;
-  const totalInProgress = filteredItems.in_progress.length;
-  const totalCompleted = filteredItems.completed.length;
+  const totalActions = actionItems?.length || 0;
+  const completedActions = actionItems?.filter(a => a.status === 'completed').length || 0;
 
   return (
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg border">
-        {canWrite && (
+        {canWrite && milestones && milestones.length > 0 && (
           <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" />
             Add Action
@@ -238,47 +273,77 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             Clear filters
           </Button>
         )}
+
+        <div className="ml-auto text-sm text-muted-foreground">
+          {completedActions}/{totalActions} completed
+        </div>
       </div>
 
-      {/* Kanban Columns */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <KanbanColumn
-          title="Open"
-          count={totalPending}
-          items={filteredItems.pending}
-          status="pending"
-          canWrite={canWrite}
-          members={members || []}
-          onStatusChange={handleStatusChange}
-          onDueDateChange={handleDueDateChange}
-          onOwnerChange={handleOwnerChange}
-          onDelete={(item) => setDeleteTarget(item)}
-        />
-        <KanbanColumn
-          title="Doing"
-          count={totalInProgress}
-          items={filteredItems.in_progress}
-          status="in_progress"
-          canWrite={canWrite}
-          members={members || []}
-          onStatusChange={handleStatusChange}
-          onDueDateChange={handleDueDateChange}
-          onOwnerChange={handleOwnerChange}
-          onDelete={(item) => setDeleteTarget(item)}
-        />
-        <KanbanColumn
-          title="Done"
-          count={totalCompleted}
-          items={filteredItems.completed}
-          status="completed"
-          canWrite={canWrite}
-          members={members || []}
-          onStatusChange={handleStatusChange}
-          onDueDateChange={handleDueDateChange}
-          onOwnerChange={handleOwnerChange}
-          onDelete={(item) => setDeleteTarget(item)}
-        />
-      </div>
+      {/* Milestones with nested actions */}
+      {(!milestones || milestones.length === 0) ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>No milestones yet. Create milestones first to add actions.</p>
+            <p className="text-xs mt-1">Actions belong to milestones to track progress toward goals.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {milestones.map(milestone => {
+            const milestoneActions = actionsByMilestone.grouped.get(milestone.id) || [];
+            const completedCount = milestoneActions.filter(a => a.status === 'completed').length;
+            const progress = milestoneActions.length > 0 
+              ? Math.round((completedCount / milestoneActions.length) * 100) 
+              : 0;
+            const isExpanded = expandedMilestones.has(milestone.id);
+
+            return (
+              <MilestoneActionGroup
+                key={milestone.id}
+                milestone={milestone}
+                actions={milestoneActions}
+                progress={progress}
+                completedCount={completedCount}
+                isExpanded={isExpanded}
+                onToggle={() => toggleMilestoneExpanded(milestone.id)}
+                onAddAction={() => openCreateDialogForMilestone(milestone.id)}
+                canWrite={canWrite}
+                members={members || []}
+                onStatusChange={handleStatusChange}
+                onDueDateChange={handleDueDateChange}
+                onOwnerChange={handleOwnerChange}
+                onDelete={(item) => setDeleteTarget(item)}
+              />
+            );
+          })}
+
+          {/* Unassigned actions (legacy) */}
+          {actionsByMilestone.unassigned.length > 0 && (
+            <Card className="border-dashed">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Unassigned Actions ({actionsByMilestone.unassigned.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 space-y-2">
+                {actionsByMilestone.unassigned.map(item => (
+                  <ActionItemCard
+                    key={item.id}
+                    item={item}
+                    canWrite={canWrite}
+                    members={members || []}
+                    onStatusChange={handleStatusChange}
+                    onDueDateChange={handleDueDateChange}
+                    onOwnerChange={handleOwnerChange}
+                    onDelete={(item) => setDeleteTarget(item)}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Create Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -287,6 +352,25 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             <DialogTitle>New Action Item</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="milestone">Milestone *</Label>
+              <Select 
+                value={newAction.milestone_id} 
+                onValueChange={v => setNewAction(a => ({ ...a, milestone_id: v }))}
+              >
+                <SelectTrigger id="milestone">
+                  <Target className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select milestone..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {milestones?.map(m => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -356,7 +440,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={createAction.isPending}>
+            <Button onClick={handleCreate} disabled={createAction.isPending || !newAction.milestone_id}>
               Create
             </Button>
           </DialogFooter>
@@ -381,6 +465,106 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+// New component for milestone with nested actions
+interface MilestoneActionGroupProps {
+  milestone: Milestone;
+  actions: ActionItem[];
+  progress: number;
+  completedCount: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onAddAction: () => void;
+  canWrite: boolean;
+  members: Array<{ user_id: string; profile: { id: string; full_name: string | null; email: string; avatar_url: string | null } | null }>;
+  onStatusChange: (item: ActionItem, status: ActionStatus) => void;
+  onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
+  onOwnerChange: (item: ActionItem, ownerId: string) => void;
+  onDelete: (item: ActionItem) => void;
+}
+
+function MilestoneActionGroup({
+  milestone,
+  actions,
+  progress,
+  completedCount,
+  isExpanded,
+  onToggle,
+  onAddAction,
+  canWrite,
+  members,
+  onStatusChange,
+  onDueDateChange,
+  onOwnerChange,
+  onDelete,
+}: MilestoneActionGroupProps) {
+  return (
+    <Card>
+      <Collapsible open={isExpanded} onOpenChange={onToggle}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="py-3 px-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <div className="flex items-center gap-3">
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+              <Target className="h-4 w-4 text-primary" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium truncate">{milestone.title}</span>
+                  <Badge variant="outline" className="text-xs shrink-0">
+                    {completedCount}/{actions.length} actions
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Progress value={progress} className="h-1.5 flex-1 max-w-[200px]" />
+                  <span className="text-xs text-muted-foreground">{progress}%</span>
+                </div>
+              </div>
+              {canWrite && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddAction();
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="px-4 pb-4 pt-0 space-y-2">
+            {actions.length === 0 ? (
+              <div className="py-4 text-center text-sm text-muted-foreground">
+                No actions yet. Add actions to track progress.
+              </div>
+            ) : (
+              actions.map(item => (
+                <ActionItemCard
+                  key={item.id}
+                  item={item}
+                  canWrite={canWrite}
+                  members={members}
+                  onStatusChange={onStatusChange}
+                  onDueDateChange={onDueDateChange}
+                  onOwnerChange={onOwnerChange}
+                  onDelete={onDelete}
+                />
+              ))
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   );
 }
 
