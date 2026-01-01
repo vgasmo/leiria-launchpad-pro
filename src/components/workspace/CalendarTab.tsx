@@ -83,13 +83,21 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
 
   // Get member emails for auto-complete (exclude current user)
   const memberEmails = workspaceMembers
-    .filter(m => m.profile?.email && m.user_id !== user?.id)
-    .map(m => ({
+    .filter((m) => m.profile?.email && m.user_id !== user?.id)
+    .map((m) => ({
       email: m.profile!.email,
       name: m.profile?.full_name || m.profile!.email,
       avatar: m.profile?.avatar_url,
       role: m.role,
     }));
+
+  const defaultInviteEmails = () => {
+    const preferredRoles = new Set(['founder', 'consultor', 'mentor_externo']);
+    const emails = memberEmails
+      .filter((m) => preferredRoles.has(m.role))
+      .map((m) => m.email);
+    return [...new Set(emails)].join(', ');
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -121,7 +129,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   // Send meeting invite
   const sendMeetingInvite = async (meeting: Meeting, emails: string[]) => {
     if (emails.length === 0) return;
-    
+
     try {
       setIsSendingInvite(true);
       const { data, error } = await supabase.functions.invoke('send-meeting-invite', {
@@ -141,8 +149,19 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       });
 
       if (error) throw error;
-      
-      toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
+
+      const results = (data as any)?.results as Array<{ email: string; success: boolean; error?: string }> | undefined;
+      const failed = (results || []).filter((r) => r && r.success === false);
+
+      if (failed.length > 0) {
+        const firstError = failed[0]?.error;
+        toast.error(
+          `Invites failed for ${failed.length} recipient(s)${firstError ? `: ${firstError}` : ''}`
+        );
+      } else {
+        toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
+      }
+
       return data;
     } catch (error) {
       console.error('Error sending meeting invite:', error);
@@ -244,6 +263,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     setFormData((prev) => ({
       ...prev,
       date: format(date, 'yyyy-MM-dd'),
+      inviteEmails: prev.inviteEmails.trim() ? prev.inviteEmails : defaultInviteEmails(),
     }));
     setIsAddDialogOpen(true);
   };
@@ -470,7 +490,20 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             </div>
           </div>
           {canWrite && (
-            <Dialog open={isAddDialogOpen} onOpenChange={(open) => { setIsAddDialogOpen(open); if (!open) resetForm(); }}>
+            <Dialog
+              open={isAddDialogOpen}
+              onOpenChange={(open) => {
+                setIsAddDialogOpen(open);
+                if (open) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    inviteEmails: prev.inviteEmails.trim() ? prev.inviteEmails : defaultInviteEmails(),
+                  }));
+                } else {
+                  resetForm();
+                }
+              }}
+            >
               <DialogTrigger asChild>
                 <Button size="sm">
                   <Plus className="h-4 w-4 mr-2" />
@@ -600,7 +633,12 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                               size="icon"
                               className="h-6 w-6"
                               title="Send calendar invite"
-                              onClick={() => setSendInviteMeeting(meeting)}
+                              onClick={() => {
+                                setSendInviteMeeting(meeting);
+                                if (!quickInviteEmails.trim()) {
+                                  setQuickInviteEmails(defaultInviteEmails());
+                                }
+                              }}
                             >
                               <Mail className="h-3 w-3" />
                             </Button>
