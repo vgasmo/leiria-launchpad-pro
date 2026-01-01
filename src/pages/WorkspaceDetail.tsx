@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: workspace, isLoading, error } = useWorkspace(id);
-  const { isAdmin, isConsultor, isMentor } = useAuth();
+  const { isAdmin, isConsultor, isMentor, isFounder } = useAuth();
 
   // Determine if user can write to this workspace
-  const canWrite = isAdmin || isConsultor || isMentor;
+  // Admins, consultors, mentors, AND founders can write
+  const canWrite = isAdmin || isConsultor || isMentor || isFounder;
 
   if (isLoading) {
     return (
@@ -54,8 +56,12 @@ export default function WorkspaceDetail() {
   const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null } | null;
   const program = workspace.program as { name: string } | null;
   
-  // Check if user is a founder (can edit startup profile)
-  const isFounder = true; // For now allow all workspace members to see settings; actual edit permissions checked in component
+  // Get the current tab from URL params
+  const currentTab = searchParams.get('tab') || 'overview';
+  
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
 
   return (
     <AppLayout
@@ -71,7 +77,7 @@ export default function WorkspaceDetail() {
       }
     >
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
