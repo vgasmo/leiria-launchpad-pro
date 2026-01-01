@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { StartupStage, HealthScore } from '@/types/database';
 
+export type WorkspaceStatus = 'pending' | 'active' | 'rejected' | 'archived';
 export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name';
 
 export interface WorkspaceFilters {
@@ -59,6 +60,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           startup:startups(id, name, description, logo_url),
           program:programs(id, name)
         `)
+        .eq('status', 'active') // Only show active workspaces
         .order('updated_at', { ascending: false });
 
       // Apply stage filter
@@ -278,6 +280,65 @@ export function usePrograms() {
 
       if (error) throw error;
       return data || [];
+    },
+  });
+}
+
+export interface PendingWorkspace {
+  id: string;
+  status: string;
+  stage: StartupStage;
+  created_at: string;
+  startup: {
+    id: string;
+    name: string;
+    description: string | null;
+  } | null;
+  program: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export function useMyPendingWorkspaces() {
+  return useQuery({
+    queryKey: ['my-pending-workspaces'],
+    queryFn: async (): Promise<PendingWorkspace[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Get workspace IDs the user is a member of
+      const { data: memberships } = await supabase
+        .from('workspace_users')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .eq('role', 'founder');
+
+      if (!memberships?.length) return [];
+
+      const workspaceIds = memberships.map(m => m.workspace_id);
+
+      // Get pending workspaces
+      const { data: workspaces, error } = await supabase
+        .from('workspaces')
+        .select(`
+          id,
+          status,
+          stage,
+          created_at,
+          startup:startups(id, name, description),
+          program:programs(id, name)
+        `)
+        .in('id', workspaceIds)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+
+      return (workspaces || []).map(w => ({
+        ...w,
+        startup: w.startup as PendingWorkspace['startup'],
+        program: w.program as PendingWorkspace['program'],
+      }));
     },
   });
 }

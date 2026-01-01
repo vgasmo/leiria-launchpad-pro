@@ -16,7 +16,9 @@ import {
   FileText,
   Users,
   AlertCircle,
-  Clock
+  Clock,
+  Plus,
+  Rocket
 } from 'lucide-react';
 import { format, isPast, isThisWeek, isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -31,6 +33,7 @@ import { ViewToggle, ViewMode } from '@/components/ui/ViewToggle';
 import { QuickFilterChips, QuickFilter } from '@/components/ui/QuickFilterChips';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { WorkspaceCard } from '@/components/dashboard/WorkspaceCard';
+import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
 import {
   Select,
   SelectContent,
@@ -55,7 +58,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useWorkspaces, usePrograms, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
+import { useWorkspaces, usePrograms, useMyPendingWorkspaces, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
 import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { StartupStage, HealthScore } from '@/types/database';
 import {
@@ -72,7 +75,9 @@ const PAGE_SIZE = 15;
 export default function MyWorkspaces() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isConsultor, isMentor, isAdmin } = useAuth();
+  const { isConsultor, isMentor, isAdmin, roles } = useAuth();
+  const isFounder = roles.includes('founder');
+  
   const [search, setSearch] = useState('');
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [stageFilter, setStageFilter] = useState<StartupStage | 'all'>('all');
@@ -83,6 +88,7 @@ export default function MyWorkspaces() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [quickFilters, setQuickFilters] = useState<Record<string, boolean>>({});
+  const [showCreateStartup, setShowCreateStartup] = useState(false);
 
   // Handle URL filter parameter (e.g., ?filter=attention)
   useEffect(() => {
@@ -111,6 +117,9 @@ export default function MyWorkspaces() {
     overdueActions,
     sortBy,
   });
+  
+  // For founders: fetch pending workspaces
+  const { data: pendingWorkspaces } = useMyPendingWorkspaces();
 
   // Calculate dashboard stats
   const dashboardStats = useMemo(() => {
@@ -304,7 +313,50 @@ export default function MyWorkspaces() {
         ? `Managing ${totalItems} startup${totalItems !== 1 ? 's' : ''}`
         : `${totalItems} workspace${totalItems !== 1 ? 's' : ''}`
       }
+      actions={
+        isFounder && !showDashboard ? (
+          <Button onClick={() => setShowCreateStartup(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create Startup
+          </Button>
+        ) : undefined
+      }
     >
+      {/* Create Startup Dialog */}
+      <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
+
+      {/* Pending Applications Banner for Founders */}
+      {isFounder && pendingWorkspaces && pendingWorkspaces.length > 0 && (
+        <div className="mb-6">
+          <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-amber-600 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-800 dark:text-amber-200">
+                    Pending Approval
+                  </h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                    Your application{pendingWorkspaces.length > 1 ? 's are' : ' is'} being reviewed by our team.
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {pendingWorkspaces.map((pw) => (
+                      <div key={pw.id} className="flex items-center gap-2 text-sm">
+                        <Rocket className="h-4 w-4 text-amber-600" />
+                        <span className="font-medium">{pw.startup?.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {pw.program?.name}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Dashboard Overview for Consultors/Mentors */}
       {showDashboard && dashboardStats && !isLoading && (
         <div className="mb-6 grid gap-6 lg:grid-cols-4">
