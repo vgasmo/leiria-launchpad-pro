@@ -101,7 +101,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6">
-      {/* My Tasks */}
+      {/* My Tasks - Read-only overview */}
       <StaffTasksPanel />
 
       {/* Quick Stats */}
