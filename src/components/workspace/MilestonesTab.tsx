@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 
 type MilestoneStatus = Database['public']['Enums']['milestone_status'];
@@ -23,14 +24,18 @@ interface MilestonesTabProps {
   canWrite: boolean;
 }
 
-const STATUS_CONFIG: Record<MilestoneStatus, { label: string; color: string; icon: typeof Circle }> = {
-  not_started: { label: 'Planned', color: 'bg-muted text-muted-foreground', icon: Circle },
-  in_progress: { label: 'In Progress', color: 'bg-primary/20 text-primary', icon: Clock },
-  completed: { label: 'Done', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle2 },
-  delayed: { label: 'Delayed', color: 'bg-destructive/20 text-destructive', icon: AlertTriangle },
-};
+function useStatusConfig() {
+  const { t } = useTranslation();
+  return {
+    not_started: { label: t('milestones.planned'), color: 'bg-muted text-muted-foreground', icon: Circle },
+    in_progress: { label: t('milestones.inProgress'), color: 'bg-primary/20 text-primary', icon: Clock },
+    completed: { label: t('milestones.done'), color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle2 },
+    delayed: { label: t('milestones.delayed'), color: 'bg-destructive/20 text-destructive', icon: AlertTriangle },
+  } as Record<MilestoneStatus, { label: string; color: string; icon: typeof Circle }>;
+}
 
 export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
+  const { t } = useTranslation();
   const { data: milestones, isLoading, error } = useMilestones(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
@@ -47,7 +52,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
 
   const handleCreate = async () => {
     if (!newMilestone.title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('milestones.titleRequired'));
       return;
     }
     try {
@@ -56,11 +61,11 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
         description: newMilestone.description || undefined,
         target_date: newMilestone.target_date || null,
       });
-      toast.success('Milestone created');
+      toast.success(t('milestones.milestoneCreated'));
       setCreateDialogOpen(false);
       setNewMilestone({ title: '', description: '', target_date: '' });
     } catch {
-      toast.error('Failed to create milestone');
+      toast.error(t('milestones.failedToCreate'));
     }
   };
 
@@ -69,7 +74,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     try {
       await updateMilestone.mutateAsync({ id: milestone.id, status });
     } catch {
-      toast.error('Failed to update status');
+      toast.error(t('milestones.failedToUpdate'));
     }
   };
 
@@ -77,10 +82,10 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     if (!deleteTarget || !canWrite) return;
     try {
       await deleteMilestone.mutateAsync(deleteTarget.id);
-      toast.success('Milestone deleted');
+      toast.success(t('milestones.milestoneDeleted'));
       setDeleteTarget(null);
     } catch {
-      toast.error('Failed to delete milestone');
+      toast.error(t('milestones.failedToDelete'));
     }
   };
 
@@ -92,7 +97,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     try {
       await reorderMilestones.mutateAsync(reordered);
     } catch {
-      toast.error('Failed to reorder');
+      toast.error(t('milestones.failedToReorder'));
     }
   };
 
@@ -104,7 +109,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     try {
       await reorderMilestones.mutateAsync(reordered);
     } catch {
-      toast.error('Failed to reorder');
+      toast.error(t('milestones.failedToReorder'));
     }
   };
 
@@ -121,7 +126,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     return (
       <Card className="border-destructive/50 bg-destructive/5">
         <CardContent className="py-8 text-center text-destructive">
-          Failed to load milestones
+          {t('milestones.failedToLoad')}
         </CardContent>
       </Card>
     );
@@ -136,18 +141,21 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
         {canWrite && (
           <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" />
-            Add Milestone
+            {t('milestones.addMilestone')}
           </Button>
         )}
         <div className="text-sm text-muted-foreground">
-          {sortedMilestones.filter(m => m.status === 'completed').length}/{sortedMilestones.length} completed
+          {t('milestones.completedCount', { 
+            completed: sortedMilestones.filter(m => m.status === 'completed').length,
+            total: sortedMilestones.length 
+          })}
         </div>
       </div>
 
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="list">List</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="list">{t('milestones.list')}</TabsTrigger>
+          <TabsTrigger value="timeline">{t('milestones.timeline')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-2">
@@ -155,7 +163,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                No milestones yet. Add your first milestone to track progress.
+                {t('milestones.noMilestonesDesc')}
               </CardContent>
             </Card>
           ) : (
@@ -184,30 +192,30 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New Milestone</DialogTitle>
+            <DialogTitle>{t('milestones.newMilestone')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">{t('milestones.titleLabel')} *</Label>
               <Input
                 id="title"
                 value={newMilestone.title}
                 onChange={e => setNewMilestone(m => ({ ...m, title: e.target.value }))}
-                placeholder="e.g., Launch MVP"
+                placeholder={t('milestones.titlePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('milestones.descriptionLabel')}</Label>
               <Textarea
                 id="description"
                 value={newMilestone.description}
                 onChange={e => setNewMilestone(m => ({ ...m, description: e.target.value }))}
-                placeholder="What does this milestone involve?"
+                placeholder={t('milestones.descriptionPlaceholder')}
                 rows={2}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="target_date">Target Date</Label>
+              <Label htmlFor="target_date">{t('milestones.targetDate')}</Label>
               <Input
                 id="target_date"
                 type="date"
@@ -218,10 +226,10 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleCreate} disabled={createMilestone.isPending}>
-              Create
+              {t('common.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -231,15 +239,15 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Milestone</AlertDialogTitle>
+            <AlertDialogTitle>{t('milestones.deleteMilestone')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+              {t('milestones.deleteConfirm', { title: deleteTarget?.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -269,6 +277,8 @@ function MilestoneListItem({
   onMoveUp,
   onMoveDown,
 }: MilestoneListItemProps) {
+  const { t } = useTranslation();
+  const STATUS_CONFIG = useStatusConfig();
   const config = STATUS_CONFIG[milestone.status];
   const StatusIcon = config.icon;
   
@@ -349,10 +359,10 @@ function MilestoneListItem({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="not_started">Planned</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Done</SelectItem>
-                    <SelectItem value="delayed">Delayed</SelectItem>
+                    <SelectItem value="not_started">{t('milestones.planned')}</SelectItem>
+                    <SelectItem value="in_progress">{t('milestones.inProgress')}</SelectItem>
+                    <SelectItem value="completed">{t('milestones.done')}</SelectItem>
+                    <SelectItem value="delayed">{t('milestones.delayed')}</SelectItem>
                   </SelectContent>
                 </Select>
               ) : (
@@ -368,13 +378,13 @@ function MilestoneListItem({
                 >
                   <Calendar className="h-3 w-3 mr-1" />
                   {format(parseISO(milestone.target_date), 'MMM d, yyyy')}
-                  {isOverdue && ' (overdue)'}
+                  {isOverdue && ` (${t('common.overdue')})`}
                 </Badge>
               )}
 
               {milestone.completed_at && (
                 <span className="text-xs text-muted-foreground">
-                  Completed {format(parseISO(milestone.completed_at), 'MMM d')}
+                  {t('milestones.completedOn', { date: format(parseISO(milestone.completed_at), 'MMM d') })}
                 </span>
               )}
             </div>
@@ -390,12 +400,15 @@ interface TimelineViewProps {
 }
 
 function TimelineView({ milestones }: TimelineViewProps) {
+  const { t } = useTranslation();
+  const STATUS_CONFIG = useStatusConfig();
+  
   if (milestones.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
           <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          No milestones to display in timeline.
+          {t('milestones.noMilestonesTimeline')}
         </CardContent>
       </Card>
     );
@@ -404,7 +417,7 @@ function TimelineView({ milestones }: TimelineViewProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Milestone Timeline</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('milestones.milestoneTimeline')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="relative">
