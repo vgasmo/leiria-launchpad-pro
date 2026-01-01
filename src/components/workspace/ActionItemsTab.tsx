@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical, Target, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +47,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
+  const { t } = useTranslation();
   const { data: actionItems, isLoading, error } = useActionItems(workspaceId);
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
@@ -84,20 +86,20 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const handleBulkStatusChange = async (ids: string[], status: string) => {
     try {
       await bulkUpdate.mutateAsync({ ids, status: status as ActionStatus });
-      toast.success(`Updated ${ids.length} actions`);
+      toast.success(t('actions.updatedCount', { count: ids.length }));
       deselectAll();
     } catch {
-      toast.error('Failed to update actions');
+      toast.error(t('actions.failedToUpdate'));
     }
   };
 
   const handleBulkDelete = async (ids: string[]) => {
     try {
       await bulkDelete.mutateAsync(ids);
-      toast.success(`Deleted ${ids.length} actions`);
+      toast.success(t('actions.deletedCount', { count: ids.length }));
       deselectAll();
     } catch {
-      toast.error('Failed to delete actions');
+      toast.error(t('actions.failedToDelete'));
     }
   };
 
@@ -105,9 +107,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     const { data } = await fetchExportData();
     if (data && data.length > 0) {
       exportActionsToCsv(data, `actions-${workspaceId}`);
-      toast.success('Exported actions to CSV');
+      toast.success(t('sessions.exportedSuccess'));
     } else {
-      toast.error('No data to export');
+      toast.error(t('sessions.noDataToExport'));
     }
   };
 
@@ -116,7 +118,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     try {
       await updateAction.mutateAsync({ id: item.id, status: newStatus });
     } catch {
-      toast.error('Failed to update status');
+      toast.error(t('actions.failedToUpdate'));
     }
   };
 
@@ -128,7 +130,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         due_date: date ? format(date, 'yyyy-MM-dd') : null 
       });
     } catch {
-      toast.error('Failed to update due date');
+      toast.error(t('actions.failedToUpdate'));
     }
   };
 
@@ -140,7 +142,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         owner_user_id: ownerId === 'none' ? null : ownerId 
       });
     } catch {
-      toast.error('Failed to update owner');
+      toast.error(t('actions.failedToUpdate'));
     }
   };
 
@@ -148,20 +150,20 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     if (!deleteTarget || !canWrite) return;
     try {
       await deleteAction.mutateAsync(deleteTarget.id);
-      toast.success('Action item deleted');
+      toast.success(t('actions.actionDeleted'));
       setDeleteTarget(null);
     } catch {
-      toast.error('Failed to delete action item');
+      toast.error(t('actions.failedToDelete'));
     }
   };
 
   const handleCreate = async () => {
     if (!newAction.title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('actions.titleRequired'));
       return;
     }
     if (!newAction.milestone_id) {
-      toast.error('Please select a milestone');
+      toast.error(t('actions.selectMilestoneRequired'));
       return;
     }
     try {
@@ -173,11 +175,11 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         owner_user_id: newAction.owner_user_id || null,
         milestone_id: newAction.milestone_id,
       });
-      toast.success('Action item created');
+      toast.success(t('actions.actionCreated'));
       setCreateDialogOpen(false);
       setNewAction({ title: '', description: '', due_date: '', priority: 'medium', owner_user_id: '', milestone_id: '' });
     } catch {
-      toast.error('Failed to create action item');
+      toast.error(t('actions.failedToCreate'));
     }
   };
 
@@ -261,7 +263,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     return (
       <Card className="border-destructive/50 bg-destructive/5">
         <CardContent className="py-8 text-center text-destructive">
-          Failed to load action items
+          {t('actions.failedToLoad')}
         </CardContent>
       </Card>
     );
@@ -277,7 +279,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         {canWrite && milestones && milestones.length > 0 && (
           <Button size="sm" onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-1" />
-            Add Action
+            {t('actions.addAction')}
           </Button>
         )}
         
@@ -286,10 +288,10 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         <Select value={filters.owner} onValueChange={v => setFilters(f => ({ ...f, owner: v }))}>
           <SelectTrigger className="w-[160px] h-8 text-sm">
             <User className="h-3 w-3 mr-1" />
-            <SelectValue placeholder="Owner" />
+            <SelectValue placeholder={t('actions.owner')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All owners</SelectItem>
+            <SelectItem value="all">{t('actions.allOwners')}</SelectItem>
             {members?.map(m => (
               <SelectItem key={m.user_id} value={m.user_id}>
                 {m.profile?.full_name || m.profile?.email || 'Unknown'}
@@ -300,13 +302,13 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
 
         <Select value={filters.priority} onValueChange={v => setFilters(f => ({ ...f, priority: v }))}>
           <SelectTrigger className="w-[140px] h-8 text-sm">
-            <SelectValue placeholder="Priority" />
+            <SelectValue placeholder={t('actions.priority')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="all">{t('actions.allPriorities')}</SelectItem>
+            <SelectItem value="high">{t('actions.high')}</SelectItem>
+            <SelectItem value="medium">{t('actions.medium')}</SelectItem>
+            <SelectItem value="low">{t('actions.low')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -317,7 +319,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           onClick={() => setFilters(f => ({ ...f, overdue: !f.overdue }))}
         >
           <AlertTriangle className="h-3 w-3 mr-1" />
-          Overdue
+          {t('actions.overdue')}
         </Button>
 
         {(filters.owner !== 'all' || filters.priority !== 'all' || filters.overdue) && (
@@ -327,17 +329,17 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             className="h-8 text-muted-foreground"
             onClick={() => setFilters({ owner: 'all', overdue: false, priority: 'all' })}
           >
-            Clear filters
+            {t('actions.clearFilters')}
           </Button>
         )}
 
         <div className="ml-auto flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {completedActions}/{totalActions} completed
+            {completedActions}/{totalActions} {t('actions.completedCount')}
           </span>
           <Button variant="outline" size="sm" className="h-8" onClick={handleExport}>
             <Download className="h-3 w-3 mr-1" />
-            Export
+            {t('sessions.export')}
           </Button>
         </div>
       </div>
@@ -351,9 +353,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         onStatusChange={handleBulkStatusChange}
         onDelete={handleBulkDelete}
         statusOptions={[
-          { value: 'pending', label: 'Open' },
-          { value: 'in_progress', label: 'Doing' },
-          { value: 'completed', label: 'Done' },
+          { value: 'pending', label: t('actions.open') },
+          { value: 'in_progress', label: t('actions.doing') },
+          { value: 'completed', label: t('actions.done') },
         ]}
         getItemId={(item) => item.id}
       />
@@ -363,8 +365,8 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No milestones yet. Create milestones first to add actions.</p>
-            <p className="text-xs mt-1">Actions belong to milestones to track progress toward goals.</p>
+            <p>{t('actions.noMilestones')}</p>
+            <p className="text-xs mt-1">{t('actions.actionsBelongToMilestones')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -404,7 +406,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             <Card className="border-dashed">
               <CardHeader className="py-3 px-4">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Unassigned Actions ({actionsByMilestone.unassigned.length})
+                  {t('actions.unassignedActions')} ({actionsByMilestone.unassigned.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-4 pb-4 space-y-2">
@@ -432,18 +434,18 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New Action Item</DialogTitle>
+            <DialogTitle>{t('actions.newAction')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="milestone">Milestone *</Label>
+              <Label htmlFor="milestone">{t('milestones.title')} *</Label>
               <Select 
                 value={newAction.milestone_id} 
                 onValueChange={v => setNewAction(a => ({ ...a, milestone_id: v }))}
               >
                 <SelectTrigger id="milestone">
                   <Target className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Select milestone..." />
+                  <SelectValue placeholder={t('actions.selectMilestone')} />
                 </SelectTrigger>
                 <SelectContent>
                   {milestones?.map(m => (
