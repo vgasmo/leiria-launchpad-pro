@@ -933,6 +933,7 @@ export type Database = {
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }
       is_founder: { Args: { _workspace_id: string }; Returns: boolean }
+      is_founder_user: { Args: never; Returns: boolean }
     }
     Enums: {
       action_status: "pending" | "in_progress" | "completed" | "cancelled"
