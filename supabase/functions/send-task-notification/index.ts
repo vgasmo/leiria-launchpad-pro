@@ -126,7 +126,7 @@ async function sendAssignedNotification(supabase: any, taskId: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Startup Leiria <onboarding@resend.dev>",
+      from: "Startup Leiria <noreply@startupleiria.com>",
       to: [assignee.email],
       subject: `Nova tarefa atribuída: ${task.title}`,
       html: emailHtml,
@@ -205,7 +205,7 @@ async function sendOverdueNotifications(supabase: any) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Startup Leiria <onboarding@resend.dev>",
+          from: "Startup Leiria <noreply@startupleiria.com>",
           to: [assignee.email],
           subject: `⚠️ ${tasks.length} tarefa(s) em atraso`,
           html: emailHtml,

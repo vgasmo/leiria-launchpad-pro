@@ -137,7 +137,7 @@ DTSTART:${formatDate(startDate)}
 DTEND:${formatDate(endDate)}
 SUMMARY:${safeTitle} - ${safeStartupName}
 DESCRIPTION:${safeAgenda}\\n\\nOrganized by: ${safeOrganizerName}
-ORGANIZER;CN=${safeOrganizerName}:mailto:noreply@resend.dev
+ORGANIZER;CN=${safeOrganizerName}:mailto:noreply@startupleiria.com
 STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT
@@ -289,7 +289,7 @@ serve(async (req) => {
     const emailPromises = payload.recipientEmails.map(async (email) => {
       try {
         const result = await resend.emails.send({
-          from: "Sessions <onboarding@resend.dev>",
+          from: "Startup Leiria <noreply@startupleiria.com>",
           to: [email],
           subject: `Session Scheduled: ${safeTitle} - ${safeStartupName}`,
           html: `

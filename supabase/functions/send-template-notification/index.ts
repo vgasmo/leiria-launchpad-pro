@@ -107,7 +107,7 @@ serve(async (req: Request) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              from: "Startup Leiria <onboarding@resend.dev>",
+              from: "Startup Leiria <noreply@startupleiria.com>",
               to: [profile.email],
               subject: `📝 Template para revisão: ${templateName} - ${startupName}`,
               html: emailHtml,
@@ -188,7 +188,7 @@ serve(async (req: Request) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Startup Leiria <onboarding@resend.dev>",
+            from: "Startup Leiria <noreply@startupleiria.com>",
             to: [creator.email],
             subject,
             html: emailHtml,
