@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
+import { formatRelativeTime } from '@/lib/dateUtils';
 import { 
   FileText, 
   CheckCircle2, 
@@ -132,6 +134,7 @@ const typeColors = {
 };
 
 export function ActivityFeed() {
+  const { t } = useTranslation();
   const { data: activities, isLoading } = useActivityFeed();
 
   return (
@@ -139,11 +142,11 @@ export function ActivityFeed() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            Recent Activity
+            <Clock className="h-5 w-5 text-primary" aria-hidden="true" />
+            {t('dashboard.recentActivity', 'Recent Activity')}
           </CardTitle>
           <Badge variant="outline" className="text-xs">
-            Last 7 days
+            {t('dashboard.last7Days', 'Last 7 days')}
           </Badge>
         </div>
       </CardHeader>
@@ -163,8 +166,8 @@ export function ActivityFeed() {
             </div>
           ) : activities?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No recent activity</p>
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
+              <p>{t('dashboard.noRecentActivity', 'No recent activity')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -173,7 +176,7 @@ export function ActivityFeed() {
                 return (
                   <div key={activity.id} className="flex gap-3 group">
                     <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${typeColors[activity.type]}`}>
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
@@ -186,7 +189,7 @@ export function ActivityFeed() {
                           )}
                         </div>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                          {formatRelativeTime(activity.timestamp)}
                         </span>
                       </div>
                       {activity.startup && (

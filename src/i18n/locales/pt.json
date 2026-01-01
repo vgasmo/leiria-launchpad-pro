@@ -68,7 +68,10 @@
     "noCriticalIssues": "Sem problemas críticos de momento",
     "todaysMeetings": "Reuniões de Hoje",
     "itemsNeedAttention": "{{count}} item precisa de atenção",
-    "itemsNeedAttention_plural": "{{count}} itens precisam de atenção"
+    "itemsNeedAttention_plural": "{{count}} itens precisam de atenção",
+    "recentActivity": "Atividade Recente",
+    "last7Days": "Últimos 7 dias",
+    "noRecentActivity": "Sem atividade recente"
   },
   "founder": {
     "applicationUnderReview": "Candidatura em Análise",

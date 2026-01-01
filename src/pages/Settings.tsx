@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -18,6 +19,7 @@ import { profileUpdateSchema, validateFormData } from '@/lib/validations';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 
 export default function Settings() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, profile, roles } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,13 +60,13 @@ export default function Settings() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+      toast.error(t('settingsPage.uploadImageFile'));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+      toast.error(t('settingsPage.imageTooLarge'));
       return;
     }
 
@@ -88,7 +90,7 @@ export default function Settings() {
       // Add cache buster to force refresh
       const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
       setAvatarUrl(urlWithCacheBuster);
-      toast.success('Avatar uploaded! Click Save to apply changes.');
+      toast.success(t('settingsPage.avatarUploaded'));
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast.error(error.message || 'Failed to upload avatar');
@@ -144,7 +146,7 @@ export default function Settings() {
         .eq('id', user.id);
 
       if (error) throw error;
-      toast.success('Profile updated successfully');
+      toast.success(t('settingsPage.profileUpdated'));
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast.error(error.message || 'Failed to update profile');
@@ -156,7 +158,7 @@ export default function Settings() {
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) {
-      toast.error('Please enter a new email address');
+      toast.error(t('settingsPage.pleaseEnterEmail'));
       return;
     }
 
@@ -167,7 +169,7 @@ export default function Settings() {
       });
 
       if (error) throw error;
-      toast.success('Confirmation email sent to your new address. Please check your inbox.');
+      toast.success(t('settingsPage.emailConfirmationSent'));
       setNewEmail('');
     } catch (error: any) {
       console.error('Error updating email:', error);
@@ -181,12 +183,12 @@ export default function Settings() {
     e.preventDefault();
     
     if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('login.passwordMinLength'));
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('settingsPage.passwordsDoNotMatch'));
       return;
     }
 
@@ -197,7 +199,7 @@ export default function Settings() {
       });
 
       if (error) throw error;
-      toast.success('Password updated successfully');
+      toast.success(t('settingsPage.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -210,16 +212,17 @@ export default function Settings() {
   };
 
   return (
-    <AppLayout title="Account Settings">
+    <AppLayout title={t('settingsPage.title')}>
       <div className="mb-6">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
           className="gap-2"
+          aria-label={t('common.back')}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {t('common.back')}
         </Button>
       </div>
 
@@ -227,20 +230,20 @@ export default function Settings() {
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="gap-2">
-              <User className="h-4 w-4" />
-              Profile
+              <User className="h-4 w-4" aria-hidden="true" />
+              {t('settingsPage.profile')}
             </TabsTrigger>
             <TabsTrigger value="email" className="gap-2">
-              <Mail className="h-4 w-4" />
-              Email
+              <Mail className="h-4 w-4" aria-hidden="true" />
+              {t('settingsPage.email')}
             </TabsTrigger>
             <TabsTrigger value="password" className="gap-2">
-              <Lock className="h-4 w-4" />
-              Password
+              <Lock className="h-4 w-4" aria-hidden="true" />
+              {t('settingsPage.password')}
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="h-4 w-4" />
-              Notifications
+              <Bell className="h-4 w-4" aria-hidden="true" />
+              {t('settingsPage.notifications')}
             </TabsTrigger>
           </TabsList>
 
@@ -248,9 +251,9 @@ export default function Settings() {
           <TabsContent value="profile">
             <Card>
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
+                <CardTitle>{t('settingsPage.profileInfo')}</CardTitle>
                 <CardDescription>
-                  Update your personal information and avatar
+                  {t('settingsPage.profileInfoDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>

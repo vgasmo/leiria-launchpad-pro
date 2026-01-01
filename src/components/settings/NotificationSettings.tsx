@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -7,16 +8,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Bell, Mail } from 'lucide-react';
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
 export function NotificationSettings() {
+  const { t } = useTranslation();
   const { data: prefs, isLoading } = useNotificationPreferences();
   const updatePrefs = useUpdateNotificationPreferences();
+
+  const DAYS = [
+    t('settingsPage.sunday'),
+    t('settingsPage.monday'),
+    t('settingsPage.tuesday'),
+    t('settingsPage.wednesday'),
+    t('settingsPage.thursday'),
+    t('settingsPage.friday'),
+    t('settingsPage.saturday')
+  ];
 
   const handleToggleDigest = async (enabled: boolean) => {
     try {
       await updatePrefs.mutateAsync({ email_digest_enabled: enabled });
-      toast.success(enabled ? 'Email digest enabled' : 'Email digest disabled');
+      toast.success(enabled ? t('settingsPage.emailDigest') + ' ' + t('common.success').toLowerCase() : t('settingsPage.emailDigest') + ' disabled');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update preferences');
     }
@@ -25,7 +35,7 @@ export function NotificationSettings() {
   const handleFrequencyChange = async (frequency: string) => {
     try {
       await updatePrefs.mutateAsync({ digest_frequency: frequency });
-      toast.success('Digest frequency updated');
+      toast.success(t('common.success'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to update preferences');
     }
@@ -34,7 +44,7 @@ export function NotificationSettings() {
   const handleDayChange = async (day: string) => {
     try {
       await updatePrefs.mutateAsync({ digest_day: parseInt(day) });
-      toast.success('Digest day updated');
+      toast.success(t('common.success'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to update preferences');
     }
@@ -57,49 +67,50 @@ export function NotificationSettings() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Bell className="h-5 w-5" />
-          Notification Preferences
+          <Bell className="h-5 w-5" aria-hidden="true" />
+          {t('settingsPage.notificationSettings')}
         </CardTitle>
-        <CardDescription>Configure how you receive updates</CardDescription>
+        <CardDescription>{t('settingsPage.notificationSettingsDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Email Digest
+              <Mail className="h-4 w-4" aria-hidden="true" />
+              {t('settingsPage.emailDigest')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Receive a summary of critical items needing your attention
+              {t('settingsPage.digestEnabled')}
             </p>
           </div>
           <Switch
             checked={digestEnabled}
             onCheckedChange={handleToggleDigest}
             disabled={updatePrefs.isPending}
+            aria-label={t('settingsPage.emailDigest')}
           />
         </div>
 
         {digestEnabled && (
           <div className="grid gap-4 sm:grid-cols-2 pl-6 border-l-2 border-muted">
             <div className="space-y-2">
-              <Label>Frequency</Label>
+              <Label>{t('settingsPage.digestFrequency')}</Label>
               <Select value={digestFrequency} onValueChange={handleFrequencyChange} disabled={updatePrefs.isPending}>
-                <SelectTrigger>
+                <SelectTrigger aria-label={t('settingsPage.digestFrequency')}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="daily">{t('settings.daily')}</SelectItem>
+                  <SelectItem value="weekly">{t('settings.weekly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {digestFrequency === 'weekly' && (
               <div className="space-y-2">
-                <Label>Day of Week</Label>
+                <Label>{t('settings.dayOfWeek')}</Label>
                 <Select value={digestDay.toString()} onValueChange={handleDayChange} disabled={updatePrefs.isPending}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label={t('settings.dayOfWeek')}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -112,11 +123,6 @@ export function NotificationSettings() {
             )}
           </div>
         )}
-
-        <p className="text-xs text-muted-foreground">
-          Note: Email digests will be sent based on your preferences. You'll receive summaries of overdue actions, 
-          at-risk startups, and other critical items.
-        </p>
       </CardContent>
     </Card>
   );

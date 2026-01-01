@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bell, Check, CheckCheck, Trash2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '@/hooks/useNotifications';
-import { formatDistanceToNow } from 'date-fns';
+import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 
 const notificationTypeIcons: Record<string, string> = {
@@ -33,6 +34,7 @@ const notificationTypeColors: Record<string, string> = {
 };
 
 export function NotificationCenter() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
@@ -70,10 +72,11 @@ export function NotificationCenter() {
           size="icon" 
           className="relative text-muted-foreground hover:text-foreground"
           data-tour="notifications"
+          aria-label={t('notifications.title')}
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4" aria-hidden="true" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center animate-pulse-soft">
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center animate-pulse-soft" aria-label={`${unreadCount} unread`}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -81,7 +84,7 @@ export function NotificationCenter() {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between p-3 border-b">
-          <h4 className="font-semibold text-sm">Notifications</h4>
+          <h4 className="font-semibold text-sm">{t('notifications.title')}</h4>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
@@ -89,21 +92,21 @@ export function NotificationCenter() {
               className="h-7 text-xs"
               onClick={handleMarkAllRead}
             >
-              <CheckCheck className="h-3 w-3 mr-1" />
-              Mark all read
+              <CheckCheck className="h-3 w-3 mr-1" aria-hidden="true" />
+              {t('notifications.markAllRead')}
             </Button>
           )}
         </div>
         
         <ScrollArea className="max-h-[400px]">
           {isLoading ? (
-            <div className="p-4 text-center text-muted-foreground text-sm">
-              Loading...
+            <div className="p-4 text-center text-muted-foreground text-sm" aria-live="polite">
+              {t('common.loading')}
             </div>
           ) : notifications?.length === 0 ? (
             <div className="p-8 text-center">
-              <Bell className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-              <p className="text-sm text-muted-foreground">No notifications yet</p>
+              <Bell className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground">{t('notifications.noNotifications')}</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -135,8 +138,9 @@ export function NotificationCenter() {
                         size="icon"
                         className="h-6 w-6 flex-shrink-0 opacity-0 group-hover:opacity-100 hover:opacity-100"
                         onClick={(e) => handleDelete(e, notification.id)}
+                        aria-label={t('common.delete')}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3 w-3" aria-hidden="true" />
                       </Button>
                     </div>
                     {notification.message && (
@@ -146,10 +150,10 @@ export function NotificationCenter() {
                     )}
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                        {formatRelativeTime(notification.created_at)}
                       </span>
                       {notification.link && (
-                        <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
+                        <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" aria-hidden="true" />
                       )}
                       {!notification.read && (
                         <Badge variant="secondary" className="h-4 text-[9px] px-1">
@@ -176,7 +180,7 @@ export function NotificationCenter() {
                   navigate('/settings?tab=notifications');
                 }}
               >
-                Notification Settings
+                {t('notifications.settings')}
               </Button>
             </div>
           </>
