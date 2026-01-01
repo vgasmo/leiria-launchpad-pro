@@ -1,5 +1,5 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +17,9 @@ import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
 import { ConsultantNotesTab } from '@/components/workspace/ConsultantNotesTab';
+import { TeamTab } from '@/components/workspace/TeamTab';
+import { OkrsTab } from '@/components/workspace/OkrsTab';
+import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -110,6 +113,16 @@ export default function WorkspaceDetail() {
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          {isFounder && startup && (
+            <TabsTrigger value="team" className="gap-1">
+              <Users className="h-3.5 w-3.5" />
+              Team
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="okrs" className="gap-1">
+            <Target className="h-3.5 w-3.5" />
+            OKRs
+          </TabsTrigger>
           {isFounder && (
             <TabsTrigger value="funding" className="gap-1">
               <DollarSign className="h-3.5 w-3.5" />
@@ -117,10 +130,16 @@ export default function WorkspaceDetail() {
             </TabsTrigger>
           )}
           {(isAdmin || isConsultor) && (
-            <TabsTrigger value="notes" className="gap-1">
-              <StickyNote className="h-3.5 w-3.5" />
-              Notes
-            </TabsTrigger>
+            <>
+              <TabsTrigger value="notes" className="gap-1">
+                <StickyNote className="h-3.5 w-3.5" />
+                Notes
+              </TabsTrigger>
+              <TabsTrigger value="time" className="gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                Time
+              </TabsTrigger>
+            </>
           )}
           <TabsTrigger value="settings" className="gap-1">
             <Settings className="h-3.5 w-3.5" />
@@ -169,14 +188,27 @@ export default function WorkspaceDetail() {
           <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         {isFounder && startup && (
+          <TabsContent value="team">
+            <TeamTab startupId={startup.id} canEdit={canWrite} />
+          </TabsContent>
+        )}
+        <TabsContent value="okrs">
+          <OkrsTab workspaceId={workspace.id} canWrite={canWrite} />
+        </TabsContent>
+        {isFounder && startup && (
           <TabsContent value="funding">
             <FundingTrackerTab startupId={startup.id} />
           </TabsContent>
         )}
         {(isAdmin || isConsultor) && (
-          <TabsContent value="notes">
-            <ConsultantNotesTab workspaceId={workspace.id} />
-          </TabsContent>
+          <>
+            <TabsContent value="notes">
+              <ConsultantNotesTab workspaceId={workspace.id} />
+            </TabsContent>
+            <TabsContent value="time">
+              <TimeTrackingTab workspaceId={workspace.id} />
+            </TabsContent>
+          </>
         )}
         <TabsContent value="settings">
           {startup && (
