@@ -1159,6 +1159,78 @@ export type Database = {
           },
         ]
       }
+      staff_tasks: {
+        Row: {
+          assignee_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          metadata: Json | null
+          priority: string | null
+          related_startup_id: string | null
+          related_user_id: string | null
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          assignee_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          related_startup_id?: string | null
+          related_user_id?: string | null
+          status?: string
+          task_type?: string
+          title: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          assignee_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          related_startup_id?: string | null
+          related_user_id?: string | null
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_tasks_related_startup_id_fkey"
+            columns: ["related_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stage_kpi_defaults: {
         Row: {
           created_at: string
@@ -1330,6 +1402,10 @@ export type Database = {
           created_by: string | null
           data_json: Json | null
           id: string
+          review_notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
           status: string
           template_id: string
           updated_at: string
@@ -1340,6 +1416,10 @@ export type Database = {
           created_by?: string | null
           data_json?: Json | null
           id?: string
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           status?: string
           template_id: string
           updated_at?: string
@@ -1350,6 +1430,10 @@ export type Database = {
           created_by?: string | null
           data_json?: Json | null
           id?: string
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           status?: string
           template_id?: string
           updated_at?: string

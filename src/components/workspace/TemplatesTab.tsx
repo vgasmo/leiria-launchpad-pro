@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,27 +8,32 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   useTemplates, 
   useTemplateInstances, 
   useUpsertTemplateInstance,
   useCompleteTemplateInstance,
+  useSubmitForReview,
+  useReviewTemplateInstance,
   type Template,
   type TemplateInstance,
   type TemplateField,
 } from '@/hooks/useTemplates';
+import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { toast } from 'sonner';
 
 interface TemplatesTabProps {
   workspaceId: string;
   canWrite: boolean;
+  isFounder?: boolean;
 }
 
-export function TemplatesTab({ workspaceId, canWrite }: TemplatesTabProps) {
+export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: TemplatesTabProps) {
   const { data: templates, isLoading: loadingTemplates } = useTemplates();
   const { data: instances, isLoading: loadingInstances } = useTemplateInstances(workspaceId);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -140,11 +145,20 @@ export function TemplatesTab({ workspaceId, canWrite }: TemplatesTabProps) {
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
-                    {isStarted && !isCompleted && (
-                      <Badge variant="secondary" className="mt-2 text-xs">
-                        In Progress
-                      </Badge>
-                    )}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {isStarted && !isCompleted && (
+                        <Badge variant="secondary" className="text-xs">In Progress</Badge>
+                      )}
+                      {instance?.review_status === 'pending_review' && (
+                        <Badge className="text-xs bg-amber-100 text-amber-700">Pending Review</Badge>
+                      )}
+                      {instance?.review_status === 'approved' && (
+                        <Badge className="text-xs bg-green-100 text-green-700">Approved</Badge>
+                      )}
+                      {instance?.review_status === 'needs_changes' && (
+                        <Badge className="text-xs bg-red-100 text-red-700">Needs Changes</Badge>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -159,6 +173,7 @@ export function TemplatesTab({ workspaceId, canWrite }: TemplatesTabProps) {
         instance={selectedInstance}
         workspaceId={workspaceId}
         canWrite={canWrite}
+        isFounder={isFounder}
         onClose={handleCloseEditor}
       />
       </TabsContent>
@@ -171,6 +186,7 @@ interface TemplateEditorDialogProps {
   instance: TemplateInstance | null;
   workspaceId: string;
   canWrite: boolean;
+  isFounder: boolean;
   onClose: () => void;
 }
 
@@ -179,13 +195,20 @@ function TemplateEditorDialog({
   instance,
   workspaceId,
   canWrite,
+  isFounder,
   onClose,
 }: TemplateEditorDialogProps) {
+  const { roles } = useAuth();
   const upsertInstance = useUpsertTemplateInstance(workspaceId);
   const completeInstance = useCompleteTemplateInstance(workspaceId);
+  const submitForReview = useSubmitForReview(workspaceId);
+  const reviewInstance = useReviewTemplateInstance(workspaceId);
   
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState('');
+  
+  const canReview = roles.includes('admin') || roles.includes('consultor') || roles.includes('mentor_externo');
 
   // Initialize form data when template/instance changes
   useState(() => {
@@ -236,10 +259,8 @@ function TemplateEditorDialog({
 
   const handleMarkComplete = async () => {
     if (!instance) {
-      // Save first, then mark complete
       await handleSave();
     }
-    // Need to get the instance ID after save
     try {
       if (instance?.id) {
         await completeInstance.mutateAsync(instance.id);
@@ -247,6 +268,35 @@ function TemplateEditorDialog({
       }
     } catch {
       toast.error('Failed to mark as complete');
+    }
+  };
+
+  const handleSubmitForReview = async () => {
+    if (!instance) {
+      await handleSave();
+    }
+    try {
+      if (instance?.id) {
+        await submitForReview.mutateAsync(instance.id);
+        toast.success('Template submitted for review');
+      }
+    } catch {
+      toast.error('Failed to submit for review');
+    }
+  };
+
+  const handleReview = async (status: 'approved' | 'needs_changes') => {
+    if (!instance?.id) return;
+    try {
+      await reviewInstance.mutateAsync({
+        instanceId: instance.id,
+        review_status: status,
+        review_notes: reviewNotes.trim() || undefined,
+      });
+      toast.success(status === 'approved' ? 'Template approved' : 'Requested changes');
+      setReviewNotes('');
+    } catch {
+      toast.error('Failed to submit review');
     }
   };
 
@@ -309,6 +359,38 @@ function TemplateEditorDialog({
           </div>
         </ScrollArea>
 
+        {/* Review feedback display */}
+        {instance?.review_status === 'needs_changes' && instance.review_notes && (
+          <Alert className="border-amber-200 bg-amber-50">
+            <MessageSquare className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-sm">
+              <strong>Reviewer feedback:</strong> {instance.review_notes}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Review section for consultants/mentors */}
+        {canReview && instance?.review_status === 'pending_review' && (
+          <div className="border-t pt-4 space-y-3">
+            <Label>Review Notes (optional)</Label>
+            <Textarea
+              value={reviewNotes}
+              onChange={(e) => setReviewNotes(e.target.value)}
+              placeholder="Add feedback for the founder..."
+              rows={2}
+            />
+            <div className="flex gap-2">
+              <Button onClick={() => handleReview('approved')} className="flex-1">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                Approve
+              </Button>
+              <Button variant="outline" onClick={() => handleReview('needs_changes')} className="flex-1">
+                Request Changes
+              </Button>
+            </div>
+          </div>
+        )}
+
         {canWrite && (
           <div className="flex items-center justify-between pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
@@ -323,7 +405,17 @@ function TemplateEditorDialog({
                 <Save className="h-4 w-4 mr-1" />
                 Save
               </Button>
-              {instance?.status !== 'completed' && (
+              {isFounder && instance?.review_status !== 'pending_review' && instance?.review_status !== 'approved' && (
+                <Button 
+                  variant="outline"
+                  onClick={handleSubmitForReview}
+                  disabled={submitForReview.isPending}
+                >
+                  <Send className="h-4 w-4 mr-1" />
+                  Submit for Review
+                </Button>
+              )}
+              {!isFounder && instance?.status !== 'completed' && (
                 <Button 
                   onClick={handleMarkComplete}
                   disabled={completeInstance.isPending}

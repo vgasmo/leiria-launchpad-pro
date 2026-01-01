@@ -41,10 +41,15 @@ export interface TemplateInstance {
   template_id: string;
   data_json: Record<string, unknown> | null;
   status: string;
+  review_status: string | null;
+  reviewer_id: string | null;
+  reviewed_at: string | null;
+  review_notes: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;
   template?: Template;
+  reviewer?: { full_name: string | null; email: string } | null;
 }
 
 // Fetch all global templates
@@ -265,6 +270,92 @@ export function useCompleteTemplateInstance(workspaceId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+    },
+  });
+}
+
+// Submit template for review (founder action)
+export function useSubmitForReview(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (instanceId: string) => {
+      const { data, error } = await supabase
+        .from('template_instances')
+        .update({ 
+          review_status: 'pending_review',
+          reviewed_at: null,
+          reviewer_id: null,
+          review_notes: null,
+        })
+        .eq('id', instanceId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+    },
+  });
+}
+
+// Review template (consultant/mentor action)
+export function useReviewTemplateInstance(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      instanceId,
+      review_status,
+      review_notes,
+    }: {
+      instanceId: string;
+      review_status: 'approved' | 'needs_changes' | 'reviewed';
+      review_notes?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('template_instances')
+        .update({ 
+          review_status,
+          reviewer_id: user?.id,
+          reviewed_at: new Date().toISOString(),
+          review_notes: review_notes || null,
+          status: review_status === 'approved' ? 'completed' : 'in_progress',
+        })
+        .eq('id', instanceId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-instances', workspaceId] });
+    },
+  });
+}
+
+// Get pending reviews for consultants/mentors
+export function usePendingTemplateReviews() {
+  return useQuery({
+    queryKey: ['pending-template-reviews'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('template_instances')
+        .select(`
+          *,
+          template:templates(id, name, category),
+          workspace:workspaces(id, startup:startups(name))
+        `)
+        .eq('review_status', 'pending_review')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
     },
   });
 }
