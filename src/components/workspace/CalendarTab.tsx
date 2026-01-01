@@ -18,13 +18,13 @@ import {
   Plus,
   Clock,
   MapPin,
-  Link as LinkIcon,
   Trash2,
   Edit2,
   Video,
   Mail,
   Send,
   Users,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +35,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -54,11 +53,17 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useMeetings, Meeting } from '@/hooks/useMeetings';
-import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
-import { supabase } from '@/integrations/supabase/client';
+import { useCalendarSessions, useCreateSession, useUpdateSession, useDeleteSession, useWorkspaceMembers, Session } from '@/hooks/useSessions';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface CalendarTabProps {
@@ -68,17 +73,21 @@ interface CalendarTabProps {
 }
 
 export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
-  const { meetings, isLoading, createMeeting, updateMeeting, deleteMeeting } = useMeetings(workspaceId);
+  const { data: sessions = [], isLoading } = useCalendarSessions(workspaceId);
   const { data: workspaceMembers = [] } = useWorkspaceMembers(workspaceId);
   const { profile, user } = useAuth();
+  const createSession = useCreateSession(workspaceId);
+  const updateSession = useUpdateSession(workspaceId);
+  const deleteSession = useDeleteSession(workspaceId);
+  
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
+  const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSendingInvite, setIsSendingInvite] = useState(false);
-  const [sendInviteMeeting, setSendInviteMeeting] = useState<Meeting | null>(null);
+  const [sendInviteSession, setSendInviteSession] = useState<Session | null>(null);
   const [quickInviteEmails, setQuickInviteEmails] = useState('');
 
   // Get member emails for auto-complete (exclude current user)
@@ -102,10 +111,10 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   // Form state
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    agenda: '',
     date: '',
     startTime: '',
-    endTime: '',
+    duration: '60',
     location: '',
     joinUrl: '',
     sendInvites: true,
@@ -115,10 +124,10 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   const resetForm = () => {
     setFormData({
       title: '',
-      description: '',
+      agenda: '',
       date: '',
       startTime: '',
-      endTime: '',
+      duration: '60',
       location: '',
       joinUrl: '',
       sendInvites: true,
@@ -126,22 +135,35 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     });
   };
 
-  // Send meeting invite
-  const sendMeetingInvite = async (meeting: Meeting, emails: string[]) => {
+  // Compute end time from start + duration for display
+  const computeEndTime = (startTime: string, duration: number): string => {
+    if (!startTime) return '';
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + duration;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMins = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+  };
+
+  // Send session invite
+  const sendSessionInvite = async (session: Session, emails: string[]) => {
     if (emails.length === 0) return;
 
     try {
       setIsSendingInvite(true);
-      const { data, error } = await supabase.functions.invoke('send-meeting-invite', {
+      const duration = session.duration || 60;
+      const endsAt = new Date(new Date(session.scheduled_at).getTime() + duration * 60000).toISOString();
+      
+      const { data, error } = await supabase.functions.invoke('send-session-invite', {
         body: {
-          meetingId: meeting.id,
-          workspaceId: meeting.workspace_id,
-          title: meeting.title,
-          startsAt: meeting.starts_at,
-          endsAt: meeting.ends_at,
-          description: meeting.description,
-          location: meeting.location,
-          joinUrl: meeting.join_url,
+          sessionId: session.id,
+          workspaceId: session.workspace_id,
+          title: session.title,
+          scheduledAt: session.scheduled_at,
+          duration: duration,
+          agenda: session.agenda,
+          location: session.location,
+          joinUrl: session.join_url,
           recipientEmails: emails,
           organizerName: profile?.full_name || 'Team Member',
           startupName: startupName || 'Startup',
@@ -150,21 +172,10 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
 
       if (error) throw error;
 
-      const results = (data as any)?.results as Array<{ email: string; success: boolean; error?: string }> | undefined;
-      const failed = (results || []).filter((r) => r && r.success === false);
-
-      if (failed.length > 0) {
-        const firstError = failed[0]?.error;
-        toast.error(
-          `Invites failed for ${failed.length} recipient(s)${firstError ? `: ${firstError}` : ''}`
-        );
-      } else {
-        toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
-      }
-
+      toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
       return data;
     } catch (error) {
-      console.error('Error sending meeting invite:', error);
+      console.error('Error sending session invite:', error);
       toast.error('Failed to send calendar invites');
       throw error;
     } finally {
@@ -172,25 +183,26 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     }
   };
 
-  const handleAddMeeting = async () => {
-    if (!formData.title || !formData.date || !formData.startTime || !formData.endTime) return;
+  const handleAddSession = async () => {
+    if (!formData.title || !formData.date || !formData.startTime) return;
 
     try {
-      const starts_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
-      const ends_at = new Date(`${formData.date}T${formData.endTime}`).toISOString();
+      const scheduled_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
+      const duration = parseInt(formData.duration);
 
-      const newMeeting = await createMeeting.mutateAsync({
+      const newSession = await createSession.mutateAsync({
         title: formData.title,
-        description: formData.description || undefined,
-        workspace_id: workspaceId,
-        starts_at,
-        ends_at,
-        location: formData.location || undefined,
-        join_url: formData.joinUrl || undefined,
+        agenda: formData.agenda || null,
+        scheduled_at,
+        duration,
+        notes: null,
+        decisions: null,
+        location: formData.location || null,
+        join_url: formData.joinUrl || null,
       });
 
       // Send invites if checkbox is checked and emails are provided
-      if (formData.sendInvites && formData.inviteEmails.trim() && newMeeting) {
+      if (formData.sendInvites && formData.inviteEmails.trim() && newSession) {
         const emails = formData.inviteEmails
           .split(/[,;\n]/)
           .map(e => e.trim())
@@ -198,64 +210,75 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         
         if (emails.length > 0) {
           try {
-            await sendMeetingInvite(newMeeting as Meeting, emails);
+            await sendSessionInvite(newSession, emails);
           } catch (inviteError) {
-            console.error('Failed to send invites but meeting was created:', inviteError);
-            // Meeting was still created, just invites failed
+            console.error('Failed to send invites but session was created:', inviteError);
           }
         }
       }
 
+      toast.success('Session scheduled');
       resetForm();
       setIsAddDialogOpen(false);
     } catch (error) {
-      console.error('Error creating meeting:', error);
-      // Toast already shown by mutation
+      console.error('Error creating session:', error);
+      toast.error('Failed to schedule session');
     }
   };
 
-  const handleEditMeeting = async () => {
-    if (!editingMeeting || !formData.title || !formData.date || !formData.startTime || !formData.endTime) return;
+  const handleEditSession = async () => {
+    if (!editingSession || !formData.title || !formData.date || !formData.startTime) return;
 
-    const starts_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
-    const ends_at = new Date(`${formData.date}T${formData.endTime}`).toISOString();
+    const scheduled_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
+    const duration = parseInt(formData.duration);
 
-    await updateMeeting.mutateAsync({
-      id: editingMeeting.id,
-      title: formData.title,
-      description: formData.description || undefined,
-      starts_at,
-      ends_at,
-      location: formData.location || undefined,
-      join_url: formData.joinUrl || undefined,
-    });
+    try {
+      await updateSession.mutateAsync({
+        id: editingSession.id,
+        title: formData.title,
+        agenda: formData.agenda || null,
+        scheduled_at,
+        duration,
+        location: formData.location || null,
+        join_url: formData.joinUrl || null,
+      });
 
-    resetForm();
-    setEditingMeeting(null);
-    setIsEditDialogOpen(false);
+      toast.success('Session updated');
+      resetForm();
+      setEditingSession(null);
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating session:', error);
+      toast.error('Failed to update session');
+    }
   };
 
-  const handleDeleteMeeting = async (id: string) => {
-    await deleteMeeting.mutateAsync(id);
-    setDeleteConfirmId(null);
+  const handleDeleteSession = async (id: string) => {
+    try {
+      await deleteSession.mutateAsync(id);
+      toast.success('Session deleted');
+      setDeleteConfirmId(null);
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      toast.error('Failed to delete session');
+    }
   };
 
-  const openEditDialog = (meeting: Meeting) => {
-    const startDate = parseISO(meeting.starts_at);
-    const endDate = parseISO(meeting.ends_at);
+  const openEditDialog = (session: Session) => {
+    const startDate = parseISO(session.scheduled_at);
     
     setFormData({
-      title: meeting.title,
-      description: meeting.description || '',
+      title: session.title,
+      agenda: session.agenda || '',
       date: format(startDate, 'yyyy-MM-dd'),
       startTime: format(startDate, 'HH:mm'),
-      endTime: format(endDate, 'HH:mm'),
-      location: meeting.location || '',
-      joinUrl: meeting.join_url || '',
+      duration: String(session.duration || 60),
+      location: session.location || '',
+      joinUrl: session.join_url || '',
       sendInvites: false,
       inviteEmails: '',
     });
-    setEditingMeeting(meeting);
+    setEditingSession(session);
     setIsEditDialogOpen(true);
   };
 
@@ -275,18 +298,18 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
-  // Get meetings for a specific day
-  const getMeetingsForDay = (date: Date) => {
-    return meetings.filter((meeting) => isSameDay(parseISO(meeting.starts_at), date));
+  // Get sessions for a specific day
+  const getSessionsForDay = (date: Date) => {
+    return sessions.filter((session) => isSameDay(parseISO(session.scheduled_at), date));
   };
 
-  // Get meetings for selected date
-  const selectedDayMeetings = selectedDate ? getMeetingsForDay(selectedDate) : [];
+  // Get sessions for selected date
+  const selectedDaySessions = selectedDate ? getSessionsForDay(selectedDate) : [];
 
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // Form fields JSX - inline to avoid re-render issues
-  const renderMeetingFormFields = (isEdit: boolean) => (
+  // Form fields JSX
+  const renderSessionFormFields = (isEdit: boolean) => (
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
         <Label htmlFor={isEdit ? "edit-title" : "title"}>Title *</Label>
@@ -294,16 +317,16 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           id={isEdit ? "edit-title" : "title"}
           value={formData.title}
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-          placeholder="Meeting title"
+          placeholder="Session title"
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor={isEdit ? "edit-description" : "description"}>Description</Label>
+        <Label htmlFor={isEdit ? "edit-agenda" : "agenda"}>Agenda</Label>
         <Textarea
-          id={isEdit ? "edit-description" : "description"}
-          value={formData.description}
-          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-          placeholder="Optional description"
+          id={isEdit ? "edit-agenda" : "agenda"}
+          value={formData.agenda}
+          onChange={(e) => setFormData((prev) => ({ ...prev, agenda: e.target.value }))}
+          placeholder="Topics to discuss"
           rows={2}
         />
       </div>
@@ -327,13 +350,20 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={isEdit ? "edit-endTime" : "endTime"}>End *</Label>
-          <Input
-            id={isEdit ? "edit-endTime" : "endTime"}
-            type="time"
-            value={formData.endTime}
-            onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
-          />
+          <Label htmlFor={isEdit ? "edit-duration" : "duration"}>Duration</Label>
+          <Select value={formData.duration} onValueChange={(v) => setFormData((prev) => ({ ...prev, duration: v }))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="15">15 min</SelectItem>
+              <SelectItem value="30">30 min</SelectItem>
+              <SelectItem value="45">45 min</SelectItem>
+              <SelectItem value="60">60 min</SelectItem>
+              <SelectItem value="90">90 min</SelectItem>
+              <SelectItem value="120">120 min</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="grid gap-2">
@@ -355,7 +385,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         />
       </div>
       
-      {/* Send Invites Section - only for new meetings */}
+      {/* Send Invites Section - only for new sessions */}
       {!isEdit && (
         <div className="border-t pt-4 space-y-3">
           <div className="flex items-center space-x-2">
@@ -494,53 +524,37 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
               open={isAddDialogOpen}
               onOpenChange={(open) => {
                 setIsAddDialogOpen(open);
-                if (open) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    inviteEmails: prev.inviteEmails.trim() ? prev.inviteEmails : defaultInviteEmails(),
-                  }));
-                } else {
-                  resetForm();
-                }
+                if (!open) resetForm();
               }}
             >
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Schedule Meeting
-                </Button>
-              </DialogTrigger>
+              <Button onClick={() => {
+                setFormData((prev) => ({
+                  ...prev,
+                  date: format(new Date(), 'yyyy-MM-dd'),
+                  inviteEmails: defaultInviteEmails(),
+                }));
+                setIsAddDialogOpen(true);
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Session
+              </Button>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Schedule New Meeting</DialogTitle>
+                  <DialogTitle>Schedule Session</DialogTitle>
                   <DialogDescription>
-                    Add a new meeting to the calendar
+                    Create a new mentoring session
                   </DialogDescription>
                 </DialogHeader>
-                {renderMeetingFormFields(false)}
+                {renderSessionFormFields(false)}
                 <DialogFooter>
                   <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); resetForm(); }}>
                     Cancel
                   </Button>
                   <Button
-                    onClick={handleAddMeeting}
-                    disabled={createMeeting.isPending || isSendingInvite || !formData.title || !formData.date || !formData.startTime || !formData.endTime}
+                    onClick={handleAddSession}
+                    disabled={createSession.isPending || !formData.title || !formData.date || !formData.startTime}
                   >
-                    {isSendingInvite ? (
-                      <>
-                        <Send className="h-4 w-4 mr-2 animate-pulse" />
-                        Sending Invites...
-                      </>
-                    ) : createMeeting.isPending ? (
-                      'Scheduling...'
-                    ) : formData.sendInvites && formData.inviteEmails.trim() ? (
-                      <>
-                        <Send className="h-4 w-4 mr-2" />
-                        Schedule & Send
-                      </>
-                    ) : (
-                      'Schedule'
-                    )}
+                    {createSession.isPending ? 'Scheduling...' : 'Schedule Session'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -559,7 +573,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day) => {
-              const dayMeetings = getMeetingsForDay(day);
+              const daySessions = getSessionsForDay(day);
               const isToday = isSameDay(day, new Date());
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isSelected = selectedDate && isSameDay(day, selectedDate);
@@ -586,17 +600,17 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                     {format(day, 'd')}
                   </span>
                   <div className="mt-1 space-y-0.5">
-                    {dayMeetings.slice(0, 2).map((meeting) => (
+                    {daySessions.slice(0, 2).map((session) => (
                       <div
-                        key={meeting.id}
+                        key={session.id}
                         className="text-xs truncate px-1 py-0.5 rounded bg-primary/20 text-primary font-medium"
                       >
-                        {format(parseISO(meeting.starts_at), 'HH:mm')} {meeting.title}
+                        {format(parseISO(session.scheduled_at), 'HH:mm')} {session.title}
                       </div>
                     ))}
-                    {dayMeetings.length > 2 && (
+                    {daySessions.length > 2 && (
                       <div className="text-xs text-muted-foreground px-1">
-                        +{dayMeetings.length - 2} more
+                        +{daySessions.length - 2} more
                       </div>
                     )}
                   </div>
@@ -617,84 +631,91 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         <CardContent>
           {selectedDate ? (
             <ScrollArea className="h-[400px]">
-              {selectedDayMeetings.length > 0 ? (
+              {selectedDaySessions.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedDayMeetings.map((meeting) => (
-                    <div
-                      key={meeting.id}
-                      className="p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-medium text-sm">{meeting.title}</h4>
-                        {canWrite && (
-                          <div className="flex gap-1 shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              title="Send calendar invite"
-                              onClick={() => {
-                                setSendInviteMeeting(meeting);
-                                if (!quickInviteEmails.trim()) {
-                                  setQuickInviteEmails(defaultInviteEmails());
-                                }
-                              }}
-                            >
-                              <Mail className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => openEditDialog(meeting)}
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-destructive hover:text-destructive"
-                              onClick={() => setDeleteConfirmId(meeting.id)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
+                  {selectedDaySessions.map((session) => {
+                    const endTime = new Date(new Date(session.scheduled_at).getTime() + (session.duration || 60) * 60000);
+                    return (
+                      <div
+                        key={session.id}
+                        className="p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-medium text-sm">{session.title}</h4>
+                          {canWrite && (
+                            <div className="flex gap-1 shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                title="Send calendar invite"
+                                onClick={() => {
+                                  setSendInviteSession(session);
+                                  if (!quickInviteEmails.trim()) {
+                                    setQuickInviteEmails(defaultInviteEmails());
+                                  }
+                                }}
+                              >
+                                <Mail className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => openEditDialog(session)}
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                onClick={() => setDeleteConfirmId(session.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          {format(parseISO(session.scheduled_at), 'HH:mm')} - {format(endTime, 'HH:mm')}
+                        </div>
+                        {session.agenda && (
+                          <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                            <FileText className="h-3 w-3 mt-0.5 shrink-0" />
+                            <span className="line-clamp-2">{session.agenda}</span>
+                          </p>
                         )}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                        <Clock className="h-3 w-3" />
-                        {format(parseISO(meeting.starts_at), 'HH:mm')} - {format(parseISO(meeting.ends_at), 'HH:mm')}
-                      </div>
-                      {meeting.description && (
-                        <p className="text-xs text-muted-foreground mt-2">{meeting.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {meeting.location && (
-                          <Badge variant="secondary" className="text-xs gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {meeting.location}
-                          </Badge>
-                        )}
-                        {meeting.join_url && (
-                          <a
-                            href={meeting.join_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex"
-                          >
-                            <Badge variant="outline" className="text-xs gap-1 hover:bg-primary/10">
-                              <Video className="h-3 w-3" />
-                              Join Meeting
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {session.location && (
+                            <Badge variant="secondary" className="text-xs gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {session.location}
                             </Badge>
-                          </a>
-                        )}
+                          )}
+                          {session.join_url && (
+                            <a
+                              href={session.join_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Badge variant="outline" className="text-xs gap-1 hover:bg-primary/10">
+                                <Video className="h-3 w-3" />
+                                Join Call
+                              </Badge>
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">No meetings scheduled</p>
+                  <p className="text-sm">No sessions scheduled</p>
                   {canWrite && (
                     <Button
                       variant="link"
@@ -703,7 +724,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                       onClick={() => openAddDialogWithDate(selectedDate)}
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      Add meeting
+                      Add session
                     </Button>
                   )}
                 </div>
@@ -711,31 +732,31 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             </ScrollArea>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Click on a date to view meetings
+              Click on a date to view sessions
             </p>
           )}
         </CardContent>
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => { setIsEditDialogOpen(open); if (!open) { resetForm(); setEditingMeeting(null); } }}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => { setIsEditDialogOpen(open); if (!open) { resetForm(); setEditingSession(null); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Meeting</DialogTitle>
+            <DialogTitle>Edit Session</DialogTitle>
             <DialogDescription>
-              Update meeting details
+              Update session details
             </DialogDescription>
           </DialogHeader>
-          {renderMeetingFormFields(true)}
+          {renderSessionFormFields(true)}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); resetForm(); setEditingMeeting(null); }}>
+            <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); resetForm(); setEditingSession(null); }}>
               Cancel
             </Button>
             <Button
-              onClick={handleEditMeeting}
-              disabled={updateMeeting.isPending || !formData.title || !formData.date || !formData.startTime || !formData.endTime}
+              onClick={handleEditSession}
+              disabled={updateSession.isPending || !formData.title || !formData.date || !formData.startTime}
             >
-              {updateMeeting.isPending ? 'Saving...' : 'Save Changes'}
+              {updateSession.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -745,15 +766,15 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Meeting</AlertDialogTitle>
+            <AlertDialogTitle>Delete Session</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this meeting? This action cannot be undone.
+              Are you sure you want to delete this session? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteConfirmId && handleDeleteMeeting(deleteConfirmId)}
+              onClick={() => deleteConfirmId && handleDeleteSession(deleteConfirmId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -763,12 +784,12 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       </AlertDialog>
 
       {/* Send Invite Dialog */}
-      <Dialog open={!!sendInviteMeeting} onOpenChange={(open) => { if (!open) { setSendInviteMeeting(null); setQuickInviteEmails(''); } }}>
+      <Dialog open={!!sendInviteSession} onOpenChange={(open) => { if (!open) { setSendInviteSession(null); setQuickInviteEmails(''); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Send Calendar Invite</DialogTitle>
             <DialogDescription>
-              Send a calendar invite (.ics) to participants for "{sendInviteMeeting?.title}"
+              Send a calendar invite (.ics) to participants for "{sendInviteSession?.title}"
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -840,20 +861,20 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setSendInviteMeeting(null); setQuickInviteEmails(''); }}>
+            <Button variant="outline" onClick={() => { setSendInviteSession(null); setQuickInviteEmails(''); }}>
               Cancel
             </Button>
             <Button
               onClick={async () => {
-                if (!sendInviteMeeting) return;
+                if (!sendInviteSession) return;
                 const emails = quickInviteEmails
                   .split(/[,;\n]/)
                   .map(e => e.trim())
                   .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
                 
                 if (emails.length > 0) {
-                  await sendMeetingInvite(sendInviteMeeting, emails);
-                  setSendInviteMeeting(null);
+                  await sendSessionInvite(sendInviteSession, emails);
+                  setSendInviteSession(null);
                   setQuickInviteEmails('');
                 } else {
                   toast.error('Please enter at least one valid email address');

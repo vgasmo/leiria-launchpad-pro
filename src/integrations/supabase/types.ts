@@ -632,62 +632,6 @@ export type Database = {
           },
         ]
       }
-      meetings: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          ends_at: string
-          id: string
-          join_url: string | null
-          location: string | null
-          provider: string | null
-          provider_event_id: string | null
-          starts_at: string
-          title: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          ends_at: string
-          id?: string
-          join_url?: string | null
-          location?: string | null
-          provider?: string | null
-          provider_event_id?: string | null
-          starts_at: string
-          title: string
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          ends_at?: string
-          id?: string
-          join_url?: string | null
-          location?: string | null
-          provider?: string | null
-          provider_event_id?: string | null
-          starts_at?: string
-          title?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mentor_availability: {
         Row: {
           created_at: string
@@ -1167,6 +1111,8 @@ export type Database = {
           decisions: string | null
           duration: number | null
           id: string
+          join_url: string | null
+          location: string | null
           notes: string | null
           scheduled_at: string
           title: string
@@ -1180,6 +1126,8 @@ export type Database = {
           decisions?: string | null
           duration?: number | null
           id?: string
+          join_url?: string | null
+          location?: string | null
           notes?: string | null
           scheduled_at: string
           title: string
@@ -1193,6 +1141,8 @@ export type Database = {
           decisions?: string | null
           duration?: number | null
           id?: string
+          join_url?: string | null
+          location?: string | null
           notes?: string | null
           scheduled_at?: string
           title?: string

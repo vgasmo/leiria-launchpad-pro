@@ -246,18 +246,18 @@ serve(async (req) => {
       );
     }
     
-    // Verify meeting exists and belongs to the workspace
-    const { data: meeting, error: meetingError } = await supabaseService
-      .from('meetings')
+    // Verify session exists and belongs to the workspace
+    const { data: session, error: sessionError } = await supabaseService
+      .from('sessions')
       .select('id, workspace_id')
       .eq('id', payload.meetingId)
       .eq('workspace_id', payload.workspaceId)
       .single();
     
-    if (meetingError || !meeting) {
-      console.error("Meeting not found or doesn't belong to workspace:", meetingError?.message);
+    if (sessionError || !session) {
+      console.error("Session not found or doesn't belong to workspace:", sessionError?.message);
       return new Response(
-        JSON.stringify({ error: "Meeting not found" }),
+        JSON.stringify({ error: "Session not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
