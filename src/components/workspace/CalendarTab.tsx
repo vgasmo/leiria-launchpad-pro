@@ -22,6 +22,8 @@ import {
   Trash2,
   Edit2,
   Video,
+  Mail,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,22 +51,31 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useMeetings, Meeting } from '@/hooks/useMeetings';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface CalendarTabProps {
   workspaceId: string;
   canWrite: boolean;
+  startupName?: string;
 }
 
-export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
+export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
   const { meetings, isLoading, createMeeting, updateMeeting, deleteMeeting } = useMeetings(workspaceId);
+  const { profile } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [sendInviteMeeting, setSendInviteMeeting] = useState<Meeting | null>(null);
+  const [quickInviteEmails, setQuickInviteEmails] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -75,6 +86,8 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
     endTime: '',
     location: '',
     joinUrl: '',
+    sendInvites: true,
+    inviteEmails: '',
   });
 
   const resetForm = () => {
@@ -86,7 +99,44 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
       endTime: '',
       location: '',
       joinUrl: '',
+      sendInvites: true,
+      inviteEmails: '',
     });
+  };
+
+  // Send meeting invite
+  const sendMeetingInvite = async (meeting: Meeting, emails: string[]) => {
+    if (emails.length === 0) return;
+    
+    try {
+      setIsSendingInvite(true);
+      const { data, error } = await supabase.functions.invoke('send-meeting-invite', {
+        body: {
+          meetingId: meeting.id,
+          workspaceId: meeting.workspace_id,
+          title: meeting.title,
+          startsAt: meeting.starts_at,
+          endsAt: meeting.ends_at,
+          description: meeting.description,
+          location: meeting.location,
+          joinUrl: meeting.join_url,
+          recipientEmails: emails,
+          organizerName: profile?.full_name || 'Team Member',
+          startupName: startupName || 'Startup',
+        },
+      });
+
+      if (error) throw error;
+      
+      toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
+      return data;
+    } catch (error) {
+      console.error('Error sending meeting invite:', error);
+      toast.error('Failed to send calendar invites');
+      throw error;
+    } finally {
+      setIsSendingInvite(false);
+    }
   };
 
   const handleAddMeeting = async () => {
@@ -95,7 +145,7 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
     const starts_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
     const ends_at = new Date(`${formData.date}T${formData.endTime}`).toISOString();
 
-    await createMeeting.mutateAsync({
+    const newMeeting = await createMeeting.mutateAsync({
       title: formData.title,
       description: formData.description || undefined,
       workspace_id: workspaceId,
@@ -104,6 +154,18 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
       location: formData.location || undefined,
       join_url: formData.joinUrl || undefined,
     });
+
+    // Send invites if checkbox is checked and emails are provided
+    if (formData.sendInvites && formData.inviteEmails.trim()) {
+      const emails = formData.inviteEmails
+        .split(/[,;\n]/)
+        .map(e => e.trim())
+        .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+      
+      if (emails.length > 0 && newMeeting) {
+        await sendMeetingInvite(newMeeting, emails);
+      }
+    }
 
     resetForm();
     setIsAddDialogOpen(false);
@@ -147,6 +209,8 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
       endTime: format(endDate, 'HH:mm'),
       location: meeting.location || '',
       joinUrl: meeting.join_url || '',
+      sendInvites: false,
+      inviteEmails: '',
     });
     setEditingMeeting(meeting);
     setIsEditDialogOpen(true);
@@ -245,6 +309,39 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
           placeholder="https://meet.google.com/..."
         />
       </div>
+      
+      {/* Send Invites Section */}
+      {!isEdit && (
+        <div className="border-t pt-4 space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="sendInvites"
+              checked={formData.sendInvites}
+              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, sendInvites: checked === true }))}
+            />
+            <Label htmlFor="sendInvites" className="flex items-center gap-2 cursor-pointer">
+              <Mail className="h-4 w-4" />
+              Send calendar invites via email
+            </Label>
+          </div>
+          
+          {formData.sendInvites && (
+            <div className="grid gap-2">
+              <Label htmlFor="inviteEmails">Recipient Emails</Label>
+              <Textarea
+                id="inviteEmails"
+                value={formData.inviteEmails}
+                onChange={(e) => setFormData((prev) => ({ ...prev, inviteEmails: e.target.value }))}
+                placeholder="Enter email addresses (separated by commas or new lines)"
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground">
+                Recipients will receive an email with an .ics calendar attachment
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -306,9 +403,23 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
                   </Button>
                   <Button
                     onClick={handleAddMeeting}
-                    disabled={createMeeting.isPending || !formData.title || !formData.date || !formData.startTime || !formData.endTime}
+                    disabled={createMeeting.isPending || isSendingInvite || !formData.title || !formData.date || !formData.startTime || !formData.endTime}
                   >
-                    {createMeeting.isPending ? 'Scheduling...' : 'Schedule'}
+                    {isSendingInvite ? (
+                      <>
+                        <Send className="h-4 w-4 mr-2 animate-pulse" />
+                        Sending Invites...
+                      </>
+                    ) : createMeeting.isPending ? (
+                      'Scheduling...'
+                    ) : formData.sendInvites && formData.inviteEmails.trim() ? (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Schedule & Send
+                      </>
+                    ) : (
+                      'Schedule'
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -396,6 +507,15 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
                         <h4 className="font-medium text-sm">{meeting.title}</h4>
                         {canWrite && (
                           <div className="flex gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              title="Send calendar invite"
+                              onClick={() => setSendInviteMeeting(meeting)}
+                            >
+                              <Mail className="h-3 w-3" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -515,6 +635,68 @@ export function CalendarTab({ workspaceId, canWrite }: CalendarTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Send Invite Dialog */}
+      <Dialog open={!!sendInviteMeeting} onOpenChange={(open) => { if (!open) { setSendInviteMeeting(null); setQuickInviteEmails(''); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Calendar Invite</DialogTitle>
+            <DialogDescription>
+              Send a calendar invite (.ics) to participants for "{sendInviteMeeting?.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="quickEmails">Recipient Emails</Label>
+              <Textarea
+                id="quickEmails"
+                value={quickInviteEmails}
+                onChange={(e) => setQuickInviteEmails(e.target.value)}
+                placeholder="Enter email addresses (separated by commas or new lines)"
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Recipients will receive an email with an .ics calendar attachment they can add to their calendar
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setSendInviteMeeting(null); setQuickInviteEmails(''); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!sendInviteMeeting) return;
+                const emails = quickInviteEmails
+                  .split(/[,;\n]/)
+                  .map(e => e.trim())
+                  .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+                
+                if (emails.length > 0) {
+                  await sendMeetingInvite(sendInviteMeeting, emails);
+                  setSendInviteMeeting(null);
+                  setQuickInviteEmails('');
+                } else {
+                  toast.error('Please enter at least one valid email address');
+                }
+              }}
+              disabled={isSendingInvite || !quickInviteEmails.trim()}
+            >
+              {isSendingInvite ? (
+                <>
+                  <Send className="h-4 w-4 mr-2 animate-pulse" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Invite
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

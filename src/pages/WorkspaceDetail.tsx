@@ -128,7 +128,7 @@ export default function WorkspaceDetail() {
           <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="calendar">
-          <CalendarTab workspaceId={workspace.id} canWrite={canWrite} />
+          <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
         </TabsContent>
         <TabsContent value="documents">
           <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
