@@ -56,3 +56,15 @@ export function useWorkspaceMembers(workspaceId: string | undefined) {
     enabled: !!workspaceId,
   });
 }
+
+export function useWorkspaceFounder(workspaceId: string | undefined) {
+  const { data: members, ...rest } = useWorkspaceMembers(workspaceId);
+  
+  const founder = members?.find(m => m.role === 'founder');
+  
+  return {
+    ...rest,
+    data: founder,
+    founderId: founder?.user_id,
+  };
+}

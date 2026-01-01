@@ -19,6 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, useBulkUpdateActions, useBulkDeleteActions, type ActionItem } from '@/hooks/useActionItems';
 import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
+import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { toast } from 'sonner';
@@ -48,6 +49,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: actionItems, isLoading, error } = useActionItems(workspaceId);
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
+  const { founderId } = useWorkspaceFounder(workspaceId);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
@@ -64,14 +66,14 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedMilestoneForCreate, setSelectedMilestoneForCreate] = useState<string>('');
   const [deleteTarget, setDeleteTarget] = useState<ActionItem | null>(null);
-  const [newAction, setNewAction] = useState({
+  const [newAction, setNewAction] = useState(() => ({
     title: '',
     description: '',
     due_date: '',
     priority: 'medium',
     owner_user_id: '',
     milestone_id: '',
-  });
+  }));
 
   // Bulk selection
   const { selectedIds, toggleItem, selectAll, deselectAll, isSelected } = useBulkSelection(
@@ -180,7 +182,21 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   };
 
   const openCreateDialogForMilestone = (milestoneId: string) => {
-    setNewAction(prev => ({ ...prev, milestone_id: milestoneId }));
+    // Auto-assign founder as default owner
+    setNewAction(prev => ({ 
+      ...prev, 
+      milestone_id: milestoneId,
+      owner_user_id: founderId || '', 
+    }));
+    setCreateDialogOpen(true);
+  };
+
+  // Also set founder as default when opening create dialog without milestone
+  const handleOpenCreateDialog = () => {
+    setNewAction(prev => ({
+      ...prev,
+      owner_user_id: founderId || '',
+    }));
     setCreateDialogOpen(true);
   };
 
@@ -259,7 +275,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg border">
         {canWrite && milestones && milestones.length > 0 && (
-          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
+          <Button size="sm" onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-1" />
             Add Action
           </Button>
