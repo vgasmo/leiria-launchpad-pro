@@ -34,6 +34,7 @@ import { useExportKpis, exportToCsv } from '@/hooks/useExportData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface KpisTabProps {
   workspaceId: string;
@@ -41,6 +42,7 @@ interface KpisTabProps {
 }
 
 export function KpisTab({ workspaceId }: KpisTabProps) {
+  const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const { data: workspace } = useWorkspace(workspaceId);
   const { data: workspaceKpis, isLoading: loadingKpis } = useWorkspaceKpiDefinitions(workspaceId);
@@ -58,9 +60,9 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
     const { data } = await fetchExportData();
     if (data && data.length > 0) {
       exportToCsv(data, `kpis-${workspaceId}`);
-      toast.success('Exported KPIs to CSV');
+      toast.success(t('kpis.exportedToCsv'));
     } else {
-      toast.error('No data to export');
+      toast.error(t('kpis.noDataToExport'));
     }
   };
 
@@ -146,7 +148,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
     const value = valueStr === '' ? null : parseFloat(valueStr);
 
     if (valueStr !== '' && isNaN(value as number)) {
-      toast.error('Please enter a valid number');
+      toast.error(t('kpis.invalidNumber'));
       return;
     }
 
@@ -169,9 +171,9 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         return newState;
       });
       
-      toast.success('KPI saved');
+      toast.success(t('kpis.kpiSaved'));
     } catch {
-      toast.error('Failed to save KPI');
+      toast.error(t('kpis.failedToSave'));
     } finally {
       setSavingKpis(prev => {
         const newSet = new Set(prev);
@@ -184,9 +186,9 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const handleMarkCheckin = async () => {
     try {
       await markCheckin.mutateAsync();
-      toast.success('Check-in marked as complete');
+      toast.success(t('kpis.checkinComplete'));
     } catch {
-      toast.error('Failed to mark check-in');
+      toast.error(t('kpis.failedCheckin'));
     }
   };
 
@@ -195,12 +197,12 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
     try {
       const result = await applyDefaults.mutateAsync(workspace.stage);
       if (result.length > 0) {
-        toast.success(`Added ${result.length} default KPIs for ${workspace.stage} stage`);
+        toast.success(t('kpis.addedDefaults', { count: result.length, stage: workspace.stage }));
       } else {
-        toast.info('All default KPIs are already configured');
+        toast.info(t('kpis.allDefaultsConfigured'));
       }
     } catch {
-      toast.error('Failed to apply defaults');
+      toast.error(t('kpis.failedDefaults'));
     }
   };
 
@@ -217,18 +219,18 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         delete next[kpiDefId];
         return next;
       });
-      toast.success('KPI added');
+      toast.success(t('kpis.kpiAdded'));
     } catch {
-      toast.error('Failed to add KPI');
+      toast.error(t('kpis.failedToAdd'));
     }
   };
 
   const handleRemoveKpi = async (workspaceKpiId: string) => {
     try {
       await removeKpi.mutateAsync(workspaceKpiId);
-      toast.success('KPI removed');
+      toast.success(t('kpis.kpiRemoved'));
     } catch {
-      toast.error('Failed to remove KPI');
+      toast.error(t('kpis.failedToRemove'));
     }
   };
 
@@ -256,24 +258,24 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         <CardContent className="py-12 text-center">
           <TrendingUp className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
           <p className="text-muted-foreground mb-4">
-            No KPIs configured for this workspace.
+            {t('kpis.noKpisDesc')}
           </p>
           {canConfigureKpis && (
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button onClick={handleApplyDefaults} disabled={applyDefaults.isPending}>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Apply {workspace?.stage} Stage Defaults
+                {t('kpis.applyDefaults', { stage: workspace?.stage })}
               </Button>
               <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline">
                     <Settings2 className="h-4 w-4 mr-2" />
-                    Configure Manually
+                    {t('kpis.configureManually')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Add KPIs</DialogTitle>
+                    <DialogTitle>{t('kpis.addKpis')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-3 max-h-[400px] overflow-y-auto">
                     {availableKpis.map(kpi => (
@@ -288,10 +290,10 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                           </Button>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Label className="text-xs text-muted-foreground whitespace-nowrap">Target:</Label>
+                          <Label className="text-xs text-muted-foreground whitespace-nowrap">{t('kpis.target')}:</Label>
                           <Input
                             type="number"
-                            placeholder={`Target ${kpi.unit || 'value'}`}
+                            placeholder={`${t('kpis.target')} ${kpi.unit || ''}`}
                             className="h-7 text-sm"
                             value={pendingTargets[kpi.id] || ''}
                             onChange={(e) => setPendingTargets(prev => ({ ...prev, [kpi.id]: e.target.value }))}
@@ -300,7 +302,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                       </div>
                     ))}
                     {availableKpis.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">All KPIs already added</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">{t('kpis.allKpisAdded')}</p>
                     )}
                   </div>
                 </DialogContent>
@@ -308,7 +310,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
             </div>
           )}
           {!canConfigureKpis && (
-            <p className="text-sm text-muted-foreground">Ask an admin to set up KPIs for tracking.</p>
+            <p className="text-sm text-muted-foreground">{t('kpis.askAdminToSetup')}</p>
           )}
         </CardContent>
       </Card>
@@ -328,7 +330,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
           <div className="min-w-[140px] text-center">
             <span className="font-medium">{format(selectedMonth, 'MMMM yyyy')}</span>
             {isCurrentMonth && (
-              <Badge variant="secondary" className="ml-2 text-xs">Current</Badge>
+              <Badge variant="secondary" className="ml-2 text-xs">{t('kpis.current')}</Badge>
             )}
           </div>
           <Button 
@@ -344,23 +346,23 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {t('kpis.export')}
           </Button>
           {canConfigureKpis && (
             <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Settings2 className="h-4 w-4 mr-2" />
-                  Configure
+                  {t('kpis.configure')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Configure KPIs</DialogTitle>
+                  <DialogTitle>{t('kpis.configureKpis')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Current KPIs</h4>
+                    <h4 className="font-medium text-sm mb-2">{t('kpis.currentKpis')}</h4>
                     <div className="space-y-2">
                       {workspaceKpis.map(wk => (
                         <div key={wk.id} className="flex items-center justify-between p-2 rounded border">
@@ -374,7 +376,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                   </div>
                   {availableKpis.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-sm mb-2">Add KPIs</h4>
+                      <h4 className="font-medium text-sm mb-2">{t('kpis.addKpis')}</h4>
                       <div className="space-y-3 max-h-[200px] overflow-y-auto">
                         {availableKpis.map(kpi => (
                           <div key={kpi.id} className="p-3 rounded border space-y-2">
@@ -388,10 +390,10 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                               </Button>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Label className="text-xs text-muted-foreground whitespace-nowrap">Target:</Label>
+                              <Label className="text-xs text-muted-foreground whitespace-nowrap">{t('kpis.target')}:</Label>
                               <Input
                                 type="number"
-                                placeholder={`Target ${kpi.unit || 'value'}`}
+                                placeholder={`${t('kpis.target')} ${kpi.unit || ''}`}
                                 className="h-7 text-sm"
                                 value={pendingTargets[kpi.id] || ''}
                                 onChange={(e) => setPendingTargets(prev => ({ ...prev, [kpi.id]: e.target.value }))}
@@ -414,7 +416,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
               disabled={markCheckin.isPending}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              Mark Check-in
             </Button>
           )}
         </div>

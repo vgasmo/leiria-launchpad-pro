@@ -35,6 +35,7 @@ import {
 } from '@/hooks/useDocuments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentsTabProps {
   workspaceId: string;
@@ -63,6 +64,7 @@ function getFileIcon(documentType: string) {
 }
 
 export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
+  const { t } = useTranslation();
   const { data: documents, isLoading } = useDocuments(workspaceId);
   const uploadMutation = useUploadDocument();
   const addLinkMutation = useAddExternalLink();
@@ -77,7 +79,6 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // External link confirmation state
   const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
 
@@ -100,7 +101,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   const handleAddLink = async () => {
     if (!linkName.trim() || !linkUrl.trim()) {
-      toast.error('Please provide both name and URL');
+      toast.error(t('documents.provideNameAndUrl'));
       return;
     }
 
@@ -171,7 +172,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   }
 
   const groupedDocuments = documents?.reduce((acc, doc) => {
-    const cat = doc.category || 'Uncategorized';
+    const cat = doc.category || t('documents.uncategorized');
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(doc);
     return acc;
@@ -185,22 +186,22 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Opening External Link
+              {t('documents.openingExternalLink')}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
-              <p>You are about to open an external website:</p>
+              <p>{t('documents.aboutToOpen')}</p>
               <p className="font-mono text-sm bg-muted p-2 rounded break-all">
                 {pendingExternalUrl}
               </p>
               <p className="text-amber-600 dark:text-amber-400">
-                This link leads to an external site. Make sure you trust this destination before proceeding.
+                {t('documents.externalLinkWarning')}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelOpenExternalLink}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={cancelOpenExternalLink}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmOpenExternalLink}>
-              Open Link
+              {t('documents.openLink')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -212,19 +213,19 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
             <DialogTrigger asChild>
               <Button>
                 <Upload className="h-4 w-4 mr-2" />
-                Upload File
+                {t('documents.uploadFile')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Upload Document</DialogTitle>
+                <DialogTitle>{t('documents.uploadDocument')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Category</Label>
+                  <Label>{t('documents.category')}</Label>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('documents.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((cat) => (
@@ -234,15 +235,15 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                   </Select>
                 </div>
                 <div>
-                  <Label>Description (optional)</Label>
+                  <Label>{t('documents.descriptionOptional')}</Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Brief description..."
+                    placeholder={t('documents.descriptionPlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label>File</Label>
+                  <Label>{t('documents.file')}</Label>
                   <Input
                     ref={fileInputRef}
                     type="file"
@@ -258,35 +259,35 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
             <DialogTrigger asChild>
               <Button variant="outline">
                 <LinkIcon className="h-4 w-4 mr-2" />
-                Add Link
+                {t('documents.addLink')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add External Link</DialogTitle>
+                <DialogTitle>{t('documents.addExternalLink')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Name</Label>
+                  <Label>{t('documents.name')}</Label>
                   <Input
                     value={linkName}
                     onChange={(e) => setLinkName(e.target.value)}
-                    placeholder="e.g., Pitch Deck on Google Drive"
+                    placeholder={t('documents.namePlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label>URL</Label>
+                  <Label>{t('documents.url')}</Label>
                   <Input
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    placeholder="https://..."
+                    placeholder={t('documents.urlPlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label>Category</Label>
+                  <Label>{t('documents.category')}</Label>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('documents.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((cat) => (
@@ -296,11 +297,11 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                   </Select>
                 </div>
                 <div>
-                  <Label>Description (optional)</Label>
+                  <Label>{t('documents.descriptionOptional')}</Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Brief description..."
+                    placeholder={t('documents.descriptionPlaceholder')}
                   />
                 </div>
                 <Button 
@@ -308,7 +309,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                   disabled={addLinkMutation.isPending}
                   className="w-full"
                 >
-                  Add Link
+                  {t('documents.addLink')}
                 </Button>
               </div>
             </DialogContent>
@@ -319,7 +320,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
       {Object.keys(groupedDocuments).length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No documents yet. {canWrite && 'Upload a file or add a link to get started.'}
+            {t('documents.noDocumentsDesc')} {canWrite && t('documents.getStarted')}
           </CardContent>
         </Card>
       ) : (
