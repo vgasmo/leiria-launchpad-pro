@@ -201,3 +201,52 @@ export function useActionItemsByMilestone(milestoneId: string | undefined) {
     enabled: !!milestoneId,
   });
 }
+
+// Bulk operations
+export function useBulkUpdateActions(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: ActionStatus }) => {
+      const updateData: Record<string, unknown> = { status };
+      
+      if (status === 'completed') {
+        updateData.completed_at = new Date().toISOString();
+      } else {
+        updateData.completed_at = null;
+      }
+
+      const { error } = await supabase
+        .from('action_items')
+        .update(updateData)
+        .in('id', ids);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
+    },
+  });
+}
+
+export function useBulkDeleteActions(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from('action_items')
+        .delete()
+        .in('id', ids);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
+    },
+  });
+}
