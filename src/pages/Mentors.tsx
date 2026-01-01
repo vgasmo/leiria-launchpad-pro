@@ -10,7 +10,8 @@ import {
   Users,
   Briefcase,
   Send,
-  Loader2
+  Loader2,
+  Calendar
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { connectionMessageSchema, validateFormData } from '@/lib/validations';
+import { MentorAvailabilitySettings } from '@/components/mentors/MentorAvailabilitySettings';
 
 interface MentorProfile {
   id: string;
@@ -443,14 +445,31 @@ export default function Mentors() {
           </TabsContent>
         </Tabs>
       ) : isMentor ? (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Connection Requests</CardTitle>
-              <CardDescription>
-                Founders interested in connecting with you
-              </CardDescription>
-            </CardHeader>
+        <Tabs defaultValue="requests" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="requests" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Connection Requests
+              {pendingConnections.length > 0 && (
+                <Badge variant="secondary" className="ml-1">
+                  {pendingConnections.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="availability" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Availability
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requests">
+            <Card>
+              <CardHeader>
+                <CardTitle>Connection Requests</CardTitle>
+                <CardDescription>
+                  Founders interested in connecting with you
+                </CardDescription>
+              </CardHeader>
             <CardContent>
               {loadingConnections ? (
                 <div className="space-y-4">
@@ -582,7 +601,12 @@ export default function Mentors() {
               )}
             </CardContent>
           </Card>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="availability">
+            <MentorAvailabilitySettings />
+          </TabsContent>
+        </Tabs>
       ) : (
         <Card>
           <CardContent className="p-12 text-center">
