@@ -131,6 +131,7 @@ export type Database = {
           external_url: string | null
           file_path: string | null
           id: string
+          mime_type: string | null
           name: string
           updated_at: string
           uploaded_by: string | null
@@ -144,6 +145,7 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          mime_type?: string | null
           name: string
           updated_at?: string
           uploaded_by?: string | null
@@ -157,6 +159,7 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          mime_type?: string | null
           name?: string
           updated_at?: string
           uploaded_by?: string | null
@@ -921,11 +924,13 @@ export type Database = {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
+      can_manage_startup: { Args: { _startup_id: string }; Returns: boolean }
       can_write_workspace: { Args: { _workspace_id: string }; Returns: boolean }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      has_program_access: { Args: { _program_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
