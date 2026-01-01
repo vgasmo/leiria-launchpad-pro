@@ -16,6 +16,8 @@ export interface Milestone {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  action_count?: number;
+  completed_action_count?: number;
 }
 
 export function useMilestones(workspaceId: string | undefined) {
@@ -31,7 +33,31 @@ export function useMilestones(workspaceId: string | undefined) {
         .order('position', { ascending: true });
 
       if (error) throw error;
-      return (data || []) as Milestone[];
+      
+      // Fetch action counts for each milestone
+      const milestoneIds = (data || []).map(m => m.id);
+      if (milestoneIds.length === 0) return [] as Milestone[];
+      
+      const { data: actionCounts } = await supabase
+        .from('action_items')
+        .select('milestone_id, status')
+        .in('milestone_id', milestoneIds);
+      
+      // Calculate counts per milestone
+      const countMap = new Map<string, { total: number; completed: number }>();
+      (actionCounts || []).forEach(a => {
+        if (!a.milestone_id) return;
+        const current = countMap.get(a.milestone_id) || { total: 0, completed: 0 };
+        current.total++;
+        if (a.status === 'completed') current.completed++;
+        countMap.set(a.milestone_id, current);
+      });
+      
+      return (data || []).map(m => ({
+        ...m,
+        action_count: countMap.get(m.id)?.total || 0,
+        completed_action_count: countMap.get(m.id)?.completed || 0,
+      })) as Milestone[];
     },
     enabled: !!workspaceId,
   });

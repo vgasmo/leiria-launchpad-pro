@@ -57,6 +57,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          milestone_id: string | null
           owner_user_id: string | null
           priority: string | null
           session_id: string | null
@@ -72,6 +73,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          milestone_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
           session_id?: string | null
@@ -87,6 +89,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          milestone_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
           session_id?: string | null
@@ -96,6 +99,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "action_items_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "action_items_session_id_fkey"
             columns: ["session_id"]
