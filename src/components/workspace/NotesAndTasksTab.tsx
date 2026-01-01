@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import { useConsultantNotes, useCreateConsultantNote, useDeleteConsultantNote } from '@/hooks/useConsultantNotes';
 import {
@@ -63,18 +64,9 @@ import {
   Phone,
   FileText,
   MoreVertical,
-  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-
-const TASK_TYPES = [
-  { value: 'general', label: 'General Task', icon: FileText },
-  { value: 'connect_startup', label: 'Connect Startup', icon: Users },
-  { value: 'contact_investor', label: 'Contact Investor', icon: Phone },
-  { value: 'follow_up', label: 'Follow Up', icon: Clock },
-  { value: 'review', label: 'Review Template', icon: FileText },
-];
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
@@ -89,6 +81,7 @@ interface NotesAndTasksTabProps {
 }
 
 export function NotesAndTasksTab({ workspaceId, startupId }: NotesAndTasksTabProps) {
+  const { t } = useTranslation();
   const { isConsultor, isAdmin, isMentor, user } = useAuth();
   const canManage = isConsultor || isAdmin || isMentor;
 
@@ -97,11 +90,11 @@ export function NotesAndTasksTab({ workspaceId, startupId }: NotesAndTasksTabPro
       <TabsList>
         <TabsTrigger value="tasks" className="gap-2">
           <CheckCircle2 className="h-4 w-4" />
-          Tasks
+          {t('notes.tasks')}
         </TabsTrigger>
         <TabsTrigger value="notes" className="gap-2">
           <MessageSquare className="h-4 w-4" />
-          Notes
+          {t('notes.notes')}
         </TabsTrigger>
       </TabsList>
 
@@ -133,6 +126,7 @@ function TasksSection({
   canManage: boolean;
   userId?: string;
 }) {
+  const { t } = useTranslation();
   const { data: tasks, isLoading } = useWorkspaceStaffTasks(workspaceId);
   const completeMutation = useCompleteStaffTask();
   const deleteMutation = useDeleteStaffTask();
@@ -146,9 +140,9 @@ function TasksSection({
   const handleComplete = async (task: StaffTask) => {
     try {
       await completeMutation.mutateAsync(task.id);
-      toast.success('Task completed');
+      toast.success(t('notes.taskCompleted'));
     } catch {
-      toast.error('Failed to complete task');
+      toast.error(t('notes.failedToComplete'));
     }
   };
 
@@ -156,10 +150,10 @@ function TasksSection({
     if (!deleteTaskId) return;
     try {
       await deleteMutation.mutateAsync(deleteTaskId);
-      toast.success('Task deleted');
+      toast.success(t('notes.taskDeleted'));
       setDeleteTaskId(null);
     } catch {
-      toast.error('Failed to delete task');
+      toast.error(t('notes.failedToDelete'));
     }
   };
 
@@ -184,12 +178,12 @@ function TasksSection({
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
-              Tasks for this Startup
+              {t('notes.tasksForStartup')}
             </CardTitle>
             {canManage && (
               <Button size="sm" onClick={() => setIsCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" />
-                Add Task
+                {t('notes.addTask')}
               </Button>
             )}
           </div>
@@ -198,15 +192,15 @@ function TasksSection({
           {pendingTasks.length === 0 && completedTasks.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No tasks yet</p>
-              {canManage && <p className="text-sm">Create a task to get started</p>}
+              <p>{t('notes.noTasksYet')}</p>
+              {canManage && <p className="text-sm">{t('notes.createTaskToStart')}</p>}
             </div>
           ) : (
             <div className="space-y-4">
               {/* Pending Tasks */}
               {pendingTasks.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Pending ({pendingTasks.length})</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">{t('notes.pending')} ({pendingTasks.length})</h4>
                   {pendingTasks.map((task) => (
                     <TaskItem
                       key={task.id}
@@ -222,7 +216,7 @@ function TasksSection({
               {/* Completed Tasks */}
               {completedTasks.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Completed ({completedTasks.length})</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">{t('notes.completed')} ({completedTasks.length})</h4>
                   {completedTasks.slice(0, 5).map((task) => (
                     <TaskItem
                       key={task.id}
@@ -235,7 +229,7 @@ function TasksSection({
                   ))}
                   {completedTasks.length > 5 && (
                     <p className="text-xs text-muted-foreground text-center">
-                      +{completedTasks.length - 5} more completed
+                      {t('notes.moreCompleted', { count: completedTasks.length - 5 })}
                     </p>
                   )}
                 </div>
@@ -260,18 +254,18 @@ function TasksSection({
       <AlertDialog open={!!deleteTaskId} onOpenChange={() => setDeleteTaskId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogTitle>{t('notes.deleteTask')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this task? This action cannot be undone.
+              {t('notes.deleteTaskConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -293,10 +287,19 @@ function TaskItem({
   onDelete: () => void;
   isCompleted?: boolean;
 }) {
+  const { t } = useTranslation();
   const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date)) && !isCompleted;
   const isDueToday = task.due_date && isToday(new Date(task.due_date));
 
-  const TaskIcon = TASK_TYPES.find((t) => t.value === task.task_type)?.icon || FileText;
+  const TASK_TYPES: Record<string, { label: string; icon: typeof FileText }> = {
+    general: { label: t('notes.generalTask'), icon: FileText },
+    connect_startup: { label: t('notes.connectStartup'), icon: Users },
+    contact_investor: { label: t('notes.contactInvestor'), icon: Phone },
+    follow_up: { label: t('notes.followUp'), icon: Clock },
+    review: { label: t('notes.reviewTemplate'), icon: FileText },
+  };
+
+  const TaskIcon = TASK_TYPES[task.task_type]?.icon || FileText;
 
   return (
     <div className={`flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group ${isCompleted ? 'opacity-60' : ''}`}>
@@ -322,13 +325,13 @@ function TaskItem({
                   : 'text-muted-foreground'
               }`}
             >
-              {isOverdue ? 'Overdue: ' : isDueToday ? 'Today' : ''}
+              {isOverdue ? `${t('common.overdue')}: ` : isDueToday ? t('common.today') : ''}
               {!isDueToday && format(new Date(task.due_date), 'MMM d')}
             </span>
           )}
           {task.priority && task.priority !== 'medium' && (
             <Badge className={`text-[10px] px-1.5 py-0 ${PRIORITY_COLORS[task.priority]}`}>
-              {task.priority}
+              {t(`notes.${task.priority}`)}
             </Badge>
           )}
           {task.assignee && (
@@ -359,12 +362,12 @@ function TaskItem({
             {!isCompleted && (
               <DropdownMenuItem onClick={onComplete}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                Mark Complete
+                {t('notes.markComplete')}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              {t('common.delete')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -386,6 +389,7 @@ function CreateWorkspaceTaskDialog({
   startupId?: string;
   assigneeId: string;
 }) {
+  const { t } = useTranslation();
   const createMutation = useCreateStaffTask();
 
   const [formData, setFormData] = useState({
@@ -396,10 +400,18 @@ function CreateWorkspaceTaskDialog({
     due_date: '',
   });
 
+  const TASK_TYPES = [
+    { value: 'general', label: t('notes.generalTask'), icon: FileText },
+    { value: 'connect_startup', label: t('notes.connectStartup'), icon: Users },
+    { value: 'contact_investor', label: t('notes.contactInvestor'), icon: Phone },
+    { value: 'follow_up', label: t('notes.followUp'), icon: Clock },
+    { value: 'review', label: t('notes.reviewTemplate'), icon: FileText },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Please enter a task title');
+      toast.error(t('notes.titleRequired'));
       return;
     }
 
@@ -414,7 +426,7 @@ function CreateWorkspaceTaskDialog({
         workspace_id: workspaceId,
         related_startup_id: startupId || null,
       });
-      toast.success('Task created');
+      toast.success(t('notes.taskCreated'));
       onOpenChange(false);
       setFormData({
         title: '',
@@ -424,7 +436,7 @@ function CreateWorkspaceTaskDialog({
         due_date: '',
       });
     } catch {
-      toast.error('Failed to create task');
+      toast.error(t('notes.failedToCreate'));
     }
   };
 
@@ -432,31 +444,31 @@ function CreateWorkspaceTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Task</DialogTitle>
+          <DialogTitle>{t('notes.createTask')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t('notes.taskTitle')} *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
-              placeholder="e.g., Follow up on investor meeting"
+              placeholder={t('notes.taskTitlePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('notes.description')}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-              placeholder="Add details..."
+              placeholder={t('notes.descriptionPlaceholder')}
               rows={2}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Type</Label>
+              <Label>{t('notes.taskType')}</Label>
               <Select
                 value={formData.task_type}
                 onValueChange={(v) => setFormData((p) => ({ ...p, task_type: v }))}
@@ -474,7 +486,7 @@ function CreateWorkspaceTaskDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Priority</Label>
+              <Label>{t('actions.priority')}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(v) => setFormData((p) => ({ ...p, priority: v }))}
@@ -483,16 +495,16 @@ function CreateWorkspaceTaskDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t('notes.low')}</SelectItem>
+                  <SelectItem value="medium">{t('notes.medium')}</SelectItem>
+                  <SelectItem value="high">{t('notes.high')}</SelectItem>
+                  <SelectItem value="urgent">{t('notes.urgent')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="due_date">Due Date</Label>
+            <Label htmlFor="due_date">{t('notes.dueDate')}</Label>
             <Input
               id="due_date"
               type="date"
@@ -502,10 +514,10 @@ function CreateWorkspaceTaskDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create Task'}
+              {createMutation.isPending ? t('common.creating') : t('notes.createTask')}
             </Button>
           </DialogFooter>
         </form>
@@ -516,6 +528,7 @@ function CreateWorkspaceTaskDialog({
 
 // Notes Section (existing consultant notes functionality)
 function NotesSection({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const [newNote, setNewNote] = useState('');
   const [isPrivate, setIsPrivate] = useState(true);
 
@@ -525,7 +538,7 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
 
   const handleSubmit = async () => {
     if (!newNote.trim()) {
-      toast.error('Please enter a note');
+      toast.error(t('notes.enterNote'));
       return;
     }
 
@@ -536,18 +549,18 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
         isPrivate,
       });
       setNewNote('');
-      toast.success('Note added');
+      toast.success(t('notes.noteAdded'));
     } catch {
-      toast.error('Failed to add note');
+      toast.error(t('notes.failedToAddNote'));
     }
   };
 
   const handleDelete = async (noteId: string) => {
     try {
       await deleteNote.mutateAsync(noteId);
-      toast.success('Note deleted');
+      toast.success(t('notes.noteDeleted'));
     } catch {
-      toast.error('Failed to delete note');
+      toast.error(t('notes.failedToDeleteNote'));
     }
   };
 
@@ -558,12 +571,12 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              Add Internal Note
+              {t('notes.addInternalNote')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
-              placeholder="Write your internal note about this startup..."
+              placeholder={t('notes.notePlaceholder')}
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               rows={4}
@@ -579,19 +592,19 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
                   {isPrivate ? (
                     <>
                       <Lock className="h-4 w-4" />
-                      Private (consultants only)
+                      {t('notes.privateLabel')}
                     </>
                   ) : (
                     <>
                       <Unlock className="h-4 w-4" />
-                      Visible to workspace members
+                      {t('notes.visibleLabel')}
                     </>
                   )}
                 </Label>
               </div>
               <Button onClick={handleSubmit} disabled={createNote.isPending || !newNote.trim()}>
                 <Plus className="h-4 w-4 mr-2" />
-                {createNote.isPending ? 'Adding...' : 'Add Note'}
+                {createNote.isPending ? t('notes.adding') : t('notes.addNote')}
               </Button>
             </div>
           </CardContent>
@@ -600,7 +613,7 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Notes History</CardTitle>
+          <CardTitle className="text-lg">{t('notes.notesHistory')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="max-h-[500px]">
@@ -618,7 +631,7 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
               </div>
             ) : !notes?.length ? (
               <p className="text-center text-muted-foreground py-8">
-                No notes yet. {canManage && 'Add the first note above.'}
+                {t('notes.noNotesYet')} {canManage && t('notes.addFirstNote')}
               </p>
             ) : (
               <div className="space-y-4">
@@ -639,7 +652,7 @@ function NotesSection({ workspaceId, canManage }: { workspaceId: string; canMana
                           {note.is_private && (
                             <Badge variant="secondary" className="text-xs">
                               <Lock className="h-3 w-3 mr-1" />
-                              Private
+                              {t('notes.private')}
                             </Badge>
                           )}
                         </div>
