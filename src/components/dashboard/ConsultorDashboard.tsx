@@ -250,7 +250,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
 
       {/* Pending Reviews & Tasks Section */}
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <PendingTemplateReviews />
+        <PendingTemplateReviews showEmpty />
         <StaffTasksPanel />
       </div>
 

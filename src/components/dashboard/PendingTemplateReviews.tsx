@@ -1,4 +1,4 @@
-import { FileText, ChevronRight, Clock } from 'lucide-react';
+import { FileText, ChevronRight, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,11 @@ import { usePendingTemplateReviews } from '@/hooks/useTemplates';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
-export function PendingTemplateReviews() {
+interface PendingTemplateReviewsProps {
+  showEmpty?: boolean;
+}
+
+export function PendingTemplateReviews({ showEmpty = false }: PendingTemplateReviewsProps) {
   const navigate = useNavigate();
   const { data: pendingReviews, isLoading } = usePendingTemplateReviews();
 
@@ -27,7 +31,23 @@ export function PendingTemplateReviews() {
   }
 
   if (!pendingReviews?.length) {
-    return null;
+    if (!showEmpty) return null;
+    
+    return (
+      <Card className="border-muted">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            Templates Pending Review
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No templates awaiting review
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   const handleNavigate = (workspaceId: string) => {
@@ -38,7 +58,7 @@ export function PendingTemplateReviews() {
     <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="h-4 w-4 text-amber-600" />
+          <AlertCircle className="h-4 w-4 text-amber-600" />
           Templates Pending Review
           <Badge variant="secondary" className="ml-auto bg-amber-100 text-amber-700">
             {pendingReviews.length}
