@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   useTemplates, 
   useTemplateInstances, 
@@ -19,6 +20,7 @@ import {
   type TemplateInstance,
   type TemplateField,
 } from '@/hooks/useTemplates';
+import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { toast } from 'sonner';
 
 interface TemplatesTabProps {
@@ -88,7 +90,23 @@ export function TemplatesTab({ workspaceId, canWrite }: TemplatesTabProps) {
   const categories = Object.keys(templatesByCategory).sort();
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="templates" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="templates" className="gap-2">
+          <FileText className="h-4 w-4" />
+          Templates
+        </TabsTrigger>
+        <TabsTrigger value="calculator" className="gap-2">
+          <Calculator className="h-4 w-4" />
+          Unit Economics
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="calculator">
+        <UnitEconomicsCalculator />
+      </TabsContent>
+
+      <TabsContent value="templates" className="space-y-6">
       {categories.map(category => (
         <div key={category}>
           <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
@@ -143,7 +161,8 @@ export function TemplatesTab({ workspaceId, canWrite }: TemplatesTabProps) {
         canWrite={canWrite}
         onClose={handleCloseEditor}
       />
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }
 
