@@ -1,0 +1,113 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "loading": "A carregar...",
+    "noResults": "Nenhum resultado encontrado",
+    "confirmDelete": "Tem a certeza que quer eliminar?",
+    "success": "Sucesso",
+    "error": "Erro",
+    "settings": "Definições",
+    "logout": "Terminar sessão"
+  },
+  "nav": {
+    "workspaces": "Workspaces",
+    "mentors": "Mentores",
+    "settings": "Definições",
+    "admin": "Admin"
+  },
+  "dashboard": {
+    "portfolio": "Visão do Portfólio",
+    "myStartup": "A Minha Startup",
+    "allStartups": "Todas as Startups",
+    "viewAll": "Ver Todas",
+    "upcomingSessions": "Próximas Sessões",
+    "pendingActions": "Ações Pendentes",
+    "overdueActions": "Ações Atrasadas",
+    "meetingsToday": "Reuniões Hoje",
+    "criticalHealth": "Crítico",
+    "atRisk": "Em Risco",
+    "healthy": "Saudável",
+    "noWorkspaces": "Nenhum workspace encontrado"
+  },
+  "sessions": {
+    "title": "Sessões",
+    "createSession": "Criar Sessão",
+    "noSessions": "Nenhuma sessão encontrada",
+    "needsNotes": "Precisa de notas",
+    "duration": "Duração",
+    "agenda": "Agenda",
+    "notes": "Notas",
+    "decisions": "Decisões",
+    "export": "Exportar",
+    "sendInvites": "Enviar convites por email",
+    "location": "Localização",
+    "meetingLink": "Link da Reunião"
+  },
+  "actions": {
+    "title": "Ações",
+    "createAction": "Criar Ação",
+    "noActions": "Nenhuma ação encontrada",
+    "pending": "Pendente",
+    "inProgress": "Em Progresso",
+    "completed": "Concluída",
+    "cancelled": "Cancelada",
+    "overdue": "Atrasada",
+    "dueDate": "Data Limite",
+    "priority": "Prioridade",
+    "assignee": "Responsável"
+  },
+  "milestones": {
+    "title": "Marcos",
+    "createMilestone": "Criar Marco",
+    "noMilestones": "Nenhum marco encontrado",
+    "notStarted": "Não Iniciado",
+    "inProgress": "Em Progresso",
+    "completed": "Concluído",
+    "delayed": "Atrasado",
+    "targetDate": "Data Alvo"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Sem notificações",
+    "settings": "Definições de Notificações"
+  },
+  "settings": {
+    "account": "Conta",
+    "profile": "Perfil",
+    "notifications": "Notificações",
+    "language": "Idioma",
+    "theme": "Tema",
+    "emailDigest": "Resumo por Email",
+    "digestFrequency": "Frequência do Resumo",
+    "daily": "Diário",
+    "weekly": "Semanal",
+    "dayOfWeek": "Dia da Semana"
+  },
+  "stages": {
+    "ideation": "Ideação",
+    "validation": "Validação",
+    "mvp": "MVP",
+    "growth": "Crescimento",
+    "scale": "Escala"
+  },
+  "health": {
+    "critical": "Crítico",
+    "atRisk": "Em Risco",
+    "stable": "Estável",
+    "healthy": "Saudável",
+    "thriving": "Próspero"
+  },
+  "roles": {
+    "admin": "Admin",
+    "consultor": "Consultor",
+    "mentor": "Mentor",
+    "founder": "Fundador",
+    "teamMember": "Membro da Equipa"
+  }
+}

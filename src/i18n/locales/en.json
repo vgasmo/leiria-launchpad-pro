@@ -1,0 +1,113 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "success": "Success",
+    "error": "Error",
+    "settings": "Settings",
+    "logout": "Sign out"
+  },
+  "nav": {
+    "workspaces": "Workspaces",
+    "mentors": "Mentors",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "dashboard": {
+    "portfolio": "Portfolio Overview",
+    "myStartup": "My Startup",
+    "allStartups": "All Startups",
+    "viewAll": "View All",
+    "upcomingSessions": "Upcoming Sessions",
+    "pendingActions": "Pending Actions",
+    "overdueActions": "Overdue Actions",
+    "meetingsToday": "Meetings Today",
+    "criticalHealth": "Critical",
+    "atRisk": "At Risk",
+    "healthy": "Healthy",
+    "noWorkspaces": "No workspaces found"
+  },
+  "sessions": {
+    "title": "Sessions",
+    "createSession": "Create Session",
+    "noSessions": "No sessions found",
+    "needsNotes": "Needs notes",
+    "duration": "Duration",
+    "agenda": "Agenda",
+    "notes": "Notes",
+    "decisions": "Decisions",
+    "export": "Export",
+    "sendInvites": "Send email invites",
+    "location": "Location",
+    "meetingLink": "Meeting Link"
+  },
+  "actions": {
+    "title": "Actions",
+    "createAction": "Create Action",
+    "noActions": "No actions found",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "overdue": "Overdue",
+    "dueDate": "Due Date",
+    "priority": "Priority",
+    "assignee": "Assignee"
+  },
+  "milestones": {
+    "title": "Milestones",
+    "createMilestone": "Create Milestone",
+    "noMilestones": "No milestones found",
+    "notStarted": "Not Started",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "delayed": "Delayed",
+    "targetDate": "Target Date"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications yet",
+    "settings": "Notification Settings"
+  },
+  "settings": {
+    "account": "Account",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme",
+    "emailDigest": "Email Digest",
+    "digestFrequency": "Digest Frequency",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "dayOfWeek": "Day of Week"
+  },
+  "stages": {
+    "ideation": "Ideation",
+    "validation": "Validation",
+    "mvp": "MVP",
+    "growth": "Growth",
+    "scale": "Scale"
+  },
+  "health": {
+    "critical": "Critical",
+    "atRisk": "At Risk",
+    "stable": "Stable",
+    "healthy": "Healthy",
+    "thriving": "Thriving"
+  },
+  "roles": {
+    "admin": "Admin",
+    "consultor": "Consultant",
+    "mentor": "Mentor",
+    "founder": "Founder",
+    "teamMember": "Team Member"
+  }
+}
