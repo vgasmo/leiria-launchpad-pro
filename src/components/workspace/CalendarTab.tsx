@@ -241,21 +241,22 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
 
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const MeetingForm = ({ isEdit = false }: { isEdit?: boolean }) => (
+  // Form fields JSX - inline to avoid re-render issues
+  const renderMeetingFormFields = (isEdit: boolean) => (
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
-        <Label htmlFor="title">Title *</Label>
+        <Label htmlFor={isEdit ? "edit-title" : "title"}>Title *</Label>
         <Input
-          id="title"
+          id={isEdit ? "edit-title" : "title"}
           value={formData.title}
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           placeholder="Meeting title"
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor={isEdit ? "edit-description" : "description"}>Description</Label>
         <Textarea
-          id="description"
+          id={isEdit ? "edit-description" : "description"}
           value={formData.description}
           onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           placeholder="Optional description"
@@ -264,27 +265,27 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="grid gap-2">
-          <Label htmlFor="date">Date *</Label>
+          <Label htmlFor={isEdit ? "edit-date" : "date"}>Date *</Label>
           <Input
-            id="date"
+            id={isEdit ? "edit-date" : "date"}
             type="date"
             value={formData.date}
             onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="startTime">Start *</Label>
+          <Label htmlFor={isEdit ? "edit-startTime" : "startTime"}>Start *</Label>
           <Input
-            id="startTime"
+            id={isEdit ? "edit-startTime" : "startTime"}
             type="time"
             value={formData.startTime}
             onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="endTime">End *</Label>
+          <Label htmlFor={isEdit ? "edit-endTime" : "endTime"}>End *</Label>
           <Input
-            id="endTime"
+            id={isEdit ? "edit-endTime" : "endTime"}
             type="time"
             value={formData.endTime}
             onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
@@ -292,25 +293,25 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor={isEdit ? "edit-location" : "location"}>Location</Label>
         <Input
-          id="location"
+          id={isEdit ? "edit-location" : "location"}
           value={formData.location}
           onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
           placeholder="Meeting room or address"
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="joinUrl">Meeting Link</Label>
+        <Label htmlFor={isEdit ? "edit-joinUrl" : "joinUrl"}>Meeting Link</Label>
         <Input
-          id="joinUrl"
+          id={isEdit ? "edit-joinUrl" : "joinUrl"}
           value={formData.joinUrl}
           onChange={(e) => setFormData((prev) => ({ ...prev, joinUrl: e.target.value }))}
           placeholder="https://meet.google.com/..."
         />
       </div>
       
-      {/* Send Invites Section */}
+      {/* Send Invites Section - only for new meetings */}
       {!isEdit && (
         <div className="border-t pt-4 space-y-3">
           <div className="flex items-center space-x-2">
@@ -396,7 +397,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                     Add a new meeting to the calendar
                   </DialogDescription>
                 </DialogHeader>
-                <MeetingForm />
+                {renderMeetingFormFields(false)}
                 <DialogFooter>
                   <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); resetForm(); }}>
                     Cancel
@@ -600,7 +601,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
               Update meeting details
             </DialogDescription>
           </DialogHeader>
-          <MeetingForm isEdit />
+          {renderMeetingFormFields(true)}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); resetForm(); setEditingMeeting(null); }}>
               Cancel
