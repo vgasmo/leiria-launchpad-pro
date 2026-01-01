@@ -13,10 +13,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useAttentionCount } from '@/hooks/useAttentionCount';
 
 export function TopBar() {
   const navigate = useNavigate();
   const { profile, roles, isAdmin, signOut } = useAuth();
+  const { data: attentionStats } = useAttentionCount();
+
+  const attentionCount = attentionStats?.totalAttention || 0;
 
   const initials = profile?.full_name
     ?.split(' ')
@@ -41,12 +45,14 @@ export function TopBar() {
       <ThemeToggle className="text-muted-foreground" />
 
       {/* Notifications */}
-      <Link to="/my-workspaces?filter=attention">
+      <Link to="/my-workspaces?filter=attention" data-tour="notifications">
         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
           <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-            3
-          </span>
+          {attentionCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+              {attentionCount > 9 ? '9+' : attentionCount}
+            </span>
+          )}
         </Button>
       </Link>
 
