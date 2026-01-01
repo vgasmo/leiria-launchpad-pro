@@ -2,7 +2,6 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
@@ -12,6 +11,7 @@ import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
 import { TemplatesTab } from '@/components/workspace/TemplatesTab';
+import { CalendarTab } from '@/components/workspace/CalendarTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
@@ -122,7 +122,7 @@ export default function WorkspaceDetail() {
           <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="calendar">
-          <Card><CardContent className="py-12 text-center text-muted-foreground">Calendar with Google sync coming soon.</CardContent></Card>
+          <CalendarTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="documents">
           <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
