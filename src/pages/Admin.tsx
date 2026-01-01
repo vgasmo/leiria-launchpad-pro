@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, FileDown } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -13,45 +14,47 @@ import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 
 export default function Admin() {
+  const { t } = useTranslation();
+  
   return (
-    <AppLayout title="Admin Panel" subtitle="Manage programs, users, and settings">
+    <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
       <Tabs defaultValue="approvals" className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
           <TabsTrigger value="approvals" className="gap-2">
-            <Clock className="h-4 w-4" />
-            Approvals
+            <Clock className="h-4 w-4" aria-hidden="true" />
+            {t('admin.approvals')}
           </TabsTrigger>
           <TabsTrigger value="programs" className="gap-2">
-            <Building2 className="h-4 w-4" />
-            Programs
+            <Building2 className="h-4 w-4" aria-hidden="true" />
+            {t('admin.programs')}
           </TabsTrigger>
           <TabsTrigger value="startups" className="gap-2">
-            <Rocket className="h-4 w-4" />
-            Startups
+            <Rocket className="h-4 w-4" aria-hidden="true" />
+            {t('admin.startups')}
           </TabsTrigger>
           <TabsTrigger value="workspaces" className="gap-2">
-            <Briefcase className="h-4 w-4" />
-            Workspaces
+            <Briefcase className="h-4 w-4" aria-hidden="true" />
+            {t('admin.workspaces')}
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
-            <Users className="h-4 w-4" />
-            Users
+            <Users className="h-4 w-4" aria-hidden="true" />
+            {t('admin.users')}
           </TabsTrigger>
           <TabsTrigger value="kpis" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            KPIs
+            <BarChart3 className="h-4 w-4" aria-hidden="true" />
+            {t('admin.kpis')}
           </TabsTrigger>
           <TabsTrigger value="templates" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Templates
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            {t('admin.templates')}
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-2">
-            <Activity className="h-4 w-4" />
-            Activity Log
+            <Activity className="h-4 w-4" aria-hidden="true" />
+            {t('admin.activityLog')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Analytics
+            <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            {t('admin.analytics')}
           </TabsTrigger>
         </TabsList>
 

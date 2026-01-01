@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users } from 'lucide-react';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,16 +15,17 @@ import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
-const loginSchema = z.object({
-  email: z.string().trim().email({ message: "Invalid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
-
-const signupSchema = loginSchema.extend({
-  fullName: z.string().trim().min(2, { message: "Name must be at least 2 characters" }).max(100),
-});
-
 export default function Login() {
+  const { t } = useTranslation();
+  
+  const loginSchema = z.object({
+    email: z.string().trim().email({ message: t('login.invalidEmail') }),
+    password: z.string().min(6, { message: t('login.passwordMinLength') }),
+  });
+
+  const signupSchema = loginSchema.extend({
+    fullName: z.string().trim().min(2, { message: t('login.nameMinLength') }).max(100),
+  });
   const navigate = useNavigate();
   const { user, isLoading, signIn, signUp } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
@@ -70,7 +72,7 @@ export default function Login() {
 
     if (error) {
       if (error.message.includes('Invalid login credentials')) {
-        setError('Invalid email or password. Please try again.');
+        setError(t('login.invalidCredentials'));
       } else {
         setError(error.message);
       }
@@ -98,7 +100,7 @@ export default function Login() {
 
     if (error) {
       if (error.message.includes('already registered')) {
-        setError('This email is already registered. Please sign in instead.');
+        setError(t('login.emailAlreadyRegistered'));
       } else {
         setError(error.message);
       }
@@ -112,7 +114,7 @@ export default function Login() {
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-muted-foreground animate-pulse">Loading...</p>
+          <p className="text-muted-foreground animate-pulse" aria-live="polite">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -152,18 +154,17 @@ export default function Login() {
             </div>
           </div>
           <h1 className="font-heading text-4xl font-bold text-background mb-4 tracking-tight">
-            Mentorship Platform
+            {t('login.platformTitle')}
           </h1>
           <p className="text-lg text-background/70 mb-10 leading-relaxed">
-            Empowering startups through structured mentorship, 
-            milestone tracking, and actionable insights.
+            {t('login.platformSubtitle')}
           </p>
           
           <div className="flex justify-center gap-6 flex-wrap">
             {[
-              { icon: '📈', label: 'Track Progress', delay: '0ms' },
-              { icon: '🤝', label: 'Manage Sessions', delay: '100ms' },
-              { icon: '🎯', label: 'Achieve Goals', delay: '200ms' },
+              { icon: '📈', label: t('login.trackProgress'), delay: '0ms' },
+              { icon: '🤝', label: t('login.manageSessions'), delay: '100ms' },
+              { icon: '🎯', label: t('login.achieveGoals'), delay: '200ms' },
             ].map((item) => (
               <div 
                 key={item.label}
@@ -179,9 +180,9 @@ export default function Login() {
           {/* Stats */}
           <div className={`mt-12 grid grid-cols-3 gap-6 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
-              { value: '150+', label: 'Startups' },
-              { value: '7', label: 'Mentors' },
-              { value: '500+', label: 'Sessions' },
+              { value: '150+', label: t('login.startups') },
+              { value: '7', label: t('login.mentors') },
+              { value: '500+', label: t('login.sessions') },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-3xl font-bold text-background">{stat.value}</div>
@@ -203,7 +204,7 @@ export default function Login() {
               className="h-16 w-auto mx-auto mb-4"
             />
             <h1 className="font-heading text-2xl font-bold text-foreground">
-              Mentorship Platform
+              {t('login.platformTitle')}
             </h1>
           </div>
 
@@ -211,18 +212,18 @@ export default function Login() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
             <CardHeader className="space-y-1 pb-4 relative">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <CardTitle className="font-heading text-2xl">Welcome</CardTitle>
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+                <CardTitle className="font-heading text-2xl">{t('login.welcome')}</CardTitle>
               </div>
               <CardDescription>
-                Sign in to access your workspaces or create a new account
+                {t('login.signInDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="relative">
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setError(null); }}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login" className="data-[state=active]:shadow-sm">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup" className="data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
+                  <TabsTrigger value="login" className="data-[state=active]:shadow-sm">{t('auth.signIn')}</TabsTrigger>
+                  <TabsTrigger value="signup" className="data-[state=active]:shadow-sm">{t('auth.signUp')}</TabsTrigger>
                 </TabsList>
 
                 {error && (
@@ -235,39 +236,42 @@ export default function Login() {
                 <TabsContent value="login" className="animate-fade-in">
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
+                      <Label htmlFor="login-email">{t('auth.email')}</Label>
                       <div className="relative group">
-                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
                         <Input
                           id="login-email"
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder={t('login.emailPlaceholder')}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 transition-shadow focus:shadow-md"
                           required
+                          aria-required="true"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="login-password">Password</Label>
+                      <Label htmlFor="login-password">{t('auth.password')}</Label>
                       <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
                         <Input
                           id="login-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder={t('login.passwordPlaceholder')}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 transition-shadow focus:shadow-md"
                           required
+                          aria-required="true"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showPassword ? t('accessibility.hidePassword') : t('accessibility.showPassword')}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                         </button>
                       </div>
                     </div>
@@ -278,10 +282,10 @@ export default function Login() {
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                          Signing in...
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" aria-hidden="true" />
+                          {t('login.signingIn')}
                         </span>
-                      ) : 'Sign In'}
+                      ) : t('auth.signIn')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -289,73 +293,77 @@ export default function Login() {
                 <TabsContent value="signup" className="animate-fade-in">
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Label htmlFor="signup-name">{t('login.fullName')}</Label>
                       <div className="relative group">
-                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
                         <Input
                           id="signup-name"
                           type="text"
-                          placeholder="John Doe"
+                          placeholder={t('login.fullNamePlaceholder')}
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           className="pl-10 transition-shadow focus:shadow-md"
                           required
+                          aria-required="true"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
+                      <Label htmlFor="signup-email">{t('auth.email')}</Label>
                       <div className="relative group">
-                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
                         <Input
                           id="signup-email"
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder={t('login.emailPlaceholder')}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 transition-shadow focus:shadow-md"
                           required
+                          aria-required="true"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
+                      <Label htmlFor="signup-password">{t('auth.password')}</Label>
                       <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder={t('login.passwordPlaceholder')}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 transition-shadow focus:shadow-md"
                           required
+                          aria-required="true"
                           minLength={6}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showPassword ? t('accessibility.hidePassword') : t('accessibility.showPassword')}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Must be at least 6 characters
+                        {t('login.passwordHint')}
                       </p>
                     </div>
                     
                     {/* Role Selection */}
                     <div className="space-y-3">
-                      <Label>I am a...</Label>
+                      <Label>{t('login.iAmA')}</Label>
                       {isConsultorEmail ? (
                         <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                           <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                            <Users className="h-4 w-4" />
-                            <span>Startup Leiria Consultor</span>
+                            <Users className="h-4 w-4" aria-hidden="true" />
+                            <span>{t('login.consultorDetected')}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Your role is automatically assigned based on your email domain.
+                            {t('login.consultorAutoAssign')}
                           </p>
                         </div>
                       ) : (
@@ -363,6 +371,7 @@ export default function Login() {
                           value={selectedRole} 
                           onValueChange={(v) => setSelectedRole(v as 'founder' | 'mentor_externo')}
                           className="grid grid-cols-2 gap-3"
+                          aria-label={t('login.iAmA')}
                         >
                           <Label
                             htmlFor="role-founder"
@@ -373,12 +382,12 @@ export default function Login() {
                             }`}
                           >
                             <RadioGroupItem value="founder" id="role-founder" className="sr-only" />
-                            <Rocket className={`h-6 w-6 ${selectedRole === 'founder' ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <Rocket className={`h-6 w-6 ${selectedRole === 'founder' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
                             <span className={`text-sm font-medium ${selectedRole === 'founder' ? 'text-primary' : 'text-foreground'}`}>
-                              Founder
+                              {t('login.founder')}
                             </span>
                             <span className="text-xs text-muted-foreground text-center">
-                              I'm building a startup
+                              {t('login.founderDesc')}
                             </span>
                           </Label>
                           <Label
@@ -390,12 +399,12 @@ export default function Login() {
                             }`}
                           >
                             <RadioGroupItem value="mentor_externo" id="role-mentor" className="sr-only" />
-                            <Users className={`h-6 w-6 ${selectedRole === 'mentor_externo' ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <Users className={`h-6 w-6 ${selectedRole === 'mentor_externo' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
                             <span className={`text-sm font-medium ${selectedRole === 'mentor_externo' ? 'text-primary' : 'text-foreground'}`}>
-                              External Mentor
+                              {t('login.externalMentor')}
                             </span>
                             <span className="text-xs text-muted-foreground text-center">
-                              I want to mentor startups
+                              {t('login.mentorDesc')}
                             </span>
                           </Label>
                         </RadioGroup>
@@ -409,10 +418,10 @@ export default function Login() {
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                          Creating account...
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" aria-hidden="true" />
+                          {t('login.creatingAccount')}
                         </span>
-                      ) : 'Create Account'}
+                      ) : t('login.createAccount')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -422,7 +431,7 @@ export default function Login() {
 
           {/* Footer */}
           <p className="text-center text-sm text-muted-foreground mt-6">
-            By signing in, you agree to our Terms of Service and Privacy Policy
+            {t('login.termsAgree')}
           </p>
         </div>
       </div>
