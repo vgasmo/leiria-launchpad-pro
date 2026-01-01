@@ -30,6 +30,7 @@ import {
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceMeetings, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
 import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
+import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -153,6 +154,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* Progress Report Button */}
+              <ProgressReportView 
+                workspaceId={workspace.id} 
+                workspace={workspace}
+              />
               {canWrite ? (
                 <Select value={workspace.stage} onValueChange={(v) => handleStageChange(v as StartupStage)}>
                   <SelectTrigger className="w-[140px]">
