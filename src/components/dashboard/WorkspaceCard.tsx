@@ -1,5 +1,6 @@
+import { memo } from 'react';
 import { format } from 'date-fns';
-import { Calendar, AlertTriangle, FileText } from 'lucide-react';
+import { Calendar, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +17,7 @@ interface WorkspaceCardProps {
   kpiTrend?: number[];
 }
 
-export function WorkspaceCard({ workspace, onClick, kpiTrend }: WorkspaceCardProps) {
+export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, kpiTrend }: WorkspaceCardProps) {
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   const hasOverdue = workspace.overdueActionsCount > 0;
 
@@ -103,4 +104,4 @@ export function WorkspaceCard({ workspace, onClick, kpiTrend }: WorkspaceCardPro
       </CardContent>
     </Card>
   );
-}
+});
