@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { DollarSign, Users, PieChartIcon, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const ROUND_TYPES = ['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'bridge', 'convertible-note'];
 const INVESTOR_TYPES = ['angel', 'vc', 'corporate', 'accelerator', 'family-office'];
@@ -28,6 +29,7 @@ interface FundingTrackerTabProps {
 }
 
 export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
+  const { t } = useTranslation();
   const [showRoundDialog, setShowRoundDialog] = useState(false);
   const [showInvestorDialog, setShowInvestorDialog] = useState(false);
   const [showCapTableDialog, setShowCapTableDialog] = useState(false);
@@ -42,7 +44,6 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
   const deleteInvestor = useDeleteInvestor();
   const deleteCapEntry = useDeleteCapTableEntry();
 
-  // Calculate totals
   const totalRaised = rounds?.reduce((sum, r) => sum + (r.raised_amount || 0), 0) || 0;
   const totalShares = capTable?.reduce((sum, e) => sum + e.shares, 0) || 0;
   const capTableData = capTable?.map(e => ({
@@ -66,10 +67,10 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
         announced_at: null,
         closed_at: null,
       });
-      toast.success('Funding round created');
+      toast.success(t('funding.roundCreated'));
       setShowRoundDialog(false);
     } catch {
-      toast.error('Failed to create funding round');
+      toast.error(t('funding.failedToCreate'));
     }
   };
 
@@ -87,10 +88,10 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
         status: formData.get('status') as string,
         notes: formData.get('notes') as string || null,
       });
-      toast.success('Investor added');
+      toast.success(t('funding.investorAdded'));
       setShowInvestorDialog(false);
     } catch {
-      toast.error('Failed to add investor');
+      toast.error(t('funding.failedToAddInvestor'));
     }
   };
 
@@ -111,10 +112,10 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
         cliff_months: null,
         notes: null,
       });
-      toast.success('Cap table entry added');
+      toast.success(t('funding.entryAdded'));
       setShowCapTableDialog(false);
     } catch {
-      toast.error('Failed to add cap table entry');
+      toast.error(t('funding.failedToAddEntry'));
     }
   };
 
@@ -130,25 +131,25 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              Total Raised
+              {t('funding.totalRaised')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRaised)}</div>
-            <p className="text-xs text-muted-foreground">{rounds?.length || 0} funding rounds</p>
+            <p className="text-xs text-muted-foreground">{t('funding.fundingRoundsCount', { count: rounds?.length || 0 })}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Investors
+              {t('funding.investors')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{investors?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {investors?.filter(i => i.status === 'committed').length || 0} committed
+              {investors?.filter(i => i.status === 'committed').length || 0} {t('funding.committed')}
             </p>
           </CardContent>
         </Card>
@@ -156,47 +157,47 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <PieChartIcon className="h-4 w-4" />
-              Shareholders
+              {t('funding.shareholders')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{capTable?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">{totalShares.toLocaleString()} total shares</p>
+            <p className="text-xs text-muted-foreground">{totalShares.toLocaleString()} {t('funding.shares')}</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="rounds" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="rounds">Funding Rounds</TabsTrigger>
-          <TabsTrigger value="investors">Investors</TabsTrigger>
-          <TabsTrigger value="captable">Cap Table</TabsTrigger>
+          <TabsTrigger value="rounds">{t('funding.rounds')}</TabsTrigger>
+          <TabsTrigger value="investors">{t('funding.investors')}</TabsTrigger>
+          <TabsTrigger value="captable">{t('funding.capTable')}</TabsTrigger>
         </TabsList>
 
         {/* Funding Rounds */}
         <TabsContent value="rounds" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Funding Rounds</h3>
+            <h3 className="text-lg font-semibold">{t('funding.rounds')}</h3>
             <Button onClick={() => setShowRoundDialog(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Round
+              <Plus className="h-4 w-4 mr-2" /> {t('funding.addRound')}
             </Button>
           </div>
           <Card>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Round</TableHead>
-                  <TableHead>Target</TableHead>
-                  <TableHead>Raised</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t('funding.roundType')}</TableHead>
+                  <TableHead>{t('funding.targetAmount')}</TableHead>
+                  <TableHead>{t('funding.raisedAmount')}</TableHead>
+                  <TableHead>{t('funding.progress')}</TableHead>
+                  <TableHead>{t('funding.status')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingRounds ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8">{t('common.loading')}</TableCell></TableRow>
                 ) : !rounds?.length ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No funding rounds yet</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('funding.noRounds')}</TableCell></TableRow>
                 ) : rounds.map(round => (
                   <TableRow key={round.id}>
                     <TableCell className="font-medium capitalize">{round.round_type.replace('-', ' ')}</TableCell>
@@ -222,27 +223,27 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
         {/* Investors */}
         <TabsContent value="investors" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Investor Pipeline</h3>
+            <h3 className="text-lg font-semibold">{t('funding.investorPipeline')}</h3>
             <Button onClick={() => setShowInvestorDialog(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Investor
+              <Plus className="h-4 w-4 mr-2" /> {t('funding.addInvestor')}
             </Button>
           </div>
           <Card>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Contact</TableHead>
+                  <TableHead>{t('funding.name')}</TableHead>
+                  <TableHead>{t('funding.type')}</TableHead>
+                  <TableHead>{t('funding.status')}</TableHead>
+                  <TableHead>{t('funding.contact')}</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingInvestors ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8">{t('common.loading')}</TableCell></TableRow>
                 ) : !investors?.length ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No investors yet</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('funding.noInvestors')}</TableCell></TableRow>
                 ) : investors.map(investor => (
                   <TableRow key={investor.id}>
                     <TableCell className="font-medium">{investor.name}</TableCell>
@@ -272,9 +273,9 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
         {/* Cap Table */}
         <TabsContent value="captable" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Cap Table</h3>
+            <h3 className="text-lg font-semibold">{t('funding.capTable')}</h3>
             <Button onClick={() => setShowCapTableDialog(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Entry
+              <Plus className="h-4 w-4 mr-2" /> {t('funding.addEntry')}
             </Button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -282,18 +283,18 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Holder</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Shares</TableHead>
+                    <TableHead>{t('funding.holder')}</TableHead>
+                    <TableHead>{t('funding.type')}</TableHead>
+                    <TableHead>{t('funding.shares')}</TableHead>
                     <TableHead>%</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingCapTable ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-8">{t('common.loading')}</TableCell></TableRow>
                   ) : !capTable?.length ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No cap table entries</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('funding.noCapTable')}</TableCell></TableRow>
                   ) : capTable.map(entry => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.holder_name}</TableCell>
@@ -340,10 +341,10 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
       {/* Dialogs */}
       <Dialog open={showRoundDialog} onOpenChange={setShowRoundDialog}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Funding Round</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('funding.addFundingRound')}</DialogTitle></DialogHeader>
           <form onSubmit={handleCreateRound} className="space-y-4">
             <div className="space-y-2">
-              <Label>Round Type</Label>
+              <Label>{t('funding.roundType')}</Label>
               <Select name="round_type" defaultValue="seed">
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -353,36 +354,36 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Target Amount (€)</Label>
+                <Label>{t('funding.targetAmount')} (€)</Label>
                 <Input name="target_amount" type="number" placeholder="500000" />
               </div>
               <div className="space-y-2">
-                <Label>Raised Amount (€)</Label>
+                <Label>{t('funding.raisedAmount')} (€)</Label>
                 <Input name="raised_amount" type="number" placeholder="0" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Valuation (€)</Label>
+              <Label>{t('funding.valuation')} (€)</Label>
               <Input name="valuation" type="number" placeholder="2000000" />
             </div>
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>{t('funding.status')}</Label>
               <Select name="status" defaultValue="planning">
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="planning">Planning</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="planning">{t('funding.planning')}</SelectItem>
+                  <SelectItem value="active">{t('okrs.active')}</SelectItem>
+                  <SelectItem value="closed">{t('funding.closed')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea name="notes" placeholder="Additional notes..." />
+              <Label>{t('funding.notes')}</Label>
+              <Textarea name="notes" placeholder={t('documents.descriptionPlaceholder')} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowRoundDialog(false)}>Cancel</Button>
-              <Button type="submit" disabled={createRound.isPending}>Create</Button>
+              <Button type="button" variant="outline" onClick={() => setShowRoundDialog(false)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={createRound.isPending}>{t('common.create')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -390,24 +391,24 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
 
       <Dialog open={showInvestorDialog} onOpenChange={setShowInvestorDialog}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Investor</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('funding.addInvestor')}</DialogTitle></DialogHeader>
           <form onSubmit={handleCreateInvestor} className="space-y-4">
             <div className="space-y-2">
-              <Label>Name *</Label>
+              <Label>{t('funding.name')} *</Label>
               <Input name="name" required placeholder="Investor or firm name" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Type</Label>
+                <Label>{t('funding.type')}</Label>
                 <Select name="type" defaultValue="angel">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {INVESTOR_TYPES.map(t => <SelectItem key={t} value={t} className="capitalize">{t.replace('-', ' ')}</SelectItem>)}
+                    {INVESTOR_TYPES.map(tp => <SelectItem key={tp} value={tp} className="capitalize">{tp.replace('-', ' ')}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>{t('funding.status')}</Label>
                 <Select name="status" defaultValue="prospect">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -417,20 +418,20 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t('team.email')}</Label>
               <Input name="email" type="email" placeholder="contact@investor.com" />
             </div>
             <div className="space-y-2">
-              <Label>Website</Label>
+              <Label>{t('funding.website')}</Label>
               <Input name="website" placeholder="https://..." />
             </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea name="notes" placeholder="Notes about the investor..." />
+              <Label>{t('funding.notes')}</Label>
+              <Textarea name="notes" placeholder={t('documents.descriptionPlaceholder')} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowInvestorDialog(false)}>Cancel</Button>
-              <Button type="submit" disabled={createInvestor.isPending}>Add Investor</Button>
+              <Button type="button" variant="outline" onClick={() => setShowInvestorDialog(false)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={createInvestor.isPending}>{t('funding.addInvestor')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -438,45 +439,45 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
 
       <Dialog open={showCapTableDialog} onOpenChange={setShowCapTableDialog}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Cap Table Entry</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('funding.addCapTableEntry')}</DialogTitle></DialogHeader>
           <form onSubmit={handleCreateCapEntry} className="space-y-4">
             <div className="space-y-2">
-              <Label>Holder Name *</Label>
+              <Label>{t('funding.holderName')} *</Label>
               <Input name="holder_name" required placeholder="Name of shareholder" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Holder Type</Label>
+                <Label>{t('funding.holderType')}</Label>
                 <Select name="holder_type" defaultValue="founder">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {HOLDER_TYPES.map(t => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}
+                    {HOLDER_TYPES.map(tp => <SelectItem key={tp} value={tp} className="capitalize">{tp}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Share Type</Label>
+                <Label>{t('funding.shareType')}</Label>
                 <Select name="share_type" defaultValue="common">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {SHARE_TYPES.map(t => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}
+                    {SHARE_TYPES.map(tp => <SelectItem key={tp} value={tp} className="capitalize">{tp}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Number of Shares *</Label>
+                <Label>{t('funding.shares')} *</Label>
                 <Input name="shares" type="number" required placeholder="10000" />
               </div>
               <div className="space-y-2">
-                <Label>Investment Amount (€)</Label>
+                <Label>{t('funding.investmentAmount')} (€)</Label>
                 <Input name="investment_amount" type="number" placeholder="50000" />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowCapTableDialog(false)}>Cancel</Button>
-              <Button type="submit" disabled={createCapEntry.isPending}>Add Entry</Button>
+              <Button type="button" variant="outline" onClick={() => setShowCapTableDialog(false)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={createCapEntry.isPending}>{t('funding.addEntry')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
