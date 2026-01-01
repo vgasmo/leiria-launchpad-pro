@@ -26,8 +26,10 @@ import { WorkspaceTable } from '@/components/workspace/WorkspaceTable';
 import { WorkspacePagination } from '@/components/workspace/WorkspacePagination';
 import { WorkspaceEmptyState } from '@/components/workspace/WorkspaceEmptyState';
 import { OnboardingTour } from '@/components/ui/OnboardingTour';
-import { useWorkspaces, usePrograms, useMyPendingWorkspaces, WorkspaceWithDetails, SortOption } from '@/hooks/useWorkspaces';
+import { SavedFiltersDropdown } from '@/components/workspace/SavedFiltersDropdown';
+import { useWorkspaces, usePrograms, useMyPendingWorkspaces, WorkspaceWithDetails, SortOption, WorkspaceFilters as WorkspaceFiltersType } from '@/hooks/useWorkspaces';
 import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
+import { useSavedFilters } from '@/hooks/useSavedFilters';
 import { StartupStage, HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -66,6 +68,28 @@ export default function MyWorkspaces() {
 
   // Enable realtime updates
   useRealtimeWorkspaces();
+
+  // Load saved filters
+  const { data: savedFilters } = useSavedFilters();
+  
+  // Apply default saved filter on load
+  useEffect(() => {
+    const defaultFilter = savedFilters?.find(f => f.is_default);
+    if (defaultFilter && !search && programFilter === 'all' && stageFilter === 'all' && healthFilter === 'all') {
+      applyFilters(defaultFilter.filters);
+    }
+  }, [savedFilters]);
+
+  const applyFilters = useCallback((filters: WorkspaceFiltersType) => {
+    setSearch(filters.search || '');
+    setProgramFilter(filters.programId || 'all');
+    setStageFilter(filters.stage || 'all');
+    setHealthFilter(filters.health || 'all');
+    setMissingKpi(filters.missingKpi || false);
+    setOverdueActions(filters.overdueActions || false);
+    if (filters.sortBy) setSortBy(filters.sortBy);
+    setCurrentPage(1);
+  }, []);
 
   // Determine which dashboard to show
   const showConsultorDashboard = (isConsultor || isAdmin) && !showDetailedView;
@@ -278,6 +302,12 @@ export default function MyWorkspaces() {
               activeQuickFiltersCount={activeQuickFiltersCount}
               onClearFilters={clearFilters}
             />
+            <div className="mt-2 flex justify-end">
+              <SavedFiltersDropdown 
+                currentFilters={{ search, programId: programFilter, stage: stageFilter, health: healthFilter, missingKpi, overdueActions, sortBy }}
+                onApplyFilter={applyFilters}
+              />
+            </div>
           </div>
 
           {/* Content */}
