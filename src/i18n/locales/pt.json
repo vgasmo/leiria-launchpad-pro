@@ -24,7 +24,15 @@
     "remove": "Remover",
     "confirm": "Confirmar",
     "selectAll": "Selecionar tudo",
-    "clearAll": "Limpar tudo"
+    "clearAll": "Limpar tudo",
+    "today": "Hoje",
+    "overdue": "atrasado",
+    "notScheduled": "Não agendado",
+    "noEntriesYet": "Sem entradas ainda",
+    "upToDate": "Atualizado",
+    "needsUpdate": "Precisa de atualização",
+    "last": "Último",
+    "creating": "A criar..."
   },
   "nav": {
     "myWorkspaces": "Os Meus Workspaces",
@@ -61,6 +69,51 @@
     "todaysMeetings": "Reuniões de Hoje",
     "itemsNeedAttention": "{{count}} item precisa de atenção",
     "itemsNeedAttention_plural": "{{count}} itens precisam de atenção"
+  },
+  "founder": {
+    "applicationUnderReview": "Candidatura em Análise",
+    "applicationBeingReviewed": "A sua candidatura de startup está a ser revista pela nossa equipa. Terá acesso ao seu workspace após a aprovação.",
+    "pending": "Pendente",
+    "responseTime": "Normalmente respondemos em 2-3 dias úteis",
+    "startYourJourney": "Inicie a Sua Jornada",
+    "startYourJourneyDesc": "Crie o perfil da sua startup para se juntar ao nosso programa de mentoria e ter acesso a orientação especializada, recursos e um workspace dedicado.",
+    "createYourStartup": "Criar a Sua Startup",
+    "openWorkspace": "Abrir Workspace",
+    "nextMeeting": "Próxima Reunião",
+    "kpiStatus": "Estado dos KPIs",
+    "lastSession": "Última Sessão",
+    "noSessionsYet": "Sem sessões ainda",
+    "quickActions": "Ações Rápidas",
+    "commonTasks": "Tarefas comuns para o seu workspace",
+    "updateKpis": "Atualizar KPIs",
+    "viewActions": "Ver Ações"
+  },
+  "mentor": {
+    "noStartupsAssigned": "Nenhuma startup atribuída ainda",
+    "noStartupsAssignedDesc": "Verá as suas startups aqui assim que for atribuído a workspaces.",
+    "viewConnectionRequests": "Ver Pedidos de Ligação",
+    "myStartups": "As Minhas Startups",
+    "activeMentorships": "Mentorias ativas",
+    "upcomingMeetings": "Próximas Reuniões",
+    "pendingActionsCount": "ações pendentes",
+    "next": "Próximo"
+  },
+  "createStartup": {
+    "title": "Criar a Sua Startup",
+    "description": "Submeta a sua startup para o programa. Um administrador irá rever e aprovar a sua candidatura.",
+    "startupName": "Nome da Startup",
+    "startupNamePlaceholder": "A Minha Startup Incrível",
+    "descriptionLabel": "Descrição",
+    "descriptionPlaceholder": "O que faz a sua startup?",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "https://minhastartup.com",
+    "programLabel": "Programa",
+    "selectProgram": "Selecionar programa",
+    "currentStage": "Fase Atual",
+    "submitApplication": "Submeter Candidatura",
+    "successMessage": "Startup criada! A sua candidatura está pendente de aprovação.",
+    "mustBeLoggedIn": "Tem de ter sessão iniciada para criar uma startup",
+    "failedToCreate": "Falha ao criar startup"
   },
   "sessions": {
     "title": "Sessões",

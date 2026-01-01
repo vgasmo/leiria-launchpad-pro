@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
   MessageSquare, 
@@ -30,6 +31,7 @@ interface MentorDashboardProps {
 
 export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Sort by last session / next meeting for relationship depth
   const sortedWorkspaces = useMemo(() => {
@@ -89,13 +91,13 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     return (
       <Card className="p-12 text-center">
         <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">No startups assigned yet</h3>
+        <h3 className="text-lg font-medium mb-2">{t('mentor.noStartupsAssigned')}</h3>
         <p className="text-muted-foreground mb-4">
-          You'll see your mentored startups here once you're assigned to workspaces.
+          {t('mentor.noStartupsAssignedDesc')}
         </p>
         <Button variant="outline" onClick={() => navigate('/mentors')}>
           <Users className="mr-2 h-4 w-4" />
-          View Connection Requests
+          {t('mentor.viewConnectionRequests')}
         </Button>
       </Card>
     );
@@ -117,14 +119,14 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         <Card className="animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              My Startups
+              {t('mentor.myStartups')}
             </CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workspaces.length}</div>
             <p className="text-xs text-muted-foreground">
-              Active mentorships
+              {t('mentor.activeMentorships')}
             </p>
           </CardContent>
         </Card>
@@ -132,14 +134,14 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         <Card className="animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Upcoming Meetings
+              {t('mentor.upcomingMeetings')}
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{upcomingMeetings.length}</div>
             <p className="text-xs text-muted-foreground">
-              {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length} today
+              {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length} {t('common.today').toLowerCase()}
             </p>
           </CardContent>
         </Card>
@@ -147,7 +149,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Actions
+              {t('dashboard.pendingActions')}
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -156,7 +158,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
               {workspaces.reduce((sum, w) => sum + w.pendingActionsCount, 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {workspaces.reduce((sum, w) => sum + w.overdueActionsCount, 0)} overdue
+              {workspaces.reduce((sum, w) => sum + w.overdueActionsCount, 0)} {t('common.overdue')}
             </p>
           </CardContent>
         </Card>
@@ -165,7 +167,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
       {/* Startup Cards */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">My Startups</h2>
+          <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -205,7 +207,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                     <div className="bg-muted/50 rounded-lg p-3 mb-3">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                         <FileText className="h-3 w-3" />
-                        Last Session
+                        {t('founder.lastSession')}
                       </div>
                       <p className="text-sm font-medium truncate">{workspace.lastSession.title}</p>
                       <p className="text-xs text-muted-foreground">
@@ -214,7 +216,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                     </div>
                   ) : (
                     <div className="bg-muted/30 rounded-lg p-3 mb-3 text-center">
-                      <p className="text-sm text-muted-foreground">No sessions yet</p>
+                      <p className="text-sm text-muted-foreground">{t('founder.noSessionsYet')}</p>
                     </div>
                   )}
 
@@ -222,10 +224,10 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                   {workspace.nextMeetingDate && (
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground">Next:</span>
+                      <span className="text-muted-foreground">{t('mentor.next')}:</span>
                       <span className={isToday(new Date(workspace.nextMeetingDate)) ? 'text-primary font-medium' : ''}>
                         {isToday(new Date(workspace.nextMeetingDate)) 
-                          ? `Today at ${format(new Date(workspace.nextMeetingDate), 'h:mm a')}`
+                          ? `${t('common.today')} at ${format(new Date(workspace.nextMeetingDate), 'h:mm a')}`
                           : format(new Date(workspace.nextMeetingDate), 'MMM d, h:mm a')
                         }
                       </span>
@@ -236,10 +238,10 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                   {workspace.pendingActionsCount > 0 && (
                     <div className="flex items-center gap-2 mt-2 text-sm">
                       <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{workspace.pendingActionsCount} pending actions</span>
+                      <span>{workspace.pendingActionsCount} {t('mentor.pendingActionsCount')}</span>
                       {workspace.overdueActionsCount > 0 && (
                         <Badge variant="destructive" className="text-xs">
-                          {workspace.overdueActionsCount} overdue
+                          {workspace.overdueActionsCount} {t('common.overdue')}
                         </Badge>
                       )}
                     </div>
@@ -258,7 +260,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                <CardTitle>Upcoming Meetings</CardTitle>
+                <CardTitle>{t('mentor.upcomingMeetings')}</CardTitle>
               </div>
             </div>
           </CardHeader>
@@ -283,7 +285,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                   <div className="text-right">
                     <div className={`text-sm font-medium ${isToday(new Date(workspace.nextMeetingDate!)) ? 'text-primary' : ''}`}>
                       {isToday(new Date(workspace.nextMeetingDate!)) 
-                        ? 'Today' 
+                        ? t('common.today') 
                         : format(new Date(workspace.nextMeetingDate!), 'MMM d')
                       }
                     </div>
