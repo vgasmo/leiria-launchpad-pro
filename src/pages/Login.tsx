@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 const loginSchema = z.object({
@@ -27,9 +28,15 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [selectedRole, setSelectedRole] = useState<'founder' | 'mentor_externo'>('founder');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Check if email is from startupleiria.com domain
+  const isConsultorEmail = useMemo(() => {
+    return email.toLowerCase().endsWith('@startupleiria.com');
+  }, [email]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -82,7 +89,9 @@ export default function Login() {
     }
 
     setIsSubmitting(true);
-    const { error } = await signUp(email, password, fullName);
+    // Only pass role if not a consultor email (consultor role is auto-assigned by the database)
+    const roleToAssign = isConsultorEmail ? undefined : selectedRole;
+    const { error } = await signUp(email, password, fullName, roleToAssign);
     setIsSubmitting(false);
 
     if (error) {
@@ -328,7 +337,65 @@ export default function Login() {
                         Must be at least 6 characters
                       </p>
                     </div>
-                    <Button 
+                    
+                    {/* Role Selection */}
+                    <div className="space-y-3">
+                      <Label>I am a...</Label>
+                      {isConsultorEmail ? (
+                        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                          <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                            <Users className="h-4 w-4" />
+                            <span>Startup Leiria Consultor</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Your role is automatically assigned based on your email domain.
+                          </p>
+                        </div>
+                      ) : (
+                        <RadioGroup 
+                          value={selectedRole} 
+                          onValueChange={(v) => setSelectedRole(v as 'founder' | 'mentor_externo')}
+                          className="grid grid-cols-2 gap-3"
+                        >
+                          <Label
+                            htmlFor="role-founder"
+                            className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              selectedRole === 'founder' 
+                                ? 'border-primary bg-primary/5' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <RadioGroupItem value="founder" id="role-founder" className="sr-only" />
+                            <Rocket className={`h-6 w-6 ${selectedRole === 'founder' ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <span className={`text-sm font-medium ${selectedRole === 'founder' ? 'text-primary' : 'text-foreground'}`}>
+                              Founder
+                            </span>
+                            <span className="text-xs text-muted-foreground text-center">
+                              I'm building a startup
+                            </span>
+                          </Label>
+                          <Label
+                            htmlFor="role-mentor"
+                            className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              selectedRole === 'mentor_externo' 
+                                ? 'border-primary bg-primary/5' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <RadioGroupItem value="mentor_externo" id="role-mentor" className="sr-only" />
+                            <Users className={`h-6 w-6 ${selectedRole === 'mentor_externo' ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <span className={`text-sm font-medium ${selectedRole === 'mentor_externo' ? 'text-primary' : 'text-foreground'}`}>
+                              External Mentor
+                            </span>
+                            <span className="text-xs text-muted-foreground text-center">
+                              I want to mentor startups
+                            </span>
+                          </Label>
+                        </RadioGroup>
+                      )}
+                    </div>
+                    
+                    <Button
                       type="submit" 
                       className="w-full h-11 text-base font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/25" 
                       disabled={isSubmitting}
