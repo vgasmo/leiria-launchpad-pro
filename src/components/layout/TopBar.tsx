@@ -1,5 +1,5 @@
-import { LogOut, User, Shield, Settings, Bell } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { LogOut, Shield, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,14 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { useAttentionCount } from '@/hooks/useAttentionCount';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 export function TopBar() {
   const navigate = useNavigate();
   const { profile, roles, isAdmin, signOut } = useAuth();
-  const { data: attentionStats } = useAttentionCount();
-
-  const attentionCount = attentionStats?.totalAttention || 0;
 
   const initials = profile?.full_name
     ?.split(' ')
@@ -41,20 +39,14 @@ export function TopBar() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Language Selector */}
+      <LanguageSelector />
+      
       {/* Theme Toggle */}
       <ThemeToggle className="text-muted-foreground" />
 
       {/* Notifications */}
-      <Link to="/my-workspaces?filter=attention" data-tour="notifications">
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4" />
-          {attentionCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-              {attentionCount > 9 ? '9+' : attentionCount}
-            </span>
-          )}
-        </Button>
-      </Link>
+      <NotificationCenter />
 
       {/* User Menu */}
       <DropdownMenu>
