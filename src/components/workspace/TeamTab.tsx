@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Users, Plus, Pencil, Trash2, Crown, Linkedin, Mail, Phone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface TeamTabProps {
   startupId: string;
@@ -20,6 +21,7 @@ interface TeamTabProps {
 const ROLES = ['founder', 'co-founder', 'cto', 'coo', 'cfo', 'developer', 'designer', 'marketing', 'sales', 'operations', 'advisor', 'team_member'];
 
 export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
+  const { t } = useTranslation();
   const { data: members, isLoading } = useTeamMembers(startupId);
   const createMember = useCreateTeamMember();
   const updateMember = useUpdateTeamMember();
@@ -63,14 +65,14 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
 
   const handleSubmit = async () => {
     if (!formData.full_name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('team.nameRequired'));
       return;
     }
 
     try {
       if (editingMember) {
         await updateMember.mutateAsync({ id: editingMember.id, ...formData });
-        toast.success('Team member updated');
+        toast.success(t('team.memberUpdated'));
       } else {
         await createMember.mutateAsync({
           startup_id: startupId,
@@ -79,22 +81,22 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
           joined_at: new Date().toISOString().split('T')[0],
           left_at: null,
         });
-        toast.success('Team member added');
+        toast.success(t('team.memberAdded'));
       }
       setDialogOpen(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save team member');
+      toast.error(error.message || t('team.failedToSave'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Remove this team member?')) return;
+    if (!confirm(t('team.removeMemberConfirm'))) return;
     try {
       await deleteMember.mutateAsync(id);
-      toast.success('Team member removed');
+      toast.success(t('team.memberRemoved'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to remove team member');
+      toast.error(error.message || t('team.failedToRemove'));
     }
   };
 
@@ -131,16 +133,16 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Team Members
+              {t('team.teamMembers')}
             </CardTitle>
             <CardDescription>
-              {members?.length || 0} team member{members?.length !== 1 ? 's' : ''}
+              {t('team.memberCount', { count: members?.length || 0 })}
             </CardDescription>
           </div>
           {canEdit && (
             <Button onClick={openAddDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Member
+              {t('team.addMember')}
             </Button>
           )}
         </CardHeader>
@@ -148,7 +150,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
           {!members?.length ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No team members added yet</p>
+              <p>{t('team.noMembersDesc')}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -208,12 +210,12 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingMember ? 'Edit Team Member' : 'Add Team Member'}</DialogTitle>
+            <DialogTitle>{editingMember ? t('team.editMember') : t('team.addMember')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{t('team.fullName')} *</Label>
                 <Input
                   id="name"
                   value={formData.full_name}
@@ -221,7 +223,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('team.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -232,7 +234,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">{t('team.role')}</Label>
                 <Select value={formData.role} onValueChange={v => setFormData(f => ({ ...f, role: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -243,18 +245,18 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="title">Job Title</Label>
+                <Label htmlFor="title">{t('team.jobTitle')}</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={e => setFormData(f => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g., Lead Developer"
+                  placeholder={t('team.jobTitlePlaceholder')}
                 />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('team.phone')}</Label>
                 <Input
                   id="phone"
                   value={formData.phone}
@@ -262,7 +264,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn URL</Label>
+                <Label htmlFor="linkedin">{t('team.linkedinUrl')}</Label>
                 <Input
                   id="linkedin"
                   value={formData.linkedin_url}
@@ -272,9 +274,9 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleSubmit} disabled={createMember.isPending || updateMember.isPending}>
-              {editingMember ? 'Save Changes' : 'Add Member'}
+              {editingMember ? t('team.saveChanges') : t('team.addMember')}
             </Button>
           </DialogFooter>
         </DialogContent>

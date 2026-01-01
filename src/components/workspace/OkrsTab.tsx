@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Target, Plus, ChevronDown, ChevronRight, Pencil, Trash2, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface OkrsTabProps {
   workspaceId: string;
@@ -23,6 +24,7 @@ const QUARTERS = ['2026-Q1', '2026-Q2', '2026-Q3', '2026-Q4', '2025-Q4', '2025-Q
 const STATUSES = ['active', 'achieved', 'missed', 'deferred'];
 
 export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
+  const { t } = useTranslation();
   const { data: objectives, isLoading } = useObjectives(workspaceId);
   const createObjective = useCreateObjective();
   const updateObjective = useUpdateObjective();
@@ -67,26 +69,26 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
 
   const handleSaveObjective = async () => {
     if (!objForm.title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('okrs.titleRequired'));
       return;
     }
     try {
       if (editingObj) {
         await updateObjective.mutateAsync({ id: editingObj.id, ...objForm });
-        toast.success('Objective updated');
+        toast.success(t('okrs.objectiveUpdated'));
       } else {
         await createObjective.mutateAsync({ workspace_id: workspaceId, ...objForm });
-        toast.success('Objective created');
+        toast.success(t('okrs.objectiveCreated'));
       }
       setObjDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save objective');
+      toast.error(error.message || t('okrs.failedToSave'));
     }
   };
 
   const handleSaveKeyResult = async () => {
     if (!krForm.title.trim() || !krForm.target_value) {
-      toast.error('Title and target value are required');
+      toast.error(t('okrs.krRequired'));
       return;
     }
     try {
@@ -96,20 +98,20 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
         target_value: parseFloat(krForm.target_value),
         unit: krForm.unit || undefined,
       });
-      toast.success('Key result added');
+      toast.success(t('okrs.keyResultAdded'));
       setKrDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to add key result');
+      toast.error(error.message || t('okrs.failedToSave'));
     }
   };
 
   const handleDeleteObjective = async (id: string) => {
-    if (!confirm('Delete this objective and all its key results?')) return;
+    if (!confirm(t('okrs.deleteObjectiveConfirm'))) return;
     try {
       await deleteObjective.mutateAsync(id);
-      toast.success('Objective deleted');
+      toast.success(t('okrs.objectiveDeleted'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete objective');
+      toast.error(error.message || t('okrs.failedToDelete'));
     }
   };
 
@@ -117,17 +119,17 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
     try {
       await updateKeyResult.mutateAsync({ id: kr.id, current_value: newValue });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update');
+      toast.error(error.message || t('okrs.failedToUpdate'));
     }
   };
 
   const handleDeleteKeyResult = async (id: string) => {
-    if (!confirm('Delete this key result?')) return;
+    if (!confirm(t('okrs.deleteKrConfirm'))) return;
     try {
       await deleteKeyResult.mutateAsync(id);
-      toast.success('Key result deleted');
+      toast.success(t('okrs.keyResultDeleted'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete');
+      toast.error(error.message || t('okrs.failedToDelete'));
     }
   };
 
@@ -156,14 +158,14 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              OKRs
+              {t('okrs.title')}
             </CardTitle>
-            <CardDescription>Track objectives and key results</CardDescription>
+            <CardDescription>{t('okrs.trackOkrs')}</CardDescription>
           </div>
           {canWrite && (
             <Button onClick={openAddObjective}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Objective
+              {t('okrs.addObjective')}
             </Button>
           )}
         </CardHeader>
@@ -171,7 +173,7 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
           {!objectives?.length ? (
             <div className="text-center py-8 text-muted-foreground">
               <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No objectives set yet</p>
+              <p>{t('okrs.noObjectivesDesc')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -204,11 +206,11 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
                     <CollapsibleContent>
                       <div className="px-4 pb-4 pt-0 border-t">
                         <div className="flex items-center justify-between py-3">
-                          <span className="text-sm font-medium">Key Results</span>
+                          <span className="text-sm font-medium">{t('okrs.keyResults')}</span>
                           {canWrite && (
                             <Button variant="outline" size="sm" onClick={() => openAddKeyResult(obj.id)}>
                               <Plus className="h-3 w-3 mr-1" />
-                              Add KR
+                              {t('okrs.addKr')}
                             </Button>
                           )}
                         </div>
@@ -243,7 +245,7 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground py-2">No key results yet</p>
+                          <p className="text-sm text-muted-foreground py-2">{t('okrs.noKeyResults')}</p>
                         )}
                       </div>
                     </CollapsibleContent>
@@ -258,19 +260,19 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
       <Dialog open={objDialogOpen} onOpenChange={setObjDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingObj ? 'Edit Objective' : 'Add Objective'}</DialogTitle>
+            <DialogTitle>{editingObj ? t('okrs.editObjective') : t('okrs.addObjective')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Title *</Label>
+              <Label>{t('milestones.titleLabel')} *</Label>
               <Input value={objForm.title} onChange={e => setObjForm(f => ({ ...f, title: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>{t('okrs.description')}</Label>
               <Textarea value={objForm.description} onChange={e => setObjForm(f => ({ ...f, description: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label>Quarter</Label>
+              <Label>{t('okrs.quarter')}</Label>
               <Select value={objForm.quarter} onValueChange={v => setObjForm(f => ({ ...f, quarter: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{QUARTERS.map(q => <SelectItem key={q} value={q}>{q}</SelectItem>)}</SelectContent>
@@ -278,8 +280,8 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setObjDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveObjective}>{editingObj ? 'Save' : 'Create'}</Button>
+            <Button variant="outline" onClick={() => setObjDialogOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleSaveObjective}>{editingObj ? t('common.save') : t('common.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -287,27 +289,27 @@ export function OkrsTab({ workspaceId, canWrite = false }: OkrsTabProps) {
       <Dialog open={krDialogOpen} onOpenChange={setKrDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Key Result</DialogTitle>
+            <DialogTitle>{t('okrs.addKeyResult')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Key Result *</Label>
-              <Input value={krForm.title} onChange={e => setKrForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g., Increase MRR" />
+              <Label>{t('okrs.keyResults')} *</Label>
+              <Input value={krForm.title} onChange={e => setKrForm(f => ({ ...f, title: e.target.value }))} placeholder={t('okrs.krPlaceholder')} />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Target Value *</Label>
+                <Label>{t('okrs.targetValue')} *</Label>
                 <Input type="number" value={krForm.target_value} onChange={e => setKrForm(f => ({ ...f, target_value: e.target.value }))} placeholder="100" />
               </div>
               <div className="space-y-2">
-                <Label>Unit</Label>
-                <Input value={krForm.unit} onChange={e => setKrForm(f => ({ ...f, unit: e.target.value }))} placeholder="e.g., %, users, €" />
+                <Label>{t('okrs.unit')}</Label>
+                <Input value={krForm.unit} onChange={e => setKrForm(f => ({ ...f, unit: e.target.value }))} placeholder={t('okrs.unitPlaceholder')} />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setKrDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveKeyResult}>Add</Button>
+            <Button variant="outline" onClick={() => setKrDialogOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleSaveKeyResult}>{t('common.add')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
