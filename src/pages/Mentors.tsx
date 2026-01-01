@@ -185,7 +185,7 @@ export default function Mentors() {
 
   // Update connection status mutation
   const updateConnectionStatus = useMutation({
-    mutationFn: async ({ connectionId, status }: { connectionId: string; status: string }) => {
+    mutationFn: async ({ connectionId, status, founderId }: { connectionId: string; status: string; founderId: string }) => {
       const { error } = await supabase
         .from('mentor_connections')
         .update({ 
@@ -195,9 +195,42 @@ export default function Mentors() {
         .eq('id', connectionId);
 
       if (error) throw error;
+
+      // If accepted, add mentor to the founder's workspaces
+      if (status === 'accepted' && user) {
+        // Find founder's workspaces
+        const { data: founderWorkspaces } = await supabase
+          .from('workspace_users')
+          .select('workspace_id')
+          .eq('user_id', founderId)
+          .eq('role', 'founder')
+          .eq('active', true);
+
+        if (founderWorkspaces && founderWorkspaces.length > 0) {
+          // Add mentor to each workspace
+          const workspaceInserts = founderWorkspaces.map(wu => ({
+            workspace_id: wu.workspace_id,
+            user_id: user.id,
+            role: 'mentor_externo' as const,
+            active: true,
+          }));
+
+          const { error: insertError } = await supabase
+            .from('workspace_users')
+            .upsert(workspaceInserts, { 
+              onConflict: 'workspace_id,user_id',
+              ignoreDuplicates: true 
+            });
+
+          if (insertError) {
+            console.error('Error adding mentor to workspaces:', insertError);
+          }
+        }
+      }
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['mentor-connections'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       toast.success(`Connection ${status === 'accepted' ? 'accepted' : 'declined'}`);
     },
     onError: (error: any) => {
@@ -472,7 +505,8 @@ export default function Mentors() {
                                   size="sm"
                                   onClick={() => updateConnectionStatus.mutate({ 
                                     connectionId: conn.id, 
-                                    status: 'accepted' 
+                                    status: 'accepted',
+                                    founderId: conn.founder_id 
                                   })}
                                   disabled={updateConnectionStatus.isPending}
                                 >
@@ -484,7 +518,8 @@ export default function Mentors() {
                                   variant="outline"
                                   onClick={() => updateConnectionStatus.mutate({ 
                                     connectionId: conn.id, 
-                                    status: 'declined' 
+                                    status: 'declined',
+                                    founderId: conn.founder_id 
                                   })}
                                   disabled={updateConnectionStatus.isPending}
                                 >
