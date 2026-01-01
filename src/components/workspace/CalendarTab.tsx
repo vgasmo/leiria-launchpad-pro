@@ -62,6 +62,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useCalendarSessions, useCreateSession, useUpdateSession, useDeleteSession, useWorkspaceMembers, Session } from '@/hooks/useSessions';
+import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -75,6 +76,7 @@ interface CalendarTabProps {
 export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
   const { data: sessions = [], isLoading } = useCalendarSessions(workspaceId);
   const { data: workspaceMembers = [] } = useWorkspaceMembers(workspaceId);
+  const { data: sessionTemplates } = useSessionTemplates();
   const { profile, user } = useAuth();
   const createSession = useCreateSession(workspaceId);
   const updateSession = useUpdateSession(workspaceId);
@@ -89,6 +91,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [sendInviteSession, setSendInviteSession] = useState<Session | null>(null);
   const [quickInviteEmails, setQuickInviteEmails] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
   // Get member emails for auto-complete (exclude current user)
   const memberEmails = workspaceMembers
@@ -133,6 +136,20 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       sendInvites: true,
       inviteEmails: '',
     });
+    setSelectedTemplate('');
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = sessionTemplates?.find(t => t.id === templateId);
+    if (template) {
+      if (template.name && !formData.title) {
+        setFormData(prev => ({ ...prev, title: template.name }));
+      }
+      if (template.agenda_template) {
+        setFormData(prev => ({ ...prev, agenda: template.agenda_template || '' }));
+      }
+    }
   };
 
   // Compute end time from start + duration for display
@@ -311,6 +328,25 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   // Form fields JSX
   const renderSessionFormFields = (isEdit: boolean) => (
     <div className="grid gap-4 py-4">
+      {/* Session Template Selector - only for new sessions */}
+      {!isEdit && sessionTemplates && sessionTemplates.length > 0 && (
+        <div className="grid gap-2">
+          <Label>Use Template (optional)</Label>
+          <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a template..." />
+            </SelectTrigger>
+            <SelectContent>
+              {sessionTemplates.map(template => (
+                <SelectItem key={template.id} value={template.id}>
+                  {template.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      
       <div className="grid gap-2">
         <Label htmlFor={isEdit ? "edit-title" : "title"}>Title *</Label>
         <Input
