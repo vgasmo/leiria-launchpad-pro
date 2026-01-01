@@ -316,8 +316,17 @@ serve(async (req) => {
     const safeLocation = payload.location ? escapeHtml(payload.location) : '';
     const safeJoinUrl = payload.joinUrl || '';
 
-    // Send email to each recipient
-    const emailPromises = payload.recipientEmails.map(async (email) => {
+    // Send email to each recipient with rate limiting (Resend allows 2 req/sec on free plan)
+    const results: Array<{ email: string; success: boolean; result?: unknown; error?: string }> = [];
+    
+    for (let i = 0; i < payload.recipientEmails.length; i++) {
+      const email = payload.recipientEmails[i];
+      
+      // Add delay between emails to avoid rate limiting (600ms between each)
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 600));
+      }
+      
       try {
         const result = await resend.emails.send({
           from: "Startup Leiria <noreply@startupleiria.com>",
@@ -359,24 +368,23 @@ serve(async (req) => {
         // Resend may return { data: null, error: {...} } without throwing.
         if ((result as any)?.error) {
           console.error(`Email failed for ${email}:`, (result as any).error);
-          return {
+          results.push({
             email,
             success: false,
             error: (result as any).error?.message ?? "Email provider error",
-            result,
-          };
+          });
+          continue;
         }
 
         console.log(`Email sent to ${email}:`, result);
-        return { email, success: true, result };
+        results.push({ email, success: true, result });
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.error(`Failed to send email to ${email}:`, err);
-        return { email, success: false, error: errorMessage };
+        results.push({ email, success: false, error: errorMessage });
       }
-    });
+    }
 
-    const results = await Promise.all(emailPromises);
     const successCount = results.filter(r => r.success).length;
 
     console.log(`Sent ${successCount}/${payload.recipientEmails.length} emails by user ${user.id}`);
