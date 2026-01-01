@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-meeting-invite]
 verify_jwt = false
+
+[functions.send-email-digest]
+verify_jwt = false

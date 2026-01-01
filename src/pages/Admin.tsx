@@ -1,6 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, FileDown } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -10,6 +10,7 @@ import { AdminWorkspacesManager } from '@/components/admin/AdminWorkspacesManage
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { ActivityLogViewer } from '@/components/admin/ActivityLogViewer';
 import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
+import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 
 export default function Admin() {
   return (
@@ -87,7 +88,14 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <CohortAnalytics />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <CohortAnalytics />
+            </div>
+            <div>
+              <BulkReportGenerator />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </AppLayout>
