@@ -104,7 +104,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     <div className="space-y-6">
       {/* Pending Reviews & Tasks */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <PendingTemplateReviews />
+        <PendingTemplateReviews showEmpty />
         <StaffTasksPanel />
       </div>
 

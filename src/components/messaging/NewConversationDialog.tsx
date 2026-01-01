@@ -110,14 +110,15 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
             ) : (
               <div className="p-2 space-y-1">
                 {filteredUsers.map(user => (
-                  <button
+                  <div
                     key={user.id}
                     onClick={() => toggleUser(user.id)}
-                    className="w-full p-2 rounded-lg hover:bg-muted/50 flex items-center gap-3 text-left transition-colors"
+                    className="w-full p-2 rounded-lg hover:bg-muted/50 flex items-center gap-3 text-left transition-colors cursor-pointer"
                   >
                     <Checkbox 
                       checked={selectedUsers.includes(user.id)}
                       onCheckedChange={() => toggleUser(user.id)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar_url || undefined} />
@@ -127,7 +128,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
                       <p className="font-medium truncate">{user.full_name || 'Unnamed'}</p>
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             )}
