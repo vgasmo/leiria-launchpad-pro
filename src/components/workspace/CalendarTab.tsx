@@ -24,6 +24,7 @@ import {
   Video,
   Mail,
   Send,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,8 +53,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useMeetings, Meeting } from '@/hooks/useMeetings';
+import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -66,7 +69,8 @@ interface CalendarTabProps {
 
 export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
   const { meetings, isLoading, createMeeting, updateMeeting, deleteMeeting } = useMeetings(workspaceId);
-  const { profile } = useAuth();
+  const { data: workspaceMembers = [] } = useWorkspaceMembers(workspaceId);
+  const { profile, user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -76,6 +80,16 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [sendInviteMeeting, setSendInviteMeeting] = useState<Meeting | null>(null);
   const [quickInviteEmails, setQuickInviteEmails] = useState('');
+
+  // Get member emails for auto-complete (exclude current user)
+  const memberEmails = workspaceMembers
+    .filter(m => m.profile?.email && m.user_id !== user?.id)
+    .map(m => ({
+      email: m.profile!.email,
+      name: m.profile?.full_name || m.profile!.email,
+      avatar: m.profile?.avatar_url,
+      role: m.role,
+    }));
 
   // Form state
   const [formData, setFormData] = useState({
@@ -142,33 +156,43 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   const handleAddMeeting = async () => {
     if (!formData.title || !formData.date || !formData.startTime || !formData.endTime) return;
 
-    const starts_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
-    const ends_at = new Date(`${formData.date}T${formData.endTime}`).toISOString();
+    try {
+      const starts_at = new Date(`${formData.date}T${formData.startTime}`).toISOString();
+      const ends_at = new Date(`${formData.date}T${formData.endTime}`).toISOString();
 
-    const newMeeting = await createMeeting.mutateAsync({
-      title: formData.title,
-      description: formData.description || undefined,
-      workspace_id: workspaceId,
-      starts_at,
-      ends_at,
-      location: formData.location || undefined,
-      join_url: formData.joinUrl || undefined,
-    });
+      const newMeeting = await createMeeting.mutateAsync({
+        title: formData.title,
+        description: formData.description || undefined,
+        workspace_id: workspaceId,
+        starts_at,
+        ends_at,
+        location: formData.location || undefined,
+        join_url: formData.joinUrl || undefined,
+      });
 
-    // Send invites if checkbox is checked and emails are provided
-    if (formData.sendInvites && formData.inviteEmails.trim()) {
-      const emails = formData.inviteEmails
-        .split(/[,;\n]/)
-        .map(e => e.trim())
-        .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
-      
-      if (emails.length > 0 && newMeeting) {
-        await sendMeetingInvite(newMeeting, emails);
+      // Send invites if checkbox is checked and emails are provided
+      if (formData.sendInvites && formData.inviteEmails.trim() && newMeeting) {
+        const emails = formData.inviteEmails
+          .split(/[,;\n]/)
+          .map(e => e.trim())
+          .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+        
+        if (emails.length > 0) {
+          try {
+            await sendMeetingInvite(newMeeting as Meeting, emails);
+          } catch (inviteError) {
+            console.error('Failed to send invites but meeting was created:', inviteError);
+            // Meeting was still created, just invites failed
+          }
+        }
       }
-    }
 
-    resetForm();
-    setIsAddDialogOpen(false);
+      resetForm();
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating meeting:', error);
+      // Toast already shown by mutation
+    }
   };
 
   const handleEditMeeting = async () => {
@@ -329,6 +353,69 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           {formData.sendInvites && (
             <div className="grid gap-2">
               <Label htmlFor="inviteEmails">Recipient Emails</Label>
+              
+              {/* Quick add workspace members */}
+              {memberEmails.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span>Quick add team members:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        const allEmails = memberEmails.map(m => m.email).join(', ');
+                        setFormData((prev) => ({
+                          ...prev,
+                          inviteEmails: prev.inviteEmails 
+                            ? `${prev.inviteEmails}, ${allEmails}` 
+                            : allEmails
+                        }));
+                      }}
+                    >
+                      <Users className="h-3 w-3 mr-1" />
+                      Add all ({memberEmails.length})
+                    </Button>
+                    {memberEmails.slice(0, 5).map((member) => (
+                      <Button
+                        key={member.email}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          const currentEmails = formData.inviteEmails
+                            .split(/[,;\n]/)
+                            .map(e => e.trim())
+                            .filter(Boolean);
+                          
+                          if (!currentEmails.includes(member.email)) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              inviteEmails: prev.inviteEmails 
+                                ? `${prev.inviteEmails}, ${member.email}` 
+                                : member.email
+                            }));
+                          }
+                        }}
+                      >
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={member.avatar || undefined} />
+                          <AvatarFallback className="text-[8px]">
+                            {member.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {member.name.split(' ')[0]}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Textarea
                 id="inviteEmails"
                 value={formData.inviteEmails}
@@ -649,6 +736,59 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="quickEmails">Recipient Emails</Label>
+              
+              {/* Quick add workspace members */}
+              {memberEmails.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span>Quick add team members:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        const allEmails = memberEmails.map(m => m.email).join(', ');
+                        setQuickInviteEmails((prev) => prev ? `${prev}, ${allEmails}` : allEmails);
+                      }}
+                    >
+                      <Users className="h-3 w-3 mr-1" />
+                      Add all ({memberEmails.length})
+                    </Button>
+                    {memberEmails.slice(0, 5).map((member) => (
+                      <Button
+                        key={member.email}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          const currentEmails = quickInviteEmails
+                            .split(/[,;\n]/)
+                            .map(e => e.trim())
+                            .filter(Boolean);
+                          
+                          if (!currentEmails.includes(member.email)) {
+                            setQuickInviteEmails((prev) => prev ? `${prev}, ${member.email}` : member.email);
+                          }
+                        }}
+                      >
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={member.avatar || undefined} />
+                          <AvatarFallback className="text-[8px]">
+                            {member.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {member.name.split(' ')[0]}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Textarea
                 id="quickEmails"
                 value={quickInviteEmails}
