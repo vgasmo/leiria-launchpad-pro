@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, isPast } from 'date-fns';
 import { 
   Search, 
@@ -68,6 +69,7 @@ interface SessionsTabProps {
 }
 
 export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
@@ -82,9 +84,9 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
     const { data } = await fetchExportData();
     if (data && data.length > 0) {
       exportSessionsToCsv(data, `sessions-${workspaceId}`);
-      toast.success('Exported sessions to CSV');
+      toast.success(t('sessions.exportedSuccess'));
     } else {
-      toast.error('No data to export');
+      toast.error(t('sessions.noDataToExport'));
     }
   };
 
@@ -97,11 +99,11 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
     if (!sessionToDelete) return;
     try {
       await deleteMutation.mutateAsync(sessionToDelete);
-      toast.success('Session deleted');
+      toast.success(t('sessions.sessionDeleted'));
       setShowDeleteAlert(false);
       setSessionToDelete(null);
     } catch (error) {
-      toast.error('Failed to delete session');
+      toast.error(t('common.error'));
     }
   };
 
@@ -112,7 +114,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search sessions..."
+            placeholder={t('sessions.searchSessions')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -121,12 +123,12 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {t('sessions.export')}
           </Button>
           {canWrite && (
             <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Session
+              {t('sessions.createSession')}
             </Button>
           )}
         </div>
@@ -141,9 +143,9 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
         <Card className="bg-muted/50">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="font-heading text-lg font-semibold mb-2">No sessions found</h3>
+            <h3 className="font-heading text-lg font-semibold mb-2">{t('sessions.noSessions')}</h3>
             <p className="text-muted-foreground text-center max-w-sm">
-              {search ? 'Try adjusting your search' : 'Create your first mentoring session'}
+              {search ? t('sessions.tryAdjustingSearch') : t('sessions.createFirstSession')}
             </p>
           </CardContent>
         </Card>
@@ -186,15 +188,15 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Session</AlertDialogTitle>
+            <AlertDialogTitle>{t('sessions.deleteSession')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this session? This action cannot be undone.
+              {t('sessions.deleteSessionConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
