@@ -355,6 +355,18 @@ serve(async (req) => {
             },
           ],
         });
+
+        // Resend may return { data: null, error: {...} } without throwing.
+        if ((result as any)?.error) {
+          console.error(`Email failed for ${email}:`, (result as any).error);
+          return {
+            email,
+            success: false,
+            error: (result as any).error?.message ?? "Email provider error",
+            result,
+          };
+        }
+
         console.log(`Email sent to ${email}:`, result);
         return { email, success: true, result };
       } catch (err: unknown) {
