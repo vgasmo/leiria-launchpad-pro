@@ -232,43 +232,21 @@ export function useCreateConversation() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Create conversation
+      const { data: convId, error: rpcError } = await supabase.rpc('create_conversation', {
+        participant_ids: participantIds,
+        _title: title ?? null,
+        _workspace_id: workspaceId ?? null,
+      });
+
+      if (rpcError) throw rpcError;
+
       const { data: conv, error: convError } = await supabase
         .from('conversations')
-        .insert([
-          {
-            title,
-            workspace_id: workspaceId || null,
-            is_group: participantIds.length > 1,
-          },
-        ])
-        .select()
+        .select('*')
+        .eq('id', convId)
         .single();
 
       if (convError) throw convError;
-
-      // Add participants (insert the creator first so RLS checks pass for adding others)
-      const others = participantIds.filter((id) => id !== user.id);
-
-      const { error: creatorError } = await supabase
-        .from('conversation_participants')
-        .insert([{ conversation_id: conv.id, user_id: user.id }]);
-
-      if (creatorError) throw creatorError;
-
-      if (others.length > 0) {
-        const { error: othersError } = await supabase
-          .from('conversation_participants')
-          .insert(
-            [...new Set(others)].map((userId) => ({
-              conversation_id: conv.id,
-              user_id: userId,
-            }))
-          );
-
-        if (othersError) throw othersError;
-      }
-
       return conv;
     },
     onSuccess: () => {

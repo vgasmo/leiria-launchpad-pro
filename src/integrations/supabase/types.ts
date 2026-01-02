@@ -2061,6 +2061,14 @@ export type Database = {
       }
       can_manage_startup: { Args: { _startup_id: string }; Returns: boolean }
       can_write_workspace: { Args: { _workspace_id: string }; Returns: boolean }
+      create_conversation: {
+        Args: {
+          _title?: string
+          _workspace_id?: string
+          participant_ids: string[]
+        }
+        Returns: string
+      }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
