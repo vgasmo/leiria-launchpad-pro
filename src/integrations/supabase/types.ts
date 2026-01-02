@@ -2531,31 +2531,37 @@ export type Database = {
       }
       stages: {
         Row: {
+          color: string | null
           created_at: string
           description: string | null
           id: string
           is_active: boolean | null
           name: string
+          order_index: number
           position: number
           program_id: string
           stage_key: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean | null
           name: string
+          order_index?: number
           position?: number
           program_id: string
           stage_key?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
+          order_index?: number
           position?: number
           program_id?: string
           stage_key?: string | null

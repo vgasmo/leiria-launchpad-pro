@@ -28,7 +28,12 @@ export interface Tag {
   created_at: string;
 }
 
-// Global search across multiple tables
+// Helper: Build FTS query from search term
+function buildTsQuery(searchTerm: string): string {
+  return searchTerm.split(' ').filter(Boolean).map(w => `${w}:*`).join(' & ');
+}
+
+// Global search across multiple tables using FTS
 export function useGlobalSearch(filters: SearchFilters) {
   return useQuery({
     queryKey: ['global-search', filters],
@@ -36,11 +41,12 @@ export function useGlobalSearch(filters: SearchFilters) {
       if (!filters.query || filters.query.length < 2) return [];
 
       const searchTerm = filters.query.trim();
-      const tsQuery = searchTerm.split(' ').filter(Boolean).join(' & ');
+      const tsQuery = buildTsQuery(searchTerm);
       const ilikeTerm = `%${searchTerm}%`;
       
-      const results: SearchResult[] = [];
-      const typesToSearch = filters.types?.length ? filters.types : ['session', 'action', 'note', 'document', 'message', 'milestone'];
+      const typesToSearch = filters.types?.length 
+        ? filters.types 
+        : ['session', 'action', 'note', 'document', 'message', 'milestone'];
 
       // Calculate date filter
       let dateFilter: string | null = null;
@@ -56,145 +62,262 @@ export function useGlobalSearch(filters: SearchFilters) {
         dateFilter = now.toISOString();
       }
 
-      // Search sessions
+      // Build tag filter set
+      const tagIdsSet = new Set(filters.tagIds || []);
+      const hasTagFilter = tagIdsSet.size > 0;
+
+      // Execute searches in parallel for performance
+      const searchPromises: Promise<SearchResult[]>[] = [];
+
+      // Search sessions (with session_tags join for tag filtering)
       if (typesToSearch.includes('session')) {
-        let query = supabase
-          .from('sessions')
-          .select('id, workspace_id, title, notes, updated_at, workspaces!inner(startup:startups(name))')
-          .or(`title.ilike.${ilikeTerm},notes.ilike.${ilikeTerm},agenda.ilike.${ilikeTerm}`)
-          .limit(20);
+        searchPromises.push((async () => {
+          let query = supabase
+            .from('sessions')
+            .select('id, workspace_id, title, notes, updated_at, workspaces!inner(startup:startups(name))')
+            .or(`title.ilike.${ilikeTerm},notes.ilike.${ilikeTerm},agenda.ilike.${ilikeTerm}`)
+            .limit(20);
 
-        if (filters.workspaceIds?.length) {
-          query = query.in('workspace_id', filters.workspaceIds);
-        }
-        if (dateFilter) {
-          query = query.gte('updated_at', dateFilter);
-        }
+          if (filters.workspaceIds?.length) {
+            query = query.in('workspace_id', filters.workspaceIds);
+          }
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
 
-        const { data } = await query;
-        results.push(...(data || []).map(s => ({
-          type: 'session' as const,
-          id: s.id,
-          workspace_id: s.workspace_id,
-          title: s.title,
-          snippet: s.notes?.slice(0, 150) || '',
-          updated_at: s.updated_at,
-          url: `/workspace/${s.workspace_id}?tab=sessions`,
-          workspace_name: (s.workspaces as any)?.startup?.name,
-        })));
+          const { data } = await query;
+          let results = (data || []).map(s => ({
+            type: 'session' as const,
+            id: s.id,
+            workspace_id: s.workspace_id,
+            title: s.title,
+            snippet: s.notes?.slice(0, 150) || '',
+            updated_at: s.updated_at,
+            url: `/workspace/${s.workspace_id}?tab=sessions`,
+            workspace_name: (s.workspaces as any)?.startup?.name,
+          }));
+
+          // Apply tag filter if needed
+          if (hasTagFilter && results.length > 0) {
+            const { data: sessionTags } = await supabase
+              .from('session_tags')
+              .select('session_id, tag_id')
+              .in('session_id', results.map(r => r.id));
+            
+            const sessionTagMap = new Map<string, Set<string>>();
+            (sessionTags || []).forEach(st => {
+              if (!sessionTagMap.has(st.session_id)) {
+                sessionTagMap.set(st.session_id, new Set());
+              }
+              sessionTagMap.get(st.session_id)!.add(st.tag_id);
+            });
+
+            results = results.filter(r => {
+              const tags = sessionTagMap.get(r.id);
+              return tags && [...tagIdsSet].some(tid => tags.has(tid));
+            });
+          }
+
+          return results;
+        })());
       }
 
-      // Search action items
+      // Search action items (with action_tags join for tag filtering)
       if (typesToSearch.includes('action')) {
-        let query = supabase
-          .from('action_items')
-          .select('id, workspace_id, title, description, updated_at, workspaces!inner(startup:startups(name))')
-          .or(`title.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
-          .limit(20);
+        searchPromises.push((async () => {
+          let query = supabase
+            .from('action_items')
+            .select('id, workspace_id, title, description, updated_at, workspaces!inner(startup:startups(name))')
+            .or(`title.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
+            .limit(20);
 
-        if (filters.workspaceIds?.length) {
-          query = query.in('workspace_id', filters.workspaceIds);
-        }
-        if (dateFilter) {
-          query = query.gte('updated_at', dateFilter);
-        }
+          if (filters.workspaceIds?.length) {
+            query = query.in('workspace_id', filters.workspaceIds);
+          }
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
 
-        const { data } = await query;
-        results.push(...(data || []).map(a => ({
-          type: 'action' as const,
-          id: a.id,
-          workspace_id: a.workspace_id,
-          title: a.title,
-          snippet: a.description?.slice(0, 150) || '',
-          updated_at: a.updated_at,
-          url: `/workspace/${a.workspace_id}?tab=actions`,
-          workspace_name: (a.workspaces as any)?.startup?.name,
-        })));
+          const { data } = await query;
+          let results = (data || []).map(a => ({
+            type: 'action' as const,
+            id: a.id,
+            workspace_id: a.workspace_id,
+            title: a.title,
+            snippet: a.description?.slice(0, 150) || '',
+            updated_at: a.updated_at,
+            url: `/workspace/${a.workspace_id}?tab=actions`,
+            workspace_name: (a.workspaces as any)?.startup?.name,
+          }));
+
+          // Apply tag filter if needed
+          if (hasTagFilter && results.length > 0) {
+            const { data: actionTags } = await supabase
+              .from('action_tags')
+              .select('action_id, tag_id')
+              .in('action_id', results.map(r => r.id));
+            
+            const actionTagMap = new Map<string, Set<string>>();
+            (actionTags || []).forEach(at => {
+              if (!actionTagMap.has(at.action_id)) {
+                actionTagMap.set(at.action_id, new Set());
+              }
+              actionTagMap.get(at.action_id)!.add(at.tag_id);
+            });
+
+            results = results.filter(r => {
+              const tags = actionTagMap.get(r.id);
+              return tags && [...tagIdsSet].some(tid => tags.has(tid));
+            });
+          }
+
+          return results;
+        })());
       }
 
       // Search consultant notes
       if (typesToSearch.includes('note')) {
-        let query = supabase
-          .from('consultant_notes')
-          .select('id, workspace_id, content, updated_at, workspaces!inner(startup:startups(name))')
-          .ilike('content', ilikeTerm)
-          .limit(20);
+        searchPromises.push((async () => {
+          let query = supabase
+            .from('consultant_notes')
+            .select('id, workspace_id, content, updated_at, workspaces!inner(startup:startups(name))')
+            .ilike('content', ilikeTerm)
+            .limit(20);
 
-        if (filters.workspaceIds?.length) {
-          query = query.in('workspace_id', filters.workspaceIds);
-        }
-        if (dateFilter) {
-          query = query.gte('updated_at', dateFilter);
-        }
+          if (filters.workspaceIds?.length) {
+            query = query.in('workspace_id', filters.workspaceIds);
+          }
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
 
-        const { data } = await query;
-        results.push(...(data || []).map(n => ({
-          type: 'note' as const,
-          id: n.id,
-          workspace_id: n.workspace_id,
-          title: 'Nota',
-          snippet: n.content.slice(0, 150),
-          updated_at: n.updated_at,
-          url: `/workspace/${n.workspace_id}?tab=notes`,
-          workspace_name: (n.workspaces as any)?.startup?.name,
-        })));
+          const { data } = await query;
+          return (data || []).map(n => ({
+            type: 'note' as const,
+            id: n.id,
+            workspace_id: n.workspace_id,
+            title: 'Nota',
+            snippet: n.content.slice(0, 150),
+            updated_at: n.updated_at,
+            url: `/workspace/${n.workspace_id}?tab=notes`,
+            workspace_name: (n.workspaces as any)?.startup?.name,
+          }));
+        })());
       }
 
       // Search documents
       if (typesToSearch.includes('document')) {
-        let query = supabase
-          .from('documents')
-          .select('id, workspace_id, name, description, updated_at, workspaces!inner(startup:startups(name))')
-          .or(`name.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
-          .limit(20);
+        searchPromises.push((async () => {
+          let query = supabase
+            .from('documents')
+            .select('id, workspace_id, name, description, updated_at, workspaces!inner(startup:startups(name))')
+            .or(`name.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
+            .limit(20);
 
-        if (filters.workspaceIds?.length) {
-          query = query.in('workspace_id', filters.workspaceIds);
-        }
-        if (dateFilter) {
-          query = query.gte('updated_at', dateFilter);
-        }
+          if (filters.workspaceIds?.length) {
+            query = query.in('workspace_id', filters.workspaceIds);
+          }
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
 
-        const { data } = await query;
-        results.push(...(data || []).map(d => ({
-          type: 'document' as const,
-          id: d.id,
-          workspace_id: d.workspace_id,
-          title: d.name,
-          snippet: d.description?.slice(0, 150) || '',
-          updated_at: d.updated_at,
-          url: `/workspace/${d.workspace_id}?tab=documents`,
-          workspace_name: (d.workspaces as any)?.startup?.name,
-        })));
+          const { data } = await query;
+          return (data || []).map(d => ({
+            type: 'document' as const,
+            id: d.id,
+            workspace_id: d.workspace_id,
+            title: d.name,
+            snippet: d.description?.slice(0, 150) || '',
+            updated_at: d.updated_at,
+            url: `/workspace/${d.workspace_id}?tab=documents`,
+            workspace_name: (d.workspaces as any)?.startup?.name,
+          }));
+        })());
       }
 
       // Search milestones
       if (typesToSearch.includes('milestone')) {
-        let query = supabase
-          .from('milestones')
-          .select('id, workspace_id, title, description, updated_at, workspaces!inner(startup:startups(name))')
-          .or(`title.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
-          .limit(20);
+        searchPromises.push((async () => {
+          let query = supabase
+            .from('milestones')
+            .select('id, workspace_id, title, description, updated_at, workspaces!inner(startup:startups(name))')
+            .or(`title.ilike.${ilikeTerm},description.ilike.${ilikeTerm}`)
+            .limit(20);
 
-        if (filters.workspaceIds?.length) {
-          query = query.in('workspace_id', filters.workspaceIds);
-        }
-        if (dateFilter) {
-          query = query.gte('updated_at', dateFilter);
-        }
+          if (filters.workspaceIds?.length) {
+            query = query.in('workspace_id', filters.workspaceIds);
+          }
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
 
-        const { data } = await query;
-        results.push(...(data || []).map(m => ({
-          type: 'milestone' as const,
-          id: m.id,
-          workspace_id: m.workspace_id,
-          title: m.title,
-          snippet: m.description?.slice(0, 150) || '',
-          updated_at: m.updated_at,
-          url: `/workspace/${m.workspace_id}?tab=milestones`,
-          workspace_name: (m.workspaces as any)?.startup?.name,
-        })));
+          const { data } = await query;
+          return (data || []).map(m => ({
+            type: 'milestone' as const,
+            id: m.id,
+            workspace_id: m.workspace_id,
+            title: m.title,
+            snippet: m.description?.slice(0, 150) || '',
+            updated_at: m.updated_at,
+            url: `/workspace/${m.workspace_id}?tab=milestones`,
+            workspace_name: (m.workspaces as any)?.startup?.name,
+          }));
+        })());
       }
+
+      // Search messages (NEW)
+      if (typesToSearch.includes('message')) {
+        searchPromises.push((async () => {
+          // Messages need to be joined with conversations to get workspace_id
+          let query = supabase
+            .from('messages')
+            .select(`
+              id, content, updated_at, conversation_id, sender_id,
+              conversation:conversations!inner(
+                id, workspace_id, title,
+                workspace:workspaces(startup:startups(name))
+              )
+            `)
+            .ilike('content', ilikeTerm)
+            .limit(20);
+
+          if (dateFilter) {
+            query = query.gte('updated_at', dateFilter);
+          }
+
+          const { data } = await query;
+          
+          let results = (data || [])
+            .filter(m => {
+              const conv = m.conversation as any;
+              const wsId = conv?.workspace_id;
+              // Apply workspace filter
+              if (filters.workspaceIds?.length && wsId) {
+                return filters.workspaceIds.includes(wsId);
+              }
+              return true;
+            })
+            .map(m => {
+              const conv = m.conversation as any;
+              return {
+                type: 'message' as const,
+                id: m.id,
+                workspace_id: conv?.workspace_id || '',
+                title: conv?.title || 'Message',
+                snippet: m.content.slice(0, 150),
+                updated_at: m.updated_at,
+                url: `/messages?conversation=${m.conversation_id}`,
+                workspace_name: conv?.workspace?.startup?.name,
+              };
+            });
+
+          return results;
+        })());
+      }
+
+      // Execute all searches in parallel
+      const allResults = await Promise.all(searchPromises);
+      const results = allResults.flat();
 
       // Sort by updated_at descending
       results.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
@@ -253,6 +376,23 @@ export function useSessionTags(sessionId: string | undefined) {
       return (data || []).map(d => d.tag) as Tag[];
     },
     enabled: !!sessionId,
+  });
+}
+
+// Get tags for an action
+export function useActionTags(actionId: string | undefined) {
+  return useQuery({
+    queryKey: ['action-tags', actionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('action_tags')
+        .select('tag:tags(*)')
+        .eq('action_id', actionId!);
+
+      if (error) throw error;
+      return (data || []).map(d => d.tag) as Tag[];
+    },
+    enabled: !!actionId,
   });
 }
 
@@ -372,6 +512,50 @@ export function useRemoveSessionTag() {
     },
     onSuccess: (_, { sessionId }) => {
       queryClient.invalidateQueries({ queryKey: ['session-tags', sessionId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+// Add tag to action
+export function useAddActionTag() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ actionId, tagId }: { actionId: string; tagId: string }) => {
+      const { error } = await supabase
+        .from('action_tags')
+        .insert({ action_id: actionId, tag_id: tagId });
+
+      if (error && error.code !== '23505') throw error;
+    },
+    onSuccess: (_, { actionId }) => {
+      queryClient.invalidateQueries({ queryKey: ['action-tags', actionId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+// Remove tag from action
+export function useRemoveActionTag() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ actionId, tagId }: { actionId: string; tagId: string }) => {
+      const { error } = await supabase
+        .from('action_tags')
+        .delete()
+        .eq('action_id', actionId)
+        .eq('tag_id', tagId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { actionId }) => {
+      queryClient.invalidateQueries({ queryKey: ['action-tags', actionId] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
