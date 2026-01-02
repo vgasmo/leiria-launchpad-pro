@@ -8,6 +8,11 @@ export interface NotificationPreferences {
   digest_frequency: string;
   digest_day: number;
   last_digest_sent_at: string | null;
+  slack_webhook_url: string | null;
+  slack_enabled: boolean;
+  calendar_sync_enabled: boolean;
+  milestone_reminders_enabled: boolean;
+  milestone_reminder_days: number;
 }
 
 export function useNotificationPreferences() {

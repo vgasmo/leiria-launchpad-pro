@@ -1126,6 +1126,48 @@ export type Database = {
           },
         ]
       }
+      milestone_reminders: {
+        Row: {
+          days_before: number
+          id: string
+          milestone_id: string
+          reminder_type: string
+          sent_at: string
+          workspace_id: string
+        }
+        Insert: {
+          days_before: number
+          id?: string
+          milestone_id: string
+          reminder_type: string
+          sent_at?: string
+          workspace_id: string
+        }
+        Update: {
+          days_before?: number
+          id?: string
+          milestone_id?: string
+          reminder_type?: string
+          sent_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_reminders_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_reminders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestones: {
         Row: {
           completed_at: string | null
@@ -1181,6 +1223,7 @@ export type Database = {
       }
       notification_preferences: {
         Row: {
+          calendar_sync_enabled: boolean | null
           created_at: string
           digest_day: number | null
           digest_frequency: string | null
@@ -1188,11 +1231,16 @@ export type Database = {
           email_on_health_drop: boolean | null
           id: string
           last_digest_sent_at: string | null
+          milestone_reminder_days: number | null
+          milestone_reminders_enabled: boolean | null
+          slack_enabled: boolean | null
+          slack_webhook_url: string | null
           updated_at: string
           user_id: string
           weekly_health_digest: boolean | null
         }
         Insert: {
+          calendar_sync_enabled?: boolean | null
           created_at?: string
           digest_day?: number | null
           digest_frequency?: string | null
@@ -1200,11 +1248,16 @@ export type Database = {
           email_on_health_drop?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
+          milestone_reminder_days?: number | null
+          milestone_reminders_enabled?: boolean | null
+          slack_enabled?: boolean | null
+          slack_webhook_url?: string | null
           updated_at?: string
           user_id: string
           weekly_health_digest?: boolean | null
         }
         Update: {
+          calendar_sync_enabled?: boolean | null
           created_at?: string
           digest_day?: number | null
           digest_frequency?: string | null
@@ -1212,6 +1265,10 @@ export type Database = {
           email_on_health_drop?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
+          milestone_reminder_days?: number | null
+          milestone_reminders_enabled?: boolean | null
+          slack_enabled?: boolean | null
+          slack_webhook_url?: string | null
           updated_at?: string
           user_id?: string
           weekly_health_digest?: boolean | null
