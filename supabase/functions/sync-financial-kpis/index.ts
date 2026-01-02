@@ -26,7 +26,7 @@ serve(async (req) => {
       });
     }
 
-    // Extract user from token
+    // SECURITY: Validate user authentication
     const token = authHeader.replace("Bearer ", "");
     const supabaseUser = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -34,8 +34,9 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user } } = await supabaseUser.auth.getUser(token);
-    if (!user) {
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
+    if (authError || !user) {
+      console.error("[sync-financial-kpis] Auth error:", authError);
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -56,7 +57,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Syncing KPIs from financial model version: ${version_id}`);
+    console.log(`[sync-financial-kpis] Syncing KPIs from version: ${version_id}, user: ${user.id}`);
 
     // Get version with workspace details
     const { data: version, error: versionError } = await supabase
@@ -69,6 +70,22 @@ serve(async (req) => {
       throw new Error(`Version not found: ${versionError?.message}`);
     }
 
+    const workspaceId = version.workspace_id;
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc("has_workspace_access", {
+      _user_id: user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (!hasAccess) {
+      console.error("[sync-financial-kpis] Access denied for user:", user.id, "workspace:", workspaceId);
+      return new Response(JSON.stringify({ error: "Access denied to this workspace" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (version.status !== "parsed" || !version.key_metrics_json) {
       return new Response(JSON.stringify({ 
         error: "Financial model must be parsed first" 
@@ -79,7 +96,6 @@ serve(async (req) => {
     }
 
     const metrics = version.key_metrics_json as Record<string, number | null>;
-    const workspaceId = version.workspace_id;
     const programId = version.workspaces?.program_id;
 
     // Get metric mappings (program-specific first, then global)
@@ -150,7 +166,7 @@ serve(async (req) => {
         });
 
       if (upsertError) {
-        console.error(`Failed to upsert KPI ${metricKey}:`, upsertError);
+        console.error(`[sync-financial-kpis] Failed to upsert KPI ${metricKey}:`, upsertError);
         result.skipped.push({ metric: metricKey, reason: upsertError.message });
       } else {
         result.synced.push({
@@ -174,7 +190,7 @@ serve(async (req) => {
       },
     });
 
-    console.log(`KPI sync complete: ${result.synced.length} synced, ${result.unmapped.length} unmapped`);
+    console.log(`[sync-financial-kpis] Complete: ${result.synced.length} synced, ${result.unmapped.length} unmapped`);
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -184,7 +200,7 @@ serve(async (req) => {
     });
 
   } catch (error: unknown) {
-    console.error("Error syncing KPIs:", error);
+    console.error("[sync-financial-kpis] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to sync KPIs";
     return new Response(JSON.stringify({ 
       success: false,

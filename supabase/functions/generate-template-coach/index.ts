@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
     if (!lovableApiKey) {
@@ -27,11 +28,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate authorization
+    // SECURITY: Validate authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Validate token and get user
+    const token = authHeader.replace('Bearer ', '');
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
+    if (authError || !user) {
+      console.error('[generate-template-coach] Auth error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -46,7 +62,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('[generate-template-coach] Processing instance:', template_instance_id, 'mode:', mode);
+    console.log('[generate-template-coach] Processing instance:', template_instance_id, 'mode:', mode, 'user:', user.id);
 
     // Fetch template instance with related data
     const { data: instance, error: instanceError } = await supabase
@@ -63,6 +79,20 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Template instance not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: instance.workspace_id,
+    });
+
+    if (!hasAccess) {
+      console.error('[generate-template-coach] Access denied for user:', user.id, 'workspace:', instance.workspace_id);
+      return new Response(
+        JSON.stringify({ error: 'Access denied to this workspace' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -342,16 +372,25 @@ Provide your analysis as a JSON object. Focus on ${mode === 'actions' ? 'specifi
     }
 
     // Save feedback to database
-    const { data: { user } } = await supabase.auth.getUser();
     await supabase
       .from('template_instances')
       .update({
         ai_feedback_json: feedback,
         ai_feedback_generated_at: new Date().toISOString(),
-        ai_feedback_generated_by: user?.id || null,
+        ai_feedback_generated_by: user.id,
         ai_feedback_visibility: 'staff',
       })
       .eq('id', template_instance_id);
+
+    // Log activity
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      workspace_id: instance.workspace_id,
+      entity_type: 'template_instance',
+      entity_id: template_instance_id,
+      action: 'ai_coach_generated',
+      metadata: { mode },
+    });
 
     console.log('[generate-template-coach] Analysis complete for:', template_instance_id);
 

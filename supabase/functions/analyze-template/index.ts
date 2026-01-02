@@ -17,12 +17,36 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
     if (!lovableApiKey) {
       return new Response(
         JSON.stringify({ error: 'LOVABLE_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Validate user authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
+    if (authError || !user) {
+      console.error('[analyze-template] Auth error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -51,6 +75,20 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Template instance not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: instance.workspace_id,
+    });
+
+    if (!hasAccess) {
+      console.error('[analyze-template] Access denied for user:', user.id, 'workspace:', instance.workspace_id);
+      return new Response(
+        JSON.stringify({ error: 'Access denied to this workspace' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -120,7 +158,7 @@ ${formattedResponses}
 
 Please analyze this submission and provide structured feedback.`;
 
-    console.log('[analyze-template] Calling AI for instance:', instance_id);
+    console.log('[analyze-template] Calling AI for instance:', instance_id, 'by user:', user.id);
 
     // Call Lovable AI Gateway
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -179,6 +217,16 @@ Please analyze this submission and provide structured feedback.`;
         recommendation: 'needs_discussion'
       };
     }
+
+    // Log activity
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      workspace_id: instance.workspace_id,
+      entity_type: 'template_instance',
+      entity_id: instance_id,
+      action: 'ai_analyzed',
+      metadata: { score: analysis.overall_score, recommendation: analysis.recommendation },
+    });
 
     console.log('[analyze-template] Analysis complete for instance:', instance_id);
 
