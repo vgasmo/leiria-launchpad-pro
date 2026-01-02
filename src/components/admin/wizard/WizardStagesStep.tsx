@@ -20,17 +20,29 @@ interface WizardStagesStepProps {
 export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
   const allStageKeys = getAllStageKeys();
 
-  // Initialize with all stages if empty
-  const [stages, setStages] = useState<DraftStage[]>(() => {
-    if (data && data.length > 0) return data;
-    return allStageKeys.map((key, idx) => ({
+  const buildDefaultStages = (): DraftStage[] =>
+    allStageKeys.map((key, idx) => ({
       stage_key: key,
       name: getStageLabel(key),
       description: getStageDescription(key),
       position: idx,
       is_active: true,
     }));
+
+  const [stages, setStages] = useState<DraftStage[]>(() => {
+    if (data && data.length > 0) return data;
+    return buildDefaultStages();
   });
+
+  // Keep local state in sync with persisted draft (prevents autosave loops)
+  useEffect(() => {
+    if (!data) return;
+    const incoming = data.length > 0 ? data : buildDefaultStages();
+    if (JSON.stringify(incoming) !== JSON.stringify(stages)) {
+      setStages(incoming);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   // Debounced update
   useEffect(() => {
@@ -54,19 +66,19 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
     );
   };
 
-  const moveStage = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= stages.length) return;
+  const moveStage = (stageKey: StartupStage, direction: 'up' | 'down') => {
+    setStages((prev) => {
+      const ordered = [...prev].sort((a, b) => a.position - b.position);
+      const idx = ordered.findIndex((s) => s.stage_key === stageKey);
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (idx < 0 || newIdx < 0 || newIdx >= ordered.length) return prev;
 
-    const newStages = [...stages];
-    [newStages[index], newStages[newIndex]] = [newStages[newIndex], newStages[index]];
-    
-    // Update positions
-    newStages.forEach((s, i) => {
-      s.position = i;
+      const swapped = [...ordered];
+      [swapped[idx], swapped[newIdx]] = [swapped[newIdx], swapped[idx]];
+
+      const normalized = swapped.map((s, i) => ({ ...s, position: i }));
+      return normalized;
     });
-    
-    setStages(newStages);
   };
 
   const sortedStages = [...stages].sort((a, b) => a.position - b.position);
@@ -98,7 +110,7 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => moveStage(idx, 'up')}
+                  onClick={() => moveStage(stage.stage_key, 'up')}
                   disabled={idx === 0}
                 >
                   <ChevronUp className="h-4 w-4" />
@@ -108,7 +120,7 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => moveStage(idx, 'down')}
+                  onClick={() => moveStage(stage.stage_key, 'down')}
                   disabled={idx === sortedStages.length - 1}
                 >
                   <ChevronDown className="h-4 w-4" />
