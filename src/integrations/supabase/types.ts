@@ -60,6 +60,7 @@ export type Database = {
           milestone_id: string | null
           owner_user_id: string | null
           priority: string | null
+          search_vector: unknown
           session_id: string | null
           status: Database["public"]["Enums"]["action_status"]
           title: string
@@ -76,6 +77,7 @@ export type Database = {
           milestone_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
+          search_vector?: unknown
           session_id?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title: string
@@ -92,6 +94,7 @@ export type Database = {
           milestone_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
+          search_vector?: unknown
           session_id?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title?: string
@@ -118,6 +121,39 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_tags: {
+        Row: {
+          action_id: string
+          created_at: string
+          tag_id: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          tag_id: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_tags_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "action_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "action_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -388,6 +424,7 @@ export type Database = {
           created_at: string
           id: string
           is_private: boolean
+          search_vector: unknown
           updated_at: string
           workspace_id: string
         }
@@ -397,6 +434,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_private?: boolean
+          search_vector?: unknown
           updated_at?: string
           workspace_id: string
         }
@@ -406,6 +444,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_private?: boolean
+          search_vector?: unknown
           updated_at?: string
           workspace_id?: string
         }
@@ -497,6 +536,7 @@ export type Database = {
           id: string
           mime_type: string | null
           name: string
+          search_vector: unknown
           updated_at: string
           uploaded_by: string | null
           workspace_id: string
@@ -511,6 +551,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           name: string
+          search_vector?: unknown
           updated_at?: string
           uploaded_by?: string | null
           workspace_id: string
@@ -525,6 +566,7 @@ export type Database = {
           id?: string
           mime_type?: string | null
           name?: string
+          search_vector?: unknown
           updated_at?: string
           uploaded_by?: string | null
           workspace_id?: string
@@ -966,6 +1008,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          search_vector: unknown
           sender_id: string
           updated_at: string
         }
@@ -974,6 +1017,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          search_vector?: unknown
           sender_id: string
           updated_at?: string
         }
@@ -982,6 +1026,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          search_vector?: unknown
           sender_id?: string
           updated_at?: string
         }
@@ -1003,6 +1048,7 @@ export type Database = {
           description: string | null
           id: string
           position: number | null
+          search_vector: unknown
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string | null
           title: string
@@ -1016,6 +1062,7 @@ export type Database = {
           description?: string | null
           id?: string
           position?: number | null
+          search_vector?: unknown
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title: string
@@ -1029,6 +1076,7 @@ export type Database = {
           description?: string | null
           id?: string
           position?: number | null
+          search_vector?: unknown
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title?: string
@@ -1157,6 +1205,97 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playbook_items: {
+        Row: {
+          created_at: string
+          default_owner_role: string | null
+          description: string | null
+          id: string
+          item_type: string
+          metadata_json: Json | null
+          order_index: number
+          playbook_id: string
+          priority: string | null
+          relative_due_days: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          default_owner_role?: string | null
+          description?: string | null
+          id?: string
+          item_type: string
+          metadata_json?: Json | null
+          order_index?: number
+          playbook_id: string
+          priority?: string | null
+          relative_due_days?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          default_owner_role?: string | null
+          description?: string | null
+          id?: string
+          item_type?: string
+          metadata_json?: Json | null
+          order_index?: number
+          playbook_id?: string
+          priority?: string | null
+          relative_due_days?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_items_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "playbooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playbooks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          program_id: string | null
+          stage: Database["public"]["Enums"]["startup_stage"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          stage: Database["public"]["Enums"]["startup_stage"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          stage?: Database["public"]["Enums"]["startup_stage"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbooks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
@@ -1480,6 +1619,39 @@ export type Database = {
           },
         ]
       }
+      session_tags: {
+        Row: {
+          created_at: string
+          session_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          session_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          session_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_tags_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_templates: {
         Row: {
           agenda_template: string | null
@@ -1544,6 +1716,7 @@ export type Database = {
           notes: string | null
           raw_transcript: string | null
           scheduled_at: string
+          search_vector: unknown
           source: string | null
           title: string
           updated_at: string
@@ -1568,6 +1741,7 @@ export type Database = {
           notes?: string | null
           raw_transcript?: string | null
           scheduled_at: string
+          search_vector?: unknown
           source?: string | null
           title: string
           updated_at?: string
@@ -1592,6 +1766,7 @@ export type Database = {
           notes?: string | null
           raw_transcript?: string | null
           scheduled_at?: string
+          search_vector?: unknown
           source?: string | null
           title?: string
           updated_at?: string
@@ -1820,6 +1995,27 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -2210,6 +2406,140 @@ export type Database = {
           },
           {
             foreignKeyName: "workspace_kpis_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_playbook_instances: {
+        Row: {
+          created_at: string
+          id: string
+          instantiated_at: string | null
+          instantiated_by: string | null
+          playbook_id: string
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instantiated_at?: string | null
+          instantiated_by?: string | null
+          playbook_id: string
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instantiated_at?: string | null
+          instantiated_by?: string | null
+          playbook_id?: string
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_playbook_instances_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "playbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_playbook_instances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_playbook_links: {
+        Row: {
+          action_item_id: string | null
+          created_at: string
+          id: string
+          milestone_id: string | null
+          playbook_item_id: string | null
+          workspace_playbook_instance_id: string
+        }
+        Insert: {
+          action_item_id?: string | null
+          created_at?: string
+          id?: string
+          milestone_id?: string | null
+          playbook_item_id?: string | null
+          workspace_playbook_instance_id: string
+        }
+        Update: {
+          action_item_id?: string | null
+          created_at?: string
+          id?: string
+          milestone_id?: string | null
+          playbook_item_id?: string | null
+          workspace_playbook_instance_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_playbook_links_action_item_id_fkey"
+            columns: ["action_item_id"]
+            isOneToOne: false
+            referencedRelation: "action_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_playbook_links_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_playbook_links_playbook_item_id_fkey"
+            columns: ["playbook_item_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_playbook_links_workspace_playbook_instance_id_fkey"
+            columns: ["workspace_playbook_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_playbook_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_tags: {
+        Row: {
+          created_at: string
+          tag_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          tag_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          tag_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_tags_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
