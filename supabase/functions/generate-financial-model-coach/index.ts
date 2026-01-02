@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface AIReview {
   summary: string;
@@ -23,16 +19,13 @@ interface AIReview {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "No authorization header" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "No authorization header" }, req, 401);
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -44,10 +37,7 @@ serve(async (req) => {
 
     const { data: { user } } = await supabaseUser.auth.getUser(token);
     if (!user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Invalid token" }, req, 401);
     }
 
     const supabase = createClient(
@@ -58,10 +48,7 @@ serve(async (req) => {
     const { version_id, mode = "full" } = await req.json();
     
     if (!version_id) {
-      return new Response(JSON.stringify({ error: "version_id is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "version_id is required" }, req, 400);
     }
 
     console.log(`Generating AI review for financial model: ${version_id}, mode: ${mode}`);
@@ -77,9 +64,36 @@ serve(async (req) => {
       throw new Error(`Version not found: ${versionError?.message}`);
     }
 
+    const workspaceId = version.workspace_id;
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (!hasAccess) {
+      console.error('[generate-financial-model-coach] Access denied for user:', user.id, 'workspace:', workspaceId);
+      return corsJsonResponse({ error: 'Access denied to this workspace' }, req, 403);
+    }
+
+    // RATE LIMITING: Check AI rate limit
+    const { data: withinLimit } = await supabase.rpc('check_ai_rate_limit', {
+      _user_id: user.id,
+      _workspace_id: workspaceId,
+      _function_name: 'generate-financial-model-coach',
+      _max_requests: 15
+    });
+
+    if (!withinLimit) {
+      console.warn('[generate-financial-model-coach] Rate limit exceeded for user:', user.id);
+      return corsJsonResponse({ 
+        error: 'Rate limit exceeded. You can make up to 15 financial model AI reviews per hour. Please try again later.' 
+      }, req, 429);
+    }
+
     const metrics = version.key_metrics_json as Record<string, number | null> || {};
     const workspace = version.workspaces;
-    const workspaceId = version.workspace_id;
 
     // Get recent sessions
     const { data: recentSessions } = await supabase
@@ -202,16 +216,10 @@ Generate insights focusing on:
       console.error("AI gateway error:", aiResponse.status, errorText);
       
       if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return corsJsonResponse({ error: "Rate limit exceeded, please try again later" }, req, 429);
       }
       if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add credits" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return corsJsonResponse({ error: "Payment required, please add credits" }, req, 402);
       }
       throw new Error(`AI gateway error: ${aiResponse.status}`);
     }
@@ -267,22 +275,17 @@ Generate insights focusing on:
 
     console.log(`AI review generated for: ${version_id}`);
 
-    return new Response(JSON.stringify({ 
+    return corsJsonResponse({ 
       success: true,
       review,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    }, req, 200);
 
   } catch (error: unknown) {
     console.error("Error generating AI review:", error);
     const message = error instanceof Error ? error.message : "Failed to generate AI review";
-    return new Response(JSON.stringify({ 
+    return corsJsonResponse({ 
       success: false,
       error: message
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    }, req, 500);
   }
 });

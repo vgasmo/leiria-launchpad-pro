@@ -199,6 +199,47 @@ export type Database = {
           },
         ]
       }
+      ai_rate_limits: {
+        Row: {
+          created_at: string
+          function_name: string
+          id: string
+          request_count: number
+          updated_at: string
+          user_id: string
+          window_start: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          function_name: string
+          id?: string
+          request_count?: number
+          updated_at?: string
+          user_id: string
+          window_start?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          function_name?: string
+          id?: string
+          request_count?: number
+          updated_at?: string
+          user_id?: string
+          window_start?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_rate_limits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cap_table_entries: {
         Row: {
           cliff_months: number | null
@@ -3574,7 +3615,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          expertise: string[] | null
+          full_name: string | null
+          id: string | null
+          role_display: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          expertise?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          role_display?: never
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          expertise?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          role_display?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_edit_workspace: {
@@ -3583,6 +3650,16 @@ export type Database = {
       }
       can_manage_startup: { Args: { _startup_id: string }; Returns: boolean }
       can_write_workspace: { Args: { _workspace_id: string }; Returns: boolean }
+      check_ai_rate_limit: {
+        Args: {
+          _function_name: string
+          _max_requests?: number
+          _user_id: string
+          _workspace_id: string
+        }
+        Returns: boolean
+      }
+      cleanup_old_rate_limits: { Args: never; Returns: number }
       create_conversation: {
         Args: {
           _title?: string

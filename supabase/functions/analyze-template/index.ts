@@ -1,9 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface AnalyzeRequest {
   instance_id: string;
@@ -11,7 +7,7 @@ interface AnalyzeRequest {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -21,19 +17,13 @@ Deno.serve(async (req) => {
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
     if (!lovableApiKey) {
-      return new Response(
-        JSON.stringify({ error: 'LOVABLE_API_KEY is not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'LOVABLE_API_KEY is not configured' }, req, 500);
     }
 
     // SECURITY: Validate user authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'Authorization required' }, req, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -44,20 +34,14 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
     if (authError || !user) {
       console.error('[analyze-template] Auth error:', authError);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { instance_id } = await req.json() as AnalyzeRequest;
 
     if (!instance_id) {
-      return new Response(
-        JSON.stringify({ error: 'instance_id is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'instance_id is required' }, req, 400);
     }
 
     // Fetch the template instance with template details
@@ -72,10 +56,7 @@ Deno.serve(async (req) => {
 
     if (instanceError || !instance) {
       console.error('[analyze-template] Instance fetch error:', instanceError);
-      return new Response(
-        JSON.stringify({ error: 'Template instance not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'Template instance not found' }, req, 404);
     }
 
     // SECURITY: Validate user has access to this workspace
@@ -86,10 +67,22 @@ Deno.serve(async (req) => {
 
     if (!hasAccess) {
       console.error('[analyze-template] Access denied for user:', user.id, 'workspace:', instance.workspace_id);
-      return new Response(
-        JSON.stringify({ error: 'Access denied to this workspace' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ error: 'Access denied to this workspace' }, req, 403);
+    }
+
+    // RATE LIMITING: Check AI rate limit
+    const { data: withinLimit } = await supabase.rpc('check_ai_rate_limit', {
+      _user_id: user.id,
+      _workspace_id: instance.workspace_id,
+      _function_name: 'analyze-template',
+      _max_requests: 20
+    });
+
+    if (!withinLimit) {
+      console.warn('[analyze-template] Rate limit exceeded for user:', user.id);
+      return corsJsonResponse({ 
+        error: 'Rate limit exceeded. You can make up to 20 AI analysis requests per hour. Please try again later.' 
+      }, req, 429);
     }
 
     // Fetch workspace context for better analysis
@@ -179,16 +172,10 @@ Please analyze this submission and provide structured feedback.`;
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return corsJsonResponse({ error: 'Rate limit exceeded. Please try again later.' }, req, 429);
       }
       if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return corsJsonResponse({ error: 'AI credits exhausted. Please add credits to continue.' }, req, 402);
       }
       const errorText = await aiResponse.text();
       console.error('[analyze-template] AI gateway error:', aiResponse.status, errorText);
@@ -230,22 +217,16 @@ Please analyze this submission and provide structured feedback.`;
 
     console.log('[analyze-template] Analysis complete for instance:', instance_id);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        analysis,
-        template_name: template?.name,
-        startup_name: startupInfo?.name,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return corsJsonResponse({
+      success: true,
+      analysis,
+      template_name: template?.name,
+      startup_name: startupInfo?.name,
+    }, req, 200);
 
   } catch (error) {
     console.error('[analyze-template] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return corsJsonResponse({ error: message }, req, 500);
   }
 });
