@@ -134,6 +134,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
   const [selectedVersion, setSelectedVersion] = useState<FinancialModelVersion | null>(null);
   const [aiReviewMode, setAiReviewMode] = useState<'full' | 'investor' | 'mentor_prep'>('full');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['metrics', 'insights']));
+  const [templateAvailable, setTemplateAvailable] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const latestVersion = versions?.[0];
@@ -143,10 +144,44 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
   const insights = metrics ? generateInsights(metrics) : [];
 
   // Template download URL (public bucket)
-  const TEMPLATE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/public-assets/templates/Template_Avaliacao_Startup_Ecossistema.xlsm`;
+  const TEMPLATE_BUCKET = 'public-assets';
+  const TEMPLATE_PATH = 'templates/Template_Avaliacao_Startup_Ecossistema.xlsm';
+  
+  const getTemplateUrl = () => {
+    const { data } = supabase.storage
+      .from(TEMPLATE_BUCKET)
+      .getPublicUrl(TEMPLATE_PATH);
+    return data.publicUrl;
+  };
 
-  const handleDownloadTemplate = () => {
-    window.open(TEMPLATE_URL, '_blank');
+  // Check if template exists on mount
+  useState(() => {
+    const checkTemplate = async () => {
+      try {
+        const url = getTemplateUrl();
+        const response = await fetch(url, { method: 'HEAD' });
+        setTemplateAvailable(response.ok);
+      } catch {
+        setTemplateAvailable(false);
+      }
+    };
+    checkTemplate();
+  });
+
+  const handleDownloadTemplate = async () => {
+    const url = getTemplateUrl();
+    
+    // Check if template exists before opening
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        window.open(url, '_blank');
+      } else {
+        toast.error('Template not available yet. Ask an admin to upload it in Admin > Templates.');
+      }
+    } catch {
+      toast.error('Template not available yet. Ask an admin to upload it in Admin > Templates.');
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
