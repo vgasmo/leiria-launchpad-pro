@@ -751,7 +751,7 @@ function ActionItemCard({
     item.status !== 'completed';
   
   const isDueToday = item.due_date && isToday(parseISO(item.due_date)) && item.status !== 'completed';
-  const priorityConfig = PRIORITY_CONFIG[item.priority || 'medium'];
+  const priorityConfig = PRIORITY_CONFIG[item.priority || 'medium'] || PRIORITY_CONFIG.medium;
 
   return (
     <div className={`
