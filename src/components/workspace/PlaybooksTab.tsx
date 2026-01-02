@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Play, CheckCircle, X, Target, ListTodo, Clock } from 'lucide-react';
+import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Lightbulb } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -40,8 +41,33 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
   const availablePlaybooks = playbooks?.filter(p => getInstanceStatus(p.id) !== 'instantiated') || [];
   const instantiatedPlaybooks = instances?.filter(i => i.status === 'instantiated') || [];
 
+  // Extract KPI hints from playbook items metadata
+  const getKpiHints = (items: PlaybookItem[] | undefined) => {
+    if (!items) return [];
+    const kpis = new Set<string>();
+    items.forEach(item => {
+      const meta = item.metadata_json as Record<string, unknown>;
+      if (meta?.kpi_names) {
+        (meta.kpi_names as string[]).forEach(k => kpis.add(k));
+      }
+      if (meta?.kpi_categories) {
+        (meta.kpi_categories as string[]).forEach(k => kpis.add(`Category: ${k}`));
+      }
+    });
+    return Array.from(kpis);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Playbooks intro */}
+      <Alert className="bg-primary/5 border-primary/20">
+        <Lightbulb className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Playbooks</strong> criam automaticamente milestones e ações com datas relativas. 
+          Cada playbook está alinhado com os KPIs da fase e ajuda a estruturar o progresso.
+        </AlertDescription>
+      </Alert>
+
       {/* Recommended Playbooks */}
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -62,6 +88,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               const status = getInstanceStatus(playbook.id);
               const milestones = playbook.items?.filter(i => i.item_type === 'milestone') || [];
               const actions = playbook.items?.filter(i => i.item_type === 'action') || [];
+              const kpiHints = getKpiHints(playbook.items);
 
               return (
                 <Card key={playbook.id} className="hover:shadow-md transition-shadow">
@@ -77,7 +104,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Target className="h-4 w-4" />
                         {milestones.length} milestones
@@ -88,6 +115,17 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                       </span>
                     </div>
 
+                    {/* KPI Connections */}
+                    {kpiHints.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        <TrendingUp className="h-3 w-3 text-primary mt-0.5" />
+                        {kpiHints.slice(0, 4).map((kpi, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs py-0">
+                            {kpi}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     {/* Preview items */}
                     {playbook.items && playbook.items.length > 0 && (
                       <div className="mb-4 p-3 rounded-lg bg-muted/50 max-h-40 overflow-y-auto">
