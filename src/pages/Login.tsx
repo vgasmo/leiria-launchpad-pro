@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 export default function Login() {
@@ -36,6 +37,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   
   // Check if email is from startupleiria.com domain
   const isConsultorEmail = useMemo(() => {
@@ -311,6 +313,16 @@ export default function Login() {
                         </button>
                       </div>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="px-0 text-sm text-muted-foreground hover:text-primary"
+                        onClick={() => setForgotPasswordOpen(true)}
+                      >
+                        {t('auth.forgotPassword')}
+                      </Button>
+                    </div>
                     <Button 
                       type="submit" 
                       className="w-full h-11 text-base font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/25" 
@@ -471,6 +483,8 @@ export default function Login() {
           </p>
         </div>
       </div>
+      
+      <ForgotPasswordDialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen} />
     </div>
   );
 }

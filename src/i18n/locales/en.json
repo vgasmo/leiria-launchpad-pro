@@ -533,6 +533,26 @@
     "founder": "Founder",
     "team_member": "Team Member"
   },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordDesc": "Enter your email address and we'll send you a link to reset your password.",
+    "sendResetLink": "Send Reset Link",
+    "resetEmailSent": "Check your email",
+    "checkYourInbox": "We've sent you a password reset link. Check your inbox.",
+    "resetPassword": "Reset Password",
+    "setNewPassword": "Set New Password",
+    "setNewPasswordDesc": "Enter your new password below.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updatePassword": "Update Password",
+    "passwordResetSuccess": "Password updated successfully!",
+    "redirecting": "Redirecting you to the app...",
+    "resetPasswordError": "Failed to reset password. Please try again."
+  },
   "workspace": {
     "overview": "Overview",
     "sessions": "Sessions",

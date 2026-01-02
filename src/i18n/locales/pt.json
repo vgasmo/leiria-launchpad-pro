@@ -101,6 +101,26 @@
     "pendingActionsCount": "ações pendentes",
     "next": "Próximo"
   },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Registar",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "forgotPassword": "Esqueceu a palavra-passe?",
+    "forgotPasswordDesc": "Introduza o seu email e enviaremos um link para redefinir a sua palavra-passe.",
+    "sendResetLink": "Enviar Link",
+    "resetEmailSent": "Verifique o seu email",
+    "checkYourInbox": "Enviámos um link de redefinição de palavra-passe. Verifique a sua caixa de entrada.",
+    "resetPassword": "Redefinir Palavra-passe",
+    "setNewPassword": "Definir Nova Palavra-passe",
+    "setNewPasswordDesc": "Introduza a sua nova palavra-passe abaixo.",
+    "newPassword": "Nova Palavra-passe",
+    "confirmPassword": "Confirmar Palavra-passe",
+    "updatePassword": "Atualizar Palavra-passe",
+    "passwordResetSuccess": "Palavra-passe atualizada com sucesso!",
+    "redirecting": "A redirecionar para a aplicação...",
+    "resetPasswordError": "Falha ao redefinir palavra-passe. Por favor tente novamente."
+  },
   "createStartup": {
     "title": "Criar a Sua Startup",
     "description": "Submeta a sua startup para o programa. Um administrador irá rever e aprovar a sua candidatura.",
