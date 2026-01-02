@@ -188,12 +188,12 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
-    const isValid = validTypes.includes(file.type) || /\.(xlsx|xls|csv)$/i.test(file.name);
+    // Validate file type - check extension first (more reliable than MIME)
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = /\.(xlsx|xlsm|xls|csv)$/i.test(fileName);
     
-    if (!isValid) {
-      toast.error('Please upload an Excel or CSV file');
+    if (!isValidExtension) {
+      toast.error('Please upload an Excel (.xlsx, .xlsm, .xls) or CSV file');
       return;
     }
 
@@ -311,7 +311,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                   <DialogHeader>
                     <DialogTitle>Upload Financial Model</DialogTitle>
                     <DialogDescription>
-                      Supports Excel (.xlsx, .xls) and CSV files
+                      Supports Excel (.xlsx, .xlsm, .xls) and CSV files
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -333,7 +333,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                       <Input
                         ref={fileInputRef}
                         type="file"
-                        accept=".xlsx,.xls,.csv"
+                        accept=".xlsx,.xlsm,.xls,.csv"
                         onChange={handleFileUpload}
                         disabled={uploadMutation.isPending || createVersion.isPending}
                       />
