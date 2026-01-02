@@ -23,10 +23,7 @@ import {
   FileAudio,
   FileSpreadsheet,
   Presentation,
-  AlertTriangle,
-  TrendingUp,
-  Calculator,
-  RefreshCw
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -40,6 +37,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { FinancialModelPanel } from './FinancialModelPanel';
 
 interface DocumentsTabProps {
   workspaceId: string;
@@ -77,23 +75,14 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
-  const [financialModelOpen, setFinancialModelOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [description, setDescription] = useState('');
   const [linkName, setLinkName] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const financialModelInputRef = useRef<HTMLInputElement>(null);
   
   const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-
-  // Find existing financial model
-  const financialModel = documents?.find(doc => doc.category === 'Financial Model' && 
-    (doc.document_type.includes('spreadsheet') || 
-     doc.document_type.includes('excel') || 
-     doc.document_type.includes('csv') ||
-     doc.name.toLowerCase().includes('financial')));
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,40 +99,6 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
     setSelectedCategory('');
     setDescription('');
     if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleFinancialModelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check file type
-    const validTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel',
-      'text/csv',
-      'application/csv'
-    ];
-    
-    const isValidType = validTypes.includes(file.type) || 
-      file.name.endsWith('.xlsx') || 
-      file.name.endsWith('.xls') || 
-      file.name.endsWith('.csv');
-
-    if (!isValidType) {
-      toast.error(t('documents.supportedFormats'));
-      return;
-    }
-
-    await uploadMutation.mutateAsync({
-      workspaceId,
-      file,
-      category: 'Financial Model',
-      description: t('documents.financialModelDesc'),
-    });
-
-    setFinancialModelOpen(false);
-    if (financialModelInputRef.current) financialModelInputRef.current.value = '';
-    toast.success(t('documents.financialModel') + ' uploaded');
   };
 
   const handleAddLink = async () => {
@@ -256,105 +211,8 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Financial Model Card */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-primary" />
-            {t('documents.financialModel')}
-          </CardTitle>
-          <CardDescription>
-            {t('documents.financialModelDesc')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {financialModel ? (
-            <div className="flex items-center justify-between p-4 rounded-lg bg-background border">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <FileSpreadsheet className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{financialModel.name}</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{format(new Date(financialModel.created_at), 'MMM d, yyyy')}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {t('documents.currentModel')}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleDownload(financialModel)}>
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </Button>
-                {canWrite && (
-                  <Dialog open={financialModelOpen} onOpenChange={setFinancialModelOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-1" />
-                        {t('documents.replaceModel')}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>{t('documents.uploadFinancialModel')}</DialogTitle>
-                        <DialogDescription>
-                          {t('documents.supportedFormats')}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="py-4">
-                        <Input
-                          ref={financialModelInputRef}
-                          type="file"
-                          accept=".xlsx,.xls,.csv"
-                          onChange={handleFinancialModelUpload}
-                          disabled={uploadMutation.isPending}
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 border-2 border-dashed rounded-lg">
-              <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground mb-2">{t('documents.noFinancialModel')}</p>
-              <p className="text-sm text-muted-foreground mb-4">{t('documents.uploadToTrack')}</p>
-              {canWrite && (
-                <Dialog open={financialModelOpen} onOpenChange={setFinancialModelOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Upload className="h-4 w-4 mr-2" />
-                      {t('documents.uploadFinancialModel')}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{t('documents.uploadFinancialModel')}</DialogTitle>
-                      <DialogDescription>
-                        {t('documents.supportedFormats')}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <Input
-                        ref={financialModelInputRef}
-                        type="file"
-                        accept=".xlsx,.xls,.csv"
-                        onChange={handleFinancialModelUpload}
-                        disabled={uploadMutation.isPending}
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Financial Model Panel */}
+      <FinancialModelPanel workspaceId={workspaceId} canWrite={canWrite} />
 
       {/* Upload Actions */}
       {canWrite && (
@@ -478,11 +336,9 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
         </Card>
       ) : (
         sortedCategories
-          .filter(cat => cat !== 'Financial Model' || (groupedDocuments[cat]?.length > 1))
+          .filter(cat => cat !== 'Financial Model')
           .map((category) => {
-            const docs = groupedDocuments[category]?.filter(d => 
-              category !== 'Financial Model' || d.id !== financialModel?.id
-            ) || [];
+            const docs = groupedDocuments[category] || [];
             
             if (docs.length === 0) return null;
 
