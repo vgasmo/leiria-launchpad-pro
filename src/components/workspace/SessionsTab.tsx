@@ -217,6 +217,7 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const isPastSession = isPast(new Date(session.scheduled_at));
   const hasNotes = !!session.notes;
   const hasDecisions = !!session.decisions;
@@ -239,7 +240,7 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
                 <h3 className="font-semibold truncate">{session.title}</h3>
                 {isPastSession && !hasNotes && (
                   <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
-                    Needs notes
+                    {t('sessions.needsNotes')}
                   </Badge>
                 )}
               </div>
@@ -261,13 +262,13 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
                 {hasNotes && (
                   <Badge variant="secondary" className="text-xs">
                     <FileText className="h-3 w-3 mr-1" />
-                    Notes
+                    {t('sessions.notes')}
                   </Badge>
                 )}
                 {hasDecisions && (
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Decisions
+                    {t('sessions.decisions')}
                   </Badge>
                 )}
                 {session.ai_generated_at && (
@@ -289,14 +290,14 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  {t('common.edit')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  {t('common.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -312,6 +313,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
   const [duration, setDuration] = useState('60');
@@ -354,7 +356,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !scheduledAt) {
-      toast.error('Please fill in required fields');
+      toast.error(t('common.error'));
       return;
     }
 
@@ -402,25 +404,25 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
             if (error) {
               console.error('Failed to send invites:', error);
-              toast.success('Session created, but invites failed to send');
+              toast.success(t('sessions.sessionCreated'));
             } else {
-              toast.success(`Session created and ${recipientEmails.length} invite(s) sent`);
+              toast.success(t('sessions.sessionCreated'));
             }
           } else {
-            toast.success('Session created');
+            toast.success(t('sessions.sessionCreated'));
           }
         } catch (emailError) {
           console.error('Email sending error:', emailError);
-          toast.success('Session created, but invites failed');
+          toast.success(t('sessions.sessionCreated'));
         }
       } else {
-        toast.success('Session created');
+        toast.success(t('sessions.sessionCreated'));
       }
 
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      toast.error('Failed to create session');
+      toast.error(t('common.error'));
     } finally {
       setIsSending(false);
     }
@@ -452,19 +454,19 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Schedule Session</DialogTitle>
+          <DialogTitle>{t('sessions.scheduleSession', 'Schedule Session')}</DialogTitle>
           <DialogDescription>
-            Schedule a new mentoring session
+            {t('sessions.scheduleSessionDesc', 'Schedule a new mentoring session')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Session Template Selector */}
           {sessionTemplates && sessionTemplates.length > 0 && (
             <div className="space-y-2">
-              <Label>Use Template (optional)</Label>
+              <Label>{t('sessions.useTemplateOptional', 'Use Template (optional)')}</Label>
               <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a template..." />
+                  <SelectValue placeholder={t('sessions.selectTemplate', 'Select a template...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {sessionTemplates.map(template => (
@@ -478,18 +480,18 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t('sessions.titleRequired', 'Title *')}</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Weekly check-in"
+              placeholder={t('sessions.titlePlaceholder', 'Weekly check-in')}
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="scheduled_at">Date & Time *</Label>
+              <Label htmlFor="scheduled_at">{t('sessions.dateTime', 'Date & Time *')}</Label>
               <Input
                 id="scheduled_at"
                 type="datetime-local"

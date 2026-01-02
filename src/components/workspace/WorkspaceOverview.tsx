@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import { 
   Calendar, 
@@ -63,6 +64,7 @@ interface WorkspaceOverviewProps {
 }
 
 export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProps) {
+  const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { roles } = useAuth();
@@ -143,15 +145,15 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Get started with your workspace</h3>
+                  <h3 className="font-semibold">{t('workspaceOverview.getStarted')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Set up KPIs, milestones, and schedule your first meeting.
+                    {t('workspaceOverview.getStartedDesc')}
                   </p>
                 </div>
               </div>
               <Button onClick={() => setShowOnboardingWizard(true)}>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Run Setup Wizard
+                {t('workspaceOverview.runSetupWizard')}
               </Button>
             </div>
           </CardContent>
@@ -232,9 +234,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-primary" />
-                Next Actions
+                {t('workspaceOverview.nextActions')}
               </CardTitle>
-              <Badge variant="secondary">{actions?.length || 0} open</Badge>
+              <Badge variant="secondary">{actions?.length || 0} {t('workspaceOverview.open')}</Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -245,7 +247,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             ) : actions?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>All caught up!</p>
+                <p>{t('workspaceOverview.allCaughtUp')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -254,7 +256,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 ))}
                 {(actions?.length || 0) > 5 && (
                   <p className="text-xs text-muted-foreground text-center pt-2">
-                    +{(actions?.length || 0) - 5} more actions
+                    {t('workspaceOverview.moreActions', { count: (actions?.length || 0) - 5 })}
                   </p>
                 )}
               </div>
@@ -268,7 +270,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                KPIs Snapshot
+                {t('workspaceOverview.kpisSnapshot')}
               </CardTitle>
               {kpiData?.currentMonth && (
                 <Badge variant="outline">
@@ -285,9 +287,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             ) : kpiData?.current.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No KPIs recorded this month</p>
-                <Button variant="link" size="sm" className="mt-2">
-                  Add KPI Entry
+                <p>{t('workspaceOverview.noKpisRecorded')}</p>
+                <Button variant="link" size="sm" className="mt-2" onClick={() => setSearchParams({ tab: 'kpis' })}>
+                  {t('workspaceOverview.addKpiEntry')}
                 </Button>
               </div>
             ) : (
@@ -311,7 +313,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Milestones
+              {t('milestones.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -320,14 +322,14 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             ) : milestones?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No milestones defined</p>
+                <p>{t('workspaceOverview.noMilestonesDefined')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <MilestoneCount label="Planned" count={milestoneCounts.planned} color="bg-muted" />
-                <MilestoneCount label="In Progress" count={milestoneCounts.inProgress} color="bg-blue-500/10 text-blue-600" />
-                <MilestoneCount label="Completed" count={milestoneCounts.completed} color="bg-green-500/10 text-green-600" />
-                <MilestoneCount label="Delayed" count={milestoneCounts.delayed} color="bg-destructive/10 text-destructive" />
+                <MilestoneCount label={t('workspaceOverview.planned')} count={milestoneCounts.planned} color="bg-muted" />
+                <MilestoneCount label={t('workspaceOverview.inProgressMilestone')} count={milestoneCounts.inProgress} color="bg-blue-500/10 text-blue-600" />
+                <MilestoneCount label={t('workspaceOverview.completedMilestone')} count={milestoneCounts.completed} color="bg-green-500/10 text-green-600" />
+                <MilestoneCount label={t('workspaceOverview.delayed')} count={milestoneCounts.delayed} color="bg-destructive/10 text-destructive" />
               </div>
             )}
           </CardContent>
@@ -339,7 +341,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5 text-primary" />
-                Upcoming
+                {t('workspaceOverview.upcoming')}
               </CardTitle>
               {canWrite && (
                 <Button 
@@ -348,7 +350,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                   onClick={() => setSearchParams({ tab: 'calendar' })}
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Schedule
+                  {t('workspaceOverview.schedule')}
                 </Button>
               )}
             </div>
@@ -359,7 +361,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             ) : !nextSession ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No upcoming sessions</p>
+                <p>{t('workspaceOverview.noUpcomingSessions')}</p>
               </div>
             ) : (
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -383,7 +385,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                   <Button variant="outline" size="sm" asChild>
                     <a href={nextSession.join_url} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4 mr-1" />
-                      Join
+                      {t('workspaceOverview.join')}
                     </a>
                   </Button>
                 )}
@@ -408,9 +410,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
-              Recent Sessions
+              {t('workspaceOverview.recentSessions')}
             </CardTitle>
-            <Badge variant="secondary">{sessions?.length || 0} sessions</Badge>
+            <Badge variant="secondary">{sessions?.length || 0} {t('sessions.title').toLowerCase()}</Badge>
           </div>
         </CardHeader>
         <CardContent>
@@ -421,7 +423,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           ) : sessions?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No sessions recorded yet</p>
+              <p>{t('workspaceOverview.noSessionsRecorded')}</p>
             </div>
           ) : (
             <div className="space-y-3">

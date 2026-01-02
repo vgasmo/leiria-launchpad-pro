@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -27,6 +28,7 @@ interface SessionPrepCardProps {
 }
 
 export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps) {
+  const { t } = useTranslation();
   const { data, isLoading } = useSessionPrep(sessionId, workspaceId);
   const [expandedSections, setExpandedSections] = useState({
     kpis: true,
@@ -67,17 +69,17 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            <CardTitle className="text-base">Session Prep</CardTitle>
+            <CardTitle className="text-base">{t('sessionPrep.title')}</CardTitle>
           </div>
           {hasUrgentItems && (
             <Badge variant="outline" className="border-amber-500 text-amber-700 dark:text-amber-400">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              Needs Attention
+              {t('sessionPrep.needsAttention')}
             </Badge>
           )}
         </div>
         <CardDescription>
-          Context for this session
+          {t('sessionPrep.context')}
         </CardDescription>
       </CardHeader>
       
@@ -105,7 +107,7 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
-                Recent KPIs
+                {t('sessionPrep.recentKpis')}
                 <Badge variant="secondary" className="text-xs">{data.recentKpis.length}</Badge>
               </div>
               {expandedSections.kpis ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -135,7 +137,7 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
                     </div>
                     {kpi.previousValue !== null && (
                       <div className="text-muted-foreground">
-                        Prev: {kpi.previousValue.toLocaleString()}
+                        {t('sessionPrep.prev')}: {kpi.previousValue.toLocaleString()}
                       </div>
                     )}
                   </div>
@@ -151,10 +153,10 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <ListTodo className="h-4 w-4 text-primary" />
-                Pending Actions
+                {t('sessionPrep.pendingActions')}
                 <Badge variant="secondary" className="text-xs">{data.pendingActions.length}</Badge>
                 {overdueActions.length > 0 && (
-                  <Badge variant="destructive" className="text-xs">{overdueActions.length} overdue</Badge>
+                  <Badge variant="destructive" className="text-xs">{overdueActions.length} {t('sessionPrep.overdue')}</Badge>
                 )}
               </div>
               {expandedSections.actions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -202,10 +204,10 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Target className="h-4 w-4 text-green-600" />
-                Milestones
+                {t('sessionPrep.milestones')}
                 <Badge variant="secondary" className="text-xs">{data.milestones.length}</Badge>
                 {overdueMilestones.length > 0 && (
-                  <Badge variant="destructive" className="text-xs">{overdueMilestones.length} overdue</Badge>
+                  <Badge variant="destructive" className="text-xs">{overdueMilestones.length} {t('sessionPrep.overdue')}</Badge>
                 )}
               </div>
               {expandedSections.milestones ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -247,7 +249,7 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                Previous Sessions
+                {t('sessionPrep.previousSessions')}
                 <Badge variant="secondary" className="text-xs">{data.previousSessions.length}</Badge>
               </div>
               {expandedSections.history ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -279,7 +281,7 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
         {data.recentKpis.length === 0 && data.pendingActions.length === 0 && 
          data.milestones.length === 0 && data.previousSessions.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-4">
-            No context data available yet
+            {t('sessionPrep.noContext')}
           </div>
         )}
       </CardContent>

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Zap, 
   TrendingUp, 
@@ -37,6 +38,7 @@ interface ActionItem {
 }
 
 export function NextBestAction({ workspaceId, programId, stage, canWrite }: NextBestActionProps) {
+  const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const { data: actions } = useWorkspaceActions(workspaceId);
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
@@ -57,12 +59,12 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         id: 'overdue-actions',
         type: 'action',
         priority: 1,
-        title: `${overdueActions.length} overdue action${overdueActions.length > 1 ? 's' : ''}`,
-        description: 'Complete or reschedule these tasks',
+        title: t('nextBestAction.overdueActions', { count: overdueActions.length }),
+        description: t('nextBestAction.completeOrReschedule'),
         icon: <AlertTriangle className="h-5 w-5" />,
         variant: 'destructive',
         action: () => setSearchParams({ tab: 'actions' }),
-        actionLabel: 'View Actions',
+        actionLabel: t('nextBestAction.viewActions'),
       });
     }
 
@@ -72,12 +74,12 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         id: 'pending-checkin',
         type: 'checkin',
         priority: 2,
-        title: 'Weekly check-in pending',
-        description: `Due ${format(new Date(pendingCheckin.due_date), 'EEEE')}`,
+        title: t('nextBestAction.weeklyCheckinPending'),
+        description: t('nextBestAction.dueOn', { date: format(new Date(pendingCheckin.due_date), 'EEEE') }),
         icon: <ClipboardList className="h-5 w-5" />,
         variant: 'warning',
         action: () => setSearchParams({ tab: 'overview' }),
-        actionLabel: 'Complete Check-in',
+        actionLabel: t('nextBestAction.completeCheckin'),
       });
     }
 
@@ -91,12 +93,12 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         id: 'missing-kpis',
         type: 'kpi',
         priority: 3,
-        title: 'Update KPIs for this month',
-        description: 'Track your progress with latest metrics',
+        title: t('nextBestAction.updateKpisForMonth'),
+        description: t('nextBestAction.trackProgress'),
         icon: <TrendingUp className="h-5 w-5" />,
         variant: 'warning',
         action: () => setSearchParams({ tab: 'kpis' }),
-        actionLabel: 'Add KPIs',
+        actionLabel: t('nextBestAction.addKpis'),
       });
     }
 
@@ -110,12 +112,12 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
           id: 'session-prep',
           type: 'session',
           priority: 4,
-          title: 'Prepare for upcoming session',
-          description: `${nextSession.title} on ${format(sessionDate, 'EEE, MMM d')}`,
+          title: t('nextBestAction.prepareSession'),
+          description: t('nextBestAction.sessionOn', { title: nextSession.title, date: format(sessionDate, 'EEE, MMM d') }),
           icon: <Calendar className="h-5 w-5" />,
           variant: 'default',
           action: () => setSearchParams({ tab: 'sessions' }),
-          actionLabel: 'View Session',
+          actionLabel: t('nextBestAction.viewSession'),
         });
       }
     }
@@ -127,18 +129,18 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         id: 'in-progress-actions',
         type: 'action',
         priority: 5,
-        title: `${inProgressActions.length} action${inProgressActions.length > 1 ? 's' : ''} in progress`,
-        description: inProgressActions[0]?.title || 'Continue your work',
+        title: t('nextBestAction.actionsInProgress', { count: inProgressActions.length }),
+        description: inProgressActions[0]?.title || t('nextBestAction.continueWork'),
         icon: <CheckCircle2 className="h-5 w-5" />,
         variant: 'default',
         action: () => setSearchParams({ tab: 'actions' }),
-        actionLabel: 'Continue',
+        actionLabel: t('nextBestAction.continue'),
       });
     }
 
     // Sort by priority and return top 3
     return items.sort((a, b) => a.priority - b.priority).slice(0, 3);
-  }, [actions, kpiData, nextSession, pendingCheckin, setSearchParams]);
+  }, [actions, kpiData, nextSession, pendingCheckin, setSearchParams, t]);
 
   if (nextActions.length === 0) {
     return (
@@ -149,8 +151,8 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
               <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-green-900 dark:text-green-100">All caught up!</h3>
-              <p className="text-sm text-green-700 dark:text-green-300">No urgent actions needed right now.</p>
+              <h3 className="font-semibold text-green-900 dark:text-green-100">{t('nextBestAction.allCaughtUp')}</h3>
+              <p className="text-sm text-green-700 dark:text-green-300">{t('nextBestAction.noUrgentActions')}</p>
             </div>
           </div>
         </CardContent>
@@ -163,7 +165,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
-          Next Best Actions
+          {t('nextBestAction.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
