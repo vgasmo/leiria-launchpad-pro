@@ -60,6 +60,10 @@ export function AdminTemplatesManager() {
     return data.publicUrl;
   };
 
+  // MIME types for Excel files
+  const XLSM_MIME = 'application/vnd.ms-excel.sheet.macroEnabled.12';
+  const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
   const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!canUploadAssets) {
       toast.error('You do not have permission to upload assets');
@@ -69,14 +73,17 @@ export function AdminTemplatesManager() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = ['.xlsm', '.xlsx'];
-    const isValid = validTypes.some(ext => file.name.toLowerCase().endsWith(ext));
+    const fileName = file.name.toLowerCase();
+    const isXlsm = fileName.endsWith('.xlsm');
+    const isXlsx = fileName.endsWith('.xlsx');
     
-    if (!isValid) {
+    if (!isXlsm && !isXlsx) {
       toast.error('Please upload an Excel file (.xlsm or .xlsx)');
       return;
     }
+
+    // Determine correct MIME type based on extension (browser MIME detection can be unreliable)
+    const contentType = isXlsm ? XLSM_MIME : XLSX_MIME;
 
     setIsUploadingAsset(true);
     try {
@@ -85,10 +92,16 @@ export function AdminTemplatesManager() {
         .from(FINANCIAL_MODEL_BUCKET)
         .upload(FINANCIAL_MODEL_TEMPLATE_PATH, file, {
           upsert: true,
-          contentType: file.type || 'application/vnd.ms-excel.sheet.macroEnabled.12',
+          contentType,
         });
 
-      if (error) throw error;
+      if (error) {
+        // Check for MIME/type restriction errors
+        if (error.message?.includes('mime') || error.message?.includes('type') || error.message?.includes('not allowed')) {
+          throw new Error('Your storage configuration restricts this file type. Please upload via Supabase Storage console or use an .xlsx fallback.');
+        }
+        throw error;
+      }
 
       const publicUrl = getTemplatePublicUrl();
       setAssetUrl(publicUrl);
