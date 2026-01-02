@@ -60,7 +60,7 @@ serve(async (req) => {
     }
 
     // Get all active workspaces with health data
-    const { data: workspaces } = await supabase
+    const { data: workspacesRaw } = await supabase
       .from("workspaces")
       .select(`
         id,
@@ -72,6 +72,15 @@ serve(async (req) => {
       `)
       .eq("status", "active")
       .order("health_score_numeric", { ascending: true });
+
+    // Helper to get startup name (supabase returns joined data as array)
+    const getStartupName = (ws: any): string => {
+      if (!ws?.startup) return "Workspace";
+      if (Array.isArray(ws.startup)) return ws.startup[0]?.name || "Workspace";
+      return ws.startup.name || "Workspace";
+    };
+
+    const workspaces = workspacesRaw || [];
 
     // Get health history for trends
     const workspaceIds = workspaces?.map(w => w.id) || [];
@@ -134,7 +143,9 @@ serve(async (req) => {
             <tr>
               <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
                 <a href="${baseUrl}/workspace/${w.id}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
-                  ${w.startup?.name || "Workspace"}
+                  ${getStartupName(w)}
+                </a>
+              </td>
                 </a>
               </td>
               <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">
@@ -155,7 +166,7 @@ serve(async (req) => {
           const ws = workspaces?.find(w => w.id === id);
           return `
             <li style="padding: 8px 0;">
-              <strong>${ws?.startup?.name || "Workspace"}</strong>: 
+              <strong>${getStartupName(ws)}</strong>: 
               <span style="color: #059669;">+${trend.delta} pts</span>
               (${trend.start} → ${trend.end})
             </li>
@@ -166,7 +177,7 @@ serve(async (req) => {
           const ws = workspaces?.find(w => w.id === id);
           return `
             <li style="padding: 8px 0;">
-              <strong>${ws?.startup?.name || "Workspace"}</strong>: 
+              <strong>${getStartupName(ws)}</strong>: 
               <span style="color: #dc2626;">${trend.delta} pts</span>
               (${trend.start} → ${trend.end})
             </li>

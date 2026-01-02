@@ -79,7 +79,7 @@ serve(async (req) => {
     }
 
     // Get workspaces for this program
-    const { data: workspaces } = await supabase
+    const { data: workspacesRaw } = await supabase
       .from("workspaces")
       .select(`
         id,
@@ -91,6 +91,15 @@ serve(async (req) => {
       .eq("program_id", program_id)
       .eq("status", "active")
       .order("health_score_numeric", { ascending: true });
+
+    // Helper to get startup name (supabase returns joined data as array)
+    const getStartupName = (ws: any): string => {
+      if (!ws?.startup) return "Unknown";
+      if (Array.isArray(ws.startup)) return ws.startup[0]?.name || "Unknown";
+      return ws.startup.name || "Unknown";
+    };
+
+    const workspaces = workspacesRaw || [];
 
     const workspaceIds = workspaces?.map(w => w.id) || [];
 
@@ -200,7 +209,7 @@ serve(async (req) => {
       ${topImproved.map(([id, trend]) => {
         const ws = workspaces?.find(w => w.id === id);
         return `<tr>
-          <td>${ws?.startup?.name || 'Unknown'}</td>
+          <td>${getStartupName(ws)}</td>
           <td>${trend.startScore}</td>
           <td>${trend.endScore}</td>
           <td class="positive">+${trend.delta}</td>
@@ -219,7 +228,7 @@ serve(async (req) => {
       ${topDeclined.map(([id, trend]) => {
         const ws = workspaces?.find(w => w.id === id);
         return `<tr>
-          <td>${ws?.startup?.name || 'Unknown'}</td>
+          <td>${getStartupName(ws)}</td>
           <td>${trend.startScore}</td>
           <td>${trend.endScore}</td>
           <td class="negative">${trend.delta}</td>
@@ -236,11 +245,11 @@ serve(async (req) => {
     </thead>
     <tbody>
       ${(workspaces || []).map(ws => {
-        const components = ws.health_score_components || {};
+        const components = (ws as any).health_score_components || {};
         return `<tr>
-          <td>${ws.startup?.name || 'Unknown'}</td>
-          <td>${ws.health_score_numeric || '-'}</td>
-          <td>${ws.health_score || '-'}</td>
+          <td>${getStartupName(ws)}</td>
+          <td>${(ws as any).health_score_numeric || '-'}</td>
+          <td>${(ws as any).health_score || '-'}</td>
           <td>${components.actions ?? '-'}</td>
           <td>${components.sessions ?? '-'}</td>
           <td>${components.kpis ?? '-'}</td>
