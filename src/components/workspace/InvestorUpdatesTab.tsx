@@ -18,7 +18,10 @@ import {
   Edit3,
   ChevronDown,
   ChevronUp,
+  BookTemplate,
 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { InvestorTemplateLibrary } from './InvestorTemplateLibrary';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -203,13 +206,19 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Actions */}
+    <Tabs defaultValue="updates" className="space-y-6">
+      {/* Header with Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">{t('investorUpdates.title')}</h2>
-          <p className="text-sm text-muted-foreground">{t('investorUpdates.description')}</p>
-        </div>
+        <TabsList>
+          <TabsTrigger value="updates" className="gap-2">
+            <FileText className="h-4 w-4" />
+            {t('investorUpdates.title')}
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-2">
+            <BookTemplate className="h-4 w-4" />
+            {t('investorUpdates.templates')}
+          </TabsTrigger>
+        </TabsList>
         {canWrite && (
           <div className="flex gap-2">
             <Button onClick={() => setShowGenerateDialog(true)} className="gap-2">
@@ -224,6 +233,13 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
         )}
       </div>
 
+      {/* Templates Tab */}
+      <TabsContent value="templates" className="mt-6">
+        <InvestorTemplateLibrary />
+      </TabsContent>
+
+      {/* Updates Tab */}
+      <TabsContent value="updates" className="mt-6 space-y-6">
       {/* Active Share Links */}
       {shareLinks && shareLinks.length > 0 && (
         <Card className="border-primary/20 bg-primary/5">
@@ -641,6 +657,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }
