@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface GenerateRequest {
   workspace_id: string;
@@ -13,7 +9,7 @@ interface GenerateRequest {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -24,9 +20,7 @@ serve(async (req) => {
     // Auth check using anon client
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
 
     // Use anon key client for auth verification
@@ -37,9 +31,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await authClient.auth.getUser();
     if (authError || !user) {
       console.error("Auth error:", authError);
-      return new Response(JSON.stringify({ error: "Unauthorized", details: authError?.message }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Unauthorized", details: authError?.message }, req, 401);
     }
 
     // Use service role client for data operations
@@ -47,6 +39,32 @@ serve(async (req) => {
 
     const body: GenerateRequest = await req.json();
     const { workspace_id, month } = body;
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: workspace_id,
+    });
+
+    if (!hasAccess) {
+      console.error('[generate-investor-update] Access denied for user:', user.id, 'workspace:', workspace_id);
+      return corsJsonResponse({ error: 'Access denied to this workspace' }, req, 403);
+    }
+
+    // RATE LIMITING: Check AI rate limit
+    const { data: withinLimit } = await supabase.rpc('check_ai_rate_limit', {
+      _user_id: user.id,
+      _workspace_id: workspace_id,
+      _function_name: 'generate-investor-update',
+      _max_requests: 10
+    });
+
+    if (!withinLimit) {
+      console.warn('[generate-investor-update] Rate limit exceeded for user:', user.id);
+      return corsJsonResponse({ 
+        error: 'Rate limit exceeded. You can generate up to 10 investor updates per hour. Please try again later.' 
+      }, req, 429);
+    }
 
     console.log(`Generating investor update for workspace ${workspace_id}, month ${month}`);
 
@@ -62,9 +80,7 @@ serve(async (req) => {
       .single();
 
     if (wsError || !workspace) {
-      return new Response(JSON.stringify({ error: "Workspace not found" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Workspace not found" }, req, 404);
     }
 
     const prevMonth = new Date(month);
@@ -177,16 +193,10 @@ serve(async (req) => {
 
     console.log(`Investor update generated: ${update.id}`);
 
-    return new Response(
-      JSON.stringify({ success: true, update }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ success: true, update }, req, 200);
   } catch (error: unknown) {
     console.error("Error in generate-investor-update:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ error: message }, req, 500);
   }
 });
