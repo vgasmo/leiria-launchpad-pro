@@ -581,14 +581,22 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState(session.notes || '');
   const [decisions, setDecisions] = useState(session.decisions || '');
   const [showActionDialog, setShowActionDialog] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const updateMutation = useUpdateSession(workspaceId);
-  const { data: actionItems, isLoading: actionsLoading } = useSessionActionItems(session.id);
+  const { data: actionItems, isLoading: actionsLoading, refetch: refetchActions } = useSessionActionItems(session.id);
   const { data: members } = useWorkspaceMembers(workspaceId);
+
+  const handleRefreshAI = () => {
+    setRefreshKey(prev => prev + 1);
+    refetchActions();
+  };
 
   const handleResendInvites = async () => {
     const recipientEmails = members
@@ -676,135 +684,156 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Resend Invites */}
-            {canWrite && (
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Calendar Invites</p>
-                    <p className="text-xs text-muted-foreground">
-                      {members?.filter(m => m.profile?.email).length || 0} workspace members
-                    </p>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details">Details & Notes</TabsTrigger>
+              <TabsTrigger value="ai" className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI Assistant
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="space-y-6 mt-4">
+              {/* Resend Invites */}
+              {canWrite && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Calendar Invites</p>
+                      <p className="text-xs text-muted-foreground">
+                        {members?.filter(m => m.profile?.email).length || 0} workspace members
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleResendInvites}
-                  disabled={isResending}
-                >
-                  <Mail className="h-4 w-4 mr-1" />
-                  {isResending ? 'Sending...' : 'Resend Invites'}
-                </Button>
-              </div>
-            )}
-
-            {/* Agenda */}
-            {session.agenda && (
-              <div>
-                <Label className="text-muted-foreground">Agenda</Label>
-                <p className="mt-1 text-sm whitespace-pre-wrap">{session.agenda}</p>
-              </div>
-            )}
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="notes">Session Notes</Label>
-              {canWrite ? (
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add notes from this session..."
-                  rows={4}
-                />
-              ) : (
-                <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
-                  {notes || 'No notes recorded'}
-                </p>
-              )}
-            </div>
-
-            {/* Decisions */}
-            <div className="space-y-2">
-              <Label htmlFor="decisions">Key Decisions</Label>
-              {canWrite ? (
-                <Textarea
-                  id="decisions"
-                  value={decisions}
-                  onChange={(e) => setDecisions(e.target.value)}
-                  placeholder="Key decisions made during this session..."
-                  rows={3}
-                />
-              ) : (
-                <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
-                  {decisions || 'No decisions recorded'}
-                </p>
-              )}
-            </div>
-
-            {/* Action Items from this session */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Action Items from this Session</Label>
-                {canWrite && (
-                  <Button variant="outline" size="sm" onClick={() => setShowActionDialog(true)}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Action Item
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleResendInvites}
+                    disabled={isResending}
+                  >
+                    <Mail className="h-4 w-4 mr-1" />
+                    {isResending ? 'Sending...' : 'Resend Invites'}
                   </Button>
+                </div>
+              )}
+
+              {/* Agenda */}
+              {session.agenda && (
+                <div>
+                  <Label className="text-muted-foreground">Agenda</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{session.agenda}</p>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="notes">Session Notes</Label>
+                {canWrite ? (
+                  <Textarea
+                    id="notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add notes from this session..."
+                    rows={4}
+                  />
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
+                    {notes || 'No notes recorded'}
+                  </p>
                 )}
               </div>
-              {actionsLoading ? (
-                <Skeleton className="h-20" />
-              ) : actionItems?.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground bg-muted/50 rounded-lg">
-                  <CheckCircle2 className="h-6 w-6 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No action items from this session</p>
+
+              {/* Decisions */}
+              <div className="space-y-2">
+                <Label htmlFor="decisions">Key Decisions</Label>
+                {canWrite ? (
+                  <Textarea
+                    id="decisions"
+                    value={decisions}
+                    onChange={(e) => setDecisions(e.target.value)}
+                    placeholder="Key decisions made during this session..."
+                    rows={3}
+                  />
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
+                    {decisions || 'No decisions recorded'}
+                  </p>
+                )}
+              </div>
+
+              {/* Action Items from this session */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Action Items from this Session</Label>
+                  {canWrite && (
+                    <Button variant="outline" size="sm" onClick={() => setShowActionDialog(true)}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Action Item
+                    </Button>
+                  )}
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {actionItems?.map(item => (
-                    <div key={item.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <div className={`h-2 w-2 rounded-full ${
-                        item.status === 'completed' ? 'bg-green-500' :
-                        item.status === 'in_progress' ? 'bg-blue-500' : 'bg-muted-foreground'
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.title}</p>
-                        {item.due_date && (
-                          <p className="text-xs text-muted-foreground">
-                            Due: {format(new Date(item.due_date), 'MMM d, yyyy')}
-                          </p>
-                        )}
+                {actionsLoading ? (
+                  <Skeleton className="h-20" />
+                ) : actionItems?.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground bg-muted/50 rounded-lg">
+                    <CheckCircle2 className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No action items from this session</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {actionItems?.map(item => (
+                      <div key={item.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                        <div className={`h-2 w-2 rounded-full ${
+                          item.status === 'completed' ? 'bg-green-500' :
+                          item.status === 'in_progress' ? 'bg-blue-500' : 'bg-muted-foreground'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.title}</p>
+                          {item.due_date && (
+                            <p className="text-xs text-muted-foreground">
+                              Due: {format(new Date(item.due_date), 'MMM d, yyyy')}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant={
+                          item.status === 'completed' ? 'default' :
+                          item.status === 'in_progress' ? 'secondary' : 'outline'
+                        } className="text-xs">
+                          {item.status.replace('_', ' ')}
+                        </Badge>
                       </div>
-                      <Badge variant={
-                        item.status === 'completed' ? 'default' :
-                        item.status === 'in_progress' ? 'secondary' : 'outline'
-                      } className="text-xs">
-                        {item.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Session Feedback */}
+              {isPastSession && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Session Feedback
+                  </Label>
+                  <SessionFeedbackCard sessionId={session.id} sessionTitle={session.title} />
                 </div>
               )}
-            </div>
-
-            {/* Session Feedback */}
-            {isPastSession && (
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  Session Feedback
-                </Label>
-                <SessionFeedbackCard sessionId={session.id} sessionTitle={session.title} />
-              </div>
-            )}
-          </div>
+            </TabsContent>
+            
+            <TabsContent value="ai" className="mt-4">
+              <SessionAIPanel 
+                key={refreshKey}
+                workspaceId={workspaceId}
+                sessionId={session.id}
+                session={session}
+                canWrite={canWrite}
+                onRefresh={handleRefreshAI}
+              />
+            </TabsContent>
+          </Tabs>
 
           {canWrite && (
-            <DialogFooter>
+            <DialogFooter className="mt-4">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Close
               </Button>
