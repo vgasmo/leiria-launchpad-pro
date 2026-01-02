@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Mentors from "./pages/Mentors";
 import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
+import SharedWorkspace from "./pages/SharedWorkspace";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/share/:token" element={<SharedWorkspace />} />
       <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
       <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
       <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />

@@ -34,7 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useWorkQueue } from '@/hooks/useWorkQueue';
+import { useWorkQueue, useMarkWorkQueueItemDone, useSnoozeWorkQueueItem, useRecomputeWorkQueue } from '@/hooks/useWorkQueue';
 import { toast } from 'sonner';
 
 interface WorkQueuePanelProps {
@@ -75,13 +75,10 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
   const [statusFilter, setStatusFilter] = useState<string>('open');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  const { 
-    workQueueItems, 
-    isLoading, 
-    markAsDone, 
-    snoozeItem, 
-    recomputeWorkQueue,
-  } = useWorkQueue();
+  const { data: workQueueItems, isLoading } = useWorkQueue({ status: statusFilter !== 'all' ? statusFilter : undefined });
+  const markAsDone = useMarkWorkQueueItemDone();
+  const snoozeItem = useSnoozeWorkQueueItem();
+  const recomputeWorkQueue = useRecomputeWorkQueue();
 
   const [isRecomputing, setIsRecomputing] = useState(false);
 
@@ -108,12 +105,13 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
 
   const handleSnooze = async (itemId: string, days: number) => {
     try {
-      await snoozeItem.mutateAsync({ itemId, snoozedUntil: addDays(new Date(), days).toISOString() });
+      await snoozeItem.mutateAsync({ id: itemId, days });
       toast.success(`Snoozed for ${days} days`);
     } catch (error) {
       toast.error('Failed to snooze');
     }
   };
+
 
   // Filter items
   const filteredItems = workQueueItems?.filter(item => {

@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceNextSession } from '@/hooks/useWorkspaceData';
-import { useCheckins } from '@/hooks/useCheckins';
+import { usePendingCheckin } from '@/hooks/useCheckins';
 import { format, isThisMonth } from 'date-fns';
 
 interface NextBestActionProps {
@@ -41,7 +41,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
   const { data: actions } = useWorkspaceActions(workspaceId);
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
   const { data: nextSession } = useWorkspaceNextSession(workspaceId);
-  const { pendingCheckin } = useCheckins(workspaceId);
+  const { data: pendingCheckin } = usePendingCheckin(workspaceId);
 
   const nextActions = useMemo<ActionItem[]>(() => {
     const items: ActionItem[] = [];

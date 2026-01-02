@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock, BookOpen } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock, BookOpen, Shield, FileBarChart } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +22,8 @@ import { TeamTab } from '@/components/workspace/TeamTab';
 import { OkrsTab } from '@/components/workspace/OkrsTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
+import { GovernanceTab } from '@/components/workspace/GovernanceTab';
+import { InvestorUpdatesTab } from '@/components/workspace/InvestorUpdatesTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -145,9 +147,19 @@ export default function WorkspaceDetail() {
             </>
           )}
           {(isAdmin || isConsultor) && (
-            <TabsTrigger value="time" className="gap-1">
+          <TabsTrigger value="time" className="gap-1">
               <Clock className="h-3.5 w-3.5" />
               {t('workspace.time')}
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="governance" className="gap-1">
+            <Shield className="h-3.5 w-3.5" />
+            Governance
+          </TabsTrigger>
+          {isFounder && (
+            <TabsTrigger value="reports" className="gap-1">
+              <FileBarChart className="h-3.5 w-3.5" />
+              Reports
             </TabsTrigger>
           )}
           <TabsTrigger value="settings" className="gap-1">
@@ -225,6 +237,19 @@ export default function WorkspaceDetail() {
         {(isAdmin || isConsultor) && (
           <TabsContent value="time">
             <TimeTrackingTab workspaceId={workspace.id} />
+          </TabsContent>
+        )}
+        <TabsContent value="governance">
+          <GovernanceTab 
+            workspaceId={workspace.id} 
+            programId={workspace.program_id}
+            currentStage={workspace.stage}
+            canWrite={canWrite}
+          />
+        </TabsContent>
+        {isFounder && (
+          <TabsContent value="reports">
+            <InvestorUpdatesTab workspaceId={workspace.id} canWrite={canWrite} />
           </TabsContent>
         )}
         <TabsContent value="settings">
