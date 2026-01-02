@@ -26,3 +26,27 @@ verify_jwt = false
 
 [functions.recompute-health-scores]
 verify_jwt = false
+
+[functions.generate-investor-update]
+verify_jwt = false
+
+[functions.generate-progress-report-pdf]
+verify_jwt = false
+
+[functions.export-cohort-health-pdf]
+verify_jwt = false
+
+[functions.get-shared-workspace]
+verify_jwt = false
+
+[functions.publish-program-setup]
+verify_jwt = false
+
+[functions.recompute-work-queue]
+verify_jwt = false
+
+[functions.send-health-alert-email]
+verify_jwt = false
+
+[functions.send-weekly-health-digest]
+verify_jwt = false
