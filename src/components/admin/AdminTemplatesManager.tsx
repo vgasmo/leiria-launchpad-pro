@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, FileText, Code } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Pencil, Trash2, FileText, Code, Upload, FileSpreadsheet, Copy, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,8 +21,16 @@ import {
 } from '@/hooks/useTemplates';
 import { INITIAL_TEMPLATES } from '@/data/initialTemplates';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+const FINANCIAL_MODEL_TEMPLATE_PATH = 'templates/Template_Avaliacao_Startup_Ecossistema.xlsm';
+const FINANCIAL_MODEL_BUCKET = 'public-assets';
 
 export function AdminTemplatesManager() {
+  const { isAdmin, isConsultor } = useAuth();
+  const canUploadAssets = isAdmin || isConsultor;
+  
   const { data: templates, isLoading, refetch } = useTemplates();
   const createTemplate = useCreateTemplate();
   const updateTemplate = useUpdateTemplate();
@@ -31,12 +40,77 @@ export function AdminTemplatesManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
   
+  // Asset upload state
+  const [isUploadingAsset, setIsUploadingAsset] = useState(false);
+  const [assetUrl, setAssetUrl] = useState<string | null>(null);
+  const assetFileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     category: '',
     schema_json: '',
   });
+
+  // Get the public URL for the financial model template
+  const getTemplatePublicUrl = () => {
+    const { data } = supabase.storage
+      .from(FINANCIAL_MODEL_BUCKET)
+      .getPublicUrl(FINANCIAL_MODEL_TEMPLATE_PATH);
+    return data.publicUrl;
+  };
+
+  const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canUploadAssets) {
+      toast.error('You do not have permission to upload assets');
+      return;
+    }
+    
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['.xlsm', '.xlsx'];
+    const isValid = validTypes.some(ext => file.name.toLowerCase().endsWith(ext));
+    
+    if (!isValid) {
+      toast.error('Please upload an Excel file (.xlsm or .xlsx)');
+      return;
+    }
+
+    setIsUploadingAsset(true);
+    try {
+      // Upload with upsert to overwrite existing
+      const { error } = await supabase.storage
+        .from(FINANCIAL_MODEL_BUCKET)
+        .upload(FINANCIAL_MODEL_TEMPLATE_PATH, file, {
+          upsert: true,
+          contentType: file.type || 'application/vnd.ms-excel.sheet.macroEnabled.12',
+        });
+
+      if (error) throw error;
+
+      const publicUrl = getTemplatePublicUrl();
+      setAssetUrl(publicUrl);
+      toast.success('Template uploaded successfully');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Failed to upload template');
+    } finally {
+      setIsUploadingAsset(false);
+      if (assetFileInputRef.current) assetFileInputRef.current.value = '';
+    }
+  };
+
+  const handleCopyAssetUrl = async () => {
+    const url = getTemplatePublicUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
 
   const handleCreate = () => {
     setFormData({ name: '', description: '', category: '', schema_json: '{\n  "sections": []\n}' });
@@ -149,6 +223,65 @@ export function AdminTemplatesManager() {
 
   return (
     <div className="space-y-6">
+      {/* Assets Section - Admin Only */}
+      {canUploadAssets && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              Program Assets
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="flex-1">
+                <h4 className="font-medium text-sm">Financial Model Template</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  The canonical .xlsm template available for all startups to download
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={assetFileInputRef}
+                  type="file"
+                  accept=".xlsm,.xlsx"
+                  className="hidden"
+                  onChange={handleAssetUpload}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => assetFileInputRef.current?.click()}
+                  disabled={isUploadingAsset}
+                >
+                  {isUploadingAsset ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4 mr-1" />
+                  )}
+                  {isUploadingAsset ? 'Uploading...' : 'Upload Template'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCopyAssetUrl}
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copy URL
+                </Button>
+              </div>
+            </div>
+            {assetUrl && (
+              <p className="text-xs text-muted-foreground">
+                Last uploaded template URL copied. Startups can download from Workspace &gt; Financial Model.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Separator />
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Templates Library</h2>
