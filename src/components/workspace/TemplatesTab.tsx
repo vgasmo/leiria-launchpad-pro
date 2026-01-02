@@ -25,7 +25,6 @@ import {
 } from '@/hooks/useTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
-import { TemplateAIAnalysis } from './TemplateAIAnalysis';
 import { TemplateCoachPanel } from './TemplateCoachPanel';
 import { toast } from 'sonner';
 
@@ -362,20 +361,14 @@ function TemplateEditorDialog({
           </Alert>
         )}
 
-        {/* AI Coach Panel for consultants/mentors (always available when instance exists) */}
+        {/* AI Coach Panel for consultants/mentors */}
         {canReview && instance?.id && (
           <TemplateCoachPanel 
             instanceId={instance.id}
             workspaceId={workspaceId}
             onCopyToNotes={(notes) => setReviewNotes(notes)}
-          />
-        )}
-
-        {/* AI Analysis for consultants/mentors on pending review */}
-        {canReview && instance?.review_status === 'pending_review' && instance?.id && (
-          <TemplateAIAnalysis 
-            instanceId={instance.id}
-            onApplyRecommendation={(recommendation, notes) => {
+            showReviewActions={instance?.review_status === 'pending_review'}
+            onApplyReview={(recommendation, notes) => {
               setReviewNotes(notes);
               handleReview(recommendation);
             }}
