@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { TemplateCoachPanel } from './TemplateCoachPanel';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface TemplatesTabProps {
   workspaceId: string;
@@ -35,6 +36,7 @@ interface TemplatesTabProps {
 }
 
 export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: TemplatesTabProps) {
+  const { t } = useTranslation();
   const { data: templates, isLoading: loadingTemplates } = useTemplates();
   const { data: instances, isLoading: loadingInstances } = useTemplateInstances(workspaceId);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -87,7 +89,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
           <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          No templates available. Ask an admin to create templates.
+          {t('templates.noTemplatesDesc', 'No templates available. Ask an admin to create templates.')}
         </CardContent>
       </Card>
     );
@@ -100,11 +102,11 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       <TabsList>
         <TabsTrigger value="templates" className="gap-2">
           <FileText className="h-4 w-4" />
-          Templates
+          {t('templates.title')}
         </TabsTrigger>
         <TabsTrigger value="calculator" className="gap-2">
           <Calculator className="h-4 w-4" />
-          Unit Economics
+          {t('templates.unitEconomics', 'Unit Economics')}
         </TabsTrigger>
       </TabsList>
 
@@ -148,16 +150,16 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
                     </div>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {isStarted && !isCompleted && (
-                        <Badge variant="secondary" className="text-xs">In Progress</Badge>
+                        <Badge variant="secondary" className="text-xs">{t('templates.inProgress', 'In Progress')}</Badge>
                       )}
                       {instance?.review_status === 'pending_review' && (
-                        <Badge className="text-xs bg-amber-100 text-amber-700">Pending Review</Badge>
+                        <Badge className="text-xs bg-amber-100 text-amber-700">{t('templates.pendingReview')}</Badge>
                       )}
                       {instance?.review_status === 'approved' && (
-                        <Badge className="text-xs bg-green-100 text-green-700">Approved</Badge>
+                        <Badge className="text-xs bg-green-100 text-green-700">{t('templates.approved')}</Badge>
                       )}
                       {instance?.review_status === 'needs_changes' && (
-                        <Badge className="text-xs bg-red-100 text-red-700">Needs Changes</Badge>
+                        <Badge className="text-xs bg-red-100 text-red-700">{t('templates.needsChanges', 'Needs Changes')}</Badge>
                       )}
                     </div>
                   </CardContent>

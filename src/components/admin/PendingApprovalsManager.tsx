@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Check, X, Clock, Building2, User, Calendar, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -98,7 +99,6 @@ function useApproveWorkspace() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-workspaces'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      toast.success('Startup approved and activated!');
     },
     onError: (e) => toast.error(`Failed to approve: ${e.message}`),
   });
@@ -116,18 +116,31 @@ function useRejectWorkspace() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-workspaces'] });
-      toast.success('Application rejected');
     },
     onError: (e) => toast.error(`Failed to reject: ${e.message}`),
   });
 }
 
 export function PendingApprovalsManager() {
+  const { t } = useTranslation();
   const { data: pending, isLoading } = usePendingWorkspaces();
   const approveWorkspace = useApproveWorkspace();
   const rejectWorkspace = useRejectWorkspace();
   
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+
+  const handleApprove = (workspaceId: string) => {
+    approveWorkspace.mutate(workspaceId, {
+      onSuccess: () => toast.success(t('admin.startupApproved')),
+    });
+  };
+
+  const handleReject = (workspaceId: string) => {
+    rejectWorkspace.mutate(workspaceId, {
+      onSuccess: () => toast.success(t('admin.applicationRejected')),
+    });
+    setRejectTarget(null);
+  };
 
   if (isLoading) {
     return (
@@ -143,9 +156,9 @@ export function PendingApprovalsManager() {
       <Card>
         <CardContent className="py-12 text-center">
           <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">No Pending Applications</h3>
+          <h3 className="text-lg font-medium">{t('admin.noPendingApprovals')}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            All startup applications have been reviewed.
+            {t('admin.allReviewed')}
           </p>
         </CardContent>
       </Card>
@@ -156,14 +169,14 @@ export function PendingApprovalsManager() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Pending Approvals</h2>
+          <h2 className="text-lg font-semibold">{t('admin.pendingApprovals')}</h2>
           <p className="text-sm text-muted-foreground">
-            {pending.length} startup{pending.length !== 1 ? 's' : ''} awaiting approval
+            {t('admin.startupsAwaiting', { count: pending.length })}
           </p>
         </div>
         <Badge variant="secondary" className="text-sm">
           <Clock className="h-3.5 w-3.5 mr-1" />
-          {pending.length} pending
+          {pending.length} {t('admin.pending')}
         </Badge>
       </div>
 
@@ -237,11 +250,11 @@ export function PendingApprovalsManager() {
                 <div className="flex flex-col gap-2">
                   <Button
                     size="sm"
-                    onClick={() => approveWorkspace.mutate(workspace.id)}
+                    onClick={() => handleApprove(workspace.id)}
                     disabled={approveWorkspace.isPending}
                   >
                     <Check className="h-4 w-4 mr-1" />
-                    Approve
+                    {t('admin.approve')}
                   </Button>
                   <Button
                     size="sm"
@@ -249,7 +262,7 @@ export function PendingApprovalsManager() {
                     onClick={() => setRejectTarget(workspace.id)}
                   >
                     <X className="h-4 w-4 mr-1" />
-                    Reject
+                    {t('admin.reject')}
                   </Button>
                 </div>
               </div>
@@ -262,24 +275,22 @@ export function PendingApprovalsManager() {
       <AlertDialog open={!!rejectTarget} onOpenChange={(open) => !open && setRejectTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reject Application</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.rejectApplication')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reject this startup application? 
-              The founder will need to submit a new application.
+              {t('admin.rejectConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => {
                 if (rejectTarget) {
-                  rejectWorkspace.mutate(rejectTarget);
-                  setRejectTarget(null);
+                  handleReject(rejectTarget);
                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Reject
+              {t('admin.reject')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
