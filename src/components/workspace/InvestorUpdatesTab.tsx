@@ -78,8 +78,9 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
       await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
       toast.success('Investor update generated');
       setShowGenerateDialog(false);
-    } catch (error) {
-      toast.error('Failed to generate update');
+    } catch (error: any) {
+      const message = error?.message || error?.details || 'Failed to generate update';
+      toast.error(message);
     } finally {
       setIsGenerating(false);
     }

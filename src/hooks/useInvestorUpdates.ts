@@ -50,10 +50,17 @@ export function useInvestorUpdates(workspaceId: string) {
 export function useGenerateInvestorUpdate() {
   const queryClient = useQueryClient();
 
+  const normalizeMonth = (input: string) => {
+    // UI uses <input type="month" /> which returns YYYY-MM
+    if (/^\d{4}-\d{2}$/.test(input)) return `${input}-01`;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+    throw new Error('Invalid month format');
+  };
+
   return useMutation({
     mutationFn: async ({ workspaceId, month }: { workspaceId: string; month: string }) => {
       const { data, error } = await supabase.functions.invoke('generate-investor-update', {
-        body: { workspace_id: workspaceId, month },
+        body: { workspace_id: workspaceId, month: normalizeMonth(month) },
       });
 
       if (error) throw error;
