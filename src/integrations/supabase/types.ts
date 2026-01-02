@@ -650,6 +650,120 @@ export type Database = {
           },
         ]
       }
+      financial_model_metric_map: {
+        Row: {
+          created_at: string
+          id: string
+          kpi_definition_id: string | null
+          metric_key: string
+          program_id: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kpi_definition_id?: string | null
+          metric_key: string
+          program_id?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kpi_definition_id?: string | null
+          metric_key?: string
+          program_id?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_model_metric_map_kpi_definition_id_fkey"
+            columns: ["kpi_definition_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_model_metric_map_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_model_versions: {
+        Row: {
+          ai_review_generated_at: string | null
+          ai_review_generated_by: string | null
+          ai_review_json: Json | null
+          created_at: string
+          document_id: string
+          id: string
+          key_metrics_json: Json | null
+          parse_error: string | null
+          scenario_name: string
+          snapshot_json: Json | null
+          status: string
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_review_generated_at?: string | null
+          ai_review_generated_by?: string | null
+          ai_review_json?: Json | null
+          created_at?: string
+          document_id: string
+          id?: string
+          key_metrics_json?: Json | null
+          parse_error?: string | null
+          scenario_name?: string
+          snapshot_json?: Json | null
+          status?: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ai_review_generated_at?: string | null
+          ai_review_generated_by?: string | null
+          ai_review_json?: Json | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          key_metrics_json?: Json | null
+          parse_error?: string | null
+          scenario_name?: string
+          snapshot_json?: Json | null
+          status?: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_model_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_model_versions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_rounds: {
         Row: {
           announced_at: string | null
@@ -3337,6 +3451,7 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          active_financial_model_version_id: string | null
           created_at: string
           health_confidence: string | null
           health_confidence_reason: string | null
@@ -3361,6 +3476,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_financial_model_version_id?: string | null
           created_at?: string
           health_confidence?: string | null
           health_confidence_reason?: string | null
@@ -3385,6 +3501,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_financial_model_version_id?: string | null
           created_at?: string
           health_confidence?: string | null
           health_confidence_reason?: string | null
@@ -3409,6 +3526,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspaces_active_financial_model_version_id_fkey"
+            columns: ["active_financial_model_version_id"]
+            isOneToOne: false
+            referencedRelation: "financial_model_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workspaces_program_id_fkey"
             columns: ["program_id"]
