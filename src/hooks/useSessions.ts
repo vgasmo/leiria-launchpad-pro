@@ -15,6 +15,16 @@ export interface Session {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // AI fields
+  source: string | null;
+  raw_transcript: string | null;
+  ai_summary: string | null;
+  ai_decisions: string[] | null;
+  ai_risks: { risk: string; severity: string }[] | null;
+  ai_action_suggestions: { title: string; description: string; priority: string; suggestedDueInDays?: number }[] | null;
+  ai_kpi_prompts: { kpiName: string; reason: string; suggestedAction: string }[] | null;
+  ai_generated_at: string | null;
+  ai_generated_by: string | null;
   creator?: { id: string; full_name: string | null; avatar_url: string | null } | null;
 }
 
