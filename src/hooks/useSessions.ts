@@ -69,7 +69,7 @@ export function useSessions(workspaceId: string | undefined) {
       return sessions.map(session => ({
         ...session,
         creator: profiles.find(p => p.id === session.created_by) || null,
-      })) as Session[];
+      })) as unknown as Session[];
     },
     enabled: !!workspaceId,
   });
@@ -88,7 +88,7 @@ export function useCalendarSessions(workspaceId: string | undefined) {
         .order('scheduled_at', { ascending: true });
 
       if (error) throw error;
-      return (sessions || []) as Session[];
+      return (sessions || []) as unknown as Session[];
     },
     enabled: !!workspaceId,
   });
@@ -119,7 +119,7 @@ export function useCreateSession(workspaceId: string) {
         .single();
 
       if (error) throw error;
-      return data as Session;
+      return data as unknown as Session;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
@@ -142,7 +142,7 @@ export function useUpdateSession(workspaceId: string) {
         .single();
 
       if (error) throw error;
-      return data as Session;
+      return data as unknown as Session;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
