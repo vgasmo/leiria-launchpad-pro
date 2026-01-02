@@ -1,0 +1,438 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { 
+  Sparkles, 
+  Upload, 
+  FileText, 
+  CheckCircle2, 
+  AlertTriangle,
+  Target,
+  Mail,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Loader2,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  useGenerateSessionSummary, 
+  useSendSessionFollowup, 
+  useApplyActionSuggestions,
+  useUpdateSessionTranscript,
+} from '@/hooks/useSessionAI';
+import { cn } from '@/lib/utils';
+
+interface SessionAIPanelProps {
+  workspaceId: string;
+  sessionId: string;
+  session: {
+    title: string;
+    notes?: string | null;
+    agenda?: string | null;
+    raw_transcript?: string | null;
+    ai_summary?: string | null;
+    ai_decisions?: string[] | null;
+    ai_risks?: { risk: string; severity: string }[] | null;
+    ai_action_suggestions?: { title: string; description: string; priority: string; suggestedDueInDays?: number }[] | null;
+    ai_kpi_prompts?: { kpiName: string; reason: string; suggestedAction: string }[] | null;
+    ai_generated_at?: string | null;
+  };
+  canWrite: boolean;
+  onRefresh?: () => void;
+}
+
+export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRefresh }: SessionAIPanelProps) {
+  const { t } = useTranslation();
+  const [showImport, setShowImport] = useState(false);
+  const [transcript, setTranscript] = useState(session.raw_transcript || '');
+  const [selectedActions, setSelectedActions] = useState<number[]>([]);
+  const [expandedSections, setExpandedSections] = useState({
+    summary: true,
+    decisions: true,
+    risks: false,
+    actions: true,
+    kpis: false,
+  });
+
+  const generateMutation = useGenerateSessionSummary(workspaceId);
+  const sendFollowupMutation = useSendSessionFollowup(workspaceId);
+  const applyActionsMutation = useApplyActionSuggestions(workspaceId);
+  const saveTranscriptMutation = useUpdateSessionTranscript(workspaceId);
+
+  const hasAIOutputs = !!session.ai_summary || !!session.ai_generated_at;
+  const actionSuggestions = session.ai_action_suggestions || [];
+  const risks = session.ai_risks || [];
+  const kpiPrompts = session.ai_kpi_prompts || [];
+  const decisions = session.ai_decisions || [];
+
+  const handleGenerate = async () => {
+    await generateMutation.mutateAsync({ 
+      sessionId, 
+      transcript: transcript.trim() || undefined,
+    });
+    onRefresh?.();
+  };
+
+  const handleApplySelected = async () => {
+    const selected = selectedActions.map(i => actionSuggestions[i]);
+    if (selected.length === 0) return;
+    
+    await applyActionsMutation.mutateAsync({ sessionId, suggestions: selected as any });
+    setSelectedActions([]);
+    onRefresh?.();
+  };
+
+  const handleApplyAll = async () => {
+    if (actionSuggestions.length === 0) return;
+    await applyActionsMutation.mutateAsync({ sessionId, suggestions: actionSuggestions as any });
+    onRefresh?.();
+  };
+
+  const handleSendFollowup = async () => {
+    await sendFollowupMutation.mutateAsync({ sessionId });
+  };
+
+  const handleSaveTranscript = async () => {
+    if (!transcript.trim()) return;
+    await saveTranscriptMutation.mutateAsync({ sessionId, transcript: transcript.trim() });
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const toggleActionSelection = (index: number) => {
+    setSelectedActions(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const priorityColors: Record<string, string> = {
+    low: 'bg-slate-100 text-slate-700',
+    medium: 'bg-blue-100 text-blue-700',
+    high: 'bg-amber-100 text-amber-700',
+    urgent: 'bg-red-100 text-red-700',
+  };
+
+  const severityColors: Record<string, string> = {
+    low: 'bg-green-100 text-green-700',
+    medium: 'bg-amber-100 text-amber-700',
+    high: 'bg-red-100 text-red-700',
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Import Section */}
+      {canWrite && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">AI Meeting Assistant</CardTitle>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowImport(!showImport)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {showImport ? 'Hide Import' : 'Import Transcript'}
+              </Button>
+            </div>
+            <CardDescription>
+              {hasAIOutputs 
+                ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
+                : 'Generate AI summary, action items, and insights from meeting notes or transcript'
+              }
+            </CardDescription>
+          </CardHeader>
+          
+          {showImport && (
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                <Textarea
+                  placeholder="Paste transcript from Teams, Zoom, or any meeting recording tool...&#10;&#10;You can also paste meeting notes or a summary."
+                  value={transcript}
+                  onChange={(e) => setTranscript(e.target.value)}
+                  rows={6}
+                  className="font-mono text-sm"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveTranscript}
+                    disabled={!transcript.trim() || saveTranscriptMutation.isPending}
+                  >
+                    {saveTranscriptMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4 mr-2" />
+                    )}
+                    Save Transcript
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          )}
+          
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={handleGenerate}
+                disabled={generateMutation.isPending}
+              >
+                {generateMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {hasAIOutputs ? 'Regenerate Summary' : 'Generate with AI'}
+                  </>
+                )}
+              </Button>
+              
+              {hasAIOutputs && (
+                <Button
+                  variant="outline"
+                  onClick={handleSendFollowup}
+                  disabled={sendFollowupMutation.isPending}
+                >
+                  {sendFollowupMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Mail className="h-4 w-4 mr-2" />
+                  )}
+                  Send Follow-up Email
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Outputs */}
+      {hasAIOutputs && (
+        <div className="space-y-3">
+          {/* Summary */}
+          {session.ai_summary && (
+            <Collapsible open={expandedSections.summary} onOpenChange={() => toggleSection('summary')}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-500" />
+                        <CardTitle className="text-sm">Summary</CardTitle>
+                      </div>
+                      {expandedSections.summary ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.ai_summary}</p>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
+          {/* Decisions */}
+          {decisions.length > 0 && (
+            <Collapsible open={expandedSections.decisions} onOpenChange={() => toggleSection('decisions')}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <CardTitle className="text-sm">Key Decisions</CardTitle>
+                        <Badge variant="secondary" className="text-xs">{decisions.length}</Badge>
+                      </div>
+                      {expandedSections.decisions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <ul className="space-y-2">
+                      {decisions.map((decision, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{decision}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
+          {/* Risks */}
+          {risks.length > 0 && (
+            <Collapsible open={expandedSections.risks} onOpenChange={() => toggleSection('risks')}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <CardTitle className="text-sm">Risks & Concerns</CardTitle>
+                        <Badge variant="secondary" className="text-xs">{risks.length}</Badge>
+                      </div>
+                      {expandedSections.risks ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <ul className="space-y-2">
+                      {risks.map((risk, i) => (
+                        <li key={i} className="flex items-start justify-between gap-2 text-sm">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                            <span>{risk.risk}</span>
+                          </div>
+                          <Badge className={cn('text-xs', severityColors[risk.severity])}>{risk.severity}</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
+          {/* Action Suggestions */}
+          {actionSuggestions.length > 0 && (
+            <Collapsible open={expandedSections.actions} onOpenChange={() => toggleSection('actions')}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm">Suggested Action Items</CardTitle>
+                        <Badge variant="secondary" className="text-xs">{actionSuggestions.length}</Badge>
+                      </div>
+                      {expandedSections.actions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0 space-y-3">
+                    <div className="space-y-2">
+                      {actionSuggestions.map((action, i) => (
+                        <div 
+                          key={i} 
+                          className={cn(
+                            "flex items-start gap-3 p-3 rounded-lg border transition-colors",
+                            selectedActions.includes(i) ? "border-primary bg-primary/5" : "border-border"
+                          )}
+                        >
+                          {canWrite && (
+                            <Checkbox
+                              checked={selectedActions.includes(i)}
+                              onCheckedChange={() => toggleActionSelection(i)}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{action.title}</span>
+                              <Badge className={cn('text-xs', priorityColors[action.priority])}>{action.priority}</Badge>
+                            </div>
+                            {action.description && (
+                              <p className="text-sm text-muted-foreground">{action.description}</p>
+                            )}
+                            {action.suggestedDueInDays && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Suggested due: {action.suggestedDueInDays} day(s)
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {canWrite && (
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          onClick={handleApplySelected}
+                          disabled={selectedActions.length === 0 || applyActionsMutation.isPending}
+                        >
+                          {applyActionsMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="h-4 w-4 mr-2" />
+                          )}
+                          Apply Selected ({selectedActions.length})
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleApplyAll}
+                          disabled={applyActionsMutation.isPending}
+                        >
+                          Apply All
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
+          {/* KPI Prompts */}
+          {kpiPrompts.length > 0 && (
+            <Collapsible open={expandedSections.kpis} onOpenChange={() => toggleSection('kpis')}>
+              <Card className="border-amber-200 bg-amber-50/50">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-amber-100/50 transition-colors pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-amber-600" />
+                        <CardTitle className="text-sm text-amber-900">KPIs to Update</CardTitle>
+                        <Badge variant="outline" className="text-xs border-amber-300 text-amber-700">{kpiPrompts.length}</Badge>
+                      </div>
+                      {expandedSections.kpis ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <ul className="space-y-3">
+                      {kpiPrompts.map((kpi, i) => (
+                        <li key={i} className="space-y-1">
+                          <div className="font-medium text-sm text-amber-900">{kpi.kpiName}</div>
+                          <p className="text-sm text-amber-700">{kpi.reason}</p>
+                          {kpi.suggestedAction && (
+                            <p className="text-xs text-amber-600">💡 {kpi.suggestedAction}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,188 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface ActionSuggestion {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  suggestedDueInDays?: number;
+}
+
+interface Risk {
+  risk: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+interface KpiPrompt {
+  kpiName: string;
+  reason: string;
+  suggestedAction: string;
+}
+
+interface AIOutputs {
+  summary: string;
+  decisions: string[];
+  risks: Risk[];
+  actionSuggestions: ActionSuggestion[];
+  kpiPrompts: KpiPrompt[];
+}
+
+export function useGenerateSessionSummary(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ sessionId, transcript }: { sessionId: string; transcript?: string }): Promise<AIOutputs> => {
+      const { data, error } = await supabase.functions.invoke('generate-session-summary', {
+        body: { sessionId, transcript },
+      });
+
+      if (error) {
+        console.error('Generate summary error:', error);
+        throw new Error(error.message || 'Failed to generate summary');
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to generate summary');
+      }
+
+      return {
+        summary: data.summary,
+        decisions: data.decisions || [],
+        risks: data.risks || [],
+        actionSuggestions: data.actionSuggestions || [],
+        kpiPrompts: data.kpiPrompts || [],
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      toast.success('AI summary generated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to generate AI summary');
+    },
+  });
+}
+
+export function useSendSessionFollowup(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      sessionId, 
+      recipientEmails,
+      includeActions = true,
+      includeKpis = true,
+    }: { 
+      sessionId: string; 
+      recipientEmails?: string[];
+      includeActions?: boolean;
+      includeKpis?: boolean;
+    }) => {
+      const { data, error } = await supabase.functions.invoke('send-session-followup', {
+        body: { sessionId, recipientEmails, includeActions, includeKpis },
+      });
+
+      if (error) {
+        console.error('Send followup error:', error);
+        throw new Error(error.message || 'Failed to send follow-up');
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to send follow-up');
+      }
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['activity-log', workspaceId] });
+      toast.success(`Follow-up sent to ${data.sent} recipient(s)`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to send follow-up');
+    },
+  });
+}
+
+export function useApplyActionSuggestions(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      sessionId, 
+      suggestions,
+    }: { 
+      sessionId: string; 
+      suggestions: ActionSuggestion[];
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const actionsToCreate = suggestions.map(suggestion => ({
+        workspace_id: workspaceId,
+        session_id: sessionId,
+        title: suggestion.title,
+        description: suggestion.description,
+        priority: suggestion.priority,
+        due_date: suggestion.suggestedDueInDays 
+          ? new Date(Date.now() + suggestion.suggestedDueInDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          : null,
+        status: 'pending' as const,
+        created_by: user.id,
+      }));
+
+      const { data, error } = await supabase
+        .from('action_items')
+        .insert(actionsToCreate)
+        .select();
+
+      if (error) {
+        console.error('Create actions error:', error);
+        throw new Error('Failed to create action items');
+      }
+
+      // Clear the suggestions from the session after applying
+      await supabase
+        .from('sessions')
+        .update({ ai_action_suggestions: [] })
+        .eq('id', sessionId);
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      toast.success(`Created ${data.length} action item(s)`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to apply suggestions');
+    },
+  });
+}
+
+export function useUpdateSessionTranscript(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ sessionId, transcript }: { sessionId: string; transcript: string }) => {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ 
+          raw_transcript: transcript,
+          source: 'teams_import',
+        })
+        .eq('id', sessionId);
+
+      if (error) {
+        throw new Error('Failed to save transcript');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
+      toast.success('Transcript saved');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}

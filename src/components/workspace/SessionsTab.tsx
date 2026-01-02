@@ -15,6 +15,7 @@ import {
   Mail,
   Download,
   Star,
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSessionActionItems, useCreateActionItem, useWorkspaceMembers } from '@/hooks/useSessions';
 import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
@@ -62,6 +64,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
+import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -262,6 +265,12 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
                     Decisions
+                  </Badge>
+                )}
+                {session.ai_generated_at && (
+                  <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    AI
                   </Badge>
                 )}
               </div>
