@@ -108,7 +108,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       </TabsList>
 
       <TabsContent value="calculator">
-        <UnitEconomicsCalculator />
+        <UnitEconomicsCalculator workspaceId={workspaceId} />
       </TabsContent>
 
       <TabsContent value="templates" className="space-y-6">

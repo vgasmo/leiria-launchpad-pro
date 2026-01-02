@@ -13,7 +13,8 @@ import {
   Loader2,
   Calendar,
   BookOpen,
-  BarChart3
+  BarChart3,
+  CalendarDays
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,6 +40,7 @@ import { toast } from 'sonner';
 import { connectionMessageSchema, validateFormData } from '@/lib/validations';
 import { MentorAvailabilitySettings } from '@/components/mentors/MentorAvailabilitySettings';
 import { MentorImpactDashboard } from '@/components/mentors/MentorImpactDashboard';
+import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
 import { ResourceLibrary } from '@/components/resources/ResourceLibrary';
 
 interface MentorProfile {
@@ -464,6 +466,10 @@ export default function Mentors() {
               <Calendar className="h-4 w-4" />
               Availability
             </TabsTrigger>
+            <TabsTrigger value="bookings" className="gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Bookings
+            </TabsTrigger>
             <TabsTrigger value="resources" className="gap-2">
               <BookOpen className="h-4 w-4" />
               Resources
@@ -617,6 +623,10 @@ export default function Mentors() {
 
           <TabsContent value="availability">
             <MentorAvailabilitySettings />
+          </TabsContent>
+
+          <TabsContent value="bookings">
+            <MentorBookingPanel mode="mentor" />
           </TabsContent>
 
           <TabsContent value="resources">
