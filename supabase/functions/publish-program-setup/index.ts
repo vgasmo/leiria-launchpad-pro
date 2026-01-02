@@ -1,0 +1,499 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface DraftData {
+  basics: {
+    name: string;
+    description?: string;
+    start_date?: string;
+    end_date?: string;
+  };
+  stages: {
+    stage_key: string;
+    name: string;
+    description?: string;
+    position: number;
+    is_active: boolean;
+  }[];
+  kpis: {
+    stage_key: string;
+    kpis: {
+      name: string;
+      unit?: string;
+      category?: string;
+      description?: string;
+      direction?: string;
+      is_required: boolean;
+      order_index: number;
+      target_value?: number;
+      kpi_definition_id?: string; // existing KPI
+    }[];
+  }[];
+  coreKpis: {
+    name: string;
+    kpi_definition_id?: string;
+    order_index: number;
+  }[];
+  playbooks: {
+    stage_key: string;
+    title: string;
+    description?: string;
+    items: {
+      item_type: 'milestone' | 'action';
+      title: string;
+      description?: string;
+      relative_due_days?: number;
+      priority?: string;
+      order_index: number;
+      default_owner_role?: string;
+      metadata_json?: Record<string, unknown>;
+    }[];
+  }[];
+  alertRules: {
+    rule_type: string;
+    threshold: number;
+    severity: string;
+    is_enabled: boolean;
+  }[];
+  healthModel?: {
+    weights_json: Record<string, number>;
+    thresholds_json: Record<string, number>;
+    is_enabled: boolean;
+  };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // Get user from token
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check if user is admin or consultor
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const isAdminOrConsultor = roles?.some(r => r.role === 'admin' || r.role === 'consultor');
+    if (!isAdminOrConsultor) {
+      return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { draft_id } = await req.json();
+    if (!draft_id) {
+      return new Response(JSON.stringify({ error: 'draft_id is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`[publish-program-setup] Publishing draft ${draft_id} by user ${user.id}`);
+
+    // Fetch draft
+    const { data: draft, error: draftError } = await supabase
+      .from('program_setup_drafts')
+      .select('*')
+      .eq('id', draft_id)
+      .single();
+
+    if (draftError || !draft) {
+      console.error('[publish-program-setup] Draft not found:', draftError);
+      return new Response(JSON.stringify({ error: 'Draft not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (draft.status !== 'draft') {
+      return new Response(JSON.stringify({ error: 'Draft already published or discarded' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const draftData = draft.draft_json as DraftData;
+
+    // Validate draft
+    const validationErrors: string[] = [];
+    if (!draftData.basics?.name?.trim()) validationErrors.push('Program name is required');
+    
+    const activeStages = draftData.stages?.filter(s => s.is_active) || [];
+    if (activeStages.length === 0) validationErrors.push('At least one stage must be active');
+    
+    const coreKpiCount = draftData.coreKpis?.length || 0;
+    if (coreKpiCount < 3 || coreKpiCount > 6) {
+      validationErrors.push('Core KPIs must be between 3 and 6');
+    }
+
+    // Check for duplicate KPIs in same stage
+    for (const stageKpis of draftData.kpis || []) {
+      const names = stageKpis.kpis.map(k => k.name.toLowerCase());
+      const uniqueNames = new Set(names);
+      if (names.length !== uniqueNames.size) {
+        validationErrors.push(`Duplicate KPIs found in stage ${stageKpis.stage_key}`);
+      }
+    }
+
+    // Check alert rule thresholds
+    for (const rule of draftData.alertRules || []) {
+      if (rule.threshold < 0) {
+        validationErrors.push(`Alert rule ${rule.rule_type} has negative threshold`);
+      }
+    }
+
+    // Check health model weights sum
+    if (draftData.healthModel?.is_enabled) {
+      const weights = Object.values(draftData.healthModel.weights_json);
+      const sum = weights.reduce((a, b) => a + b, 0);
+      if (Math.abs(sum - 100) > 0.1) {
+        validationErrors.push(`Health model weights must sum to 100 (current: ${sum})`);
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      console.log('[publish-program-setup] Validation errors:', validationErrors);
+      return new Response(JSON.stringify({ error: 'Validation failed', details: validationErrors }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // --- ATOMIC PUBLISH TRANSACTION ---
+    let programId = draft.program_id;
+
+    // 1. Upsert program
+    if (programId) {
+      // Update existing program
+      const { error: updateError } = await supabase
+        .from('programs')
+        .update({
+          name: draftData.basics.name,
+          description: draftData.basics.description || null,
+          start_date: draftData.basics.start_date || null,
+          end_date: draftData.basics.end_date || null,
+          status: 'active',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', programId);
+
+      if (updateError) throw new Error(`Failed to update program: ${updateError.message}`);
+      console.log(`[publish-program-setup] Updated program ${programId}`);
+    } else {
+      // Create new program
+      const { data: newProgram, error: createError } = await supabase
+        .from('programs')
+        .insert({
+          name: draftData.basics.name,
+          description: draftData.basics.description || null,
+          start_date: draftData.basics.start_date || null,
+          end_date: draftData.basics.end_date || null,
+          status: 'active',
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (createError || !newProgram) throw new Error(`Failed to create program: ${createError?.message}`);
+      programId = newProgram.id;
+      console.log(`[publish-program-setup] Created program ${programId}`);
+    }
+
+    // 2. Upsert stages metadata
+    for (const stage of draftData.stages || []) {
+      // Check if stage exists
+      const { data: existing } = await supabase
+        .from('stages')
+        .select('id')
+        .eq('program_id', programId)
+        .eq('stage_key', stage.stage_key)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from('stages')
+          .update({
+            name: stage.name,
+            description: stage.description,
+            position: stage.position,
+            is_active: stage.is_active,
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase.from('stages').insert({
+          program_id: programId,
+          stage_key: stage.stage_key,
+          name: stage.name,
+          description: stage.description,
+          position: stage.position,
+          is_active: stage.is_active,
+        });
+      }
+    }
+    console.log(`[publish-program-setup] Upserted ${draftData.stages?.length || 0} stages`);
+
+    // 3. Process KPIs - create definitions if needed, then upsert defaults
+    const kpiDefinitionMap: Record<string, string> = {}; // name -> id
+
+    // First pass: ensure all KPI definitions exist
+    for (const stageKpis of draftData.kpis || []) {
+      for (const kpi of stageKpis.kpis) {
+        if (kpi.kpi_definition_id) {
+          kpiDefinitionMap[kpi.name] = kpi.kpi_definition_id;
+        } else {
+          // Check if KPI definition exists by name
+          const { data: existingDef } = await supabase
+            .from('kpi_definitions')
+            .select('id')
+            .eq('name', kpi.name)
+            .single();
+
+          if (existingDef) {
+            kpiDefinitionMap[kpi.name] = existingDef.id;
+          } else {
+            // Create new KPI definition
+            const { data: newDef, error: defError } = await supabase
+              .from('kpi_definitions')
+              .insert({
+                name: kpi.name,
+                unit: kpi.unit || null,
+                category: kpi.category || null,
+                description: kpi.description || null,
+                direction: kpi.direction || 'up',
+                is_global: false,
+                program_id: programId,
+              })
+              .select()
+              .single();
+
+            if (defError || !newDef) {
+              console.error(`[publish-program-setup] Failed to create KPI definition: ${kpi.name}`, defError);
+              continue;
+            }
+            kpiDefinitionMap[kpi.name] = newDef.id;
+          }
+        }
+      }
+    }
+    console.log(`[publish-program-setup] Processed ${Object.keys(kpiDefinitionMap).length} KPI definitions`);
+
+    // Second pass: upsert stage_kpi_defaults
+    // First, remove existing defaults for this program
+    await supabase
+      .from('stage_kpi_defaults')
+      .delete()
+      .eq('program_id', programId);
+
+    for (const stageKpis of draftData.kpis || []) {
+      for (const kpi of stageKpis.kpis) {
+        const kpiDefId = kpiDefinitionMap[kpi.name];
+        if (!kpiDefId) continue;
+
+        await supabase.from('stage_kpi_defaults').insert({
+          program_id: programId,
+          stage: stageKpis.stage_key,
+          kpi_definition_id: kpiDefId,
+          required: kpi.is_required,
+          order_index: kpi.order_index,
+          target_value: kpi.target_value || null,
+        });
+      }
+    }
+    console.log(`[publish-program-setup] Upserted stage KPI defaults`);
+
+    // 4. Upsert core KPIs
+    await supabase.from('program_core_kpis').delete().eq('program_id', programId);
+    
+    for (const coreKpi of draftData.coreKpis || []) {
+      const kpiDefId = coreKpi.kpi_definition_id || kpiDefinitionMap[coreKpi.name];
+      if (!kpiDefId) continue;
+
+      await supabase.from('program_core_kpis').insert({
+        program_id: programId,
+        kpi_definition_id: kpiDefId,
+        order_index: coreKpi.order_index,
+      });
+    }
+    console.log(`[publish-program-setup] Upserted ${draftData.coreKpis?.length || 0} core KPIs`);
+
+    // 5. Upsert playbooks
+    for (const playbook of draftData.playbooks || []) {
+      // Check if playbook exists for this stage
+      const { data: existingPlaybook } = await supabase
+        .from('playbooks')
+        .select('id')
+        .eq('program_id', programId)
+        .eq('stage', playbook.stage_key)
+        .single();
+
+      let playbookId: string;
+      if (existingPlaybook) {
+        await supabase
+          .from('playbooks')
+          .update({
+            title: playbook.title,
+            description: playbook.description,
+            is_active: true,
+          })
+          .eq('id', existingPlaybook.id);
+        playbookId = existingPlaybook.id;
+
+        // Delete existing items (will recreate)
+        await supabase.from('playbook_items').delete().eq('playbook_id', playbookId);
+      } else {
+        const { data: newPlaybook, error: pbError } = await supabase
+          .from('playbooks')
+          .insert({
+            program_id: programId,
+            stage: playbook.stage_key,
+            title: playbook.title,
+            description: playbook.description,
+            is_active: true,
+          })
+          .select()
+          .single();
+
+        if (pbError || !newPlaybook) {
+          console.error(`[publish-program-setup] Failed to create playbook`, pbError);
+          continue;
+        }
+        playbookId = newPlaybook.id;
+      }
+
+      // Create playbook items
+      for (const item of playbook.items || []) {
+        await supabase.from('playbook_items').insert({
+          playbook_id: playbookId,
+          item_type: item.item_type,
+          title: item.title,
+          description: item.description,
+          relative_due_days: item.relative_due_days,
+          priority: item.priority,
+          order_index: item.order_index,
+          default_owner_role: item.default_owner_role,
+          metadata_json: item.metadata_json || {},
+        });
+      }
+    }
+    console.log(`[publish-program-setup] Upserted ${draftData.playbooks?.length || 0} playbooks`);
+
+    // 6. Upsert alert rules
+    await supabase.from('program_alert_rules').delete().eq('program_id', programId);
+    
+    for (const rule of draftData.alertRules || []) {
+      await supabase.from('program_alert_rules').insert({
+        program_id: programId,
+        rule_type: rule.rule_type,
+        threshold: rule.threshold,
+        severity: rule.severity,
+        is_enabled: rule.is_enabled,
+      });
+    }
+    console.log(`[publish-program-setup] Upserted ${draftData.alertRules?.length || 0} alert rules`);
+
+    // 7. Upsert health model
+    if (draftData.healthModel) {
+      const { data: existingModel } = await supabase
+        .from('program_health_model')
+        .select('id')
+        .eq('program_id', programId)
+        .single();
+
+      if (existingModel) {
+        await supabase
+          .from('program_health_model')
+          .update({
+            weights_json: draftData.healthModel.weights_json,
+            thresholds_json: draftData.healthModel.thresholds_json,
+            is_enabled: draftData.healthModel.is_enabled,
+          })
+          .eq('id', existingModel.id);
+      } else {
+        await supabase.from('program_health_model').insert({
+          program_id: programId,
+          weights_json: draftData.healthModel.weights_json,
+          thresholds_json: draftData.healthModel.thresholds_json,
+          is_enabled: draftData.healthModel.is_enabled,
+        });
+      }
+      console.log(`[publish-program-setup] Upserted health model`);
+    }
+
+    // 8. Mark draft as published
+    await supabase
+      .from('program_setup_drafts')
+      .update({
+        status: 'published',
+        program_id: programId,
+      })
+      .eq('id', draft_id);
+
+    // Log activity
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      entity_type: 'program',
+      entity_id: programId,
+      action: draft.program_id ? 'updated' : 'created',
+      metadata: {
+        via: 'setup_wizard',
+        draft_id: draft_id,
+        stages_count: activeStages.length,
+        kpi_count: Object.keys(kpiDefinitionMap).length,
+      },
+    });
+
+    console.log(`[publish-program-setup] Successfully published program ${programId}`);
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      program_id: programId,
+      message: 'Program published successfully'
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('[publish-program-setup] Error:', error);
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : 'Internal server error' 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
