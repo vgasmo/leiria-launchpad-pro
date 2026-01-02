@@ -1,0 +1,184 @@
+import { Link } from 'react-router-dom';
+import { AlertTriangle, CheckCircle, EyeOff, ExternalLink, Info, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useWorkspaceAlerts, useResolveAlert, useIgnoreAlert, getAlertCTA, getSeverityConfig, getRuleTypeLabel } from '@/hooks/useWorkspaceAlerts';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface WorkspaceAlertsSectionProps {
+  workspaceId: string;
+  canManage?: boolean;
+}
+
+export function WorkspaceAlertsSection({ workspaceId, canManage = false }: WorkspaceAlertsSectionProps) {
+  const { roles } = useAuth();
+  const isStaff = roles.includes('admin') || roles.includes('consultor');
+  const { data: alerts, isLoading } = useWorkspaceAlerts(workspaceId);
+  const resolveAlert = useResolveAlert();
+  const ignoreAlert = useIgnoreAlert();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Alertas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2].map(i => <Skeleton key={i} className="h-16" />)}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!alerts || alerts.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            Alertas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-6 text-muted-foreground">
+            <CheckCircle className="h-10 w-10 mx-auto mb-2 text-green-500 opacity-50" />
+            <p className="font-medium">Sem alertas ativos</p>
+            <p className="text-sm">Tudo está a correr bem!</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const criticalCount = alerts.filter(a => a.severity === 'critical').length;
+  const warningCount = alerts.filter(a => a.severity === 'warning').length;
+
+  return (
+    <Card className={criticalCount > 0 ? 'border-red-200 dark:border-red-800' : warningCount > 0 ? 'border-amber-200 dark:border-amber-800' : ''}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className={`h-5 w-5 ${criticalCount > 0 ? 'text-red-600' : 'text-amber-600'}`} />
+            Alertas
+          </CardTitle>
+          <div className="flex gap-1">
+            {criticalCount > 0 && (
+              <Badge variant="destructive">{criticalCount} crítico{criticalCount > 1 ? 's' : ''}</Badge>
+            )}
+            {warningCount > 0 && (
+              <Badge variant="outline" className="border-amber-500 text-amber-600">{warningCount} atenção</Badge>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {alerts.map(alert => {
+            const severityConfig = getSeverityConfig(alert.severity);
+            const cta = getAlertCTA(alert.rule_type, workspaceId);
+            const evidence = alert.evidence_json as Record<string, unknown>;
+
+            return (
+              <div
+                key={alert.id}
+                className={`p-3 rounded-lg border ${
+                  alert.severity === 'critical' 
+                    ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800'
+                    : alert.severity === 'warning'
+                    ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'
+                    : 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge className={severityConfig.color} variant="secondary">
+                        {severityConfig.icon} {getRuleTypeLabel(alert.rule_type)}
+                      </Badge>
+                    </div>
+                    <p className="font-medium text-sm">{alert.reason}</p>
+                    
+                    {/* Evidence details */}
+                    {Object.keys(evidence).length > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="flex items-center gap-1 text-xs text-muted-foreground mt-1 hover:text-foreground">
+                            <Info className="h-3 w-3" />
+                            Ver detalhes
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs">
+                          <pre className="text-xs whitespace-pre-wrap">
+                            {JSON.stringify(evidence, null, 2)}
+                          </pre>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* CTA Button */}
+                    {cta && (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={cta.href}>
+                          {cta.label}
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </Link>
+                      </Button>
+                    )}
+
+                    {/* Resolve/Ignore (staff only) */}
+                    {isStaff && (canManage || true) && (
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => resolveAlert.mutate(alert.id)}
+                              disabled={resolveAlert.isPending}
+                            >
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Marcar como resolvido</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => ignoreAlert.mutate(alert.id)}
+                              disabled={ignoreAlert.isPending}
+                            >
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Ignorar alerta</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

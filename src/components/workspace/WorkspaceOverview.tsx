@@ -33,6 +33,8 @@ import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboa
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
+import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
+import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -357,14 +359,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </CardContent>
         </Card>
 
-        {/* Health Score Panel */}
-        <HealthScorePanel
-          workspaceId={workspace.id}
-          healthScore={(workspace.health_score_override || workspace.health_score) as Database['public']['Enums']['health_score'] | null}
-          healthStatus={workspace.health_status}
-          healthNotes={workspace.health_notes}
-          canWrite={canWrite}
-        />
+        {/* Health Score Card (new) */}
+        <HealthScoreCard workspaceId={workspace.id} canManage={canWrite} />
+        
+        {/* Workspace Alerts Section */}
+        <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
         
         {/* Progress Timeline */}
         <ProgressTimeline workspaceId={workspace.id} />
