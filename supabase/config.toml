@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.analyze-template]
 verify_jwt = false
+
+[functions.generate-template-coach]
+verify_jwt = false
