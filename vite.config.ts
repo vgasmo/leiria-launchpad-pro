@@ -49,6 +49,8 @@ export default defineConfig(({ mode }) => ({
         // P0 SECURITY: Do NOT cache authenticated Supabase API requests
         // This prevents stale/leaked data between sessions
         navigateFallback: null,
+        // Increase the size limit to 3 MB to handle large bundles
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           {
             // Cache only static assets from CDNs, not Supabase API
