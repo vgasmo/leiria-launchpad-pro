@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { format, isPast, isToday, parseISO } from 'date-fns';
-import { Plus, ChevronUp, ChevronDown, Trash2, Calendar, Target, Clock, CheckCircle2, Circle, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Calendar, Target, Clock, CheckCircle2, Circle, AlertTriangle, GripVertical } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SortableList } from '@/components/ui/SortableList';
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -89,30 +90,6 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     }
   };
 
-  const handleMoveUp = async (index: number) => {
-    if (!canWrite || !milestones || index === 0) return;
-    const updated = [...milestones];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    const reordered = updated.map((m, i) => ({ id: m.id, position: i }));
-    try {
-      await reorderMilestones.mutateAsync(reordered);
-    } catch {
-      toast.error(t('milestones.failedToReorder'));
-    }
-  };
-
-  const handleMoveDown = async (index: number) => {
-    if (!canWrite || !milestones || index === milestones.length - 1) return;
-    const updated = [...milestones];
-    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-    const reordered = updated.map((m, i) => ({ id: m.id, position: i }));
-    try {
-      await reorderMilestones.mutateAsync(reordered);
-    } catch {
-      toast.error(t('milestones.failedToReorder'));
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -167,19 +144,26 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
               </CardContent>
             </Card>
           ) : (
-            sortedMilestones.map((milestone, index) => (
-              <MilestoneListItem
-                key={milestone.id}
-                milestone={milestone}
-                index={index}
-                total={sortedMilestones.length}
-                canWrite={canWrite}
-                onStatusChange={handleStatusChange}
-                onDelete={(m) => setDeleteTarget(m)}
-                onMoveUp={handleMoveUp}
-                onMoveDown={handleMoveDown}
-              />
-            ))
+            <SortableList
+              items={sortedMilestones}
+              disabled={!canWrite}
+              onReorder={(reordered) => {
+                const updates = reordered.map((m, i) => ({ id: m.id, position: i }));
+                reorderMilestones.mutateAsync(updates).catch(() => {
+                  toast.error(t('milestones.failedToReorder'));
+                });
+              }}
+              renderItem={(milestone, index, dragHandle) => (
+                <MilestoneListItem
+                  key={milestone.id}
+                  milestone={milestone}
+                  canWrite={canWrite}
+                  onStatusChange={handleStatusChange}
+                  onDelete={(m) => setDeleteTarget(m)}
+                  dragHandle={dragHandle}
+                />
+              )}
+            />
           )}
         </TabsContent>
 
@@ -258,24 +242,18 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
 
 interface MilestoneListItemProps {
   milestone: Milestone;
-  index: number;
-  total: number;
   canWrite: boolean;
   onStatusChange: (milestone: Milestone, status: MilestoneStatus) => void;
   onDelete: (milestone: Milestone) => void;
-  onMoveUp: (index: number) => void;
-  onMoveDown: (index: number) => void;
+  dragHandle?: React.ReactNode;
 }
 
 function MilestoneListItem({
   milestone,
-  index,
-  total,
   canWrite,
   onStatusChange,
   onDelete,
-  onMoveUp,
-  onMoveDown,
+  dragHandle,
 }: MilestoneListItemProps) {
   const { t } = useTranslation();
   const STATUS_CONFIG = useStatusConfig();
@@ -291,27 +269,10 @@ function MilestoneListItem({
     <Card className={`transition-all ${isOverdue ? 'border-destructive/50' : ''}`}>
       <CardContent className="py-3 px-4">
         <div className="flex items-start gap-3">
-          {/* Order controls */}
-          {canWrite && (
-            <div className="flex flex-col gap-0.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5"
-                onClick={() => onMoveUp(index)}
-                disabled={index === 0}
-              >
-                <ChevronUp className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5"
-                onClick={() => onMoveDown(index)}
-                disabled={index === total - 1}
-              >
-                <ChevronDown className="h-3 w-3" />
-              </Button>
+          {/* Drag handle */}
+          {canWrite && dragHandle && (
+            <div className="pt-1">
+              {dragHandle}
             </div>
           )}
 
