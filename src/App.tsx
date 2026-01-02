@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { GlobalQuickActions } from "@/components/ui/GlobalQuickActions";
 import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
@@ -54,6 +55,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   return (
     <>
       <SessionTimeoutWarning timeoutMs={30 * 60 * 1000} warningTimeMs={5 * 60 * 1000} />
+      <GlobalQuickActions />
       {children}
     </>
   );
