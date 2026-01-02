@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { KpiImportDialog } from './KpiImportDialog';
 
 interface KpisTabProps {
   workspaceId: string;
@@ -70,6 +71,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const [editedValues, setEditedValues] = useState<Record<string, { value: string; notes: string }>>({});
   const [savingKpis, setSavingKpis] = useState<Set<string>>(new Set());
   const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [pendingTargets, setPendingTargets] = useState<Record<string, string>>({});
 
   // Check if user can edit KPIs (founder or admin)
@@ -344,6 +346,12 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         </div>
 
         <div className="flex gap-2">
+          {canEditKpis && (
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              {t('kpis.import', 'Import')}
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             {t('kpis.export')}
@@ -437,6 +445,13 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
           />
         ))}
       </div>
+
+      {/* Import Dialog */}
+      <KpiImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        workspaceId={workspaceId}
+      />
     </div>
   );
 }
