@@ -2690,6 +2690,7 @@ export type Database = {
           health_notes: string | null
           health_score: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated: string | null
+          health_score_components: Json | null
           health_score_explanation: Json | null
           health_score_numeric: number | null
           health_score_override:
@@ -2711,6 +2712,7 @@ export type Database = {
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated?: string | null
+          health_score_components?: Json | null
           health_score_explanation?: Json | null
           health_score_numeric?: number | null
           health_score_override?:
@@ -2732,6 +2734,7 @@ export type Database = {
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated?: string | null
+          health_score_components?: Json | null
           health_score_explanation?: Json | null
           health_score_numeric?: number | null
           health_score_override?:

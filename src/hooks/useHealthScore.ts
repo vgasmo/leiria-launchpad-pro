@@ -22,6 +22,12 @@ export interface WorkspaceHealth {
   health_score_override: string | null;
   health_score_updated_at: string | null;
   health_score_explanation: HealthExplanationFactor[];
+  health_score_components: {
+    actions: number;
+    sessions: number;
+    kpis: number;
+    checkins: number;
+  } | null;
 }
 
 export interface HealthComputationResult {
@@ -38,7 +44,7 @@ export function useWorkspaceHealth(workspaceId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('workspaces')
-        .select('id, health_score, health_score_calculated, health_score_numeric, health_score_override, health_score_updated_at, health_score_explanation')
+        .select('id, health_score, health_score_calculated, health_score_numeric, health_score_override, health_score_updated_at, health_score_explanation, health_score_components')
         .eq('id', workspaceId)
         .single();
 
@@ -48,6 +54,7 @@ export function useWorkspaceHealth(workspaceId: string) {
         health_score_explanation: Array.isArray(data.health_score_explanation) 
           ? (data.health_score_explanation as unknown as HealthExplanationFactor[])
           : [],
+        health_score_components: data.health_score_components as WorkspaceHealth['health_score_components'],
       } as WorkspaceHealth;
     },
     enabled: !!workspaceId,

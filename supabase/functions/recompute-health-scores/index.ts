@@ -288,6 +288,14 @@ serve(async (req) => {
       const finalScore = Math.round(weightedScore);
       const healthLabel = getHealthLabel(finalScore, thresholds);
 
+      // Store component scores for transparency
+      const componentScores = {
+        actions: Math.round(actionsScore),
+        sessions: Math.round(sessionsScore),
+        kpis: Math.round(kpisScore),
+        checkins: Math.round(checkinsScore),
+      };
+
       // Sort explanation by impact (negative first)
       explanation.sort((a, b) => {
         const order = { negative: 0, neutral: 1, positive: 2 };
@@ -302,6 +310,7 @@ serve(async (req) => {
           health_score_numeric: finalScore,
           health_score_updated_at: new Date().toISOString(),
           health_score_explanation: explanation,
+          health_score_components: componentScores,
           // Only update health_score if no override is set
           health_score: healthLabel,
         })
@@ -316,6 +325,7 @@ serve(async (req) => {
           health_score_numeric: finalScore,
           health_score_updated_at: new Date().toISOString(),
           health_score_explanation: explanation,
+          health_score_components: componentScores,
         })
         .eq("id", workspace.id)
         .not("health_score_override", "is", null);

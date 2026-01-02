@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -12,6 +12,7 @@ import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsMana
 import { ActivityLogViewer } from '@/components/admin/ActivityLogViewer';
 import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
+import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -56,6 +57,10 @@ export default function Admin() {
             <TrendingUp className="h-4 w-4" aria-hidden="true" />
             {t('admin.analytics')}
           </TabsTrigger>
+          <TabsTrigger value="health" className="gap-2">
+            <Heart className="h-4 w-4" aria-hidden="true" />
+            Health Models
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
@@ -99,6 +104,10 @@ export default function Admin() {
               <BulkReportGenerator />
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="health">
+          <HealthModelViewer />
         </TabsContent>
       </Tabs>
     </AppLayout>
