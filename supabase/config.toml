@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-session-followup]
 verify_jwt = false
+
+[functions.run-checkin-reminders]
+verify_jwt = false
