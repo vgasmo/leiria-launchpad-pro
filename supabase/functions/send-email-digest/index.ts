@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SITE_URL = Deno.env.get("SITE_URL") || "https://startupleiria.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,8 +16,20 @@ interface DigestData {
   overdueActions: number;
   criticalHealth: number;
   atRiskHealth: number;
-  upcomingMeetings: number;
+  upcomingSessions: number;
   pendingKpis: number;
+}
+
+// HTML escape function to prevent XSS
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
 }
 
 serve(async (req: Request) => {
@@ -122,15 +135,15 @@ serve(async (req: Request) => {
         .in("id", workspaceIds)
         .eq("health_score", "at_risk");
 
-      // Get upcoming meetings in next 7 days
+      // Get upcoming sessions in next 7 days (using sessions table, not meetings)
       const nextWeek = new Date(now);
       nextWeek.setDate(nextWeek.getDate() + 7);
-      const { count: meetingsCount } = await supabase
-        .from("meetings")
+      const { count: sessionsCount } = await supabase
+        .from("sessions")
         .select("*", { count: "exact", head: true })
         .in("workspace_id", workspaceIds)
-        .gte("starts_at", now.toISOString())
-        .lte("starts_at", nextWeek.toISOString());
+        .gte("scheduled_at", now.toISOString())
+        .lte("scheduled_at", nextWeek.toISOString());
 
       const digestData: DigestData = {
         userId: pref.user_id,
@@ -139,7 +152,7 @@ serve(async (req: Request) => {
         overdueActions: overdueCount || 0,
         criticalHealth: criticalCount || 0,
         atRiskHealth: atRiskCount || 0,
-        upcomingMeetings: meetingsCount || 0,
+        upcomingSessions: sessionsCount || 0,
         pendingKpis: 0, // Calculated separately if needed
       };
 
@@ -228,9 +241,12 @@ function buildDigestEmail(data: DigestData): string {
   if (data.atRiskHealth > 0) {
     items.push(`<li>🟠 <strong>${data.atRiskHealth}</strong> startup(s) at risk</li>`);
   }
-  if (data.upcomingMeetings > 0) {
-    items.push(`<li>📅 <strong>${data.upcomingMeetings}</strong> upcoming meetings this week</li>`);
+  if (data.upcomingSessions > 0) {
+    items.push(`<li>📅 <strong>${data.upcomingSessions}</strong> upcoming sessions this week</li>`);
   }
+
+  // Escape user-controlled content
+  const safeFullName = escapeHtml(data.fullName);
 
   return `
     <!DOCTYPE html>
@@ -246,7 +262,7 @@ function buildDigestEmail(data: DigestData): string {
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 12px 12px;">
-        <p style="margin-top: 0;">Hi ${data.fullName},</p>
+        <p style="margin-top: 0;">Hi ${safeFullName},</p>
         
         <p>Here's your weekly summary of items that need your attention:</p>
         
@@ -255,7 +271,7 @@ function buildDigestEmail(data: DigestData): string {
         </ul>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/my-workspaces" 
+          <a href="${SITE_URL}/my-workspaces" 
              style="display: inline-block; background: #c03c3c; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500;">
             View Dashboard
           </a>
@@ -265,7 +281,7 @@ function buildDigestEmail(data: DigestData): string {
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
           You're receiving this because you have email digests enabled.<br>
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Manage preferences</a>
+          <a href="${SITE_URL}/settings" style="color: #c03c3c;">Manage preferences</a>
         </p>
       </div>
     </body>

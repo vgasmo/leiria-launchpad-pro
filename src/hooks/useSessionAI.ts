@@ -141,10 +141,10 @@ export function useApplyActionSuggestions(workspaceId: string) {
         throw new Error('Failed to create action items');
       }
 
-      // Clear the suggestions from the session after applying
+      // Clear the suggestions from the session after applying (don't change source)
       await supabase
         .from('sessions')
-        .update({ ai_action_suggestions: [] })
+        .update({ ai_action_suggestions: null })
         .eq('id', sessionId);
 
       return data;
