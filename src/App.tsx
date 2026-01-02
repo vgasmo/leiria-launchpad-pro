@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
 import Admin from "./pages/Admin";
+import ProgramSetupWizard from "./pages/ProgramSetupWizard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Mentors from "./pages/Mentors";
@@ -69,6 +70,10 @@ function AppRoutes() {
       <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+      <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+      <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+      <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+      <Route path="/admin/programs/:id/setup/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
