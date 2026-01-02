@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { AppRole, Profile } from '@/types/database';
@@ -9,6 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   roles: AppRole[];
   isLoading: boolean;
+  isAuthReady: boolean; // P1: New flag - true only when auth + profile/roles fully loaded
   isAdmin: boolean;
   isConsultor: boolean;
   isMentor: boolean;
@@ -26,65 +27,106 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false); // P1: Track full readiness
 
-  const fetchUserData = async (userId: string) => {
-    // Fetch profile
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    if (profileData) {
-      setProfile(profileData as Profile);
+  const fetchUserData = useCallback(async (userId: string): Promise<void> => {
+    try {
+      // Fetch profile and roles in parallel
+      const [profileResult, rolesResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle(),
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+      ]);
+      
+      if (profileResult.data) {
+        setProfile(profileResult.data as Profile);
+      }
+      
+      if (rolesResult.data) {
+        setRoles(rolesResult.data.map(r => r.role as AppRole));
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
-
-    // Fetch roles
-    const { data: rolesData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-    
-    if (rolesData) {
-      setRoles(rolesData.map(r => r.role as AppRole));
-    }
-  };
+  }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        if (session?.user) {
-          // Defer data fetching to avoid deadlock
-          setTimeout(() => {
-            fetchUserData(session.user.id);
+        if (!isMounted) return;
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
+          await fetchUserData(initialSession.user.id);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          setIsAuthReady(true); // P1: Only set ready after everything is loaded
+        }
+      }
+    };
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        if (!isMounted) return;
+        
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        if (event === 'SIGNED_OUT') {
+          setProfile(null);
+          setRoles([]);
+          setIsAuthReady(true);
+        } else if (newSession?.user) {
+          // P1: Set loading while fetching data to prevent flash of wrong content
+          setIsAuthReady(false);
+          
+          // Defer to avoid Supabase deadlock
+          setTimeout(async () => {
+            if (isMounted) {
+              await fetchUserData(newSession.user.id);
+              setIsAuthReady(true);
+            }
           }, 0);
         } else {
           setProfile(null);
           setRoles([]);
+          setIsAuthReady(true);
         }
-        setIsLoading(false);
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-      setIsLoading(false);
-    });
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchUserData]);
 
   const signIn = async (email: string, password: string) => {
+    setIsAuthReady(false); // P1: Mark as loading during sign in
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setIsAuthReady(true); // Restore ready state on error
+    }
     return { error: error as Error | null };
   };
 
@@ -105,9 +147,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    setIsAuthReady(false);
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
+    setIsAuthReady(true);
   };
 
   const isAdmin = roles.includes('admin');
@@ -122,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       roles,
       isLoading,
+      isAuthReady,
       isAdmin,
       isConsultor,
       isMentor,
