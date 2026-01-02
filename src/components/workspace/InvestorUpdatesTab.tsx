@@ -1,28 +1,32 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { 
   FileText, 
   Plus, 
-  Download, 
-  Mail, 
   Copy, 
   Link2, 
   Trash2,
   Loader2,
-  Calendar,
   TrendingUp,
+  TrendingDown,
   Target,
   AlertTriangle,
   Sparkles,
-  ExternalLink,
+  CheckCircle,
+  Clock,
+  Edit3,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -49,14 +53,18 @@ interface InvestorUpdatesTabProps {
 interface UpdateContent {
   highlights?: string[];
   lowlights?: string[];
-  kpis?: { name: string; value: number; change?: number; unit?: string }[];
-  milestones?: { title: string; status: string }[];
+  kpis?: { name: string; value: number | null; target?: number | null; delta?: number | null; unit?: string }[];
+  milestones_achieved?: string[];
+  next_milestones?: { title: string; target_date: string }[];
   risks?: string[];
   asks?: string[];
-  priorities?: string[];
+  next_month_priorities?: string[];
+  health_score?: number | null;
+  stage?: string;
 }
 
 export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTabProps) {
+  const { t } = useTranslation();
   const { data: investorUpdates, isLoading } = useInvestorUpdates(workspaceId);
   const { data: shareLinks } = useShareLinks(workspaceId);
   const generateInvestorUpdate = useGenerateInvestorUpdate();
@@ -65,21 +73,31 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
 
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [shareDays, setShareDays] = useState('7');
   const [shareScope, setShareScope] = useState('report_only');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCreatingLink, setIsCreatingLink] = useState(false);
+  const [expandedUpdates, setExpandedUpdates] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (id: string) => {
+    const newSet = new Set(expandedUpdates);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setExpandedUpdates(newSet);
+  };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
       await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
-      toast.success('Investor update generated');
+      toast.success(t('investorUpdates.updateGenerated'));
       setShowGenerateDialog(false);
     } catch (error: any) {
-      const message = error?.message || error?.details || 'Failed to generate update';
+      const message = error?.message || t('investorUpdates.failedToGenerate');
       toast.error(message);
     } finally {
       setIsGenerating(false);
@@ -94,16 +112,15 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
         scope: shareScope,
         expiresInDays: parseInt(shareDays),
       });
-      toast.success('Share link created');
+      toast.success(t('investorUpdates.linkCreated'));
       
-      // Copy to clipboard
       const shareUrl = `${window.location.origin}/share/${link.token}`;
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied to clipboard');
+      toast.success(t('investorUpdates.linkCopied'));
       
       setShowShareDialog(false);
     } catch (error) {
-      toast.error('Failed to create share link');
+      toast.error(t('investorUpdates.failedToCreateLink'));
     } finally {
       setIsCreatingLink(false);
     }
@@ -112,50 +129,73 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
   const handleCopyLink = async (token: string) => {
     const shareUrl = `${window.location.origin}/share/${token}`;
     await navigator.clipboard.writeText(shareUrl);
-    toast.success('Link copied to clipboard');
+    toast.success(t('investorUpdates.linkCopied'));
   };
 
   const handleRevokeLink = async (linkId: string) => {
     try {
       await revokeShareLink.mutateAsync({ id: linkId, workspaceId });
-      toast.success('Link revoked');
+      toast.success(t('investorUpdates.linkRevoked'));
     } catch (error) {
-      toast.error('Failed to revoke link');
+      toast.error(t('investorUpdates.failedToRevokeLink'));
     }
   };
 
-  const copyUpdateAsMarkdown = (content: UpdateContent) => {
-    let markdown = `# Investor Update - ${format(new Date(), 'MMMM yyyy')}\n\n`;
+  const copyUpdateAsMarkdown = (content: UpdateContent, month: string) => {
+    let markdown = `# ${t('investorUpdates.title')} - ${format(new Date(month), 'MMMM yyyy')}\n\n`;
     
+    if (content.health_score !== undefined && content.health_score !== null) {
+      markdown += `**${t('investorUpdates.healthScore')}**: ${content.health_score}/100\n`;
+    }
+    if (content.stage) {
+      markdown += `**${t('investorUpdates.stage')}**: ${content.stage}\n\n`;
+    }
+
     if (content.highlights?.length) {
-      markdown += `## Highlights\n${content.highlights.map(h => `- ${h}`).join('\n')}\n\n`;
+      markdown += `## ${t('investorUpdates.highlights')}\n${content.highlights.map(h => `- ${h}`).join('\n')}\n\n`;
     }
     if (content.lowlights?.length) {
-      markdown += `## Lowlights\n${content.lowlights.map(l => `- ${l}`).join('\n')}\n\n`;
+      markdown += `## ${t('investorUpdates.lowlights')}\n${content.lowlights.map(l => `- ${l}`).join('\n')}\n\n`;
     }
     if (content.kpis?.length) {
-      markdown += `## KPIs\n${content.kpis.map(k => `- **${k.name}**: ${k.value}${k.unit || ''} ${k.change ? `(${k.change > 0 ? '+' : ''}${k.change}%)` : ''}`).join('\n')}\n\n`;
+      markdown += `## ${t('investorUpdates.keyMetrics')}\n${content.kpis.map(k => {
+        const deltaStr = k.delta !== null && k.delta !== undefined ? ` (${k.delta > 0 ? '+' : ''}${k.delta}${k.unit === '%' ? 'pp' : ''})` : '';
+        return `- **${k.name}**: ${k.value ?? 'N/A'}${k.unit || ''}${deltaStr}`;
+      }).join('\n')}\n\n`;
     }
-    if (content.milestones?.length) {
-      markdown += `## Milestones\n${content.milestones.map(m => `- ${m.title} (${m.status})`).join('\n')}\n\n`;
+    if (content.milestones_achieved?.length) {
+      markdown += `## ${t('investorUpdates.milestonesAchieved')}\n${content.milestones_achieved.map(m => `- ✅ ${m}`).join('\n')}\n\n`;
+    }
+    if (content.next_milestones?.length) {
+      markdown += `## ${t('investorUpdates.upcomingMilestones')}\n${content.next_milestones.map(m => `- ${m.title} (${m.target_date})`).join('\n')}\n\n`;
     }
     if (content.risks?.length) {
-      markdown += `## Risks & Challenges\n${content.risks.map(r => `- ${r}`).join('\n')}\n\n`;
+      markdown += `## ${t('investorUpdates.risks')}\n${content.risks.map(r => `- ⚠️ ${r}`).join('\n')}\n\n`;
     }
     if (content.asks?.length) {
-      markdown += `## Asks\n${content.asks.map(a => `- ${a}`).join('\n')}\n\n`;
+      markdown += `## ${t('investorUpdates.asks')}\n${content.asks.map(a => `- 🙏 ${a}`).join('\n')}\n\n`;
     }
-    if (content.priorities?.length) {
-      markdown += `## Next Month Priorities\n${content.priorities.map(p => `- ${p}`).join('\n')}\n\n`;
+    if (content.next_month_priorities?.length) {
+      markdown += `## ${t('investorUpdates.priorities')}\n${content.next_month_priorities.map(p => `- ${p}`).join('\n')}\n\n`;
     }
 
     navigator.clipboard.writeText(markdown);
-    toast.success('Copied as Markdown');
+    toast.success(t('investorUpdates.copiedMarkdown'));
+  };
+
+  const getHealthColor = (score: number | null | undefined) => {
+    if (score === null || score === undefined) return 'bg-muted';
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-emerald-500';
+    if (score >= 40) return 'bg-yellow-500';
+    if (score >= 20) return 'bg-orange-500';
+    return 'bg-red-500';
   };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <Skeleton className="h-12 w-64" />
         <Skeleton className="h-32" />
         <Skeleton className="h-48" />
       </div>
@@ -164,54 +204,62 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
 
   return (
     <div className="space-y-6">
-      {/* Actions */}
-      <div className="flex flex-wrap gap-2">
+      {/* Header Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-semibold">{t('investorUpdates.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('investorUpdates.description')}</p>
+        </div>
         {canWrite && (
-          <>
-            <Button onClick={() => setShowGenerateDialog(true)}>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate Update
+          <div className="flex gap-2">
+            <Button onClick={() => setShowGenerateDialog(true)} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t('investorUpdates.generateUpdate')}
             </Button>
-            <Button variant="outline" onClick={() => setShowShareDialog(true)}>
-              <Link2 className="h-4 w-4 mr-2" />
-              Create Share Link
+            <Button variant="outline" onClick={() => setShowShareDialog(true)} className="gap-2">
+              <Link2 className="h-4 w-4" />
+              {t('investorUpdates.createShareLink')}
             </Button>
-          </>
+          </div>
         )}
       </div>
 
       {/* Active Share Links */}
       {shareLinks && shareLinks.length > 0 && (
-        <Card>
+        <Card className="border-primary/20 bg-primary/5">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Link2 className="h-4 w-4" />
-              Active Share Links
+              <Link2 className="h-4 w-4 text-primary" />
+              {t('investorUpdates.activeLinks')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {shareLinks.filter(l => !l.revoked_at).map((link) => (
-                <div key={link.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div key={link.id} className="flex items-center justify-between p-3 rounded-lg bg-background border">
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline">{link.scope.replace('_', ' ')}</Badge>
+                    <Badge variant="secondary" className="font-normal">
+                      {link.scope === 'report_only' ? t('investorUpdates.scopeReportOnly') :
+                       link.scope === 'kpis_only' ? t('investorUpdates.scopeKpisOnly') :
+                       t('investorUpdates.scopeFullReadonly')}
+                    </Badge>
                     <span className="text-sm text-muted-foreground">
-                      Expires {format(new Date(link.expires_at), 'MMM d, yyyy')}
+                      {t('investorUpdates.expires')} {format(new Date(link.expires_at), 'MMM d, yyyy')}
                     </span>
                     {link.views_count !== null && link.views_count > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        {link.views_count} view{link.views_count !== 1 ? 's' : ''}
-                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {link.views_count} {link.views_count === 1 ? t('investorUpdates.views') : t('investorUpdates.views_plural')}
+                      </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => handleCopyLink(link.token)}>
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-destructive"
+                      className="text-destructive hover:text-destructive"
                       onClick={() => handleRevokeLink(link.id)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -225,142 +273,308 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
       )}
 
       {/* Updates List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            Investor Updates
-          </CardTitle>
-          <CardDescription>
-            Generated monthly updates for investors and board members
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {investorUpdates?.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="font-medium mb-2">No updates yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Generate your first investor update to share with stakeholders
-              </p>
-              {canWrite && (
-                <Button onClick={() => setShowGenerateDialog(true)}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate First Update
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {investorUpdates?.map((update) => {
-                const content = update.content_json as UpdateContent;
-                
-                return (
-                  <div key={update.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold">
-                          {format(new Date(update.month), 'MMMM yyyy')} Update
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Generated {format(new Date(update.created_at), 'MMM d, yyyy')}
-                        </p>
+      {investorUpdates?.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <FileText className="h-16 w-16 mx-auto text-muted-foreground/30 mb-6" />
+            <h3 className="font-semibold text-lg mb-2">{t('investorUpdates.noUpdatesYet')}</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              {t('investorUpdates.noUpdatesDesc')}
+            </p>
+            {canWrite && (
+              <Button onClick={() => setShowGenerateDialog(true)} size="lg" className="gap-2">
+                <Sparkles className="h-5 w-5" />
+                {t('investorUpdates.generateFirst')}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {investorUpdates?.map((update) => {
+            const content = update.content_json as UpdateContent;
+            const isExpanded = expandedUpdates.has(update.id);
+            
+            return (
+              <Collapsible key={update.id} open={isExpanded} onOpenChange={() => toggleExpanded(update.id)}>
+                <Card className="overflow-hidden">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <FileText className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">
+                              {format(new Date(update.month), 'MMMM yyyy')}
+                            </CardTitle>
+                            <CardDescription>
+                              {t('investorUpdates.generated')} {format(new Date(update.created_at), 'MMM d, yyyy')}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {content.health_score !== null && content.health_score !== undefined && (
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground mb-1">{t('investorUpdates.healthScore')}</p>
+                              <div className="flex items-center gap-2">
+                                <Progress value={content.health_score} className="w-24 h-2" />
+                                <span className="font-semibold text-sm">{content.health_score}%</span>
+                              </div>
+                            </div>
+                          )}
+                          {isExpanded ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                    </CardHeader>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <CardContent className="pt-0 space-y-6">
+                      {/* Quick Stats Row */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-3 rounded-lg bg-muted/50 text-center">
+                          <p className="text-2xl font-bold text-primary">{content.kpis?.length || 0}</p>
+                          <p className="text-xs text-muted-foreground">{t('investorUpdates.keyMetrics')}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted/50 text-center">
+                          <p className="text-2xl font-bold text-green-600">{content.milestones_achieved?.length || 0}</p>
+                          <p className="text-xs text-muted-foreground">{t('investorUpdates.milestonesAchieved')}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted/50 text-center">
+                          <p className="text-2xl font-bold text-amber-600">{content.risks?.length || 0}</p>
+                          <p className="text-xs text-muted-foreground">{t('investorUpdates.risks')}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted/50 text-center">
+                          <p className="text-2xl font-bold text-blue-600">{content.asks?.length || 0}</p>
+                          <p className="text-xs text-muted-foreground">{t('investorUpdates.asks')}</p>
+                        </div>
+                      </div>
+
+                      {/* Content Grid */}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {/* Highlights */}
+                        {content.highlights && content.highlights.length > 0 && (
+                          <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <TrendingUp className="h-5 w-5 text-green-600" />
+                              <span className="font-semibold text-green-700 dark:text-green-400">{t('investorUpdates.highlights')}</span>
+                            </div>
+                            <ul className="space-y-2">
+                              {content.highlights.map((h, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-green-800 dark:text-green-200">
+                                  <CheckCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                                  <span>{h}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Lowlights */}
+                        {content.lowlights && content.lowlights.length > 0 && (
+                          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <TrendingDown className="h-5 w-5 text-red-600" />
+                              <span className="font-semibold text-red-700 dark:text-red-400">{t('investorUpdates.lowlights')}</span>
+                            </div>
+                            <ul className="space-y-2">
+                              {content.lowlights.map((l, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-red-800 dark:text-red-200">
+                                  <span className="text-red-500">•</span>
+                                  <span>{l}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* KPIs */}
+                        {content.kpis && content.kpis.length > 0 && (
+                          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Target className="h-5 w-5 text-blue-600" />
+                              <span className="font-semibold text-blue-700 dark:text-blue-400">{t('investorUpdates.keyMetrics')}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              {content.kpis.slice(0, 6).map((kpi, i) => (
+                                <div key={i} className="p-2 rounded bg-background/50">
+                                  <p className="text-xs text-muted-foreground truncate">{kpi.name}</p>
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="font-bold text-blue-700 dark:text-blue-300">
+                                      {kpi.value ?? 'N/A'}{kpi.unit || ''}
+                                    </span>
+                                    {kpi.delta !== null && kpi.delta !== undefined && (
+                                      <span className={`text-xs ${kpi.delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {kpi.delta > 0 ? '+' : ''}{kpi.delta}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Risks */}
+                        {content.risks && content.risks.length > 0 && (
+                          <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <AlertTriangle className="h-5 w-5 text-amber-600" />
+                              <span className="font-semibold text-amber-700 dark:text-amber-400">{t('investorUpdates.risks')}</span>
+                            </div>
+                            <ul className="space-y-2">
+                              {content.risks.map((r, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200">
+                                  <span className="text-amber-500">⚠</span>
+                                  <span>{r}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Asks */}
+                        {content.asks && content.asks.length > 0 && (
+                          <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-lg">🙏</span>
+                              <span className="font-semibold text-purple-700 dark:text-purple-400">{t('investorUpdates.asks')}</span>
+                            </div>
+                            <ul className="space-y-2">
+                              {content.asks.map((a, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-purple-800 dark:text-purple-200">
+                                  <span className="text-purple-500">•</span>
+                                  <span>{a}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Priorities */}
+                        {content.next_month_priorities && content.next_month_priorities.length > 0 && (
+                          <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Clock className="h-5 w-5 text-indigo-600" />
+                              <span className="font-semibold text-indigo-700 dark:text-indigo-400">{t('investorUpdates.priorities')}</span>
+                            </div>
+                            <ul className="space-y-2">
+                              {content.next_month_priorities.map((p, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-indigo-800 dark:text-indigo-200">
+                                  <span className="font-bold text-indigo-500">{i + 1}.</span>
+                                  <span>{p}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Milestones */}
+                      {((content.milestones_achieved && content.milestones_achieved.length > 0) || 
+                        (content.next_milestones && content.next_milestones.length > 0)) && (
+                        <div className="grid gap-4 md:grid-cols-2">
+                          {content.milestones_achieved && content.milestones_achieved.length > 0 && (
+                            <div className="p-4 rounded-lg border bg-muted/30">
+                              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                {t('investorUpdates.milestonesAchieved')}
+                              </h4>
+                              <ul className="space-y-1">
+                                {content.milestones_achieved.map((m, i) => (
+                                  <li key={i} className="text-sm flex items-center gap-2">
+                                    <span className="text-green-500">✓</span> {m}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {content.next_milestones && content.next_milestones.length > 0 && (
+                            <div className="p-4 rounded-lg border bg-muted/30">
+                              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-blue-600" />
+                                {t('investorUpdates.upcomingMilestones')}
+                              </h4>
+                              <ul className="space-y-1">
+                                {content.next_milestones.map((m, i) => (
+                                  <li key={i} className="text-sm flex items-center justify-between">
+                                    <span>{m.title}</span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {m.target_date ? format(new Date(m.target_date), 'MMM d') : '-'}
+                                    </Badge>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex justify-end gap-2 pt-4 border-t">
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm"
-                          onClick={() => copyUpdateAsMarkdown(content)}
+                          onClick={() => copyUpdateAsMarkdown(content, update.month)}
+                          className="gap-2"
                         >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Copy
+                          <Copy className="h-4 w-4" />
+                          {t('investorUpdates.copyAsMarkdown')}
                         </Button>
                       </div>
-                    </div>
-
-                    {/* Update Preview */}
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {content.highlights && content.highlights.length > 0 && (
-                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <TrendingUp className="h-4 w-4 text-green-600" />
-                            <span className="font-medium text-sm text-green-700 dark:text-green-400">Highlights</span>
-                          </div>
-                          <ul className="text-sm space-y-1">
-                            {content.highlights.slice(0, 3).map((h, i) => (
-                              <li key={i} className="text-green-800 dark:text-green-200">• {h}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {content.kpis && content.kpis.length > 0 && (
-                        <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium text-sm text-blue-700 dark:text-blue-400">Key Metrics</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            {content.kpis.slice(0, 4).map((kpi, i) => (
-                              <div key={i} className="text-sm">
-                                <span className="text-muted-foreground">{kpi.name}:</span>
-                                <span className="font-medium ml-1">{kpi.value}{kpi.unit || ''}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {content.risks && content.risks.length > 0 && (
-                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <AlertTriangle className="h-4 w-4 text-amber-600" />
-                            <span className="font-medium text-sm text-amber-700 dark:text-amber-400">Risks</span>
-                          </div>
-                          <ul className="text-sm space-y-1">
-                            {content.risks.slice(0, 2).map((r, i) => (
-                              <li key={i} className="text-amber-800 dark:text-amber-200">• {r}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            );
+          })}
+        </div>
+      )}
 
       {/* Generate Dialog */}
       <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate Investor Update</DialogTitle>
+            <DialogTitle>{t('investorUpdates.generateUpdate')}</DialogTitle>
             <DialogDescription>
-              Create a structured monthly update from your workspace data
+              {t('investorUpdates.description')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Month</Label>
+              <Label>{t('investorUpdates.month')}</Label>
               <Input
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-full"
               />
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleGenerate} disabled={isGenerating}>
-              {isGenerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Generate
+            <Button onClick={handleGenerate} disabled={isGenerating} className="gap-2">
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('investorUpdates.generating')}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  {t('investorUpdates.generateUpdate')}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -370,38 +584,38 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Share Link</DialogTitle>
+            <DialogTitle>{t('investorUpdates.createShareLink')}</DialogTitle>
             <DialogDescription>
-              Create a read-only link to share with investors or board members
+              {t('investorUpdates.description')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Scope</Label>
+              <Label>{t('investorUpdates.shareScope')}</Label>
               <Select value={shareScope} onValueChange={setShareScope}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="report_only">Report Only</SelectItem>
-                  <SelectItem value="kpis_only">KPIs Only</SelectItem>
-                  <SelectItem value="full_readonly">Full Read-Only</SelectItem>
+                  <SelectItem value="report_only">{t('investorUpdates.scopeReportOnly')}</SelectItem>
+                  <SelectItem value="kpis_only">{t('investorUpdates.scopeKpisOnly')}</SelectItem>
+                  <SelectItem value="full_readonly">{t('investorUpdates.scopeFullReadonly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Expires In</Label>
+              <Label>{t('investorUpdates.expiresIn')}</Label>
               <Select value={shareDays} onValueChange={setShareDays}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 day</SelectItem>
-                  <SelectItem value="7">7 days</SelectItem>
-                  <SelectItem value="30">30 days</SelectItem>
-                  <SelectItem value="90">90 days</SelectItem>
+                  <SelectItem value="1">{t('investorUpdates.oneDay')}</SelectItem>
+                  <SelectItem value="7">{t('investorUpdates.sevenDays')}</SelectItem>
+                  <SelectItem value="30">{t('investorUpdates.thirtyDays')}</SelectItem>
+                  <SelectItem value="90">{t('investorUpdates.ninetyDays')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -409,11 +623,20 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowShareDialog(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleCreateShareLink} disabled={isCreatingLink}>
-              {isCreatingLink && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Create Link
+            <Button onClick={handleCreateShareLink} disabled={isCreatingLink} className="gap-2">
+              {isCreatingLink ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('investorUpdates.creatingLink')}
+                </>
+              ) : (
+                <>
+                  <Link2 className="h-4 w-4" />
+                  {t('investorUpdates.createShareLink')}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
