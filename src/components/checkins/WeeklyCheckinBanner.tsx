@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePendingCheckin, useSubmitCheckin, useSkipCheckin, CheckinQuestion, SubmitCheckinPayload } from '@/hooks/useCheckins';
-import { useKpiDefinitions } from '@/hooks/useKpis';
+import { useAllKpiDefinitions, KpiDefinition } from '@/hooks/useKpis';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardCheck, Clock, AlertTriangle, Send, X } from 'lucide-react';
+import { ClipboardCheck, Clock, AlertTriangle, Send } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -21,7 +21,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
   const [responses, setResponses] = useState<Record<string, string | number>>({});
   
   const { data: pendingCheckin, isLoading } = usePendingCheckin(workspaceId);
-  const { data: kpiDefinitions } = useKpiDefinitions();
+  const { data: kpiDefinitions } = useAllKpiDefinitions();
   const submitCheckin = useSubmitCheckin();
   const skipCheckin = useSkipCheckin();
 
@@ -166,7 +166,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
               <div className="border-t pt-4">
                 <h4 className="font-medium mb-3">KPIs deste mês</h4>
                 {kpiIds.map(kpiId => {
-                  const kpi = kpiDefsMap.get(kpiId);
+                  const kpi = kpiDefsMap.get(kpiId) as KpiDefinition | undefined;
                   if (!kpi) return null;
                   return (
                     <div key={kpiId} className="space-y-2 mb-4">
