@@ -65,6 +65,7 @@ import {
 } from '@/components/ui/select';
 import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
 import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
+import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -685,13 +686,19 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="prep">Prep</TabsTrigger>
               <TabsTrigger value="details">Details & Notes</TabsTrigger>
               <TabsTrigger value="ai" className="gap-2">
                 <Sparkles className="h-4 w-4" />
-                AI Assistant
+                AI
               </TabsTrigger>
             </TabsList>
+            
+            {/* Session Prep Tab */}
+            <TabsContent value="prep" className="mt-4">
+              <SessionPrepCard sessionId={session.id} workspaceId={workspaceId} />
+            </TabsContent>
             
             <TabsContent value="details" className="space-y-6 mt-4">
               {/* Resend Invites */}
