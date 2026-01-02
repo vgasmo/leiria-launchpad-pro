@@ -569,6 +569,149 @@ export type Database = {
           },
         ]
       }
+      dataroom_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dataroom_id: string
+          description: string | null
+          document_id: string | null
+          id: string
+          investor_update_id: string | null
+          sort_order: number
+          title: string
+          type: string
+          url: string | null
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dataroom_id: string
+          description?: string | null
+          document_id?: string | null
+          id?: string
+          investor_update_id?: string | null
+          sort_order?: number
+          title: string
+          type: string
+          url?: string | null
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dataroom_id?: string
+          description?: string | null
+          document_id?: string | null
+          id?: string
+          investor_update_id?: string | null
+          sort_order?: number
+          title?: string
+          type?: string
+          url?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataroom_items_dataroom_id_fkey"
+            columns: ["dataroom_id"]
+            isOneToOne: false
+            referencedRelation: "datarooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dataroom_items_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dataroom_items_investor_update_id_fkey"
+            columns: ["investor_update_id"]
+            isOneToOne: false
+            referencedRelation: "investor_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dataroom_share_links: {
+        Row: {
+          access_count: number
+          allow_download: boolean
+          created_at: string
+          created_by: string | null
+          dataroom_id: string
+          expires_at: string | null
+          id: string
+          last_access_at: string | null
+          revoked_at: string | null
+          token_hash: string
+        }
+        Insert: {
+          access_count?: number
+          allow_download?: boolean
+          created_at?: string
+          created_by?: string | null
+          dataroom_id: string
+          expires_at?: string | null
+          id?: string
+          last_access_at?: string | null
+          revoked_at?: string | null
+          token_hash: string
+        }
+        Update: {
+          access_count?: number
+          allow_download?: boolean
+          created_at?: string
+          created_by?: string | null
+          dataroom_id?: string
+          expires_at?: string | null
+          id?: string
+          last_access_at?: string | null
+          revoked_at?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataroom_share_links_dataroom_id_fkey"
+            columns: ["dataroom_id"]
+            isOneToOne: false
+            referencedRelation: "datarooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      datarooms: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datarooms_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: string | null
@@ -988,50 +1131,6 @@ export type Database = {
           },
         ]
       }
-      key_results: {
-        Row: {
-          created_at: string
-          current_value: number | null
-          id: string
-          objective_id: string
-          status: string
-          target_value: number
-          title: string
-          unit: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          current_value?: number | null
-          id?: string
-          objective_id: string
-          status?: string
-          target_value: number
-          title: string
-          unit?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          current_value?: number | null
-          id?: string
-          objective_id?: string
-          status?: string
-          target_value?: number
-          title?: string
-          unit?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "key_results_objective_id_fkey"
-            columns: ["objective_id"]
-            isOneToOne: false
-            referencedRelation: "objectives"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       kpi_definitions: {
         Row: {
           category: string | null
@@ -1259,6 +1358,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_nda_acceptances: {
+        Row: {
+          accepted_at: string
+          id: string
+          ip_hash: string | null
+          nda_version: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          ip_hash?: string | null
+          nda_version: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          ip_hash?: string | null
+          nda_version?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -1481,53 +1607,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      objectives: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          id: string
-          progress: number | null
-          quarter: string | null
-          status: string
-          title: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          progress?: number | null
-          quarter?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          progress?: number | null
-          quarter?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "objectives_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       playbook_items: {
         Row: {
@@ -3668,7 +3747,15 @@ export type Database = {
         }
         Returns: string
       }
+      ensure_dataroom_exists: {
+        Args: { _workspace_id: string }
+        Returns: string
+      }
       generate_weekly_checkins: { Args: never; Returns: number }
+      get_dataroom_workspace_id: {
+        Args: { _dataroom_id: string }
+        Returns: string
+      }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -3687,6 +3774,10 @@ export type Database = {
           pending_actions_count: number
           workspace_id: string
         }[]
+      }
+      has_accepted_nda: {
+        Args: { _nda_version?: string; _user_id: string }
+        Returns: boolean
       }
       has_program_access: { Args: { _program_id: string }; Returns: boolean }
       has_role: {
