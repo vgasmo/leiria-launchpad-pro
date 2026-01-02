@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -212,14 +212,13 @@ function TemplateEditorDialog({
   const canReview = roles.includes('admin') || roles.includes('consultor') || roles.includes('mentor_externo');
 
   // Initialize form data when template/instance changes
-  useState(() => {
-    if (instance?.data_json) {
-      setFormData(instance.data_json);
-    } else {
-      setFormData({});
+  useEffect(() => {
+    if (template) {
+      const instanceData = instance?.data_json || {};
+      setFormData(instanceData);
+      setHasChanges(false);
     }
-    setHasChanges(false);
-  });
+  }, [template?.id, instance?.id, instance?.data_json]);
 
   // Reset form when dialog opens with new template
   const handleOpenChange = (open: boolean) => {
@@ -229,14 +228,6 @@ function TemplateEditorDialog({
       setHasChanges(false);
     }
   };
-
-  // Reinitialize when instance changes
-  if (template && !hasChanges) {
-    const instanceData = instance?.data_json || {};
-    if (JSON.stringify(formData) !== JSON.stringify(instanceData)) {
-      setFormData(instanceData);
-    }
-  }
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
