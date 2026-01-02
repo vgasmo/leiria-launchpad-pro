@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock, BookOpen, Shield, FileBarChart } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Clock, BookOpen, Shield, FileBarChart, FolderLock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +19,7 @@ import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
 import { NotesAndTasksTab } from '@/components/workspace/NotesAndTasksTab';
 import { TeamTab } from '@/components/workspace/TeamTab';
-import { OkrsTab } from '@/components/workspace/OkrsTab';
+import { DataroomTab } from '@/components/workspace/DataroomTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
@@ -128,9 +128,9 @@ export default function WorkspaceDetail() {
               {t('workspace.team')}
             </TabsTrigger>
           )}
-          <TabsTrigger value="okrs" className="gap-1">
-            <Target className="h-3.5 w-3.5" />
-            {t('workspace.okrs')}
+          <TabsTrigger value="dataroom" className="gap-1">
+            <FolderLock className="h-3.5 w-3.5" />
+            Dataroom
           </TabsTrigger>
           {isFounder && (
             <TabsTrigger value="funding" className="gap-1">
@@ -221,8 +221,8 @@ export default function WorkspaceDetail() {
             <TeamTab startupId={startup.id} canEdit={canWrite} />
           </TabsContent>
         )}
-        <TabsContent value="okrs">
-          <OkrsTab workspaceId={workspace.id} canWrite={canWrite} />
+        <TabsContent value="dataroom">
+          <DataroomTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         {isFounder && startup && (
           <TabsContent value="funding">

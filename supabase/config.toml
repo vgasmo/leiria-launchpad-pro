@@ -46,7 +46,23 @@ verify_jwt = true
 [functions.transcribe-audio]
 verify_jwt = true
 
+[functions.dataroom-create-link]
+verify_jwt = true
+
+[functions.dataroom-revoke-link]
+verify_jwt = true
+
+[functions.accept-mentor-nda]
+verify_jwt = true
+
+# ============================================
+# PUBLIC FUNCTIONS - NO JWT
+# ============================================
+
 [functions.get-shared-workspace]
+verify_jwt = false
+
+[functions.dataroom-get-by-token]
 verify_jwt = false
 
 # ============================================

@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
 import Admin from "./pages/Admin";
+import AdminDatarooms from "./pages/AdminDatarooms";
 import ProgramSetupWizard from "./pages/ProgramSetupWizard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -19,6 +20,8 @@ import Mentors from "./pages/Mentors";
 import ResetPassword from "./pages/ResetPassword";
 import Search from "./pages/Search";
 import SharedWorkspace from "./pages/SharedWorkspace";
+import SharedDataroom from "./pages/SharedDataroom";
+import MentorNda from "./pages/MentorNda";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +70,8 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/share/:token" element={<SharedWorkspace />} />
+      <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
+      <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
       <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
       <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
@@ -74,6 +79,7 @@ function AppRoutes() {
       <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+      <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />
       <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
