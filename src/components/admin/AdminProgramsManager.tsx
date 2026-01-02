@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ import {
   useUpdateStage,
   useDeleteStage,
 } from '@/hooks/useAdminData';
+import { useProgramSetupDrafts, useCreateProgramDraft } from '@/hooks/useProgramSetup';
 import { format } from 'date-fns';
 
 interface Program {
@@ -157,16 +159,44 @@ function StagesManager({ programId }: { programId: string }) {
 }
 
 export function AdminProgramsManager() {
+  const navigate = useNavigate();
   const { data: programs, isLoading } = usePrograms();
+  const { data: drafts } = useProgramSetupDrafts();
   const createProgram = useCreateProgram();
   const updateProgram = useUpdateProgram();
   const deleteProgram = useDeleteProgram();
+  const createDraft = useCreateProgramDraft();
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Program | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '', start_date: '', end_date: '' });
+
+  // Find pending drafts for programs
+  const getProgramDraft = (programId: string) => drafts?.find(d => d.program_id === programId);
+  const hasNewProgramDraft = drafts?.some(d => !d.program_id);
+
+  const handleNewProgramWizard = async () => {
+    // Check if there's already a new program draft
+    const existingDraft = drafts?.find(d => !d.program_id);
+    if (existingDraft) {
+      navigate(`/admin/programs/new/${existingDraft.id}`);
+    } else {
+      const draft = await createDraft.mutateAsync({});
+      navigate(`/admin/programs/new/${draft.id}`);
+    }
+  };
+
+  const handleSetupProgram = async (programId: string) => {
+    const existingDraft = getProgramDraft(programId);
+    if (existingDraft) {
+      navigate(`/admin/programs/${programId}/setup/${existingDraft.id}`);
+    } else {
+      const draft = await createDraft.mutateAsync({ programId });
+      navigate(`/admin/programs/${programId}/setup/${draft.id}`);
+    }
+  };
 
   const handleCreate = () => {
     setFormData({ name: '', description: '', start_date: '', end_date: '' });
@@ -227,15 +257,21 @@ export function AdminProgramsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-semibold">Programs & Stages</h2>
           <p className="text-sm text-muted-foreground">Manage incubation programs and their stages</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-1" />
-          New Program
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleNewProgramWizard} disabled={createDraft.isPending}>
+            <Wand2 className="h-4 w-4 mr-1" />
+            {hasNewProgramDraft ? 'Continue Draft' : 'New Program (Wizard)'}
+          </Button>
+          <Button variant="outline" onClick={handleCreate}>
+            <Plus className="h-4 w-4 mr-1" />
+            Quick Create
+          </Button>
+        </div>
       </div>
 
       {programs?.length === 0 ? (
@@ -262,6 +298,11 @@ export function AdminProgramsManager() {
                         <Badge variant={program.is_active ? 'default' : 'secondary'}>
                           {program.is_active ? 'Active' : 'Inactive'}
                         </Badge>
+                        {getProgramDraft(program.id) && (
+                          <Badge variant="outline" className="text-orange-600 border-orange-300">
+                            Draft
+                          </Badge>
+                        )}
                       </div>
                       {program.description && <p className="text-sm text-muted-foreground truncate">{program.description}</p>}
                       {(program.start_date || program.end_date) && (
@@ -273,6 +314,15 @@ export function AdminProgramsManager() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSetupProgram(program.id)}
+                        disabled={createDraft.isPending}
+                      >
+                        <FileEdit className="h-3 w-3 mr-1" />
+                        {getProgramDraft(program.id) ? 'Continue Setup' : 'Setup'}
+                      </Button>
                       <Switch checked={program.is_active} onCheckedChange={() => handleToggleActive(program)} />
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(program)}>
                         <Pencil className="h-4 w-4" />
