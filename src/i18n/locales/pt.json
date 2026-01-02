@@ -162,7 +162,22 @@
     "exportedSuccess": "Exportado para CSV",
     "noDataToExport": "Sem dados para exportar",
     "sessionDeleted": "Sessão eliminada",
-    "sessionCreated": "Sessão criada"
+    "sessionCreated": "Sessão criada",
+    "typing": "a escrever...",
+    "isTyping": "está a escrever...",
+    "peopleTyping": "pessoas estão a escrever",
+    "mentionSomeone": "Mencionar alguém",
+    "mentionHint": "Digite @ para mencionar um membro da equipa",
+    "voiceToText": "Voz para Texto",
+    "recording": "A gravar...",
+    "stopRecording": "Parar",
+    "processing": "A processar...",
+    "microphoneError": "Não foi possível aceder ao microfone",
+    "transcriptionComplete": "Transcrição adicionada às notas",
+    "transcriptionFailed": "Transcrição falhou",
+    "noSpeechDetected": "Nenhuma fala detetada",
+    "rateLimitError": "Limite de taxa excedido. Tente novamente mais tarde.",
+    "creditsError": "Créditos de IA esgotados. Por favor adicione créditos."
   },
   "actions": {
     "title": "Ações",

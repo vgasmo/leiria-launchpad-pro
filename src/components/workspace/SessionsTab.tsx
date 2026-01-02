@@ -66,6 +66,8 @@ import {
 import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
 import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
 import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
+import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
+import { VoiceToTextButton } from '@/components/sessions/VoiceToTextButton';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -735,14 +737,22 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Session Notes</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="notes">Session Notes</Label>
+                  {canWrite && (
+                    <VoiceToTextButton 
+                      onTranscript={(text) => setNotes(prev => prev ? `${prev}\n\n${text}` : text)} 
+                    />
+                  )}
+                </div>
                 {canWrite ? (
-                  <Textarea
-                    id="notes"
+                  <CollaborativeNotesEditor
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={setNotes}
+                    workspaceId={workspaceId}
+                    sessionId={session.id}
                     placeholder="Add notes from this session..."
-                    rows={4}
+                    members={members || []}
                   />
                 ) : (
                   <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">

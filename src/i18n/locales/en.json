@@ -142,7 +142,22 @@
     "exportedSuccess": "Exported to CSV",
     "noDataToExport": "No data to export",
     "sessionDeleted": "Session deleted",
-    "sessionCreated": "Session created"
+    "sessionCreated": "Session created",
+    "typing": "typing...",
+    "isTyping": "is typing...",
+    "peopleTyping": "people are typing",
+    "mentionSomeone": "Mention someone",
+    "mentionHint": "Type @ to mention a team member",
+    "voiceToText": "Voice to Text",
+    "recording": "Recording...",
+    "stopRecording": "Stop",
+    "processing": "Processing...",
+    "microphoneError": "Could not access microphone",
+    "transcriptionComplete": "Transcription added to notes",
+    "transcriptionFailed": "Transcription failed",
+    "noSpeechDetected": "No speech detected",
+    "rateLimitError": "Rate limit exceeded. Please try again later.",
+    "creditsError": "AI credits exhausted. Please add credits."
   },
   "actions": {
     "title": "Actions",
