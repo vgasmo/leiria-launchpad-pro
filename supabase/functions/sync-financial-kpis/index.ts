@@ -132,7 +132,7 @@ serve(async (req) => {
         continue;
       }
 
-      // Upsert KPI value
+      // Upsert KPI value with source tracking
       const { error: upsertError } = await supabase
         .from("kpi_values")
         .upsert({
@@ -142,6 +142,9 @@ serve(async (req) => {
           value: value,
           notes: `Synced from financial model (${version.scenario_name})`,
           created_by: user.id,
+          source_type: 'financial_model',
+          source_ref_id: version_id,
+          locked_by_source: true,
         }, {
           onConflict: "workspace_id,kpi_definition_id,period_month"
         });
