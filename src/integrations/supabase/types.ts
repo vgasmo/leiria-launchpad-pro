@@ -1665,6 +1665,74 @@ export type Database = {
           },
         ]
       }
+      unit_economics_values: {
+        Row: {
+          arpu: number | null
+          cac: number | null
+          created_at: string
+          created_by: string | null
+          customer_lifetime_months: number | null
+          gross_margin: number | null
+          id: string
+          ltv: number | null
+          ltv_cac_ratio: number | null
+          marketing_costs: number | null
+          monthly_churn_rate: number | null
+          new_customers: number | null
+          payback_months: number | null
+          period_month: string
+          sales_costs: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          arpu?: number | null
+          cac?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_lifetime_months?: number | null
+          gross_margin?: number | null
+          id?: string
+          ltv?: number | null
+          ltv_cac_ratio?: number | null
+          marketing_costs?: number | null
+          monthly_churn_rate?: number | null
+          new_customers?: number | null
+          payback_months?: number | null
+          period_month: string
+          sales_costs?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          arpu?: number | null
+          cac?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_lifetime_months?: number | null
+          gross_margin?: number | null
+          id?: string
+          ltv?: number | null
+          ltv_cac_ratio?: number | null
+          marketing_costs?: number | null
+          monthly_churn_rate?: number | null
+          new_customers?: number | null
+          payback_months?: number | null
+          period_month?: string
+          sales_costs?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_economics_values_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
