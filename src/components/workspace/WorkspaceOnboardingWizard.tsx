@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, addDays, addWeeks } from 'date-fns';
 import {
   Sparkles,
@@ -283,9 +283,9 @@ export function WorkspaceOnboardingWizard({
   const [milestonesCreated, setMilestonesCreated] = useState(false);
   const [meetingScheduled, setMeetingScheduled] = useState(false);
   
-  // Milestone selections
+  // Milestone selections - initialize with current stage
   const [selectedMilestones, setSelectedMilestones] = useState<Set<number>>(
-    new Set(STAGE_MILESTONES[stage].map((_, i) => i))
+    () => new Set(STAGE_MILESTONES[stage]?.map((_, i) => i) || [])
   );
   
   // Meeting form
@@ -293,6 +293,21 @@ export function WorkspaceOnboardingWizard({
   const [meetingDate, setMeetingDate] = useState(format(addDays(new Date(), 3), 'yyyy-MM-dd'));
   const [meetingTime, setMeetingTime] = useState('10:00');
   const [meetingDuration, setMeetingDuration] = useState('60');
+
+  // Reset state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setCurrentStep('welcome');
+      setKpisApplied(false);
+      setMilestonesCreated(false);
+      setMeetingScheduled(false);
+      setSelectedMilestones(new Set(STAGE_MILESTONES[stage]?.map((_, i) => i) || []));
+      setMeetingTitle(`Kickoff Meeting - ${startupName}`);
+      setMeetingDate(format(addDays(new Date(), 3), 'yyyy-MM-dd'));
+      setMeetingTime('10:00');
+      setMeetingDuration('60');
+    }
+  }, [open, stage, startupName]);
 
   const applyDefaults = useApplyStageDefaults(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
@@ -389,14 +404,7 @@ export function WorkspaceOnboardingWizard({
 
   const handleClose = () => {
     onOpenChange(false);
-    // Reset state after close animation
-    setTimeout(() => {
-      setCurrentStep('welcome');
-      setKpisApplied(false);
-      setMilestonesCreated(false);
-      setMeetingScheduled(false);
-      setSelectedMilestones(new Set(STAGE_MILESTONES[stage].map((_, i) => i)));
-    }, 200);
+    // State will be reset by useEffect when dialog reopens
   };
 
   const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = [
