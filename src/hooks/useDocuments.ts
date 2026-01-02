@@ -92,7 +92,8 @@ export function useUploadDocument() {
           workspace_id: workspaceId,
           name: file.name,
           file_path: filePath,
-          document_type: file.type || 'application/octet-stream',
+          document_type: 'file', // Must be 'file' or 'link' per DB constraint
+          mime_type: file.type || 'application/octet-stream',
           category,
           description,
           uploaded_by: user.id,
