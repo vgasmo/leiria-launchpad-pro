@@ -36,6 +36,8 @@ import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
+import { TagPicker } from '@/components/tags/TagPicker';
+import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -71,6 +73,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const { data: nextSession, isLoading: sessionLoading } = useWorkspaceNextSession(workspace.id);
   const { data: sessions, isLoading: sessionsLoading } = useWorkspaceSessions(workspace.id);
   const { data: stages } = useStages(workspace.program_id);
+  const { data: workspaceTags = [] } = useWorkspaceTags(workspace.id);
+  const addWorkspaceTag = useAddWorkspaceTag();
+  const removeWorkspaceTag = useRemoveWorkspaceTag();
   
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
@@ -172,6 +177,17 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                     {workspace.startup.description}
                   </p>
                 )}
+                {/* Workspace Tags */}
+                <div className="mt-2">
+                  <TagPicker
+                    selectedTags={workspaceTags}
+                    onAddTag={(tagId) => addWorkspaceTag.mutate({ workspaceId: workspace.id, tagId })}
+                    onRemoveTag={(tagId) => removeWorkspaceTag.mutate({ workspaceId: workspace.id, tagId })}
+                    disabled={!canWrite}
+                    placeholder="Add tags..."
+                    size="sm"
+                  />
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -186,9 +202,15 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(['ideation', 'validation', 'mvp', 'growth', 'scale'] as const).map(stage => (
-                      <SelectItem key={stage} value={stage} className="capitalize">
-                        {stage}
+                    {(stages && stages.length > 0 ? stages : [
+                      { stage_key: 'ideation', name: 'Ideation' },
+                      { stage_key: 'validation', name: 'Validation' },
+                      { stage_key: 'mvp', name: 'MVP' },
+                      { stage_key: 'growth', name: 'Growth' },
+                      { stage_key: 'scale', name: 'Scale' },
+                    ]).map(stage => (
+                      <SelectItem key={stage.stage_key} value={stage.stage_key}>
+                        {stage.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
