@@ -23,12 +23,44 @@ Deno.serve(async (req) => {
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // SECURITY: Validate Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { workspace_id, source, kpi_mappings } = await req.json() as ImportConfig;
 
     if (!workspace_id) {
       return new Response(
         JSON.stringify({ error: 'workspace_id is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Validate user has access to this workspace
+    const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: workspace_id,
+    });
+
+    if (!hasAccess) {
+      return new Response(
+        JSON.stringify({ error: 'Access denied to this workspace' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -145,7 +177,6 @@ Deno.serve(async (req) => {
       }
 
       // Log activity
-      const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('activity_log').insert({
         workspace_id,
         user_id: user?.id || 'system',
