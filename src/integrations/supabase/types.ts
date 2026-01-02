@@ -387,6 +387,69 @@ export type Database = {
           },
         ]
       }
+      email_log: {
+        Row: {
+          body: string | null
+          created_at: string
+          created_by: string | null
+          email_type: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          recipients: Json
+          sent_at: string | null
+          session_id: string | null
+          status: string
+          subject: string
+          workspace_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipients?: Json
+          sent_at?: string | null
+          session_id?: string | null
+          status?: string
+          subject: string
+          workspace_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipients?: Json
+          sent_at?: string | null
+          session_id?: string | null
+          status?: string
+          subject?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_rounds: {
         Row: {
           announced_at: string | null
@@ -1018,6 +1081,53 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_jobs: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          job_type: string
+          last_run_at: string | null
+          metadata: Json | null
+          next_run_at: string | null
+          schedule: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          job_type: string
+          last_run_at?: string | null
+          metadata?: Json | null
+          next_run_at?: string | null
+          schedule?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          job_type?: string
+          last_run_at?: string | null
+          metadata?: Json | null
+          next_run_at?: string | null
+          schedule?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           category: string | null
@@ -1186,6 +1296,13 @@ export type Database = {
       sessions: {
         Row: {
           agenda: string | null
+          ai_action_suggestions: Json | null
+          ai_decisions: Json | null
+          ai_generated_at: string | null
+          ai_generated_by: string | null
+          ai_kpi_prompts: Json | null
+          ai_risks: Json | null
+          ai_summary: string | null
           created_at: string
           created_by: string | null
           decisions: string | null
@@ -1194,13 +1311,22 @@ export type Database = {
           join_url: string | null
           location: string | null
           notes: string | null
+          raw_transcript: string | null
           scheduled_at: string
+          source: string | null
           title: string
           updated_at: string
           workspace_id: string
         }
         Insert: {
           agenda?: string | null
+          ai_action_suggestions?: Json | null
+          ai_decisions?: Json | null
+          ai_generated_at?: string | null
+          ai_generated_by?: string | null
+          ai_kpi_prompts?: Json | null
+          ai_risks?: Json | null
+          ai_summary?: string | null
           created_at?: string
           created_by?: string | null
           decisions?: string | null
@@ -1209,13 +1335,22 @@ export type Database = {
           join_url?: string | null
           location?: string | null
           notes?: string | null
+          raw_transcript?: string | null
           scheduled_at: string
+          source?: string | null
           title: string
           updated_at?: string
           workspace_id: string
         }
         Update: {
           agenda?: string | null
+          ai_action_suggestions?: Json | null
+          ai_decisions?: Json | null
+          ai_generated_at?: string | null
+          ai_generated_by?: string | null
+          ai_kpi_prompts?: Json | null
+          ai_risks?: Json | null
+          ai_summary?: string | null
           created_at?: string
           created_by?: string | null
           decisions?: string | null
@@ -1224,7 +1359,9 @@ export type Database = {
           join_url?: string | null
           location?: string | null
           notes?: string | null
+          raw_transcript?: string | null
           scheduled_at?: string
+          source?: string | null
           title?: string
           updated_at?: string
           workspace_id?: string

@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.send-template-notification]
 verify_jwt = false
+
+[functions.generate-session-summary]
+verify_jwt = false
+
+[functions.send-session-followup]
+verify_jwt = false
