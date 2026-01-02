@@ -16,7 +16,7 @@ export interface GeneratedKpi {
   target_value?: number;
 }
 
-interface StageKpiConfig {
+export interface StageKpiConfig {
   stage_key: StartupStage;
   kpis: GeneratedKpi[];
 }
