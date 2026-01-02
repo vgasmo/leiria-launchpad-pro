@@ -1,0 +1,218 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    console.log("Starting milestone reminder check...");
+
+    // Get all upcoming milestones with due dates
+    const { data: milestones, error: milestonesError } = await supabase
+      .from("milestones")
+      .select(`
+        id,
+        title,
+        target_date,
+        status,
+        workspace_id,
+        workspaces!inner(
+          id,
+          startup_id,
+          startups!inner(name)
+        )
+      `)
+      .not("target_date", "is", null)
+      .in("status", ["not_started", "in_progress"])
+      .gte("target_date", new Date().toISOString().split("T")[0])
+      .order("target_date", { ascending: true });
+
+    if (milestonesError) {
+      console.error("Error fetching milestones:", milestonesError);
+      throw milestonesError;
+    }
+
+    console.log(`Found ${milestones?.length || 0} upcoming milestones`);
+
+    let emailsSent = 0;
+    let slackSent = 0;
+    let notificationsSent = 0;
+
+    for (const milestone of milestones || []) {
+      const targetDate = new Date(milestone.target_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const daysUntilDue = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Get workspace users with their notification preferences
+      const { data: workspaceUsers, error: usersError } = await supabase
+        .from("workspace_users")
+        .select(`
+          user_id,
+          role,
+          profiles!inner(id, email, full_name),
+          notification_preferences(
+            milestone_reminders_enabled,
+            milestone_reminder_days,
+            slack_enabled,
+            slack_webhook_url
+          )
+        `)
+        .eq("workspace_id", milestone.workspace_id)
+        .eq("active", true);
+
+      if (usersError) {
+        console.error("Error fetching workspace users:", usersError);
+        continue;
+      }
+
+      for (const user of workspaceUsers || []) {
+        const prefs = user.notification_preferences?.[0];
+        const reminderDays = prefs?.milestone_reminder_days ?? 3;
+        const remindersEnabled = prefs?.milestone_reminders_enabled ?? true;
+
+        // Skip if reminders disabled or not the right day
+        if (!remindersEnabled || daysUntilDue !== reminderDays) {
+          continue;
+        }
+
+        // Check if we already sent this reminder
+        const { data: existingReminder } = await supabase
+          .from("milestone_reminders")
+          .select("id")
+          .eq("milestone_id", milestone.id)
+          .eq("days_before", daysUntilDue)
+          .single();
+
+        if (existingReminder) {
+          console.log(`Reminder already sent for milestone ${milestone.id}`);
+          continue;
+        }
+
+        const startupName = (milestone.workspaces as any)?.startups?.name || "Your Startup";
+        const profile = user.profiles as any;
+
+        // Send email reminder
+        try {
+          const emailHtml = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">⏰ Milestone Reminder</h2>
+              <p>Hi ${profile.full_name || "there"},</p>
+              <p>This is a reminder that the following milestone is due in <strong>${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}</strong>:</p>
+              <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <h3 style="margin: 0 0 8px 0; color: #333;">${milestone.title}</h3>
+                <p style="margin: 0; color: #666;">
+                  <strong>Startup:</strong> ${startupName}<br/>
+                  <strong>Due Date:</strong> ${targetDate.toLocaleDateString()}
+                </p>
+              </div>
+              <p>
+                <a href="${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/workspace/${milestone.workspace_id}?tab=milestones" 
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
+                  View Milestone
+                </a>
+              </p>
+              <p style="color: #888; font-size: 14px; margin-top: 24px;">
+                You can manage your notification preferences in Settings.
+              </p>
+            </div>
+          `;
+
+          await resend.emails.send({
+            from: "Startup Leiria <noreply@startupleiria.com>",
+            to: profile.email,
+            subject: `⏰ Milestone due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}: ${milestone.title}`,
+            html: emailHtml,
+          });
+
+          emailsSent++;
+          console.log(`Email sent to ${profile.email} for milestone ${milestone.id}`);
+        } catch (emailError) {
+          console.error("Error sending email:", emailError);
+        }
+
+        // Send Slack notification if enabled
+        if (prefs?.slack_enabled && prefs?.slack_webhook_url) {
+          try {
+            await fetch(prefs.slack_webhook_url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: `⏰ Milestone Reminder: "${milestone.title}" is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`,
+                blocks: [
+                  {
+                    type: "section",
+                    text: {
+                      type: "mrkdwn",
+                      text: `⏰ *Milestone Reminder*\n\n*${milestone.title}*\n📍 ${startupName}\n📅 Due: ${targetDate.toLocaleDateString()}\n⏳ ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''} remaining`,
+                    },
+                  },
+                ],
+              }),
+            });
+            slackSent++;
+            console.log(`Slack notification sent for milestone ${milestone.id}`);
+          } catch (slackError) {
+            console.error("Error sending Slack:", slackError);
+          }
+        }
+
+        // Create in-app notification
+        try {
+          await supabase.from("notifications").insert({
+            user_id: user.user_id,
+            type: "milestone_reminder",
+            title: `Milestone due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`,
+            message: `"${milestone.title}" for ${startupName} is due on ${targetDate.toLocaleDateString()}`,
+            link: `/workspace/${milestone.workspace_id}?tab=milestones`,
+            metadata: { milestone_id: milestone.id, days_until_due: daysUntilDue },
+          });
+          notificationsSent++;
+        } catch (notifError) {
+          console.error("Error creating notification:", notifError);
+        }
+
+        // Record that we sent this reminder
+        await supabase.from("milestone_reminders").insert({
+          milestone_id: milestone.id,
+          workspace_id: milestone.workspace_id,
+          reminder_type: "combined",
+          days_before: daysUntilDue,
+        });
+      }
+    }
+
+    console.log(`Reminders sent - Emails: ${emailsSent}, Slack: ${slackSent}, In-app: ${notificationsSent}`);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        emails_sent: emailsSent,
+        slack_sent: slackSent,
+        notifications_sent: notificationsSent,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: any) {
+    console.error("Error in send-milestone-reminders:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

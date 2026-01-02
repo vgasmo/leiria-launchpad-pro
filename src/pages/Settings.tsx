@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell } from 'lucide-react';
+import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { profileUpdateSchema, validateFormData } from '@/lib/validations';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -228,22 +229,26 @@ export default function Settings() {
 
       <div className="max-w-2xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" aria-hidden="true" />
-              {t('settingsPage.profile')}
+              <span className="hidden sm:inline">{t('settingsPage.profile')}</span>
             </TabsTrigger>
             <TabsTrigger value="email" className="gap-2">
               <Mail className="h-4 w-4" aria-hidden="true" />
-              {t('settingsPage.email')}
+              <span className="hidden sm:inline">{t('settingsPage.email')}</span>
             </TabsTrigger>
             <TabsTrigger value="password" className="gap-2">
               <Lock className="h-4 w-4" aria-hidden="true" />
-              {t('settingsPage.password')}
+              <span className="hidden sm:inline">{t('settingsPage.password')}</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               <Bell className="h-4 w-4" aria-hidden="true" />
-              {t('settingsPage.notifications')}
+              <span className="hidden sm:inline">{t('settingsPage.notifications')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="gap-2">
+              <Zap className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">{t('integrations.title')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -553,6 +558,11 @@ export default function Settings() {
           {/* Notifications Tab */}
           <TabsContent value="notifications">
             <NotificationSettings />
+          </TabsContent>
+
+          {/* Integrations Tab */}
+          <TabsContent value="integrations">
+            <WorkflowIntegrations />
           </TabsContent>
         </Tabs>
       </div>

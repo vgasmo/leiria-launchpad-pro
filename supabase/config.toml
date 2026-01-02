@@ -50,3 +50,9 @@ verify_jwt = false
 
 [functions.send-weekly-health-digest]
 verify_jwt = false
+
+[functions.send-milestone-reminders]
+verify_jwt = false
+
+[functions.send-slack-notification]
+verify_jwt = false
