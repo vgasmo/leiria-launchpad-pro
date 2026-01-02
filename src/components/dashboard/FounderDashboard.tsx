@@ -128,35 +128,38 @@ export function FounderDashboard({
   const health = workspace.health_score_override || workspace.health_score;
 
   return (
-    <div className="space-y-6">
-      {/* Startup Header Card */}
+    <div className="space-y-4 md:space-y-6">
+      {/* Startup Header Card - Mobile Optimized */}
       <Card className="overflow-hidden animate-fade-in">
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
-          <div className="flex items-start gap-5">
-            <Avatar className="h-20 w-20 rounded-2xl border-4 border-background shadow-lg">
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-5">
+            <Avatar className="h-16 w-16 md:h-20 md:w-20 rounded-2xl border-4 border-background shadow-lg">
               <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
-              <AvatarFallback className="rounded-2xl bg-primary text-primary-foreground text-2xl font-bold">
+              <AvatarFallback className="rounded-2xl bg-primary text-primary-foreground text-xl md:text-2xl font-bold">
                 {workspace.startup?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold">{workspace.startup?.name}</h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                <h1 className="text-xl md:text-2xl font-bold truncate">{workspace.startup?.name}</h1>
                 <HealthBadge score={health as HealthScore | null} />
               </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="text-sm">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <Badge variant="outline" className="text-xs md:text-sm">
                   {workspace.program?.name}
                 </Badge>
                 <StageBadge stage={workspace.stage} />
               </div>
               {workspace.startup?.description && (
-                <p className="text-muted-foreground mt-3 line-clamp-2">
+                <p className="text-muted-foreground mt-2 md:mt-3 line-clamp-2 text-sm md:text-base">
                   {workspace.startup.description}
                 </p>
               )}
             </div>
-            <Button onClick={() => navigate(`/workspace/${workspace.id}`)}>
+            <Button 
+              onClick={() => navigate(`/workspace/${workspace.id}`)}
+              className="w-full sm:w-auto mt-3 sm:mt-0"
+            >
               {t('founder.openWorkspace')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -164,17 +167,17 @@ export function FounderDashboard({
         </div>
       </Card>
 
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Quick Stats - Mobile Grid */}
+      <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-4">
         <Card className="animate-fade-in" style={{ animationDelay: '50ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
               {t('dashboard.pendingActions')}
             </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{workspace.pendingActionsCount}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl md:text-2xl font-bold">{workspace.pendingActionsCount}</div>
             {workspace.overdueActionsCount > 0 && (
               <p className="text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
@@ -185,16 +188,16 @@ export function FounderDashboard({
         </Card>
 
         <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
               {t('founder.nextMeeting')}
             </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
             {workspace.nextMeetingDate ? (
               <>
-                <div className={`text-xl font-bold ${isToday(new Date(workspace.nextMeetingDate)) ? 'text-primary' : ''}`}>
+                <div className={`text-lg md:text-xl font-bold ${isToday(new Date(workspace.nextMeetingDate)) ? 'text-primary' : ''}`}>
                   {isToday(new Date(workspace.nextMeetingDate)) 
                     ? t('common.today') 
                     : format(new Date(workspace.nextMeetingDate), 'MMM d')
@@ -205,23 +208,23 @@ export function FounderDashboard({
                 </p>
               </>
             ) : (
-              <div className="text-lg text-muted-foreground">{t('common.notScheduled')}</div>
+              <div className="text-sm md:text-lg text-muted-foreground">{t('common.notScheduled')}</div>
             )}
           </CardContent>
         </Card>
 
         <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
               {t('founder.kpiStatus')}
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className={`text-lg font-bold ${workspace.hasCurrentMonthKpi ? 'text-green-600' : 'text-amber-600'}`}>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className={`text-sm md:text-lg font-bold ${workspace.hasCurrentMonthKpi ? 'text-green-600' : 'text-amber-600'}`}>
               {workspace.hasCurrentMonthKpi ? t('common.upToDate') : t('common.needsUpdate')}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               {workspace.lastKpiMonth 
                 ? `${t('common.last')}: ${format(new Date(workspace.lastKpiMonth), 'MMM yyyy')}`
                 : t('common.noEntriesYet')
@@ -231,49 +234,65 @@ export function FounderDashboard({
         </Card>
 
         <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 p-3 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
               {t('founder.lastSession')}
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
             {workspace.lastSession ? (
               <>
-                <div className="text-lg font-medium truncate">{workspace.lastSession.title}</div>
+                <div className="text-sm md:text-lg font-medium truncate">{workspace.lastSession.title}</div>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(workspace.lastSession.scheduled_at), { addSuffix: true })}
                 </p>
               </>
             ) : (
-              <div className="text-lg text-muted-foreground">{t('founder.noSessionsYet')}</div>
+              <div className="text-sm md:text-lg text-muted-foreground">{t('founder.noSessionsYet')}</div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Mobile Optimized */}
       <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
-        <CardHeader>
-          <CardTitle>{t('founder.quickActions')}</CardTitle>
-          <CardDescription>{t('founder.commonTasks')}</CardDescription>
+        <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
+          <CardTitle className="text-base md:text-lg">{t('founder.quickActions')}</CardTitle>
+          <CardDescription className="text-xs md:text-sm">{t('founder.commonTasks')}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-4">
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=kpis`)}>
-              <TrendingUp className="h-5 w-5 text-primary" />
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+          <div className="grid gap-2 md:gap-3 grid-cols-2 md:grid-cols-4">
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+              onClick={() => navigate(`/workspace/${workspace.id}?tab=kpis`)}
+            >
+              <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               <span>{t('founder.updateKpis')}</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=actions`)}>
-              <CheckCircle2 className="h-5 w-5 text-primary" />
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+              onClick={() => navigate(`/workspace/${workspace.id}?tab=actions`)}
+            >
+              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               <span>{t('founder.viewActions')}</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}>
-              <Target className="h-5 w-5 text-primary" />
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+              onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}
+            >
+              <Target className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               <span>{t('milestones.title')}</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => navigate(`/workspace/${workspace.id}?tab=documents`)}>
-              <FileText className="h-5 w-5 text-primary" />
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+              onClick={() => navigate(`/workspace/${workspace.id}?tab=documents`)}
+            >
+              <FileText className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               <span>{t('documents.title')}</span>
             </Button>
           </div>
