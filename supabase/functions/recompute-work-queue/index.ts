@@ -1,0 +1,206 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    console.log("Starting work queue recomputation...");
+
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7) + "-01";
+
+    // Get all active workspaces with assignments
+    const { data: workspaces, error: wsError } = await supabase
+      .from("workspaces")
+      .select(`
+        id, 
+        program_id, 
+        stage,
+        startup:startups(name),
+        workspace_assignments(assigned_user_id, role)
+      `)
+      .eq("status", "active");
+
+    if (wsError) throw wsError;
+
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const workspace of workspaces || []) {
+      const startupName = (workspace.startup as any)?.name || "Workspace";
+      const leadConsultant = (workspace.workspace_assignments as any[])?.find(
+        (a: any) => a.role === "lead_consultant"
+      )?.assigned_user_id;
+
+      // Check for missing KPIs this month
+      const { data: expectedKpis } = await supabase
+        .from("workspace_kpis")
+        .select("kpi_definition_id")
+        .eq("workspace_id", workspace.id)
+        .eq("active", true);
+
+      const { data: filledKpis } = await supabase
+        .from("kpi_values")
+        .select("kpi_definition_id")
+        .eq("workspace_id", workspace.id)
+        .eq("period_month", currentMonth);
+
+      const expectedCount = expectedKpis?.length || 0;
+      const filledCount = filledKpis?.length || 0;
+      const missingKpis = expectedCount - filledCount;
+
+      if (missingKpis > 0) {
+        const { error: insertError } = await supabase
+          .from("staff_work_queue_items")
+          .upsert({
+            workspace_id: workspace.id,
+            type: "missing_kpis",
+            title: `${startupName}: ${missingKpis} KPIs em falta`,
+            description: `${filledCount}/${expectedCount} KPIs preenchidos este mês`,
+            priority: missingKpis > 3 ? "high" : "medium",
+            due_at: new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString(), // End of month
+            status: "open",
+            assigned_to: leadConsultant,
+            evidence_json: { expected: expectedCount, filled: filledCount, missing: missingKpis },
+          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
+
+        if (!insertError) createdCount++;
+      }
+
+      // Check for overdue actions
+      const { data: overdueActions } = await supabase
+        .from("action_items")
+        .select("id")
+        .eq("workspace_id", workspace.id)
+        .in("status", ["pending", "in_progress"])
+        .lt("due_date", today.toISOString().split("T")[0]);
+
+      const overdueCount = overdueActions?.length || 0;
+      if (overdueCount >= 3) {
+        await supabase
+          .from("staff_work_queue_items")
+          .upsert({
+            workspace_id: workspace.id,
+            type: "overdue_actions",
+            title: `${startupName}: ${overdueCount} ações em atraso`,
+            description: `Startup tem ${overdueCount} ações passadas do prazo`,
+            priority: overdueCount >= 5 ? "urgent" : "high",
+            due_at: today.toISOString(),
+            status: "open",
+            assigned_to: leadConsultant,
+            evidence_json: { overdue_count: overdueCount },
+          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
+
+        createdCount++;
+      }
+
+      // Check for no recent sessions
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const { data: recentSessions } = await supabase
+        .from("sessions")
+        .select("id")
+        .eq("workspace_id", workspace.id)
+        .gte("scheduled_at", thirtyDaysAgo.toISOString())
+        .limit(1);
+
+      if (!recentSessions || recentSessions.length === 0) {
+        await supabase
+          .from("staff_work_queue_items")
+          .upsert({
+            workspace_id: workspace.id,
+            type: "schedule_session",
+            title: `${startupName}: Sem sessão há 30+ dias`,
+            description: "Agendar sessão de acompanhamento",
+            priority: "high",
+            due_at: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "open",
+            assigned_to: leadConsultant,
+            evidence_json: { last_session_check: thirtyDaysAgo.toISOString() },
+          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
+
+        createdCount++;
+      }
+
+      // Check for overdue check-ins
+      const { data: overdueCheckins } = await supabase
+        .from("checkin_instances")
+        .select("id")
+        .eq("workspace_id", workspace.id)
+        .eq("status", "pending")
+        .lt("due_date", today.toISOString().split("T")[0]);
+
+      if (overdueCheckins && overdueCheckins.length > 0) {
+        await supabase
+          .from("staff_work_queue_items")
+          .upsert({
+            workspace_id: workspace.id,
+            type: "outreach",
+            title: `${startupName}: Check-in em atraso`,
+            description: `${overdueCheckins.length} check-in(s) por submeter`,
+            priority: "medium",
+            due_at: today.toISOString(),
+            status: "open",
+            assigned_to: leadConsultant,
+            evidence_json: { overdue_checkins: overdueCheckins.length },
+          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
+
+        createdCount++;
+      }
+
+      // Update health confidence
+      let confidence = "high";
+      let reason = "Dados completos";
+
+      if (expectedCount === 0) {
+        confidence = "low";
+        reason = "Sem KPIs configurados";
+      } else if (missingKpis > expectedCount / 2) {
+        confidence = "low";
+        reason = "Menos de 50% dos KPIs preenchidos";
+      } else if (missingKpis > 0) {
+        confidence = "medium";
+        reason = `${missingKpis} KPIs em falta`;
+      }
+
+      await supabase
+        .from("workspaces")
+        .update({ health_confidence: confidence, health_confidence_reason: reason })
+        .eq("id", workspace.id);
+
+      updatedCount++;
+    }
+
+    // Resolve items that are no longer relevant
+    const { error: resolveError } = await supabase
+      .from("staff_work_queue_items")
+      .update({ status: "done" })
+      .eq("status", "open")
+      .lt("due_at", new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString());
+
+    console.log(`Work queue recomputed: ${createdCount} items created/updated, ${updatedCount} workspaces processed`);
+
+    return new Response(
+      JSON.stringify({ success: true, createdItems: createdCount, updatedWorkspaces: updatedCount }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in recompute-work-queue:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

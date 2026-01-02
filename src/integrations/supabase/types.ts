@@ -426,6 +426,7 @@ export type Database = {
           is_private: boolean
           search_vector: unknown
           updated_at: string
+          visibility: string | null
           workspace_id: string
         }
         Insert: {
@@ -436,6 +437,7 @@ export type Database = {
           is_private?: boolean
           search_vector?: unknown
           updated_at?: string
+          visibility?: string | null
           workspace_id: string
         }
         Update: {
@@ -446,6 +448,7 @@ export type Database = {
           is_private?: boolean
           search_vector?: unknown
           updated_at?: string
+          visibility?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -539,6 +542,7 @@ export type Database = {
           search_vector: unknown
           updated_at: string
           uploaded_by: string | null
+          visibility: string | null
           workspace_id: string
         }
         Insert: {
@@ -554,6 +558,7 @@ export type Database = {
           search_vector?: unknown
           updated_at?: string
           uploaded_by?: string | null
+          visibility?: string | null
           workspace_id: string
         }
         Update: {
@@ -569,6 +574,7 @@ export type Database = {
           search_vector?: unknown
           updated_at?: string
           uploaded_by?: string | null
+          visibility?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -732,6 +738,50 @@ export type Database = {
           weights_json?: Json
         }
         Relationships: []
+      }
+      investor_updates: {
+        Row: {
+          content_json: Json
+          created_at: string
+          generated_by: string | null
+          id: string
+          month: string
+          sent_at: string | null
+          sent_to: Json | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          content_json?: Json
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          month: string
+          sent_at?: string | null
+          sent_to?: Json | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          content_json?: Json
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          month?: string
+          sent_at?: string | null
+          sent_to?: Json | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_updates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       investors: {
         Row: {
@@ -1711,6 +1761,60 @@ export type Database = {
           },
         ]
       }
+      ritual_instances: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          due_at: string
+          id: string
+          program_id: string | null
+          ritual_type: string
+          status: string
+          summary: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_at: string
+          id?: string
+          program_id?: string | null
+          ritual_type: string
+          status?: string
+          summary?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          program_id?: string | null
+          ritual_type?: string
+          status?: string
+          summary?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ritual_instances_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ritual_instances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_filters: {
         Row: {
           created_at: string
@@ -1856,6 +1960,50 @@ export type Database = {
           },
         ]
       }
+      session_workflow_state: {
+        Row: {
+          actions_done: boolean | null
+          completed_at: string | null
+          created_at: string
+          decisions_done: boolean | null
+          followup_sent: boolean | null
+          next_session_planned: boolean | null
+          risks_done: boolean | null
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          actions_done?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          decisions_done?: boolean | null
+          followup_sent?: boolean | null
+          next_session_planned?: boolean | null
+          risks_done?: boolean | null
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          actions_done?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          decisions_done?: boolean | null
+          followup_sent?: boolean | null
+          next_session_planned?: boolean | null
+          risks_done?: boolean | null
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_workflow_state_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           agenda: string | null
@@ -1942,6 +2090,53 @@ export type Database = {
           },
         ]
       }
+      share_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          last_viewed_at: string | null
+          revoked_at: string | null
+          scope: string
+          token: string
+          views_count: number | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          last_viewed_at?: string | null
+          revoked_at?: string | null
+          scope?: string
+          token?: string
+          views_count?: number | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          revoked_at?: string | null
+          scope?: string
+          token?: string
+          views_count?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_tasks: {
         Row: {
           assignee_id: string
@@ -2007,6 +2202,183 @@ export type Database = {
           },
           {
             foreignKeyName: "staff_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_work_queue_items: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          evidence_json: Json | null
+          id: string
+          priority: string
+          related_action_id: string | null
+          related_milestone_id: string | null
+          related_session_id: string | null
+          snoozed_until: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          evidence_json?: Json | null
+          id?: string
+          priority?: string
+          related_action_id?: string | null
+          related_milestone_id?: string | null
+          related_session_id?: string | null
+          snoozed_until?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          evidence_json?: Json | null
+          id?: string
+          priority?: string
+          related_action_id?: string | null
+          related_milestone_id?: string | null
+          related_session_id?: string | null
+          snoozed_until?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_work_queue_items_related_action_id_fkey"
+            columns: ["related_action_id"]
+            isOneToOne: false
+            referencedRelation: "action_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_work_queue_items_related_milestone_id_fkey"
+            columns: ["related_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_work_queue_items_related_session_id_fkey"
+            columns: ["related_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_work_queue_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_gate_criteria: {
+        Row: {
+          created_at: string
+          criteria_json: Json
+          id: string
+          program_id: string
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          criteria_json?: Json
+          id?: string
+          program_id: string
+          stage: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          criteria_json?: Json
+          id?: string
+          program_id?: string
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_gate_criteria_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_gate_reviews: {
+        Row: {
+          conditions: string | null
+          created_at: string
+          evidence_json: Json | null
+          from_stage: string
+          id: string
+          requested_at: string | null
+          requested_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          to_stage: string
+          workspace_id: string
+        }
+        Insert: {
+          conditions?: string | null
+          created_at?: string
+          evidence_json?: Json | null
+          from_stage: string
+          id?: string
+          requested_at?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_stage: string
+          workspace_id: string
+        }
+        Update: {
+          conditions?: string | null
+          created_at?: string
+          evidence_json?: Json | null
+          from_stage?: string
+          id?: string
+          requested_at?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_stage?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_gate_reviews_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -2547,6 +2919,38 @@ export type Database = {
           },
         ]
       }
+      workspace_assignments: {
+        Row: {
+          assigned_user_id: string
+          created_at: string
+          id: string
+          role: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_user_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_user_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_health_alerts: {
         Row: {
           ack_at: string | null
@@ -2871,6 +3275,8 @@ export type Database = {
       workspaces: {
         Row: {
           created_at: string
+          health_confidence: string | null
+          health_confidence_reason: string | null
           health_notes: string | null
           health_score: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated: string | null
@@ -2893,6 +3299,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          health_confidence?: string | null
+          health_confidence_reason?: string | null
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated?: string | null
@@ -2915,6 +3323,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          health_confidence?: string | null
+          health_confidence_reason?: string | null
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
           health_score_calculated?: string | null
