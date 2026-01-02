@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { 
   Upload, 
   Link as LinkIcon, 
@@ -22,7 +23,10 @@ import {
   FileAudio,
   FileSpreadsheet,
   Presentation,
-  AlertTriangle
+  AlertTriangle,
+  TrendingUp,
+  Calculator,
+  RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -73,14 +77,23 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
+  const [financialModelOpen, setFinancialModelOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [description, setDescription] = useState('');
   const [linkName, setLinkName] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const financialModelInputRef = useRef<HTMLInputElement>(null);
   
   const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+
+  // Find existing financial model
+  const financialModel = documents?.find(doc => doc.category === 'Financial Model' && 
+    (doc.document_type.includes('spreadsheet') || 
+     doc.document_type.includes('excel') || 
+     doc.document_type.includes('csv') ||
+     doc.name.toLowerCase().includes('financial')));
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -97,6 +110,40 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
     setSelectedCategory('');
     setDescription('');
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleFinancialModelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv',
+      'application/csv'
+    ];
+    
+    const isValidType = validTypes.includes(file.type) || 
+      file.name.endsWith('.xlsx') || 
+      file.name.endsWith('.xls') || 
+      file.name.endsWith('.csv');
+
+    if (!isValidType) {
+      toast.error(t('documents.supportedFormats'));
+      return;
+    }
+
+    await uploadMutation.mutateAsync({
+      workspaceId,
+      file,
+      category: 'Financial Model',
+      description: t('documents.financialModelDesc'),
+    });
+
+    setFinancialModelOpen(false);
+    if (financialModelInputRef.current) financialModelInputRef.current.value = '';
+    toast.success(t('documents.financialModel') + ' uploaded');
   };
 
   const handleAddLink = async () => {
@@ -122,7 +169,6 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   const handleDownload = async (doc: Document) => {
     if (doc.external_url) {
-      // Show confirmation dialog for external links
       setPendingExternalUrl(doc.external_url);
       setExternalLinkConfirmOpen(true);
       return;
@@ -158,16 +204,10 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 w-full" />
-          ))}
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Skeleton className="h-32" />
+        <Skeleton className="h-48" />
+      </div>
     );
   }
 
@@ -177,6 +217,15 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
     acc[cat].push(doc);
     return acc;
   }, {} as Record<string, Document[]>) || {};
+
+  // Sort categories to show Financial Model first
+  const sortedCategories = Object.keys(groupedDocuments).sort((a, b) => {
+    if (a === 'Financial Model') return -1;
+    if (b === 'Financial Model') return 1;
+    if (a === t('documents.uncategorized')) return 1;
+    if (b === t('documents.uncategorized')) return -1;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="space-y-6">
@@ -206,7 +255,108 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
+
+      {/* Financial Model Card */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-primary" />
+            {t('documents.financialModel')}
+          </CardTitle>
+          <CardDescription>
+            {t('documents.financialModelDesc')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {financialModel ? (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-background border">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <FileSpreadsheet className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{financialModel.name}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{format(new Date(financialModel.created_at), 'MMM d, yyyy')}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      {t('documents.currentModel')}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleDownload(financialModel)}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+                {canWrite && (
+                  <Dialog open={financialModelOpen} onOpenChange={setFinancialModelOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        {t('documents.replaceModel')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('documents.uploadFinancialModel')}</DialogTitle>
+                        <DialogDescription>
+                          {t('documents.supportedFormats')}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <Input
+                          ref={financialModelInputRef}
+                          type="file"
+                          accept=".xlsx,.xls,.csv"
+                          onChange={handleFinancialModelUpload}
+                          disabled={uploadMutation.isPending}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed rounded-lg">
+              <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground mb-2">{t('documents.noFinancialModel')}</p>
+              <p className="text-sm text-muted-foreground mb-4">{t('documents.uploadToTrack')}</p>
+              {canWrite && (
+                <Dialog open={financialModelOpen} onOpenChange={setFinancialModelOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {t('documents.uploadFinancialModel')}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t('documents.uploadFinancialModel')}</DialogTitle>
+                      <DialogDescription>
+                        {t('documents.supportedFormats')}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                      <Input
+                        ref={financialModelInputRef}
+                        type="file"
+                        accept=".xlsx,.xls,.csv"
+                        onChange={handleFinancialModelUpload}
+                        disabled={uploadMutation.isPending}
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Upload Actions */}
       {canWrite && (
         <div className="flex gap-2">
           <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
@@ -317,84 +467,107 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
         </div>
       )}
 
-      {Object.keys(groupedDocuments).length === 0 ? (
-        <Card>
+      {/* Documents List */}
+      {sortedCategories.length === 0 || (sortedCategories.length === 1 && !documents?.some(d => d.category !== 'Financial Model')) ? (
+        <Card className="border-dashed">
           <CardContent className="py-12 text-center text-muted-foreground">
-            {t('documents.noDocumentsDesc')} {canWrite && t('documents.getStarted')}
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+            <p>{t('documents.noDocumentsDesc')}</p>
+            {canWrite && <p className="text-sm mt-2">{t('documents.getStarted')}</p>}
           </CardContent>
         </Card>
       ) : (
-        Object.entries(groupedDocuments).map(([category, docs]) => (
-          <Card key={category}>
-            <CardHeader>
-              <CardTitle className="text-lg">{category}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {docs.map((doc) => {
-                  const Icon = getFileIcon(doc.document_type);
-                  return (
-                    <div
-                      key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
-                        <div className="min-w-0">
-                          <p className="font-medium truncate">{doc.name}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            {doc.uploader && (
-                              <div className="flex items-center gap-1">
-                                <Avatar className="h-4 w-4">
-                                  <AvatarImage src={doc.uploader.avatar_url || undefined} />
-                                  <AvatarFallback className="text-[8px]">
-                                    {doc.uploader.full_name?.charAt(0) || '?'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span>{doc.uploader.full_name}</span>
-                              </div>
-                            )}
-                            <span>•</span>
-                            <span>{format(new Date(doc.created_at), 'MMM d, yyyy')}</span>
-                          </div>
-                          {doc.description && (
-                            <p className="text-xs text-muted-foreground mt-1 truncate">
-                              {doc.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDownload(doc)}
-                          title={doc.external_url ? 'Open link' : 'Download'}
+        sortedCategories
+          .filter(cat => cat !== 'Financial Model' || (groupedDocuments[cat]?.length > 1))
+          .map((category) => {
+            const docs = groupedDocuments[category]?.filter(d => 
+              category !== 'Financial Model' || d.id !== financialModel?.id
+            ) || [];
+            
+            if (docs.length === 0) return null;
+
+            return (
+              <Card key={category}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {category === 'Financial Model' && <FileSpreadsheet className="h-5 w-5 text-green-600" />}
+                    {category === 'Pitch Deck' && <Presentation className="h-5 w-5 text-blue-600" />}
+                    {category === 'Legal' && <FileText className="h-5 w-5 text-amber-600" />}
+                    {!['Financial Model', 'Pitch Deck', 'Legal'].includes(category) && <File className="h-5 w-5 text-muted-foreground" />}
+                    {category}
+                    <Badge variant="secondary" className="ml-2">{docs.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {docs.map((doc) => {
+                      const Icon = getFileIcon(doc.document_type);
+                      return (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                         >
-                          {doc.external_url ? (
-                            <ExternalLink className="h-4 w-4" />
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                        </Button>
-                        {canWrite && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(doc)}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ))
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center shrink-0">
+                              <Icon className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{doc.name}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {doc.uploader && (
+                                  <div className="flex items-center gap-1">
+                                    <Avatar className="h-4 w-4">
+                                      <AvatarImage src={doc.uploader.avatar_url || undefined} />
+                                      <AvatarFallback className="text-[8px]">
+                                        {doc.uploader.full_name?.charAt(0) || '?'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="truncate max-w-[100px]">{doc.uploader.full_name}</span>
+                                  </div>
+                                )}
+                                <span>•</span>
+                                <span>{format(new Date(doc.created_at), 'MMM d, yyyy')}</span>
+                              </div>
+                              {doc.description && (
+                                <p className="text-xs text-muted-foreground mt-1 truncate">
+                                  {doc.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDownload(doc)}
+                              title={doc.external_url ? 'Open link' : 'Download'}
+                            >
+                              {doc.external_url ? (
+                                <ExternalLink className="h-4 w-4" />
+                              ) : (
+                                <Download className="h-4 w-4" />
+                              )}
+                            </Button>
+                            {canWrite && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(doc)}
+                                disabled={deleteMutation.isPending}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
       )}
     </div>
   );
