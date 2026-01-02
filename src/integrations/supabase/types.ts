@@ -229,6 +229,158 @@ export type Database = {
           },
         ]
       }
+      checkin_definitions: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          is_active: boolean
+          kpi_definition_ids: string[] | null
+          name: string
+          questions: Json
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_active?: boolean
+          kpi_definition_ids?: string[] | null
+          name?: string
+          questions?: Json
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_active?: boolean
+          kpi_definition_ids?: string[] | null
+          name?: string
+          questions?: Json
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkin_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkin_instances: {
+        Row: {
+          compliance_status: Database["public"]["Enums"]["compliance_status"]
+          created_at: string
+          definition_id: string
+          due_date: string
+          id: string
+          reminder_sent_at: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+          week_start: string
+          workspace_id: string
+        }
+        Insert: {
+          compliance_status?: Database["public"]["Enums"]["compliance_status"]
+          created_at?: string
+          definition_id: string
+          due_date: string
+          id?: string
+          reminder_sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          week_start: string
+          workspace_id: string
+        }
+        Update: {
+          compliance_status?: Database["public"]["Enums"]["compliance_status"]
+          created_at?: string
+          definition_id?: string
+          due_date?: string
+          id?: string
+          reminder_sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          week_start?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkin_instances_definition_id_fkey"
+            columns: ["definition_id"]
+            isOneToOne: false
+            referencedRelation: "checkin_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_instances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkin_responses: {
+        Row: {
+          created_at: string
+          id: string
+          instance_id: string
+          kpi_definition_id: string | null
+          question_id: string
+          response_number: number | null
+          response_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instance_id: string
+          kpi_definition_id?: string | null
+          question_id: string
+          response_number?: number | null
+          response_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instance_id?: string
+          kpi_definition_id?: string | null
+          question_id?: string
+          response_number?: number | null
+          response_value?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkin_responses_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "checkin_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_responses_kpi_definition_id_fkey"
+            columns: ["kpi_definition_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_notes: {
         Row: {
           author_id: string
@@ -2069,6 +2221,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_weekly_checkins: { Args: never; Returns: number }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -2111,6 +2264,10 @@ export type Database = {
       }
       is_founder: { Args: { _workspace_id: string }; Returns: boolean }
       is_founder_user: { Args: never; Returns: boolean }
+      submit_checkin: {
+        Args: { p_instance_id: string; p_responses: Json }
+        Returns: string
+      }
     }
     Enums: {
       action_status: "pending" | "in_progress" | "completed" | "cancelled"
@@ -2120,6 +2277,7 @@ export type Database = {
         | "mentor_externo"
         | "founder"
         | "team_member"
+      compliance_status: "on_track" | "needs_update" | "overdue"
       health_score: "critical" | "at_risk" | "stable" | "healthy" | "thriving"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
       startup_stage: "ideation" | "validation" | "mvp" | "growth" | "scale"
@@ -2258,6 +2416,7 @@ export const Constants = {
         "founder",
         "team_member",
       ],
+      compliance_status: ["on_track", "needs_update", "overdue"],
       health_score: ["critical", "at_risk", "stable", "healthy", "thriving"],
       milestone_status: ["not_started", "in_progress", "completed", "delayed"],
       startup_stage: ["ideation", "validation", "mvp", "growth", "scale"],
