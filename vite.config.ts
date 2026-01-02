@@ -46,15 +46,19 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // P0 SECURITY: Do NOT cache authenticated Supabase API requests
+        // This prevents stale/leaked data between sessions
+        navigateFallback: null,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/apxzuslwhjujgrcsfzqw\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
+            // Cache only static assets from CDNs, not Supabase API
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
             options: {
-              cacheName: 'supabase-api',
+              cacheName: 'google-fonts',
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 // 1 hour
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               }
             }
           }

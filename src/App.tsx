@@ -26,9 +26,11 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin } = useAuth();
 
-  if (isLoading) {
+  // P1: Wait for both auth check AND profile/roles to be fully loaded
+  // This prevents flash of wrong content or premature redirects
+  if (isLoading || !isAuthReady) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -40,6 +42,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
     return <Navigate to="/login" replace />;
   }
 
+  // P1: Only check admin after isAuthReady is true (roles are loaded)
   if (adminOnly && !isAdmin) {
     return <Navigate to="/my-workspaces" replace />;
   }
