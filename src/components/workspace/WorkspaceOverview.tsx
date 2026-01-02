@@ -33,6 +33,8 @@ import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboa
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
+import { WorkspaceAlertsSection } from '@/components/alerts/WorkspaceAlertsSection';
+import { HealthScoreCard } from '@/components/health/HealthScoreCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -103,6 +105,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
   return (
     <div className="space-y-6">
+      {/* Workspace Alerts Section */}
+      <WorkspaceAlertsSection workspaceId={workspace.id} />
+
       {/* Weekly Check-in Banner for Founders */}
       {isFounder && <WeeklyCheckinBanner workspaceId={workspace.id} />}
 
@@ -188,6 +193,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </div>
         </CardContent>
       </Card>
+
+      {/* Health Score Card */}
+      <HealthScoreCard workspaceId={workspace.id} />
 
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
