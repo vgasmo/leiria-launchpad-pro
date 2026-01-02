@@ -177,16 +177,44 @@ export default function Login() {
             ))}
           </div>
 
-          {/* Stats */}
-          <div className={`mt-12 grid grid-cols-3 gap-6 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          {/* Stats - Enhanced Design */}
+          <div className={`mt-12 grid grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
-              { value: '150+', label: t('login.startups') },
-              { value: '7', label: t('login.mentors') },
-              { value: '500+', label: t('login.sessions') },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-background">{stat.value}</div>
-                <div className="text-sm text-background/60">{stat.label}</div>
+              { value: '150', suffix: '+', label: t('login.startups'), icon: Rocket, gradient: 'from-accent to-accent/60' },
+              { value: '7', suffix: '', label: t('login.mentors'), icon: Users, gradient: 'from-primary to-primary/60' },
+              { value: '500', suffix: '+', label: t('login.sessions'), icon: Sparkles, gradient: 'from-accent to-primary' },
+            ].map((stat, index) => (
+              <div 
+                key={stat.label} 
+                className="group relative text-center p-4 rounded-2xl bg-background/5 backdrop-blur-sm border border-background/10 hover:bg-background/10 hover:border-background/20 transition-all duration-500 cursor-default"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
+                {/* Glow effect on hover */}
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
+                
+                {/* Icon */}
+                <div className="relative mb-2 flex justify-center">
+                  <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg`}>
+                    <stat.icon className="h-4 w-4 text-background" />
+                  </div>
+                </div>
+                
+                {/* Number with animated counter effect */}
+                <div className="relative flex items-baseline justify-center gap-0.5">
+                  <span className="text-4xl font-bold bg-gradient-to-b from-background to-background/70 bg-clip-text text-transparent">
+                    {stat.value}
+                  </span>
+                  {stat.suffix && (
+                    <span className="text-2xl font-bold text-accent">
+                      {stat.suffix}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Label */}
+                <div className="relative mt-1 text-sm font-medium text-background/70 group-hover:text-background/90 transition-colors">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
