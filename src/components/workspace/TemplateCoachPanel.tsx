@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Sparkles, CheckCircle2, AlertTriangle, HelpCircle, Loader2, 
   Target, Lightbulb, ListChecks, Calendar, TrendingUp, ChevronDown, ChevronUp,
-  Copy, Share2
+  Copy, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +17,17 @@ interface TemplateCoachPanelProps {
   instanceId: string;
   workspaceId: string;
   onCopyToNotes?: (notes: string) => void;
+  showReviewActions?: boolean;
+  onApplyReview?: (recommendation: 'approved' | 'needs_changes', notes: string) => void;
 }
 
-export function TemplateCoachPanel({ instanceId, workspaceId, onCopyToNotes }: TemplateCoachPanelProps) {
+export function TemplateCoachPanel({ 
+  instanceId, 
+  workspaceId, 
+  onCopyToNotes,
+  showReviewActions = false,
+  onApplyReview
+}: TemplateCoachPanelProps) {
   const { t } = useTranslation();
   const generateCoach = useGenerateTemplateCoach();
   const createActions = useCreateActionsFromAI(workspaceId);
@@ -70,6 +78,22 @@ export function TemplateCoachPanel({ instanceId, workspaceId, onCopyToNotes }: T
     
     onCopyToNotes(notes.trim());
     toast.success('Copied to review notes');
+  };
+
+  const handleApplyReview = (decision: 'approved' | 'needs_changes') => {
+    if (!feedback || !onApplyReview) return;
+    
+    let notes = `## AI Coach Summary\n${feedback.summary}\n\n`;
+    
+    if (feedback.gaps.length > 0) {
+      notes += `### Gaps to Address\n${feedback.gaps.map(g => `- **${g.field}**: ${g.why}`).join('\n')}\n\n`;
+    }
+    
+    if (feedback.red_flags.length > 0) {
+      notes += `### Red Flags\n${feedback.red_flags.map(r => `- [${r.severity.toUpperCase()}] ${r.risk}`).join('\n')}\n\n`;
+    }
+    
+    onApplyReview(decision, notes.trim());
   };
 
   const toggleSection = (section: string) => {
@@ -319,7 +343,30 @@ export function TemplateCoachPanel({ instanceId, workspaceId, onCopyToNotes }: T
 
             <Separator />
 
-            {/* Action Buttons */}
+            {/* Review Actions (when applicable) */}
+            {showReviewActions && onApplyReview && feedback && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleApplyReview('approved')}
+                  className="flex-1"
+                >
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  Apply & Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleApplyReview('needs_changes')}
+                  className="flex-1"
+                >
+                  <ThumbsDown className="h-4 w-4 mr-1" />
+                  Apply & Request Changes
+                </Button>
+              </div>
+            )}
+
+            {/* Other Action Buttons */}
             <div className="flex gap-2 flex-wrap">
               {onCopyToNotes && (
                 <Button
