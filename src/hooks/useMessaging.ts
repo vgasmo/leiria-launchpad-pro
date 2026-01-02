@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 export interface Conversation {
   id: string;
@@ -219,8 +220,12 @@ export function useSendMessage() {
 export function useCreateConversation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ participantIds, title, workspaceId }: { 
-      participantIds: string[]; 
+    mutationFn: async ({
+      participantIds,
+      title,
+      workspaceId,
+    }: {
+      participantIds: string[];
       title?: string;
       workspaceId?: string;
     }) => {
@@ -230,31 +235,49 @@ export function useCreateConversation() {
       // Create conversation
       const { data: conv, error: convError } = await supabase
         .from('conversations')
-        .insert([{ 
-          title, 
-          workspace_id: workspaceId || null,
-          is_group: participantIds.length > 1
-        }])
+        .insert([
+          {
+            title,
+            workspace_id: workspaceId || null,
+            is_group: participantIds.length > 1,
+          },
+        ])
         .select()
         .single();
 
       if (convError) throw convError;
 
-      // Add participants (including creator)
-      const allParticipants = [...new Set([user.id, ...participantIds])];
-      const { error: partError } = await supabase
-        .from('conversation_participants')
-        .insert(allParticipants.map(userId => ({
-          conversation_id: conv.id,
-          user_id: userId,
-        })));
+      // Add participants (insert the creator first so RLS checks pass for adding others)
+      const others = participantIds.filter((id) => id !== user.id);
 
-      if (partError) throw partError;
+      const { error: creatorError } = await supabase
+        .from('conversation_participants')
+        .insert([{ conversation_id: conv.id, user_id: user.id }]);
+
+      if (creatorError) throw creatorError;
+
+      if (others.length > 0) {
+        const { error: othersError } = await supabase
+          .from('conversation_participants')
+          .insert(
+            [...new Set(others)].map((userId) => ({
+              conversation_id: conv.id,
+              user_id: userId,
+            }))
+          );
+
+        if (othersError) throw othersError;
+      }
 
       return conv;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (err: any) => {
+      toast.error('Could not start conversation', {
+        description: err?.message ?? 'Please try again.',
+      });
     },
   });
 }

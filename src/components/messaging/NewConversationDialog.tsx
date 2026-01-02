@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Users } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NewConversationDialogProps {
   open: boolean;
@@ -66,15 +67,21 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
   const handleCreate = async () => {
     if (selectedUsers.length === 0) return;
 
-    const conversation = await createConversation.mutateAsync({
-      participantIds: selectedUsers,
-    });
+    try {
+      const conversation = await createConversation.mutateAsync({
+        participantIds: selectedUsers,
+      });
 
-    // Reset and close
-    setSelectedUsers([]);
-    setSearch('');
-    onOpenChange(false);
-    onConversationCreated(conversation as Conversation);
+      // Reset and close
+      setSelectedUsers([]);
+      setSearch('');
+      onOpenChange(false);
+      onConversationCreated(conversation as Conversation);
+    } catch (e: any) {
+      toast.error('Could not start conversation', {
+        description: e?.message ?? 'Please try again.',
+      });
+    }
   };
 
   return (
