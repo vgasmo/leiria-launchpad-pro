@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useGovernance } from '@/hooks/useGovernance';
+import { useStageGateReviews, useStageGateCriteria, useRequestStageGateReview, useApproveStageGateReview } from '@/hooks/useGovernance';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { StartupStage } from '@/types/database';
@@ -58,13 +58,13 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
   const { isAdmin, isConsultor, isFounder } = useAuth();
   const isStaff = isAdmin || isConsultor;
   
-  const { 
-    stageGateCriteria, 
-    stageGateReviews, 
-    isLoading,
-    requestStageGateReview,
-    approveStageGateReview,
-  } = useGovernance(workspaceId, programId);
+  const { data: stageGateReviews, isLoading: reviewsLoading } = useStageGateReviews(workspaceId);
+  const { data: stageGateCriteriaData } = useStageGateCriteria(programId, currentStage);
+  const requestStageGateReview = useRequestStageGateReview();
+  const approveStageGateReview = useApproveStageGateReview();
+  
+  const isLoading = reviewsLoading;
+  const stageGateCriteria = stageGateCriteriaData ? [stageGateCriteriaData] : [];
 
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
@@ -96,6 +96,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
     setIsSubmitting(true);
     try {
       await requestStageGateReview.mutateAsync({
+        workspaceId,
         fromStage: currentStage,
         toStage: nextStage,
         evidence: evidence.trim() || undefined,
@@ -116,6 +117,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
     setIsSubmitting(true);
     try {
       await approveStageGateReview.mutateAsync({
+        workspaceId,
         reviewId: selectedReview.id,
         status: decision,
         conditions: decision === 'conditional' ? conditions.trim() : undefined,

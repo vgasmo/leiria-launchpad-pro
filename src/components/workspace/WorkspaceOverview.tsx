@@ -35,6 +35,7 @@ import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
+import { NextBestAction } from '@/components/workspace/NextBestAction';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -105,6 +106,16 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
   return (
     <div className="space-y-6">
+      {/* Next Best Action for Founders */}
+      {isFounder && (
+        <NextBestAction 
+          workspaceId={workspace.id} 
+          programId={workspace.program_id}
+          stage={workspace.stage}
+          canWrite={canWrite}
+        />
+      )}
+
       {/* Weekly Check-in Banner for Founders */}
       {isFounder && <WeeklyCheckinBanner workspaceId={workspace.id} />}
 

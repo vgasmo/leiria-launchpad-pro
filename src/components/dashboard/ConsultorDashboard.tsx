@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
@@ -253,15 +254,18 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* Pending Reviews, Tasks & Check-ins Section */}
-      <div className="grid gap-6 lg:grid-cols-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <PendingTemplateReviews showEmpty />
-        <StaffTasksPanel />
-        <PendingCheckinsPanel />
+      {/* Work Queue & Pending Reviews Section */}
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <WorkQueuePanel compact />
+        <div className="space-y-6">
+          <PendingTemplateReviews showEmpty />
+          <StaffTasksPanel compact />
+        </div>
       </div>
 
-      {/* Alerts Panel */}
-      <div className="animate-fade-in" style={{ animationDelay: '220ms' }}>
+      {/* Pending Check-ins & Alerts */}
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '220ms' }}>
+        <PendingCheckinsPanel />
         <AlertsPanel />
       </div>
 

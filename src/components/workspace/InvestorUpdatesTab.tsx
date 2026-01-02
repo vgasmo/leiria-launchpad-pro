@@ -38,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useInvestorUpdates } from '@/hooks/useInvestorUpdates';
+import { useInvestorUpdates, useShareLinks, useGenerateInvestorUpdate, useCreateShareLink, useRevokeShareLink } from '@/hooks/useInvestorUpdates';
 import { toast } from 'sonner';
 
 interface InvestorUpdatesTabProps {
@@ -57,14 +57,11 @@ interface UpdateContent {
 }
 
 export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTabProps) {
-  const { 
-    investorUpdates, 
-    shareLinks,
-    isLoading,
-    generateInvestorUpdate,
-    createShareLink,
-    revokeShareLink,
-  } = useInvestorUpdates(workspaceId);
+  const { data: investorUpdates, isLoading } = useInvestorUpdates(workspaceId);
+  const { data: shareLinks } = useShareLinks(workspaceId);
+  const generateInvestorUpdate = useGenerateInvestorUpdate();
+  const createShareLink = useCreateShareLink();
+  const revokeShareLink = useRevokeShareLink();
 
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -78,7 +75,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      await generateInvestorUpdate.mutateAsync({ month: selectedMonth });
+      await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
       toast.success('Investor update generated');
       setShowGenerateDialog(false);
     } catch (error) {
@@ -92,6 +89,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
     setIsCreatingLink(true);
     try {
       const link = await createShareLink.mutateAsync({
+        workspaceId,
         scope: shareScope,
         expiresInDays: parseInt(shareDays),
       });
@@ -118,7 +116,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
 
   const handleRevokeLink = async (linkId: string) => {
     try {
-      await revokeShareLink.mutateAsync(linkId);
+      await revokeShareLink.mutateAsync({ id: linkId, workspaceId });
       toast.success('Link revoked');
     } catch (error) {
       toast.error('Failed to revoke link');

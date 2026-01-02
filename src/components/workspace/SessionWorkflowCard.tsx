@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useGovernance } from '@/hooks/useGovernance';
+import { useSessionWorkflow, useUpdateSessionWorkflow } from '@/hooks/useGovernance';
 import { toast } from 'sonner';
 
 interface SessionWorkflowCardProps {
@@ -55,10 +55,13 @@ export function SessionWorkflowCard({
   onScheduleSession,
   onSendFollowup,
 }: SessionWorkflowCardProps) {
-  const { sessionWorkflow, updateSessionWorkflow } = useGovernance(workspaceId);
+  const { data: workflowData } = useSessionWorkflow(sessionId);
+  const updateSessionWorkflow = useUpdateSessionWorkflow();
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  const workflow = sessionWorkflow?.find(w => w.session_id === sessionId) as WorkflowState | undefined;
+  const workflow = workflowData as WorkflowState | undefined;
+
+  
 
   const checklistItems: ChecklistItem[] = [
     {
