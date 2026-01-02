@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ import {
 } from '@/hooks/useTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
+import { TemplateAIAnalysis } from './TemplateAIAnalysis';
 import { toast } from 'sonner';
 
 interface TemplatesTabProps {
@@ -367,6 +368,17 @@ function TemplateEditorDialog({
               <strong>Reviewer feedback:</strong> {instance.review_notes}
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* AI Analysis for consultants/mentors */}
+        {canReview && instance?.review_status === 'pending_review' && instance?.id && (
+          <TemplateAIAnalysis 
+            instanceId={instance.id}
+            onApplyRecommendation={(recommendation, notes) => {
+              setReviewNotes(notes);
+              handleReview(recommendation);
+            }}
+          />
         )}
 
         {/* Review section for consultants/mentors */}
