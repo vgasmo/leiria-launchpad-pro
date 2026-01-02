@@ -592,7 +592,13 @@
     "achieveGoals": "Achieve Goals",
     "startups": "Startups",
     "mentors": "Mentors",
-    "sessions": "Sessions"
+    "sessions": "Sessions",
+    "benefitMentorship": "Personalized Mentorship",
+    "benefitMentorshipDesc": "Dedicated guidance from experienced mentors",
+    "benefitNetwork": "Strong Network",
+    "benefitNetworkDesc": "Access to a community of entrepreneurs",
+    "benefitGrowth": "Accelerated Growth",
+    "benefitGrowthDesc": "Tools and metrics to scale your startup"
   },
   "admin": {
     "title": "Admin Panel",
