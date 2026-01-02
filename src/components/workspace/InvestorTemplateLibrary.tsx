@@ -140,7 +140,10 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
     navigator.clipboard.writeText(templateText);
     
     setPreviewOpen(false);
-    toast.success(t('investorUpdates.templateCopied'));
+    toast.success(t('investorUpdates.templateCopied'), {
+      description: t('investorUpdates.templateCopiedDesc'),
+      duration: 4000,
+    });
   };
 
   return (
