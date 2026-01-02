@@ -177,43 +177,51 @@ export default function Login() {
             ))}
           </div>
 
-          {/* Stats - Enhanced Design */}
+          {/* Benefits Section */}
           <div className={`mt-12 grid grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
-              { value: '150', suffix: '+', label: t('login.startups'), icon: Rocket, gradient: 'from-accent to-accent/60' },
-              { value: '7', suffix: '', label: t('login.mentors'), icon: Users, gradient: 'from-primary to-primary/60' },
-              { value: '500', suffix: '+', label: t('login.sessions'), icon: Sparkles, gradient: 'from-accent to-primary' },
-            ].map((stat, index) => (
+              { 
+                title: t('login.benefitMentorship'), 
+                description: t('login.benefitMentorshipDesc'),
+                icon: Users, 
+                gradient: 'from-accent to-accent/60' 
+              },
+              { 
+                title: t('login.benefitNetwork'), 
+                description: t('login.benefitNetworkDesc'),
+                icon: Rocket, 
+                gradient: 'from-primary to-primary/60' 
+              },
+              { 
+                title: t('login.benefitGrowth'), 
+                description: t('login.benefitGrowthDesc'),
+                icon: Sparkles, 
+                gradient: 'from-accent to-primary' 
+              },
+            ].map((benefit, index) => (
               <div 
-                key={stat.label} 
+                key={benefit.title} 
                 className="group relative text-center p-4 rounded-2xl bg-background/5 backdrop-blur-sm border border-background/10 hover:bg-background/10 hover:border-background/20 transition-all duration-500 cursor-default"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 {/* Glow effect on hover */}
-                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${benefit.gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
                 
                 {/* Icon */}
-                <div className="relative mb-2 flex justify-center">
-                  <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg`}>
-                    <stat.icon className="h-4 w-4 text-background" />
+                <div className="relative mb-3 flex justify-center">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${benefit.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <benefit.icon className="h-5 w-5 text-background" />
                   </div>
                 </div>
                 
-                {/* Number with animated counter effect */}
-                <div className="relative flex items-baseline justify-center gap-0.5">
-                  <span className="text-4xl font-bold bg-gradient-to-b from-background to-background/70 bg-clip-text text-transparent">
-                    {stat.value}
-                  </span>
-                  {stat.suffix && (
-                    <span className="text-2xl font-bold text-accent">
-                      {stat.suffix}
-                    </span>
-                  )}
+                {/* Title */}
+                <div className="relative text-sm font-semibold text-background mb-1">
+                  {benefit.title}
                 </div>
                 
-                {/* Label */}
-                <div className="relative mt-1 text-sm font-medium text-background/70 group-hover:text-background/90 transition-colors">
-                  {stat.label}
+                {/* Description */}
+                <div className="relative text-xs text-background/60 group-hover:text-background/80 transition-colors leading-relaxed">
+                  {benefit.description}
                 </div>
               </div>
             ))}
