@@ -967,15 +967,15 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
           </div>
           <div className="space-y-2">
             <Label htmlFor="action-owner">Assign to</Label>
-            <Select value={ownerId} onValueChange={setOwnerId}>
+            <Select value={ownerId} onValueChange={(val) => setOwnerId(val === 'unassigned' ? '' : val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
-                {members?.map(member => (
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members?.filter(m => m.user_id).map(member => (
                   <SelectItem key={member.user_id} value={member.user_id}>
-                    {member.profile?.full_name || member.profile?.email}
+                    {member.profile?.full_name || member.profile?.email || 'Unknown'}
                   </SelectItem>
                 ))}
               </SelectContent>
