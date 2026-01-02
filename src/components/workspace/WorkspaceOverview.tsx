@@ -360,7 +360,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         </Card>
 
         {/* Health Score Card (new) */}
-        <HealthScoreCard workspaceId={workspace.id} canManage={canWrite} />
+        <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={canWrite} />
         
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
