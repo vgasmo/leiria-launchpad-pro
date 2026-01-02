@@ -32,11 +32,13 @@ import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
+import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { StartupStage, HealthScore } from '@/types/database';
 import type { Database } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WorkspaceOverviewProps {
   workspace: {
@@ -58,6 +60,8 @@ interface WorkspaceOverviewProps {
 export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProps) {
   const [, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const { roles } = useAuth();
+  const isFounder = roles.includes('founder');
   const { data: actions, isLoading: actionsLoading } = useWorkspaceActions(workspace.id);
   const { data: kpiData, isLoading: kpisLoading } = useWorkspaceKpis(workspace.id);
   const { data: milestones, isLoading: milestonesLoading } = useWorkspaceMilestones(workspace.id);
@@ -99,6 +103,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
   return (
     <div className="space-y-6">
+      {/* Weekly Check-in Banner for Founders */}
+      {isFounder && <WeeklyCheckinBanner workspaceId={workspace.id} />}
+
       {/* Onboarding Wizard */}
       <WorkspaceOnboardingWizard
         open={showOnboardingWizard}
