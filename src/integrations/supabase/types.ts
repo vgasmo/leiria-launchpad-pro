@@ -1200,6 +1200,85 @@ export type Database = {
         }
         Relationships: []
       }
+      program_alert_rules: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          program_id: string
+          rule_type: string
+          severity: string
+          threshold: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          program_id: string
+          rule_type: string
+          severity?: string
+          threshold?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          program_id?: string
+          rule_type?: string
+          severity?: string
+          threshold?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_alert_rules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_health_model: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          program_id: string
+          thresholds_json: Json
+          updated_at: string
+          weights_json: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          program_id: string
+          thresholds_json?: Json
+          updated_at?: string
+          weights_json?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          program_id?: string
+          thresholds_json?: Json
+          updated_at?: string
+          weights_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_health_model_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: true
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           created_at: string
@@ -2043,6 +2122,53 @@ export type Database = {
         }
         Relationships: []
       }
+      workspace_alerts: {
+        Row: {
+          created_at: string
+          evidence_json: Json | null
+          id: string
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          rule_type: string
+          severity: string
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_json?: Json | null
+          id?: string
+          reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_type: string
+          severity: string
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          evidence_json?: Json | null
+          id?: string
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_type?: string
+          severity?: string
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_alerts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_kpis: {
         Row: {
           active: boolean
@@ -2131,9 +2257,13 @@ export type Database = {
           created_at: string
           health_notes: string | null
           health_score: Database["public"]["Enums"]["health_score"] | null
+          health_score_calculated: string | null
+          health_score_explanation: Json | null
+          health_score_numeric: number | null
           health_score_override:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_score_updated_at: string | null
           health_status: string | null
           id: string
           last_checkin_at: string | null
@@ -2148,9 +2278,13 @@ export type Database = {
           created_at?: string
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
+          health_score_calculated?: string | null
+          health_score_explanation?: Json | null
+          health_score_numeric?: number | null
           health_score_override?:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_score_updated_at?: string | null
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null
@@ -2165,9 +2299,13 @@ export type Database = {
           created_at?: string
           health_notes?: string | null
           health_score?: Database["public"]["Enums"]["health_score"] | null
+          health_score_calculated?: string | null
+          health_score_explanation?: Json | null
+          health_score_numeric?: number | null
           health_score_override?:
             | Database["public"]["Enums"]["health_score"]
             | null
+          health_score_updated_at?: string | null
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null

@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.run-checkin-reminders]
 verify_jwt = false
+
+[functions.recompute-workspace-alerts]
+verify_jwt = false
+
+[functions.recompute-health-scores]
+verify_jwt = false
