@@ -25,6 +25,7 @@ import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
+import { AlertsPanel } from '@/components/alerts/AlertsPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -265,64 +266,10 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <div className="lg:col-span-3 animate-fade-in" style={{ animationDelay: '225ms' }}>
           <CalendarWidget />
         </div>
-        {/* Needs Attention Column */}
-        <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-              <CardTitle>{t('dashboard.needsAttention')}</CardTitle>
-            </div>
-            {attentionStartups.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={() => navigate('/my-workspaces?filter=attention')}>
-                {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent>
-            {attentionStartups.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Activity className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p className="font-medium">{t('dashboard.allOnTrack')}</p>
-                <p className="text-sm">{t('dashboard.noCriticalIssues')}</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {attentionStartups.map(workspace => {
-                  const health = workspace.health_score_override || workspace.health_score;
-                  return (
-                    <div
-                      key={workspace.id}
-                      className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/workspace/${workspace.id}`)}
-                    >
-                      <Avatar className="h-10 w-10 rounded-lg">
-                        <AvatarImage src={workspace.startup?.logo_url || undefined} />
-                        <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
-                          {workspace.startup?.name?.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium truncate">{workspace.startup?.name}</h4>
-                          <HealthBadge score={health as HealthScore | null} size="sm" />
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>{workspace.program?.name}</span>
-                          {workspace.overdueActionsCount > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {workspace.overdueActionsCount} {t('actions.overdue').toLowerCase()}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <StageBadge stage={workspace.stage} size="sm" />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Alerts Panel - replaces old Needs Attention */}
+        <div className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
+          <AlertsPanel />
+        </div>
 
         {/* Activity Feed */}
         <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
