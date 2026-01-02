@@ -2097,6 +2097,10 @@ export type Database = {
       is_admin:
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_founder: { Args: { _workspace_id: string }; Returns: boolean }
       is_founder_user: { Args: never; Returns: boolean }
     }
