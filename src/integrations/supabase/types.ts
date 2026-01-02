@@ -1380,6 +1380,45 @@ export type Database = {
           },
         ]
       }
+      program_core_kpis: {
+        Row: {
+          created_at: string
+          id: string
+          kpi_definition_id: string
+          order_index: number
+          program_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kpi_definition_id: string
+          order_index?: number
+          program_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kpi_definition_id?: string
+          order_index?: number
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_core_kpis_kpi_definition_id_fkey"
+            columns: ["kpi_definition_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_core_kpis_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_health_model: {
         Row: {
           created_at: string
@@ -1418,6 +1457,44 @@ export type Database = {
           },
         ]
       }
+      program_setup_drafts: {
+        Row: {
+          created_at: string
+          created_by: string
+          draft_json: Json
+          id: string
+          program_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          draft_json?: Json
+          id?: string
+          program_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          draft_json?: Json
+          id?: string
+          program_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_setup_drafts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           created_at: string
@@ -1427,6 +1504,7 @@ export type Database = {
           is_active: boolean
           name: string
           start_date: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -1437,6 +1515,7 @@ export type Database = {
           is_active?: boolean
           name: string
           start_date?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -1447,6 +1526,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           start_date?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1897,22 +1977,31 @@ export type Database = {
           created_at: string
           id: string
           kpi_definition_id: string
+          order_index: number | null
+          program_id: string | null
           required: boolean
           stage: Database["public"]["Enums"]["startup_stage"]
+          target_value: number | null
         }
         Insert: {
           created_at?: string
           id?: string
           kpi_definition_id: string
+          order_index?: number | null
+          program_id?: string | null
           required?: boolean
           stage: Database["public"]["Enums"]["startup_stage"]
+          target_value?: number | null
         }
         Update: {
           created_at?: string
           id?: string
           kpi_definition_id?: string
+          order_index?: number | null
+          program_id?: string | null
           required?: boolean
           stage?: Database["public"]["Enums"]["startup_stage"]
+          target_value?: number | null
         }
         Relationships: [
           {
@@ -1922,6 +2011,13 @@ export type Database = {
             referencedRelation: "kpi_definitions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stage_kpi_defaults_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       stages: {
@@ -1929,25 +2025,31 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_active: boolean | null
           name: string
           position: number
           program_id: string
+          stage_key: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           position?: number
           program_id: string
+          stage_key?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           position?: number
           program_id?: string
+          stage_key?: string | null
         }
         Relationships: [
           {
