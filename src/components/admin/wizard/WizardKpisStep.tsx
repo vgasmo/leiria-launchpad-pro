@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Sparkles, Star, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
-import { generateKpisForStages, suggestCoreKpis, getStageLabel } from '@/lib/kpiAutoGenerator';
+import { generateKpisForStages, suggestCoreKpis, getStageLabel, type StageKpiConfig } from '@/lib/kpiAutoGenerator';
 import type { DraftStage, DraftStageKpis, DraftKpi, DraftCoreKpi } from '@/hooks/useProgramSetup';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -26,19 +26,21 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
   const activeStages = stages.filter((s) => s.is_active).map((s) => s.stage_key);
 
   // Auto-generate KPIs if empty
-  const [stageKpis, setStageKpis] = useState<DraftStageKpis[]>(() => {
+  const initialStageKpis = (() => {
     if (kpis && kpis.length > 0) return kpis;
     const generated = generateKpisForStages(activeStages);
     return generated.map(g => ({
       stage_key: g.stage_key,
       kpis: g.kpis.map(k => ({ ...k, unit: k.unit || '#' })),
     }));
-  });
+  })();
+
+  const [stageKpis, setStageKpis] = useState<DraftStageKpis[]>(initialStageKpis);
 
   const [localCoreKpis, setLocalCoreKpis] = useState<DraftCoreKpi[]>(() => {
     if (coreKpis && coreKpis.length > 0) return coreKpis;
-    // Convert DraftStageKpis to StageKpiConfig format for suggestCoreKpis
-    const stageKpiConfigs = stageKpis.map(sk => ({
+    // Convert to StageKpiConfig format for suggestCoreKpis
+    const stageKpiConfigs: StageKpiConfig[] = initialStageKpis.map(sk => ({
       stage_key: sk.stage_key,
       kpis: sk.kpis.map(k => ({
         name: k.name,
