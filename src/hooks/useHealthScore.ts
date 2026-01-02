@@ -45,7 +45,9 @@ export function useWorkspaceHealth(workspaceId: string) {
       if (error) throw error;
       return {
         ...data,
-        health_score_explanation: (data.health_score_explanation as HealthExplanationFactor[]) || [],
+        health_score_explanation: Array.isArray(data.health_score_explanation) 
+          ? (data.health_score_explanation as unknown as HealthExplanationFactor[])
+          : [],
       } as WorkspaceHealth;
     },
     enabled: !!workspaceId,
@@ -78,7 +80,7 @@ export function useHealthDistribution() {
 export function useSetHealthOverride() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workspaceId, override, reason }: { workspaceId: string; override: string | null; reason: string }) => {
+    mutationFn: async ({ workspaceId, override, reason }: { workspaceId: string; override: HealthScore | null; reason: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase.from('workspaces').update({ health_score_override: override, health_score: override }).eq('id', workspaceId);
