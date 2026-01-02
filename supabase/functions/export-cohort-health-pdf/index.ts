@@ -1,0 +1,308 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+interface ExportRequest {
+  program_id: string;
+  start_date?: string;
+  end_date?: string;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check if user is admin or consultor
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    const isStaff = roles?.some(r => r.role === "admin" || r.role === "consultor");
+    if (!isStaff) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body: ExportRequest = await req.json();
+    const { program_id, start_date, end_date } = body;
+
+    const now = new Date();
+    const startDate = start_date ? new Date(start_date) : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = end_date ? new Date(end_date) : now;
+
+    console.log(`Exporting cohort health for program: ${program_id}`);
+
+    // Get program info
+    const { data: program } = await supabase
+      .from("programs")
+      .select("id, name")
+      .eq("id", program_id)
+      .single();
+
+    if (!program) {
+      return new Response(JSON.stringify({ error: "Program not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get workspaces for this program
+    const { data: workspaces } = await supabase
+      .from("workspaces")
+      .select(`
+        id,
+        health_score,
+        health_score_numeric,
+        health_score_components,
+        startup:startups(name)
+      `)
+      .eq("program_id", program_id)
+      .eq("status", "active")
+      .order("health_score_numeric", { ascending: true });
+
+    const workspaceIds = workspaces?.map(w => w.id) || [];
+
+    // Get health history for the period
+    const { data: historyData } = await supabase
+      .from("workspace_health_history")
+      .select("workspace_id, score_numeric, label, computed_at")
+      .in("workspace_id", workspaceIds)
+      .gte("computed_at", startDate.toISOString())
+      .lte("computed_at", endDate.toISOString())
+      .order("computed_at", { ascending: true });
+
+    // Calculate distribution
+    const distribution = {
+      thriving: workspaces?.filter(w => w.health_score === "thriving").length || 0,
+      healthy: workspaces?.filter(w => w.health_score === "healthy").length || 0,
+      stable: workspaces?.filter(w => w.health_score === "stable").length || 0,
+      at_risk: workspaces?.filter(w => w.health_score === "at_risk").length || 0,
+      critical: workspaces?.filter(w => w.health_score === "critical").length || 0,
+    };
+
+    // Calculate trends per workspace
+    const trends: Record<string, { startScore: number; endScore: number; delta: number }> = {};
+    for (const ws of workspaces || []) {
+      const wsHistory = historyData?.filter(h => h.workspace_id === ws.id) || [];
+      if (wsHistory.length >= 2) {
+        const startScore = wsHistory[0].score_numeric;
+        const endScore = wsHistory[wsHistory.length - 1].score_numeric;
+        trends[ws.id] = { startScore, endScore, delta: endScore - startScore };
+      } else if (wsHistory.length === 1) {
+        trends[ws.id] = { startScore: wsHistory[0].score_numeric, endScore: wsHistory[0].score_numeric, delta: 0 };
+      }
+    }
+
+    // Top improved and declined
+    const sortedByDelta = Object.entries(trends).sort((a, b) => b[1].delta - a[1].delta);
+    const topImproved = sortedByDelta.slice(0, 10).filter(([, t]) => t.delta > 0);
+    const topDeclined = sortedByDelta.slice(-10).filter(([, t]) => t.delta < 0).reverse();
+
+    // Generate HTML report (can be converted to PDF client-side or via external service)
+    const htmlReport = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cohort Health Report - ${program.name}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 40px; }
+    h1 { color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+    h2 { color: #374151; margin-top: 30px; }
+    .meta { color: #6b7280; margin-bottom: 30px; }
+    .distribution { display: flex; gap: 20px; margin: 20px 0; }
+    .dist-item { text-align: center; padding: 20px; border-radius: 8px; flex: 1; }
+    .dist-thriving { background: #d1fae5; color: #065f46; }
+    .dist-healthy { background: #dbeafe; color: #1e40af; }
+    .dist-stable { background: #fef3c7; color: #92400e; }
+    .dist-at_risk { background: #fed7aa; color: #c2410c; }
+    .dist-critical { background: #fecaca; color: #991b1b; }
+    .dist-count { font-size: 32px; font-weight: bold; }
+    .dist-label { font-size: 12px; text-transform: uppercase; margin-top: 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; }
+    .positive { color: #059669; }
+    .negative { color: #dc2626; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>📊 Cohort Health Report</h1>
+  <div class="meta">
+    <strong>Program:</strong> ${program.name}<br>
+    <strong>Period:</strong> ${startDate.toLocaleDateString('pt-PT')} - ${endDate.toLocaleDateString('pt-PT')}<br>
+    <strong>Generated:</strong> ${now.toLocaleString('pt-PT')}
+  </div>
+
+  <h2>Current Distribution</h2>
+  <div class="distribution">
+    <div class="dist-item dist-thriving">
+      <div class="dist-count">${distribution.thriving}</div>
+      <div class="dist-label">Thriving</div>
+    </div>
+    <div class="dist-item dist-healthy">
+      <div class="dist-count">${distribution.healthy}</div>
+      <div class="dist-label">Healthy</div>
+    </div>
+    <div class="dist-item dist-stable">
+      <div class="dist-count">${distribution.stable}</div>
+      <div class="dist-label">Stable</div>
+    </div>
+    <div class="dist-item dist-at_risk">
+      <div class="dist-count">${distribution.at_risk}</div>
+      <div class="dist-label">At Risk</div>
+    </div>
+    <div class="dist-item dist-critical">
+      <div class="dist-count">${distribution.critical}</div>
+      <div class="dist-label">Critical</div>
+    </div>
+  </div>
+
+  <h2>📈 Most Improved</h2>
+  <table>
+    <thead>
+      <tr><th>Startup</th><th>Start Score</th><th>End Score</th><th>Change</th></tr>
+    </thead>
+    <tbody>
+      ${topImproved.map(([id, trend]) => {
+        const ws = workspaces?.find(w => w.id === id);
+        return `<tr>
+          <td>${ws?.startup?.name || 'Unknown'}</td>
+          <td>${trend.startScore}</td>
+          <td>${trend.endScore}</td>
+          <td class="positive">+${trend.delta}</td>
+        </tr>`;
+      }).join('')}
+      ${topImproved.length === 0 ? '<tr><td colspan="4" style="text-align: center; color: #9ca3af;">No improvements recorded</td></tr>' : ''}
+    </tbody>
+  </table>
+
+  <h2>📉 Most Declined</h2>
+  <table>
+    <thead>
+      <tr><th>Startup</th><th>Start Score</th><th>End Score</th><th>Change</th></tr>
+    </thead>
+    <tbody>
+      ${topDeclined.map(([id, trend]) => {
+        const ws = workspaces?.find(w => w.id === id);
+        return `<tr>
+          <td>${ws?.startup?.name || 'Unknown'}</td>
+          <td>${trend.startScore}</td>
+          <td>${trend.endScore}</td>
+          <td class="negative">${trend.delta}</td>
+        </tr>`;
+      }).join('')}
+      ${topDeclined.length === 0 ? '<tr><td colspan="4" style="text-align: center; color: #9ca3af;">No declines recorded</td></tr>' : ''}
+    </tbody>
+  </table>
+
+  <h2>All Workspaces</h2>
+  <table>
+    <thead>
+      <tr><th>Startup</th><th>Current Score</th><th>Status</th><th>Actions</th><th>Sessions</th><th>KPIs</th><th>Check-ins</th></tr>
+    </thead>
+    <tbody>
+      ${(workspaces || []).map(ws => {
+        const components = ws.health_score_components || {};
+        return `<tr>
+          <td>${ws.startup?.name || 'Unknown'}</td>
+          <td>${ws.health_score_numeric || '-'}</td>
+          <td>${ws.health_score || '-'}</td>
+          <td>${components.actions ?? '-'}</td>
+          <td>${components.sessions ?? '-'}</td>
+          <td>${components.kpis ?? '-'}</td>
+          <td>${components.checkins ?? '-'}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Generated by Startup Leiria Platform
+  </div>
+</body>
+</html>
+    `;
+
+    // Store report in storage
+    const fileName = `cohort-health-${program_id}-${now.toISOString().split('T')[0]}.html`;
+    const { error: uploadError } = await supabase.storage
+      .from("workspace-documents")
+      .upload(`reports/${fileName}`, new Blob([htmlReport], { type: 'text/html' }), {
+        contentType: 'text/html',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("Error uploading report:", uploadError);
+      throw uploadError;
+    }
+
+    // Generate signed URL
+    const { data: signedUrl } = await supabase.storage
+      .from("workspace-documents")
+      .createSignedUrl(`reports/${fileName}`, 3600); // 1 hour expiry
+
+    // Log activity
+    await supabase.from("activity_log").insert({
+      user_id: user.id,
+      entity_type: "report",
+      entity_id: program_id,
+      action: "export_cohort_health",
+      metadata: { program_name: program.name, workspace_count: workspaces?.length || 0 },
+    });
+
+    console.log(`Report generated: ${fileName}`);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        report_url: signedUrl?.signedUrl,
+        file_name: fileName,
+        distribution,
+        workspace_count: workspaces?.length || 0,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in export-cohort-health-pdf:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
