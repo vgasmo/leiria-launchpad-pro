@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 interface HealthModel {
@@ -49,7 +49,60 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Starting health scores recomputation...");
+    // SECURITY: Validate CRON_SECRET for system-initiated calls
+    const cronSecret = req.headers.get("x-cron-secret");
+    const expectedSecret = Deno.env.get("CRON_SECRET");
+    
+    // If CRON_SECRET is configured, require it for non-user calls
+    if (expectedSecret && cronSecret !== expectedSecret) {
+      // Check if there's a valid user auth instead (for manual triggers by admins)
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader) {
+        const token = authHeader.replace("Bearer ", "");
+        const supabaseCheck = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+          { global: { headers: { Authorization: authHeader } } }
+        );
+        const { data: { user } } = await supabaseCheck.auth.getUser(token);
+        
+        if (!user) {
+          console.error("[recompute-health-scores] Unauthorized: Invalid token and no cron secret");
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        // Verify user is admin or consultor
+        const supabaseAdmin = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        );
+        const { data: roles } = await supabaseAdmin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        
+        const isStaff = roles?.some(r => r.role === "admin" || r.role === "consultor");
+        if (!isStaff) {
+          console.error("[recompute-health-scores] Forbidden: User not staff");
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        console.log("[recompute-health-scores] Authorized via user:", user.id);
+      } else {
+        console.error("[recompute-health-scores] Unauthorized: No cron secret or auth header");
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    console.log("[recompute-health-scores] Starting health scores recomputation...");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -82,11 +135,11 @@ serve(async (req) => {
     const { data: workspaces, error: wsError } = await wsQuery;
 
     if (wsError) {
-      console.error("Error fetching workspaces:", wsError);
+      console.error("[recompute-health-scores] Error fetching workspaces:", wsError);
       throw wsError;
     }
 
-    console.log(`Processing ${workspaces?.length || 0} active workspaces`);
+    console.log(`[recompute-health-scores] Processing ${workspaces?.length || 0} active workspaces`);
 
     // Get health models for all programs
     const { data: healthModels } = await supabase
@@ -372,7 +425,7 @@ serve(async (req) => {
       if (!updateError) {
         updatedCount++;
       } else {
-        console.error(`Error updating workspace ${workspace.id}:`, updateError);
+        console.error(`[recompute-health-scores] Error updating workspace ${workspace.id}:`, updateError);
       }
 
       // Insert health history snapshot (max 1 per day)
@@ -399,7 +452,7 @@ serve(async (req) => {
         if (!historyError) {
           historyCount++;
         } else {
-          console.error(`Error inserting health history for ${workspace.id}:`, historyError);
+          console.error(`[recompute-health-scores] Error inserting health history for ${workspace.id}:`, historyError);
         }
       }
 
@@ -496,33 +549,22 @@ serve(async (req) => {
             }
           }
         }
-
-        // Resolve old alerts when health recovers
-        if (healthLabel !== "at_risk" && healthLabel !== "critical") {
-          await supabase
-            .from("workspace_health_alerts")
-            .update({ status: "resolved", resolved_at: new Date().toISOString() })
-            .eq("workspace_id", workspace.id)
-            .eq("status", "active")
-            .in("alert_type", ["drop_to_at_risk", "drop_to_critical"]);
-        }
       }
     }
 
-    console.log(`Health scores recomputation complete. Updated ${updatedCount} workspaces, ${historyCount} history snapshots, ${alertsCreated} alerts created.`);
+    console.log(`[recompute-health-scores] Complete: ${updatedCount} updated, ${historyCount} history entries, ${alertsCreated} alerts`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        updatedWorkspaces: updatedCount,
-        historySnapshots: historyCount,
-        alertsCreated: alertsCreated,
-        filters: { program_id: programIdFilter, workspace_id: workspaceIdFilter },
+        updated: updatedCount,
+        history_entries: historyCount,
+        alerts_created: alertsCreated,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Error in recompute-health-scores:", error);
+    console.error("[recompute-health-scores] Error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: message }),

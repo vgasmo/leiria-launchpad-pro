@@ -1,5 +1,73 @@
 project_id = "apxzuslwhjujgrcsfzqw"
 
+# ============================================
+# USER-FACING FUNCTIONS - JWT REQUIRED
+# ============================================
+
+[functions.analyze-template]
+verify_jwt = true
+
+[functions.generate-template-coach]
+verify_jwt = true
+
+[functions.generate-financial-model-coach]
+verify_jwt = true
+
+[functions.generate-investor-update]
+verify_jwt = true
+
+[functions.import-financial-model]
+verify_jwt = true
+
+[functions.sync-financial-kpis]
+verify_jwt = true
+
+[functions.generate-session-suggestions]
+verify_jwt = true
+
+[functions.generate-session-summary]
+verify_jwt = true
+
+[functions.generate-progress-report-pdf]
+verify_jwt = true
+
+[functions.export-cohort-health-pdf]
+verify_jwt = true
+
+[functions.publish-program-setup]
+verify_jwt = true
+
+[functions.smart-session-scheduler]
+verify_jwt = true
+
+[functions.import-kpi-data]
+verify_jwt = true
+
+[functions.transcribe-audio]
+verify_jwt = true
+
+[functions.get-shared-workspace]
+verify_jwt = false
+
+# ============================================
+# CRON/SYSTEM FUNCTIONS - NO JWT (use CRON_SECRET)
+# ============================================
+
+[functions.recompute-health-scores]
+verify_jwt = false
+
+[functions.recompute-workspace-alerts]
+verify_jwt = false
+
+[functions.recompute-work-queue]
+verify_jwt = false
+
+[functions.run-checkin-reminders]
+verify_jwt = false
+
+[functions.check-missed-milestones]
+verify_jwt = false
+
 [functions.send-session-invite]
 verify_jwt = false
 
@@ -12,37 +80,7 @@ verify_jwt = false
 [functions.send-template-notification]
 verify_jwt = false
 
-[functions.generate-session-summary]
-verify_jwt = false
-
 [functions.send-session-followup]
-verify_jwt = false
-
-[functions.run-checkin-reminders]
-verify_jwt = false
-
-[functions.recompute-workspace-alerts]
-verify_jwt = false
-
-[functions.recompute-health-scores]
-verify_jwt = false
-
-[functions.generate-investor-update]
-verify_jwt = false
-
-[functions.generate-progress-report-pdf]
-verify_jwt = false
-
-[functions.export-cohort-health-pdf]
-verify_jwt = false
-
-[functions.get-shared-workspace]
-verify_jwt = false
-
-[functions.publish-program-setup]
-verify_jwt = false
-
-[functions.recompute-work-queue]
 verify_jwt = false
 
 [functions.send-health-alert-email]
@@ -55,34 +93,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-slack-notification]
-verify_jwt = false
-
-[functions.generate-session-suggestions]
-verify_jwt = false
-
-[functions.transcribe-audio]
-verify_jwt = false
-
-[functions.check-missed-milestones]
-verify_jwt = false
-
-[functions.smart-session-scheduler]
-verify_jwt = false
-
-[functions.import-kpi-data]
-verify_jwt = false
-
-[functions.analyze-template]
-verify_jwt = false
-
-[functions.generate-template-coach]
-verify_jwt = false
-
-[functions.import-financial-model]
-verify_jwt = false
-
-[functions.sync-financial-kpis]
-verify_jwt = false
-
-[functions.generate-financial-model-coach]
 verify_jwt = false

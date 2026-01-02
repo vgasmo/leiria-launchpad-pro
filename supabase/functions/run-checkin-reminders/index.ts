@@ -5,7 +5,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 // Simple Resend email sending function (no npm import needed)
@@ -44,7 +44,7 @@ interface PendingCheckin {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("run-checkin-reminders: Starting execution");
+  console.log("[run-checkin-reminders] Starting execution");
 
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -52,6 +52,18 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // SECURITY: Validate CRON_SECRET for system-initiated calls
+    const cronSecret = req.headers.get("x-cron-secret");
+    const expectedSecret = Deno.env.get("CRON_SECRET");
+    
+    if (expectedSecret && cronSecret !== expectedSecret) {
+      console.error("[run-checkin-reminders] Unauthorized: Invalid cron secret");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = RESEND_API_KEY;
@@ -59,13 +71,13 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Step 1: Generate weekly check-ins for this week
-    console.log("run-checkin-reminders: Generating weekly check-ins...");
+    console.log("[run-checkin-reminders] Generating weekly check-ins...");
     const { data: generatedCount, error: genError } = await supabase.rpc("generate_weekly_checkins");
     
     if (genError) {
-      console.error("run-checkin-reminders: Error generating check-ins:", genError);
+      console.error("[run-checkin-reminders] Error generating check-ins:", genError);
     } else {
-      console.log(`run-checkin-reminders: Generated ${generatedCount} new check-in instances`);
+      console.log(`[run-checkin-reminders] Generated ${generatedCount} new check-in instances`);
     }
 
     // Step 2: Update overdue status
@@ -77,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       .lt("due_date", today);
 
     if (updateError) {
-      console.error("run-checkin-reminders: Error updating overdue status:", updateError);
+      console.error("[run-checkin-reminders] Error updating overdue status:", updateError);
     }
 
     // Step 3: Find pending check-ins that need reminders
@@ -103,11 +115,11 @@ const handler = async (req: Request): Promise<Response> => {
       .lte("due_date", new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]); // Due within 2 days
 
     if (fetchError) {
-      console.error("run-checkin-reminders: Error fetching pending check-ins:", fetchError);
+      console.error("[run-checkin-reminders] Error fetching pending check-ins:", fetchError);
       throw fetchError;
     }
 
-    console.log(`run-checkin-reminders: Found ${pendingCheckins?.length || 0} pending check-ins needing reminders`);
+    console.log(`[run-checkin-reminders] Found ${pendingCheckins?.length || 0} pending check-ins needing reminders`);
 
     const results = {
       generated: generatedCount || 0,
@@ -136,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
 
         if (founders.length === 0) {
-          console.log(`run-checkin-reminders: No founders found for workspace ${checkin.workspace_id}`);
+          console.log(`[run-checkin-reminders] No founders found for workspace ${checkin.workspace_id}`);
           continue;
         }
 
@@ -155,7 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
           });
 
           if (notifError) {
-            console.error(`run-checkin-reminders: Error creating notification for user ${founder.user_id}:`, notifError);
+            console.error(`[run-checkin-reminders] Error creating notification for user ${founder.user_id}:`, notifError);
           }
         }
 
@@ -210,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
               // Rate limiting: 600ms delay between emails
               await new Promise((resolve) => setTimeout(resolve, 600));
             } catch (emailError: any) {
-              console.error(`run-checkin-reminders: Error sending email to ${founderEmail}:`, emailError);
+              console.error(`[run-checkin-reminders] Error sending email to ${founderEmail}:`, emailError);
               
               // Log failed email
               await supabase.from("email_log").insert({
@@ -234,12 +246,12 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", checkin.id);
 
       } catch (checkinError: any) {
-        console.error(`run-checkin-reminders: Error processing check-in ${checkin.id}:`, checkinError);
+        console.error(`[run-checkin-reminders] Error processing check-in ${checkin.id}:`, checkinError);
         results.errors.push(`Check-in ${checkin.id}: ${checkinError.message}`);
       }
     }
 
-    console.log("run-checkin-reminders: Completed", results);
+    console.log("[run-checkin-reminders] Completed", results);
 
     return new Response(JSON.stringify({ success: true, ...results }), {
       status: 200,
@@ -247,7 +259,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
   } catch (error: any) {
-    console.error("run-checkin-reminders: Fatal error:", error);
+    console.error("[run-checkin-reminders] Fatal error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
