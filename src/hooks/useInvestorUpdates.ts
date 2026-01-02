@@ -64,6 +64,7 @@ export function useGenerateInvestorUpdate() {
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
       return data.update as InvestorUpdate;
     },
     onSuccess: (_, { workspaceId }) => {
@@ -83,6 +84,8 @@ export function useUpdateInvestorUpdate() {
         .eq('id', id)
         .single();
 
+      if (fetchError) throw fetchError;
+
       const existingContent = existing.content_json as Record<string, unknown> || {};
       const mergedContent = { ...existingContent, ...content };
 
@@ -100,19 +103,42 @@ export function useUpdateInvestorUpdate() {
   });
 }
 
+// Share links now use the dataroom system
+// These are kept for backward compatibility but redirect to dataroom_share_links
 export function useShareLinks(workspaceId: string) {
   return useQuery({
-    queryKey: ['share-links', workspaceId],
+    queryKey: ['investor-share-links', workspaceId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('share_links')
-        .select('*')
+      // First get the dataroom for this workspace
+      const { data: dataroom } = await supabase
+        .from('datarooms')
+        .select('id')
         .eq('workspace_id', workspaceId)
+        .maybeSingle();
+
+      if (!dataroom) return [];
+
+      // Get share links from the new dataroom system
+      const { data, error } = await supabase
+        .from('dataroom_share_links')
+        .select('*')
+        .eq('dataroom_id', dataroom.id)
         .is('revoked_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Map to the expected format
+      return (data || []).map(link => ({
+        id: link.id,
+        workspace_id: workspaceId,
+        token: link.id, // Use id as token since we store hash
+        scope: 'report_only',
+        expires_at: link.expires_at,
+        revoked_at: link.revoked_at,
+        views_count: link.access_count,
+        created_at: link.created_at,
+      }));
     },
     enabled: !!workspaceId,
   });
@@ -131,38 +157,29 @@ export function useCreateShareLink() {
       scope: string; 
       expiresInDays: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + expiresInDays);
-
-      const { data, error } = await supabase
-        .from('share_links')
-        .insert({
-          workspace_id: workspaceId,
-          scope,
-          expires_at: expiresAt.toISOString(),
-          created_by: user?.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Log activity
-      await supabase.from('activity_log').insert({
-        workspace_id: workspaceId,
-        user_id: user?.id,
-        entity_type: 'share_link',
-        entity_id: data.id,
-        action: 'created',
-        metadata: { scope, expires_at: expiresAt.toISOString() },
+      // Use the new dataroom share link system
+      const { data, error } = await supabase.functions.invoke('dataroom-create-link', {
+        body: { 
+          workspace_id: workspaceId, 
+          expires_in_days: expiresInDays,
+          allow_download: true 
+        },
       });
 
-      return data;
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      return {
+        id: data.link.id,
+        token: data.link.token,
+        workspace_id: workspaceId,
+        scope,
+        expires_at: data.link.expires_at,
+      };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['share-links', data.workspace_id] });
+      queryClient.invalidateQueries({ queryKey: ['investor-share-links', data.workspace_id] });
+      queryClient.invalidateQueries({ queryKey: ['dataroom-links'] });
     },
   });
 }
@@ -172,26 +189,19 @@ export function useRevokeShareLink() {
 
   return useMutation({
     mutationFn: async ({ id, workspaceId }: { id: string; workspaceId: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { error } = await supabase
-        .from('share_links')
-        .update({ revoked_at: new Date().toISOString() })
-        .eq('id', id);
+      // Use the new dataroom revoke system
+      const { data, error } = await supabase.functions.invoke('dataroom-revoke-link', {
+        body: { link_id: id },
+      });
 
       if (error) throw error;
-
-      // Log activity
-      await supabase.from('activity_log').insert({
-        workspace_id: workspaceId,
-        user_id: user?.id,
-        entity_type: 'share_link',
-        entity_id: id,
-        action: 'revoked',
-      });
+      if (data.error) throw new Error(data.error);
+      
+      return { workspaceId };
     },
-    onSuccess: (_, { workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ['share-links', workspaceId] });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['investor-share-links', data.workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['dataroom-links'] });
     },
   });
 }

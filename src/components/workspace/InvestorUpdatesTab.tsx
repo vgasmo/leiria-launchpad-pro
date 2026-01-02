@@ -117,7 +117,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
       });
       toast.success(t('investorUpdates.linkCreated'));
       
-      const shareUrl = `${window.location.origin}/share/${link.token}`;
+      const shareUrl = `${window.location.origin}/dataroom/shared/${link.token}`;
       await navigator.clipboard.writeText(shareUrl);
       toast.success(t('investorUpdates.linkCopied'));
       
@@ -130,7 +130,7 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
   };
 
   const handleCopyLink = async (token: string) => {
-    const shareUrl = `${window.location.origin}/share/${token}`;
+    const shareUrl = `${window.location.origin}/dataroom/shared/${token}`;
     await navigator.clipboard.writeText(shareUrl);
     toast.success(t('investorUpdates.linkCopied'));
   };

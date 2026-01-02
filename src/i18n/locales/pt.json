@@ -637,7 +637,21 @@
     "addHighlight": "Adicionar destaque",
     "addLowlight": "Adicionar desafio",
     "addAsk": "Adicionar pedido",
-    "addPriority": "Adicionar prioridade"
+    "addPriority": "Adicionar prioridade",
+    "templateLibrary": "Biblioteca de Templates",
+    "templateLibraryDesc": "Templates profissionais para diferentes tipos de investidores",
+    "searchTemplates": "Pesquisar templates...",
+    "sections": "secções",
+    "useTemplate": "Usar Template",
+    "templateCopied": "Template copiado!",
+    "templateCopiedDesc": "O template foi copiado para a área de transferência. Cole num email ou documento.",
+    "angel": "Angel",
+    "seed": "Seed",
+    "seriesA": "Série A",
+    "seriesB": "Série B",
+    "vc": "VC",
+    "strategic": "Estratégico",
+    "templates": "Templates"
   },
   "documents": {
     "title": "Documentos",
