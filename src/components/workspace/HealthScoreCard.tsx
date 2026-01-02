@@ -28,16 +28,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWorkspaceHealth, useSetHealthOverride, useRecomputeHealthScores, getHealthScoreConfig, HealthExplanationFactor } from '@/hooks/useHealthScore';
 import { useAuth } from '@/contexts/AuthContext';
+import { HealthModelBreakdown } from './HealthModelBreakdown';
 import type { Database } from '@/integrations/supabase/types';
 
 type HealthScore = Database['public']['Enums']['health_score'];
 
 interface HealthScoreCardProps {
   workspaceId: string;
+  programId?: string | null;
   canManage?: boolean;
 }
 
-export function HealthScoreCard({ workspaceId, canManage = false }: HealthScoreCardProps) {
+export function HealthScoreCard({ workspaceId, programId, canManage = false }: HealthScoreCardProps) {
   const { roles } = useAuth();
   const isStaff = roles.includes('admin') || roles.includes('consultor');
   const { data: health, isLoading } = useWorkspaceHealth(workspaceId);
@@ -200,6 +202,9 @@ export function HealthScoreCard({ workspaceId, canManage = false }: HealthScoreC
           )}
         </CardContent>
       </Card>
+
+      {/* Health Model Breakdown */}
+      <HealthModelBreakdown workspaceId={workspaceId} programId={programId || null} />
 
       {/* Override Dialog */}
       <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
