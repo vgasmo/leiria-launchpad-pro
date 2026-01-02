@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { FileText, Download, Share2, Printer, TrendingUp, Target, CheckCircle2, Calendar, Users } from 'lucide-react';
+import { FileText, Download, Share2, Printer, TrendingUp, Target, CheckCircle2, Calendar, Loader2, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceSessions } from '@/hooks/useWorkspaceData';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { HealthScore, StartupStage } from '@/types/database';
 
@@ -25,6 +25,7 @@ interface ProgressReportViewProps {
 
 export function ProgressReportView({ workspaceId, workspace }: ProgressReportViewProps) {
   const [open, setOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const { data: actions } = useWorkspaceActions(workspaceId);
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
   const { data: milestones } = useWorkspaceMilestones(workspaceId);
@@ -54,6 +55,36 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
     toast.success('Link copied to clipboard');
   };
 
+  const handleExportPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-progress-report-pdf', {
+        body: { workspaceId },
+      });
+
+      if (error) throw error;
+
+      // Create a blob from HTML and trigger download
+      const blob = new Blob([data.html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // Open in new tab for printing/saving as PDF
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.success('Report generated! Use browser print to save as PDF');
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+      toast.error('Failed to generate report');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -71,9 +102,22 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
         </DialogHeader>
 
         <div className="flex gap-2 mb-4 print:hidden">
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={handleExportPdf}
+            disabled={isGeneratingPdf}
+          >
+            {isGeneratingPdf ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            Export PDF
+          </Button>
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
-            Print / PDF
+            Print
           </Button>
           <Button variant="outline" size="sm" onClick={handleShare}>
             <Share2 className="h-4 w-4 mr-2" />
