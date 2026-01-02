@@ -43,10 +43,10 @@ export function useWorkspaceHealth(workspaceId: string) {
         .single();
 
       if (error) throw error;
-      const explanation = Array.isArray(data.health_score_explanation) 
-        ? (data.health_score_explanation as unknown as HealthExplanationFactor[]) 
-        : [];
-      return { ...data, health_score_explanation: explanation } as WorkspaceHealth;
+      return {
+        ...data,
+        health_score_explanation: (data.health_score_explanation as HealthExplanationFactor[]) || [],
+      } as WorkspaceHealth;
     },
     enabled: !!workspaceId,
   });
@@ -81,9 +81,7 @@ export function useSetHealthOverride() {
     mutationFn: async ({ workspaceId, override, reason }: { workspaceId: string; override: string | null; reason: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-      const updateData: Record<string, unknown> = { health_score_override: override };
-      if (override) updateData.health_score = override as HealthScore;
-      const { error } = await supabase.from('workspaces').update(updateData).eq('id', workspaceId);
+      const { error } = await supabase.from('workspaces').update({ health_score_override: override, health_score: override }).eq('id', workspaceId);
       if (error) throw error;
       await supabase.from('activity_log').insert({ user_id: user.id, workspace_id: workspaceId, entity_type: 'workspace', entity_id: workspaceId, action: override ? 'health_score_override_set' : 'health_score_override_removed', metadata: { new_override: override, reason } });
     },
