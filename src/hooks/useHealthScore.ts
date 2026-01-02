@@ -1,9 +1,28 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, subMonths, format, isPast, isToday, parseISO } from 'date-fns';
+import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
 type HealthScore = Database['public']['Enums']['health_score'];
+
+export interface HealthExplanationFactor {
+  factor: string;
+  score: number;
+  maxScore: number;
+  details: string;
+  impact: 'positive' | 'negative' | 'neutral';
+}
+
+export interface WorkspaceHealth {
+  id: string;
+  health_score: string | null;
+  health_score_calculated: string | null;
+  health_score_numeric: number | null;
+  health_score_override: string | null;
+  health_score_updated_at: string | null;
+  health_score_explanation: HealthExplanationFactor[];
+}
 
 export interface HealthComputationResult {
   score: number;
@@ -12,176 +31,158 @@ export interface HealthComputationResult {
   reasons: string[];
 }
 
+// Get health score for a workspace (new API)
+export function useWorkspaceHealth(workspaceId: string) {
+  return useQuery({
+    queryKey: ['workspace-health', workspaceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select('id, health_score, health_score_calculated, health_score_numeric, health_score_override, health_score_updated_at, health_score_explanation')
+        .eq('id', workspaceId)
+        .single();
+
+      if (error) throw error;
+      return {
+        ...data,
+        health_score_explanation: (data.health_score_explanation as HealthExplanationFactor[]) || [],
+      } as WorkspaceHealth;
+    },
+    enabled: !!workspaceId,
+  });
+}
+
+// Get health distribution
+export function useHealthDistribution() {
+  return useQuery({
+    queryKey: ['health-distribution'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select('health_score, health_score_override')
+        .eq('status', 'active');
+
+      if (error) throw error;
+      const distribution = { thriving: 0, healthy: 0, stable: 0, at_risk: 0, critical: 0, unknown: 0 };
+      for (const ws of data || []) {
+        const score = ws.health_score_override || ws.health_score;
+        if (score && score in distribution) distribution[score as keyof typeof distribution]++;
+        else distribution.unknown++;
+      }
+      return distribution;
+    },
+  });
+}
+
+// Set health score override
+export function useSetHealthOverride() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workspaceId, override, reason }: { workspaceId: string; override: string | null; reason: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      const { error } = await supabase.from('workspaces').update({ health_score_override: override, health_score: override }).eq('id', workspaceId);
+      if (error) throw error;
+      await supabase.from('activity_log').insert({ user_id: user.id, workspace_id: workspaceId, entity_type: 'workspace', entity_id: workspaceId, action: override ? 'health_score_override_set' : 'health_score_override_removed', metadata: { new_override: override, reason } });
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-health', vars.workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['health-distribution'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      toast.success(vars.override ? 'Override aplicado' : 'Override removido');
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+// Trigger manual recompute
+export function useRecomputeHealthScores() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('recompute-health-scores');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-health'] });
+      queryClient.invalidateQueries({ queryKey: ['health-distribution'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      toast.success('Health scores recalculados');
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+// Get health score config
+export function getHealthScoreConfig(score: string | null) {
+  const configs: Record<string, { color: string; icon: string; label: string; description: string }> = {
+    thriving: { color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', icon: '🌟', label: 'Excelente', description: 'A startup está a exceder expectativas' },
+    healthy: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: '✅', label: 'Saudável', description: 'Bom progresso geral' },
+    stable: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: '➡️', label: 'Estável', description: 'Progresso moderado' },
+    at_risk: { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: '⚠️', label: 'Em risco', description: 'Precisa de atenção' },
+    critical: { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: '🚨', label: 'Crítico', description: 'Ação urgente necessária' },
+  };
+  return configs[score || ''] || { color: 'bg-muted text-muted-foreground', icon: '❓', label: 'Desconhecido', description: 'Score não calculado' };
+}
+
+// Legacy functions below for backwards compatibility
 export async function computeWorkspaceHealth(workspaceId: string): Promise<HealthComputationResult> {
   const reasons: string[] = [];
   let score = 100;
   let forceRed = false;
-
   const currentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd');
   const previousMonth = format(startOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd');
-
-  // 1. Check required KPIs
-  const { data: workspaceKpis } = await supabase
-    .from('workspace_kpis')
-    .select('kpi_definition_id')
-    .eq('workspace_id', workspaceId)
-    .eq('required', true)
-    .eq('active', true);
-
+  const { data: workspaceKpis } = await supabase.from('workspace_kpis').select('kpi_definition_id').eq('workspace_id', workspaceId).eq('required', true).eq('active', true);
   if (workspaceKpis && workspaceKpis.length > 0) {
     const requiredKpiIds = workspaceKpis.map(wk => wk.kpi_definition_id);
-
-    // Check current month KPI values
-    const { data: currentMonthValues } = await supabase
-      .from('kpi_values')
-      .select('kpi_definition_id')
-      .eq('workspace_id', workspaceId)
-      .eq('period_month', currentMonth)
-      .in('kpi_definition_id', requiredKpiIds)
-      .not('value', 'is', null);
-
+    const { data: currentMonthValues } = await supabase.from('kpi_values').select('kpi_definition_id').eq('workspace_id', workspaceId).eq('period_month', currentMonth).in('kpi_definition_id', requiredKpiIds).not('value', 'is', null);
     const currentMonthFilledIds = new Set(currentMonthValues?.map(v => v.kpi_definition_id) || []);
     const missingCurrentMonth = requiredKpiIds.filter(id => !currentMonthFilledIds.has(id));
-
     if (missingCurrentMonth.length > 0) {
       score -= 30;
       reasons.push(`Missing ${missingCurrentMonth.length} required KPI(s) for current month`);
-
-      // Check previous month too
-      const { data: previousMonthValues } = await supabase
-        .from('kpi_values')
-        .select('kpi_definition_id')
-        .eq('workspace_id', workspaceId)
-        .eq('period_month', previousMonth)
-        .in('kpi_definition_id', requiredKpiIds)
-        .not('value', 'is', null);
-
+      const { data: previousMonthValues } = await supabase.from('kpi_values').select('kpi_definition_id').eq('workspace_id', workspaceId).eq('period_month', previousMonth).in('kpi_definition_id', requiredKpiIds).not('value', 'is', null);
       const previousMonthFilledIds = new Set(previousMonthValues?.map(v => v.kpi_definition_id) || []);
       const missingPreviousMonth = requiredKpiIds.filter(id => !previousMonthFilledIds.has(id));
-
-      if (missingPreviousMonth.length > 0) {
-        forceRed = true;
-        reasons.push(`Missing required KPIs for 2+ consecutive months`);
-      }
+      if (missingPreviousMonth.length > 0) { forceRed = true; reasons.push(`Missing required KPIs for 2+ consecutive months`); }
     }
   }
-
-  // 2. Check overdue action items
-  const { data: actionItems } = await supabase
-    .from('action_items')
-    .select('id, due_date, status')
-    .eq('workspace_id', workspaceId)
-    .in('status', ['pending', 'in_progress']);
-
-  const overdueItems = actionItems?.filter(item => {
-    if (!item.due_date) return false;
-    const dueDate = parseISO(item.due_date);
-    return isPast(dueDate) && !isToday(dueDate);
-  }) || [];
-
+  const { data: actionItems } = await supabase.from('action_items').select('id, due_date, status').eq('workspace_id', workspaceId).in('status', ['pending', 'in_progress']);
+  const overdueItems = actionItems?.filter(item => item.due_date && isPast(parseISO(item.due_date)) && !isToday(parseISO(item.due_date))) || [];
   const overdueCount = overdueItems.length;
-
-  if (overdueCount >= 10) {
-    forceRed = true;
-    reasons.push(`${overdueCount} overdue action items (critical)`);
-  } else if (overdueCount >= 5) {
-    score -= 20;
-    reasons.push(`${overdueCount} overdue action items`);
-  } else if (overdueCount > 0) {
-    score -= 5;
-    reasons.push(`${overdueCount} overdue action item(s)`);
-  }
-
-  // Ensure score is within bounds
+  if (overdueCount >= 10) { forceRed = true; reasons.push(`${overdueCount} overdue action items (critical)`); }
+  else if (overdueCount >= 5) { score -= 20; reasons.push(`${overdueCount} overdue action items`); }
+  else if (overdueCount > 0) { score -= 5; reasons.push(`${overdueCount} overdue action item(s)`); }
   score = Math.max(0, Math.min(100, score));
-
-  // Determine health status
-  let healthStatus: 'green' | 'yellow' | 'red';
-  if (forceRed) {
-    healthStatus = 'red';
-  } else if (score >= 80) {
-    healthStatus = 'green';
-  } else if (score >= 50) {
-    healthStatus = 'yellow';
-  } else {
-    healthStatus = 'red';
-  }
-
-  // Map score to health_score enum
-  let healthScore: HealthScore;
-  if (score >= 90) {
-    healthScore = 'thriving';
-  } else if (score >= 75) {
-    healthScore = 'healthy';
-  } else if (score >= 50) {
-    healthScore = 'stable';
-  } else if (score >= 25) {
-    healthScore = 'at_risk';
-  } else {
-    healthScore = 'critical';
-  }
-
-  // Override based on forceRed
-  if (forceRed && healthScore !== 'critical' && healthScore !== 'at_risk') {
-    healthScore = 'at_risk';
-  }
-
-  if (reasons.length === 0) {
-    reasons.push('All health checks passed');
-  }
-
-  return {
-    score,
-    healthScore,
-    healthStatus,
-    reasons,
-  };
+  let healthStatus: 'green' | 'yellow' | 'red' = forceRed ? 'red' : score >= 80 ? 'green' : score >= 50 ? 'yellow' : 'red';
+  let healthScore: HealthScore = score >= 90 ? 'thriving' : score >= 75 ? 'healthy' : score >= 50 ? 'stable' : score >= 25 ? 'at_risk' : 'critical';
+  if (forceRed && healthScore !== 'critical' && healthScore !== 'at_risk') healthScore = 'at_risk';
+  if (reasons.length === 0) reasons.push('All health checks passed');
+  return { score, healthScore, healthStatus, reasons };
 }
 
 export function useRecomputeHealth(workspaceId: string) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async () => {
       const result = await computeWorkspaceHealth(workspaceId);
-
-      const { data, error } = await supabase
-        .from('workspaces')
-        .update({
-          health_score: result.healthScore,
-          health_status: result.healthStatus,
-        })
-        .eq('id', workspaceId)
-        .select()
-        .single();
-
+      const { data, error } = await supabase.from('workspaces').update({ health_score: result.healthScore, health_status: result.healthStatus }).eq('id', workspaceId).select().single();
       if (error) throw error;
       return { workspace: data, computation: result };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] }); queryClient.invalidateQueries({ queryKey: ['workspaces'] }); },
   });
 }
 
 export function useUpdateHealthNotes(workspaceId: string) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (healthNotes: string | null) => {
-      const { data, error } = await supabase
-        .from('workspaces')
-        .update({ health_notes: healthNotes })
-        .eq('id', workspaceId)
-        .select()
-        .single();
-
+      const { data, error } = await supabase.from('workspaces').update({ health_notes: healthNotes }).eq('id', workspaceId).select().single();
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] }); },
   });
 }
