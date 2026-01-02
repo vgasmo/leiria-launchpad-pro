@@ -93,31 +93,33 @@ export function useCurrentMonthUnitEconomics(workspaceId: string | undefined) {
 
 export function useSaveUnitEconomics(workspaceId: string) {
   const queryClient = useQueryClient();
-  const currentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd');
   
   return useMutation({
-    mutationFn: async (formData: UnitEconomicsFormData) => {
+    mutationFn: async (data: UnitEconomicsFormData & { period_month?: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+      
+      const periodMonth = data.period_month || format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const { period_month: _, ...formData } = data;
       
       const metrics = calculateMetrics(formData);
       
       const payload = {
         workspace_id: workspaceId,
-        period_month: currentMonth,
+        period_month: periodMonth,
         ...formData,
         ...metrics,
         created_by: user.id,
       };
       
-      const { data, error } = await supabase
+      const { data: result, error } = await supabase
         .from('unit_economics_values')
         .upsert(payload, { onConflict: 'workspace_id,period_month' })
         .select()
         .single();
       
       if (error) throw error;
-      return data;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unit-economics', workspaceId] });

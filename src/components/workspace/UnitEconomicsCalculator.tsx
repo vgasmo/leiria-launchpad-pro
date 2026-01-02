@@ -1,16 +1,37 @@
-import { useState, useMemo } from 'react';
-import { Calculator, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Calculator, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info, Save, Loader2, ChevronLeft, ChevronRight, History } from 'lucide-react';
+import { format, startOfMonth, subMonths, addMonths, isSameMonth } from 'date-fns';
+import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  useUnitEconomicsHistory,
+  useCurrentMonthUnitEconomics,
+  useSaveUnitEconomics,
+  type UnitEconomicsFormData,
+} from '@/hooks/useUnitEconomics';
+
+// Validation schema
+const unitEconomicsSchema = z.object({
+  marketing_costs: z.number().min(0, 'Must be non-negative'),
+  sales_costs: z.number().min(0, 'Must be non-negative'),
+  new_customers: z.number().int().min(0, 'Must be non-negative integer'),
+  arpu: z.number().min(0, 'Must be non-negative'),
+  gross_margin: z.number().min(0, 'Min 0%').max(100, 'Max 100%'),
+  monthly_churn_rate: z.number().min(0, 'Min 0%').max(100, 'Max 100%'),
+});
 
 interface MetricInputProps {
   label: string;
@@ -19,9 +40,11 @@ interface MetricInputProps {
   prefix?: string;
   suffix?: string;
   tooltip?: string;
+  error?: string;
+  disabled?: boolean;
 }
 
-function MetricInput({ label, value, onChange, prefix, suffix, tooltip }: MetricInputProps) {
+function MetricInput({ label, value, onChange, prefix, suffix, tooltip, error, disabled }: MetricInputProps) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
@@ -49,9 +72,10 @@ function MetricInput({ label, value, onChange, prefix, suffix, tooltip }: Metric
           type="number"
           value={value || ''}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className={prefix ? 'pl-7' : suffix ? 'pr-8' : ''}
+          className={`${prefix ? 'pl-7' : ''} ${suffix ? 'pr-8' : ''} ${error ? 'border-destructive' : ''}`}
           min={0}
           step="any"
+          disabled={disabled}
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
@@ -59,6 +83,7 @@ function MetricInput({ label, value, onChange, prefix, suffix, tooltip }: Metric
           </span>
         )}
       </div>
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -68,9 +93,10 @@ interface ResultCardProps {
   value: string;
   status: 'good' | 'warning' | 'bad' | 'neutral';
   description?: string;
+  previousValue?: number | null;
 }
 
-function ResultCard({ label, value, status, description }: ResultCardProps) {
+function ResultCard({ label, value, status, description, previousValue }: ResultCardProps) {
   const statusColors = {
     good: 'text-green-600 dark:text-green-400',
     warning: 'text-yellow-600 dark:text-yellow-400',
@@ -99,14 +125,64 @@ function ResultCard({ label, value, status, description }: ResultCardProps) {
   );
 }
 
-export function UnitEconomicsCalculator() {
-  // Input state
+interface UnitEconomicsCalculatorProps {
+  workspaceId: string;
+}
+
+export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculatorProps) {
+  const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()));
+  const [hasChanges, setHasChanges] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  
+  // Form state
   const [marketingCosts, setMarketingCosts] = useState(0);
   const [salesCosts, setSalesCosts] = useState(0);
   const [newCustomers, setNewCustomers] = useState(0);
   const [arpu, setArpu] = useState(0);
   const [grossMargin, setGrossMargin] = useState(70);
   const [monthlyChurnRate, setMonthlyChurnRate] = useState(5);
+
+  // Data hooks
+  const { data: history, isLoading: loadingHistory } = useUnitEconomicsHistory(workspaceId);
+  const saveUnitEconomics = useSaveUnitEconomics(workspaceId);
+
+  const currentMonthKey = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+  const selectedMonthKey = format(selectedMonth, 'yyyy-MM-dd');
+  const isCurrentMonth = isSameMonth(selectedMonth, new Date());
+
+  // Find data for selected month
+  const selectedMonthData = useMemo(() => {
+    return history?.find(h => h.period_month === selectedMonthKey);
+  }, [history, selectedMonthKey]);
+
+  // Find previous month data for comparison
+  const previousMonthData = useMemo(() => {
+    const prevMonth = format(subMonths(selectedMonth, 1), 'yyyy-MM-dd');
+    return history?.find(h => h.period_month === prevMonth);
+  }, [history, selectedMonth]);
+
+  // Load saved data when month changes
+  useEffect(() => {
+    if (selectedMonthData) {
+      setMarketingCosts(selectedMonthData.marketing_costs || 0);
+      setSalesCosts(selectedMonthData.sales_costs || 0);
+      setNewCustomers(selectedMonthData.new_customers || 0);
+      setArpu(selectedMonthData.arpu || 0);
+      setGrossMargin(selectedMonthData.gross_margin || 70);
+      setMonthlyChurnRate(selectedMonthData.monthly_churn_rate || 5);
+      setHasChanges(false);
+    } else {
+      // Reset to defaults for new month
+      setMarketingCosts(0);
+      setSalesCosts(0);
+      setNewCustomers(0);
+      setArpu(0);
+      setGrossMargin(70);
+      setMonthlyChurnRate(5);
+      setHasChanges(false);
+    }
+    setValidationErrors({});
+  }, [selectedMonthData, selectedMonthKey]);
 
   // Calculated metrics
   const metrics = useMemo(() => {
@@ -145,16 +221,120 @@ export function UnitEconomicsCalculator() {
     return `€${value.toFixed(0)}`;
   };
 
+  const handleInputChange = (setter: (v: number) => void, value: number) => {
+    setter(value);
+    setHasChanges(true);
+    setValidationErrors({});
+  };
+
+  const handleSave = async () => {
+    const formData: UnitEconomicsFormData = {
+      marketing_costs: marketingCosts,
+      sales_costs: salesCosts,
+      new_customers: newCustomers,
+      arpu: arpu,
+      gross_margin: grossMargin,
+      monthly_churn_rate: monthlyChurnRate,
+    };
+
+    // Validate
+    const result = unitEconomicsSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0] as string] = err.message;
+        }
+      });
+      setValidationErrors(errors);
+      toast.error('Please fix validation errors');
+      return;
+    }
+
+    try {
+      await saveUnitEconomics.mutateAsync(formData);
+      toast.success('Unit economics saved');
+      setHasChanges(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save');
+    }
+  };
+
+  const goToPreviousMonth = () => {
+    setSelectedMonth(subMonths(selectedMonth, 1));
+  };
+
+  const goToNextMonth = () => {
+    const next = addMonths(selectedMonth, 1);
+    if (!isSameMonth(next, new Date()) && next > new Date()) return;
+    setSelectedMonth(next);
+  };
+
+  const goToCurrentMonth = () => {
+    setSelectedMonth(startOfMonth(new Date()));
+  };
+
+  if (loadingHistory) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle>Unit Economics Calculator</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-primary" />
+            <CardTitle>Unit Economics Calculator</CardTitle>
+          </div>
+          {history && history.length > 0 && (
+            <Badge variant="outline" className="gap-1">
+              <History className="h-3 w-3" />
+              {history.length} months
+            </Badge>
+          )}
         </div>
         <CardDescription>
           Calculate your key SaaS metrics: CAC, LTV, LTV/CAC ratio, and payback period
         </CardDescription>
+        
+        {/* Month Selector */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={goToPreviousMonth}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="text-center min-w-[120px]">
+              <span className="font-medium">{format(selectedMonth, 'MMMM yyyy')}</span>
+              {selectedMonthData && (
+                <p className="text-xs text-muted-foreground">Saved</p>
+              )}
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={goToNextMonth}
+              disabled={isCurrentMonth}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          {!isCurrentMonth && (
+            <Button variant="ghost" size="sm" onClick={goToCurrentMonth}>
+              Go to Current Month
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Input Section */}
@@ -166,22 +346,28 @@ export function UnitEconomicsCalculator() {
             <MetricInput
               label="Marketing Costs (monthly)"
               value={marketingCosts}
-              onChange={setMarketingCosts}
+              onChange={(v) => handleInputChange(setMarketingCosts, v)}
               prefix="€"
               tooltip="Total monthly spend on marketing: ads, content, events, etc."
+              error={validationErrors.marketing_costs}
+              disabled={!isCurrentMonth}
             />
             <MetricInput
               label="Sales Costs (monthly)"
               value={salesCosts}
-              onChange={setSalesCosts}
+              onChange={(v) => handleInputChange(setSalesCosts, v)}
               prefix="€"
               tooltip="Total monthly sales costs: salaries, commissions, tools"
+              error={validationErrors.sales_costs}
+              disabled={!isCurrentMonth}
             />
             <MetricInput
               label="New Customers (monthly)"
               value={newCustomers}
-              onChange={setNewCustomers}
+              onChange={(v) => handleInputChange(setNewCustomers, Math.floor(v))}
               tooltip="Number of new paying customers acquired this month"
+              error={validationErrors.new_customers}
+              disabled={!isCurrentMonth}
             />
           </div>
 
@@ -192,26 +378,54 @@ export function UnitEconomicsCalculator() {
             <MetricInput
               label="ARPU (monthly)"
               value={arpu}
-              onChange={setArpu}
+              onChange={(v) => handleInputChange(setArpu, v)}
               prefix="€"
               tooltip="Average Revenue Per User per month"
+              error={validationErrors.arpu}
+              disabled={!isCurrentMonth}
             />
             <MetricInput
               label="Gross Margin"
               value={grossMargin}
-              onChange={setGrossMargin}
+              onChange={(v) => handleInputChange(setGrossMargin, v)}
               suffix="%"
               tooltip="Revenue minus cost of goods sold (typically 70-90% for SaaS)"
+              error={validationErrors.gross_margin}
+              disabled={!isCurrentMonth}
             />
             <MetricInput
               label="Monthly Churn Rate"
               value={monthlyChurnRate}
-              onChange={setMonthlyChurnRate}
+              onChange={(v) => handleInputChange(setMonthlyChurnRate, v)}
               suffix="%"
               tooltip="Percentage of customers who cancel each month"
+              error={validationErrors.monthly_churn_rate}
+              disabled={!isCurrentMonth}
             />
           </div>
         </div>
+
+        {/* Save Button */}
+        {isCurrentMonth && (
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleSave} 
+              disabled={!hasChanges || saveUnitEconomics.isPending}
+            >
+              {saveUnitEconomics.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save
+                </>
+              )}
+            </Button>
+          </div>
+        )}
 
         <Separator />
 
@@ -227,12 +441,14 @@ export function UnitEconomicsCalculator() {
               value={metrics.cac > 0 ? formatCurrency(metrics.cac) : '-'}
               status="neutral"
               description="Cost to acquire one customer"
+              previousValue={previousMonthData?.cac}
             />
             <ResultCard
               label="LTV"
               value={metrics.ltv > 0 ? formatCurrency(metrics.ltv) : '-'}
               status="neutral"
               description="Lifetime value per customer"
+              previousValue={previousMonthData?.ltv}
             />
             <ResultCard
               label="LTV:CAC Ratio"
