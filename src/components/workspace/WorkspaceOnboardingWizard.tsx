@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Loader2,
   X,
+  BookOpen,
 } from 'lucide-react';
 import {
   Dialog,
@@ -474,6 +475,19 @@ export function WorkspaceOnboardingWizard({
                   initial milestones, and schedule your first meeting.
                 </p>
               </div>
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-left">
+                <div className="flex items-start gap-2">
+                  <BookOpen className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-primary">Pro tip: Use Playbooks</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      After setup, visit the <strong>Playbooks</strong> tab to instantly apply pre-built 
+                      milestone and action templates specific to your stage. Playbooks connect your KPIs 
+                      to actionable tasks.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -636,6 +650,14 @@ export function WorkspaceOnboardingWizard({
                     <Check className="h-3 w-3" /> Meeting scheduled
                   </Badge>
                 )}
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                <div className="flex items-center gap-2 justify-center text-sm">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">
+                    Next step: Check <strong className="text-foreground">Playbooks</strong> tab for stage-specific templates
+                  </span>
+                </div>
               </div>
             </div>
           )}
