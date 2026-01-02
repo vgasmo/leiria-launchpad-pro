@@ -892,12 +892,14 @@
     "aiSuggestionsFailed": "Failed to generate suggestions"
   },
   "investorUpdates": {
+    "templates": "Templates",
     "templateLibrary": "Investor Update Templates",
     "templateLibraryDesc": "Choose a template tailored to your investor audience",
     "searchTemplates": "Search templates...",
     "sections": "sections",
     "useTemplate": "Use This Template",
     "templateApplied": "Template applied successfully",
+    "templateCopied": "Template copied to clipboard",
     "angel": "Angel",
     "seed": "Seed",
     "seriesA": "Series A",

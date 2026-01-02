@@ -102,7 +102,7 @@ const INVESTOR_TEMPLATES: InvestorTemplate[] = [
 ];
 
 interface InvestorTemplateLibraryProps {
-  onSelectTemplate: (template: InvestorTemplate) => void;
+  onSelectTemplate?: (template: InvestorTemplate) => void;
 }
 
 export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLibraryProps) {
@@ -131,9 +131,16 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
   };
 
   const handleUseTemplate = (template: InvestorTemplate) => {
-    onSelectTemplate(template);
+    if (onSelectTemplate) {
+      onSelectTemplate(template);
+    }
+    
+    // Copy template sections to clipboard as formatted text
+    const templateText = template.sections.map(s => `## ${s.title}\n${s.placeholder}`).join('\n\n');
+    navigator.clipboard.writeText(templateText);
+    
     setPreviewOpen(false);
-    toast.success(t('investorUpdates.templateApplied'));
+    toast.success(t('investorUpdates.templateCopied'));
   };
 
   return (

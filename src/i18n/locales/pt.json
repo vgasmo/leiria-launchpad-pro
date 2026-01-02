@@ -892,12 +892,14 @@
     "aiSuggestionsFailed": "Falha ao gerar sugestões"
   },
   "investorUpdates": {
+    "templates": "Modelos",
     "templateLibrary": "Modelos de Atualizações para Investidores",
     "templateLibraryDesc": "Escolha um modelo adaptado ao seu público de investidores",
     "searchTemplates": "Pesquisar modelos...",
     "sections": "secções",
     "useTemplate": "Usar Este Modelo",
     "templateApplied": "Modelo aplicado com sucesso",
+    "templateCopied": "Modelo copiado para a área de transferência",
     "angel": "Angel",
     "seed": "Seed",
     "seriesA": "Série A",
