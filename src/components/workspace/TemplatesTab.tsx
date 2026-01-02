@@ -26,6 +26,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { TemplateAIAnalysis } from './TemplateAIAnalysis';
+import { TemplateCoachPanel } from './TemplateCoachPanel';
 import { toast } from 'sonner';
 
 interface TemplatesTabProps {
@@ -361,7 +362,16 @@ function TemplateEditorDialog({
           </Alert>
         )}
 
-        {/* AI Analysis for consultants/mentors */}
+        {/* AI Coach Panel for consultants/mentors (always available when instance exists) */}
+        {canReview && instance?.id && (
+          <TemplateCoachPanel 
+            instanceId={instance.id}
+            workspaceId={workspaceId}
+            onCopyToNotes={(notes) => setReviewNotes(notes)}
+          />
+        )}
+
+        {/* AI Analysis for consultants/mentors on pending review */}
         {canReview && instance?.review_status === 'pending_review' && instance?.id && (
           <TemplateAIAnalysis 
             instanceId={instance.id}
