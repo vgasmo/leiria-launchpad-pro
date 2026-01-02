@@ -15,7 +15,7 @@ import {
   Upload, FileSpreadsheet, Download, RefreshCw, Calculator, TrendingUp, 
   Loader2, CheckCircle2, AlertTriangle, XCircle, Sparkles, ChevronDown,
   ChevronUp, ArrowRight, Lightbulb, Target, ListChecks, Copy, Calendar,
-  TrendingDown, Zap, Clock, Users
+  TrendingDown, Zap, Clock, Users, FileDown
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -142,6 +142,13 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
   const aiReview = activeVersion?.ai_review_json;
   const insights = metrics ? generateInsights(metrics) : [];
 
+  // Template download URL (public bucket)
+  const TEMPLATE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/public-assets/templates/Template_Avaliacao_Startup_Ecossistema.xlsm`;
+
+  const handleDownloadTemplate = () => {
+    window.open(TEMPLATE_URL, '_blank');
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -252,49 +259,55 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
               Upload, parse, and analyze your financial projections
             </CardDescription>
           </div>
-          {canWrite && (
-            <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {versions?.length ? 'New Version' : 'Upload Model'}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Upload Financial Model</DialogTitle>
-                  <DialogDescription>
-                    Supports Excel (.xlsx, .xls) and CSV files
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div>
-                    <Label>Scenario</Label>
-                    <Select value={scenarioName} onValueChange={setScenarioName}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCENARIOS.map(s => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Download Template
+            </Button>
+            {canWrite && (
+              <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    {versions?.length ? 'New Version' : 'Upload Model'}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Upload Financial Model</DialogTitle>
+                    <DialogDescription>
+                      Supports Excel (.xlsx, .xls) and CSV files
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label>Scenario</Label>
+                      <Select value={scenarioName} onValueChange={setScenarioName}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SCENARIOS.map(s => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>File</Label>
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xlsx,.xls,.csv"
+                        onChange={handleFileUpload}
+                        disabled={uploadMutation.isPending || createVersion.isPending}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label>File</Label>
-                    <Input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".xlsx,.xls,.csv"
-                      onChange={handleFileUpload}
-                      disabled={uploadMutation.isPending || createVersion.isPending}
-                    />
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
       </CardHeader>
 

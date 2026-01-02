@@ -25,6 +25,9 @@ export interface KpiValue {
   target_value: number | null;
   notes: string | null;
   created_at: string;
+  source_type: 'manual' | 'financial_model' | 'import' | 'ai';
+  source_ref_id: string | null;
+  locked_by_source: boolean;
 }
 
 export interface WorkspaceKpi {
@@ -200,6 +203,31 @@ export function useUpsertKpiValue(workspaceId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kpi-values', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-kpis', workspaceId] });
+    },
+  });
+}
+
+// Unlock a KPI value (switch from locked source to manual)
+export function useUnlockKpiValue(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (kpiValueId: string) => {
+      const { data, error } = await supabase
+        .from('kpi_values')
+        .update({
+          source_type: 'manual',
+          locked_by_source: false,
+        })
+        .eq('id', kpiValueId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kpi-values', workspaceId] });
     },
   });
 }

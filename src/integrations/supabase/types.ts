@@ -1041,8 +1041,11 @@ export type Database = {
           created_by: string | null
           id: string
           kpi_definition_id: string
+          locked_by_source: boolean
           notes: string | null
           period_month: string
+          source_ref_id: string | null
+          source_type: string
           target_value: number | null
           updated_at: string
           value: number | null
@@ -1053,8 +1056,11 @@ export type Database = {
           created_by?: string | null
           id?: string
           kpi_definition_id: string
+          locked_by_source?: boolean
           notes?: string | null
           period_month: string
+          source_ref_id?: string | null
+          source_type?: string
           target_value?: number | null
           updated_at?: string
           value?: number | null
@@ -1065,8 +1071,11 @@ export type Database = {
           created_by?: string | null
           id?: string
           kpi_definition_id?: string
+          locked_by_source?: boolean
           notes?: string | null
           period_month?: string
+          source_ref_id?: string | null
+          source_type?: string
           target_value?: number | null
           updated_at?: string
           value?: number | null
@@ -1085,6 +1094,13 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kpi_values_source_ref_fkey"
+            columns: ["source_ref_id"]
+            isOneToOne: false
+            referencedRelation: "financial_model_versions"
             referencedColumns: ["id"]
           },
         ]

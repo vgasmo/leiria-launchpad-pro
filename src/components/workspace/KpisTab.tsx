@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import {
   useAddWorkspaceKpi,
   useRemoveWorkspaceKpi,
   useApplyStageDefaults,
+  useUnlockKpiValue,
   type WorkspaceKpi,
   type KpiValue,
 } from '@/hooks/useKpis';
@@ -55,6 +56,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const addKpi = useAddWorkspaceKpi(workspaceId);
   const removeKpi = useRemoveWorkspaceKpi(workspaceId);
   const applyDefaults = useApplyStageDefaults(workspaceId);
+  const unlockKpi = useUnlockKpiValue(workspaceId);
   const { refetch: fetchExportData } = useExportKpis(workspaceId);
 
   const handleExport = async () => {
@@ -442,6 +444,10 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
             isSaving={savingKpis.has(wk.kpi_definition_id)}
             onValueChange={(field, val) => handleValueChange(wk.kpi_definition_id, field, val)}
             onSave={() => handleSaveKpi(wk)}
+            onUnlock={async (kpiValueId) => {
+              await unlockKpi.mutateAsync(kpiValueId);
+              toast.success('KPI unlocked for manual editing');
+            }}
           />
         ))}
       </div>
@@ -465,6 +471,7 @@ interface KpiCardProps {
   isSaving: boolean;
   onValueChange: (field: 'value' | 'notes', val: string) => void;
   onSave: () => void;
+  onUnlock?: (kpiValueId: string) => void;
 }
 
 function KpiCard({
@@ -476,12 +483,20 @@ function KpiCard({
   isSaving,
   onValueChange,
   onSave,
+  onUnlock,
 }: KpiCardProps) {
+  const { t } = useTranslation();
   const def = workspaceKpi.definition;
   if (!def) return null;
 
   const displayValue = editedValue?.value ?? currentValue?.value?.toString() ?? '';
   const displayNotes = editedValue?.notes ?? currentValue?.notes ?? '';
+  
+  // Source tracking
+  const isLocked = currentValue?.locked_by_source ?? false;
+  const sourceType = currentValue?.source_type ?? 'manual';
+  const isFromFinancialModel = sourceType === 'financial_model';
+  const effectiveCanEdit = canEdit && !isLocked;
   
   // Check if there are unsaved changes
   const hasChanges = editedValue !== undefined;
@@ -507,7 +522,7 @@ function KpiCard({
   }));
 
   return (
-    <Card>
+    <Card className={isLocked ? 'border-amber-200 dark:border-amber-800' : ''}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -516,9 +531,31 @@ function KpiCard({
               {workspaceKpi.required && (
                 <Badge variant="outline" className="text-xs">Required</Badge>
               )}
+              {isLocked && (
+                <Lock className="h-3.5 w-3.5 text-amber-600" />
+              )}
             </CardTitle>
             {def.description && (
               <p className="text-xs text-muted-foreground mt-0.5">{def.description}</p>
+            )}
+            {/* Source indicator */}
+            {isFromFinancialModel && currentValue && (
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  From Financial Model
+                </Badge>
+                {isLocked && canEdit && onUnlock && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-5 px-1.5 text-xs"
+                    onClick={() => onUnlock(currentValue.id)}
+                  >
+                    <Unlock className="h-3 w-3 mr-1" />
+                    Unlock
+                  </Button>
+                )}
+              </div>
             )}
           </div>
           <TrendIcon className={`h-4 w-4 ${trendColor}`} />
@@ -528,7 +565,7 @@ function KpiCard({
         {/* Current value display/input */}
         <div className="flex items-end gap-4">
           <div className="flex-1">
-            {canEdit ? (
+            {effectiveCanEdit ? (
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Value</Label>
                 <div className="flex items-center gap-2">
@@ -570,7 +607,7 @@ function KpiCard({
         </div>
 
         {/* Notes */}
-        {canEdit ? (
+        {effectiveCanEdit ? (
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Notes (optional)</Label>
             <Textarea
@@ -587,8 +624,16 @@ function KpiCard({
           </div>
         ) : null}
 
+        {/* Locked message */}
+        {isLocked && canEdit && (
+          <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <Lock className="h-3 w-3" />
+            Locked from Financial Model sync. Unlock to edit manually.
+          </div>
+        )}
+
         {/* Save button */}
-        {canEdit && hasChanges && (
+        {effectiveCanEdit && hasChanges && (
           <Button size="sm" onClick={onSave} disabled={isSaving} className="w-full">
             <Save className="h-3.5 w-3.5 mr-1" />
             Save
