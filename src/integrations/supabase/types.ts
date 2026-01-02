@@ -697,6 +697,42 @@ export type Database = {
           },
         ]
       }
+      health_model_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          thresholds_json: Json
+          updated_at: string
+          weights_json: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          thresholds_json?: Json
+          updated_at?: string
+          weights_json?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          thresholds_json?: Json
+          updated_at?: string
+          weights_json?: Json
+        }
+        Relationships: []
+      }
       investors: {
         Row: {
           created_at: string
@@ -1099,30 +1135,36 @@ export type Database = {
           digest_day: number | null
           digest_frequency: string | null
           email_digest_enabled: boolean | null
+          email_on_health_drop: boolean | null
           id: string
           last_digest_sent_at: string | null
           updated_at: string
           user_id: string
+          weekly_health_digest: boolean | null
         }
         Insert: {
           created_at?: string
           digest_day?: number | null
           digest_frequency?: string | null
           email_digest_enabled?: boolean | null
+          email_on_health_drop?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
           updated_at?: string
           user_id: string
+          weekly_health_digest?: boolean | null
         }
         Update: {
           created_at?: string
           digest_day?: number | null
           digest_frequency?: string | null
           email_digest_enabled?: boolean | null
+          email_on_health_drop?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
           updated_at?: string
           user_id?: string
+          weekly_health_digest?: boolean | null
         }
         Relationships: []
       }
@@ -1452,6 +1494,44 @@ export type Database = {
             foreignKeyName: "program_health_model_program_id_fkey"
             columns: ["program_id"]
             isOneToOne: true
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_health_model_versions: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          note: string | null
+          program_id: string
+          thresholds_json: Json
+          weights_json: Json
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          note?: string | null
+          program_id: string
+          thresholds_json: Json
+          weights_json: Json
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          note?: string | null
+          program_id?: string
+          thresholds_json?: Json
+          weights_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_health_model_versions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
@@ -2460,6 +2540,110 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "workspace_alerts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_health_alerts: {
+        Row: {
+          ack_at: string | null
+          ack_by: string | null
+          alert_type: string
+          created_at: string
+          evidence_json: Json
+          id: string
+          reason: string
+          resolved_at: string | null
+          severity: string
+          snoozed_until: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          ack_at?: string | null
+          ack_by?: string | null
+          alert_type: string
+          created_at?: string
+          evidence_json?: Json
+          id?: string
+          reason: string
+          resolved_at?: string | null
+          severity?: string
+          snoozed_until?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          ack_at?: string | null
+          ack_by?: string | null
+          alert_type?: string
+          created_at?: string
+          evidence_json?: Json
+          id?: string
+          reason?: string
+          resolved_at?: string | null
+          severity?: string
+          snoozed_until?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_health_alerts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_health_history: {
+        Row: {
+          components_json: Json
+          computed_at: string
+          created_at: string
+          explanation_json: Json | null
+          id: string
+          label: string
+          model_version_id: string | null
+          score_numeric: number
+          workspace_id: string
+        }
+        Insert: {
+          components_json?: Json
+          computed_at?: string
+          created_at?: string
+          explanation_json?: Json | null
+          id?: string
+          label: string
+          model_version_id?: string | null
+          score_numeric: number
+          workspace_id: string
+        }
+        Update: {
+          components_json?: Json
+          computed_at?: string
+          created_at?: string
+          explanation_json?: Json | null
+          id?: string
+          label?: string
+          model_version_id?: string | null
+          score_numeric?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_health_history_model_version"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "program_health_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_health_history_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
