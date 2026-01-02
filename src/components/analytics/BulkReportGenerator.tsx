@@ -114,9 +114,18 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
         ]);
       }
 
-      // Convert to CSV
+      // Convert to CSV with formula injection protection
+      const sanitizeCell = (cell: string): string => {
+        const str = String(cell).replace(/"/g, '""');
+        // Prevent formula injection by prefixing dangerous characters
+        if (/^[=+\-@\t\r]/.test(str)) {
+          return `'${str}`;
+        }
+        return str;
+      };
+      
       const csv = rows.map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+        row.map(cell => `"${sanitizeCell(cell)}"`).join(',')
       ).join('\n');
 
       // Download
