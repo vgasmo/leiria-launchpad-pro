@@ -12,11 +12,13 @@ type StartupStage = Database['public']['Enums']['startup_stage'];
 
 interface PlaybooksTabProps {
   workspaceId: string;
-  stage: StartupStage;
   programId?: string;
+  currentStage?: StartupStage;
+  canWrite?: boolean;
 }
 
-export function PlaybooksTab({ workspaceId, stage, programId }: PlaybooksTabProps) {
+export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }: PlaybooksTabProps) {
+  const stage = currentStage || 'ideation';
   const { data: playbooks, isLoading } = usePlaybooksForStage(stage, programId);
   const { data: instances } = useWorkspacePlaybookInstances(workspaceId);
   const instantiate = useInstantiatePlaybook();

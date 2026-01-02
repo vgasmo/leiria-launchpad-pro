@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Target, Clock, BookOpen } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,6 +21,7 @@ import { NotesAndTasksTab } from '@/components/workspace/NotesAndTasksTab';
 import { TeamTab } from '@/components/workspace/TeamTab';
 import { OkrsTab } from '@/components/workspace/OkrsTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
+import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -112,6 +113,10 @@ export default function WorkspaceDetail() {
           <TabsTrigger value="actions">{t('workspace.actions')}</TabsTrigger>
           <TabsTrigger value="milestones">{t('workspace.milestones')}</TabsTrigger>
           <TabsTrigger value="kpis">{t('workspace.kpis')}</TabsTrigger>
+          <TabsTrigger value="playbooks" className="gap-1">
+            <BookOpen className="h-3.5 w-3.5" />
+            Playbooks
+          </TabsTrigger>
           <TabsTrigger value="templates">{t('workspace.templates')}</TabsTrigger>
           <TabsTrigger value="calendar">{t('workspace.calendar')}</TabsTrigger>
           <TabsTrigger value="documents">{t('workspace.documents')}</TabsTrigger>
@@ -181,6 +186,14 @@ export default function WorkspaceDetail() {
         </TabsContent>
         <TabsContent value="kpis">
           <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
+        </TabsContent>
+        <TabsContent value="playbooks">
+          <PlaybooksTab 
+            workspaceId={workspace.id} 
+            programId={workspace.program_id} 
+            currentStage={workspace.stage} 
+            canWrite={canWrite} 
+          />
         </TabsContent>
         <TabsContent value="templates">
           <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />

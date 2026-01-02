@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, FileText, ListTodo, MessageSquare, File, Target, StickyNote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
-import { useDebounce } from '@/hooks/use-mobile';
 
 const typeIcons: Record<string, React.ReactNode> = {
   session: <FileText className="h-4 w-4" />,

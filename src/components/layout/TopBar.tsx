@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { GlobalSearchInput } from '@/components/search/GlobalSearchInput';
 
 export function TopBar() {
   const navigate = useNavigate();
@@ -39,6 +40,9 @@ export function TopBar() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Global Search */}
+      <GlobalSearchInput />
+      
       {/* Language Selector */}
       <LanguageSelector />
       
