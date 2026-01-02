@@ -25,6 +25,7 @@ import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
+import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -257,6 +258,11 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <PendingTemplateReviews showEmpty />
         <StaffTasksPanel />
         <PendingCheckinsPanel />
+      </div>
+
+      {/* Alerts Panel */}
+      <div className="animate-fade-in" style={{ animationDelay: '220ms' }}>
+        <AlertsPanel />
       </div>
 
       {/* Main Content Grid */}
