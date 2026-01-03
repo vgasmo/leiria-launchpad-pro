@@ -28,6 +28,7 @@ import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
+import { ConsultantWorkloadWidget } from '@/components/staff/ConsultantWorkloadWidget';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -255,13 +256,18 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* Work Queue & Pending Reviews Section */}
-      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <WorkQueuePanel compact />
-        <div className="space-y-6">
-          <PendingTemplateReviews showEmpty />
-          <StaffTasksPanel compact />
+      {/* Work Queue & Workload Widget Section */}
+      <div className="grid gap-6 lg:grid-cols-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="lg:col-span-2">
+          <WorkQueuePanel compact />
         </div>
+        <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
+      </div>
+
+      {/* Staff Tasks & Template Reviews */}
+      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '220ms' }}>
+        <PendingTemplateReviews showEmpty />
+        <StaffTasksPanel compact />
       </div>
 
       {/* Pending Check-ins & Alerts */}

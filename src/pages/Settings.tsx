@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { profileUpdateSchema, validateFormData } from '@/lib/validations';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
+import { MentorNdaStatus } from '@/components/mentors/MentorNdaStatus';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -405,6 +406,9 @@ export default function Settings() {
                           Add tags for your areas of expertise to help founders find you
                         </p>
                       </div>
+
+                      {/* NDA Status */}
+                      <MentorNdaStatus />
                     </>
                   )}
 
