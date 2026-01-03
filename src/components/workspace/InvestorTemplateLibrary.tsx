@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Users, TrendingUp, Target, Sparkles, Copy, Check, Search } from 'lucide-react';
+import { FileText, Sparkles, Copy, Search, Edit3, Download, X, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 interface InvestorTemplate {
@@ -110,6 +110,8 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
   const [search, setSearch] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<InvestorTemplate | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingSections, setEditingSections] = useState<{ title: string; content: string; placeholder: string }[]>([]);
 
   const audienceLabels: Record<string, { label: string; color: string }> = {
     angel: { label: t('investorUpdates.angel'), color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
@@ -130,12 +132,50 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
     setPreviewOpen(true);
   };
 
+  const handleEditTemplate = (template: InvestorTemplate) => {
+    setSelectedTemplate(template);
+    setEditingSections(template.sections.map(s => ({ ...s, content: '' })));
+    setPreviewOpen(false);
+    setEditorOpen(true);
+  };
+
+  const handleSectionChange = (index: number, content: string) => {
+    setEditingSections(prev => prev.map((s, i) => i === index ? { ...s, content } : s));
+  };
+
+  const handleCopyToClipboard = () => {
+    if (!selectedTemplate) return;
+    const templateText = editingSections
+      .map(s => `## ${s.title}\n${s.content || s.placeholder}`)
+      .join('\n\n');
+    navigator.clipboard.writeText(templateText);
+    toast.success(t('investorUpdates.templateCopied'), {
+      description: t('investorUpdates.templateCopiedDesc'),
+    });
+  };
+
+  const handleExportMarkdown = () => {
+    if (!selectedTemplate) return;
+    const templateText = `# ${selectedTemplate.name}\n\n` + editingSections
+      .map(s => `## ${s.title}\n\n${s.content || s.placeholder}`)
+      .join('\n\n');
+    
+    const blob = new Blob([templateText], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedTemplate.name.toLowerCase().replace(/\s+/g, '-')}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success(t('investorUpdates.exportSuccess'));
+  };
+
   const handleUseTemplate = (template: InvestorTemplate) => {
     if (onSelectTemplate) {
       onSelectTemplate(template);
     }
     
-    // Copy template sections to clipboard as formatted text
     const templateText = template.sections.map(s => `## ${s.title}\n${s.placeholder}`).join('\n\n');
     navigator.clipboard.writeText(templateText);
     
@@ -145,6 +185,8 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
       duration: 4000,
     });
   };
+
+  const filledSectionsCount = editingSections.filter(s => s.content.trim()).length;
 
   return (
     <>
@@ -196,6 +238,7 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
         </CardContent>
       </Card>
 
+      {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh]">
           {selectedTemplate && (
@@ -223,14 +266,81 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
                 </div>
               </ScrollArea>
 
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setPreviewOpen(false)}>
-                  {t('common.cancel')}
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => handleUseTemplate(selectedTemplate)}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  {t('investorUpdates.copyTemplate')}
                 </Button>
-                <Button onClick={() => handleUseTemplate(selectedTemplate)}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {t('investorUpdates.useTemplate')}
+                <Button onClick={() => handleEditTemplate(selectedTemplate)}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  {t('investorUpdates.editInApp')}
                 </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Editor Dialog */}
+      <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+          {selectedTemplate && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Edit3 className="h-5 w-5" />
+                      {selectedTemplate.name}
+                      <Badge variant="outline" className={audienceLabels[selectedTemplate.audience].color}>
+                        {audienceLabels[selectedTemplate.audience].label}
+                      </Badge>
+                    </DialogTitle>
+                    <DialogDescription className="mt-1">
+                      {t('investorUpdates.fillSections')} • {filledSectionsCount}/{editingSections.length} {t('investorUpdates.completed')}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <ScrollArea className="flex-1 pr-4">
+                <div className="space-y-6 py-4">
+                  {editingSections.map((section, i) => (
+                    <div key={i} className="space-y-2">
+                      <label className="font-medium text-sm flex items-center gap-2">
+                        {section.title}
+                        {section.content.trim() && (
+                          <Badge variant="secondary" className="text-xs">
+                            {t('investorUpdates.filled')}
+                          </Badge>
+                        )}
+                      </label>
+                      <Textarea
+                        value={section.content}
+                        onChange={(e) => handleSectionChange(i, e.target.value)}
+                        placeholder={section.placeholder}
+                        className="min-h-[120px] resize-y"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              <DialogFooter className="flex-col sm:flex-row gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setEditorOpen(false)}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  {t('common.back')}
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleCopyToClipboard}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    {t('investorUpdates.copyToClipboard')}
+                  </Button>
+                  <Button onClick={handleExportMarkdown}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {t('investorUpdates.exportMarkdown')}
+                  </Button>
+                </div>
               </DialogFooter>
             </>
           )}
