@@ -1267,5 +1267,17 @@
     "noRisks": "Sem riscos críticos detetados",
     "totalWorkspacesAtRisk": "Total de workspaces em risco",
     "tableCopied": "Resumo de riscos copiado para área de transferência"
+  },
+  "priority": {
+    "setLevel": "Definir Nível de Prioridade",
+    "notes": "Notas (opcional)",
+    "notesPlaceholder": "Porquê este nível de prioridade?",
+    "updated": "Prioridade atualizada",
+    "updatedDescription": "A prioridade do workspace foi atualizada",
+    "updateFailed": "Falha ao atualizar prioridade",
+    "star": "Estrela",
+    "high": "Alta",
+    "standard": "Normal",
+    "maintenance": "Manutenção"
   }
 }

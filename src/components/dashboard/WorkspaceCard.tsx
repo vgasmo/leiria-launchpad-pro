@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
+import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
@@ -50,7 +51,12 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
               {workspace.program?.name}
             </p>
           </div>
-          <HealthBadge score={effectiveHealth as HealthScore | null} size="sm" />
+          <div className="flex flex-col items-end gap-1">
+            <HealthBadge score={effectiveHealth as HealthScore | null} size="sm" />
+            {workspace.priority_level && workspace.priority_level !== 'standard' && (
+              <PriorityBadge priority={workspace.priority_level} size="sm" showLabel={false} />
+            )}
+          </div>
         </div>
 
         {/* Stats Grid */}

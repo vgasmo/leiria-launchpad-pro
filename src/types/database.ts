@@ -3,6 +3,7 @@
 export type AppRole = 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member';
 export type StartupStage = 'ideation' | 'validation' | 'mvp' | 'growth' | 'scale';
 export type HealthScore = 'critical' | 'at_risk' | 'stable' | 'healthy' | 'thriving';
+export type WorkspacePriority = 'star' | 'high' | 'standard' | 'maintenance';
 export type ActionStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 export type MilestoneStatus = 'not_started' | 'in_progress' | 'completed' | 'delayed';
 export type ActionPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -69,6 +70,10 @@ export interface Workspace {
   health_status: string | null;
   health_notes: string | null;
   last_checkin_at: string | null;
+  priority_level: WorkspacePriority;
+  priority_notes: string | null;
+  priority_set_at: string | null;
+  priority_set_by: string | null;
   created_at: string;
   updated_at: string;
   // Joined fields

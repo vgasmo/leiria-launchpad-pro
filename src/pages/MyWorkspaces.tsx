@@ -30,7 +30,7 @@ import { SavedFiltersDropdown } from '@/components/workspace/SavedFiltersDropdow
 import { useWorkspaces, usePrograms, useMyPendingWorkspaces, WorkspaceWithDetails, SortOption, WorkspaceFilters as WorkspaceFiltersType } from '@/hooks/useWorkspaces';
 import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
-import { StartupStage, HealthScore } from '@/types/database';
+import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 
 const PAGE_SIZE = 15;
@@ -47,9 +47,10 @@ export default function MyWorkspaces() {
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [stageFilter, setStageFilter] = useState<StartupStage | 'all'>('all');
   const [healthFilter, setHealthFilter] = useState<HealthScore | 'all'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<WorkspacePriority | 'all'>('all');
   const [missingKpi, setMissingKpi] = useState(false);
   const [overdueActions, setOverdueActions] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('urgency');
+  const [sortBy, setSortBy] = useState<SortOption>('priority');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [quickFilters, setQuickFilters] = useState<Record<string, boolean>>({});
@@ -103,6 +104,7 @@ export default function MyWorkspaces() {
     programId: programFilter,
     stage: stageFilter,
     health: healthFilter,
+    priority: priorityFilter,
     missingKpi,
     overdueActions,
     sortBy,
@@ -289,6 +291,8 @@ export default function MyWorkspaces() {
               onStageFilterChange={(v) => { setStageFilter(v); handleFilterChange(); }}
               healthFilter={healthFilter}
               onHealthFilterChange={(v) => { setHealthFilter(v); handleFilterChange(); }}
+              priorityFilter={priorityFilter}
+              onPriorityFilterChange={(v) => { setPriorityFilter(v); handleFilterChange(); }}
               missingKpi={missingKpi}
               onMissingKpiChange={(v) => { setMissingKpi(v); handleFilterChange(); }}
               overdueActions={overdueActions}

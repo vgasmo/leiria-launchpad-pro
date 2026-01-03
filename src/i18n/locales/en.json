@@ -1111,5 +1111,17 @@
     "noRisks": "No critical risks detected",
     "totalWorkspacesAtRisk": "Total workspaces at risk",
     "tableCopied": "Risk summary copied to clipboard"
+  },
+  "priority": {
+    "setLevel": "Set Priority Level",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Why this priority level?",
+    "updated": "Priority updated",
+    "updatedDescription": "Workspace priority has been updated",
+    "updateFailed": "Failed to update priority",
+    "star": "Star",
+    "high": "High",
+    "standard": "Standard",
+    "maintenance": "Maintenance"
   }
 }

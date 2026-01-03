@@ -18,11 +18,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ViewToggle, ViewMode } from '@/components/ui/ViewToggle';
-import { StartupStage, HealthScore } from '@/types/database';
+import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import { SortOption } from '@/hooks/useWorkspaces';
 
 const stages: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const healthScores: HealthScore[] = ['critical', 'at_risk', 'stable', 'healthy', 'thriving'];
+const priorities: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
 
 interface Program {
   id: string;
@@ -38,6 +39,8 @@ interface WorkspaceFiltersProps {
   onStageFilterChange: (value: StartupStage | 'all') => void;
   healthFilter: HealthScore | 'all';
   onHealthFilterChange: (value: HealthScore | 'all') => void;
+  priorityFilter: WorkspacePriority | 'all';
+  onPriorityFilterChange: (value: WorkspacePriority | 'all') => void;
   missingKpi: boolean;
   onMissingKpiChange: (value: boolean) => void;
   overdueActions: boolean;
@@ -61,6 +64,8 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
   onStageFilterChange,
   healthFilter,
   onHealthFilterChange,
+  priorityFilter,
+  onPriorityFilterChange,
   missingKpi,
   onMissingKpiChange,
   overdueActions,
@@ -95,6 +100,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="priority">By Priority</SelectItem>
             <SelectItem value="urgency">By Urgency</SelectItem>
             <SelectItem value="meeting">By Next Meeting</SelectItem>
             <SelectItem value="name">By Name</SelectItem>
@@ -145,6 +151,23 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
             {healthScores.map((health) => (
               <SelectItem key={health} value={health} className="capitalize">
                 {health.replace('_', ' ')}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={priorityFilter}
+          onValueChange={(v) => onPriorityFilterChange(v as WorkspacePriority | 'all')}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            {priorities.map((priority) => (
+              <SelectItem key={priority} value={priority} className="capitalize">
+                {priority === 'star' ? '⭐ Star' : priority.charAt(0).toUpperCase() + priority.slice(1)}
               </SelectItem>
             ))}
           </SelectContent>
