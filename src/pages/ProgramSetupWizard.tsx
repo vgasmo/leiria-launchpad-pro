@@ -207,6 +207,7 @@ export default function ProgramSetupWizard() {
                 return (
                   <button
                     key={step.key}
+                    type="button"
                     onClick={() => setCurrentStep(step.key)}
                     className={`flex flex-col items-center gap-1 text-xs transition-colors ${
                       isActive
@@ -306,6 +307,7 @@ export default function ProgramSetupWizard() {
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
             <Button
+              type="button"
               variant="outline"
               onClick={() => setShowDiscardDialog(true)}
               className="text-destructive"
@@ -317,20 +319,21 @@ export default function ProgramSetupWizard() {
 
           <div className="flex gap-2">
             {currentStepIndex > 0 && (
-              <Button variant="outline" onClick={handleBack}>
+              <Button type="button" variant="outline" onClick={handleBack}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
             )}
 
             {currentStep !== 'review' ? (
-              <Button onClick={handleSaveAndContinue} disabled={updateDraft.isPending}>
+              <Button type="button" onClick={handleSaveAndContinue} disabled={updateDraft.isPending}>
                 <Save className="h-4 w-4 mr-1" />
                 Save & Continue
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <Button
+                type="button"
                 onClick={handlePublish}
                 disabled={publishDraft.isPending || getValidationErrors().length > 0}
                 className="bg-green-600 hover:bg-green-700"
