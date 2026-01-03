@@ -1,0 +1,385 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Copy,
+  Lightbulb,
+  Target,
+  Users,
+  AlertTriangle,
+  Sparkles,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import {
+  useCreateValueProp,
+  useValuePropArtifacts,
+  generateValuePropOutputs,
+  ValuePropFields,
+  ValuePropOutputs,
+} from '@/hooks/useValueProp';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+interface ValuePropWizardProps {
+  workspaceId: string;
+  onComplete?: () => void;
+}
+
+const STEPS = [
+  { key: 'segment', icon: Users, title: 'Customer Segment', description: 'Who are you solving for?' },
+  { key: 'problem', icon: AlertTriangle, title: 'Problem & Evidence', description: 'What pain have you observed?' },
+  { key: 'consequence', icon: Target, title: 'Consequence', description: 'What happens if unsolved?' },
+  { key: 'jobs', icon: Lightbulb, title: 'Jobs to be Done', description: 'What do they need to accomplish?' },
+  { key: 'alternatives', icon: Users, title: 'Alternatives', description: 'What do they use today?' },
+  { key: 'value', icon: Sparkles, title: 'Value Proposition', description: 'Your unique solution' },
+  { key: 'proof', icon: Check, title: 'Proof', description: 'Evidence & credentials' },
+];
+
+const EXAMPLES: Record<string, string> = {
+  segment: 'e.g., "B2B SaaS founders with 10-50 employees who are scaling their sales team"',
+  problem: 'e.g., "They spend 40% of their time on manual data entry instead of closing deals"',
+  evidence: 'e.g., "Interviewed 15 founders; 12 reported this as top-3 pain point"',
+  consequence: 'e.g., "Miss quota by 20-30%, lose good salespeople to frustration"',
+  jobs_to_be_done: 'e.g., "Close more deals, reduce admin time, track pipeline accurately"',
+  alternatives: 'e.g., "Spreadsheets, basic CRM, or hiring more admins"',
+  why_alternatives_fail: 'e.g., "Spreadsheets don\'t scale; CRMs require manual entry"',
+  value_prop: 'e.g., "AI-powered CRM that auto-captures data from email/calls"',
+  proof: 'e.g., "Beta users saved 10hrs/week; 3 paying pilots at $500/mo"',
+};
+
+export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProps) {
+  const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+  const [fields, setFields] = useState<ValuePropFields>({
+    segment: '',
+    problem: '',
+    evidence: '',
+    consequence: '',
+    jobs_to_be_done: '',
+    alternatives: '',
+    why_alternatives_fail: '',
+    value_prop: '',
+    proof: '',
+  });
+  const [outputs, setOutputs] = useState<ValuePropOutputs | null>(null);
+
+  const createMutation = useCreateValueProp(workspaceId);
+
+  const updateField = (key: keyof ValuePropFields, value: string) => {
+    setFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const progress = ((currentStep + 1) / STEPS.length) * 100;
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return fields.segment.trim().length > 5;
+      case 1:
+        return fields.problem.trim().length > 10;
+      case 2:
+        return fields.consequence.trim().length > 5;
+      case 3:
+        return fields.jobs_to_be_done.trim().length > 5;
+      case 4:
+        return fields.alternatives.trim().length > 5;
+      case 5:
+        return fields.value_prop.trim().length > 10;
+      case 6:
+        return true; // Proof is optional
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // Generate outputs
+      const generated = generateValuePropOutputs(fields);
+      setOutputs(generated);
+      setShowResults(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (showResults) {
+      setShowResults(false);
+    } else if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!outputs) return;
+    try {
+      await createMutation.mutateAsync({ fields, outputs });
+      toast.success('Value proposition saved!');
+      onComplete?.();
+    } catch (error) {
+      toast.error('Failed to save');
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
+  };
+
+  if (showResults && outputs) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <CardTitle>Your Value Proposition</CardTitle>
+          </div>
+          <CardDescription>Review and use your generated value proposition</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* VP Statement */}
+          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-medium">Full Statement</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(outputs.vp_statement)}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1" />
+                Copy
+              </Button>
+            </div>
+            <p className="text-sm">{outputs.vp_statement}</p>
+          </div>
+
+          {/* Short Version */}
+          <div className="p-4 rounded-lg bg-muted">
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-medium">One-liner</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(outputs.short_version)}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1" />
+                Copy
+              </Button>
+            </div>
+            <p className="text-sm">{outputs.short_version}</p>
+          </div>
+
+          {/* Bullet Points */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-medium">Bullet Points for Proposals</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(outputs.bullet_points.join('\n• '))}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1" />
+                Copy All
+              </Button>
+            </div>
+            <ul className="space-y-1">
+              {outputs.bullet_points.map((point, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <span className="text-primary mt-1">•</span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Separator />
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Edit Inputs
+            </Button>
+            <Button onClick={handleSave} disabled={createMutation.isPending}>
+              <Check className="h-4 w-4 mr-2" />
+              Save Value Proposition
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const StepIcon = STEPS[currentStep].icon;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <StepIcon className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">{STEPS[currentStep].title}</CardTitle>
+          </div>
+          <Badge variant="outline">
+            {currentStep + 1} / {STEPS.length}
+          </Badge>
+        </div>
+        <CardDescription>{STEPS[currentStep].description}</CardDescription>
+        <Progress value={progress} className="h-1 mt-2" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Step Content */}
+        {currentStep === 0 && (
+          <div className="space-y-3">
+            <Label>Who is your target customer segment?</Label>
+            <Textarea
+              value={fields.segment}
+              onChange={(e) => updateField('segment', e.target.value)}
+              placeholder={EXAMPLES.segment}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Be specific: decision maker role, company size, industry
+            </p>
+          </div>
+        )}
+
+        {currentStep === 1 && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>What problem do they face?</Label>
+              <Textarea
+                value={fields.problem}
+                onChange={(e) => updateField('problem', e.target.value)}
+                placeholder={EXAMPLES.problem}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>What evidence do you have? (interviews, data)</Label>
+              <Textarea
+                value={fields.evidence}
+                onChange={(e) => updateField('evidence', e.target.value)}
+                placeholder={EXAMPLES.evidence}
+                rows={2}
+              />
+            </div>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div className="space-y-3">
+            <Label>What happens if they don't solve this problem?</Label>
+            <Textarea
+              value={fields.consequence}
+              onChange={(e) => updateField('consequence', e.target.value)}
+              placeholder={EXAMPLES.consequence}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Think: lost revenue, wasted time, missed opportunities
+            </p>
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className="space-y-3">
+            <Label>What jobs are they trying to get done?</Label>
+            <Textarea
+              value={fields.jobs_to_be_done}
+              onChange={(e) => updateField('jobs_to_be_done', e.target.value)}
+              placeholder={EXAMPLES.jobs_to_be_done}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Focus on outcomes, not features
+            </p>
+          </div>
+        )}
+
+        {currentStep === 4 && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>What alternatives do they use today?</Label>
+              <Textarea
+                value={fields.alternatives}
+                onChange={(e) => updateField('alternatives', e.target.value)}
+                placeholder={EXAMPLES.alternatives}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Why do these alternatives fail?</Label>
+              <Textarea
+                value={fields.why_alternatives_fail}
+                onChange={(e) => updateField('why_alternatives_fail', e.target.value)}
+                placeholder={EXAMPLES.why_alternatives_fail}
+                rows={2}
+              />
+            </div>
+          </div>
+        )}
+
+        {currentStep === 5 && (
+          <div className="space-y-3">
+            <Label>What's your value proposition?</Label>
+            <Textarea
+              value={fields.value_prop}
+              onChange={(e) => updateField('value_prop', e.target.value)}
+              placeholder={EXAMPLES.value_prop}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              How do you uniquely solve their problem better than alternatives?
+            </p>
+          </div>
+        )}
+
+        {currentStep === 6 && (
+          <div className="space-y-3">
+            <Label>What proof or credentials do you have?</Label>
+            <Textarea
+              value={fields.proof}
+              onChange={(e) => updateField('proof', e.target.value)}
+              placeholder={EXAMPLES.proof}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              KPIs, testimonials, benchmarks, case studies (optional but powerful)
+            </p>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex justify-between pt-4">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Button onClick={handleNext} disabled={!canProceed()}>
+            {currentStep === STEPS.length - 1 ? 'Generate' : 'Next'}
+            {currentStep === STEPS.length - 1 ? (
+              <Sparkles className="h-4 w-4 ml-2" />
+            ) : (
+              <ArrowRight className="h-4 w-4 ml-2" />
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

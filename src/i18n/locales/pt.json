@@ -1523,5 +1523,32 @@
     "zoomMeet": "Zoom / Google Meet",
     "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
     "testPayload": "Exemplo de Payload de Teste"
+  },
+  "consultorTools": {
+    "title": "Ferramentas de Consultor",
+    "subtitle": "Biblioteca de exercícios, materiais de apoio e ferramentas de produtividade",
+    "exercises": "Exercícios",
+    "materials": "Materiais de Apoio",
+    "searchExercises": "Pesquisar exercícios...",
+    "searchMaterials": "Pesquisar materiais...",
+    "filterByContext": "Filtrar por contexto",
+    "groupSize": "Tamanho do grupo",
+    "newExercise": "Novo Exercício",
+    "noExercises": "Nenhum exercício encontrado",
+    "tryAdjustingSearch": "Tente ajustar a sua pesquisa ou filtros",
+    "createFirstExercise": "Crie o seu primeiro exercício para começar"
+  },
+  "valueProp": {
+    "title": "Assistente de Proposta de Valor",
+    "subtitle": "Crie uma proposta de valor convincente em 5-7 minutos"
+  },
+  "qualityGate": {
+    "title": "Verificação de Qualidade",
+    "recalculate": "Recalcular",
+    "missing": "Em falta",
+    "completed": "Concluído",
+    "coachTips": "Dicas do Coach",
+    "strictMode": "Modo Estrito",
+    "blockingWarning": "Isto não pode ser marcado como pronto até a pontuação atingir 70+"
   }
 }

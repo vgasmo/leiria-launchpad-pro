@@ -1452,5 +1452,32 @@
     "zoomMeet": "Zoom / Google Meet",
     "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint.",
     "testPayload": "Test Payload Example"
+  },
+  "consultorTools": {
+    "title": "Consultor Tools",
+    "subtitle": "Exercise library, support materials, and productivity tools",
+    "exercises": "Exercises",
+    "materials": "Support Materials",
+    "searchExercises": "Search exercises...",
+    "searchMaterials": "Search materials...",
+    "filterByContext": "Filter by context",
+    "groupSize": "Group size",
+    "newExercise": "New Exercise",
+    "noExercises": "No exercises found",
+    "tryAdjustingSearch": "Try adjusting your search or filters",
+    "createFirstExercise": "Create your first exercise to get started"
+  },
+  "valueProp": {
+    "title": "Value Proposition Wizard",
+    "subtitle": "Create a compelling value proposition in 5-7 minutes"
+  },
+  "qualityGate": {
+    "title": "Quality Check",
+    "recalculate": "Recalculate",
+    "missing": "Missing",
+    "completed": "Completed",
+    "coachTips": "Coach Tips",
+    "strictMode": "Strict Mode",
+    "blockingWarning": "This cannot be marked as ready until the score reaches 70+"
   }
 }
