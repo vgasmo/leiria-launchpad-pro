@@ -59,6 +59,8 @@ export type Database = {
           id: string
           milestone_id: string | null
           owner_user_id: string | null
+          planner_sync_status: string | null
+          planner_task_id: string | null
           priority: string | null
           search_vector: unknown
           session_id: string | null
@@ -76,6 +78,8 @@ export type Database = {
           id?: string
           milestone_id?: string | null
           owner_user_id?: string | null
+          planner_sync_status?: string | null
+          planner_task_id?: string | null
           priority?: string | null
           search_vector?: unknown
           session_id?: string | null
@@ -93,6 +97,8 @@ export type Database = {
           id?: string
           milestone_id?: string | null
           owner_user_id?: string | null
+          planner_sync_status?: string | null
+          planner_task_id?: string | null
           priority?: string | null
           search_vector?: unknown
           session_id?: string | null
@@ -1838,6 +1844,56 @@ export type Database = {
         }
         Relationships: []
       }
+      outlook_calendar_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          graph_client_id: string | null
+          graph_secret_key: string | null
+          graph_tenant_id: string | null
+          id: string
+          sync_mode: string
+          updated_at: string
+          webhook_url: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          graph_client_id?: string | null
+          graph_secret_key?: string | null
+          graph_tenant_id?: string | null
+          id?: string
+          sync_mode?: string
+          updated_at?: string
+          webhook_url?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          graph_client_id?: string | null
+          graph_secret_key?: string | null
+          graph_tenant_id?: string | null
+          id?: string
+          sync_mode?: string
+          updated_at?: string
+          webhook_url?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outlook_calendar_settings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbook_items: {
         Row: {
           created_at: string
@@ -2719,10 +2775,15 @@ export type Database = {
           join_url: string | null
           location: string | null
           notes: string | null
+          outlook_event_id: string | null
+          outlook_sync_error: string | null
+          outlook_sync_status: string | null
+          outlook_synced_at: string | null
           raw_transcript: string | null
           scheduled_at: string
           search_vector: unknown
           source: string | null
+          teams_meeting_url: string | null
           title: string
           updated_at: string
           workspace_id: string
@@ -2744,10 +2805,15 @@ export type Database = {
           join_url?: string | null
           location?: string | null
           notes?: string | null
+          outlook_event_id?: string | null
+          outlook_sync_error?: string | null
+          outlook_sync_status?: string | null
+          outlook_synced_at?: string | null
           raw_transcript?: string | null
           scheduled_at: string
           search_vector?: unknown
           source?: string | null
+          teams_meeting_url?: string | null
           title: string
           updated_at?: string
           workspace_id: string
@@ -2769,10 +2835,15 @@ export type Database = {
           join_url?: string | null
           location?: string | null
           notes?: string | null
+          outlook_event_id?: string | null
+          outlook_sync_error?: string | null
+          outlook_sync_status?: string | null
+          outlook_synced_at?: string | null
           raw_transcript?: string | null
           scheduled_at?: string
           search_vector?: unknown
           source?: string | null
+          teams_meeting_url?: string | null
           title?: string
           updated_at?: string
           workspace_id?: string
@@ -3403,6 +3474,75 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams_integration_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_channel_name: string | null
+          enabled: boolean
+          id: string
+          notify_action_assigned: boolean
+          notify_action_overdue: boolean
+          notify_checkin_submitted: boolean
+          notify_health_alert: boolean
+          notify_session_created: boolean
+          notify_session_rescheduled: boolean
+          program_id: string | null
+          updated_at: string
+          webhook_url: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_channel_name?: string | null
+          enabled?: boolean
+          id?: string
+          notify_action_assigned?: boolean
+          notify_action_overdue?: boolean
+          notify_checkin_submitted?: boolean
+          notify_health_alert?: boolean
+          notify_session_created?: boolean
+          notify_session_rescheduled?: boolean
+          program_id?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_channel_name?: string | null
+          enabled?: boolean
+          id?: string
+          notify_action_assigned?: boolean
+          notify_action_overdue?: boolean
+          notify_checkin_submitted?: boolean
+          notify_health_alert?: boolean
+          notify_session_created?: boolean
+          notify_session_rescheduled?: boolean
+          program_id?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_integration_settings_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: true
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_integration_settings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]

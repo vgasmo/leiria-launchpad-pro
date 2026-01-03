@@ -1,0 +1,258 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { toast } from 'sonner';
+import { 
+  CheckCircle2, 
+  ExternalLink, 
+  ChevronDown, 
+  Send,
+  Bell,
+  AlertTriangle,
+  Calendar,
+  ClipboardList,
+  Activity
+} from 'lucide-react';
+import { useTeamsSettings, useUpdateTeamsSettings, useTestTeamsWebhook } from '@/hooks/useTeamsIntegration';
+
+// Microsoft Teams icon component
+const TeamsIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.19 8.77c1.32 0 2.4-1.06 2.4-2.38s-1.08-2.39-2.4-2.39c-.51 0-.98.16-1.37.43.25.52.38 1.1.38 1.71 0 .94-.32 1.8-.86 2.48.39.1.81.15 1.25.15h.6zm-4.12-3.4c0-1.62-1.32-2.93-2.95-2.93s-2.95 1.31-2.95 2.93 1.32 2.93 2.95 2.93 2.95-1.31 2.95-2.93zM5.27 11.53c0-.78.28-1.49.75-2.04H3.3v6.23c0 1.37 1.12 2.48 2.5 2.48.17 0 .33-.02.49-.05v-6.62h-1.02zm11.22-2.04H9.65c-1.38 0-2.5 1.11-2.5 2.48v5.81c0 .87.71 1.58 1.58 1.58H16c.87 0 1.58-.71 1.58-1.58v-7.43c0-.47-.38-.86-.86-.86h-.23zm.41 7.91c0 .31-.25.56-.56.56H9.22c-.31 0-.56-.25-.56-.56v-4.62c0-.31.25-.56.56-.56h7.12c.31 0 .56.25.56.56v4.62zm3.8-8.87c-.34-.15-.71-.24-1.1-.24h-.24c.56.62.9 1.44.9 2.33 0 .34-.05.67-.14.98h.91c.83 0 1.5.67 1.5 1.5v3.42c0 .31-.25.56-.56.56h-2.04v1.02h2.55c.87 0 1.58-.71 1.58-1.58v-5.81c0-1.08-.61-2.02-1.36-2.18z"/>
+  </svg>
+);
+
+interface TeamsIntegrationCardProps {
+  workspaceId?: string;
+  programId?: string;
+  canEdit: boolean;
+}
+
+const EVENT_OPTIONS = [
+  { key: 'notify_checkin_submitted', icon: ClipboardList, label: 'Check-in submitted', description: 'When a startup submits their weekly check-in' },
+  { key: 'notify_action_assigned', icon: Bell, label: 'Action assigned', description: 'When an action item is assigned to someone' },
+  { key: 'notify_action_overdue', icon: AlertTriangle, label: 'Action overdue', description: 'When an action item becomes overdue' },
+  { key: 'notify_session_created', icon: Calendar, label: 'Session created', description: 'When a new session/meeting is scheduled' },
+  { key: 'notify_session_rescheduled', icon: Calendar, label: 'Session rescheduled', description: 'When a session time is changed' },
+  { key: 'notify_health_alert', icon: Activity, label: 'Health alert', description: 'When a startup health score drops significantly' },
+] as const;
+
+export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsIntegrationCardProps) {
+  const { t } = useTranslation();
+  const { data: settings, isLoading } = useTeamsSettings(workspaceId, programId);
+  const updateSettings = useUpdateTeamsSettings(workspaceId, programId);
+  const testWebhook = useTestTeamsWebhook();
+  
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [showSetup, setShowSetup] = useState(false);
+
+  const currentWebhookUrl = webhookUrl || settings?.webhook_url || '';
+  const isEnabled = settings?.enabled ?? false;
+  const hasWebhook = !!currentWebhookUrl;
+
+  const handleToggle = async (enabled: boolean) => {
+    if (enabled && !hasWebhook) {
+      toast.error('Please configure a webhook URL first');
+      return;
+    }
+    try {
+      await updateSettings.mutateAsync({ 
+        enabled,
+        ...(webhookUrl && { webhook_url: webhookUrl })
+      });
+      toast.success(enabled ? 'Teams integration enabled' : 'Teams integration disabled');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update settings');
+    }
+  };
+
+  const handleSaveWebhook = async () => {
+    if (!webhookUrl) {
+      toast.error('Please enter a webhook URL');
+      return;
+    }
+    // Basic validation for Teams webhook URL patterns
+    if (!webhookUrl.includes('webhook.office.com') && !webhookUrl.includes('logic.azure.com')) {
+      toast.error('Please enter a valid Microsoft Teams webhook URL');
+      return;
+    }
+    try {
+      await updateSettings.mutateAsync({ webhook_url: webhookUrl });
+      toast.success('Webhook URL saved');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save webhook');
+    }
+  };
+
+  const handleTestWebhook = async () => {
+    if (!currentWebhookUrl) {
+      toast.error('Please save a webhook URL first');
+      return;
+    }
+    testWebhook.mutate(currentWebhookUrl);
+  };
+
+  const handleEventToggle = async (eventKey: string, enabled: boolean) => {
+    try {
+      await updateSettings.mutateAsync({ [eventKey]: enabled });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update setting');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
+        <CardContent><Skeleton className="h-32 w-full" /></CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TeamsIcon className="h-5 w-5 text-[#6264A7]" />
+          Microsoft Teams
+          {isEnabled && hasWebhook && (
+            <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Connected
+            </Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Receive notifications in your Teams channel when important events occur
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Webhook URL */}
+        <div className="space-y-2">
+          <Label htmlFor="teams-webhook">Webhook URL</Label>
+          <div className="flex gap-2">
+            <Input
+              id="teams-webhook"
+              type="url"
+              placeholder="https://...webhook.office.com/..."
+              value={webhookUrl || settings?.webhook_url || ''}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              className="flex-1 font-mono text-sm"
+              disabled={!canEdit}
+            />
+            <Button 
+              variant="outline" 
+              onClick={handleSaveWebhook} 
+              disabled={!webhookUrl || updateSettings.isPending || !canEdit}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+
+        {/* Setup Instructions */}
+        <Collapsible open={showSetup} onOpenChange={setShowSetup}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
+              <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
+              How to get a webhook URL
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
+              <div>
+                <h4 className="font-medium mb-2">Option 1: Teams Workflows (Recommended)</h4>
+                <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
+                  <li>In Teams, go to your channel → ⋯ → Workflows</li>
+                  <li>Search for "Post to a channel when a webhook request is received"</li>
+                  <li>Configure the workflow and copy the webhook URL</li>
+                </ol>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Option 2: Power Automate</h4>
+                <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
+                  <li>Go to <a href="https://make.powerautomate.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Power Automate</a></li>
+                  <li>Create a new Instant flow with "When an HTTP request is received" trigger</li>
+                  <li>Add "Post message in a chat or channel" action</li>
+                  <li>Copy the HTTP POST URL from the trigger</li>
+                </ol>
+              </div>
+              <a 
+                href="https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline inline-flex items-center gap-1 text-xs"
+              >
+                Microsoft documentation
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Enable Toggle */}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="space-y-0.5">
+            <Label>Enable Teams notifications</Label>
+            <p className="text-sm text-muted-foreground">
+              Send notifications to your configured Teams channel
+            </p>
+          </div>
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={handleToggle}
+            disabled={updateSettings.isPending || !hasWebhook || !canEdit}
+          />
+        </div>
+
+        {/* Test Button */}
+        {hasWebhook && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleTestWebhook}
+            disabled={testWebhook.isPending}
+            className="gap-2"
+          >
+            <Send className="h-3 w-3" />
+            {testWebhook.isPending ? 'Sending...' : 'Send test message'}
+          </Button>
+        )}
+
+        {/* Event Toggles */}
+        {isEnabled && (
+          <div className="space-y-3 pt-4 border-t">
+            <Label>Notification events</Label>
+            <div className="space-y-2">
+              {EVENT_OPTIONS.map(({ key, icon: Icon, label, description }) => (
+                <div key={key} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50">
+                  <Checkbox
+                    id={key}
+                    checked={settings?.[key as keyof typeof settings] as boolean ?? true}
+                    onCheckedChange={(checked) => handleEventToggle(key, checked as boolean)}
+                    disabled={updateSettings.isPending || !canEdit}
+                  />
+                  <div className="flex-1 grid gap-0.5">
+                    <label htmlFor={key} className="text-sm font-medium flex items-center gap-2 cursor-pointer">
+                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      {label}
+                    </label>
+                    <p className="text-xs text-muted-foreground">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
