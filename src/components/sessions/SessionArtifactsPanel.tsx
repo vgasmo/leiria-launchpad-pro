@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
 import { 
   Collapsible,
   CollapsibleContent,
@@ -18,9 +19,14 @@ import {
   FileText,
   CheckCircle2,
   AlertCircle,
-  ListTodo
+  ListTodo,
+  Mic,
+  Video,
+  Eye
 } from 'lucide-react';
 import { useGenerateSessionArtifacts, useSessionTranscripts, useAddTranscript } from '@/hooks/useSessionArtifacts';
+import { SessionTranscriptsViewer } from './SessionTranscriptsViewer';
+import { MeetingIntegrationGuide } from './MeetingIntegrationGuide';
 import { toast } from 'sonner';
 
 interface SessionArtifactsPanelProps {
@@ -43,6 +49,7 @@ export function SessionArtifactsPanel({
   
   const [manualTranscript, setManualTranscript] = useState('');
   const [showTranscriptInput, setShowTranscriptInput] = useState(false);
+  const [showTranscriptPreview, setShowTranscriptPreview] = useState(false);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<{
     summary: string;
     decisions: string[];
@@ -103,12 +110,25 @@ export function SessionArtifactsPanel({
             </Badge>
           )}
           {transcripts && transcripts.length > 0 && (
-            <Badge variant="secondary" className="gap-1">
-              <FileText className="h-3 w-3" />
+            <Badge 
+              variant="secondary" 
+              className="gap-1 cursor-pointer hover:bg-secondary/80"
+              onClick={() => setShowTranscriptPreview(!showTranscriptPreview)}
+            >
+              <Mic className="h-3 w-3" />
               {transcripts.length} transcript(s)
+              <Eye className="h-3 w-3 ml-1" />
             </Badge>
           )}
         </div>
+
+        {/* Transcript preview */}
+        {showTranscriptPreview && transcripts && transcripts.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Transcript Preview</Label>
+            <SessionTranscriptsViewer sessionId={sessionId} showEmpty={false} />
+          </div>
+        )}
 
         {/* Add transcript option */}
         {!hasContent && (
@@ -116,42 +136,45 @@ export function SessionArtifactsPanel({
             <p className="text-sm text-muted-foreground mb-3">
               No content available to analyze. Add notes, agenda, or a transcript first.
             </p>
+            <MeetingIntegrationGuide compact />
           </div>
         )}
 
-        <Collapsible open={showTranscriptInput} onOpenChange={setShowTranscriptInput}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full">
-              <ChevronDown className={`h-4 w-4 mr-2 transition-transform ${showTranscriptInput ? 'rotate-180' : ''}`} />
-              Add Transcript Manually
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 space-y-3">
-            <Textarea
-              placeholder="Paste meeting transcript here..."
-              value={manualTranscript}
-              onChange={(e) => setManualTranscript(e.target.value)}
-              rows={6}
-            />
-            <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                onClick={handleAddTranscript}
-                disabled={addTranscript.isPending}
-              >
-                {addTranscript.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Save Transcript
+        <div className="flex gap-2">
+          <Collapsible open={showTranscriptInput} onOpenChange={setShowTranscriptInput} className="flex-1">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full">
+                <ChevronDown className={`h-4 w-4 mr-2 transition-transform ${showTranscriptInput ? 'rotate-180' : ''}`} />
+                Add Transcript Manually
               </Button>
-              <Button 
-                size="sm" 
-                variant="ghost"
-                onClick={() => setShowTranscriptInput(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 space-y-3">
+              <Textarea
+                placeholder="Paste meeting transcript here..."
+                value={manualTranscript}
+                onChange={(e) => setManualTranscript(e.target.value)}
+                rows={6}
+              />
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  onClick={handleAddTranscript}
+                  disabled={addTranscript.isPending}
+                >
+                  {addTranscript.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Save Transcript
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => setShowTranscriptInput(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
 
         {/* Generate button */}
         <Button 

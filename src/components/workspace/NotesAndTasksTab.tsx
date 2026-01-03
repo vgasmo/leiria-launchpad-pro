@@ -620,8 +620,9 @@ function SessionInsightsSection({
         <CardContent className="py-8 text-center text-muted-foreground">
           <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-50" />
           <p className="font-medium">No AI insights yet</p>
-          <p className="text-sm mt-1">
-            Session insights will appear here after running AI analysis on your sessions.
+          <p className="text-sm mt-1 max-w-sm mx-auto">
+            Session insights will appear here after running AI analysis on your sessions. 
+            Open a session, add notes or voice transcripts, then use the AI tab to generate insights.
           </p>
         </CardContent>
       </Card>

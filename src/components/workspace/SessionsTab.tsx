@@ -68,6 +68,7 @@ import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
 import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
 import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
 import { VoiceToTextButton } from '@/components/sessions/VoiceToTextButton';
+import { SessionTranscriptsViewer } from '@/components/sessions/SessionTranscriptsViewer';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 
 interface SessionsTabProps {
@@ -796,6 +797,12 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                     {decisions || 'No decisions recorded'}
                   </p>
                 )}
+              </div>
+
+              {/* Session Transcripts */}
+              <div className="space-y-2">
+                <Label>Session Transcripts</Label>
+                <SessionTranscriptsViewer sessionId={session.id} />
               </div>
 
               {/* Action Items from this session */}
