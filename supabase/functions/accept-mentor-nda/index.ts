@@ -12,7 +12,10 @@ Deno.serve(async (req: Request) => {
   try {
     // Get authorization header
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (!authHeader) {
+      console.log('No auth header');
       return corsJsonResponse({ error: 'Authorization required' }, req, 401);
     }
 
@@ -21,6 +24,8 @@ Deno.serve(async (req: Request) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
+    console.log('Supabase URL:', supabaseUrl);
+    
     const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
@@ -28,7 +33,10 @@ Deno.serve(async (req: Request) => {
 
     // Verify user
     const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+    console.log('User fetch result - error:', userError?.message, 'user:', user?.id);
+    
     if (userError || !user) {
+      console.log('User auth failed:', userError?.message);
       return corsJsonResponse({ error: 'Invalid token' }, req, 401);
     }
 
