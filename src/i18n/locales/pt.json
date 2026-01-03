@@ -1497,7 +1497,8 @@
       "removeRole": "Remover Função",
       "removeRoleConfirm": "Remover a função \"{{role}}\" deste utilizador?",
       "removeAssignment": "Remover Atribuição",
-      "removeAssignmentConfirm": "Remover este utilizador do workspace?"
+      "removeAssignmentConfirm": "Remover este utilizador do workspace?",
+      "alreadyAssignedAll": "Já atribuído a todos os workspaces"
     }
   }
 }

@@ -290,11 +290,25 @@ export function AdminUsersManager() {
                   <SelectValue placeholder={t('admin.users.selectWorkspace')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {workspaces?.map(ws => (
-                    <SelectItem key={ws.id} value={ws.id}>
-                      {ws.startup?.name || t('admin.users.noName')} ({ws.program?.name || t('admin.users.noProgram')})
-                    </SelectItem>
-                  ))}
+                  {workspaces
+                    ?.filter(ws => {
+                      // Filter out workspaces the user is already assigned to
+                      const userAssignments = getUserWorkspaces(assignWsDialog?.userId || '');
+                      return !userAssignments.some(ua => ua.workspace_id === ws.id);
+                    })
+                    .map(ws => (
+                      <SelectItem key={ws.id} value={ws.id}>
+                        {ws.startup?.name || t('admin.users.noName')} ({ws.program?.name || t('admin.users.noProgram')})
+                      </SelectItem>
+                    ))}
+                  {workspaces?.filter(ws => {
+                    const userAssignments = getUserWorkspaces(assignWsDialog?.userId || '');
+                    return !userAssignments.some(ua => ua.workspace_id === ws.id);
+                  }).length === 0 && (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      {t('admin.users.alreadyAssignedAll')}
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
