@@ -193,8 +193,8 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
   }
   
   return (
-    <>
-    <Tabs defaultValue="dataroom" className="space-y-6">
+    <div className="space-y-6">
+      <Tabs defaultValue="dataroom" className="space-y-6">
       {/* Header with tabs and actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <TabsList>
@@ -611,6 +611,6 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
