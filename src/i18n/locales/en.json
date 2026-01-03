@@ -1144,5 +1144,98 @@
     "high": "High",
     "standard": "Standard",
     "maintenance": "Maintenance"
+  },
+  "journey": {
+    "healthExplanation": "Health Score Breakdown",
+    "healthExplanationDesc": "Understand how your workspace health is calculated",
+    "aiInsight": "AI Insight",
+    "nextSession": "Next session",
+    "scheduleSession": "Schedule Session",
+    "noSessionScheduled": "No session scheduled",
+    "actionsCompleted": "{{completed}}/{{total}} actions completed",
+    "milestonesCompleted": "{{completed}}/{{total}} milestones completed"
+  },
+  "nextSteps": {
+    "title": "Next Steps",
+    "items": "items",
+    "allCaughtUp": "All caught up!",
+    "greatProgress": "You're making great progress. Keep up the momentum!",
+    "overdueDays": "{{days}} days overdue",
+    "complete": "Complete",
+    "updateKpis": "Update KPIs",
+    "kpisForMonth": "Track your metrics for {{month}}",
+    "addNow": "Add Now",
+    "weeklyCheckin": "Weekly Check-in Due",
+    "dueOn": "Due on {{date}}",
+    "completeNow": "Complete",
+    "createInvestorUpdate": "Create Investor Update",
+    "noRecentUpdate": "No update in the last 30 days",
+    "create": "Create",
+    "prepareSession": "Prepare for Session",
+    "prepare": "Prepare",
+    "highPriorityInProgress": "High priority action in progress",
+    "continue": "Continue"
+  },
+  "quickActions": {
+    "addKpi": "Add KPI",
+    "addAction": "Add Action",
+    "requestSession": "Request Session",
+    "uploadDocument": "Upload Document"
+  },
+  "workload": {
+    "myLoad": "My Workload",
+    "portfolioHealth": "Portfolio Health",
+    "healthy": "healthy",
+    "activeWorkspaces": "Active Workspaces",
+    "criticalAtRisk": "Critical / At Risk",
+    "noSession30d": "No Session (30d)",
+    "missingKpis": "Missing KPIs",
+    "totalOverdueActions": "{{count}} total overdue actions across portfolio"
+  },
+  "quickKpi": {
+    "title": "Quick KPI Entry",
+    "description": "Update your key metrics for {{month}}",
+    "allFilled": "All KPIs are up to date!",
+    "enterAtLeastOne": "Please enter at least one value",
+    "saved": "KPIs saved successfully",
+    "error": "Failed to save KPIs",
+    "save": "Save KPIs"
+  },
+  "mentorFeedback": {
+    "title": "Post-Session Feedback",
+    "description": "Quick feedback for {{startup}} session",
+    "sessionRating": "Session Rating",
+    "whatClarified": "What was clarified?",
+    "clarifiedPlaceholder": "Key insights or decisions made...",
+    "whatBlocked": "What's blocked?",
+    "blockedPlaceholder": "Issues or blockers identified...",
+    "recommendedNextSteps": "Recommended Next Steps",
+    "nextStepsPlaceholder": "Actions or focus areas for the founder...",
+    "submit": "Submit Feedback",
+    "saved": "Feedback submitted",
+    "error": "Failed to submit feedback"
+  },
+  "followup": {
+    "title": "Follow-up Autopilot",
+    "description": "Send session summary to founder with decisions and actions",
+    "decisions": "Decisions",
+    "actionsCount": "{{count}} action items",
+    "moreActions": "more actions",
+    "createTaskIn7Days": "Create follow-up task in 7 days",
+    "sendSummary": "Send Follow-up Summary",
+    "sent": "Follow-up sent",
+    "error": "Failed to send follow-up",
+    "taskTitle": "Follow-up: {{startup}}",
+    "taskDescription": "Review progress on {{actionsCount}} actions from session: {{session}}"
+  },
+  "mentorNda": {
+    "statusTitle": "NDA Agreement",
+    "accepted": "Accepted",
+    "pending": "Pending",
+    "acceptedDesc": "You have signed the confidentiality agreement and have full access to startup data.",
+    "pendingDesc": "You need to sign the NDA to access confidential startup information.",
+    "version": "Version",
+    "acceptedOn": "Accepted on",
+    "reviewAndSign": "Review & Sign NDA"
   }
 }

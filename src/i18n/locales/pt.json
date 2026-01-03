@@ -1287,5 +1287,98 @@
     "high": "Alta",
     "standard": "Normal",
     "maintenance": "Manutenção"
+  },
+  "journey": {
+    "healthExplanation": "Detalhe do Estado de Saúde",
+    "healthExplanationDesc": "Entenda como a saúde do seu workspace é calculada",
+    "aiInsight": "Insight IA",
+    "nextSession": "Próxima sessão",
+    "scheduleSession": "Agendar Sessão",
+    "noSessionScheduled": "Sem sessão agendada",
+    "actionsCompleted": "{{completed}}/{{total}} ações concluídas",
+    "milestonesCompleted": "{{completed}}/{{total}} marcos concluídos"
+  },
+  "nextSteps": {
+    "title": "Próximos Passos",
+    "items": "itens",
+    "allCaughtUp": "Tudo em dia!",
+    "greatProgress": "Está a fazer ótimo progresso. Mantenha o ritmo!",
+    "overdueDays": "{{days}} dias de atraso",
+    "complete": "Concluir",
+    "updateKpis": "Atualizar KPIs",
+    "kpisForMonth": "Acompanhe as suas métricas de {{month}}",
+    "addNow": "Adicionar",
+    "weeklyCheckin": "Check-in Semanal Pendente",
+    "dueOn": "Vence {{date}}",
+    "completeNow": "Concluir",
+    "createInvestorUpdate": "Criar Investor Update",
+    "noRecentUpdate": "Sem update nos últimos 30 dias",
+    "create": "Criar",
+    "prepareSession": "Preparar Sessão",
+    "prepare": "Preparar",
+    "highPriorityInProgress": "Ação de alta prioridade em progresso",
+    "continue": "Continuar"
+  },
+  "quickActions": {
+    "addKpi": "Adicionar KPI",
+    "addAction": "Adicionar Ação",
+    "requestSession": "Solicitar Sessão",
+    "uploadDocument": "Carregar Documento"
+  },
+  "workload": {
+    "myLoad": "A Minha Carga",
+    "portfolioHealth": "Saúde do Portfólio",
+    "healthy": "saudável",
+    "activeWorkspaces": "Workspaces Ativos",
+    "criticalAtRisk": "Crítico / Em Risco",
+    "noSession30d": "Sem Sessão (30d)",
+    "missingKpis": "KPIs em Falta",
+    "totalOverdueActions": "{{count}} ações atrasadas no total do portfólio"
+  },
+  "quickKpi": {
+    "title": "Entrada Rápida de KPI",
+    "description": "Atualize as suas métricas chave para {{month}}",
+    "allFilled": "Todos os KPIs estão atualizados!",
+    "enterAtLeastOne": "Por favor introduza pelo menos um valor",
+    "saved": "KPIs guardados com sucesso",
+    "error": "Falha ao guardar KPIs",
+    "save": "Guardar KPIs"
+  },
+  "mentorFeedback": {
+    "title": "Feedback Pós-Sessão",
+    "description": "Feedback rápido para a sessão de {{startup}}",
+    "sessionRating": "Avaliação da Sessão",
+    "whatClarified": "O que foi esclarecido?",
+    "clarifiedPlaceholder": "Insights chave ou decisões tomadas...",
+    "whatBlocked": "O que está bloqueado?",
+    "blockedPlaceholder": "Problemas ou bloqueios identificados...",
+    "recommendedNextSteps": "Próximos Passos Recomendados",
+    "nextStepsPlaceholder": "Ações ou áreas de foco para o founder...",
+    "submit": "Submeter Feedback",
+    "saved": "Feedback submetido",
+    "error": "Falha ao submeter feedback"
+  },
+  "followup": {
+    "title": "Acompanhamento Automático",
+    "description": "Enviar resumo da sessão ao founder com decisões e ações",
+    "decisions": "Decisões",
+    "actionsCount": "{{count}} itens de ação",
+    "moreActions": "mais ações",
+    "createTaskIn7Days": "Criar tarefa de acompanhamento em 7 dias",
+    "sendSummary": "Enviar Resumo",
+    "sent": "Acompanhamento enviado",
+    "error": "Falha ao enviar acompanhamento",
+    "taskTitle": "Acompanhamento: {{startup}}",
+    "taskDescription": "Rever progresso de {{actionsCount}} ações da sessão: {{session}}"
+  },
+  "mentorNda": {
+    "statusTitle": "Acordo NDA",
+    "accepted": "Aceite",
+    "pending": "Pendente",
+    "acceptedDesc": "Assinou o acordo de confidencialidade e tem acesso total aos dados das startups.",
+    "pendingDesc": "Precisa de assinar o NDA para aceder a informação confidencial das startups.",
+    "version": "Versão",
+    "acceptedOn": "Aceite em",
+    "reviewAndSign": "Rever e Assinar NDA"
   }
 }

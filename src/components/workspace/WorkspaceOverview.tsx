@@ -38,6 +38,9 @@ import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
+import { JourneyHeader } from '@/components/workspace/JourneyHeader';
+import { EnhancedNextSteps } from '@/components/workspace/EnhancedNextSteps';
+import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
 import { TagPicker } from '@/components/tags/TagPicker';
@@ -116,12 +119,34 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
     completed: milestones?.filter(m => m.status === 'completed').length || 0,
     delayed: milestones?.filter(m => m.status === 'delayed').length || 0,
   };
+  
+  // Calculate action counts
+  const actionsCompleted = actions?.filter(a => a.status === 'completed').length || 0;
+  const actionsTotal = actions?.length || 0;
 
   return (
     <div className="space-y-6">
-      {/* Next Best Action for Founders */}
+      {/* Journey Header - Stage + Health + Progress */}
+      <JourneyHeader
+        workspace={{
+          id: workspace.id,
+          program_id: workspace.program_id,
+          stage: workspace.stage,
+          health_score: workspace.health_score,
+          health_score_override: workspace.health_score_override,
+          health_notes: workspace.health_notes,
+        }}
+        nextSession={nextSession}
+        actionsCompleted={actionsCompleted}
+        actionsTotal={actionsTotal}
+        milestonesCompleted={milestoneCounts.completed}
+        milestonesTotal={(milestoneCounts.planned + milestoneCounts.inProgress + milestoneCounts.completed + milestoneCounts.delayed)}
+        canWrite={canWrite}
+      />
+
+      {/* Enhanced Next Steps for Founders */}
       {isFounder && (
-        <NextBestAction 
+        <EnhancedNextSteps 
           workspaceId={workspace.id} 
           programId={workspace.program_id}
           stage={workspace.stage}
@@ -460,6 +485,17 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile Quick Actions FAB for Founders */}
+      {isFounder && canWrite && (
+        <MobileQuickActions
+          workspaceId={workspace.id}
+          programId={workspace.program_id}
+          onAddAction={() => setSearchParams({ tab: 'actions' })}
+          onRequestSession={() => setSearchParams({ tab: 'calendar' })}
+          className="md:hidden"
+        />
+      )}
     </div>
   );
 }
