@@ -5,14 +5,17 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExerciseLibraryTab } from '@/components/consultor/ExerciseLibraryTab';
 import { SupportMaterialsTab } from '@/components/consultor/SupportMaterialsTab';
+import { ValuePropWizard } from '@/components/consultor/ValuePropWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
 export default function ConsultorTools() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('exercises');
+  const [showVPWizard, setShowVPWizard] = useState(false);
 
   return (
     <AppLayout
@@ -22,7 +25,7 @@ export default function ConsultorTools() {
       <div className="space-y-6">
         {/* Quick Actions */}
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/my-workspaces')}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setShowVPWizard(true)}>
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -36,7 +39,7 @@ export default function ConsultorTools() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Guided wizard to build value propositions. Access from any workspace.
+                Guided wizard to build value propositions. Practice mode - save from workspace.
               </p>
             </CardContent>
           </Card>
@@ -81,6 +84,22 @@ export default function ConsultorTools() {
             <SupportMaterialsTab />
           </TabsContent>
         </Tabs>
+
+        {/* VP Wizard Dialog */}
+        <Dialog open={showVPWizard} onOpenChange={setShowVPWizard}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Value Proposition Wizard</DialogTitle>
+              <DialogDescription>
+                Practice mode - outputs can be copied. To save permanently, use the wizard from a specific workspace.
+              </DialogDescription>
+            </DialogHeader>
+            <ValuePropWizard 
+              workspaceId="" 
+              onComplete={() => setShowVPWizard(false)} 
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
