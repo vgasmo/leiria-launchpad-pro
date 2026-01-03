@@ -123,6 +123,10 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
   const handleSave = async () => {
     if (!outputs) return;
+    if (!workspaceId) {
+      toast.info('Practice mode - copy the outputs to use them. Open from a workspace to save.');
+      return;
+    }
     try {
       await createMutation.mutateAsync({ fields, outputs });
       toast.success('Value proposition saved!');
@@ -131,6 +135,8 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
       toast.error('Failed to save');
     }
   };
+
+  const canSave = !!workspaceId;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -210,10 +216,16 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               <ArrowLeft className="h-4 w-4 mr-2" />
               Edit Inputs
             </Button>
-            <Button onClick={handleSave} disabled={createMutation.isPending}>
-              <Check className="h-4 w-4 mr-2" />
-              Save Value Proposition
-            </Button>
+            {canSave ? (
+              <Button onClick={handleSave} disabled={createMutation.isPending}>
+                <Check className="h-4 w-4 mr-2" />
+                Save Value Proposition
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => onComplete?.()}>
+                Done (Practice Mode)
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
