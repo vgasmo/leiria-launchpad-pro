@@ -107,6 +107,7 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
               {/* Drag handle / Reorder */}
               <div className="flex flex-col gap-1 pt-1">
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
@@ -117,6 +118,7 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
                 </Button>
                 <GripVertical className="h-4 w-4 text-muted-foreground mx-auto" />
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"

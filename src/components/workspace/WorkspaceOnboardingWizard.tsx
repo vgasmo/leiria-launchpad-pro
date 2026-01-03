@@ -666,6 +666,7 @@ export function WorkspaceOnboardingWizard({
         <DialogFooter className="gap-2 sm:gap-0">
           {currentStep !== 'complete' && currentStep !== 'welcome' && (
             <Button
+              type="button"
               variant="ghost"
               onClick={() => {
                 const prevStep = steps[currentStepIndex - 1]?.key;
@@ -678,7 +679,7 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'welcome' && (
-            <Button onClick={() => setCurrentStep('kpis')} className="w-full sm:w-auto">
+            <Button type="button" onClick={() => setCurrentStep('kpis')} className="w-full sm:w-auto">
               Get Started
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -686,10 +687,10 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'kpis' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="outline" onClick={() => setCurrentStep('milestones')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => setCurrentStep('milestones')} disabled={isProcessing}>
                 Skip
               </Button>
-              <Button onClick={handleApplyKpis} disabled={isProcessing || kpisApplied}>
+              <Button type="button" onClick={handleApplyKpis} disabled={isProcessing || kpisApplied}>
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {kpisApplied ? 'Applied' : 'Apply KPIs'}
               </Button>
@@ -698,10 +699,11 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'milestones' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="outline" onClick={() => setCurrentStep('meeting')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => setCurrentStep('meeting')} disabled={isProcessing}>
                 Skip
               </Button>
               <Button 
+                type="button"
                 onClick={handleCreateMilestones} 
                 disabled={isProcessing || selectedMilestones.size === 0 || milestonesCreated}
               >
@@ -713,10 +715,10 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'meeting' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="outline" onClick={() => setCurrentStep('complete')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => setCurrentStep('complete')} disabled={isProcessing}>
                 Skip
               </Button>
-              <Button onClick={handleScheduleSession} disabled={isProcessing || meetingScheduled}>
+              <Button type="button" onClick={handleScheduleSession} disabled={isProcessing || meetingScheduled}>
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {meetingScheduled ? 'Scheduled' : 'Schedule Session'}
               </Button>
@@ -724,7 +726,7 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'complete' && (
-            <Button onClick={handleClose} className="w-full sm:w-auto">
+            <Button type="button" onClick={handleClose} className="w-full sm:w-auto">
               Go to Workspace
             </Button>
           )}
