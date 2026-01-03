@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -9,7 +9,8 @@ import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 import { AdminStartupsManager } from '@/components/admin/AdminStartupsManager';
 import { AdminWorkspacesManager } from '@/components/admin/AdminWorkspacesManager';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
-import { ActivityLogViewer } from '@/components/admin/ActivityLogViewer';
+import { ActivityLogViewerEnhanced } from '@/components/admin/ActivityLogViewerEnhanced';
+import { ComplianceDashboard } from '@/components/admin/ComplianceDashboard';
 import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
@@ -24,6 +25,10 @@ export default function Admin() {
           <TabsTrigger value="approvals" className="gap-2">
             <Clock className="h-4 w-4" aria-hidden="true" />
             {t('admin.approvals')}
+          </TabsTrigger>
+          <TabsTrigger value="compliance" className="gap-2">
+            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+            {t('admin.compliance')}
           </TabsTrigger>
           <TabsTrigger value="programs" className="gap-2">
             <Building2 className="h-4 w-4" aria-hidden="true" />
@@ -59,12 +64,16 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="health" className="gap-2">
             <Heart className="h-4 w-4" aria-hidden="true" />
-            Health Models
+            {t('admin.healthModels')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
           <PendingApprovalsManager />
+        </TabsContent>
+
+        <TabsContent value="compliance">
+          <ComplianceDashboard />
         </TabsContent>
 
         <TabsContent value="programs">
@@ -92,7 +101,7 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="activity">
-          <ActivityLogViewer maxHeight="600px" />
+          <ActivityLogViewerEnhanced maxHeight="600px" />
         </TabsContent>
 
         <TabsContent value="analytics">
