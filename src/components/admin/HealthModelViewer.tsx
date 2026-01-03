@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,18 +74,11 @@ interface Program {
   health_model?: HealthModel | null;
 }
 
-// Calculation windows (hardcoded in edge function)
-const CALCULATION_WINDOWS = {
-  actions: 'Last 30 days: completion rate (80%) + penalty for overdue (50%)',
-  sessions: 'Days since last session: ≤7d=100, ≤14d=80, ≤21d=50, ≤30d=30, >30d=10; +10 bonus for upcoming',
-  kpis: 'Current month fill rate vs expected KPIs; ±5 trend bonus/penalty vs last month',
-  checkins: 'Last 30 days: on-time submission rate (submitted before due date)',
-};
-
 const DEFAULT_WEIGHTS = { actions: 30, sessions: 20, kpis: 30, checkins: 20 };
 const DEFAULT_THRESHOLDS = { thriving: 85, healthy: 70, stable: 50, at_risk: 30 };
 
 export function HealthModelViewer() {
+  const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [editingModel, setEditingModel] = useState<Program | null>(null);
@@ -160,7 +154,7 @@ export function HealthModelViewer() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs-with-health-models'] });
-      toast.success('Health model saved');
+      toast.success(t('admin.healthModel.saved'));
       setEditingModel(null);
     },
     onError: (error: Error) => {
@@ -175,7 +169,7 @@ export function HealthModelViewer() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Health scores recomputed');
+      toast.success(t('admin.healthModel.recomputed'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -194,7 +188,7 @@ export function HealthModelViewer() {
     if (!editingModel) return;
     const sum = editWeights.actions + editWeights.sessions + editWeights.kpis + editWeights.checkins;
     if (sum !== 100) {
-      toast.error(`Weights must sum to 100 (current: ${sum})`);
+      toast.error(t('admin.healthModel.weightsMustSum', { sum }));
       return;
     }
     upsertModel.mutate({
@@ -220,15 +214,15 @@ export function HealthModelViewer() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Health Score Models</h2>
+          <h2 className="text-lg font-semibold">{t('admin.healthModel.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            Configure how workspace health is calculated per program
+            {t('admin.healthModel.description')}
           </p>
         </div>
         {isAdmin && (
           <Button onClick={() => recompute.mutate()} disabled={recompute.isPending}>
             <RefreshCw className={`h-4 w-4 mr-2 ${recompute.isPending ? 'animate-spin' : ''}`} />
-            Recompute All
+            {t('admin.healthModel.recomputeAll')}
           </Button>
         )}
       </div>
@@ -238,7 +232,7 @@ export function HealthModelViewer() {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Info className="h-4 w-4" />
-            How Scores Are Calculated
+            {t('admin.healthModel.howCalculated')}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
@@ -246,29 +240,29 @@ export function HealthModelViewer() {
             <div className="flex items-start gap-2">
               <Activity className="h-4 w-4 mt-0.5 text-primary" />
               <div>
-                <span className="font-medium">Actions:</span>
-                <p className="text-muted-foreground text-xs">{CALCULATION_WINDOWS.actions}</p>
+                <span className="font-medium">{t('admin.healthModel.actions')}:</span>
+                <p className="text-muted-foreground text-xs">{t('admin.healthModel.actionsDesc')}</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <Calendar className="h-4 w-4 mt-0.5 text-primary" />
               <div>
-                <span className="font-medium">Sessions:</span>
-                <p className="text-muted-foreground text-xs">{CALCULATION_WINDOWS.sessions}</p>
+                <span className="font-medium">{t('admin.healthModel.sessions')}:</span>
+                <p className="text-muted-foreground text-xs">{t('admin.healthModel.sessionsDesc')}</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <BarChart3 className="h-4 w-4 mt-0.5 text-primary" />
               <div>
-                <span className="font-medium">KPIs:</span>
-                <p className="text-muted-foreground text-xs">{CALCULATION_WINDOWS.kpis}</p>
+                <span className="font-medium">{t('admin.healthModel.kpis')}:</span>
+                <p className="text-muted-foreground text-xs">{t('admin.healthModel.kpisDesc')}</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <ClipboardCheck className="h-4 w-4 mt-0.5 text-primary" />
               <div>
-                <span className="font-medium">Check-ins:</span>
-                <p className="text-muted-foreground text-xs">{CALCULATION_WINDOWS.checkins}</p>
+                <span className="font-medium">{t('admin.healthModel.checkins')}:</span>
+                <p className="text-muted-foreground text-xs">{t('admin.healthModel.checkinsDesc')}</p>
               </div>
             </div>
           </div>
@@ -289,7 +283,7 @@ export function HealthModelViewer() {
           {programs?.length === 0 && (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No programs found
+                {t('admin.healthModel.noPrograms')}
               </CardContent>
             </Card>
           )}
@@ -300,12 +294,12 @@ export function HealthModelViewer() {
       <Dialog open={!!editingModel} onOpenChange={(open) => !open && setEditingModel(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Health Model: {editingModel?.name}</DialogTitle>
+            <DialogTitle>{t('admin.healthModel.editModel')}: {editingModel?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Enable toggle */}
             <div className="flex items-center justify-between">
-              <Label>Health scoring enabled</Label>
+              <Label>{t('admin.healthModel.scoringEnabled')}</Label>
               <Switch checked={editEnabled} onCheckedChange={setEditEnabled} />
             </div>
 
@@ -314,7 +308,7 @@ export function HealthModelViewer() {
             {/* Weights */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Weights (must sum to 100)</Label>
+                <Label>{t('admin.healthModel.weightsMust100')}</Label>
                 <Badge variant={weightsSum === 100 ? 'default' : 'destructive'}>
                   Total: {weightsSum}
                 </Badge>
@@ -344,11 +338,11 @@ export function HealthModelViewer() {
 
             {/* Thresholds */}
             <div className="space-y-3">
-              <Label>Score Thresholds (minimum score for each level)</Label>
+              <Label>{t('admin.healthModel.thresholds')}</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs flex items-center gap-1">
-                    🌟 Thriving ≥
+                    🌟 {t('admin.healthModel.thriving')} ≥
                   </Label>
                   <Input
                     type="number"
@@ -365,7 +359,7 @@ export function HealthModelViewer() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs flex items-center gap-1">
-                    ✅ Healthy ≥
+                    ✅ {t('admin.healthModel.healthy')} ≥
                   </Label>
                   <Input
                     type="number"
@@ -382,7 +376,7 @@ export function HealthModelViewer() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs flex items-center gap-1">
-                    ➡️ Stable ≥
+                    ➡️ {t('admin.healthModel.stable')} ≥
                   </Label>
                   <Input
                     type="number"
@@ -399,7 +393,7 @@ export function HealthModelViewer() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs flex items-center gap-1">
-                    ⚠️ At Risk ≥
+                    ⚠️ {t('admin.healthModel.atRisk')} ≥
                   </Label>
                   <Input
                     type="number"
@@ -416,16 +410,16 @@ export function HealthModelViewer() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                🚨 Critical: below {editThresholds.at_risk}
+                🚨 {t('admin.healthModel.critical')}: {t('admin.healthModel.belowThreshold', { threshold: editThresholds.at_risk })}
               </p>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingModel(null)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={upsertModel.isPending || weightsSum !== 100}>
-              {upsertModel.isPending ? 'Saving...' : 'Save'}
+              {upsertModel.isPending ? t('common.loading') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -443,6 +437,7 @@ function ProgramHealthModelCard({
   onEdit: () => void;
   canEdit: boolean;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const model = program.health_model;
   const weights = model?.weights_json || DEFAULT_WEIGHTS;
@@ -465,16 +460,16 @@ function ProgramHealthModelCard({
                       isEnabled ? (
                         <Badge variant="default" className="text-xs">
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Model configured
+                          {t('admin.healthModel.modelConfigured')}
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="text-xs">
-                          Disabled
+                          {t('admin.healthModel.disabled')}
                         </Badge>
                       )
                     ) : (
                       <Badge variant="outline" className="text-xs">
-                        Using defaults
+                        {t('admin.healthModel.usingDefaults')}
                       </Badge>
                     )}
                   </CardDescription>
@@ -506,7 +501,7 @@ function ProgramHealthModelCard({
           <CardContent className="pt-0 space-y-4">
             {/* Weights Table */}
             <div>
-              <h4 className="text-sm font-medium mb-2">Weights</h4>
+              <h4 className="text-sm font-medium mb-2">{t('admin.healthModel.weightsMust100')}</h4>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -517,25 +512,25 @@ function ProgramHealthModelCard({
                 <TableBody>
                   <TableRow>
                     <TableCell className="flex items-center gap-2">
-                      <Activity className="h-4 w-4" /> Actions
+                      <Activity className="h-4 w-4" /> {t('admin.healthModel.actions')}
                     </TableCell>
                     <TableCell className="text-right">{weights.actions}%</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" /> Sessions
+                      <Calendar className="h-4 w-4" /> {t('admin.healthModel.sessions')}
                     </TableCell>
                     <TableCell className="text-right">{weights.sessions}%</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" /> KPIs
+                      <BarChart3 className="h-4 w-4" /> {t('admin.healthModel.kpis')}
                     </TableCell>
                     <TableCell className="text-right">{weights.kpis}%</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="flex items-center gap-2">
-                      <ClipboardCheck className="h-4 w-4" /> Check-ins
+                      <ClipboardCheck className="h-4 w-4" /> {t('admin.healthModel.checkins')}
                     </TableCell>
                     <TableCell className="text-right">{weights.checkins}%</TableCell>
                   </TableRow>
@@ -551,26 +546,26 @@ function ProgramHealthModelCard({
 
             {/* Thresholds */}
             <div>
-              <h4 className="text-sm font-medium mb-2">Score → Label Mapping</h4>
+              <h4 className="text-sm font-medium mb-2">{t('admin.healthModel.thresholds')}</h4>
               <div className="grid grid-cols-5 gap-2 text-center text-xs">
                 <div className="p-2 rounded bg-green-100 dark:bg-green-900/30">
-                  <div className="font-medium">🌟 Thriving</div>
+                  <div className="font-medium">🌟 {t('admin.healthModel.thriving')}</div>
                   <div>≥ {thresholds.thriving}</div>
                 </div>
                 <div className="p-2 rounded bg-emerald-100 dark:bg-emerald-900/30">
-                  <div className="font-medium">✅ Healthy</div>
+                  <div className="font-medium">✅ {t('admin.healthModel.healthy')}</div>
                   <div>≥ {thresholds.healthy}</div>
                 </div>
                 <div className="p-2 rounded bg-blue-100 dark:bg-blue-900/30">
-                  <div className="font-medium">➡️ Stable</div>
+                  <div className="font-medium">➡️ {t('admin.healthModel.stable')}</div>
                   <div>≥ {thresholds.stable}</div>
                 </div>
                 <div className="p-2 rounded bg-amber-100 dark:bg-amber-900/30">
-                  <div className="font-medium">⚠️ At Risk</div>
+                  <div className="font-medium">⚠️ {t('admin.healthModel.atRisk')}</div>
                   <div>≥ {thresholds.at_risk}</div>
                 </div>
                 <div className="p-2 rounded bg-red-100 dark:bg-red-900/30">
-                  <div className="font-medium">🚨 Critical</div>
+                  <div className="font-medium">🚨 {t('admin.healthModel.critical')}</div>
                   <div>&lt; {thresholds.at_risk}</div>
                 </div>
               </div>

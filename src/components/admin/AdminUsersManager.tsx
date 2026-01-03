@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, UserCheck, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,15 +28,8 @@ import {
 const ROLES = ['admin', 'consultor', 'mentor_externo', 'founder', 'team_member'] as const;
 type Role = typeof ROLES[number];
 
-const ROLE_LABELS: Record<Role, string> = {
-  admin: 'Admin',
-  consultor: 'Consultor',
-  mentor_externo: 'External Mentor',
-  founder: 'Founder',
-  team_member: 'Team Member',
-};
-
 export function AdminUsersManager() {
+  const { t } = useTranslation();
   const { data: profiles, isLoading: loadingProfiles } = useProfiles();
   const { data: userRoles, isLoading: loadingRoles } = useUserRoles();
   const { data: workspaceUsers, isLoading: loadingWsUsers } = useWorkspaceUsers();
@@ -75,8 +69,10 @@ export function AdminUsersManager() {
 
   const getWorkspaceName = (wsId: string) => {
     const ws = workspaces?.find(w => w.id === wsId);
-    return ws?.startup?.name || 'Unknown';
+    return ws?.startup?.name || t('admin.users.noName');
   };
+
+  const getRoleLabel = (role: string) => t(`roles.${role}`) || role;
 
   const handleAddRole = async () => {
     if (!addRoleDialog) return;
@@ -124,12 +120,12 @@ export function AdminUsersManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">User Management</h2>
-        <p className="text-sm text-muted-foreground">Manage user roles and workspace assignments</p>
+        <h2 className="text-lg font-semibold">{t('admin.users.title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.users.description')}</p>
       </div>
 
       <Input 
-        placeholder="Search users by name or email..." 
+        placeholder={t('admin.users.searchPlaceholder')} 
         value={searchTerm} 
         onChange={e => setSearchTerm(e.target.value)}
         className="max-w-md"
@@ -139,7 +135,7 @@ export function AdminUsersManager() {
         {filteredProfiles.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              No users found.
+              {t('admin.users.noUsers')}
             </CardContent>
           </Card>
         ) : (
@@ -159,8 +155,8 @@ export function AdminUsersManager() {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{profile.full_name || 'No name'}</h3>
-                        {isAdmin && <Badge variant="destructive">Admin</Badge>}
+                        <h3 className="font-medium">{profile.full_name || t('admin.users.noName')}</h3>
+                        {isAdmin && <Badge variant="destructive">{t('roles.admin')}</Badge>}
                       </div>
                       <p className="text-sm text-muted-foreground">{profile.email}</p>
 
@@ -168,7 +164,7 @@ export function AdminUsersManager() {
                       <div className="mt-3">
                         <div className="flex items-center gap-2 mb-2">
                           <UserCheck className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs font-medium text-muted-foreground">Global Roles</span>
+                          <span className="text-xs font-medium text-muted-foreground">{t('admin.users.globalRoles')}</span>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -176,12 +172,12 @@ export function AdminUsersManager() {
                             onClick={() => setAddRoleDialog({ userId: profile.id, userName: profile.full_name || profile.email })}
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            Add
+                            {t('admin.users.addRole')}
                           </Button>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {roles.length === 0 ? (
-                            <span className="text-xs text-muted-foreground">No roles</span>
+                            <span className="text-xs text-muted-foreground">{t('admin.users.noRoles')}</span>
                           ) : (
                             roles.map(r => (
                               <Badge 
@@ -190,7 +186,7 @@ export function AdminUsersManager() {
                                 className="cursor-pointer hover:bg-destructive/20"
                                 onClick={() => setDeleteRoleTarget({ id: r.id, role: r.role })}
                               >
-                                {ROLE_LABELS[r.role as Role] || r.role}
+                                {getRoleLabel(r.role)}
                                 <Trash2 className="h-3 w-3 ml-1" />
                               </Badge>
                             ))
@@ -202,7 +198,7 @@ export function AdminUsersManager() {
                       <div className="mt-3">
                         <div className="flex items-center gap-2 mb-2">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs font-medium text-muted-foreground">Workspace Assignments</span>
+                          <span className="text-xs font-medium text-muted-foreground">{t('admin.users.workspaceAssignments')}</span>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -210,25 +206,25 @@ export function AdminUsersManager() {
                             onClick={() => setAssignWsDialog({ userId: profile.id, userName: profile.full_name || profile.email })}
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            Assign
+                            {t('admin.users.assign')}
                           </Button>
                         </div>
                         <div className="space-y-1">
                           {wsAssignments.length === 0 ? (
-                            <span className="text-xs text-muted-foreground">Not assigned to any workspace</span>
+                            <span className="text-xs text-muted-foreground">{t('admin.users.notAssigned')}</span>
                           ) : (
                             wsAssignments.map(wu => (
                               <div key={wu.id} className="flex items-center gap-2 text-xs bg-muted/50 rounded p-2">
                                 <span className="flex-1">{getWorkspaceName(wu.workspace_id)}</span>
                                 <Badge variant="outline" className="text-xs">
-                                  {ROLE_LABELS[wu.role as Role] || wu.role}
+                                  {getRoleLabel(wu.role)}
                                 </Badge>
                                 <div className="flex items-center gap-1">
                                   <Switch 
                                     checked={wu.active} 
                                     onCheckedChange={() => handleToggleWsActive(wu.id, wu.active)}
                                   />
-                                  <span className="text-muted-foreground">{wu.active ? 'Active' : 'Inactive'}</span>
+                                  <span className="text-muted-foreground">{wu.active ? t('admin.users.active') : t('admin.users.inactive')}</span>
                                 </div>
                                 <Button 
                                   variant="ghost" 
@@ -256,26 +252,26 @@ export function AdminUsersManager() {
       <Dialog open={!!addRoleDialog} onOpenChange={(open) => !open && setAddRoleDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Role to {addRoleDialog?.userName}</DialogTitle>
+            <DialogTitle>{t('admin.users.addRoleTitle', { name: addRoleDialog?.userName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Role</Label>
+              <Label>{t('admin.users.role')}</Label>
               <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as Role)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {ROLES.map(role => (
-                    <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                    <SelectItem key={role} value={role}>{getRoleLabel(role)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddRoleDialog(null)}>Cancel</Button>
-            <Button onClick={handleAddRole}>Add Role</Button>
+            <Button variant="outline" onClick={() => setAddRoleDialog(null)}>{t('common.cancel')}</Button>
+            <Button onClick={handleAddRole}>{t('admin.users.addRole')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -284,41 +280,41 @@ export function AdminUsersManager() {
       <Dialog open={!!assignWsDialog} onOpenChange={(open) => !open && setAssignWsDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign {assignWsDialog?.userName} to Workspace</DialogTitle>
+            <DialogTitle>{t('admin.users.assignTitle', { name: assignWsDialog?.userName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Workspace</Label>
+              <Label>{t('admin.users.workspace')}</Label>
               <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select workspace" />
+                  <SelectValue placeholder={t('admin.users.selectWorkspace')} />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces?.map(ws => (
                     <SelectItem key={ws.id} value={ws.id}>
-                      {ws.startup?.name || 'Unknown'} ({ws.program?.name || 'No program'})
+                      {ws.startup?.name || t('admin.users.noName')} ({ws.program?.name || t('admin.users.noProgram')})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>Role</Label>
+              <Label>{t('admin.users.role')}</Label>
               <Select value={wsRole} onValueChange={(v) => setWsRole(v as Role)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {ROLES.filter(r => r !== 'admin').map(role => (
-                    <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                    <SelectItem key={role} value={role}>{getRoleLabel(role)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignWsDialog(null)}>Cancel</Button>
-            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>Assign</Button>
+            <Button variant="outline" onClick={() => setAssignWsDialog(null)}>{t('common.cancel')}</Button>
+            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>{t('admin.users.assign')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -327,14 +323,14 @@ export function AdminUsersManager() {
       <AlertDialog open={!!deleteRoleTarget} onOpenChange={(open) => !open && setDeleteRoleTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Role</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.users.removeRole')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Remove the "{deleteRoleTarget?.role}" role from this user?
+              {t('admin.users.removeRoleConfirm', { role: deleteRoleTarget?.role })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveRole} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveRole} className="bg-destructive text-destructive-foreground">{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -343,14 +339,14 @@ export function AdminUsersManager() {
       <AlertDialog open={!!deleteWsUserTarget} onOpenChange={(open) => !open && setDeleteWsUserTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Assignment</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.users.removeAssignment')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Remove this user from the workspace?
+              {t('admin.users.removeAssignmentConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveWsUser} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveWsUser} className="bg-destructive text-destructive-foreground">{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
