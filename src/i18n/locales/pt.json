@@ -85,7 +85,9 @@
     "upToDate": "Atualizado",
     "needsUpdate": "Precisa de atualização",
     "last": "Último",
-    "creating": "A criar..."
+    "creating": "A criar...",
+    "generating": "A gerar...",
+    "copy": "Copiar"
   },
   "nav": {
     "myWorkspaces": "Os Meus Workspaces",
@@ -686,6 +688,9 @@
     "failedToGenerate": "Falha ao gerar atualização",
     "failedToCreateLink": "Falha ao criar link de partilha",
     "failedToRevokeLink": "Falha ao revogar link",
+    "generateDesc": "Gera uma atualização automaticamente com base nos dados do workspace",
+    "selectMonth": "Selecionar Mês",
+    "generate": "Gerar",
     "editHighlights": "Edite destaques, desafios, pedidos e prioridades para personalizar a sua atualização",
     "addHighlight": "Adicionar destaque",
     "addLowlight": "Adicionar desafio",
