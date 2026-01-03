@@ -1037,6 +1037,45 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_update_templates: {
+        Row: {
+          audience: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          sections_json: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          sections_json?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sections_json?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       investor_updates: {
         Row: {
           content_json: Json
