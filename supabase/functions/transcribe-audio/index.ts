@@ -5,6 +5,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Process base64 in chunks to prevent memory issues
+function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Array {
+  const chunks: Uint8Array[] = [];
+  let position = 0;
+  
+  while (position < base64String.length) {
+    const chunk = base64String.slice(position, position + chunkSize);
+    const binaryChunk = atob(chunk);
+    const bytes = new Uint8Array(binaryChunk.length);
+    
+    for (let i = 0; i < binaryChunk.length; i++) {
+      bytes[i] = binaryChunk.charCodeAt(i);
+    }
+    
+    chunks.push(bytes);
+    position += chunkSize;
+  }
+
+  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return result;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,6 +44,7 @@ serve(async (req) => {
     const { audio } = await req.json();
 
     if (!audio) {
+      console.error("No audio data provided");
       return new Response(
         JSON.stringify({ error: "No audio data provided" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -22,25 +53,21 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Transcribing audio...");
+    console.log("Processing audio for transcription...");
+    console.log("Audio base64 length:", audio.length);
 
-    // Convert base64 to binary
-    const binaryString = atob(audio);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
+    // Process audio in chunks to avoid memory issues
+    const binaryAudio = processBase64Chunks(audio);
+    console.log("Binary audio size:", binaryAudio.length, "bytes");
 
-    // Use Lovable AI for transcription via chat completions with audio description
-    // Since Lovable AI doesn't have direct audio transcription, we'll use a workaround
-    // by having the AI describe what it would transcribe from audio context
-    
-    // For actual transcription, we need to use the audio as context
-    // This is a simplified version - in production you'd use a dedicated transcription service
-    
+    // Use Gemini model with audio input capability
+    // Send audio as base64 data URL for processing
+    const audioDataUrl = `data:audio/webm;base64,${audio}`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -51,14 +78,23 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           {
-            role: "system",
-            content: "You are a transcription assistant. The user has provided audio data. For now, respond with a helpful message about transcription capabilities."
-          },
-          {
             role: "user",
-            content: "Transcribe the following audio recording. Audio length: " + Math.round(bytes.length / 1000) + "KB"
+            content: [
+              {
+                type: "text",
+                text: "Please transcribe the following audio recording accurately. Return ONLY the transcription text, nothing else. If you cannot understand the audio or there is no speech, respond with '[No speech detected]'."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: audioDataUrl
+                }
+              }
+            ]
           }
         ],
+        temperature: 0.1,
+        max_tokens: 4000,
       }),
     });
 
@@ -79,24 +115,32 @@ serve(async (req) => {
         );
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`AI gateway error: ${response.status} - ${errorText}`);
     }
 
-    // For now, return a placeholder indicating transcription is not yet fully implemented
-    // In production, you would integrate with a proper speech-to-text service
-    console.log("Audio received, size:", bytes.length);
+    const data = await response.json();
+    console.log("AI response received");
+
+    const transcription = data.choices?.[0]?.message?.content?.trim() || "";
+    
+    if (!transcription || transcription === "[No speech detected]") {
+      console.log("No speech detected in audio");
+      return new Response(
+        JSON.stringify({ text: "", note: "No speech detected" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Transcription successful, length:", transcription.length);
 
     return new Response(
-      JSON.stringify({ 
-        text: "[Voice transcription requires additional setup. Please type your notes manually or contact support to enable this feature.]",
-        note: "Full transcription requires integration with a speech-to-text service like OpenAI Whisper or ElevenLabs."
-      }),
+      JSON.stringify({ text: transcription }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
-    console.error("Error in transcribe-audio:", error);
+    console.error("Error in transcribe-audio:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Transcription failed" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
