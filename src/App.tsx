@@ -23,6 +23,7 @@ import SharedWorkspace from "./pages/SharedWorkspace";
 import SharedDataroom from "./pages/SharedDataroom";
 import MentorNda from "./pages/MentorNda";
 import ConsultorTools from "./pages/ConsultorTools";
+import ValuePropWizardPage from "./pages/ValuePropWizardPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +80,7 @@ function AppRoutes() {
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
       <Route path="/consultor-tools" element={<ProtectedRoute><ConsultorTools /></ProtectedRoute>} />
+      <Route path="/workspace/:workspaceId/value-prop" element={<ProtectedRoute><ValuePropWizardPage /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />

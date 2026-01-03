@@ -16,6 +16,7 @@ import {
   Download,
   Star,
   Sparkles,
+  Play,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,9 @@ import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
 import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
 import { VoiceToTextButton } from '@/components/sessions/VoiceToTextButton';
 import { SessionTranscriptsViewer } from '@/components/sessions/SessionTranscriptsViewer';
+import { SessionExercisesPicker } from '@/components/sessions/SessionExercisesPicker';
+import { FacilitatorMode } from '@/components/sessions/FacilitatorMode';
+import { QualityGateCard } from '@/components/consultor/QualityGateCard';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 
 interface SessionsTabProps {
@@ -595,6 +599,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   const [isResending, setIsResending] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showFacilitatorMode, setShowFacilitatorMode] = useState(false);
 
   const updateMutation = useUpdateSession(workspaceId);
   const { data: actionItems, isLoading: actionsLoading, refetch: refetchActions } = useSessionActionItems(session.id);
@@ -700,11 +705,24 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{session.title}</DialogTitle>
-            <DialogDescription>
-              {format(new Date(session.scheduled_at), 'EEEE, MMMM d, yyyy')} at {format(new Date(session.scheduled_at), 'h:mm a')}
-              {session.duration && ` • ${session.duration} min`}
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>{session.title}</DialogTitle>
+                <DialogDescription>
+                  {format(new Date(session.scheduled_at), 'EEEE, MMMM d, yyyy')} at {format(new Date(session.scheduled_at), 'h:mm a')}
+                  {session.duration && ` • ${session.duration} min`}
+                </DialogDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowFacilitatorMode(true)}
+                className="shrink-0"
+              >
+                <Play className="h-4 w-4 mr-1" />
+                Facilitator Mode
+              </Button>
+            </div>
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -718,8 +736,15 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
             </TabsList>
             
             {/* Session Prep Tab */}
-            <TabsContent value="prep" className="mt-4">
+            <TabsContent value="prep" className="mt-4 space-y-4">
+              <QualityGateCard
+                entityType="session"
+                entityId={session.id}
+                entityData={session}
+                workspaceId={workspaceId}
+              />
               <SessionPrepCard sessionId={session.id} workspaceId={workspaceId} />
+              <SessionExercisesPicker sessionId={session.id} canEdit={canWrite} />
             </TabsContent>
             
             <TabsContent value="details" className="space-y-6 mt-4">
@@ -895,6 +920,18 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
         open={showActionDialog}
         onOpenChange={setShowActionDialog}
       />
+
+      {/* Facilitator Mode */}
+      {showFacilitatorMode && (
+        <FacilitatorMode
+          session={session}
+          onClose={() => setShowFacilitatorMode(false)}
+          onCreateAction={() => {
+            setShowFacilitatorMode(false);
+            setShowActionDialog(true);
+          }}
+        />
+      )}
     </>
   );
 }
