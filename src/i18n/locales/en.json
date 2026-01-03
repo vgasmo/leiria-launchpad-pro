@@ -633,11 +633,15 @@
     "failedToGenerate": "Failed to generate update",
     "failedToCreateLink": "Failed to create share link",
     "failedToRevokeLink": "Failed to revoke link",
+    "generateDesc": "Automatically generates an update based on workspace data",
+    "selectMonth": "Select Month",
+    "generate": "Generate",
     "editHighlights": "Edit highlights, lowlights, asks, and priorities to customize your update",
     "addHighlight": "Add highlight",
     "addLowlight": "Add lowlight",
     "addAsk": "Add ask",
-    "addPriority": "Add priority"
+    "addPriority": "Add priority",
+    "templates": "Templates"
   },
   "documents": {
     "title": "Documents",
