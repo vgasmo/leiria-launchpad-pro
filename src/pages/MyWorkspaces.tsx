@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   AlertTriangle, 
   Calendar,
@@ -37,6 +38,7 @@ const PAGE_SIZE = 15;
 
 export default function MyWorkspaces() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isConsultor, isMentor, isAdmin, roles } = useAuth();
   const isFounder = roles.includes('founder');
@@ -210,17 +212,17 @@ export default function MyWorkspaces() {
 
   // Page title/subtitle
   const getPageTitle = () => {
-    if (showDetailedView) return "All Startups";
-    if (showConsultorDashboard) return "Portfolio Overview";
-    if (showMentorDashboard) return "My Mentorships";
-    if (showFounderDashboard) return "My Startup";
-    return "My Workspaces";
+    if (showDetailedView) return t('myWorkspaces.allStartups');
+    if (showConsultorDashboard) return t('myWorkspaces.portfolioOverview');
+    if (showMentorDashboard) return t('myWorkspaces.myMentorships');
+    if (showFounderDashboard) return t('myWorkspaces.myStartup');
+    return t('myWorkspaces.title');
   };
 
   const getPageSubtitle = () => {
-    if (showDetailedView) return `${totalItems} startup${totalItems !== 1 ? 's' : ''}`;
-    if (showConsultorDashboard) return `Managing ${workspaces?.length || 0} startups`;
-    if (showMentorDashboard) return `${workspaces?.length || 0} active mentorship${(workspaces?.length || 0) !== 1 ? 's' : ''}`;
+    if (showDetailedView) return t('myWorkspaces.startupsCount', { count: totalItems });
+    if (showConsultorDashboard) return t('myWorkspaces.managingStartups', { count: workspaces?.length || 0 });
+    if (showMentorDashboard) return t('myWorkspaces.activeMentorships', { count: workspaces?.length || 0 });
     return undefined;
   };
 
@@ -233,19 +235,19 @@ export default function MyWorkspaces() {
           {(showConsultorDashboard || showMentorDashboard) && (
             <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)}>
               <FileText className="h-4 w-4 mr-2" />
-              View All
+              {t('myWorkspaces.viewAll')}
             </Button>
           )}
           {showDetailedView && (
             <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)}>
               <TrendingUp className="h-4 w-4 mr-2" />
-              Dashboard
+              {t('myWorkspaces.dashboard')}
             </Button>
           )}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (
             <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
-              Create Startup
+              {t('myWorkspaces.createStartup')}
             </Button>
           )}
         </div>

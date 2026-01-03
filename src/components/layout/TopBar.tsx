@@ -1,5 +1,6 @@
 import { LogOut, Shield, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,6 +20,7 @@ import { GlobalSearchInput } from '@/components/search/GlobalSearchInput';
 
 export function TopBar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { profile, roles, isAdmin, signOut } = useAuth();
 
   const initials = profile?.full_name
@@ -29,14 +31,14 @@ export function TopBar() {
     .slice(0, 2) || 'U';
 
   const displayRole = isAdmin 
-    ? 'Admin' 
+    ? t('roles.admin')
     : roles.includes('consultor') 
-      ? 'Consultor' 
+      ? t('roles.consultor')
       : roles.includes('mentor_externo') 
-        ? 'Mentor' 
+        ? t('roles.mentor_externo')
         : roles.includes('founder') 
-          ? 'Founder' 
-          : 'Member';
+          ? t('roles.founder')
+          : t('roles.team_member');
 
   return (
     <div className="flex items-center gap-2">
@@ -81,29 +83,29 @@ export function TopBar() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Roles
+            {t('topBar.roles')}
           </DropdownMenuLabel>
           <div className="px-2 py-1.5 flex flex-wrap gap-1">
             {roles.length > 0 ? (
               roles.map((role) => (
                 <Badge key={role} variant="secondary" className="text-xs capitalize">
                   {role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
-                  {role.replace('_', ' ')}
+                  {t(`roles.${role}`, role.replace('_', ' '))}
                 </Badge>
               ))
             ) : (
-              <span className="text-xs text-muted-foreground">No roles assigned</span>
+              <span className="text-xs text-muted-foreground">{t('topBar.noRoles')}</span>
             )}
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
             <Settings className="h-4 w-4 mr-2" />
-            Account Settings
+            {t('topBar.accountSettings')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
             <LogOut className="h-4 w-4 mr-2" />
-            Sign out
+            {t('auth.signOut')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
