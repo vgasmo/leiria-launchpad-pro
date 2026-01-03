@@ -69,6 +69,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [showUnblockQuestions, setShowUnblockQuestions] = useState(false);
+  const [unblockIndex, setUnblockIndex] = useState(0);
 
   const { data: sessionExercises } = useSessionExercises(session.id);
 
@@ -118,7 +119,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
 
   // Timer logic
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isRunning) {
       interval = setInterval(() => {
         setTimer((t) => t + 1);
@@ -129,17 +130,34 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
     };
   }, [isRunning]);
 
+  // Auto-progress when time is up (optional)
+  useEffect(() => {
+    if (!isRunning) return;
+    if (!targetSeconds) return;
+    if (timer < targetSeconds) return;
+
+    // advance to next item automatically; stop at the end
+    if (currentItemIndex < agendaItems.length - 1) {
+      setCurrentItemIndex((i) => i + 1);
+      setTimer(0);
+      setUnblockIndex(0);
+    } else {
+      setIsRunning(false);
+    }
+  }, [isRunning, timer, targetSeconds, currentItemIndex, agendaItems.length]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleNext = () => {
+  const handleNext = (keepRunning = false) => {
     if (currentItemIndex < agendaItems.length - 1) {
       setCurrentItemIndex(currentItemIndex + 1);
       setTimer(0);
-      setIsRunning(false);
+      setUnblockIndex(0);
+      if (!keepRunning) setIsRunning(false);
     }
   };
 
@@ -147,6 +165,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
     if (currentItemIndex > 0) {
       setCurrentItemIndex(currentItemIndex - 1);
       setTimer(0);
+      setUnblockIndex(0);
       setIsRunning(false);
     }
   };
@@ -184,26 +203,27 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
         {/* Left: Current Item */}
         <div className="flex-1 p-6 flex flex-col">
           {/* Timer */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <Button variant="outline" size="icon" onClick={handleReset}>
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <div
-              className={cn(
-                'text-5xl font-mono font-bold tabular-nums transition-colors',
-                isOvertime ? 'text-red-500' : 'text-foreground'
-              )}
-            >
-              {formatTime(timer)}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Button type="button" variant="outline" size="icon" onClick={handleReset}>
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              <div
+                className={cn(
+                  'text-5xl font-mono font-bold tabular-nums transition-colors',
+                  isOvertime ? 'text-destructive' : 'text-foreground'
+                )}
+              >
+                {formatTime(timer)}
+              </div>
+              <Button
+                type="button"
+                variant={isRunning ? 'secondary' : 'default'}
+                size="icon"
+                onClick={() => setIsRunning((v) => !v)}
+              >
+                {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
             </div>
-            <Button
-              variant={isRunning ? 'secondary' : 'default'}
-              size="icon"
-              onClick={() => setIsRunning(!isRunning)}
-            >
-              {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-          </div>
 
           {targetSeconds > 0 && (
             <div className="text-center mb-6">
@@ -262,7 +282,8 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
               Previous
             </Button>
             <Button
-              onClick={handleNext}
+              type="button"
+              onClick={() => handleNext(isRunning)}
               disabled={currentItemIndex === agendaItems.length - 1}
             >
               Next
@@ -296,24 +317,61 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
           {/* Unblock Questions */}
           <div className="p-4 border-b">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               className="w-full justify-start"
-              onClick={() => setShowUnblockQuestions(!showUnblockQuestions)}
+              onClick={() => setShowUnblockQuestions((v) => !v)}
             >
-              <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
+              <Lightbulb className="h-4 w-4 mr-2" />
               Unblock Questions
-              {showUnblockQuestions ? <ChevronLeft className="h-4 w-4 ml-auto rotate-90" /> : <ChevronRight className="h-4 w-4 ml-auto rotate-90" />}
+              {showUnblockQuestions ? (
+                <ChevronLeft className="h-4 w-4 ml-auto rotate-90" />
+              ) : (
+                <ChevronRight className="h-4 w-4 ml-auto rotate-90" />
+              )}
             </Button>
-            {showUnblockQuestions && (
-              <ul className="mt-2 space-y-2">
-                {UNBLOCK_QUESTIONS.map((q, i) => (
-                  <li key={i} className="text-sm text-muted-foreground">
-                    • {q}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {showUnblockQuestions && (() => {
+              const exerciseSpecific =
+                currentItem?.type === 'exercise' && currentItem.exercise
+                  ? [
+                      currentItem.exercise.common_pitfalls ? `Common pitfall: ${currentItem.exercise.common_pitfalls}` : null,
+                      currentItem.exercise.success_criteria ? `Success looks like: ${currentItem.exercise.success_criteria}` : null,
+                    ].filter(Boolean)
+                  : [];
+
+              const questions = [...exerciseSpecific, ...UNBLOCK_QUESTIONS];
+              const q = questions[unblockIndex % Math.max(questions.length, 1)];
+
+              return (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-lg border bg-card p-3 text-sm text-foreground">
+                    {q}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setUnblockIndex((i) => (i - 1 + questions.length) % questions.length)}
+                      disabled={questions.length <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setUnblockIndex((i) => (i + 1) % questions.length)}
+                      disabled={questions.length <= 1}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Agenda Overview */}
@@ -321,36 +379,53 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
             <h3 className="text-sm font-medium mb-2">Agenda</h3>
             <ScrollArea className="h-full">
               <ul className="space-y-1">
-                {agendaItems.map((item, i) => (
-                  <li
-                    key={i}
-                    className={cn(
-                      'text-sm p-2 rounded cursor-pointer transition-colors',
-                      i === currentItemIndex
-                        ? 'bg-primary/10 text-primary font-medium'
-                        : i < currentItemIndex
-                        ? 'text-muted-foreground line-through'
-                        : 'text-muted-foreground hover:bg-muted'
-                    )}
-                    onClick={() => {
-                      setCurrentItemIndex(i);
-                      setTimer(0);
-                      setIsRunning(false);
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      {i < currentItemIndex && (
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
+                {agendaItems.map((item, i) => {
+                  const durationSeconds = (item.duration || 0) * 60;
+                  const isCurrent = i === currentItemIndex;
+                  const isDone = i < currentItemIndex;
+                  const progressPct =
+                    isDone ? 100 : isCurrent && durationSeconds > 0 ? Math.min(100, Math.round((timer / durationSeconds) * 100)) : 0;
+
+                  return (
+                    <li
+                      key={i}
+                      className={cn(
+                        'text-sm p-2 rounded cursor-pointer transition-colors',
+                        isCurrent
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : isDone
+                          ? 'text-muted-foreground line-through'
+                          : 'text-muted-foreground hover:bg-muted'
                       )}
-                      <span className="truncate">{item.title}</span>
-                    </div>
-                    {item.duration && (
-                      <span className="text-xs opacity-60">
-                        {item.duration} min
-                      </span>
-                    )}
-                  </li>
-                ))}
+                      onClick={() => {
+                        setCurrentItemIndex(i);
+                        setTimer(0);
+                        setUnblockIndex(0);
+                        setIsRunning(false);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isDone && <CheckCircle2 className="h-3 w-3" />}
+                        <span className="truncate">{item.title}</span>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between">
+                        {item.duration ? (
+                          <span className="text-xs opacity-60">{item.duration} min</span>
+                        ) : (
+                          <span className="text-xs opacity-60">—</span>
+                        )}
+                        {isCurrent && durationSeconds > 0 && (
+                          <span className="text-xs opacity-60">{progressPct}%</span>
+                        )}
+                      </div>
+                      {isCurrent && durationSeconds > 0 && (
+                        <div className="mt-2 h-1.5 w-full rounded bg-muted overflow-hidden">
+                          <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </ScrollArea>
           </div>
