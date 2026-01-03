@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, addDays, addWeeks } from 'date-fns';
 import {
   Sparkles,
@@ -8,9 +8,11 @@ import {
   Calendar,
   ChevronRight,
   Loader2,
-  X,
   BookOpen,
 } from 'lucide-react';
+import { WizardStepTransition } from '@/components/ui/WizardStepTransition';
+import { WizardIllustration } from '@/components/ui/WizardIllustration';
+import { triggerConfetti } from '@/lib/confetti';
 import {
   Dialog,
   DialogContent,
@@ -277,7 +279,9 @@ export function WorkspaceOnboardingWizard({
   startupName,
 }: WorkspaceOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('welcome');
+  const [prevStep, setPrevStep] = useState<WizardStep>('welcome');
   const [isProcessing, setIsProcessing] = useState(false);
+  const confettiTriggered = useRef(false);
   
   // Step results tracking
   const [kpisApplied, setKpisApplied] = useState(false);
@@ -299,6 +303,7 @@ export function WorkspaceOnboardingWizard({
   useEffect(() => {
     if (open) {
       setCurrentStep('welcome');
+      setPrevStep('welcome');
       setKpisApplied(false);
       setMilestonesCreated(false);
       setMeetingScheduled(false);
@@ -307,8 +312,33 @@ export function WorkspaceOnboardingWizard({
       setMeetingDate(format(addDays(new Date(), 3), 'yyyy-MM-dd'));
       setMeetingTime('10:00');
       setMeetingDuration('60');
+      confettiTriggered.current = false;
     }
   }, [open, stage, startupName]);
+
+  // Trigger confetti on completion
+  useEffect(() => {
+    if (currentStep === 'complete' && !confettiTriggered.current) {
+      confettiTriggered.current = true;
+      triggerConfetti();
+    }
+  }, [currentStep]);
+
+  const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = [
+    { key: 'welcome', label: 'Welcome', icon: Sparkles },
+    { key: 'kpis', label: 'KPIs', icon: TrendingUp },
+    { key: 'milestones', label: 'Milestones', icon: Target },
+    { key: 'meeting', label: 'Meeting', icon: Calendar },
+    { key: 'complete', label: 'Done', icon: Check },
+  ];
+
+  // Helper for step transitions
+  const goToStep = (step: WizardStep) => {
+    setPrevStep(currentStep);
+    setCurrentStep(step);
+  };
+  
+  const direction = steps.findIndex(s => s.key === currentStep) > steps.findIndex(s => s.key === prevStep) ? 'forward' : 'backward';
 
   const applyDefaults = useApplyStageDefaults(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
@@ -327,7 +357,7 @@ export function WorkspaceOnboardingWizard({
       } else {
         toast.info('Default KPIs already configured');
       }
-      setCurrentStep('milestones');
+      goToStep('milestones');
     } catch {
       toast.error('Failed to apply KPI defaults');
     } finally {
@@ -365,7 +395,7 @@ export function WorkspaceOnboardingWizard({
       
       setMilestonesCreated(true);
       toast.success(`Created ${milestonesToCreate.length} milestones with ${totalActionsCreated} actions`);
-      setCurrentStep('meeting');
+      goToStep('meeting');
     } catch {
       toast.error('Failed to create milestones');
     } finally {
@@ -395,7 +425,7 @@ export function WorkspaceOnboardingWizard({
       
       setMeetingScheduled(true);
       toast.success('Session scheduled');
-      setCurrentStep('complete');
+      goToStep('complete');
     } catch {
       toast.error('Failed to schedule session');
     } finally {
@@ -407,14 +437,6 @@ export function WorkspaceOnboardingWizard({
     onOpenChange(false);
     // State will be reset by useEffect when dialog reopens
   };
-
-  const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = [
-    { key: 'welcome', label: 'Welcome', icon: Sparkles },
-    { key: 'kpis', label: 'KPIs', icon: TrendingUp },
-    { key: 'milestones', label: 'Milestones', icon: Target },
-    { key: 'meeting', label: 'Meeting', icon: Calendar },
-    { key: 'complete', label: 'Done', icon: Check },
-  ];
 
   const currentStepIndex = steps.findIndex(s => s.key === currentStep);
 
@@ -462,205 +484,202 @@ export function WorkspaceOnboardingWizard({
         </div>
 
         {/* Step content */}
-        <div className="min-h-[200px]">
-          {currentStep === 'welcome' && (
-            <div className="text-center py-6 space-y-4">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Sparkles className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Welcome to {startupName}!</h3>
-                <p className="text-muted-foreground text-sm">
-                  This wizard will help you set up your workspace with stage-appropriate KPIs,
-                  initial milestones, and schedule your first meeting.
-                </p>
-              </div>
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-left">
-                <div className="flex items-start gap-2">
-                  <BookOpen className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-primary">Pro tip: Use Playbooks</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      After setup, visit the <strong>Playbooks</strong> tab to instantly apply pre-built 
-                      milestone and action templates specific to your stage. Playbooks connect your KPIs 
-                      to actionable tasks.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentStep === 'kpis' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <TrendingUp className="h-10 w-10 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-1">Setup KPI Tracking</h3>
-                <p className="text-sm text-muted-foreground">
-                  We'll add the recommended KPIs for the <Badge variant="secondary">{stage}</Badge> stage.
-                </p>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                <p className="text-muted-foreground">
-                  This will add key metrics like revenue, burn rate, active users, and more based
-                  on what matters most at your current stage.
-                </p>
-              </div>
-              {kpisApplied && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Check className="h-4 w-4" />
-                  <span className="text-sm">KPIs applied successfully</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {currentStep === 'milestones' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <Target className="h-10 w-10 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-1">Create Initial Milestones</h3>
-                <p className="text-sm text-muted-foreground">
-                  Select the milestones to add for your {stage} stage journey.
-                </p>
-              </div>
-              <ScrollArea className="h-[180px]">
-                <div className="space-y-2">
-                  {stageMilestones.map((m, idx) => (
-                    <label
-                      key={idx}
-                      className={cn(
-                        'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
-                        selectedMilestones.has(idx) ? 'bg-primary/5 border-primary/30' : 'bg-muted/30'
-                      )}
-                    >
-                      <Checkbox
-                        checked={selectedMilestones.has(idx)}
-                        onCheckedChange={(checked) => {
-                          const newSet = new Set(selectedMilestones);
-                          if (checked) newSet.add(idx);
-                          else newSet.delete(idx);
-                          setSelectedMilestones(newSet);
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{m.title}</p>
-                        <p className="text-xs text-muted-foreground">{m.description}</p>
-                        <Badge variant="outline" className="mt-1 text-xs">
-                          ~{m.weeksOut} weeks
-                        </Badge>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </ScrollArea>
-              {milestonesCreated && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Check className="h-4 w-4" />
-                  <span className="text-sm">Milestones created successfully</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {currentStep === 'meeting' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <Calendar className="h-10 w-10 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-1">Schedule Kickoff Meeting</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set up your first team meeting to align on goals.
-                </p>
-              </div>
-              <div className="space-y-3">
+        <div className="min-h-[280px] overflow-hidden">
+          <WizardStepTransition stepKey={currentStep} direction={direction}>
+            {currentStep === 'welcome' && (
+              <div className="text-center py-6 space-y-4">
+                <WizardIllustration type="welcome" size="lg" className="mx-auto" />
                 <div>
-                  <Label htmlFor="meeting-title">Meeting Title</Label>
-                  <Input
-                    id="meeting-title"
-                    value={meetingTitle}
-                    onChange={(e) => setMeetingTitle(e.target.value)}
-                  />
+                  <h3 className="text-lg font-semibold mb-2">Welcome to {startupName}!</h3>
+                  <p className="text-muted-foreground text-sm">
+                    This wizard will help you set up your workspace with stage-appropriate KPIs,
+                    initial milestones, and schedule your first meeting.
+                  </p>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label htmlFor="meeting-date">Date</Label>
-                    <Input
-                      id="meeting-date"
-                      type="date"
-                      value={meetingDate}
-                      onChange={(e) => setMeetingDate(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="meeting-time">Time</Label>
-                    <Input
-                      id="meeting-time"
-                      type="time"
-                      value={meetingTime}
-                      onChange={(e) => setMeetingTime(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="meeting-duration">Duration</Label>
-                    <Input
-                      id="meeting-duration"
-                      type="number"
-                      value={meetingDuration}
-                      onChange={(e) => setMeetingDuration(e.target.value)}
-                      min="15"
-                      max="180"
-                    />
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-left">
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-primary">Pro tip: Use Playbooks</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        After setup, visit the <strong>Playbooks</strong> tab to instantly apply pre-built 
+                        milestone and action templates specific to your stage.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-              {meetingScheduled && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Check className="h-4 w-4" />
-                  <span className="text-sm">Meeting scheduled successfully</span>
-                </div>
-              )}
-            </div>
-          )}
+            )}
 
-          {currentStep === 'complete' && (
-            <div className="text-center py-6 space-y-4">
-              <div className="h-16 w-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-                <Check className="h-8 w-8 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">You're all set!</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your workspace is ready to go. You can now track KPIs, manage milestones,
-                  and collaborate with your team.
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2 text-sm">
+            {currentStep === 'kpis' && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <WizardIllustration type="kpis" className="mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Setup KPI Tracking</h3>
+                  <p className="text-sm text-muted-foreground">
+                    We'll add the recommended KPIs for the <Badge variant="secondary">{stage}</Badge> stage.
+                  </p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-4 text-sm">
+                  <p className="text-muted-foreground">
+                    This will add key metrics like revenue, burn rate, active users, and more based
+                    on what matters most at your current stage.
+                  </p>
+                </div>
                 {kpisApplied && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Check className="h-3 w-3" /> KPIs configured
-                  </Badge>
-                )}
-                {milestonesCreated && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Check className="h-3 w-3" /> Milestones created
-                  </Badge>
-                )}
-                {meetingScheduled && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Check className="h-3 w-3" /> Meeting scheduled
-                  </Badge>
+                  <div className="flex items-center gap-2 text-green-600 justify-center">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm">KPIs applied successfully</span>
+                  </div>
                 )}
               </div>
-              <div className="bg-muted/50 rounded-lg p-3 mt-2">
-                <div className="flex items-center gap-2 justify-center text-sm">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                  <span className="text-muted-foreground">
-                    Next step: Check <strong className="text-foreground">Playbooks</strong> tab for stage-specific templates
-                  </span>
+            )}
+
+            {currentStep === 'milestones' && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <WizardIllustration type="milestones" className="mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Create Initial Milestones</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Select the milestones to add for your {stage} stage journey.
+                  </p>
+                </div>
+                <ScrollArea className="h-[180px]">
+                  <div className="space-y-2">
+                    {stageMilestones.map((m, idx) => (
+                      <label
+                        key={idx}
+                        className={cn(
+                          'flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm',
+                          selectedMilestones.has(idx) ? 'bg-primary/5 border-primary/30' : 'bg-muted/30 hover:bg-muted/50'
+                        )}
+                      >
+                        <Checkbox
+                          checked={selectedMilestones.has(idx)}
+                          onCheckedChange={(checked) => {
+                            const newSet = new Set(selectedMilestones);
+                            if (checked) newSet.add(idx);
+                            else newSet.delete(idx);
+                            setSelectedMilestones(newSet);
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{m.title}</p>
+                          <p className="text-xs text-muted-foreground">{m.description}</p>
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            ~{m.weeksOut} weeks
+                          </Badge>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </ScrollArea>
+                {milestonesCreated && (
+                  <div className="flex items-center gap-2 text-green-600 justify-center">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm">Milestones created successfully</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {currentStep === 'meeting' && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <WizardIllustration type="meeting" className="mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Schedule Kickoff Meeting</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Set up your first team meeting to align on goals.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="meeting-title">Meeting Title</Label>
+                    <Input
+                      id="meeting-title"
+                      value={meetingTitle}
+                      onChange={(e) => setMeetingTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <Label htmlFor="meeting-date">Date</Label>
+                      <Input
+                        id="meeting-date"
+                        type="date"
+                        value={meetingDate}
+                        onChange={(e) => setMeetingDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="meeting-time">Time</Label>
+                      <Input
+                        id="meeting-time"
+                        type="time"
+                        value={meetingTime}
+                        onChange={(e) => setMeetingTime(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="meeting-duration">Duration</Label>
+                      <Input
+                        id="meeting-duration"
+                        type="number"
+                        value={meetingDuration}
+                        onChange={(e) => setMeetingDuration(e.target.value)}
+                        min="15"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {meetingScheduled && (
+                  <div className="flex items-center gap-2 text-green-600 justify-center">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm">Meeting scheduled successfully</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {currentStep === 'complete' && (
+              <div className="text-center py-6 space-y-4">
+                <WizardIllustration type="complete" size="lg" className="mx-auto" />
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">You're all set! 🎉</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Your workspace is ready to go. You can now track KPIs, manage milestones,
+                    and collaborate with your team.
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 text-sm">
+                  {kpisApplied && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Check className="h-3 w-3" /> KPIs configured
+                    </Badge>
+                  )}
+                  {milestonesCreated && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Check className="h-3 w-3" /> Milestones created
+                    </Badge>
+                  )}
+                  {meetingScheduled && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Check className="h-3 w-3" /> Meeting scheduled
+                    </Badge>
+                  )}
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                  <div className="flex items-center gap-2 justify-center text-sm">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">
+                      Next step: Check <strong className="text-foreground">Playbooks</strong> tab for stage-specific templates
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </WizardStepTransition>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
@@ -669,8 +688,8 @@ export function WorkspaceOnboardingWizard({
               type="button"
               variant="ghost"
               onClick={() => {
-                const prevStep = steps[currentStepIndex - 1]?.key;
-                if (prevStep) setCurrentStep(prevStep);
+                const prev = steps[currentStepIndex - 1]?.key;
+                if (prev) goToStep(prev);
               }}
               disabled={isProcessing}
             >
@@ -679,7 +698,7 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'welcome' && (
-            <Button type="button" onClick={() => setCurrentStep('kpis')} className="w-full sm:w-auto">
+            <Button type="button" onClick={() => goToStep('kpis')} className="w-full sm:w-auto">
               Get Started
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -687,7 +706,7 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'kpis' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button type="button" variant="outline" onClick={() => setCurrentStep('milestones')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => goToStep('milestones')} disabled={isProcessing}>
                 Skip
               </Button>
               <Button type="button" onClick={handleApplyKpis} disabled={isProcessing || kpisApplied}>
@@ -699,7 +718,7 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'milestones' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button type="button" variant="outline" onClick={() => setCurrentStep('meeting')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => goToStep('meeting')} disabled={isProcessing}>
                 Skip
               </Button>
               <Button 
@@ -715,7 +734,7 @@ export function WorkspaceOnboardingWizard({
           
           {currentStep === 'meeting' && (
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button type="button" variant="outline" onClick={() => setCurrentStep('complete')} disabled={isProcessing}>
+              <Button type="button" variant="outline" onClick={() => goToStep('complete')} disabled={isProcessing}>
                 Skip
               </Button>
               <Button type="button" onClick={handleScheduleSession} disabled={isProcessing || meetingScheduled}>
@@ -726,8 +745,8 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'complete' && (
-            <Button type="button" onClick={handleClose} className="w-full sm:w-auto">
-              Go to Workspace
+            <Button type="button" onClick={handleClose} className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+              🎉 Go to Workspace
             </Button>
           )}
         </DialogFooter>

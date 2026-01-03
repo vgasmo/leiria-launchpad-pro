@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +29,6 @@ import {
   BookOpen,
   Bell,
   CheckCircle,
-  AlertTriangle,
   Rocket,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,6 +46,9 @@ import { WizardKpisStep } from '@/components/admin/wizard/WizardKpisStep';
 import { WizardPlaybooksStep } from '@/components/admin/wizard/WizardPlaybooksStep';
 import { WizardAlertRulesStep } from '@/components/admin/wizard/WizardAlertRulesStep';
 import { WizardReviewStep } from '@/components/admin/wizard/WizardReviewStep';
+import { WizardStepTransition } from '@/components/ui/WizardStepTransition';
+import { WizardIllustration } from '@/components/ui/WizardIllustration';
+import { triggerConfetti } from '@/lib/confetti';
 
 type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
@@ -66,14 +67,24 @@ export default function ProgramSetupWizard() {
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState<WizardStep>('basics');
+  const [prevStep, setPrevStep] = useState<WizardStep>('basics');
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(draftId || null);
+  const publishedRef = useRef(false);
 
   const { data: draft, isLoading: draftLoading } = useProgramSetupDraft(activeDraftId || undefined);
   const createDraft = useCreateProgramDraft();
   const updateDraft = useUpdateProgramDraft();
   const discardDraft = useDiscardProgramDraft();
   const publishDraft = usePublishProgramDraft();
+
+  // Helper for step transitions
+  const goToStep = (step: WizardStep) => {
+    setPrevStep(currentStep);
+    setCurrentStep(step);
+  };
+  
+  const direction = STEPS.findIndex(s => s.key === currentStep) > STEPS.findIndex(s => s.key === prevStep) ? 'forward' : 'backward';
 
   // Create draft on mount if needed
   useEffect(() => {
@@ -97,14 +108,14 @@ export default function ProgramSetupWizard() {
   const handleNext = () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < STEPS.length) {
-      setCurrentStep(STEPS[nextIndex].key);
+      goToStep(STEPS[nextIndex].key);
     }
   };
 
   const handleBack = () => {
     const prevIndex = currentStepIndex - 1;
     if (prevIndex >= 0) {
-      setCurrentStep(STEPS[prevIndex].key);
+      goToStep(STEPS[prevIndex].key);
     }
   };
 
@@ -126,11 +137,15 @@ export default function ProgramSetupWizard() {
   };
 
   const handlePublish = async () => {
-    if (!activeDraftId) return;
+    if (!activeDraftId || publishedRef.current) return;
     try {
+      publishedRef.current = true;
+      triggerConfetti();
       await publishDraft.mutateAsync(activeDraftId);
-      navigate('/admin');
+      toast.success('🎉 Program published successfully!');
+      setTimeout(() => navigate('/admin'), 1500);
     } catch (error) {
+      publishedRef.current = false;
       // Error handled by mutation
     }
   };
@@ -208,8 +223,8 @@ export default function ProgramSetupWizard() {
                   <button
                     key={step.key}
                     type="button"
-                    onClick={() => setCurrentStep(step.key)}
-                    className={`flex flex-col items-center gap-1 text-xs transition-colors ${
+                    onClick={() => goToStep(step.key)}
+                    className={`flex flex-col items-center gap-1 text-xs transition-all hover:scale-105 ${
                       isActive
                         ? 'text-primary font-medium'
                         : isComplete
@@ -237,69 +252,73 @@ export default function ProgramSetupWizard() {
         </Card>
 
         {/* Step Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {(() => {
-                const StepIcon = STEPS[currentStepIndex].icon;
-                return <StepIcon className="h-5 w-5" />;
-              })()}
-              {STEPS[currentStepIndex].label}
-            </CardTitle>
-            <CardDescription>
-              {currentStep === 'basics' && 'Enter the basic information about your program'}
-              {currentStep === 'stages' && 'Configure which stages are active and their order'}
-              {currentStep === 'kpis' && 'Review and customize KPIs for each stage'}
-              {currentStep === 'playbooks' && 'Set up playbooks with milestones and actions'}
-              {currentStep === 'alerts' && 'Configure alert rules and health scoring'}
-              {currentStep === 'review' && 'Review your configuration and publish'}
-            </CardDescription>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-start gap-4">
+            <WizardIllustration 
+              type={currentStep as any} 
+              size="sm" 
+            />
+            <div className="flex-1">
+              <CardTitle className="flex items-center gap-2">
+                {STEPS[currentStepIndex].label}
+              </CardTitle>
+              <CardDescription>
+                {currentStep === 'basics' && 'Enter the basic information about your program'}
+                {currentStep === 'stages' && 'Configure which stages are active and their order'}
+                {currentStep === 'kpis' && 'Review and customize KPIs for each stage'}
+                {currentStep === 'playbooks' && 'Set up playbooks with milestones and actions'}
+                {currentStep === 'alerts' && 'Configure alert rules and health scoring'}
+                {currentStep === 'review' && 'Review your configuration and publish'}
+              </CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
-            {draft && (
-              <>
-                {currentStep === 'basics' && (
-                  <WizardBasicsStep
-                    data={draft.draft_json.basics}
-                    onUpdate={(basics) => handleUpdateDraft({ basics })}
-                  />
-                )}
-                {currentStep === 'stages' && (
-                  <WizardStagesStep
-                    data={draft.draft_json.stages}
-                    onUpdate={(stages) => handleUpdateDraft({ stages })}
-                  />
-                )}
-                {currentStep === 'kpis' && (
-                  <WizardKpisStep
-                    stages={draft.draft_json.stages}
-                    kpis={draft.draft_json.kpis}
-                    coreKpis={draft.draft_json.coreKpis}
-                    onUpdate={(kpis, coreKpis) => handleUpdateDraft({ kpis, coreKpis })}
-                  />
-                )}
-                {currentStep === 'playbooks' && (
-                  <WizardPlaybooksStep
-                    stages={draft.draft_json.stages}
-                    playbooks={draft.draft_json.playbooks}
-                    onUpdate={(playbooks) => handleUpdateDraft({ playbooks })}
-                  />
-                )}
-                {currentStep === 'alerts' && (
-                  <WizardAlertRulesStep
-                    alertRules={draft.draft_json.alertRules}
-                    healthModel={draft.draft_json.healthModel}
-                    onUpdate={(alertRules, healthModel) => handleUpdateDraft({ alertRules, healthModel })}
-                  />
-                )}
-                {currentStep === 'review' && (
-                  <WizardReviewStep
-                    draft={draft}
-                    validationErrors={getValidationErrors()}
-                  />
-                )}
-              </>
-            )}
+            <WizardStepTransition stepKey={currentStep} direction={direction}>
+              {draft && (
+                <>
+                  {currentStep === 'basics' && (
+                    <WizardBasicsStep
+                      data={draft.draft_json.basics}
+                      onUpdate={(basics) => handleUpdateDraft({ basics })}
+                    />
+                  )}
+                  {currentStep === 'stages' && (
+                    <WizardStagesStep
+                      data={draft.draft_json.stages}
+                      onUpdate={(stages) => handleUpdateDraft({ stages })}
+                    />
+                  )}
+                  {currentStep === 'kpis' && (
+                    <WizardKpisStep
+                      stages={draft.draft_json.stages}
+                      kpis={draft.draft_json.kpis}
+                      coreKpis={draft.draft_json.coreKpis}
+                      onUpdate={(kpis, coreKpis) => handleUpdateDraft({ kpis, coreKpis })}
+                    />
+                  )}
+                  {currentStep === 'playbooks' && (
+                    <WizardPlaybooksStep
+                      stages={draft.draft_json.stages}
+                      playbooks={draft.draft_json.playbooks}
+                      onUpdate={(playbooks) => handleUpdateDraft({ playbooks })}
+                    />
+                  )}
+                  {currentStep === 'alerts' && (
+                    <WizardAlertRulesStep
+                      alertRules={draft.draft_json.alertRules}
+                      healthModel={draft.draft_json.healthModel}
+                      onUpdate={(alertRules, healthModel) => handleUpdateDraft({ alertRules, healthModel })}
+                    />
+                  )}
+                  {currentStep === 'review' && (
+                    <WizardReviewStep
+                      draft={draft}
+                      validationErrors={getValidationErrors()}
+                    />
+                  )}
+                </>
+              )}
+            </WizardStepTransition>
           </CardContent>
         </Card>
 
@@ -335,11 +354,11 @@ export default function ProgramSetupWizard() {
               <Button
                 type="button"
                 onClick={handlePublish}
-                disabled={publishDraft.isPending || getValidationErrors().length > 0}
+                disabled={publishDraft.isPending || getValidationErrors().length > 0 || publishedRef.current}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {publishDraft.isPending ? (
-                  'Publishing...'
+                {publishDraft.isPending || publishedRef.current ? (
+                  '🎉 Publishing...'
                 ) : (
                   <>
                     <Rocket className="h-4 w-4 mr-2" />
