@@ -60,6 +60,9 @@ verify_jwt = true
 [functions.generate-session-artifacts]
 verify_jwt = true
 
+[functions.sync-outlook-calendar]
+verify_jwt = true
+
 # ============================================
 # PUBLIC FUNCTIONS (Token-based auth)
 # No JWT - uses token/secret validation internally
@@ -69,6 +72,9 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.dataroom-get-by-token]
+verify_jwt = false
+
+[functions.calendar-feed]
 verify_jwt = false
 
 # ============================================
@@ -120,6 +126,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.run-workflow-rules]
+verify_jwt = false
+
+[functions.teams-notify]
 verify_jwt = false
 
 # ============================================
