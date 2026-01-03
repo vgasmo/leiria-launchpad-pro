@@ -1354,7 +1354,8 @@
       "removeRole": "Remove Role",
       "removeRoleConfirm": "Remove the \"{{role}}\" role from this user?",
       "removeAssignment": "Remove Assignment",
-      "removeAssignmentConfirm": "Remove this user from the workspace?"
+      "removeAssignmentConfirm": "Remove this user from the workspace?",
+      "alreadyAssignedAll": "Already assigned to all workspaces"
     }
   }
 }
