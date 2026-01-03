@@ -153,262 +153,166 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="animate-fade-in">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.totalStartups')}
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              {t('dashboard.acrossPrograms', { count: programsCount })}
-            </p>
-          </CardContent>
+      {/* Compact Stats Bar */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('dashboard.totalStartups')}</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+            <Users className="h-5 w-5 text-muted-foreground" />
+          </div>
         </Card>
 
         <Card 
-          className={`animate-fade-in cursor-pointer transition-shadow hover:shadow-md ${
-            stats.needsAttentionCount > 0 
-              ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' 
-              : ''
+          className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+            stats.needsAttentionCount > 0 ? 'border-amber-300 dark:border-amber-700' : ''
           }`}
           onClick={() => navigate('/my-workspaces?filter=attention')}
-          style={{ animationDelay: '50ms' }}
         >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.needsAttention')}
-            </CardTitle>
-            <AlertCircle className={`h-4 w-4 ${stats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${stats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
-              {stats.needsAttentionCount}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('dashboard.needsAttention')}</p>
+              <p className={`text-2xl font-bold ${stats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
+                {stats.needsAttentionCount}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t('dashboard.criticalOrAtRisk')}
-            </p>
-          </CardContent>
+            <AlertCircle className={`h-5 w-5 ${stats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+          </div>
         </Card>
 
-        <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.meetingsThisWeek')}
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.upcomingMeetingsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.meetingsTodayCount} {t('dashboard.scheduledForToday')}
-            </p>
-          </CardContent>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('dashboard.meetingsThisWeek')}</p>
+              <p className="text-2xl font-bold">{stats.upcomingMeetingsCount}</p>
+            </div>
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+          </div>
         </Card>
 
-        <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.healthDistribution')}
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-1 h-6">
-              {Object.entries(stats.healthCounts).map(([health, count]) => {
-                if (count === 0) return null;
-                const colors: Record<string, string> = {
-                  critical: 'bg-health-critical',
-                  at_risk: 'bg-health-at-risk',
-                  stable: 'bg-health-stable',
-                  healthy: 'bg-health-healthy',
-                  thriving: 'bg-health-thriving',
-                };
-                const width = (count / stats.total) * 100;
-                return (
-                  <Tooltip key={health}>
-                    <TooltipTrigger asChild>
-                      <div 
-                        className={`${colors[health]} rounded h-full cursor-pointer transition-all hover:opacity-80`}
-                        style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <span>{t(`health.${health}`)}: {count}</span>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('dashboard.overdueActions')}</p>
+              <p className={`text-2xl font-bold ${stats.overdueCount > 0 ? 'text-destructive' : ''}`}>
+                {stats.overdueCount}
+              </p>
             </div>
-            <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
-              {stats.healthCounts.healthy + stats.healthCounts.thriving > 0 && (
-                <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-health-healthy" />
-                  {stats.healthCounts.healthy + stats.healthCounts.thriving} {t('dashboard.healthy').toLowerCase()}
-                </span>
-              )}
-            </div>
-          </CardContent>
+            <ClipboardList className={`h-5 w-5 ${stats.overdueCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+          </div>
+        </Card>
+
+        <Card className="p-4 col-span-2 lg:col-span-1">
+          <p className="text-xs text-muted-foreground mb-2">{t('dashboard.healthDistribution')}</p>
+          <div className="flex gap-1 h-4">
+            {Object.entries(stats.healthCounts).map(([health, count]) => {
+              if (count === 0) return null;
+              const colors: Record<string, string> = {
+                critical: 'bg-health-critical',
+                at_risk: 'bg-health-at-risk',
+                stable: 'bg-health-stable',
+                healthy: 'bg-health-healthy',
+                thriving: 'bg-health-thriving',
+              };
+              const width = (count / stats.total) * 100;
+              return (
+                <Tooltip key={health}>
+                  <TooltipTrigger asChild>
+                    <div 
+                      className={`${colors[health]} rounded cursor-pointer transition-all hover:opacity-80`}
+                      style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <span>{t(`health.${health}`)}: {count}</span>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
         </Card>
       </div>
 
-      {/* Work Queue & Workload Widget Section */}
-      <div className="grid gap-6 lg:grid-cols-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <div className="lg:col-span-2">
-          <WorkQueuePanel compact />
-        </div>
-        <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
-      </div>
-
-      {/* Staff Tasks & Template Reviews */}
-      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '220ms' }}>
-        <PendingTemplateReviews showEmpty />
-        <StaffTasksPanel compact />
-      </div>
-
-      {/* Pending Check-ins & Alerts */}
-      <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '220ms' }}>
-        <PendingCheckinsPanel />
-        <AlertsPanel />
-      </div>
-
-      {/* Triage Workspace List */}
-      <div className="animate-fade-in" style={{ animationDelay: '240ms' }}>
-        <TriageWorkspaceList 
-          workspaces={workspaces.map(w => ({
-            id: w.id,
-            startup_id: w.startup_id,
-            program_id: w.program_id,
-            stage: w.stage,
-            health_score: null,
-            health_label: (w.health_score_override || w.health_score) as HealthScore | null,
-            created_at: w.created_at,
-            updated_at: w.updated_at,
-            startup: w.startup,
-            program: w.program,
-            overdue_actions_count: w.overdueActionsCount,
-            last_session_date: w.lastSession?.scheduled_at || null,
-            next_session_date: w.nextMeetingDate || null,
-            top_overdue_action: undefined,
-            missing_kpis_count: w.hasCurrentMonthKpi ? 0 : 1,
-          }))}
-          onScheduleSession={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=sessions`)}
-          onMessage={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=notes`)}
-        />
-      </div>
-
-      {/* Main Content Grid */}
+      {/* Primary Action Area: Work Queue + Urgent Items */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Calendar Widget - Full width on mobile, spans 1 col on desktop */}
-        <div className="lg:col-span-3 animate-fade-in" style={{ animationDelay: '225ms' }}>
-          <CalendarWidget />
-        </div>
-        {/* Needs Attention Column */}
-        <Card className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '250ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-              <CardTitle>{t('dashboard.needsAttention')}</CardTitle>
-            </div>
-            {attentionStartups.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={() => navigate('/my-workspaces?filter=attention')}>
-                {t('common.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent>
-            {attentionStartups.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Activity className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p className="font-medium">{t('dashboard.allOnTrack')}</p>
-                <p className="text-sm">{t('dashboard.noCriticalIssues')}</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {attentionStartups.map(workspace => {
-                  const health = workspace.health_score_override || workspace.health_score;
-                  return (
+        <div className="lg:col-span-2 space-y-6">
+          <WorkQueuePanel compact />
+          
+          {/* Today's Meetings - Only show if there are any */}
+          {todaysMeetings.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-base">{t('dashboard.todaysMeetings')}</CardTitle>
+                  <Badge variant="secondary" className="ml-auto">{todaysMeetings.length}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {todaysMeetings.slice(0, 4).map(workspace => (
                     <div
                       key={workspace.id}
-                      className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => navigate(`/workspace/${workspace.id}`)}
                     >
-                      <Avatar className="h-10 w-10 rounded-lg">
+                      <Avatar className="h-8 w-8 rounded-md">
                         <AvatarImage src={workspace.startup?.logo_url || undefined} />
-                        <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
+                        <AvatarFallback className="rounded-md bg-primary/10 text-primary text-xs font-semibold">
                           {workspace.startup?.name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium truncate">{workspace.startup?.name}</h4>
-                          <HealthBadge score={health as HealthScore | null} size="sm" />
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>{workspace.program?.name}</span>
-                          {workspace.overdueActionsCount > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {workspace.overdueActionsCount} {t('actions.overdue').toLowerCase()}
-                            </Badge>
-                          )}
-                        </div>
+                        <p className="font-medium text-sm truncate">{workspace.startup?.name}</p>
                       </div>
-                      <StageBadge stage={workspace.stage} size="sm" />
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(workspace.nextMeetingDate!), 'h:mm a')}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-        {/* Activity Feed */}
-        <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <ActivityFeed />
+        {/* Right Sidebar: Quick Glance */}
+        <div className="space-y-4">
+          <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
+          <StaffTasksPanel compact />
         </div>
       </div>
 
-      {/* Today's Meetings */}
-      {todaysMeetings.length > 0 && (
-        <Card className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle>{t('dashboard.todaysMeetings')}</CardTitle>
-              <Badge variant="secondary">{todaysMeetings.length}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {todaysMeetings.map(workspace => (
-                <div
-                  key={workspace.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => navigate(`/workspace/${workspace.id}`)}
-                >
-                  <Avatar className="h-10 w-10 rounded-lg">
-                    <AvatarImage src={workspace.startup?.logo_url || undefined} />
-                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
-                      {workspace.startup?.name?.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{workspace.startup?.name}</h4>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{format(new Date(workspace.nextMeetingDate!), 'h:mm a')}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Secondary: Triage List (collapsible feel) */}
+      <TriageWorkspaceList 
+        workspaces={workspaces.map(w => ({
+          id: w.id,
+          startup_id: w.startup_id,
+          program_id: w.program_id,
+          stage: w.stage,
+          health_score: null,
+          health_label: (w.health_score_override || w.health_score) as HealthScore | null,
+          created_at: w.created_at,
+          updated_at: w.updated_at,
+          startup: w.startup,
+          program: w.program,
+          overdue_actions_count: w.overdueActionsCount,
+          last_session_date: w.lastSession?.scheduled_at || null,
+          next_session_date: w.nextMeetingDate || null,
+          top_overdue_action: undefined,
+          missing_kpis_count: w.hasCurrentMonthKpi ? 0 : 1,
+        }))}
+        onScheduleSession={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=sessions`)}
+        onMessage={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=notes`)}
+      />
+
+      {/* Bottom Grid: Calendar + Activity */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CalendarWidget />
+        <ActivityFeed />
+      </div>
     </div>
   );
 }
