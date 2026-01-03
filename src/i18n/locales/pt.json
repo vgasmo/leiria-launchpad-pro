@@ -87,7 +87,8 @@
     "last": "Último",
     "creating": "A criar...",
     "generating": "A gerar...",
-    "copy": "Copiar"
+    "copy": "Copiar",
+    "submitting": "A submeter..."
   },
   "nav": {
     "myWorkspaces": "Os Meus Workspaces",
@@ -1400,6 +1401,16 @@
     "version": "Versão",
     "acceptedOn": "Aceite em",
     "reviewAndSign": "Rever e Assinar NDA"
+  },
+  "nda": {
+    "title": "Acordo de Confidencialidade",
+    "description": "Antes de aceder à informação das startups, deve ler e aceitar o NDA.",
+    "acceptLabel": "Li, compreendo e aceito os termos deste Acordo de Confidencialidade",
+    "acceptButton": "Aceitar e Continuar",
+    "mustAccept": "Deve aceitar o NDA para continuar",
+    "acceptedSuccess": "NDA aceite com sucesso!",
+    "failedToAccept": "Falha ao aceitar NDA. Por favor tente novamente.",
+    "legalNote": "Esta aceitação é legalmente vinculativa e será registada com data/hora para auditoria."
   },
   "myWorkspaces": {
     "title": "Os Meus Workspaces",
