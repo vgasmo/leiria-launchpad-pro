@@ -32,7 +32,8 @@
     "upToDate": "Up to date",
     "needsUpdate": "Needs update",
     "last": "Last",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "submitting": "Submitting..."
   },
   "nav": {
     "myWorkspaces": "My Workspaces",
@@ -1276,6 +1277,16 @@
     "version": "Version",
     "acceptedOn": "Accepted on",
     "reviewAndSign": "Review & Sign NDA"
+  },
+  "nda": {
+    "title": "Confidentiality Agreement",
+    "description": "Before accessing startup information, you must read and accept the NDA.",
+    "acceptLabel": "I have read, understand and accept the terms of this Confidentiality Agreement",
+    "acceptButton": "Accept & Continue",
+    "mustAccept": "You must accept the NDA to continue",
+    "acceptedSuccess": "NDA accepted successfully!",
+    "failedToAccept": "Failed to accept NDA. Please try again.",
+    "legalNote": "This acceptance is legally binding and will be recorded with timestamp for audit purposes."
   },
   "myWorkspaces": {
     "title": "My Workspaces",

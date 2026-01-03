@@ -9,6 +9,7 @@ const DEFAULT_ALLOWED = [
   'http://localhost:3000',
   'https://lovable.dev',
   'https://id-preview--apxzuslwhjujgrcsfzqw.lovable.app',
+  '*.lovableproject.com',
 ];
 
 /**
