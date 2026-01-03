@@ -1,66 +1,68 @@
 project_id = "apxzuslwhjujgrcsfzqw"
 
 # ============================================
-# USER-FACING FUNCTIONS
-# These validate auth internally via Authorization header
+# USER-FACING FUNCTIONS (Category A)
+# Require JWT verification + runtime auth check
+# Called from frontend by logged-in users
 # ============================================
 
 [functions.analyze-template]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-template-coach]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-financial-model-coach]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-investor-update]
-verify_jwt = false
+verify_jwt = true
 
 [functions.import-financial-model]
-verify_jwt = false
+verify_jwt = true
 
 [functions.sync-financial-kpis]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-session-suggestions]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-session-summary]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-progress-report-pdf]
-verify_jwt = false
+verify_jwt = true
 
 [functions.export-cohort-health-pdf]
-verify_jwt = false
+verify_jwt = true
 
 [functions.publish-program-setup]
-verify_jwt = false
+verify_jwt = true
 
 [functions.smart-session-scheduler]
-verify_jwt = false
+verify_jwt = true
 
 [functions.import-kpi-data]
-verify_jwt = false
+verify_jwt = true
 
 [functions.transcribe-audio]
-verify_jwt = false
+verify_jwt = true
 
 [functions.dataroom-create-link]
-verify_jwt = false
+verify_jwt = true
 
 [functions.dataroom-revoke-link]
-verify_jwt = false
+verify_jwt = true
 
 [functions.accept-mentor-nda]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-session-artifacts]
-verify_jwt = false
+verify_jwt = true
 
 # ============================================
-# PUBLIC FUNCTIONS - NO JWT
+# PUBLIC FUNCTIONS (Token-based auth)
+# No JWT - uses token/secret validation internally
 # ============================================
 
 [functions.get-shared-workspace]
@@ -70,7 +72,9 @@ verify_jwt = false
 verify_jwt = false
 
 # ============================================
-# CRON/SYSTEM/WEBHOOK FUNCTIONS - NO JWT (use secrets)
+# CRON/SYSTEM FUNCTIONS (Category B)
+# No JWT - requires x-cron-secret header
+# Called by scheduled jobs or internal systems
 # ============================================
 
 [functions.recompute-health-scores]
@@ -117,6 +121,12 @@ verify_jwt = false
 
 [functions.run-workflow-rules]
 verify_jwt = false
+
+# ============================================
+# WEBHOOK FUNCTIONS (Category C)
+# No JWT - requires x-webhook-secret header
+# Called by external systems (meeting tools, email)
+# ============================================
 
 [functions.webhook-meeting-ingest]
 verify_jwt = false

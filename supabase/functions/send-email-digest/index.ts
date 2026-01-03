@@ -1,13 +1,10 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { requireCronSecret, generateRequestId, createLogger } from '../_shared/security.ts';
 
+const FUNCTION_NAME = 'send-email-digest';
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://startupleiria.com";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface DigestData {
   userId: string;
@@ -32,14 +29,23 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
 }
 
-serve(async (req: Request) => {
-  // Handle CORS preflight
+Deno.serve(async (req) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
-    console.log("Starting email digest job...");
+    // SECURITY: Require cron secret for system-initiated calls
+    const authResult = requireCronSecret(req);
+    if ('error' in authResult) {
+      log.warn('Unauthorized access attempt');
+      return authResult.error;
+    }
+
+    log.info('Starting email digest job');
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -57,23 +63,22 @@ serve(async (req: Request) => {
       .eq("email_digest_enabled", true);
 
     if (prefError) {
-      console.error("Error fetching preferences:", prefError);
+      log.error('Error fetching preferences', prefError);
       throw prefError;
     }
 
-    console.log(`Found ${preferences?.length || 0} users with digest enabled`);
+    log.info('Found users with digest enabled', { count: preferences?.length || 0 });
 
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfWeek = now.getDay();
     const emailsSent: string[] = [];
 
     for (const pref of preferences || []) {
-      // Check if it's time to send (weekly on configured day, or daily)
+      // Check if it's time to send
       const shouldSend = pref.digest_frequency === "daily" || 
         (pref.digest_frequency === "weekly" && dayOfWeek === (pref.digest_day || 1));
 
       if (!shouldSend) {
-        console.log(`Skipping user ${pref.user_id} - not scheduled for today`);
         continue;
       }
 
@@ -82,7 +87,6 @@ serve(async (req: Request) => {
         const lastSent = new Date(pref.last_digest_sent_at);
         const hoursSinceLastSent = (now.getTime() - lastSent.getTime()) / (1000 * 60 * 60);
         if (hoursSinceLastSent < 20) {
-          console.log(`Skipping user ${pref.user_id} - already sent in last 20 hours`);
           continue;
         }
       }
@@ -95,7 +99,6 @@ serve(async (req: Request) => {
         .single();
 
       if (!profile?.email) {
-        console.log(`Skipping user ${pref.user_id} - no email`);
         continue;
       }
 
@@ -109,7 +112,6 @@ serve(async (req: Request) => {
       const workspaceIds = workspaceUsers?.map(wu => wu.workspace_id) || [];
 
       if (workspaceIds.length === 0) {
-        console.log(`Skipping user ${pref.user_id} - no workspaces`);
         continue;
       }
 
@@ -135,7 +137,7 @@ serve(async (req: Request) => {
         .in("id", workspaceIds)
         .eq("health_score", "at_risk");
 
-      // Get upcoming sessions in next 7 days (using sessions table, not meetings)
+      // Get upcoming sessions in next 7 days
       const nextWeek = new Date(now);
       nextWeek.setDate(nextWeek.getDate() + 7);
       const { count: sessionsCount } = await supabase
@@ -153,7 +155,7 @@ serve(async (req: Request) => {
         criticalHealth: criticalCount || 0,
         atRiskHealth: atRiskCount || 0,
         upcomingSessions: sessionsCount || 0,
-        pendingKpis: 0, // Calculated separately if needed
+        pendingKpis: 0,
       };
 
       // Only send if there's something to report
@@ -162,7 +164,6 @@ serve(async (req: Request) => {
         digestData.atRiskHealth > 0;
 
       if (!hasContent) {
-        console.log(`Skipping user ${pref.user_id} - nothing to report`);
         continue;
       }
 
@@ -191,7 +192,7 @@ serve(async (req: Request) => {
         }
 
         const result = await emailResponse.json();
-        console.log(`Email sent to ${digestData.email}:`, result);
+        log.info('Email sent', { email: digestData.email, emailId: result.id });
         emailsSent.push(digestData.email);
 
         // Update last_digest_sent_at
@@ -200,32 +201,22 @@ serve(async (req: Request) => {
           .update({ last_digest_sent_at: now.toISOString() })
           .eq("user_id", pref.user_id);
       } catch (emailError) {
-        console.error(`Failed to send email to ${digestData.email}:`, emailError);
+        log.error('Failed to send email', emailError, { email: digestData.email });
       }
     }
 
-    console.log(`Digest job complete. Sent ${emailsSent.length} emails.`);
+    log.info('Digest job complete', { emailsSent: emailsSent.length });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        emailsSent: emailsSent.length,
-        recipients: emailsSent 
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
-  } catch (error: any) {
-    console.error("Error in send-email-digest function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    return corsJsonResponse({ 
+      success: true, 
+      emailsSent: emailsSent.length,
+      recipients: emailsSent 
+    }, req);
+
+  } catch (error) {
+    log.error('Fatal error', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
   }
 });
 
@@ -245,7 +236,6 @@ function buildDigestEmail(data: DigestData): string {
     items.push(`<li>📅 <strong>${data.upcomingSessions}</strong> upcoming sessions this week</li>`);
   }
 
-  // Escape user-controlled content
   const safeFullName = escapeHtml(data.fullName);
 
   return `

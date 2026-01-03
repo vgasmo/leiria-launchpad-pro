@@ -1,9 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { requireUser, checkAIRateLimit, generateRequestId, createLogger } from '../_shared/security.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const FUNCTION_NAME = 'transcribe-audio';
 
 // Process base64 in chunks to prevent memory issues
 function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Array {
@@ -35,43 +34,71 @@ function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Arra
   return result;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
-    const { audio } = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+
+    if (!lovableApiKey) {
+      log.error('LOVABLE_API_KEY not configured');
+      return corsJsonResponse({ error: 'AI service not configured', code: 'CONFIG_ERROR' }, req, 500);
+    }
+
+    // SECURITY: Require authenticated user
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization') || '' } }
+    });
+
+    const authResult = await requireUser(req, supabaseUser);
+    if ('error' in authResult) {
+      log.warn('Unauthorized access attempt');
+      return authResult.error;
+    }
+
+    const user = authResult.user;
+    log.info('Processing transcription request', { userId: user.id });
+
+    // RATE LIMITING: Check AI rate limit (more restrictive for transcription)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const withinLimit = await checkAIRateLimit(supabase, user.id, null, FUNCTION_NAME, 10);
+
+    if (!withinLimit) {
+      log.warn('Rate limit exceeded', { userId: user.id });
+      return corsJsonResponse({ 
+        error: 'Rate limit exceeded. You can make up to 10 transcription requests per hour.',
+        code: 'RATE_LIMITED'
+      }, req, 429);
+    }
+
+    const { audio, workspace_id } = await req.json();
 
     if (!audio) {
-      console.error("No audio data provided");
-      return new Response(
-        JSON.stringify({ error: "No audio data provided" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      log.error('No audio data provided');
+      return corsJsonResponse({ error: 'No audio data provided', code: 'BAD_REQUEST' }, req, 400);
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    console.log("Processing audio for transcription...");
-    console.log("Audio base64 length:", audio.length);
+    log.info('Processing audio', { audioLength: audio.length, workspaceId: workspace_id });
 
     // Process audio in chunks to avoid memory issues
     const binaryAudio = processBase64Chunks(audio);
-    console.log("Binary audio size:", binaryAudio.length, "bytes");
+    log.info('Binary audio processed', { bytes: binaryAudio.length });
 
     // Use Gemini model with audio input capability
-    // Send audio as base64 data URL for processing
     const audioDataUrl = `data:audio/webm;base64,${audio}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -100,48 +127,39 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      log.error('AI gateway error', new Error(errorText), { status: response.status });
       
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return corsJsonResponse({ 
+          error: 'Rate limit exceeded. Please try again later.',
+          code: 'RATE_LIMITED'
+        }, req, 429);
       }
       if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return corsJsonResponse({ 
+          error: 'AI credits exhausted. Please add credits to continue.',
+          code: 'CREDITS_EXHAUSTED'
+        }, req, 402);
       }
       
-      throw new Error(`AI gateway error: ${response.status} - ${errorText}`);
+      throw new Error(`AI gateway error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("AI response received");
-
     const transcription = data.choices?.[0]?.message?.content?.trim() || "";
     
     if (!transcription || transcription === "[No speech detected]") {
-      console.log("No speech detected in audio");
-      return new Response(
-        JSON.stringify({ text: "", note: "No speech detected" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      log.info('No speech detected in audio');
+      return corsJsonResponse({ text: "", note: "No speech detected" }, req);
     }
 
-    console.log("Transcription successful, length:", transcription.length);
+    log.info('Transcription successful', { textLength: transcription.length });
 
-    return new Response(
-      JSON.stringify({ text: transcription }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error: any) {
-    console.error("Error in transcribe-audio:", error.message);
-    return new Response(
-      JSON.stringify({ error: error.message || "Transcription failed" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ text: transcription }, req);
+
+  } catch (error) {
+    log.error('Fatal error', error);
+    const message = error instanceof Error ? error.message : 'Transcription failed';
+    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
   }
 });
