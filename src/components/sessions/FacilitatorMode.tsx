@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   X,
@@ -157,8 +158,8 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
 
   const isOvertime = timer > targetSeconds && targetSeconds > 0;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
+  const content = (
+    <div className="fixed inset-0 z-[100] bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-muted/30">
         <div>
@@ -357,4 +358,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
       </div>
     </div>
   );
+
+  // Use portal to render outside any dialog context
+  return createPortal(content, document.body);
 }
