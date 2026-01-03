@@ -1431,5 +1431,26 @@
     "founderNoStartups": "You don't have any startups yet. Create your first startup to get started with tracking KPIs, managing milestones, and growing your business.",
     "noAccess": "You don't have access to any workspaces yet. Contact an administrator to get assigned to a startup.",
     "createFirstStartup": "Create Your First Startup"
+  },
+  "integrations": {
+    "title": "Integrations & Capture",
+    "description": "Automatically capture emails and meeting notes into your workspace",
+    "emailForwarding": "Email Forwarding",
+    "emailDescription": "Forward important investor or client emails to this address to keep a timeline in your workspace.",
+    "emailHint": "Emails forwarded here appear in the Communications tab",
+    "meetingWebhook": "Meeting Webhook",
+    "meetingDescription": "Receive meeting transcripts and summaries from video conferencing tools.",
+    "howToUse": "How to use",
+    "recommended": "Recommended",
+    "advanced": "Advanced",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Failed to copy",
+    "microsoftTeams": "Microsoft Teams",
+    "teamsStep1": "Go to Power Automate and create a new flow",
+    "teamsStep2": "Use the 'When a Teams meeting ends' trigger",
+    "teamsStep3": "Add an HTTP POST action pointing to this webhook URL",
+    "zoomMeet": "Zoom / Google Meet",
+    "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint.",
+    "testPayload": "Test Payload Example"
   }
 }

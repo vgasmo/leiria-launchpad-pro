@@ -320,9 +320,9 @@ export default function Mentors() {
               <MessageSquare className="h-4 w-4" />
               My Connections
               {pendingConnections.length > 0 && (
-                <Badge variant="secondary" className="ml-1">
+                <span className="ml-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
                   {pendingConnections.length}
-                </Badge>
+                </span>
               )}
             </TabsTrigger>
           </TabsList>
@@ -480,9 +480,9 @@ export default function Mentors() {
               <MessageSquare className="h-4 w-4" />
               Connection Requests
               {pendingConnections.length > 0 && (
-                <Badge variant="secondary" className="ml-1">
+                <span className="ml-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
                   {pendingConnections.length}
-                </Badge>
+                </span>
               )}
             </TabsTrigger>
             <TabsTrigger value="availability" className="gap-2">

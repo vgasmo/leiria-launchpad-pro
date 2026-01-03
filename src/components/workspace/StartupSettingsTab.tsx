@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { IntegrationSettings } from './IntegrationSettings';
 
 interface StartupSettingsTabProps {
   workspaceId: string;
@@ -155,6 +158,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
   }
 
   return (
+  <>
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -289,5 +293,15 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
         </form>
       </CardContent>
     </Card>
+
+    <Separator className="my-6" />
+
+    {/* Integration Settings for meeting/email capture */}
+    <IntegrationSettings 
+      workspaceId={workspaceId} 
+      emailAlias={`workspace-${workspaceId.slice(0, 8)}@capture.startupleiria.com`}
+      canEdit={canEdit}
+    />
+  </>
   );
 }

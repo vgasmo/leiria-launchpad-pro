@@ -1502,5 +1502,26 @@
     "founderNoStartups": "Ainda não tem nenhuma startup. Crie a sua primeira startup para começar a acompanhar KPIs, gerir marcos e fazer crescer o seu negócio.",
     "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador para ser atribuído a uma startup.",
     "createFirstStartup": "Criar a Sua Primeira Startup"
+  },
+  "integrations": {
+    "title": "Integrações e Captura",
+    "description": "Capturar automaticamente emails e notas de reunião no seu workspace",
+    "emailForwarding": "Reencaminhamento de Email",
+    "emailDescription": "Reencaminhe emails importantes de investidores ou clientes para este endereço para manter uma linha do tempo no seu workspace.",
+    "emailHint": "Os emails reencaminhados aparecem no separador Comunicações",
+    "meetingWebhook": "Webhook de Reunião",
+    "meetingDescription": "Receba transcrições e resumos de reuniões de ferramentas de videoconferência.",
+    "howToUse": "Como usar",
+    "recommended": "Recomendado",
+    "advanced": "Avançado",
+    "copied": "Copiado para a área de transferência",
+    "copyFailed": "Falha ao copiar",
+    "microsoftTeams": "Microsoft Teams",
+    "teamsStep1": "Vá ao Power Automate e crie um novo fluxo",
+    "teamsStep2": "Use o gatilho 'Quando uma reunião do Teams termina'",
+    "teamsStep3": "Adicione uma ação HTTP POST apontando para este URL de webhook",
+    "zoomMeet": "Zoom / Google Meet",
+    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
+    "testPayload": "Exemplo de Payload de Teste"
   }
 }

@@ -11,9 +11,10 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Verify webhook secret
+    // Verify webhook secret (use dedicated WEBHOOK_SECRET)
     const webhookSecret = req.headers.get('X-Webhook-Secret');
-    const expectedSecret = Deno.env.get('CRON_SECRET'); // Reuse cron secret for webhooks
+    const expectedSecret = Deno.env.get('WEBHOOK_SECRET');
+    
     
     if (!webhookSecret || webhookSecret !== expectedSecret) {
       console.error('Invalid or missing webhook secret');
