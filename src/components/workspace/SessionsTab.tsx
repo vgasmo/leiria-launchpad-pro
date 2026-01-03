@@ -68,6 +68,7 @@ import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
 import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
 import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
 import { VoiceToTextButton } from '@/components/sessions/VoiceToTextButton';
+import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -597,6 +598,22 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   const updateMutation = useUpdateSession(workspaceId);
   const { data: actionItems, isLoading: actionsLoading, refetch: refetchActions } = useSessionActionItems(session.id);
   const { data: members } = useWorkspaceMembers(workspaceId);
+  const addTranscript = useAddTranscript();
+
+  const handleVoiceTranscript = async (text: string) => {
+    // Append to notes
+    setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+    // Also save as transcript record for AI analysis
+    try {
+      await addTranscript.mutateAsync({
+        sessionId: session.id,
+        transcriptText: text,
+        source: 'voice'
+      });
+    } catch (error) {
+      console.error('Failed to save transcript:', error);
+    }
+  };
 
   const handleRefreshAI = () => {
     setRefreshKey(prev => prev + 1);
@@ -743,7 +760,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                   <Label htmlFor="notes">Session Notes</Label>
                   {canWrite && (
                     <VoiceToTextButton 
-                      onTranscript={(text) => setNotes(prev => prev ? `${prev}\n\n${text}` : text)} 
+                      onTranscript={handleVoiceTranscript} 
                     />
                   )}
                 </div>
