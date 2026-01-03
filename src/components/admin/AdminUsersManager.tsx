@@ -69,7 +69,7 @@ export function AdminUsersManager() {
 
   const getWorkspaceName = (wsId: string) => {
     const ws = workspaces?.find(w => w.id === wsId);
-    return ws?.startup?.name || t('admin.users.noName');
+    return ws?.startup?.name || t('admin.userManagement.noName');
   };
 
   const getRoleLabel = (role: string) => t(`roles.${role}`) || role;
@@ -120,12 +120,12 @@ export function AdminUsersManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">{t('admin.users.title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('admin.users.description')}</p>
+        <h2 className="text-lg font-semibold">{t('admin.userManagement.title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.userManagement.description')}</p>
       </div>
 
       <Input 
-        placeholder={t('admin.users.searchPlaceholder')} 
+        placeholder={t('admin.userManagement.searchPlaceholder')} 
         value={searchTerm} 
         onChange={e => setSearchTerm(e.target.value)}
         className="max-w-md"
@@ -135,7 +135,7 @@ export function AdminUsersManager() {
         {filteredProfiles.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              {t('admin.users.noUsers')}
+              {t('admin.userManagement.noUsers')}
             </CardContent>
           </Card>
         ) : (
@@ -155,7 +155,7 @@ export function AdminUsersManager() {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{profile.full_name || t('admin.users.noName')}</h3>
+                        <h3 className="font-medium">{profile.full_name || t('admin.userManagement.noName')}</h3>
                         {isAdmin && <Badge variant="destructive">{t('roles.admin')}</Badge>}
                       </div>
                       <p className="text-sm text-muted-foreground">{profile.email}</p>
@@ -164,7 +164,7 @@ export function AdminUsersManager() {
                       <div className="mt-3">
                         <div className="flex items-center gap-2 mb-2">
                           <UserCheck className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs font-medium text-muted-foreground">{t('admin.users.globalRoles')}</span>
+                          <span className="text-xs font-medium text-muted-foreground">{t('admin.userManagement.globalRoles')}</span>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -172,12 +172,12 @@ export function AdminUsersManager() {
                             onClick={() => setAddRoleDialog({ userId: profile.id, userName: profile.full_name || profile.email })}
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            {t('admin.users.addRole')}
+                            {t('admin.userManagement.addRole')}
                           </Button>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {roles.length === 0 ? (
-                            <span className="text-xs text-muted-foreground">{t('admin.users.noRoles')}</span>
+                            <span className="text-xs text-muted-foreground">{t('admin.userManagement.noRoles')}</span>
                           ) : (
                             roles.map(r => (
                               <Badge 
@@ -198,7 +198,7 @@ export function AdminUsersManager() {
                       <div className="mt-3">
                         <div className="flex items-center gap-2 mb-2">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs font-medium text-muted-foreground">{t('admin.users.workspaceAssignments')}</span>
+                          <span className="text-xs font-medium text-muted-foreground">{t('admin.userManagement.workspaceAssignments')}</span>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -206,12 +206,12 @@ export function AdminUsersManager() {
                             onClick={() => setAssignWsDialog({ userId: profile.id, userName: profile.full_name || profile.email })}
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            {t('admin.users.assign')}
+                            {t('admin.userManagement.assign')}
                           </Button>
                         </div>
                         <div className="space-y-1">
                           {wsAssignments.length === 0 ? (
-                            <span className="text-xs text-muted-foreground">{t('admin.users.notAssigned')}</span>
+                            <span className="text-xs text-muted-foreground">{t('admin.userManagement.notAssigned')}</span>
                           ) : (
                             wsAssignments.map(wu => (
                               <div key={wu.id} className="flex items-center gap-2 text-xs bg-muted/50 rounded p-2">
@@ -224,7 +224,7 @@ export function AdminUsersManager() {
                                     checked={wu.active} 
                                     onCheckedChange={() => handleToggleWsActive(wu.id, wu.active)}
                                   />
-                                  <span className="text-muted-foreground">{wu.active ? t('admin.users.active') : t('admin.users.inactive')}</span>
+                                  <span className="text-muted-foreground">{wu.active ? t('admin.userManagement.active') : t('admin.userManagement.inactive')}</span>
                                 </div>
                                 <Button 
                                   variant="ghost" 
@@ -252,11 +252,11 @@ export function AdminUsersManager() {
       <Dialog open={!!addRoleDialog} onOpenChange={(open) => !open && setAddRoleDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('admin.users.addRoleTitle', { name: addRoleDialog?.userName })}</DialogTitle>
+            <DialogTitle>{t('admin.userManagement.addRoleTitle', { name: addRoleDialog?.userName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>{t('admin.users.role')}</Label>
+              <Label>{t('admin.userManagement.role')}</Label>
               <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as Role)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -271,7 +271,7 @@ export function AdminUsersManager() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddRoleDialog(null)}>{t('common.cancel')}</Button>
-            <Button onClick={handleAddRole}>{t('admin.users.addRole')}</Button>
+            <Button onClick={handleAddRole}>{t('admin.userManagement.addRole')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -280,14 +280,14 @@ export function AdminUsersManager() {
       <Dialog open={!!assignWsDialog} onOpenChange={(open) => !open && setAssignWsDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('admin.users.assignTitle', { name: assignWsDialog?.userName })}</DialogTitle>
+            <DialogTitle>{t('admin.userManagement.assignTitle', { name: assignWsDialog?.userName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>{t('admin.users.workspace')}</Label>
+              <Label>{t('admin.userManagement.workspace')}</Label>
               <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('admin.users.selectWorkspace')} />
+                  <SelectValue placeholder={t('admin.userManagement.selectWorkspace')} />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces
@@ -298,7 +298,7 @@ export function AdminUsersManager() {
                     })
                     .map(ws => (
                       <SelectItem key={ws.id} value={ws.id}>
-                        {ws.startup?.name || t('admin.users.noName')} ({ws.program?.name || t('admin.users.noProgram')})
+                        {ws.startup?.name || t('admin.userManagement.noName')} ({ws.program?.name || t('admin.userManagement.noProgram')})
                       </SelectItem>
                     ))}
                   {workspaces?.filter(ws => {
@@ -306,14 +306,14 @@ export function AdminUsersManager() {
                     return !userAssignments.some(ua => ua.workspace_id === ws.id);
                   }).length === 0 && (
                     <div className="p-2 text-sm text-muted-foreground text-center">
-                      {t('admin.users.alreadyAssignedAll')}
+                      {t('admin.userManagement.alreadyAssignedAll')}
                     </div>
                   )}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>{t('admin.users.role')}</Label>
+              <Label>{t('admin.userManagement.role')}</Label>
               <Select value={wsRole} onValueChange={(v) => setWsRole(v as Role)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -328,7 +328,7 @@ export function AdminUsersManager() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignWsDialog(null)}>{t('common.cancel')}</Button>
-            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>{t('admin.users.assign')}</Button>
+            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>{t('admin.userManagement.assign')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -337,9 +337,9 @@ export function AdminUsersManager() {
       <AlertDialog open={!!deleteRoleTarget} onOpenChange={(open) => !open && setDeleteRoleTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.users.removeRole')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.userManagement.removeRole')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.users.removeRoleConfirm', { role: deleteRoleTarget?.role })}
+              {t('admin.userManagement.removeRoleConfirm', { role: deleteRoleTarget?.role })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -353,9 +353,9 @@ export function AdminUsersManager() {
       <AlertDialog open={!!deleteWsUserTarget} onOpenChange={(open) => !open && setDeleteWsUserTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.users.removeAssignment')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.userManagement.removeAssignment')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.users.removeAssignmentConfirm')}
+              {t('admin.userManagement.removeAssignmentConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

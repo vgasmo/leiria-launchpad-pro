@@ -830,7 +830,7 @@
       "disabled": "Disabled",
       "usingDefaults": "Using defaults"
     },
-    "users": {
+    "userManagement": {
       "title": "User Management",
       "description": "Manage user roles and workspace assignments",
       "searchPlaceholder": "Search users by name or email...",

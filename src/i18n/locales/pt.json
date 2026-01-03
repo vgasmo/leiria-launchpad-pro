@@ -885,7 +885,7 @@
       "disabled": "Desativado",
       "usingDefaults": "A usar padrões"
     },
-    "users": {
+    "userManagement": {
       "title": "Gestão de Utilizadores",
       "description": "Gerir funções de utilizadores e atribuições a workspaces",
       "searchPlaceholder": "Pesquisar utilizadores por nome ou email...",

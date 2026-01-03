@@ -364,7 +364,7 @@ export function AdminExternalMentorsManager() {
       <AlertDialog open={!!removeTarget} onOpenChange={(open) => !open && setRemoveTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.users.removeRole')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.userManagement.removeRole')}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('admin.mentors.confirmRemoveMentor')}
             </AlertDialogDescription>
