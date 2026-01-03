@@ -1,0 +1,233 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { 
+  Sparkles, 
+  Loader2, 
+  ChevronDown, 
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  ListTodo
+} from 'lucide-react';
+import { useGenerateSessionArtifacts, useSessionTranscripts, useAddTranscript } from '@/hooks/useSessionArtifacts';
+import { toast } from 'sonner';
+
+interface SessionArtifactsPanelProps {
+  sessionId: string;
+  sessionNotes?: string | null;
+  sessionAgenda?: string | null;
+  onClose?: () => void;
+}
+
+export function SessionArtifactsPanel({ 
+  sessionId, 
+  sessionNotes,
+  sessionAgenda,
+  onClose 
+}: SessionArtifactsPanelProps) {
+  const { t } = useTranslation();
+  const { data: transcripts, isLoading: loadingTranscripts } = useSessionTranscripts(sessionId);
+  const generateArtifacts = useGenerateSessionArtifacts();
+  const addTranscript = useAddTranscript();
+  
+  const [manualTranscript, setManualTranscript] = useState('');
+  const [showTranscriptInput, setShowTranscriptInput] = useState(false);
+  const [generatedArtifacts, setGeneratedArtifacts] = useState<{
+    summary: string;
+    decisions: string[];
+    risks: string[];
+    next_steps: string[];
+  } | null>(null);
+  const [actionsCreated, setActionsCreated] = useState<Array<{ id: string; title: string }>>([]);
+
+  const hasContent = !!(sessionNotes || sessionAgenda || (transcripts && transcripts.length > 0));
+
+  const handleGenerate = async () => {
+    try {
+      const result = await generateArtifacts.mutateAsync(sessionId);
+      setGeneratedArtifacts(result.artifacts);
+      setActionsCreated(result.actions_created);
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  const handleAddTranscript = async () => {
+    if (!manualTranscript.trim()) {
+      toast.error('Please enter transcript text');
+      return;
+    }
+    
+    await addTranscript.mutateAsync({
+      sessionId,
+      transcriptText: manualTranscript,
+      source: 'manual'
+    });
+    
+    setManualTranscript('');
+    setShowTranscriptInput(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Sparkles className="h-5 w-5 text-primary" />
+          AI Session Analysis
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Content status */}
+        <div className="flex flex-wrap gap-2">
+          {sessionNotes && (
+            <Badge variant="secondary" className="gap-1">
+              <FileText className="h-3 w-3" />
+              Notes available
+            </Badge>
+          )}
+          {sessionAgenda && (
+            <Badge variant="secondary" className="gap-1">
+              <ListTodo className="h-3 w-3" />
+              Agenda available
+            </Badge>
+          )}
+          {transcripts && transcripts.length > 0 && (
+            <Badge variant="secondary" className="gap-1">
+              <FileText className="h-3 w-3" />
+              {transcripts.length} transcript(s)
+            </Badge>
+          )}
+        </div>
+
+        {/* Add transcript option */}
+        {!hasContent && (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              No content available to analyze. Add notes, agenda, or a transcript first.
+            </p>
+          </div>
+        )}
+
+        <Collapsible open={showTranscriptInput} onOpenChange={setShowTranscriptInput}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full">
+              <ChevronDown className={`h-4 w-4 mr-2 transition-transform ${showTranscriptInput ? 'rotate-180' : ''}`} />
+              Add Transcript Manually
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3 space-y-3">
+            <Textarea
+              placeholder="Paste meeting transcript here..."
+              value={manualTranscript}
+              onChange={(e) => setManualTranscript(e.target.value)}
+              rows={6}
+            />
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                onClick={handleAddTranscript}
+                disabled={addTranscript.isPending}
+              >
+                {addTranscript.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Save Transcript
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={() => setShowTranscriptInput(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Generate button */}
+        <Button 
+          onClick={handleGenerate} 
+          disabled={!hasContent || generateArtifacts.isPending}
+          className="w-full"
+        >
+          {generateArtifacts.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Analyzing...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Generate Summary & Actions
+            </>
+          )}
+        </Button>
+
+        {/* Generated results */}
+        {generatedArtifacts && (
+          <div className="space-y-4 pt-4 border-t">
+            {generatedArtifacts.summary && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Summary</h4>
+                <p className="text-sm text-muted-foreground">
+                  {generatedArtifacts.summary}
+                </p>
+              </div>
+            )}
+
+            {generatedArtifacts.decisions?.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Decisions
+                </h4>
+                <ul className="text-sm space-y-1">
+                  {generatedArtifacts.decisions.map((d, i) => (
+                    <li key={i} className="text-muted-foreground">• {d}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {generatedArtifacts.risks?.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  Risks & Concerns
+                </h4>
+                <ul className="text-sm space-y-1">
+                  {generatedArtifacts.risks.map((r, i) => (
+                    <li key={i} className="text-muted-foreground">• {r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {actionsCreated.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm flex items-center gap-2">
+                  <ListTodo className="h-4 w-4 text-blue-500" />
+                  Actions Created ({actionsCreated.length})
+                </h4>
+                <ul className="text-sm space-y-1">
+                  {actionsCreated.map((a) => (
+                    <li key={a.id} className="text-muted-foreground">• {a.title}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

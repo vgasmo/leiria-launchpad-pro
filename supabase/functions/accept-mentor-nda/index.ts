@@ -4,8 +4,13 @@ import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
 
 Deno.serve(async (req: Request) => {
+  console.log('=== accept-mentor-nda called ===');
+  console.log('Method:', req.method);
+  console.log('Origin:', req.headers.get('Origin'));
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight');
     return handleCorsOptions(req);
   }
 
@@ -41,12 +46,15 @@ Deno.serve(async (req: Request) => {
     }
 
     // Check if user is mentor_externo
-    const { data: isMentor } = await supabaseAdmin.rpc('has_role', {
+    console.log('Checking mentor role for user:', user.id);
+    const { data: isMentor, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: user.id,
       _role: 'mentor_externo'
     });
+    console.log('Is mentor result:', isMentor, 'error:', roleError?.message);
 
     if (!isMentor) {
+      console.log('User is not a mentor_externo');
       return corsJsonResponse({ error: 'Only external mentors need to accept NDA' }, req, 400);
     }
 

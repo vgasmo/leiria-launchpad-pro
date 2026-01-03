@@ -458,6 +458,47 @@ export type Database = {
           },
         ]
       }
+      communication_log: {
+        Row: {
+          body: string | null
+          channel: string | null
+          created_at: string | null
+          from_address: string | null
+          id: string
+          metadata_json: Json | null
+          subject: string | null
+          workspace_id: string
+        }
+        Insert: {
+          body?: string | null
+          channel?: string | null
+          created_at?: string | null
+          from_address?: string | null
+          id?: string
+          metadata_json?: Json | null
+          subject?: string | null
+          workspace_id: string
+        }
+        Update: {
+          body?: string | null
+          channel?: string | null
+          created_at?: string | null
+          from_address?: string | null
+          id?: string
+          metadata_json?: Json | null
+          subject?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_notes: {
         Row: {
           author_id: string
@@ -1036,6 +1077,50 @@ export type Database = {
           weights_json?: Json
         }
         Relationships: []
+      }
+      investor_readiness_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          program_id: string | null
+          sort_order: number
+          stage: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          sort_order?: number
+          stage: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          sort_order?: number
+          stage?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_readiness_items_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       investor_update_templates: {
         Row: {
@@ -2306,6 +2391,38 @@ export type Database = {
           },
         ]
       }
+      session_transcripts: {
+        Row: {
+          created_at: string | null
+          id: string
+          session_id: string
+          source: string | null
+          transcript_text: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          session_id: string
+          source?: string | null
+          transcript_text?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          session_id?: string
+          source?: string | null
+          transcript_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_transcripts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_workflow_state: {
         Row: {
           actions_done: boolean | null
@@ -2496,6 +2613,7 @@ export type Database = {
           priority: string | null
           related_startup_id: string | null
           related_user_id: string | null
+          source_rule_id: string | null
           status: string
           task_type: string
           title: string
@@ -2514,6 +2632,7 @@ export type Database = {
           priority?: string | null
           related_startup_id?: string | null
           related_user_id?: string | null
+          source_rule_id?: string | null
           status?: string
           task_type?: string
           title: string
@@ -2532,6 +2651,7 @@ export type Database = {
           priority?: string | null
           related_startup_id?: string | null
           related_user_id?: string | null
+          source_rule_id?: string | null
           status?: string
           task_type?: string
           title?: string
@@ -2544,6 +2664,13 @@ export type Database = {
             columns: ["related_startup_id"]
             isOneToOne: false
             referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_source_rule_id_fkey"
+            columns: ["source_rule_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_rules"
             referencedColumns: ["id"]
           },
           {
@@ -3224,6 +3351,98 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_executions: {
+        Row: {
+          created_at: string
+          id: string
+          result_json: Json | null
+          rule_id: string
+          status: string
+          trigger_event_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          result_json?: Json | null
+          rule_id: string
+          status?: string
+          trigger_event_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          result_json?: Json | null
+          rule_id?: string
+          status?: string
+          trigger_event_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_executions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_rules: {
+        Row: {
+          actions_json: Json
+          conditions_json: Json
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          program_id: string | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          actions_json?: Json
+          conditions_json?: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          program_id?: string | null
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          actions_json?: Json
+          conditions_json?: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          program_id?: string | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_rules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_alerts: {
         Row: {
           created_at: string
@@ -3298,6 +3517,35 @@ export type Database = {
             foreignKeyName: "workspace_assignments_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_email_aliases: {
+        Row: {
+          alias: string
+          created_at: string | null
+          id: string
+          workspace_id: string
+        }
+        Insert: {
+          alias: string
+          created_at?: string | null
+          id?: string
+          workspace_id: string
+        }
+        Update: {
+          alias?: string
+          created_at?: string | null
+          id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_email_aliases_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3556,6 +3804,57 @@ export type Database = {
           },
         ]
       }
+      workspace_readiness_status: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          item_id: string
+          notes: string | null
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_readiness_status_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "investor_readiness_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_readiness_status_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_tags: {
         Row: {
           created_at: string
@@ -3628,6 +3927,7 @@ export type Database = {
         Row: {
           active_financial_model_version_id: string | null
           created_at: string
+          external_id: string | null
           health_confidence: string | null
           health_confidence_reason: string | null
           health_notes: string | null
@@ -3657,6 +3957,7 @@ export type Database = {
         Insert: {
           active_financial_model_version_id?: string | null
           created_at?: string
+          external_id?: string | null
           health_confidence?: string | null
           health_confidence_reason?: string | null
           health_notes?: string | null
@@ -3686,6 +3987,7 @@ export type Database = {
         Update: {
           active_financial_model_version_id?: string | null
           created_at?: string
+          external_id?: string | null
           health_confidence?: string | null
           health_confidence_reason?: string | null
           health_notes?: string | null
@@ -3806,6 +4108,19 @@ export type Database = {
       get_dataroom_workspace_id: {
         Args: { _dataroom_id: string }
         Returns: string
+      }
+      get_kpi_percentiles: {
+        Args: {
+          _kpi_definition_id: string
+          _program_id?: string
+          _stage?: string
+        }
+        Returns: {
+          count: number
+          p25: number
+          p50: number
+          p75: number
+        }[]
       }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }
