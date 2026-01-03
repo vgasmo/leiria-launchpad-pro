@@ -10,12 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
-  FolderLock, Plus, Link2, Copy, ExternalLink, Trash2, 
+  FolderLock, Plus, Link2, Copy, Trash2, 
   Eye, EyeOff, FileText, TrendingUp, LinkIcon, GripVertical,
-  Calendar, Download, XCircle, Clock, Users
+  Calendar, Download, XCircle, Clock, Users, Sparkles, BookTemplate, ExternalLink
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -31,7 +31,8 @@ import {
   useRevokeShareLink,
 } from '@/hooks/useDataroom';
 import { useDocuments } from '@/hooks/useDocuments';
-import { useInvestorUpdates } from '@/hooks/useInvestorUpdates';
+import { useInvestorUpdates, useGenerateInvestorUpdate } from '@/hooks/useInvestorUpdates';
+import { InvestorTemplateLibrary } from './InvestorTemplateLibrary';
 
 interface DataroomTabProps {
   workspaceId: string;
@@ -52,9 +53,13 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
   const deleteItem = useDeleteDataroomItem();
   const createShareLink = useCreateShareLink();
   const revokeShareLink = useRevokeShareLink();
+  const generateInvestorUpdate = useGenerateInvestorUpdate();
   
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [addLinkOpen, setAddLinkOpen] = useState(false);
+  const [generateUpdateOpen, setGenerateUpdateOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [isGenerating, setIsGenerating] = useState(false);
   const [itemType, setItemType] = useState<'document' | 'investor_update' | 'link'>('document');
   const [itemForm, setItemForm] = useState({
     title: '',
@@ -76,6 +81,31 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
       ensureDataroom.mutate(workspaceId);
     }
   }, [loadingDataroom, dataroom, workspaceId, canWrite]);
+  
+  const handleGenerateUpdate = async () => {
+    setIsGenerating(true);
+    try {
+      const result = await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
+      toast.success(t('investorUpdates.updateGenerated'));
+      setGenerateUpdateOpen(false);
+      
+      // Auto-add to dataroom if we have one
+      if (dataroom?.id && result?.id) {
+        await createItem.mutateAsync({
+          dataroom_id: dataroom.id,
+          type: 'investor_update',
+          title: `Investor Update - ${format(new Date(selectedMonth), 'MMM yyyy')}`,
+          investor_update_id: result.id,
+          visibility: 'investors',
+        });
+        toast.success(t('dataroom.autoAddedToDataroom'));
+      }
+    } catch (error: any) {
+      toast.error(error?.message || t('investorUpdates.failedToGenerate'));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   
   const handleAddItem = async () => {
     if (!dataroom?.id) return;
@@ -163,7 +193,40 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
   }
   
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="dataroom" className="space-y-6">
+      {/* Header with tabs and actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <TabsList>
+          <TabsTrigger value="dataroom" className="gap-2">
+            <FolderLock className="h-4 w-4" />
+            {t('dataroom.title')}
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-2">
+            <BookTemplate className="h-4 w-4" />
+            {t('investorUpdates.templates')}
+          </TabsTrigger>
+        </TabsList>
+        {canWrite && (
+          <div className="flex gap-2">
+            <Button onClick={() => setGenerateUpdateOpen(true)} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t('investorUpdates.generateUpdate')}
+            </Button>
+            <Button variant="outline" onClick={() => { setAddLinkOpen(true); setCreatedLink(null); }} className="gap-2">
+              <Link2 className="h-4 w-4" />
+              {t('dataroom.createLink')}
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      {/* Templates Tab */}
+      <TabsContent value="templates" className="mt-6">
+        <InvestorTemplateLibrary />
+      </TabsContent>
+      
+      {/* Dataroom Tab */}
+      <TabsContent value="dataroom" className="mt-6 space-y-6">
       {/* Dataroom Items */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -517,6 +580,35 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      
+      {/* Generate Update Dialog */}
+      <Dialog open={generateUpdateOpen} onOpenChange={setGenerateUpdateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('investorUpdates.generateUpdate')}</DialogTitle>
+            <DialogDescription>{t('investorUpdates.generateDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('investorUpdates.selectMonth')}</Label>
+              <Input 
+                type="month" 
+                value={selectedMonth} 
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenerateUpdateOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleGenerateUpdate} disabled={isGenerating}>
+              {isGenerating ? t('common.generating') : t('investorUpdates.generate')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </TabsContent>
+    </Tabs>
   );
 }
