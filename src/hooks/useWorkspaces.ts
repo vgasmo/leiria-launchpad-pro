@@ -1,15 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { StartupStage, HealthScore } from '@/types/database';
+import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 
 export type WorkspaceStatus = 'pending' | 'active' | 'rejected' | 'archived';
-export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name';
+export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name' | 'priority';
 
 export interface WorkspaceFilters {
   search?: string;
   programId?: string | 'all';
   stage?: StartupStage | 'all';
   health?: HealthScore | 'all';
+  priority?: WorkspacePriority | 'all';
   missingKpi?: boolean;
   overdueActions?: boolean;
   sortBy?: SortOption;
@@ -23,6 +24,8 @@ export interface WorkspaceWithDetails {
   health_score: HealthScore | null;
   health_score_override: HealthScore | null;
   health_notes: string | null;
+  priority_level: WorkspacePriority;
+  priority_notes: string | null;
   created_at: string;
   updated_at: string;
   startup: {
@@ -78,6 +81,10 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         query = query.or(`health_score.eq.${filters.health},health_score_override.eq.${filters.health}`);
       }
 
+      // Apply priority filter
+      if (filters.priority && filters.priority !== 'all') {
+        query = query.eq('priority_level', filters.priority);
+      }
       const { data: workspaces, error } = await query;
 
       if (error) throw error;
@@ -117,6 +124,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         const stat = statsMap.get(w.id);
         return {
           ...w,
+          priority_level: (w.priority_level || 'standard') as WorkspacePriority,
           startup: w.startup as WorkspaceWithDetails['startup'],
           program: w.program as WorkspaceWithDetails['program'],
           pendingActionsCount: stat?.pending_actions_count || 0,
@@ -161,6 +169,13 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         thriving: 4,
       };
 
+      const priorityOrder: Record<WorkspacePriority, number> = {
+        star: 0,
+        high: 1,
+        standard: 2,
+        maintenance: 3,
+      };
+
       const sortBy = filters.sortBy || 'updated';
       filtered.sort((a, b) => {
         switch (sortBy) {
@@ -181,6 +196,14 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
           }
           case 'name':
             return (a.startup?.name || '').localeCompare(b.startup?.name || '');
+          case 'priority': {
+            // Sort by priority level (star first, then high, standard, maintenance)
+            const aPriority = priorityOrder[a.priority_level] ?? 2;
+            const bPriority = priorityOrder[b.priority_level] ?? 2;
+            if (aPriority !== bPriority) return aPriority - bPriority;
+            // Secondary sort by name within same priority
+            return (a.startup?.name || '').localeCompare(b.startup?.name || '');
+          }
           case 'updated':
           default:
             return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();

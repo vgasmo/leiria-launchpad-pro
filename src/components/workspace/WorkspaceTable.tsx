@@ -4,6 +4,7 @@ import { Calendar, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
+import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import {
   Table,
   TableBody,
@@ -52,6 +53,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
         <TableRow className="hover:bg-transparent">
           <TableHead className="w-[200px]">Startup</TableHead>
           <TableHead>Program</TableHead>
+          <TableHead>Priority</TableHead>
           <TableHead>Health</TableHead>
           <TableHead className="text-center">Overdue</TableHead>
           <TableHead>Next Meeting</TableHead>
@@ -90,6 +92,9 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                 <Badge variant="outline" className="font-normal">
                   {workspace.program?.name || '-'}
                 </Badge>
+              </TableCell>
+              <TableCell>
+                <PriorityBadge priority={workspace.priority_level} size="sm" />
               </TableCell>
               <TableCell>
                 <HealthBadge score={effectiveHealth} />

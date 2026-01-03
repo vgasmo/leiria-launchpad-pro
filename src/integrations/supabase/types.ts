@@ -3643,6 +3643,10 @@ export type Database = {
           health_status: string | null
           id: string
           last_checkin_at: string | null
+          priority_level: Database["public"]["Enums"]["workspace_priority"]
+          priority_notes: string | null
+          priority_set_at: string | null
+          priority_set_by: string | null
           program_id: string
           stage: Database["public"]["Enums"]["startup_stage"]
           stage_id: string | null
@@ -3668,6 +3672,10 @@ export type Database = {
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null
+          priority_level?: Database["public"]["Enums"]["workspace_priority"]
+          priority_notes?: string | null
+          priority_set_at?: string | null
+          priority_set_by?: string | null
           program_id: string
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
@@ -3693,6 +3701,10 @@ export type Database = {
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null
+          priority_level?: Database["public"]["Enums"]["workspace_priority"]
+          priority_notes?: string | null
+          priority_set_at?: string | null
+          priority_set_by?: string | null
           program_id?: string
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
@@ -3858,6 +3870,7 @@ export type Database = {
       health_score: "critical" | "at_risk" | "stable" | "healthy" | "thriving"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
       startup_stage: "ideation" | "validation" | "mvp" | "growth" | "scale"
+      workspace_priority: "star" | "high" | "standard" | "maintenance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3997,6 +4010,7 @@ export const Constants = {
       health_score: ["critical", "at_risk", "stable", "healthy", "thriving"],
       milestone_status: ["not_started", "in_progress", "completed", "delayed"],
       startup_stage: ["ideation", "validation", "mvp", "growth", "scale"],
+      workspace_priority: ["star", "high", "standard", "maintenance"],
     },
   },
 } as const

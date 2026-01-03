@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
+import { PrioritySelector } from '@/components/workspace/PrioritySelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -44,7 +45,7 @@ import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/h
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { StartupStage, HealthScore } from '@/types/database';
+import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -59,6 +60,8 @@ interface WorkspaceOverviewProps {
     health_score_override: string | null;
     health_status: string | null;
     health_notes: string | null;
+    priority_level?: WorkspacePriority;
+    priority_notes?: string | null;
     startup: { name: string; description: string | null; logo_url?: string | null } | null;
     program: { name: string } | null;
   };
@@ -69,8 +72,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { roles } = useAuth();
+  const { roles, isConsultor, isAdmin } = useAuth();
   const isFounder = roles.includes('founder');
+  const canSetPriority = isConsultor || isAdmin;
   const { data: actions, isLoading: actionsLoading } = useWorkspaceActions(workspace.id);
   const { data: kpiData, isLoading: kpisLoading } = useWorkspaceKpis(workspace.id);
   const { data: milestones, isLoading: milestonesLoading } = useWorkspaceMilestones(workspace.id);
@@ -223,6 +227,13 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 <StageBadge stage={workspace.stage} />
               )}
               <HealthBadge score={effectiveHealth as HealthScore | null} size="lg" />
+              {canSetPriority && (
+                <PrioritySelector
+                  workspaceId={workspace.id}
+                  currentPriority={workspace.priority_level || 'standard'}
+                  currentNotes={workspace.priority_notes}
+                />
+              )}
             </div>
           </div>
         </CardContent>
