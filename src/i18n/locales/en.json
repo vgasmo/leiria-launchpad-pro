@@ -1237,5 +1237,66 @@
     "version": "Version",
     "acceptedOn": "Accepted on",
     "reviewAndSign": "Review & Sign NDA"
+  },
+  "myWorkspaces": {
+    "title": "My Workspaces",
+    "allStartups": "All Startups",
+    "portfolioOverview": "Portfolio Overview",
+    "myMentorships": "My Mentorships",
+    "myStartup": "My Startup",
+    "startupsCount": "{{count}} startup",
+    "startupsCount_plural": "{{count}} startups",
+    "managingStartups": "Managing {{count}} startups",
+    "activeMentorships": "{{count}} active mentorship",
+    "activeMentorships_plural": "{{count}} active mentorships",
+    "viewAll": "View All",
+    "dashboard": "Dashboard",
+    "createStartup": "Create Startup"
+  },
+  "topBar": {
+    "roles": "Roles",
+    "noRoles": "No roles assigned",
+    "accountSettings": "Account Settings"
+  },
+  "workQueue": {
+    "title": "Work Queue",
+    "updated": "Work queue updated",
+    "updateFailed": "Failed to update work queue",
+    "markedDone": "Marked as done",
+    "snoozedForDays": "Snoozed for {{days}} days",
+    "snoozeFailed": "Failed to snooze",
+    "statusAll": "All",
+    "statusOpen": "Open",
+    "statusInProgress": "In Progress",
+    "statusDone": "Done",
+    "statusSnoozed": "Snoozed",
+    "noItems": "No items in queue",
+    "actions": "Actions",
+    "markDone": "Mark Done",
+    "snooze1Day": "Snooze 1 day",
+    "snooze7Days": "Snooze 7 days",
+    "viewAll": "View all {{count}} items"
+  },
+  "triage": {
+    "title": "Workspace Triage",
+    "triageMode": "Triage Mode",
+    "noWorkspaces": "No workspaces match the current filter",
+    "overdue": "overdue",
+    "filters": {
+      "all": "All",
+      "noActivity": "No activity 14d",
+      "missingKpis": "Missing KPIs",
+      "overdueActions": "Overdue actions",
+      "atRisk": "At risk"
+    }
+  },
+  "emptyState": {
+    "noMatchingWorkspaces": "No matching workspaces",
+    "adjustFilters": "Try adjusting your search or filters to find what you're looking for.",
+    "clearFilters": "Clear Filters",
+    "welcomeToWorkspace": "Welcome to your workspace",
+    "founderNoStartups": "You don't have any startups yet. Create your first startup to get started with tracking KPIs, managing milestones, and growing your business.",
+    "noAccess": "You don't have access to any workspaces yet. Contact an administrator to get assigned to a startup.",
+    "createFirstStartup": "Create Your First Startup"
   }
 }

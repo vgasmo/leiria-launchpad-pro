@@ -1380,5 +1380,66 @@
     "version": "Versão",
     "acceptedOn": "Aceite em",
     "reviewAndSign": "Rever e Assinar NDA"
+  },
+  "myWorkspaces": {
+    "title": "Os Meus Workspaces",
+    "allStartups": "Todas as Startups",
+    "portfolioOverview": "Visão do Portfólio",
+    "myMentorships": "As Minhas Mentorias",
+    "myStartup": "A Minha Startup",
+    "startupsCount": "{{count}} startup",
+    "startupsCount_plural": "{{count}} startups",
+    "managingStartups": "A gerir {{count}} startups",
+    "activeMentorships": "{{count}} mentoria ativa",
+    "activeMentorships_plural": "{{count}} mentorias ativas",
+    "viewAll": "Ver Todas",
+    "dashboard": "Dashboard",
+    "createStartup": "Criar Startup"
+  },
+  "topBar": {
+    "roles": "Funções",
+    "noRoles": "Sem funções atribuídas",
+    "accountSettings": "Definições da Conta"
+  },
+  "workQueue": {
+    "title": "Fila de Trabalho",
+    "updated": "Fila atualizada",
+    "updateFailed": "Falha ao atualizar a fila",
+    "markedDone": "Marcado como concluído",
+    "snoozedForDays": "Adiado por {{days}} dias",
+    "snoozeFailed": "Falha ao adiar",
+    "statusAll": "Todas",
+    "statusOpen": "Abertas",
+    "statusInProgress": "Em Progresso",
+    "statusDone": "Concluídas",
+    "statusSnoozed": "Adiadas",
+    "noItems": "Sem itens na fila",
+    "actions": "Ações",
+    "markDone": "Marcar Concluída",
+    "snooze1Day": "Adiar 1 dia",
+    "snooze7Days": "Adiar 7 dias",
+    "viewAll": "Ver todos os {{count}} itens"
+  },
+  "triage": {
+    "title": "Triagem de Workspaces",
+    "triageMode": "Modo Triagem",
+    "noWorkspaces": "Nenhum workspace corresponde ao filtro atual",
+    "overdue": "atrasadas",
+    "filters": {
+      "all": "Todas",
+      "noActivity": "Sem atividade 14d",
+      "missingKpis": "KPIs em falta",
+      "overdueActions": "Ações atrasadas",
+      "atRisk": "Em risco"
+    }
+  },
+  "emptyState": {
+    "noMatchingWorkspaces": "Nenhum workspace encontrado",
+    "adjustFilters": "Tente ajustar a sua pesquisa ou filtros para encontrar o que procura.",
+    "clearFilters": "Limpar Filtros",
+    "welcomeToWorkspace": "Bem-vindo ao seu workspace",
+    "founderNoStartups": "Ainda não tem nenhuma startup. Crie a sua primeira startup para começar a acompanhar KPIs, gerir marcos e fazer crescer o seu negócio.",
+    "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador para ser atribuído a uma startup.",
+    "createFirstStartup": "Criar a Sua Primeira Startup"
   }
 }

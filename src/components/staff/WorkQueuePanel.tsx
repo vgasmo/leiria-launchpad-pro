@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { 
   ListTodo, 
@@ -72,6 +73,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<string>('open');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
@@ -86,9 +88,9 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
     setIsRecomputing(true);
     try {
       await recomputeWorkQueue.mutateAsync();
-      toast.success('Work queue updated');
+      toast.success(t('workQueue.updated'));
     } catch (error) {
-      toast.error('Failed to update work queue');
+      toast.error(t('workQueue.updateFailed'));
     } finally {
       setIsRecomputing(false);
     }
@@ -97,18 +99,18 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
   const handleMarkDone = async (itemId: string) => {
     try {
       await markAsDone.mutateAsync(itemId);
-      toast.success('Marked as done');
+      toast.success(t('workQueue.markedDone'));
     } catch (error) {
-      toast.error('Failed to update');
+      toast.error(t('workQueue.updateFailed'));
     }
   };
 
   const handleSnooze = async (itemId: string, days: number) => {
     try {
       await snoozeItem.mutateAsync({ id: itemId, days });
-      toast.success(`Snoozed for ${days} days`);
+      toast.success(t('workQueue.snoozedForDays', { days }));
     } catch (error) {
-      toast.error('Failed to snooze');
+      toast.error(t('workQueue.snoozeFailed'));
     }
   };
 
@@ -153,7 +155,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <ListTodo className="h-5 w-5 text-primary" />
-            Work Queue
+            {t('workQueue.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             {!compact && (
@@ -163,11 +165,11 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="done">Done</SelectItem>
-                    <SelectItem value="snoozed">Snoozed</SelectItem>
+                    <SelectItem value="all">{t('workQueue.statusAll')}</SelectItem>
+                    <SelectItem value="open">{t('workQueue.statusOpen')}</SelectItem>
+                    <SelectItem value="in_progress">{t('workQueue.statusInProgress')}</SelectItem>
+                    <SelectItem value="done">{t('workQueue.statusDone')}</SelectItem>
+                    <SelectItem value="snoozed">{t('workQueue.statusSnoozed')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -224,7 +226,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
         {displayItems.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No items in queue</p>
+            <p>{t('workQueue.noItems')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -280,7 +282,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="sm" className="h-8">
-                          Actions
+                          {t('workQueue.actions')}
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -290,21 +292,21 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                           handleMarkDone(item.id);
                         }}>
                           <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Mark Done
+                          {t('workQueue.markDone')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation();
                           handleSnooze(item.id, 1);
                         }}>
                           <Clock className="h-4 w-4 mr-2" />
-                          Snooze 1 day
+                          {t('workQueue.snooze1Day')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation();
                           handleSnooze(item.id, 7);
                         }}>
                           <Calendar className="h-4 w-4 mr-2" />
-                          Snooze 7 days
+                          {t('workQueue.snooze7Days')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -319,7 +321,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                 className="w-full text-sm"
                 onClick={() => navigate('/my-workspaces?tab=queue')}
               >
-                View all {filteredItems.length} items
+                {t('workQueue.viewAll', { count: filteredItems.length })}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}
