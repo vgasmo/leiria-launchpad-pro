@@ -1,22 +1,30 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { requireCronSecret, generateRequestId, createLogger } from '../_shared/security.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const FUNCTION_NAME = 'check-missed-milestones';
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
+    // SECURITY: Require cron secret for system-initiated calls
+    const authResult = requireCronSecret(req);
+    if ('error' in authResult) {
+      log.warn('Unauthorized access attempt');
+      return authResult.error;
+    }
+
+    log.info('Starting missed milestones check');
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
-
-    console.log("Checking for missed milestones...");
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -39,11 +47,11 @@ serve(async (req) => {
       .is('completed_at', null);
 
     if (milestonesError) {
-      console.error("Error fetching milestones:", milestonesError);
+      log.error('Error fetching milestones', milestonesError);
       throw milestonesError;
     }
 
-    console.log(`Found ${missedMilestones?.length || 0} missed milestones`);
+    log.info('Found missed milestones', { count: missedMilestones?.length || 0 });
 
     const createdActions: any[] = [];
     const createdAlerts: any[] = [];
@@ -58,7 +66,7 @@ serve(async (req) => {
         .limit(1);
 
       if (existingAction && existingAction.length > 0) {
-        console.log(`Action already exists for milestone ${milestone.id}`);
+        log.info('Action already exists for milestone', { milestoneId: milestone.id });
         continue;
       }
 
@@ -77,7 +85,7 @@ serve(async (req) => {
         .single();
 
       if (actionError) {
-        console.error(`Error creating action for milestone ${milestone.id}:`, actionError);
+        log.error('Error creating action for milestone', actionError, { milestoneId: milestone.id });
         continue;
       }
 
@@ -121,22 +129,22 @@ serve(async (req) => {
         });
     }
 
-    console.log(`Created ${createdActions.length} actions and ${createdAlerts.length} alerts`);
+    log.info('Check complete', { 
+      checked: missedMilestones?.length || 0,
+      actionsCreated: createdActions.length,
+      alertsCreated: createdAlerts.length 
+    });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        checked: missedMilestones?.length || 0,
-        actionsCreated: createdActions.length,
-        alertsCreated: createdAlerts.length,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error: any) {
-    console.error("Error in check-missed-milestones:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ 
+      success: true,
+      checked: missedMilestones?.length || 0,
+      actionsCreated: createdActions.length,
+      alertsCreated: createdAlerts.length,
+    }, req);
+
+  } catch (error) {
+    log.error('Fatal error', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
   }
 });

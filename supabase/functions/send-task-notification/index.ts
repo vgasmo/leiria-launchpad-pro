@@ -1,12 +1,9 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { requireCronSecret, generateRequestId, createLogger } from '../_shared/security.ts';
 
+const FUNCTION_NAME = 'send-task-notification';
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface TaskNotificationRequest {
   type: "assigned" | "overdue";
@@ -14,50 +11,47 @@ interface TaskNotificationRequest {
   taskIds?: string[];
 }
 
-serve(async (req: Request) => {
-  // Handle CORS preflight
+Deno.serve(async (req) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
+    // SECURITY: Require cron secret for system-initiated calls
+    const authResult = requireCronSecret(req);
+    if ('error' in authResult) {
+      log.warn('Unauthorized access attempt');
+      return authResult.error;
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body: TaskNotificationRequest = await req.json();
-    console.log("Task notification request:", body);
+    log.info('Task notification request', { type: body.type, taskId: body.taskId });
 
     if (body.type === "assigned" && body.taskId) {
-      // Handle single task assignment notification
-      const result = await sendAssignedNotification(supabase, body.taskId);
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      const result = await sendAssignedNotification(supabase, body.taskId, log);
+      return corsJsonResponse(result, req);
     } else if (body.type === "overdue") {
-      // Handle overdue tasks notification (batch)
-      const result = await sendOverdueNotifications(supabase);
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      const result = await sendOverdueNotifications(supabase, log);
+      return corsJsonResponse(result, req);
     }
 
-    return new Response(
-      JSON.stringify({ error: "Invalid request type" }),
-      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
-  } catch (error: any) {
-    console.error("Error in send-task-notification:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return corsJsonResponse({ error: "Invalid request type", code: "BAD_REQUEST" }, req, 400);
+
+  } catch (error) {
+    log.error('Fatal error', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
   }
 });
 
-async function sendAssignedNotification(supabase: any, taskId: string) {
+async function sendAssignedNotification(supabase: any, taskId: string, log: any) {
   // Get task details
   const { data: task, error: taskError } = await supabase
     .from("staff_tasks")
@@ -69,7 +63,7 @@ async function sendAssignedNotification(supabase: any, taskId: string) {
     .single();
 
   if (taskError || !task) {
-    console.error("Task not found:", taskError);
+    log.error('Task not found', taskError, { taskId });
     return { success: false, error: "Task not found" };
   }
 
@@ -81,7 +75,7 @@ async function sendAssignedNotification(supabase: any, taskId: string) {
     .single();
 
   if (assigneeError || !assignee?.email) {
-    console.error("Assignee not found:", assigneeError);
+    log.error('Assignee not found', assigneeError, { assigneeId: task.assignee_id });
     return { success: false, error: "Assignee not found" };
   }
 
@@ -135,16 +129,16 @@ async function sendAssignedNotification(supabase: any, taskId: string) {
 
   if (!emailResponse.ok) {
     const errorText = await emailResponse.text();
-    console.error("Resend API error:", errorText);
+    log.error('Resend API error', new Error(errorText));
     return { success: false, error: errorText };
   }
 
   const result = await emailResponse.json();
-  console.log("Assignment email sent:", result);
+  log.info('Assignment email sent', { emailId: result.id });
   return { success: true, emailId: result.id };
 }
 
-async function sendOverdueNotifications(supabase: any) {
+async function sendOverdueNotifications(supabase: any, log: any) {
   const today = new Date().toISOString().split("T")[0];
 
   // Get all overdue tasks that are still pending
@@ -158,12 +152,12 @@ async function sendOverdueNotifications(supabase: any) {
     .lt("due_date", today);
 
   if (error) {
-    console.error("Error fetching overdue tasks:", error);
+    log.error('Error fetching overdue tasks', error);
     return { success: false, error: error.message };
   }
 
   if (!overdueTasks || overdueTasks.length === 0) {
-    console.log("No overdue tasks found");
+    log.info('No overdue tasks found');
     return { success: true, emailsSent: 0 };
   }
 
@@ -214,10 +208,10 @@ async function sendOverdueNotifications(supabase: any) {
 
       if (emailResponse.ok) {
         emailsSent++;
-        console.log(`Overdue email sent to ${assignee.email}`);
+        log.info('Overdue email sent', { email: assignee.email });
       }
     } catch (e) {
-      console.error(`Failed to send overdue email to ${assignee.email}:`, e);
+      log.error('Failed to send overdue email', e, { email: assignee.email });
     }
   }
 

@@ -1,10 +1,8 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { requireCronOrStaff, generateRequestId, createLogger } from '../_shared/security.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const FUNCTION_NAME = 'recompute-workspace-alerts';
 
 interface AlertRule {
   id: string;
@@ -15,13 +13,6 @@ interface AlertRule {
   is_enabled: boolean;
 }
 
-interface WorkspaceData {
-  id: string;
-  program_id: string;
-  startup_id: string;
-  status: string;
-}
-
 interface AlertResult {
   workspace_id: string;
   rule_type: string;
@@ -30,17 +21,32 @@ interface AlertResult {
   evidence_json: Record<string, unknown>;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
-    console.log("Starting workspace alerts recomputation...");
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // SECURITY: Require cron secret or staff user
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization') || '' } }
+    });
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const authResult = await requireCronOrStaff(req, supabaseUser, supabase);
+    if ('error' in authResult) {
+      log.warn('Unauthorized access attempt');
+      return authResult.error;
+    }
+
+    log.info('Starting workspace alerts recomputation', { userId: authResult.userId });
 
     const today = new Date();
     const currentMonth = today.toISOString().slice(0, 7) + "-01";
@@ -52,11 +58,11 @@ serve(async (req) => {
       .eq("status", "active");
 
     if (wsError) {
-      console.error("Error fetching workspaces:", wsError);
+      log.error('Error fetching workspaces', wsError);
       throw wsError;
     }
 
-    console.log(`Processing ${workspaces?.length || 0} active workspaces`);
+    log.info('Processing workspaces', { count: workspaces?.length || 0 });
 
     // Get all enabled alert rules grouped by program
     const { data: allRules, error: rulesError } = await supabase
@@ -65,7 +71,7 @@ serve(async (req) => {
       .eq("is_enabled", true);
 
     if (rulesError) {
-      console.error("Error fetching rules:", rulesError);
+      log.error('Error fetching rules', rulesError);
       throw rulesError;
     }
 
@@ -86,7 +92,6 @@ serve(async (req) => {
 
       // Fetch workspace data in parallel
       const [sessionsResult, actionsResult, kpisResult, checkinsResult, milestonesResult] = await Promise.all([
-        // Last session
         supabase
           .from("sessions")
           .select("scheduled_at")
@@ -94,27 +99,23 @@ serve(async (req) => {
           .lt("scheduled_at", today.toISOString())
           .order("scheduled_at", { ascending: false })
           .limit(1),
-        // Overdue actions
         supabase
           .from("action_items")
           .select("id, title, due_date")
           .eq("workspace_id", workspace.id)
           .in("status", ["pending", "in_progress"])
           .lt("due_date", today.toISOString().split("T")[0]),
-        // Current month KPIs
         supabase
           .from("kpi_values")
           .select("id, kpi_definition_id")
           .eq("workspace_id", workspace.id)
           .eq("period_month", currentMonth),
-        // Overdue check-ins
         supabase
           .from("checkin_instances")
           .select("id, due_date, status")
           .eq("workspace_id", workspace.id)
           .eq("status", "pending")
           .lt("due_date", today.toISOString().split("T")[0]),
-        // Overdue milestones
         supabase
           .from("milestones")
           .select("id, title, target_date, status")
@@ -244,7 +245,7 @@ serve(async (req) => {
       .select("id, workspace_id, rule_type")
       .eq("status", "active");
 
-    // Determine which alerts to resolve (exist but no longer triggered)
+    // Determine which alerts to resolve
     const newAlertKeys = new Set(newAlerts.map(a => `${a.workspace_id}:${a.rule_type}`));
     for (const existing of existingAlerts || []) {
       const key = `${existing.workspace_id}:${existing.rule_type}`;
@@ -259,10 +260,10 @@ serve(async (req) => {
         .from("workspace_alerts")
         .update({ status: "resolved", resolved_at: new Date().toISOString() })
         .in("id", resolvedAlertIds);
-      console.log(`Resolved ${resolvedAlertIds.length} alerts`);
+      log.info('Resolved alerts', { count: resolvedAlertIds.length });
     }
 
-    // Upsert new alerts (only if not already exists with same status)
+    // Upsert new alerts
     const existingActiveKeys = new Set((existingAlerts || []).map(a => `${a.workspace_id}:${a.rule_type}`));
     const alertsToInsert = newAlerts.filter(a => !existingActiveKeys.has(`${a.workspace_id}:${a.rule_type}`));
 
@@ -275,9 +276,9 @@ serve(async (req) => {
         })));
 
       if (insertError) {
-        console.error("Error inserting alerts:", insertError);
+        log.error('Error inserting alerts', insertError);
       } else {
-        console.log(`Created ${alertsToInsert.length} new alerts`);
+        log.info('Created new alerts', { count: alertsToInsert.length });
       }
     }
 
@@ -296,23 +297,21 @@ serve(async (req) => {
         .eq("status", "active");
     }
 
-    console.log(`Alerts recomputation complete. Active: ${newAlerts.length}, Resolved: ${resolvedAlertIds.length}`);
+    log.info('Recomputation complete', { 
+      activeAlerts: newAlerts.length, 
+      resolvedAlerts: resolvedAlertIds.length 
+    });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        activeAlerts: newAlerts.length,
-        resolvedAlerts: resolvedAlertIds.length,
-        newAlerts: alertsToInsert.length,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error: unknown) {
-    console.error("Error in recompute-workspace-alerts:", error);
+    return corsJsonResponse({
+      success: true,
+      activeAlerts: newAlerts.length,
+      resolvedAlerts: resolvedAlertIds.length,
+      newAlerts: alertsToInsert.length,
+    }, req);
+
+  } catch (error) {
+    log.error('Fatal error', error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
   }
 });
