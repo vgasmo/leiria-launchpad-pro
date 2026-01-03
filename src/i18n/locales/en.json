@@ -1085,5 +1085,31 @@
     "cancel": "Cancel",
     "startupApproved": "Startup approved and activated!",
     "applicationRejected": "Application rejected"
+  },
+  "triage": {
+    "title": "Workspace Triage",
+    "triageMode": "Triage Mode",
+    "filters": {
+      "all": "All",
+      "noActivity": "No activity 14d",
+      "missingKpis": "Missing KPIs",
+      "overdueActions": "Overdue actions",
+      "atRisk": "At risk"
+    },
+    "noWorkspaces": "No workspaces match the current filter",
+    "overdue": "overdue",
+    "chaseTooltip": "Send follow-up reminder for {{count}} overdue actions",
+    "chaseSuccess": "Follow-up sent",
+    "chaseSuccessDescription": "The founder has been notified about overdue actions",
+    "chaseError": "Failed to send follow-up message"
+  },
+  "topRisks": {
+    "title": "Top Risks",
+    "criticalHealth": "Critical Health",
+    "noSessions30d": "No Sessions (30d)",
+    "missingKpis": "Missing KPIs",
+    "noRisks": "No critical risks detected",
+    "totalWorkspacesAtRisk": "Total workspaces at risk",
+    "tableCopied": "Risk summary copied to clipboard"
   }
 }
