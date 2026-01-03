@@ -37,6 +37,8 @@ import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
+import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
+import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
@@ -80,7 +82,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const removeWorkspaceTag = useRemoveWorkspaceTag();
   
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
-
+  const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   
   // Check if workspace is "empty" and should show onboarding prompt
@@ -400,9 +402,22 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
         
+        {/* Investor Readiness Checklist for Founders */}
+        {isFounder && (
+          <InvestorReadinessChecklist workspaceId={workspace.id} canWrite={canWrite} />
+        )}
+        
         {/* Progress Timeline */}
         <ProgressTimeline workspaceId={workspace.id} />
       </div>
+
+      {/* Quick KPI Modal */}
+      <QuickKpiModal
+        open={showQuickKpiModal}
+        onOpenChange={setShowQuickKpiModal}
+        workspaceId={workspace.id}
+        programId={workspace.program_id}
+      />
 
       {/* Recent Sessions - Full Width */}
       <Card>
