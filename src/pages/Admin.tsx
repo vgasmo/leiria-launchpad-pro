@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2 } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -14,6 +14,7 @@ import { ComplianceDashboard } from '@/components/admin/ComplianceDashboard';
 import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
+import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -45,6 +46,10 @@ export default function Admin() {
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" aria-hidden="true" />
             {t('admin.users')}
+          </TabsTrigger>
+          <TabsTrigger value="mentors" className="gap-2">
+            <Users2 className="h-4 w-4" aria-hidden="true" />
+            {t('admin.externalMentors')}
           </TabsTrigger>
           <TabsTrigger value="kpis" className="gap-2">
             <BarChart3 className="h-4 w-4" aria-hidden="true" />
@@ -90,6 +95,10 @@ export default function Admin() {
 
         <TabsContent value="users">
           <AdminUsersManager />
+        </TabsContent>
+
+        <TabsContent value="mentors">
+          <AdminExternalMentorsManager />
         </TabsContent>
 
         <TabsContent value="kpis">
