@@ -93,14 +93,27 @@ export default function MentorNda() {
     setIsSubmitting(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('accept-mentor-nda', {});
+      console.log('Submitting NDA acceptance...');
+      const { data, error } = await supabase.functions.invoke('accept-mentor-nda', {
+        body: {}  // Explicit empty body for POST
+      });
       
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+      console.log('NDA response:', { data, error });
+      
+      if (error) {
+        console.error('Function invoke error:', error);
+        throw new Error(error.message || 'Failed to invoke function');
+      }
+      
+      if (data?.error) {
+        console.error('Function returned error:', data.error);
+        throw new Error(data.error);
+      }
       
       toast.success(t('nda.acceptedSuccess'));
       navigate('/my-workspaces');
     } catch (error: any) {
+      console.error('NDA submission error:', error);
       toast.error(error.message || t('nda.failedToAccept'));
     } finally {
       setIsSubmitting(false);

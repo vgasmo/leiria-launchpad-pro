@@ -55,6 +55,9 @@ verify_jwt = true
 [functions.accept-mentor-nda]
 verify_jwt = true
 
+[functions.generate-session-artifacts]
+verify_jwt = true
+
 # ============================================
 # PUBLIC FUNCTIONS - NO JWT
 # ============================================
@@ -66,7 +69,7 @@ verify_jwt = false
 verify_jwt = false
 
 # ============================================
-# CRON/SYSTEM FUNCTIONS - NO JWT (use CRON_SECRET)
+# CRON/SYSTEM/WEBHOOK FUNCTIONS - NO JWT (use secrets)
 # ============================================
 
 [functions.recompute-health-scores]
@@ -109,4 +112,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-slack-notification]
+verify_jwt = false
+
+[functions.run-workflow-rules]
+verify_jwt = false
+
+[functions.webhook-meeting-ingest]
+verify_jwt = false
+
+[functions.inbound-email-webhook]
 verify_jwt = false
