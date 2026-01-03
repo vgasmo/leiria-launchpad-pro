@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Clock, BookOpen, Shield, FileBarChart, FolderLock } from 'lucide-react';
+import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Clock, BookOpen, Shield, FolderLock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,7 +23,6 @@ import { DataroomTab } from '@/components/workspace/DataroomTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
-import { InvestorUpdatesTab } from '@/components/workspace/InvestorUpdatesTab';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -130,7 +129,7 @@ export default function WorkspaceDetail() {
           )}
           <TabsTrigger value="dataroom" className="gap-1">
             <FolderLock className="h-3.5 w-3.5" />
-            Dataroom
+            {t('dataroom.title')}
           </TabsTrigger>
           {isFounder && (
             <TabsTrigger value="funding" className="gap-1">
@@ -156,12 +155,6 @@ export default function WorkspaceDetail() {
             <Shield className="h-3.5 w-3.5" />
             Governance
           </TabsTrigger>
-          {isFounder && (
-            <TabsTrigger value="reports" className="gap-1">
-              <FileBarChart className="h-3.5 w-3.5" />
-              Reports
-            </TabsTrigger>
-          )}
           <TabsTrigger value="settings" className="gap-1">
             <Settings className="h-3.5 w-3.5" />
             {t('workspace.settings')}
@@ -247,11 +240,6 @@ export default function WorkspaceDetail() {
             canWrite={canWrite}
           />
         </TabsContent>
-        {isFounder && (
-          <TabsContent value="reports">
-            <InvestorUpdatesTab workspaceId={workspace.id} canWrite={canWrite} />
-          </TabsContent>
-        )}
         <TabsContent value="settings">
           {startup && (
             <StartupSettingsTab
