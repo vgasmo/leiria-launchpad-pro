@@ -193,6 +193,7 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
   }
   
   return (
+    <>
     <Tabs defaultValue="dataroom" className="space-y-6">
       {/* Header with tabs and actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -407,8 +408,9 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
         </CardContent>
       </Card>
       </TabsContent>
+    </Tabs>
       
-      {/* Generate Update Dialog */}
+    {/* Generate Update Dialog */}
       <Dialog open={generateUpdateOpen} onOpenChange={setGenerateUpdateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -609,6 +611,6 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Tabs>
+    </>
   );
 }
