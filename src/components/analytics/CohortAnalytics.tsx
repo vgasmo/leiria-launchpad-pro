@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCohortAnalytics } from '@/hooks/useCohortAnalytics';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -7,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useState } from 'react';
 import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { TopRisksPanel } from './TopRisksPanel';
 
 const HEALTH_COLORS: Record<string, string> = {
   critical: '#ef4444',
@@ -22,6 +24,7 @@ export function CohortAnalytics() {
   const [selectedProgram, setSelectedProgram] = useState<string>('all');
   const { data: programs } = usePrograms();
   const { data: stats, isLoading } = useCohortAnalytics(selectedProgram === 'all' ? undefined : selectedProgram);
+  const { data: workspaces } = useWorkspaces();
 
   const aggregateStats = stats?.reduce((acc, s) => ({
     totalStartups: acc.totalStartups + s.totalStartups,
@@ -158,6 +161,17 @@ export function CohortAnalytics() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Top Risks Panel */}
+      <TopRisksPanel 
+        workspaces={workspaces?.map(w => ({
+          id: w.id,
+          startup: w.startup,
+          health_label: w.health_score as any,
+          last_session_date: w.lastSession?.scheduled_at || null,
+          missing_kpis_count: w.hasCurrentMonthKpi ? 0 : 1,
+        })) || []}
+      />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

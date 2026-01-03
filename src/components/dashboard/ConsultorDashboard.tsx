@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
+import { TriageWorkspaceList } from '@/components/staff/TriageWorkspaceList';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
@@ -267,6 +268,31 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
       <div className="grid gap-6 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: '220ms' }}>
         <PendingCheckinsPanel />
         <AlertsPanel />
+      </div>
+
+      {/* Triage Workspace List */}
+      <div className="animate-fade-in" style={{ animationDelay: '240ms' }}>
+        <TriageWorkspaceList 
+          workspaces={workspaces.map(w => ({
+            id: w.id,
+            startup_id: w.startup_id,
+            program_id: w.program_id,
+            stage: w.stage,
+            health_score: null,
+            health_label: (w.health_score_override || w.health_score) as HealthScore | null,
+            created_at: w.created_at,
+            updated_at: w.updated_at,
+            startup: w.startup,
+            program: w.program,
+            overdue_actions_count: w.overdueActionsCount,
+            last_session_date: w.lastSession?.scheduled_at || null,
+            next_session_date: w.nextMeetingDate || null,
+            top_overdue_action: undefined,
+            missing_kpis_count: w.hasCurrentMonthKpi ? 0 : 1,
+          }))}
+          onScheduleSession={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=sessions`)}
+          onMessage={(workspaceId) => navigate(`/workspace/${workspaceId}?tab=notes`)}
+        />
       </div>
 
       {/* Main Content Grid */}

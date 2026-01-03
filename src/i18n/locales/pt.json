@@ -1241,5 +1241,31 @@
     "last30Days": "Últimos 30 Dias",
     "noActivities": "Nenhuma atividade encontrada",
     "showing": "A mostrar {{count}} de {{total}} atividades"
+  },
+  "triage": {
+    "title": "Triagem de Workspaces",
+    "triageMode": "Modo Triagem",
+    "filters": {
+      "all": "Todos",
+      "noActivity": "Sem atividade 14d",
+      "missingKpis": "KPIs em falta",
+      "overdueActions": "Ações atrasadas",
+      "atRisk": "Em risco"
+    },
+    "noWorkspaces": "Nenhum workspace corresponde ao filtro atual",
+    "overdue": "atrasadas",
+    "chaseTooltip": "Enviar lembrete de acompanhamento para {{count}} ações atrasadas",
+    "chaseSuccess": "Acompanhamento enviado",
+    "chaseSuccessDescription": "O founder foi notificado sobre as ações atrasadas",
+    "chaseError": "Falha ao enviar mensagem de acompanhamento"
+  },
+  "topRisks": {
+    "title": "Principais Riscos",
+    "criticalHealth": "Saúde Crítica",
+    "noSessions30d": "Sem Sessões (30d)",
+    "missingKpis": "KPIs em Falta",
+    "noRisks": "Sem riscos críticos detetados",
+    "totalWorkspacesAtRisk": "Total de workspaces em risco",
+    "tableCopied": "Resumo de riscos copiado para área de transferência"
   }
 }
