@@ -709,7 +709,15 @@
     "seriesB": "Série B",
     "vc": "VC",
     "strategic": "Estratégico",
-    "templates": "Templates"
+    "templates": "Templates",
+    "copyTemplate": "Copiar Template",
+    "editInApp": "Editar na App",
+    "fillSections": "Preencha as secções abaixo",
+    "completed": "concluído",
+    "filled": "Preenchido",
+    "copyToClipboard": "Copiar para Área de Transferência",
+    "exportMarkdown": "Exportar Markdown",
+    "exportSuccess": "Atualização exportada como Markdown"
   },
   "documents": {
     "title": "Documentos",
