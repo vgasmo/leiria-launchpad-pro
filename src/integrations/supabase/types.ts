@@ -875,6 +875,112 @@ export type Database = {
           },
         ]
       }
+      exercise_attachments: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          external_url: string | null
+          file_path: string | null
+          id: string
+          mime_type: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          mime_type?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          mime_type?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_attachments_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_library: {
+        Row: {
+          common_pitfalls: string | null
+          created_at: string
+          duration_minutes: number | null
+          facilitator_tips: string | null
+          group_size: string | null
+          id: string
+          materials_needed: string[] | null
+          owner_user_id: string | null
+          program_id: string | null
+          purpose: string | null
+          startup_context_tags: string[] | null
+          status: string
+          step_by_step: Json | null
+          success_criteria: string | null
+          title: string
+          updated_at: string
+          variations: string | null
+        }
+        Insert: {
+          common_pitfalls?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          facilitator_tips?: string | null
+          group_size?: string | null
+          id?: string
+          materials_needed?: string[] | null
+          owner_user_id?: string | null
+          program_id?: string | null
+          purpose?: string | null
+          startup_context_tags?: string[] | null
+          status?: string
+          step_by_step?: Json | null
+          success_criteria?: string | null
+          title: string
+          updated_at?: string
+          variations?: string | null
+        }
+        Update: {
+          common_pitfalls?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          facilitator_tips?: string | null
+          group_size?: string | null
+          id?: string
+          materials_needed?: string[] | null
+          owner_user_id?: string | null
+          program_id?: string | null
+          purpose?: string | null
+          startup_context_tags?: string[] | null
+          status?: string
+          step_by_step?: Json | null
+          success_criteria?: string | null
+          title?: string
+          updated_at?: string
+          variations?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_library_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_model_metric_map: {
         Row: {
           created_at: string
@@ -2092,6 +2198,92 @@ export type Database = {
         }
         Relationships: []
       }
+      quality_check_results: {
+        Row: {
+          coach_hints: Json | null
+          computed_at: string
+          computed_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          missing_items: Json | null
+          passed_items: Json | null
+          score: number | null
+        }
+        Insert: {
+          coach_hints?: Json | null
+          computed_at?: string
+          computed_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          missing_items?: Json | null
+          passed_items?: Json | null
+          score?: number | null
+        }
+        Update: {
+          coach_hints?: Json | null
+          computed_at?: string
+          computed_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          missing_items?: Json | null
+          passed_items?: Json | null
+          score?: number | null
+        }
+        Relationships: []
+      }
+      quality_checks_config: {
+        Row: {
+          check_function: string | null
+          created_at: string
+          criteria_key: string
+          description: string | null
+          entity_type: string
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          label: string
+          program_id: string | null
+          weight: number | null
+        }
+        Insert: {
+          check_function?: string | null
+          created_at?: string
+          criteria_key: string
+          description?: string | null
+          entity_type: string
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label: string
+          program_id?: string | null
+          weight?: number | null
+        }
+        Update: {
+          check_function?: string | null
+          created_at?: string
+          criteria_key?: string
+          description?: string | null
+          entity_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label?: string
+          program_id?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_checks_config_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminder_jobs: {
         Row: {
           created_at: string
@@ -2275,6 +2467,48 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      session_exercises: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          notes: string | null
+          order_index: number | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_exercises_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       session_feedback: {
         Row: {
@@ -3031,6 +3265,68 @@ export type Database = {
         }
         Relationships: []
       }
+      support_materials: {
+        Row: {
+          category: string | null
+          content_markdown: string | null
+          created_at: string
+          description: string | null
+          external_links: Json | null
+          file_path: string | null
+          id: string
+          owner_user_id: string | null
+          program_id: string | null
+          startup_stage: string | null
+          startup_type: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          content_markdown?: string | null
+          created_at?: string
+          description?: string | null
+          external_links?: Json | null
+          file_path?: string | null
+          id?: string
+          owner_user_id?: string | null
+          program_id?: string | null
+          startup_stage?: string | null
+          startup_type?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          content_markdown?: string | null
+          created_at?: string
+          description?: string | null
+          external_links?: Json | null
+          file_path?: string | null
+          id?: string
+          owner_user_id?: string | null
+          program_id?: string | null
+          startup_stage?: string | null
+          startup_type?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_materials_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           color: string | null
@@ -3350,6 +3646,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      value_prop_artifacts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          json_fields: Json
+          outputs_text: Json
+          updated_at: string
+          version: number | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          json_fields?: Json
+          outputs_text?: Json
+          updated_at?: string
+          version?: number | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          json_fields?: Json
+          outputs_text?: Json
+          updated_at?: string
+          version?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_prop_artifacts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflow_executions: {
         Row: {
@@ -3948,6 +4285,7 @@ export type Database = {
           priority_set_at: string | null
           priority_set_by: string | null
           program_id: string
+          quality_mode: string | null
           stage: Database["public"]["Enums"]["startup_stage"]
           stage_id: string | null
           startup_id: string
@@ -3978,6 +4316,7 @@ export type Database = {
           priority_set_at?: string | null
           priority_set_by?: string | null
           program_id: string
+          quality_mode?: string | null
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
           startup_id: string
@@ -4008,6 +4347,7 @@ export type Database = {
           priority_set_at?: string | null
           priority_set_by?: string | null
           program_id?: string
+          quality_mode?: string | null
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
           startup_id?: string
@@ -4081,6 +4421,10 @@ export type Database = {
         Returns: boolean
       }
       can_manage_startup: { Args: { _startup_id: string }; Returns: boolean }
+      can_view_quality_result: {
+        Args: { _entity_id: string; _entity_type: string }
+        Returns: boolean
+      }
       can_write_workspace: { Args: { _workspace_id: string }; Returns: boolean }
       check_ai_rate_limit: {
         Args: {
@@ -4121,6 +4465,10 @@ export type Database = {
           p50: number
           p75: number
         }[]
+      }
+      get_session_workspace_id: {
+        Args: { _session_id: string }
+        Returns: string
       }
       get_workspace_role: {
         Args: { _user_id: string; _workspace_id: string }

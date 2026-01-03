@@ -9,7 +9,8 @@ import {
   ChevronRight,
   AlertCircle,
   Users,
-  MessageCircle
+  MessageCircle,
+  Lightbulb,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,8 +29,9 @@ import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 export function AppSidebar() {
   const location = useLocation();
   const { t } = useTranslation();
-  const { profile, isAdmin, isMentor, roles, signOut } = useAuth();
+  const { profile, isAdmin, isMentor, isConsultor, roles, signOut } = useAuth();
   const isFounder = roles.includes('founder');
+  const showConsultorTools = isAdmin || isConsultor || roles.includes('consultor');
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
 
@@ -162,6 +164,45 @@ export function AppSidebar() {
                       <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
                       <TooltipContent side="right" className="font-medium">
                         {t('nav.findMentors')}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+                return NavItem;
+              })()}
+            </>
+          )}
+
+          {/* Consultor Tools */}
+          {showConsultorTools && (
+            <>
+              <div className="my-4 h-px bg-sidebar-border" />
+              {(() => {
+                const isActive = location.pathname === '/consultor-tools';
+                const NavItem = (
+                  <Link
+                    to="/consultor-tools"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                      collapsed && "justify-center px-2"
+                    )}
+                  >
+                    <Lightbulb className="h-5 w-5 shrink-0" />
+                    {!collapsed && (
+                      <span className="animate-fade-in">{t('nav.consultorTools', 'Consultor Tools')}</span>
+                    )}
+                  </Link>
+                );
+
+                if (collapsed) {
+                  return (
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
+                      <TooltipContent side="right" className="font-medium">
+                        {t('nav.consultorTools', 'Consultor Tools')}
                       </TooltipContent>
                     </Tooltip>
                   );
