@@ -406,6 +406,35 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
           )}
         </CardContent>
       </Card>
+      </TabsContent>
+      
+      {/* Generate Update Dialog */}
+      <Dialog open={generateUpdateOpen} onOpenChange={setGenerateUpdateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('investorUpdates.generateUpdate')}</DialogTitle>
+            <DialogDescription>{t('investorUpdates.generateDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('investorUpdates.selectMonth')}</Label>
+              <Input 
+                type="month" 
+                value={selectedMonth} 
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenerateUpdateOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleGenerateUpdate} disabled={isGenerating}>
+              {isGenerating ? t('common.generating') : t('investorUpdates.generate')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       {/* Add Item Dialog */}
       <Dialog open={addItemOpen} onOpenChange={setAddItemOpen}>
@@ -580,35 +609,6 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Generate Update Dialog */}
-      <Dialog open={generateUpdateOpen} onOpenChange={setGenerateUpdateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('investorUpdates.generateUpdate')}</DialogTitle>
-            <DialogDescription>{t('investorUpdates.generateDesc')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t('investorUpdates.selectMonth')}</Label>
-              <Input 
-                type="month" 
-                value={selectedMonth} 
-                onChange={(e) => setSelectedMonth(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setGenerateUpdateOpen(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleGenerateUpdate} disabled={isGenerating}>
-              {isGenerating ? t('common.generating') : t('investorUpdates.generate')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      </TabsContent>
     </Tabs>
   );
 }
