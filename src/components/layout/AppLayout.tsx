@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, forwardRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Building2, Users, Settings } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
@@ -12,7 +12,10 @@ interface AppLayoutProps {
   actions?: ReactNode;
 }
 
-export function AppLayout({ children, title, subtitle, actions }: AppLayoutProps) {
+export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function AppLayout(
+  { children, title, subtitle, actions },
+  ref
+) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -39,7 +42,7 @@ export function AppLayout({ children, title, subtitle, actions }: AppLayoutProps
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={ref} className="min-h-screen bg-background">
       {/* Sidebar - hidden on mobile, shown on lg+ */}
       <div className="hidden lg:block">
         <AppSidebar />
@@ -92,7 +95,7 @@ export function AppLayout({ children, title, subtitle, actions }: AppLayoutProps
       </main>
     </div>
   );
-}
+});
 
 // Mobile bottom navigation
 function MobileBottomNav() {

@@ -48,8 +48,8 @@ export function MeetingIntegrationGuide({ compact = false }: MeetingIntegrationG
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-foreground">
             <Video className="h-4 w-4 mr-2" />
-            Connect meeting tools
-            <Badge variant="secondary" className="ml-auto text-[10px]">Soon</Badge>
+            {t('sessions.connectMeetingTools')}
+            <Badge variant="secondary" className="ml-auto text-[10px]">{t('sessions.comingSoon')}</Badge>
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
@@ -58,12 +58,12 @@ export function MeetingIntegrationGuide({ compact = false }: MeetingIntegrationG
               <div key={integration.id} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-3 w-3 opacity-30" />
                 <span>{integration.name}</span>
-                <Badge variant="outline" className="text-[9px] ml-auto">Coming soon</Badge>
+                <Badge variant="outline" className="text-[9px] ml-auto">{t('sessions.comingSoon')}</Badge>
               </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-3 pl-6">
-            For now, use voice-to-text or paste transcripts manually.
+            {t('sessions.voiceTextHint')}
           </p>
         </CollapsibleContent>
       </Collapsible>
@@ -75,10 +75,10 @@ export function MeetingIntegrationGuide({ compact = false }: MeetingIntegrationG
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Video className="h-4 w-4" />
-          Meeting Integrations
+          {t('sessions.meetingIntegrations')}
         </CardTitle>
         <CardDescription>
-          Automatically import transcripts from your video calls
+          {t('sessions.meetingIntegrationsDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -97,7 +97,7 @@ export function MeetingIntegrationGuide({ compact = false }: MeetingIntegrationG
               </div>
             </div>
             <Badge variant="secondary" className="text-xs">
-              Coming soon
+              {t('sessions.comingSoon')}
             </Badge>
           </div>
         ))}
@@ -105,8 +105,7 @@ export function MeetingIntegrationGuide({ compact = false }: MeetingIntegrationG
         <div className="pt-2 border-t">
           <p className="text-xs text-muted-foreground">
             <Zap className="h-3 w-3 inline mr-1" />
-            Meanwhile, use the <strong>Voice-to-Text</strong> button while taking notes, 
-            or paste meeting transcripts in the AI panel.
+            {t('sessions.voiceTextHint')}
           </p>
         </div>
       </CardContent>

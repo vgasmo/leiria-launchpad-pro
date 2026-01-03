@@ -60,9 +60,9 @@ export function SessionTranscriptsViewer({ sessionId, showEmpty = true }: Sessio
       <Card className="bg-muted/30">
         <CardContent className="py-4 text-center">
           <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground">No transcripts available</p>
+          <p className="text-sm text-muted-foreground">{t('sessions.noTranscripts')}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Use voice-to-text or connect a meeting integration
+            {t('sessions.noTranscriptsHint')}
           </p>
         </CardContent>
       </Card>

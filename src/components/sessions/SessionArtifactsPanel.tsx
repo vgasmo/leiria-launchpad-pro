@@ -91,7 +91,7 @@ export function SessionArtifactsPanel({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Sparkles className="h-5 w-5 text-primary" />
-          AI Session Analysis
+          {t('sessions.aiSessionAnalysis')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -100,13 +100,13 @@ export function SessionArtifactsPanel({
           {sessionNotes && (
             <Badge variant="secondary" className="gap-1">
               <FileText className="h-3 w-3" />
-              Notes available
+              {t('sessions.notesAvailable')}
             </Badge>
           )}
           {sessionAgenda && (
             <Badge variant="secondary" className="gap-1">
               <ListTodo className="h-3 w-3" />
-              Agenda available
+              {t('sessions.agendaAvailable')}
             </Badge>
           )}
           {transcripts && transcripts.length > 0 && (
@@ -116,7 +116,7 @@ export function SessionArtifactsPanel({
               onClick={() => setShowTranscriptPreview(!showTranscriptPreview)}
             >
               <Mic className="h-3 w-3" />
-              {transcripts.length} transcript(s)
+              {transcripts.length} {t('sessions.transcripts')}
               <Eye className="h-3 w-3 ml-1" />
             </Badge>
           )}
@@ -125,7 +125,7 @@ export function SessionArtifactsPanel({
         {/* Transcript preview */}
         {showTranscriptPreview && transcripts && transcripts.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Transcript Preview</Label>
+            <Label className="text-xs text-muted-foreground">{t('sessions.transcriptPreview')}</Label>
             <SessionTranscriptsViewer sessionId={sessionId} showEmpty={false} />
           </div>
         )}
@@ -134,7 +134,7 @@ export function SessionArtifactsPanel({
         {!hasContent && (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground mb-3">
-              No content available to analyze. Add notes, agenda, or a transcript first.
+              {t('sessions.noContentToAnalyze')}
             </p>
             <MeetingIntegrationGuide compact />
           </div>
@@ -145,12 +145,12 @@ export function SessionArtifactsPanel({
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
                 <ChevronDown className={`h-4 w-4 mr-2 transition-transform ${showTranscriptInput ? 'rotate-180' : ''}`} />
-                Add Transcript Manually
+                {t('sessions.addTranscriptManually')}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3 space-y-3">
               <Textarea
-                placeholder="Paste meeting transcript here..."
+                placeholder={t('sessions.pasteTranscript')}
                 value={manualTranscript}
                 onChange={(e) => setManualTranscript(e.target.value)}
                 rows={6}
@@ -162,14 +162,14 @@ export function SessionArtifactsPanel({
                   disabled={addTranscript.isPending}
                 >
                   {addTranscript.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Save Transcript
+                  {t('sessions.saveTranscript')}
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost"
                   onClick={() => setShowTranscriptInput(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </div>
             </CollapsibleContent>
@@ -185,12 +185,12 @@ export function SessionArtifactsPanel({
           {generateArtifacts.isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Analyzing...
+              {t('sessions.analyzing')}
             </>
           ) : (
             <>
               <Sparkles className="h-4 w-4 mr-2" />
-              Generate Summary & Actions
+              {t('sessions.generateSummaryActions')}
             </>
           )}
         </Button>
@@ -200,7 +200,7 @@ export function SessionArtifactsPanel({
           <div className="space-y-4 pt-4 border-t">
             {generatedArtifacts.summary && (
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">Summary</h4>
+                <h4 className="font-medium text-sm">{t('sessions.summary')}</h4>
                 <p className="text-sm text-muted-foreground">
                   {generatedArtifacts.summary}
                 </p>
@@ -211,7 +211,7 @@ export function SessionArtifactsPanel({
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Decisions
+                  {t('sessions.decisionsLabel')}
                 </h4>
                 <ul className="text-sm space-y-1">
                   {generatedArtifacts.decisions.map((d, i) => (
@@ -225,7 +225,7 @@ export function SessionArtifactsPanel({
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-500" />
-                  Risks & Concerns
+                  {t('sessions.risksAndConcerns')}
                 </h4>
                 <ul className="text-sm space-y-1">
                   {generatedArtifacts.risks.map((r, i) => (
@@ -239,7 +239,7 @@ export function SessionArtifactsPanel({
               <div className="space-y-2">
                 <h4 className="font-medium text-sm flex items-center gap-2">
                   <ListTodo className="h-4 w-4 text-blue-500" />
-                  Actions Created ({actionsCreated.length})
+                  {t('sessions.actionsCreated')} ({actionsCreated.length})
                 </h4>
                 <ul className="text-sm space-y-1">
                   {actionsCreated.map((a) => (
