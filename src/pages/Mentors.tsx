@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Navigate } from 'react-router-dom';
 import { 
   Search, 
   Linkedin, 
@@ -12,7 +13,6 @@ import {
   Send,
   Loader2,
   Calendar,
-  BookOpen,
   BarChart3,
   CalendarDays
 } from 'lucide-react';
@@ -41,7 +41,8 @@ import { connectionMessageSchema, validateFormData } from '@/lib/validations';
 import { MentorAvailabilitySettings } from '@/components/mentors/MentorAvailabilitySettings';
 import { MentorImpactDashboard } from '@/components/mentors/MentorImpactDashboard';
 import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
-import { ResourceLibrary } from '@/components/resources/ResourceLibrary';
+
+const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
 
 interface MentorProfile {
   id: string;
@@ -143,7 +144,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
 }
 
 export default function Mentors() {
-  const { user, roles } = useAuth();
+  const { user, roles, isLoading: authLoading, isAuthReady } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [selectedMentor, setSelectedMentor] = useState<MentorProfile | null>(null);
@@ -153,11 +154,33 @@ export default function Mentors() {
   const isFounder = roles.includes('founder');
   const isMentor = roles.includes('mentor_externo');
 
+  // Check NDA acceptance for external mentors
+  const { data: ndaAcceptance, isLoading: ndaLoading } = useQuery({
+    queryKey: ['mentor-nda-check', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('mentor_nda_acceptances')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('nda_version', CURRENT_NDA_VERSION)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && isMentor,
+  });
+
   const { data: mentors, isLoading: loadingMentors } = useMentors(search);
   const { data: connections, isLoading: loadingConnections } = useConnections(
     user?.id, 
     isFounder ? 'founder' : 'mentor'
   );
+
+  // Redirect external mentors to NDA page if not accepted
+  if (isMentor && isAuthReady && !ndaLoading && !ndaAcceptance) {
+    return <Navigate to="/mentor-nda" replace />;
+  }
 
   // Create connection mutation
   const createConnection = useMutation({
@@ -462,17 +485,13 @@ export default function Mentors() {
                 </Badge>
               )}
             </TabsTrigger>
-          <TabsTrigger value="availability" className="gap-2">
+            <TabsTrigger value="availability" className="gap-2">
               <Calendar className="h-4 w-4" />
               Availability
             </TabsTrigger>
             <TabsTrigger value="bookings" className="gap-2">
               <CalendarDays className="h-4 w-4" />
               Bookings
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              Resources
             </TabsTrigger>
             <TabsTrigger value="impact" className="gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -627,10 +646,6 @@ export default function Mentors() {
 
           <TabsContent value="bookings">
             <MentorBookingPanel mode="mentor" />
-          </TabsContent>
-
-          <TabsContent value="resources">
-            <ResourceLibrary />
           </TabsContent>
 
           <TabsContent value="impact">
