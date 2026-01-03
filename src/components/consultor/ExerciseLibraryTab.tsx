@@ -97,12 +97,12 @@ export function ExerciseLibraryTab() {
             className="pl-10"
           />
         </div>
-        <Select value={tagFilter} onValueChange={setTagFilter}>
+        <Select value={tagFilter || "all"} onValueChange={(v) => setTagFilter(v === "all" ? "" : v)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t('consultorTools.filterByContext', 'Filter by context')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All contexts</SelectItem>
+            <SelectItem value="all">All contexts</SelectItem>
             {CONTEXT_TAGS.map((tag) => (
               <SelectItem key={tag} value={tag}>
                 {tag.replace('_', ' ')}
@@ -110,12 +110,12 @@ export function ExerciseLibraryTab() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={groupSizeFilter} onValueChange={setGroupSizeFilter}>
+        <Select value={groupSizeFilter || "all"} onValueChange={(v) => setGroupSizeFilter(v === "all" ? "" : v)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder={t('consultorTools.groupSize', 'Group size')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All sizes</SelectItem>
+            <SelectItem value="all">All sizes</SelectItem>
             <SelectItem value="1:1">1:1</SelectItem>
             <SelectItem value="small_group">Small Group</SelectItem>
             <SelectItem value="cohort">Cohort</SelectItem>
