@@ -1,62 +1,63 @@
 project_id = "apxzuslwhjujgrcsfzqw"
 
 # ============================================
-# USER-FACING FUNCTIONS - JWT REQUIRED
+# USER-FACING FUNCTIONS
+# These validate auth internally via Authorization header
 # ============================================
 
 [functions.analyze-template]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-template-coach]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-financial-model-coach]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-investor-update]
-verify_jwt = true
+verify_jwt = false
 
 [functions.import-financial-model]
-verify_jwt = true
+verify_jwt = false
 
 [functions.sync-financial-kpis]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-session-suggestions]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-session-summary]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-progress-report-pdf]
-verify_jwt = true
+verify_jwt = false
 
 [functions.export-cohort-health-pdf]
-verify_jwt = true
+verify_jwt = false
 
 [functions.publish-program-setup]
-verify_jwt = true
+verify_jwt = false
 
 [functions.smart-session-scheduler]
-verify_jwt = true
+verify_jwt = false
 
 [functions.import-kpi-data]
-verify_jwt = true
+verify_jwt = false
 
 [functions.transcribe-audio]
-verify_jwt = true
+verify_jwt = false
 
 [functions.dataroom-create-link]
-verify_jwt = true
+verify_jwt = false
 
 [functions.dataroom-revoke-link]
-verify_jwt = true
+verify_jwt = false
 
 [functions.accept-mentor-nda]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-session-artifacts]
-verify_jwt = true
+verify_jwt = false
 
 # ============================================
 # PUBLIC FUNCTIONS - NO JWT
