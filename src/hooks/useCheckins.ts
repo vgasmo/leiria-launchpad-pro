@@ -2,6 +2,26 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
+import { Json } from '@/integrations/supabase/types';
+
+// P1.2: Helper to log activity
+async function logActivity(action: string, entityType: string, entityId: string, workspaceId: string, metadata?: Record<string, unknown>) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      workspace_id: workspaceId,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      metadata: (metadata || {}) as Json,
+    });
+  } catch (e) {
+    console.error('Failed to log activity:', e);
+  }
+}
 
 // Types
 export interface CheckinDefinition {
@@ -190,6 +210,11 @@ export function useSubmitCheckin() {
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['all-pending-checkins'] });
       queryClient.invalidateQueries({ queryKey: ['kpi-values'] });
+
+      // P1.2: Log activity
+      if (result.workspaceId) {
+        logActivity('submitted', 'checkin', result.instanceId, result.workspaceId);
+      }
 
       // P0.1: Trigger Teams notification for check-in submission
       if (result.workspaceId) {

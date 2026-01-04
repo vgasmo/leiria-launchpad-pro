@@ -1,0 +1,143 @@
+import { format, formatDistanceToNow } from 'date-fns';
+import { AlertCircle, CheckCircle, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  useUnresolvedIntegrationErrors,
+  useResolveIntegrationError,
+} from '@/hooks/useIntegrationErrors';
+
+const integrationTypeLabels: Record<string, string> = {
+  outlook: 'Outlook Calendar',
+  teams: 'Microsoft Teams',
+  webhook: 'Webhook',
+  email: 'Email',
+};
+
+const integrationTypeColors: Record<string, string> = {
+  outlook: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  teams: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  webhook: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  email: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+};
+
+interface IntegrationErrorsPanelProps {
+  compact?: boolean;
+  maxHeight?: string;
+}
+
+export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }: IntegrationErrorsPanelProps) {
+  const { data: errors, isLoading, refetch } = useUnresolvedIntegrationErrors();
+  const resolveMutation = useResolveIntegrationError();
+
+  const handleResolve = async (errorId: string) => {
+    await resolveMutation.mutateAsync(errorId);
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            Integration Errors
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const errorCount = errors?.length || 0;
+
+  return (
+    <Card className={errorCount > 0 ? 'border-destructive/30' : ''}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertCircle className={`h-4 w-4 ${errorCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+            Integration Errors
+            {errorCount > 0 && (
+              <Badge variant="destructive" className="ml-2">{errorCount}</Badge>
+            )}
+          </CardTitle>
+          <Button variant="ghost" size="icon" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {errorCount === 0 ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            All integrations running smoothly
+          </div>
+        ) : (
+          <ScrollArea style={{ maxHeight }}>
+            <div className="space-y-3">
+              {errors?.map((error) => (
+                <div
+                  key={error.id}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <Badge
+                        variant="secondary"
+                        className={integrationTypeColors[error.integration_type] || ''}
+                      >
+                        {integrationTypeLabels[error.integration_type] || error.integration_type}
+                      </Badge>
+                      {error.error_code && (
+                        <Badge variant="outline" className="text-xs">
+                          {error.error_code}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium truncate">{error.error_message}</p>
+                    {error.workspace && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Workspace: {error.workspace.startup?.name || 'Unknown'}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatDistanceToNow(new Date(error.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => handleResolve(error.id)}
+                        disabled={resolveMutation.isPending}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Mark as resolved</TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
