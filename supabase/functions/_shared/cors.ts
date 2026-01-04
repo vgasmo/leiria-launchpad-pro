@@ -8,6 +8,9 @@ const DEFAULT_ALLOWED = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://lovable.dev',
+  // Lovable preview domains (dynamic subdomains)
+  '*.lovable.app',
+  // Backwards-compat / older preview host
   'https://id-preview--apxzuslwhjujgrcsfzqw.lovable.app',
   '*.lovableproject.com',
 ];
