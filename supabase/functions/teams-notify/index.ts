@@ -12,7 +12,14 @@ const FUNCTION_NAME = 'teams-notify';
 interface TeamsNotificationRequest {
   workspace_id?: string;
   program_id?: string;
-  event_type: 'checkin_submitted' | 'action_assigned' | 'action_overdue' | 'session_created' | 'session_rescheduled' | 'health_alert';
+  event_type:
+    | 'checkin_submitted'
+    | 'action_assigned'
+    | 'action_overdue'
+    | 'session_created'
+    | 'session_rescheduled'
+    | 'health_alert'
+    | 'test';
   payload: {
     title: string;
     summary: string;
@@ -24,13 +31,15 @@ interface TeamsNotificationRequest {
 }
 
 // Map event types to toggle columns
-const EVENT_TOGGLE_MAP: Record<string, string> = {
+const EVENT_TOGGLE_MAP: Record<string, string | null> = {
   checkin_submitted: 'notify_checkin_submitted',
   action_assigned: 'notify_action_assigned',
   action_overdue: 'notify_action_overdue',
   session_created: 'notify_session_created',
   session_rescheduled: 'notify_session_rescheduled',
   health_alert: 'notify_health_alert',
+  // test bypasses toggles
+  test: null,
 };
 
 // Priority to color mapping (Teams Adaptive Card accent colors)
@@ -86,12 +95,14 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'event_type and payload.title are required', code: ErrorCode.BAD_REQUEST }, req, 400);
     }
 
-    if (!workspace_id && !program_id) {
+    // Allow global settings (no workspace_id/program_id) for admin testing
+    const isGlobal = !workspace_id && !program_id;
+    if (!isGlobal && !workspace_id && !program_id) {
       return corsJsonResponse({ error: 'Either workspace_id or program_id is required', code: ErrorCode.BAD_REQUEST }, req, 400);
     }
 
     const toggleColumn = EVENT_TOGGLE_MAP[event_type];
-    if (!toggleColumn) {
+    if (toggleColumn === undefined) {
       return corsJsonResponse({ error: `Invalid event_type: ${event_type}`, code: ErrorCode.BAD_REQUEST }, req, 400);
     }
 
@@ -100,13 +111,15 @@ Deno.serve(async (req: Request) => {
     // Fetch Teams settings
     let query = supabase
       .from('teams_integration_settings')
-      .select('*')
-      .eq('enabled', true);
+      .select('*');
 
     if (workspace_id) {
       query = query.eq('workspace_id', workspace_id);
     } else if (program_id) {
       query = query.eq('program_id', program_id);
+    } else {
+      // Global settings
+      query = query.is('workspace_id', null).is('program_id', null);
     }
 
     const { data: settings, error: settingsError } = await query.maybeSingle();
@@ -117,12 +130,18 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!settings) {
-      log.info('No Teams integration configured or not enabled');
+      log.info('No Teams integration configured');
       return corsJsonResponse({ success: true, sent: false, reason: 'not_configured' }, req);
     }
 
-    // Check if this event type is enabled
-    if (!settings[toggleColumn]) {
+    // For normal events, require integration enabled
+    if (event_type !== 'test' && !settings.enabled) {
+      log.info('Teams integration disabled');
+      return corsJsonResponse({ success: true, sent: false, reason: 'disabled' }, req);
+    }
+
+    // Check if this event type is enabled (test bypasses toggles)
+    if (toggleColumn && !settings[toggleColumn]) {
       log.info('Event type not enabled', { event_type, toggle: toggleColumn });
       return corsJsonResponse({ success: true, sent: false, reason: 'event_disabled' }, req);
     }
@@ -132,75 +151,104 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ success: true, sent: false, reason: 'no_webhook_url' }, req);
     }
 
-    // Build Adaptive Card for Teams
-    const icon = EVENT_ICONS[event_type] || '📢';
-    const color = PRIORITY_COLORS[payload.priority || 'medium'];
-    
-    const card = {
-      type: 'message',
-      attachments: [
-        {
-          contentType: 'application/vnd.microsoft.card.adaptive',
-          contentUrl: null,
-          content: {
-            $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.4',
-            body: [
-              {
-                type: 'TextBlock',
-                size: 'Medium',
-                weight: 'Bolder',
-                text: `${icon} ${payload.title}`,
-                wrap: true,
-                style: color === 'attention' ? 'attention' : undefined,
-              },
-              {
-                type: 'TextBlock',
-                text: payload.summary,
-                wrap: true,
-                spacing: 'Small',
-              },
-              ...(payload.fields?.length ? [
-                {
-                  type: 'FactSet',
-                  facts: payload.fields.map(f => ({ title: f.name, value: f.value })),
-                  spacing: 'Medium',
-                },
-              ] : []),
-            ],
-            actions: payload.link ? [
-              {
-                type: 'Action.OpenUrl',
-                title: payload.link_text || 'View Details',
-                url: payload.link,
-              },
-            ] : [],
-          },
-        },
-      ],
-    };
+    // Send payload (Adaptive Card for Office 365 Connector; plain JSON for Power Automate)
+    const webhookUrl: string = settings.webhook_url;
+    const isPowerAutomate = webhookUrl.includes('powerplatform.com') || webhookUrl.includes('flow.microsoft.com');
 
-    // Send to Teams webhook
-    log.info('Sending to Teams webhook');
-    const teamsResponse = await fetch(settings.webhook_url, {
+    const icon = EVENT_ICONS[event_type] || '📢';
+
+    let bodyToSend: unknown;
+    if (isPowerAutomate) {
+      // Power Automate flows typically start with "When an HTTP request is received" and parse JSON
+      // Keep it simple and predictable.
+      bodyToSend = {
+        title: payload.title,
+        workspaceName: payload.fields?.find((f) => f.name.toLowerCase() === 'startup')?.value,
+        owner: payload.fields?.find((f) => f.name.toLowerCase() === 'owner')?.value,
+        severity: payload.priority || 'medium',
+        message: payload.summary,
+        link: payload.link,
+        linkText: payload.link_text,
+        eventType: event_type,
+        sentAt: new Date().toISOString(),
+      };
+    } else {
+      // Adaptive Card format for Teams incoming webhooks
+      const color = PRIORITY_COLORS[payload.priority || 'medium'];
+      bodyToSend = {
+        type: 'message',
+        attachments: [
+          {
+            contentType: 'application/vnd.microsoft.card.adaptive',
+            contentUrl: null,
+            content: {
+              $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+              type: 'AdaptiveCard',
+              version: '1.4',
+              body: [
+                {
+                  type: 'TextBlock',
+                  size: 'Medium',
+                  weight: 'Bolder',
+                  text: `${icon} ${payload.title}`,
+                  wrap: true,
+                  style: color === 'attention' ? 'attention' : undefined,
+                },
+                {
+                  type: 'TextBlock',
+                  text: payload.summary,
+                  wrap: true,
+                  spacing: 'Small',
+                },
+                ...(payload.fields?.length
+                  ? [
+                      {
+                        type: 'FactSet',
+                        facts: payload.fields.map((f) => ({ title: f.name, value: f.value })),
+                        spacing: 'Medium',
+                      },
+                    ]
+                  : []),
+              ],
+              actions: payload.link
+                ? [
+                    {
+                      type: 'Action.OpenUrl',
+                      title: payload.link_text || 'View Details',
+                      url: payload.link,
+                    },
+                  ]
+                : [],
+            },
+          },
+        ],
+      };
+    }
+
+    log.info('Sending to Teams webhook', { isPowerAutomate });
+    const teamsResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(card),
+      body: JSON.stringify(bodyToSend),
     });
 
     if (!teamsResponse.ok) {
       const errorText = await teamsResponse.text();
       log.error('Teams webhook failed', null, { status: teamsResponse.status, error: errorText });
-      return corsJsonResponse({ 
-        success: false, 
-        error: `Teams webhook returned ${teamsResponse.status}`,
-        code: ErrorCode.INTERNAL_ERROR 
-      }, req, 502);
+      return corsJsonResponse(
+        {
+          success: false,
+          error: `Teams webhook returned ${teamsResponse.status}`,
+          details: errorText.slice(0, 500),
+          code: ErrorCode.INTERNAL_ERROR,
+        },
+        req,
+        502,
+      );
     }
 
     log.info('Teams notification sent successfully');
-    return corsJsonResponse({ success: true, sent: true }, req);
+    return corsJsonResponse({ success: true, sent: true, isPowerAutomate }, req);
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
