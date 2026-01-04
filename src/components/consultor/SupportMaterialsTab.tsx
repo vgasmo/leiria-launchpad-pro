@@ -76,12 +76,12 @@ export function SupportMaterialsTab() {
             className="pl-10"
           />
         </div>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
+        <Select value={typeFilter || 'all'} onValueChange={(v) => setTypeFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Startup type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All types</SelectItem>
+            <SelectItem value="all">All types</SelectItem>
             {STARTUP_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
                 {type.replace('_', ' ').toUpperCase()}
@@ -89,12 +89,12 @@ export function SupportMaterialsTab() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={stageFilter} onValueChange={setStageFilter}>
+        <Select value={stageFilter || 'all'} onValueChange={(v) => setStageFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All stages</SelectItem>
+            <SelectItem value="all">All stages</SelectItem>
             {STARTUP_STAGES.map((stage) => (
               <SelectItem key={stage} value={stage}>
                 {stage.replace('_', ' ')}
@@ -102,12 +102,12 @@ export function SupportMaterialsTab() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+        <Select value={categoryFilter || 'all'} onValueChange={(v) => setCategoryFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat} value={cat}>
                 {cat}
