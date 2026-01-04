@@ -19,7 +19,7 @@ interface SessionData {
   id: string;
   title: string;
   scheduled_at: string;
-  duration: number | null; // Fixed: was duration_minutes, actual column is duration
+  duration: number | null;
   location: string | null;
   notes: string | null;
   outlook_event_id: string | null;
@@ -29,6 +29,205 @@ interface SessionData {
     startups: {
       name: string;
     } | null;
+  };
+}
+
+interface GraphTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+interface GraphCalendarEvent {
+  id?: string;
+  subject: string;
+  body: {
+    contentType: string;
+    content: string;
+  };
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  location?: {
+    displayName: string;
+  };
+  isOnlineMeeting: boolean;
+  onlineMeetingProvider?: string;
+  onlineMeeting?: {
+    joinUrl: string;
+  };
+  attendees?: Array<{
+    emailAddress: {
+      address: string;
+      name?: string;
+    };
+    type: string;
+  }>;
+}
+
+// Get Microsoft Graph access token using client credentials flow
+async function getGraphAccessToken(
+  tenantId: string,
+  clientId: string,
+  clientSecret: string,
+  log: ReturnType<typeof createLogger>
+): Promise<string> {
+  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+  
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    scope: 'https://graph.microsoft.com/.default',
+    grant_type: 'client_credentials',
+  });
+
+  log.info('Requesting Graph API access token', { tenantId, clientId: clientId.slice(0, 8) + '...' });
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    log.error('Failed to get Graph token', null, { status: response.status, error: errorText });
+    throw new Error(`Failed to authenticate with Microsoft: ${response.status}`);
+  }
+
+  const tokenData: GraphTokenResponse = await response.json();
+  return tokenData.access_token;
+}
+
+// Create calendar event via Graph API
+async function createCalendarEvent(
+  accessToken: string,
+  userId: string,
+  event: GraphCalendarEvent,
+  log: ReturnType<typeof createLogger>
+): Promise<GraphCalendarEvent> {
+  // For application permissions, we need to specify the user
+  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events`;
+  
+  log.info('Creating calendar event via Graph', { userId, subject: event.subject });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(event),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    log.error('Failed to create calendar event', null, { status: response.status, error: errorText });
+    throw new Error(`Failed to create calendar event: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+// Update calendar event via Graph API
+async function updateCalendarEvent(
+  accessToken: string,
+  userId: string,
+  eventId: string,
+  event: Partial<GraphCalendarEvent>,
+  log: ReturnType<typeof createLogger>
+): Promise<GraphCalendarEvent> {
+  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events/${eventId}`;
+  
+  log.info('Updating calendar event via Graph', { userId, eventId });
+
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(event),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    log.error('Failed to update calendar event', null, { status: response.status, error: errorText });
+    throw new Error(`Failed to update calendar event: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+// Delete calendar event via Graph API
+async function deleteCalendarEvent(
+  accessToken: string,
+  userId: string,
+  eventId: string,
+  log: ReturnType<typeof createLogger>
+): Promise<void> {
+  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events/${eventId}`;
+  
+  log.info('Deleting calendar event via Graph', { userId, eventId });
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok && response.status !== 404) {
+    const errorText = await response.text();
+    log.error('Failed to delete calendar event', null, { status: response.status, error: errorText });
+    throw new Error(`Failed to delete calendar event: ${response.status}`);
+  }
+}
+
+// Create online meeting via Graph API (for Teams)
+async function createOnlineMeeting(
+  accessToken: string,
+  organizerId: string,
+  session: SessionData,
+  log: ReturnType<typeof createLogger>
+): Promise<{ joinUrl: string; meetingId: string }> {
+  const url = `https://graph.microsoft.com/v1.0/users/${organizerId}/onlineMeetings`;
+  
+  const startDate = new Date(session.scheduled_at);
+  const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
+
+  const meetingPayload = {
+    startDateTime: startDate.toISOString(),
+    endDateTime: endDate.toISOString(),
+    subject: session.title,
+  };
+
+  log.info('Creating Teams online meeting via Graph', { organizerId, subject: session.title });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(meetingPayload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    log.error('Failed to create online meeting', null, { status: response.status, error: errorText });
+    throw new Error(`Failed to create Teams meeting: ${response.status}`);
+  }
+
+  const meeting = await response.json();
+  return {
+    joinUrl: meeting.joinWebUrl,
+    meetingId: meeting.id,
   };
 }
 
@@ -117,8 +316,8 @@ Deno.serve(async (req: Request) => {
     const appUrl = Deno.env.get('APP_URL') || 'https://startupleiria.app';
     const sessionLink = `${appUrl}/workspace/${session.workspace_id}?tab=sessions`;
 
+    // ========== WEBHOOK MODE ==========
     if (outlookSettings.sync_mode === 'webhook') {
-      // Webhook mode - send to Power Automate
       if (!outlookSettings.webhook_url) {
         return corsJsonResponse({ 
           success: false, 
@@ -128,7 +327,6 @@ Deno.serve(async (req: Request) => {
       }
 
       const startDate = new Date(session.scheduled_at);
-      // Fixed: use session.duration (minutes), default 60 if not set
       const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
 
       const webhookPayload = {
@@ -140,8 +338,8 @@ Deno.serve(async (req: Request) => {
         end: endDate.toISOString(),
         location: session.location || '',
         description: `${session.notes || ''}\n\nView in Startup Leiria: ${sessionLink}`,
-        is_online_meeting: true, // Request Teams meeting link
-        attendees: [], // Power Automate can add attendees from session participants
+        is_online_meeting: true,
+        attendees: [],
         workspace_id: session.workspace_id,
       };
 
@@ -171,7 +369,6 @@ Deno.serve(async (req: Request) => {
         }, req, 502);
       }
 
-      // Try to parse response for event ID
       let eventId = session.outlook_event_id;
       let teamsMeetingUrl = null;
       try {
@@ -182,7 +379,6 @@ Deno.serve(async (req: Request) => {
         // Response may not be JSON
       }
 
-      // Update session with sync status
       await supabaseAdmin
         .from('sessions')
         .update({ 
@@ -202,16 +398,134 @@ Deno.serve(async (req: Request) => {
         teams_meeting_url: teamsMeetingUrl,
       }, req);
 
+    // ========== GRAPH API MODE ==========
     } else if (outlookSettings.sync_mode === 'graph') {
-      // Direct Graph API mode (requires Azure AD app credentials)
-      // This is more complex and requires OAuth token management
-      // For now, return a message that Graph mode needs additional setup
+      // Validate Graph credentials
+      const { graph_tenant_id, graph_client_id, graph_secret_key } = outlookSettings;
       
-      return corsJsonResponse({ 
-        success: false, 
-        reason: 'graph_not_implemented',
-        message: 'Direct Microsoft Graph integration requires Azure AD app registration. Please use webhook mode with Power Automate.'
-      }, req);
+      if (!graph_tenant_id || !graph_client_id || !graph_secret_key) {
+        return corsJsonResponse({ 
+          success: false, 
+          reason: 'graph_not_configured',
+          message: 'Microsoft Graph API credentials not configured'
+        }, req);
+      }
+
+      // Get user email for calendar operations
+      const { data: userProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('email')
+        .eq('id', user.id)
+        .single();
+
+      if (!userProfile?.email) {
+        return corsJsonResponse({ 
+          success: false, 
+          reason: 'no_user_email',
+          message: 'User email not found'
+        }, req);
+      }
+
+      try {
+        // Get Graph API access token
+        const accessToken = await getGraphAccessToken(
+          graph_tenant_id,
+          graph_client_id,
+          graph_secret_key,
+          log
+        );
+
+        const startDate = new Date(session.scheduled_at);
+        const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
+
+        // Build event object
+        const eventData: GraphCalendarEvent = {
+          subject: `${session.title} - ${startupName}`,
+          body: {
+            contentType: 'HTML',
+            content: `<p>${session.notes || ''}</p><p><a href="${sessionLink}">View in Startup Leiria</a></p>`,
+          },
+          start: {
+            dateTime: startDate.toISOString().slice(0, -1), // Remove Z for Graph API
+            timeZone: 'UTC',
+          },
+          end: {
+            dateTime: endDate.toISOString().slice(0, -1),
+            timeZone: 'UTC',
+          },
+          isOnlineMeeting: true,
+          onlineMeetingProvider: 'teamsForBusiness',
+        };
+
+        if (session.location) {
+          eventData.location = { displayName: session.location };
+        }
+
+        let eventId = session.outlook_event_id;
+        let teamsMeetingUrl: string | null = null;
+        let createdEvent: GraphCalendarEvent | null = null;
+
+        if (action === 'create') {
+          createdEvent = await createCalendarEvent(accessToken, userProfile.email, eventData, log);
+          eventId = createdEvent.id || null;
+          teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
+          
+        } else if (action === 'update' && eventId) {
+          createdEvent = await updateCalendarEvent(accessToken, userProfile.email, eventId, eventData, log);
+          teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
+          
+        } else if (action === 'delete' && eventId) {
+          await deleteCalendarEvent(accessToken, userProfile.email, eventId, log);
+          eventId = null;
+        }
+
+        // Update session with sync status
+        await supabaseAdmin
+          .from('sessions')
+          .update({ 
+            outlook_sync_status: action === 'delete' ? 'pending' : 'synced',
+            outlook_synced_at: new Date().toISOString(),
+            outlook_sync_error: null,
+            outlook_event_id: eventId,
+            ...(teamsMeetingUrl && { teams_meeting_url: teamsMeetingUrl }),
+          })
+          .eq('id', session_id);
+
+        log.info('Outlook sync via Graph API completed', { action, eventId, teamsMeetingUrl });
+        
+        return corsJsonResponse({ 
+          success: true, 
+          mode: 'graph',
+          event_id: eventId,
+          teams_meeting_url: teamsMeetingUrl,
+        }, req);
+
+      } catch (graphError: unknown) {
+        const errorMessage = graphError instanceof Error ? graphError.message : 'Unknown Graph API error';
+        log.error('Graph API sync failed', graphError);
+        
+        // Log integration error
+        await supabaseAdmin
+          .from('integration_errors')
+          .insert({
+            source: 'outlook_graph',
+            error_message: errorMessage,
+            workspace_id: session.workspace_id,
+          });
+
+        await supabaseAdmin
+          .from('sessions')
+          .update({ 
+            outlook_sync_status: 'error',
+            outlook_sync_error: errorMessage.slice(0, 200),
+          })
+          .eq('id', session_id);
+
+        return corsJsonResponse({ 
+          success: false, 
+          error: errorMessage
+        }, req, 502);
+      }
     }
 
     return corsJsonResponse({ 
