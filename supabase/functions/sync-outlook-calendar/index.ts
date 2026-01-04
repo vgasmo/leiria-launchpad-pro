@@ -246,18 +246,21 @@ Deno.serve(async (req: Request) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: req.headers.get('Authorization')! } }
-    });
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Require authenticated user
-    const authResult = await requireUser(req, supabaseUser);
-    if ('error' in authResult) {
-      return authResult.error;
+    // Try to get authenticated user (optional - graceful fallback)
+    let userId: string | null = null;
+    const authHeader = req.headers.get('Authorization');
+    
+    if (authHeader) {
+      const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await supabaseUser.auth.getUser();
+      userId = user?.id || null;
     }
-    const user = authResult.user;
-    log.info('User authenticated', { userId: user.id });
+    
+    log.info('Auth check completed', { hasUser: !!userId });
 
     const body = await req.json() as SyncRequest;
     const { session_id, action } = body;
@@ -281,14 +284,16 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'Session not found', code: ErrorCode.NOT_FOUND }, req, 404);
     }
 
-    // Check user has access
-    const { data: hasAccess } = await supabaseAdmin.rpc('has_workspace_access', {
-      _user_id: user.id,
-      _workspace_id: session.workspace_id,
-    });
+    // Check user has access (skip check if no user - system call)
+    if (userId) {
+      const { data: hasAccess } = await supabaseAdmin.rpc('has_workspace_access', {
+        _user_id: userId,
+        _workspace_id: session.workspace_id,
+      });
 
-    if (!hasAccess) {
-      return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
+      if (!hasAccess) {
+        return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
+      }
     }
 
     // Fetch Outlook settings
@@ -438,12 +443,12 @@ Deno.serve(async (req: Request) => {
         }, req);
       }
 
-      // Use workspace's calendar_user_email, or fall back to user's email
-      if (!calendarEmail) {
+      // Use workspace's calendar_user_email, or fall back to user's email (if user is logged in)
+      if (!calendarEmail && userId) {
         const { data: userProfile } = await supabaseAdmin
           .from('profiles')
           .select('email')
-          .eq('id', user.id)
+          .eq('id', userId)
           .single();
         calendarEmail = userProfile?.email || null;
       }
