@@ -125,48 +125,63 @@ export function useUpdateTeamsSettings(workspaceId?: string, programId?: string)
 export function useTestTeamsWebhook() {
   return useMutation({
     mutationFn: async (webhookUrl: string) => {
-      const testCard = {
-        type: 'message',
-        attachments: [
-          {
-            contentType: 'application/vnd.microsoft.card.adaptive',
-            contentUrl: null,
-            content: {
-              $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-              type: 'AdaptiveCard',
-              version: '1.4',
-              body: [
-                {
-                  type: 'TextBlock',
-                  size: 'Medium',
-                  weight: 'Bolder',
-                  text: '✅ Startup Leiria Integration Test',
-                  wrap: true,
-                },
-                {
-                  type: 'TextBlock',
-                  text: 'Your Microsoft Teams integration is working! You will receive notifications here.',
-                  wrap: true,
-                  spacing: 'Small',
-                },
-              ],
+      // Power Automate / Teams Workflows expect a simpler JSON structure
+      // We'll try a simple format that works with most webhook types
+      const isPowerAutomate = webhookUrl.includes('powerplatform.com') || webhookUrl.includes('flow.microsoft.com');
+      
+      let payload;
+      if (isPowerAutomate) {
+        // Simple JSON for Power Automate triggers
+        payload = {
+          title: '✅ Startup Leiria Integration Test',
+          message: 'Your Microsoft Teams integration is working! You will receive notifications here.',
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        // Adaptive Card format for Office 365 Connectors
+        payload = {
+          type: 'message',
+          attachments: [
+            {
+              contentType: 'application/vnd.microsoft.card.adaptive',
+              contentUrl: null,
+              content: {
+                $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+                type: 'AdaptiveCard',
+                version: '1.4',
+                body: [
+                  {
+                    type: 'TextBlock',
+                    size: 'Medium',
+                    weight: 'Bolder',
+                    text: '✅ Startup Leiria Integration Test',
+                    wrap: true,
+                  },
+                  {
+                    type: 'TextBlock',
+                    text: 'Your Microsoft Teams integration is working! You will receive notifications here.',
+                    wrap: true,
+                    spacing: 'Small',
+                  },
+                ],
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
 
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         mode: 'no-cors', // Teams webhooks don't return CORS headers
-        body: JSON.stringify(testCard),
+        body: JSON.stringify(payload),
       });
 
       // With no-cors, we can't read the response, but if no error thrown, assume success
       return { success: true };
     },
     onSuccess: () => {
-      toast.success('Test message sent to Teams!');
+      toast.success('Test message sent to Teams! Check your Power Automate flow execution history.');
     },
     onError: (error: Error) => {
       toast.error(`Failed to send test: ${error.message}`);
