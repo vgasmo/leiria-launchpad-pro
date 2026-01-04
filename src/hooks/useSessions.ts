@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
+import { syncOutlookCalendar, sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 export interface Session {
   id: string;
   workspace_id: string;
@@ -114,6 +114,7 @@ export function useCreateSession(workspaceId: string) {
           location: session.location || null,
           join_url: session.join_url || null,
           created_by: user?.id,
+          outlook_sync_status: 'pending', // Mark for sync
         })
         .select()
         .single();
@@ -121,10 +122,33 @@ export function useCreateSession(workspaceId: string) {
       if (error) throw error;
       return data as unknown as Session;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
+
+      // P0.1: Auto-trigger Outlook sync (graceful fail)
+      syncOutlookCalendar({
+        sessionId: data.id,
+        action: 'create',
+        workspaceId,
+      }).catch(() => {}); // Silent fail - non-blocking
+
+      // P0.1: Auto-trigger Teams notification (graceful fail)
+      sendTeamsNotification({
+        workspaceId,
+        eventType: 'session_created',
+        payload: {
+          title: 'New Session Scheduled',
+          summary: `Session "${data.title}" has been scheduled`,
+          fields: [
+            { name: 'Date', value: new Date(data.scheduled_at).toLocaleDateString() },
+            { name: 'Duration', value: `${data.duration || 60} min` },
+          ],
+          link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+          linkText: 'View Session',
+        },
+      }).catch(() => {}); // Silent fail - non-blocking
     },
   });
 }
@@ -134,20 +158,48 @@ export function useUpdateSession(workspaceId: string) {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<SessionFormData> & { id: string }) => {
+      // Track which fields changed for conditional sync
+      const syncTriggerFields = ['scheduled_at', 'duration', 'title', 'location', 'join_url'];
+      const needsSync = syncTriggerFields.some(field => field in updates);
+
       const { data, error } = await supabase
         .from('sessions')
-        .update(updates)
+        .update({
+          ...updates,
+          ...(needsSync && { outlook_sync_status: 'pending' }), // Mark for re-sync if relevant fields changed
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as Session;
+      return { session: data as unknown as Session, needsSync };
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
+
+      // P0.1: Auto-trigger Outlook sync if date/time/duration changed
+      if (result.needsSync) {
+        syncOutlookCalendar({
+          sessionId: result.session.id,
+          action: 'update',
+          workspaceId,
+        }).catch(() => {}); // Silent fail - non-blocking
+
+        // Send reschedule notification
+        sendTeamsNotification({
+          workspaceId,
+          eventType: 'session_rescheduled',
+          payload: {
+            title: 'Session Updated',
+            summary: `Session "${result.session.title}" has been updated`,
+            link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+            linkText: 'View Session',
+          },
+        }).catch(() => {});
+      }
     },
   });
 }
@@ -157,6 +209,14 @@ export function useDeleteSession(workspaceId: string) {
 
   return useMutation({
     mutationFn: async (sessionId: string) => {
+      // P0.1: First, trigger Outlook delete BEFORE removing from DB
+      // This ensures we still have the outlook_event_id
+      await syncOutlookCalendar({
+        sessionId,
+        action: 'delete',
+        workspaceId,
+      }).catch(() => {}); // Silent fail - non-blocking
+
       const { error } = await supabase
         .from('sessions')
         .delete()

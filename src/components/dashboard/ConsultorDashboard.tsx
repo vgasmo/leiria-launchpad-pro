@@ -10,7 +10,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Activity,
-  ClipboardList
+  ClipboardList,
+  Zap,
 } from 'lucide-react';
 import { isToday, isThisWeek, format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateRe
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { ConsultantWorkloadWidget } from '@/components/staff/ConsultantWorkloadWidget';
+import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -278,8 +280,10 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           )}
         </div>
 
-        {/* Right Sidebar: Quick Glance */}
+        {/* Right Sidebar: Quick Actions + Quick Glance */}
         <div className="space-y-4">
+          {/* P0.4: Quick Actions for daily operations */}
+          <CockpitQuickActions workspaces={workspaces} />
           <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
           <StaffTasksPanel compact />
         </div>
