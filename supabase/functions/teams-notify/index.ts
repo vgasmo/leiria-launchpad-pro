@@ -306,10 +306,17 @@ Deno.serve(async (req: Request) => {
 
     let bodyToSend: unknown;
     if (isPowerAutomate) {
-      // Power Automate flows - send ONLY the basic fields to match their "Parse JSON" schema
-      // Avoid null values - use empty strings instead
+      // Power Automate flows - match their expected schema exactly
+      // Use empty strings for missing values (never null)
+      const owner =
+        payload.fields?.find((f) => ['owner', 'consultor', 'mentor', 'founder', 'assignee'].includes(f.name.toLowerCase()))
+          ?.value || '';
+
       bodyToSend = {
         title: `${icon} ${payload.title}`,
+        Startup: startupName,
+        Owner: owner,
+        Severidade: payload.priority || 'medium',
         message: payload.summary || '',
         link: payload.link || '',
       };
