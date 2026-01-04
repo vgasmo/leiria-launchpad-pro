@@ -306,16 +306,28 @@ Deno.serve(async (req: Request) => {
 
     let bodyToSend: unknown;
     if (isPowerAutomate) {
-      // Power Automate flows - simple JSON
+      // Power Automate flows - send a flat JSON payload (best compatibility with "Parse JSON")
+      // Keep both legacy-ish keys (workspaceName/message/severity) and our newer keys.
+      const owner =
+        payload.fields?.find((f) => ['owner', 'consultor', 'mentor', 'founder'].includes(f.name.toLowerCase()))
+          ?.value ?? null;
+
       bodyToSend = {
+        // Common keys many flows use
         title: `${icon} ${payload.title}`,
+        workspaceName: startupName,
+        owner,
+        severity: payload.priority || 'medium',
+        message: payload.summary,
+        link: payload.link,
+
+        // Our current keys (keep for forward compatibility)
         startupName,
         eventType: event_type,
         eventName,
         summary: payload.summary,
         fields: payload.fields,
         priority: payload.priority || 'medium',
-        link: payload.link,
         linkText: payload.link_text || 'Open in Startup Companion',
         sentAt: new Date().toISOString(),
         settingsSource: source,
