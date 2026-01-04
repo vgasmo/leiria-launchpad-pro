@@ -374,66 +374,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </CardContent>
         </Card>
 
-        {/* Next Meeting/Session */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-primary" />
-                {t('workspaceOverview.upcoming')}
-              </CardTitle>
-              {canWrite && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSearchParams({ tab: 'calendar' })}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('workspaceOverview.schedule')}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {sessionLoading ? (
-              <Skeleton className="h-20" />
-            ) : !nextSession ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>{t('workspaceOverview.noUpcomingSessions')}</p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-                    <span className="text-xs text-primary font-medium">
-                      {format(new Date(nextSession.starts_at), 'MMM')}
-                    </span>
-                    <span className="text-lg font-bold text-primary leading-none">
-                      {format(new Date(nextSession.starts_at), 'd')}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-medium">{nextSession.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(nextSession.starts_at), 'h:mm a')} - {format(new Date(nextSession.ends_at), 'h:mm a')}
-                    </p>
-                  </div>
-                </div>
-                {nextSession.join_url && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={nextSession.join_url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      {t('workspaceOverview.join')}
-                    </a>
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Health Score Card (new) */}
+        {/* Health Score Card */}
         <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={canWrite} />
         
         {/* P1.1: Ownership & SLA Card - visible to staff */}
