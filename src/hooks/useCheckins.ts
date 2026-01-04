@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 
 // Types
 export interface CheckinDefinition {
@@ -160,10 +161,12 @@ export function useSubmitCheckin() {
   return useMutation({
     mutationFn: async ({ 
       instanceId, 
-      responses 
+      responses,
+      workspaceId, // Added for Teams notification
     }: { 
       instanceId: string; 
-      responses: SubmitCheckinPayload[] 
+      responses: SubmitCheckinPayload[];
+      workspaceId?: string;
     }) => {
       // Convert to plain JSON-compatible objects
       const jsonResponses = responses.map(r => ({
@@ -179,14 +182,28 @@ export function useSubmitCheckin() {
       });
 
       if (error) throw error;
-      return data;
+      return { instanceId, workspaceId };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.success('Check-in submitted successfully!');
       queryClient.invalidateQueries({ queryKey: ['pending-checkin'] });
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['all-pending-checkins'] });
       queryClient.invalidateQueries({ queryKey: ['kpi-values'] });
+
+      // P0.1: Trigger Teams notification for check-in submission
+      if (result.workspaceId) {
+        sendTeamsNotification({
+          workspaceId: result.workspaceId,
+          eventType: 'checkin_submitted',
+          payload: {
+            title: 'Weekly Check-in Submitted',
+            summary: 'A founder has submitted their weekly check-in',
+            link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
+            linkText: 'View Check-in',
+          },
+        }).catch(() => {}); // Silent fail
+      }
     },
     onError: (error: any) => {
       toast.error('Failed to submit check-in', {

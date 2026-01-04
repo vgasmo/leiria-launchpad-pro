@@ -17,6 +17,8 @@ import {
   Star,
   Sparkles,
   Play,
+  Video,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,6 +76,7 @@ import { SessionExercisesPicker } from '@/components/sessions/SessionExercisesPi
 import { FacilitatorMode } from '@/components/sessions/FacilitatorMode';
 import { QualityGateCard } from '@/components/consultor/QualityGateCard';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
+import { SessionSyncStatus } from '@/components/sessions/SessionSyncStatus';
 
 interface SessionsTabProps {
   workspaceId: string;
@@ -167,6 +170,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
             <SessionCard
               key={session.id}
               session={session}
+              workspaceId={workspaceId}
               canWrite={canWrite}
               onEdit={() => setSelectedSession(session)}
               onDelete={() => {
@@ -217,8 +221,9 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
   );
 }
 
-function SessionCard({ session, canWrite, onEdit, onDelete }: { 
+function SessionCard({ session, workspaceId, canWrite, onEdit, onDelete }: { 
   session: any; 
+  workspaceId: string;
   canWrite: boolean;
   onEdit: () => void;
   onDelete: () => void;
@@ -242,7 +247,7 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h3 className="font-semibold truncate">{session.title}</h3>
                 {isPastSession && !hasNotes && (
                   <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
@@ -264,7 +269,7 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
                   {session.agenda}
                 </p>
               )}
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {hasNotes && (
                   <Badge variant="secondary" className="text-xs">
                     <FileText className="h-3 w-3 mr-1" />
@@ -283,6 +288,16 @@ function SessionCard({ session, canWrite, onEdit, onDelete }: {
                     AI
                   </Badge>
                 )}
+                {/* P0.3: Show Outlook sync status */}
+                <SessionSyncStatus
+                  sessionId={session.id}
+                  workspaceId={workspaceId}
+                  syncStatus={session.outlook_sync_status}
+                  syncError={session.outlook_sync_error}
+                  syncedAt={session.outlook_synced_at}
+                  teamsMeetingUrl={session.teams_meeting_url}
+                  canWrite={canWrite}
+                />
               </div>
             </div>
           </div>

@@ -19,10 +19,11 @@ interface SessionData {
   id: string;
   title: string;
   scheduled_at: string;
-  duration_minutes: number | null;
+  duration: number | null; // Fixed: was duration_minutes, actual column is duration
   location: string | null;
   notes: string | null;
   outlook_event_id: string | null;
+  outlook_sync_status: string | null;
   workspace_id: string;
   workspaces: {
     startups: {
@@ -70,7 +71,7 @@ Deno.serve(async (req: Request) => {
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('sessions')
       .select(`
-        id, title, scheduled_at, duration_minutes, location, notes, outlook_event_id, workspace_id,
+        id, title, scheduled_at, duration, location, notes, outlook_event_id, outlook_sync_status, workspace_id,
         workspaces!inner(startups(name))
       `)
       .eq('id', session_id)
@@ -127,7 +128,8 @@ Deno.serve(async (req: Request) => {
       }
 
       const startDate = new Date(session.scheduled_at);
-      const endDate = new Date(startDate.getTime() + (session.duration_minutes || 60) * 60 * 1000);
+      // Fixed: use session.duration (minutes), default 60 if not set
+      const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
 
       const webhookPayload = {
         action,

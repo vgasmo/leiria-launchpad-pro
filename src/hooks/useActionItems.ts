@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 
 type ActionStatus = Database['public']['Enums']['action_status'];
 
@@ -91,15 +92,33 @@ export function useUpdateActionItem(workspaceId: string) {
         .from('action_items')
         .update(updateData)
         .eq('id', id)
-        .select()
+        .select('*, owner:profiles!action_items_owner_user_id_fkey(full_name)')
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Track if owner was assigned for Teams notification
+      const ownerAssigned = 'owner_user_id' in updates && updates.owner_user_id;
+      return { data, ownerAssigned, title: data.title };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+
+      // P0.1: Trigger Teams notification when action is assigned to someone
+      if (result.ownerAssigned) {
+        const ownerName = (result.data as any)?.owner?.full_name || 'someone';
+        sendTeamsNotification({
+          workspaceId,
+          eventType: 'action_assigned',
+          payload: {
+            title: 'Action Item Assigned',
+            summary: `"${result.title}" has been assigned to ${ownerName}`,
+            link: `${getAppUrl()}/workspace/${workspaceId}?tab=actions`,
+            linkText: 'View Action',
+          },
+        }).catch(() => {}); // Silent fail
+      }
     },
   });
 }

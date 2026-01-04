@@ -3,6 +3,7 @@ import { format, isToday } from 'date-fns';
 import { Calendar, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import {
@@ -23,11 +24,18 @@ import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 interface WorkspaceTableProps {
   workspaces: WorkspaceWithDetails[];
   onRowClick: (id: string) => void;
+  // P0.5: Bulk selection support
+  selectionEnabled?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
 }
 
 export const WorkspaceTable = memo(function WorkspaceTable({
   workspaces,
   onRowClick,
+  selectionEnabled = false,
+  selectedIds = new Set(),
+  onToggleSelect,
 }: WorkspaceTableProps) {
   const formatMeetingDate = (dateStr: string | null) => {
     if (!dateStr) return <span className="text-muted-foreground">None scheduled</span>;
@@ -51,6 +59,11 @@ export const WorkspaceTable = memo(function WorkspaceTable({
     <Table>
       <TableHeader>
         <TableRow className="hover:bg-transparent">
+          {selectionEnabled && (
+            <TableHead className="w-[40px]">
+              <span className="sr-only">Select</span>
+            </TableHead>
+          )}
           <TableHead className="w-[200px]">Startup</TableHead>
           <TableHead>Program</TableHead>
           <TableHead>Priority</TableHead>
@@ -63,13 +76,24 @@ export const WorkspaceTable = memo(function WorkspaceTable({
       <TableBody>
         {workspaces.map((workspace) => {
           const effectiveHealth = workspace.health_score_override || workspace.health_score;
+          const isSelected = selectedIds.has(workspace.id);
 
           return (
             <TableRow
               key={workspace.id}
-              className="cursor-pointer hover:bg-accent/50 transition-colors"
+              className={`cursor-pointer hover:bg-accent/50 transition-colors ${
+                isSelected ? 'bg-primary/5' : ''
+              }`}
               onClick={() => onRowClick(workspace.id)}
             >
+              {selectionEnabled && (
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => onToggleSelect?.(workspace.id)}
+                  />
+                </TableCell>
+              )}
               <TableCell className="font-medium">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8 rounded-lg">
