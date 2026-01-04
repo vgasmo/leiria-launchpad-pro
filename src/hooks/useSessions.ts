@@ -159,20 +159,35 @@ export function useCreateSession(workspaceId: string) {
       }).catch(() => {}); // Silent fail - non-blocking
 
       // P0.1: Auto-trigger Teams notification (graceful fail)
-      sendTeamsNotification({
-        workspaceId,
-        eventType: 'session_created',
-        payload: {
-          title: 'New Session Scheduled',
-          summary: `Session "${data.title}" has been scheduled`,
-          fields: [
-            { name: 'Date', value: new Date(data.scheduled_at).toLocaleDateString() },
-            { name: 'Duration', value: `${data.duration || 60} min` },
-          ],
-          link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
-          linkText: 'View Session',
-        },
-      }).catch(() => {}); // Silent fail - non-blocking
+      (async () => {
+        let startupName: string | undefined;
+        try {
+          const { data: ws } = await supabase
+            .from('workspaces')
+            .select('startup:startups(name)')
+            .eq('id', workspaceId)
+            .maybeSingle();
+          startupName = (ws as any)?.startup?.name || undefined;
+        } catch {
+          // ignore
+        }
+
+        sendTeamsNotification({
+          workspaceId,
+          eventType: 'session_created',
+          payload: {
+            title: 'New Session Scheduled',
+            summary: `Session "${data.title}" has been scheduled`,
+            startup_name: startupName,
+            fields: [
+              { name: 'Date', value: new Date(data.scheduled_at).toLocaleDateString() },
+              { name: 'Duration', value: `${data.duration || 60} min` },
+            ],
+            link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+            linkText: 'View Session',
+          },
+        }).catch(() => {}); // Silent fail - non-blocking
+      })().catch(() => {});
     },
   });
 }
@@ -216,16 +231,31 @@ export function useUpdateSession(workspaceId: string) {
         }).catch(() => {}); // Silent fail - non-blocking
 
         // Send reschedule notification
-        sendTeamsNotification({
-          workspaceId,
-          eventType: 'session_rescheduled',
-          payload: {
-            title: 'Session Updated',
-            summary: `Session "${result.session.title}" has been updated`,
-            link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
-            linkText: 'View Session',
-          },
-        }).catch(() => {});
+        (async () => {
+          let startupName: string | undefined;
+          try {
+            const { data: ws } = await supabase
+              .from('workspaces')
+              .select('startup:startups(name)')
+              .eq('id', workspaceId)
+              .maybeSingle();
+            startupName = (ws as any)?.startup?.name || undefined;
+          } catch {
+            // ignore
+          }
+
+          sendTeamsNotification({
+            workspaceId,
+            eventType: 'session_rescheduled',
+            payload: {
+              title: 'Session Updated',
+              summary: `Session "${result.session.title}" has been updated`,
+              startup_name: startupName,
+              link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+              linkText: 'View Session',
+            },
+          }).catch(() => {});
+        })().catch(() => {});
       }
     },
   });

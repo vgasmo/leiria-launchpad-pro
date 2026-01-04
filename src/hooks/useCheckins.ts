@@ -216,19 +216,34 @@ export function useSubmitCheckin() {
         logActivity('submitted', 'checkin', result.instanceId, result.workspaceId);
       }
 
-      // P0.1: Trigger Teams notification for check-in submission
-      if (result.workspaceId) {
-        sendTeamsNotification({
-          workspaceId: result.workspaceId,
-          eventType: 'checkin_submitted',
-          payload: {
-            title: 'Weekly Check-in Submitted',
-            summary: 'A founder has submitted their weekly check-in',
-            link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
-            linkText: 'View Check-in',
-          },
-        }).catch(() => {}); // Silent fail
-      }
+       // P0.1: Trigger Teams notification for check-in submission
+       if (result.workspaceId) {
+         (async () => {
+           let startupName: string | undefined;
+           try {
+             const { data: ws } = await supabase
+               .from('workspaces')
+               .select('startup:startups(name)')
+               .eq('id', result.workspaceId)
+               .maybeSingle();
+             startupName = (ws as any)?.startup?.name || undefined;
+           } catch {
+             // ignore
+           }
+
+           sendTeamsNotification({
+             workspaceId: result.workspaceId,
+             eventType: 'checkin_submitted',
+             payload: {
+               title: 'Weekly Check-in Submitted',
+               summary: 'A founder has submitted their weekly check-in',
+               startup_name: startupName,
+               link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
+               linkText: 'View Check-in',
+             },
+           }).catch(() => {}); // Silent fail
+         })().catch(() => {});
+       }
     },
     onError: (error: any) => {
       toast.error('Failed to submit check-in', {

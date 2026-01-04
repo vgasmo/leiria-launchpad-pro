@@ -128,20 +128,36 @@ export function useUpdateActionItem(workspaceId: string) {
       // P1.2: Log activity
       logActivity('updated', 'action_item', result.data.id, workspaceId, { title: result.title });
 
-      // P0.1: Trigger Teams notification when action is assigned to someone
-      if (result.ownerAssigned) {
-        const ownerName = (result.data as any)?.owner?.full_name || 'someone';
-        sendTeamsNotification({
-          workspaceId,
-          eventType: 'action_assigned',
-          payload: {
-            title: 'Action Item Assigned',
-            summary: `"${result.title}" has been assigned to ${ownerName}`,
-            link: `${getAppUrl()}/workspace/${workspaceId}?tab=actions`,
-            linkText: 'View Action',
-          },
-        }).catch(() => {}); // Silent fail
-      }
+       // P0.1: Trigger Teams notification when action is assigned to someone
+       if (result.ownerAssigned) {
+         (async () => {
+           const ownerName = (result.data as any)?.owner?.full_name || 'someone';
+           let startupName: string | undefined;
+           try {
+             const { data: ws } = await supabase
+               .from('workspaces')
+               .select('startup:startups(name)')
+               .eq('id', workspaceId)
+               .maybeSingle();
+             startupName = (ws as any)?.startup?.name || undefined;
+           } catch {
+             // ignore
+           }
+
+           sendTeamsNotification({
+             workspaceId,
+             eventType: 'action_assigned',
+             payload: {
+               title: 'Action Item Assigned',
+               summary: `"${result.title}" has been assigned to ${ownerName}`,
+               startup_name: startupName,
+               fields: [{ name: 'Assignee', value: ownerName }],
+               link: `${getAppUrl()}/workspace/${workspaceId}?tab=actions`,
+               linkText: 'View Action',
+             },
+           }).catch(() => {}); // Silent fail
+         })().catch(() => {});
+       }
     },
   });
 }
