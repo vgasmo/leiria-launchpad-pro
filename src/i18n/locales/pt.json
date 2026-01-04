@@ -1132,7 +1132,10 @@
     "uploadDocument": "Carregar Documento",
     "uploadDocumentDesc": "Adicionar ficheiros ao workspace",
     "weeklyCheckin": "Check-in Semanal",
-    "weeklyCheckinDesc": "Submeter a sua atualização semanal"
+    "weeklyCheckinDesc": "Submeter a sua atualização semanal",
+    "addKpi": "Adicionar KPI",
+    "addAction": "Adicionar Ação",
+    "requestSession": "Solicitar Sessão"
   },
   "sessionPrep": {
     "title": "Preparação da Sessão",
@@ -1408,12 +1411,6 @@
     "prepare": "Preparar",
     "highPriorityInProgress": "Ação de alta prioridade em progresso",
     "continue": "Continuar"
-  },
-  "quickActions": {
-    "addKpi": "Adicionar KPI",
-    "addAction": "Adicionar Ação",
-    "requestSession": "Solicitar Sessão",
-    "uploadDocument": "Carregar Documento"
   },
   "workload": {
     "myLoad": "A Minha Carga",
