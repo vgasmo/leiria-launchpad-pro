@@ -25,7 +25,7 @@ interface Session {
   id: string;
   title: string;
   scheduled_at: string;
-  duration_minutes: number | null;
+  duration: number | null;
   location: string | null;
   notes: string | null;
   join_url: string | null;
@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
       const { data, error } = await supabase
         .from('sessions')
         .select(`
-          id, title, scheduled_at, duration_minutes, location, notes, join_url, teams_meeting_url,
+          id, title, scheduled_at, duration, location, notes, join_url, teams_meeting_url,
           workspaces!inner(startups(name))
         `)
         .eq('workspace_id', workspaceId)
@@ -118,7 +118,7 @@ Deno.serve(async (req: Request) => {
         log.error('Error fetching workspace sessions', error);
         throw error;
       }
-      sessions = (data || []) as Session[];
+      sessions = (data || []) as unknown as Session[];
     } else if (authenticatedUserId) {
       // Fetch sessions for all workspaces the user has access to
       const { data: userWorkspaces } = await supabase
@@ -133,7 +133,7 @@ Deno.serve(async (req: Request) => {
         const { data, error } = await supabase
           .from('sessions')
           .select(`
-            id, title, scheduled_at, duration_minutes, location, notes, join_url, teams_meeting_url,
+            id, title, scheduled_at, duration, location, notes, join_url, teams_meeting_url,
             workspaces!inner(startups(name))
           `)
           .in('workspace_id', workspaceIds)
@@ -146,7 +146,7 @@ Deno.serve(async (req: Request) => {
           log.error('Error fetching user sessions', error);
           throw error;
         }
-        sessions = (data || []) as Session[];
+        sessions = (data || []) as unknown as Session[];
       }
     }
 
@@ -157,7 +157,7 @@ Deno.serve(async (req: Request) => {
     
     const icsEvents = sessions.map(session => {
       const startDate = new Date(session.scheduled_at);
-      const endDate = new Date(startDate.getTime() + (session.duration_minutes || 60) * 60 * 1000);
+      const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
       const startupName = session.workspaces?.startups?.name || 'Session';
       
       const description = [
