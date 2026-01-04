@@ -4406,6 +4406,7 @@ export type Database = {
       workspaces: {
         Row: {
           active_financial_model_version_id: string | null
+          assigned_consultor_id: string | null
           created_at: string
           external_id: string | null
           health_confidence: string | null
@@ -4423,6 +4424,8 @@ export type Database = {
           health_status: string | null
           id: string
           last_checkin_at: string | null
+          last_contact_at: string | null
+          next_followup_at: string | null
           priority_level: Database["public"]["Enums"]["workspace_priority"]
           priority_notes: string | null
           priority_set_at: string | null
@@ -4437,6 +4440,7 @@ export type Database = {
         }
         Insert: {
           active_financial_model_version_id?: string | null
+          assigned_consultor_id?: string | null
           created_at?: string
           external_id?: string | null
           health_confidence?: string | null
@@ -4454,6 +4458,8 @@ export type Database = {
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null
+          last_contact_at?: string | null
+          next_followup_at?: string | null
           priority_level?: Database["public"]["Enums"]["workspace_priority"]
           priority_notes?: string | null
           priority_set_at?: string | null
@@ -4468,6 +4474,7 @@ export type Database = {
         }
         Update: {
           active_financial_model_version_id?: string | null
+          assigned_consultor_id?: string | null
           created_at?: string
           external_id?: string | null
           health_confidence?: string | null
@@ -4485,6 +4492,8 @@ export type Database = {
           health_status?: string | null
           id?: string
           last_checkin_at?: string | null
+          last_contact_at?: string | null
+          next_followup_at?: string | null
           priority_level?: Database["public"]["Enums"]["workspace_priority"]
           priority_notes?: string | null
           priority_set_at?: string | null
