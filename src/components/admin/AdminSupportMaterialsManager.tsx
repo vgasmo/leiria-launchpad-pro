@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Pencil, Trash2, FileText, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ interface SupportMaterial {
 }
 
 export function AdminSupportMaterialsManager() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [editingMaterial, setEditingMaterial] = useState<SupportMaterial | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -186,14 +188,14 @@ export function AdminSupportMaterialsManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Support Materials</h2>
+          <h2 className="text-lg font-semibold">{t('admin.supportMaterials.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            Guides and checklists for consultants • {approvedCount} approved, {draftCount} drafts
+            {t('admin.supportMaterials.description')} • {approvedCount} {t('admin.supportMaterials.approved')}, {draftCount} {t('admin.supportMaterials.drafts')}
           </p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-1" />
-          New Material
+          {t('admin.supportMaterials.newMaterial')}
         </Button>
       </div>
 
@@ -201,7 +203,7 @@ export function AdminSupportMaterialsManager() {
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            No support materials yet. Click "New Material" to add one.
+            {t('admin.supportMaterials.noMaterials')}
           </CardContent>
         </Card>
       ) : (
@@ -214,7 +216,7 @@ export function AdminSupportMaterialsManager() {
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm line-clamp-1">{material.title}</h4>
                       {material.status !== 'approved' && (
-                        <Badge variant="outline" className="text-xs text-amber-600">Draft</Badge>
+                        <Badge variant="outline" className="text-xs text-amber-600">{t('admin.supportMaterials.draft')}</Badge>
                       )}
                     </div>
                     {material.description && (
@@ -240,7 +242,7 @@ export function AdminSupportMaterialsManager() {
                       size="icon" 
                       className="h-7 w-7" 
                       onClick={() => toggleStatus(material)}
-                      title={material.status === 'approved' ? 'Hide from consultants' : 'Show to consultants'}
+                      title={material.status === 'approved' ? t('admin.supportMaterials.hideFromConsultants') : t('admin.supportMaterials.showToConsultants')}
                     >
                       {material.status === 'approved' ? (
                         <Eye className="h-3.5 w-3.5 text-green-600" />
@@ -271,12 +273,12 @@ export function AdminSupportMaterialsManager() {
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingMaterial ? 'Edit Material' : 'New Support Material'}</DialogTitle>
+            <DialogTitle>{editingMaterial ? t('common.edit') : t('admin.supportMaterials.newMaterial')}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">{t('common.title', 'Title')} *</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -286,28 +288,28 @@ export function AdminSupportMaterialsManager() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('common.description', 'Description')}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-                placeholder="Brief description of this material"
+                placeholder={t('documents.descriptionPlaceholder')}
                 rows={2}
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>{t('admin.supportMaterials.category')}</Label>
                 <Select 
                   value={formData.category || 'none'} 
                   onValueChange={(v) => setFormData(f => ({ ...f, category: v === 'none' ? '' : v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('documents.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                     {CATEGORIES.map(cat => (
                       <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
@@ -316,7 +318,7 @@ export function AdminSupportMaterialsManager() {
               </div>
               
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>{t('admin.supportMaterials.status')}</Label>
                 <Select 
                   value={formData.status} 
                   onValueChange={(v) => setFormData(f => ({ ...f, status: v }))}
@@ -328,10 +330,10 @@ export function AdminSupportMaterialsManager() {
                     <SelectItem value="approved">
                       <span className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                        Approved (visible)
+                        {t('admin.supportMaterials.approvedVisible')}
                       </span>
                     </SelectItem>
-                    <SelectItem value="draft">Draft (hidden)</SelectItem>
+                    <SelectItem value="draft">{t('admin.supportMaterials.draftHidden')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -339,16 +341,16 @@ export function AdminSupportMaterialsManager() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Startup Type</Label>
+                <Label>{t('admin.supportMaterials.startupType')}</Label>
                 <Select 
                   value={formData.startup_type || 'any'} 
                   onValueChange={(v) => setFormData(f => ({ ...f, startup_type: v === 'any' ? '' : v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Any type" />
+                    <SelectValue placeholder={t('admin.supportMaterials.anyType')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="any">Any type</SelectItem>
+                    <SelectItem value="any">{t('admin.supportMaterials.anyType')}</SelectItem>
                     {STARTUP_TYPES.map(type => (
                       <SelectItem key={type} value={type}>{type.toUpperCase()}</SelectItem>
                     ))}
@@ -357,16 +359,16 @@ export function AdminSupportMaterialsManager() {
               </div>
               
               <div className="space-y-2">
-                <Label>Startup Stage</Label>
+                <Label>{t('admin.supportMaterials.startupStage')}</Label>
                 <Select 
                   value={formData.startup_stage || 'any'} 
                   onValueChange={(v) => setFormData(f => ({ ...f, startup_stage: v === 'any' ? '' : v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Any stage" />
+                    <SelectValue placeholder={t('admin.supportMaterials.anyStage')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="any">Any stage</SelectItem>
+                    <SelectItem value="any">{t('admin.supportMaterials.anyStage')}</SelectItem>
                     {STARTUP_STAGES.map(stage => (
                       <SelectItem key={stage} value={stage}>{stage.replace('_', ' ')}</SelectItem>
                     ))}
@@ -376,22 +378,22 @@ export function AdminSupportMaterialsManager() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Label htmlFor="tags">{t('admin.supportMaterials.tags')}</Label>
               <Input
                 id="tags"
                 value={formData.tags}
                 onChange={e => setFormData(f => ({ ...f, tags: e.target.value }))}
-                placeholder="e.g., discovery, interviews, validation"
+                placeholder={t('admin.supportMaterials.tagsPlaceholder')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="content">Content (Markdown)</Label>
+              <Label htmlFor="content">{t('admin.supportMaterials.content')}</Label>
               <Textarea
                 id="content"
                 value={formData.content_markdown}
                 onChange={e => setFormData(f => ({ ...f, content_markdown: e.target.value }))}
-                placeholder="## Section Title&#10;&#10;Content goes here..."
+                placeholder={t('admin.supportMaterials.contentPlaceholder')}
                 className="font-mono text-sm"
                 rows={12}
               />
@@ -403,13 +405,13 @@ export function AdminSupportMaterialsManager() {
               setIsCreating(false);
               setEditingMaterial(null);
             }}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleSave} 
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              {editingMaterial ? 'Update' : 'Create'}
+              {editingMaterial ? t('common.save') : t('common.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -419,18 +421,18 @@ export function AdminSupportMaterialsManager() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Material</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.supportMaterials.deleteMaterial')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+              {t('admin.supportMaterials.deleteConfirm', { title: deleteTarget?.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)} 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

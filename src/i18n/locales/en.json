@@ -86,7 +86,12 @@
     "needsUpdate": "Needs update",
     "last": "Last",
     "creating": "Creating...",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "title": "Title",
+    "description": "Description",
+    "none": "None",
+    "tryAgain": "Try Again",
+    "generating": "Generating..."
   },
   "nav": {
     "myWorkspaces": "My Workspaces",
@@ -939,7 +944,42 @@
       "removeAssignment": "Remove Assignment",
       "removeAssignmentConfirm": "Remove this user from the workspace?",
       "alreadyAssignedAll": "Already assigned to all workspaces"
-    }
+    },
+    "supportMaterials": {
+      "title": "Support Materials",
+      "description": "Guides and checklists for consultants",
+      "newMaterial": "New Material",
+      "noMaterials": "No support materials yet. Click \"New Material\" to add one.",
+      "approved": "approved",
+      "drafts": "drafts",
+      "draft": "Draft",
+      "allTypes": "All types",
+      "allStages": "All stages",
+      "anyType": "Any type",
+      "anyStage": "Any stage",
+      "category": "Category",
+      "startupType": "Startup Type",
+      "startupStage": "Startup Stage",
+      "status": "Status",
+      "approvedVisible": "Approved (visible)",
+      "draftHidden": "Draft (hidden)",
+      "showToConsultants": "Show to consultants",
+      "hideFromConsultants": "Hide from consultants",
+      "tags": "Tags (comma-separated)",
+      "tagsPlaceholder": "e.g., discovery, interviews, validation",
+      "content": "Content (Markdown)",
+      "contentPlaceholder": "## Section Title\n\nContent goes here...",
+      "titleRequired": "Title is required",
+      "materialCreated": "Material created",
+      "materialUpdated": "Material updated",
+      "materialDeleted": "Material deleted",
+      "failedToCreate": "Failed to create material",
+      "failedToUpdate": "Failed to update material",
+      "failedToDelete": "Failed to delete material",
+      "deleteMaterial": "Delete Material",
+      "deleteConfirm": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "integrations": "Integrations"
   },
   "settingsPage": {
     "title": "Account Settings",

@@ -88,7 +88,11 @@
     "creating": "A criar...",
     "generating": "A gerar...",
     "copy": "Copiar",
-    "submitting": "A submeter..."
+    "submitting": "A submeter...",
+    "title": "Título",
+    "description": "Descrição",
+    "none": "Nenhum",
+    "tryAgain": "Tentar Novamente"
   },
   "nav": {
     "myWorkspaces": "Os Meus Workspaces",
@@ -941,7 +945,42 @@
       "removeAssignment": "Remover Atribuição",
       "removeAssignmentConfirm": "Remover este utilizador do workspace?",
       "alreadyAssignedAll": "Já atribuído a todos os workspaces"
-    }
+    },
+    "supportMaterials": {
+      "title": "Materiais de Apoio",
+      "description": "Guias e checklists para consultores",
+      "newMaterial": "Novo Material",
+      "noMaterials": "Sem materiais de apoio ainda. Clique em \"Novo Material\" para adicionar.",
+      "approved": "aprovados",
+      "drafts": "rascunhos",
+      "draft": "Rascunho",
+      "allTypes": "Todos os tipos",
+      "allStages": "Todas as fases",
+      "anyType": "Qualquer tipo",
+      "anyStage": "Qualquer fase",
+      "category": "Categoria",
+      "startupType": "Tipo de Startup",
+      "startupStage": "Fase da Startup",
+      "status": "Estado",
+      "approvedVisible": "Aprovado (visível)",
+      "draftHidden": "Rascunho (oculto)",
+      "showToConsultants": "Mostrar aos consultores",
+      "hideFromConsultants": "Ocultar dos consultores",
+      "tags": "Tags (separadas por vírgula)",
+      "tagsPlaceholder": "ex: discovery, entrevistas, validação",
+      "content": "Conteúdo (Markdown)",
+      "contentPlaceholder": "## Título da Secção\n\nConteúdo aqui...",
+      "titleRequired": "Título é obrigatório",
+      "materialCreated": "Material criado",
+      "materialUpdated": "Material atualizado",
+      "materialDeleted": "Material eliminado",
+      "failedToCreate": "Falha ao criar material",
+      "failedToUpdate": "Falha ao atualizar material",
+      "failedToDelete": "Falha ao eliminar material",
+      "deleteMaterial": "Eliminar Material",
+      "deleteConfirm": "Tem a certeza que quer eliminar \"{{title}}\"? Esta ação não pode ser desfeita."
+    },
+    "integrations": "Integrações"
   },
   "settingsPage": {
     "title": "Definições da Conta",
