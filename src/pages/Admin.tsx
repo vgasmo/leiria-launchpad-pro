@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -17,6 +17,7 @@ import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
 import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
+import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -60,6 +61,10 @@ export default function Admin() {
           <TabsTrigger value="templates" className="gap-2">
             <FileText className="h-4 w-4" aria-hidden="true" />
             {t('admin.templates')}
+          </TabsTrigger>
+          <TabsTrigger value="support-materials" className="gap-2">
+            <BookOpen className="h-4 w-4" aria-hidden="true" />
+            {t('admin.supportMaterials', 'Support Materials')}
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-2">
             <Activity className="h-4 w-4" aria-hidden="true" />
@@ -113,6 +118,10 @@ export default function Admin() {
 
         <TabsContent value="templates">
           <AdminTemplatesManager />
+        </TabsContent>
+
+        <TabsContent value="support-materials">
+          <AdminSupportMaterialsManager />
         </TabsContent>
 
         <TabsContent value="activity">
