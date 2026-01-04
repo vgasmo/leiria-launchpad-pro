@@ -18,6 +18,7 @@ import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMen
 import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
+import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -145,6 +146,7 @@ export default function Admin() {
 
         <TabsContent value="integrations">
           <div className="space-y-6">
+            <AdminTeamsTestPanel />
             <IntegrationErrorsPanel maxHeight="400px" />
             <WorkflowIntegrations />
           </div>
