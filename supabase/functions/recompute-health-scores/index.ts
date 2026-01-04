@@ -6,6 +6,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
+/**
+ * Helper to send Teams notification for health alerts (non-blocking)
+ */
+async function sendTeamsHealthAlert(
+  supabaseUrl: string,
+  supabaseKey: string,
+  workspaceId: string,
+  startupName: string,
+  alertType: string,
+  reason: string,
+  prevScore: number,
+  newScore: number
+) {
+  try {
+    const appUrl = Deno.env.get('APP_URL') || 'https://startupleiria.app';
+    const response = await fetch(`${supabaseUrl}/functions/v1/teams-notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseKey}`,
+        'x-cron-secret': Deno.env.get('CRON_SECRET') || '',
+      },
+      body: JSON.stringify({
+        workspace_id: workspaceId,
+        event_type: 'health_alert',
+        payload: {
+          title: alertType === 'drop_to_critical' ? '🚨 Critical Health Alert' : '⚠️ Health Alert',
+          summary: reason,
+          startup_name: startupName,
+          fields: [
+            { name: 'Previous Score', value: `${prevScore}` },
+            { name: 'Current Score', value: `${newScore}` },
+            { name: 'Change', value: `${prevScore - newScore} points` },
+          ],
+          link: `${appUrl}/workspace/${workspaceId}?tab=overview`,
+          link_text: 'View Workspace',
+          priority: alertType === 'drop_to_critical' ? 'critical' : 'high',
+        },
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 interface HealthModel {
   program_id: string;
   weights_json: {
@@ -124,8 +170,8 @@ serve(async (req) => {
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 7) + "-01";
     const todayStr = today.toISOString().split("T")[0];
 
-    // Get workspaces based on filters
-    let wsQuery = supabase.from("workspaces").select("id, program_id, status").eq("status", "active");
+    // Get workspaces based on filters (include startup for notifications)
+    let wsQuery = supabase.from("workspaces").select("id, program_id, status, startup:startups(name)").eq("status", "active");
     if (workspaceIdFilter) {
       wsQuery = wsQuery.eq("id", workspaceIdFilter);
     } else if (programIdFilter) {
@@ -475,6 +521,8 @@ serve(async (req) => {
         const isSnoozed = snoozedAlerts && snoozedAlerts.length > 0;
 
         if (!isSnoozed) {
+          const startupName = (workspace as any).startup?.name || 'Unknown Startup';
+          
           // Alert: drop to critical
           if (healthLabel === "critical" && prevLabel !== "critical") {
             await supabase.from("workspace_health_alerts").insert({
@@ -491,6 +539,18 @@ serve(async (req) => {
               },
             });
             alertsCreated++;
+            
+            // Send Teams notification for critical alerts
+            sendTeamsHealthAlert(
+              supabaseUrl,
+              supabaseKey,
+              workspace.id,
+              startupName,
+              'drop_to_critical',
+              `Health dropped to critical (${prevScore} → ${finalScore})`,
+              prevScore,
+              finalScore
+            ).catch(() => {}); // Non-blocking
           }
           // Alert: drop to at_risk
           else if (healthLabel === "at_risk" && prevLabel !== "at_risk" && prevLabel !== "critical") {
@@ -508,6 +568,18 @@ serve(async (req) => {
               },
             });
             alertsCreated++;
+            
+            // Send Teams notification for at_risk alerts
+            sendTeamsHealthAlert(
+              supabaseUrl,
+              supabaseKey,
+              workspace.id,
+              startupName,
+              'drop_to_at_risk',
+              `Health dropped to at risk (${prevScore} → ${finalScore})`,
+              prevScore,
+              finalScore
+            ).catch(() => {}); // Non-blocking
           }
           // Alert: significant points drop
           else if (scoreDelta >= alertConfig.pointsDropThreshold) {

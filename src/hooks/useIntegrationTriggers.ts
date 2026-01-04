@@ -1,6 +1,10 @@
 /**
  * Hook for auto-triggering Microsoft 365 integrations (Outlook Calendar & Teams)
  * These triggers fire "gracefully" - they don't fail if integrations are not configured.
+ * 
+ * Teams notifications now use global fallback logic:
+ * 1. Try workspace-specific settings first
+ * 2. Fallback to global settings if no workspace row exists
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +22,7 @@ interface TeamsNotifyParams {
   payload: {
     title: string;
     summary: string;
+    startup_name?: string;
     fields?: { name: string; value: string }[];
     link?: string;
     linkText?: string;
@@ -28,8 +33,10 @@ interface TeamsNotifyParams {
 export interface IntegrationResult {
   success: boolean;
   reason?: string;
+  sent?: boolean;
   eventId?: string;
   teamsMeetingUrl?: string;
+  settings_source?: 'workspace' | 'program' | 'global_fallback' | 'not_found';
 }
 
 /**
@@ -63,6 +70,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
 
 /**
  * Send Teams notification (fails gracefully if not configured)
+ * Uses global fallback logic in the edge function
  */
 export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<IntegrationResult> {
   try {
@@ -73,6 +81,7 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
         payload: {
           title: params.payload.title,
           summary: params.payload.summary,
+          startup_name: params.payload.startup_name,
           fields: params.payload.fields,
           link: params.payload.link,
           link_text: params.payload.linkText,
@@ -88,7 +97,9 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
 
     return {
       success: data?.success ?? false,
+      sent: data?.sent ?? false,
       reason: data?.reason,
+      settings_source: data?.settings_source,
     };
   } catch (err) {
     console.warn('[IntegrationTrigger] Teams notify failed (non-blocking):', err);

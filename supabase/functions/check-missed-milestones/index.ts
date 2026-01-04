@@ -4,6 +4,36 @@ import { requireCronSecret, generateRequestId, createLogger } from '../_shared/s
 
 const FUNCTION_NAME = 'check-missed-milestones';
 
+/**
+ * Helper to send Teams notification (non-blocking)
+ */
+async function sendTeamsNotification(
+  supabaseUrl: string,
+  supabaseKey: string,
+  workspaceId: string,
+  eventType: string,
+  payload: Record<string, unknown>
+) {
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/teams-notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseKey}`,
+        'x-cron-secret': Deno.env.get('CRON_SECRET') || '',
+      },
+      body: JSON.stringify({
+        workspace_id: workspaceId,
+        event_type: eventType,
+        payload,
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   const requestId = generateRequestId();
   const log = createLogger(FUNCTION_NAME, requestId);
@@ -53,10 +83,13 @@ Deno.serve(async (req) => {
 
     log.info('Found missed milestones', { count: missedMilestones?.length || 0 });
 
-    const createdActions: any[] = [];
-    const createdAlerts: any[] = [];
+    const createdActions: string[] = [];
+    const createdAlerts: string[] = [];
+    const teamsNotifications: string[] = [];
 
     for (const milestone of missedMilestones || []) {
+      const startupName = (milestone.workspace as any)?.startup?.name || 'Unknown Startup';
+
       // Check if we already created an action for this missed milestone
       const { data: existingAction } = await supabase
         .from('action_items')
@@ -89,7 +122,7 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      createdActions.push(actionData);
+      createdActions.push(actionData.id);
 
       // Mark milestone as delayed
       await supabase
@@ -113,7 +146,33 @@ Deno.serve(async (req) => {
         .single();
 
       if (!alertError && alertData) {
-        createdAlerts.push(alertData);
+        createdAlerts.push(alertData.id);
+      }
+
+      // Send Teams notification for action overdue
+      const appUrl = Deno.env.get('APP_URL') || 'https://startupleiria.app';
+      const teamsSent = await sendTeamsNotification(
+        supabaseUrl,
+        supabaseKey,
+        milestone.workspace_id,
+        'action_overdue',
+        {
+          title: 'Milestone Overdue',
+          summary: `Milestone "${milestone.title}" was due on ${milestone.target_date} and has not been completed.`,
+          startup_name: startupName,
+          fields: [
+            { name: 'Milestone', value: milestone.title },
+            { name: 'Due Date', value: milestone.target_date },
+            { name: 'Status', value: 'Marked as Delayed' },
+          ],
+          link: `${appUrl}/workspace/${milestone.workspace_id}?tab=milestones`,
+          link_text: 'View Milestone',
+          priority: 'high',
+        }
+      );
+      
+      if (teamsSent) {
+        teamsNotifications.push(milestone.id);
       }
 
       // Log activity
@@ -132,7 +191,8 @@ Deno.serve(async (req) => {
     log.info('Check complete', { 
       checked: missedMilestones?.length || 0,
       actionsCreated: createdActions.length,
-      alertsCreated: createdAlerts.length 
+      alertsCreated: createdAlerts.length,
+      teamsNotified: teamsNotifications.length,
     });
 
     return corsJsonResponse({ 
@@ -140,6 +200,7 @@ Deno.serve(async (req) => {
       checked: missedMilestones?.length || 0,
       actionsCreated: createdActions.length,
       alertsCreated: createdAlerts.length,
+      teamsNotified: teamsNotifications.length,
     }, req);
 
   } catch (error) {
