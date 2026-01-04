@@ -1154,6 +1154,36 @@ export type Database = {
           },
         ]
       }
+      global_integration_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          integration_type: string
+          is_enabled: boolean
+          settings_json: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          integration_type: string
+          is_enabled?: boolean
+          settings_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          integration_type?: string
+          is_enabled?: boolean
+          settings_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       health_model_templates: {
         Row: {
           created_at: string
@@ -1846,6 +1876,7 @@ export type Database = {
       }
       outlook_calendar_settings: {
         Row: {
+          calendar_user_email: string | null
           created_at: string
           created_by: string | null
           enabled: boolean
@@ -1859,6 +1890,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          calendar_user_email?: string | null
           created_at?: string
           created_by?: string | null
           enabled?: boolean
@@ -1872,6 +1904,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          calendar_user_email?: string | null
           created_at?: string
           created_by?: string | null
           enabled?: boolean

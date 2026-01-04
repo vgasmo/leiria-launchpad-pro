@@ -16,6 +16,7 @@ import {
   Info
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { WorkspaceCalendarCard } from '@/components/settings/WorkspaceCalendarCard';
 
 interface IntegrationSettingsProps {
   workspaceId: string;
@@ -50,7 +51,11 @@ export function IntegrationSettings({ workspaceId, emailAlias, canEdit }: Integr
   };
 
   return (
-    <Card>
+    <div className="space-y-6">
+      {/* Calendar Sync - Simple email-only config */}
+      <WorkspaceCalendarCard workspaceId={workspaceId} canEdit={canEdit} />
+
+      <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
@@ -168,6 +173,7 @@ export function IntegrationSettings({ workspaceId, emailAlias, canEdit }: Integr
           </Collapsible>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }

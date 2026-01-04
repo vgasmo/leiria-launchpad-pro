@@ -1,0 +1,249 @@
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
+import { 
+  CheckCircle2, 
+  ExternalLink, 
+  ChevronDown, 
+  Shield,
+  Info,
+  Video,
+  Calendar,
+  Users,
+  Link2,
+  Globe
+} from 'lucide-react';
+import { useGlobalGraphSettings, useUpdateGlobalGraphSettings, useToggleGlobalGraph, GraphApiGlobalSettings } from '@/hooks/useGlobalIntegrations';
+
+export function GlobalGraphApiCard() {
+  const { data: settings, isLoading } = useGlobalGraphSettings();
+  const updateSettings = useUpdateGlobalGraphSettings();
+  const toggleEnabled = useToggleGlobalGraph();
+  
+  const [tenantId, setTenantId] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [showSetup, setShowSetup] = useState(false);
+
+  const settingsJson = settings?.settings_json as GraphApiGlobalSettings | undefined;
+  const isConfigured = !!(settingsJson?.tenant_id && settingsJson?.client_id);
+  const isEnabled = settings?.is_enabled && isConfigured;
+
+  const handleSaveCredentials = async () => {
+    if (!tenantId || !clientId || !clientSecret) {
+      toast.error('All Azure AD credentials are required');
+      return;
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(tenantId)) {
+      toast.error('Invalid Tenant ID format (should be a GUID)');
+      return;
+    }
+    if (!uuidRegex.test(clientId)) {
+      toast.error('Invalid Client ID format (should be a GUID)');
+      return;
+    }
+
+    await updateSettings.mutateAsync({
+      tenant_id: tenantId,
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    setClientSecret('');
+  };
+
+  const handleToggle = async (enabled: boolean) => {
+    if (enabled && !isConfigured) {
+      toast.error('Please configure Azure AD credentials first');
+      return;
+    }
+    await toggleEnabled.mutateAsync(enabled);
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
+        <CardContent><Skeleton className="h-32 w-full" /></CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-2 border-primary/20">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5 text-primary" />
+          Global Microsoft Graph API
+          {isEnabled && (
+            <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Active
+            </Badge>
+          )}
+          {isConfigured && !isEnabled && (
+            <Badge variant="outline">Configured</Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Configure Azure AD credentials once. Workspaces only need to specify their calendar email.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Alert className="bg-primary/5 border-primary/20">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Admin Setup:</strong> Configure these credentials once. Then each workspace only needs to enter the email address of the calendar user.
+          </AlertDescription>
+        </Alert>
+
+        {/* Features */}
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Calendar className="h-4 w-4 text-[#0078D4]" />
+            <span>Outlook events</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Video className="h-4 w-4 text-[#6264A7]" />
+            <span>Teams meetings</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Users className="h-4 w-4" />
+            <span>Invite attendees</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Link2 className="h-4 w-4" />
+            <span>Auto join URL</span>
+          </div>
+        </div>
+
+        {/* Azure AD Credentials */}
+        <div className="space-y-3 pt-3 border-t">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-amber-500" />
+            <Label className="font-medium">Azure AD App Registration</Label>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="global-tenant-id" className="text-xs">Tenant ID (Directory ID)</Label>
+            <Input
+              id="global-tenant-id"
+              type="text"
+              placeholder={settingsJson?.tenant_id || 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'}
+              value={tenantId}
+              onChange={(e) => setTenantId(e.target.value)}
+              className="font-mono text-xs"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="global-client-id" className="text-xs">Application (Client) ID</Label>
+            <Input
+              id="global-client-id"
+              type="text"
+              placeholder={settingsJson?.client_id || 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'}
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              className="font-mono text-xs"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="global-client-secret" className="text-xs">Client Secret</Label>
+            <Input
+              id="global-client-secret"
+              type="password"
+              placeholder={isConfigured ? '••••••••••••••••' : 'Enter client secret'}
+              value={clientSecret}
+              onChange={(e) => setClientSecret(e.target.value)}
+              className="font-mono text-xs"
+            />
+          </div>
+
+          <Button 
+            onClick={handleSaveCredentials}
+            disabled={(!tenantId || !clientId || !clientSecret) || updateSettings.isPending}
+            size="sm"
+            className="w-full"
+          >
+            {updateSettings.isPending ? 'Saving...' : isConfigured ? 'Update Credentials' : 'Save Credentials'}
+          </Button>
+        </div>
+
+        {/* Setup Instructions */}
+        <Collapsible open={showSetup} onOpenChange={setShowSetup}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
+              <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
+              How to set up Azure AD App
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
+              <h4 className="font-medium">Create Azure AD App Registration:</h4>
+              <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
+                <li>Go to <a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Azure Portal → App Registrations <ExternalLink className="h-3 w-3 inline" /></a></li>
+                <li>Click "New registration"</li>
+                <li>Name: "Startup Leiria Calendar Sync"</li>
+                <li>Supported account types: "Single tenant"</li>
+                <li>Click "Register"</li>
+              </ol>
+              
+              <h4 className="font-medium pt-2">Configure API Permissions:</h4>
+              <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
+                <li>Go to "API Permissions" → "Add a permission"</li>
+                <li>Select "Microsoft Graph" → "Application permissions"</li>
+                <li>Add:
+                  <ul className="list-disc list-inside ml-4 mt-1">
+                    <li><code className="bg-muted px-1 rounded">Calendars.ReadWrite</code></li>
+                    <li><code className="bg-muted px-1 rounded">OnlineMeetings.ReadWrite.All</code></li>
+                    <li><code className="bg-muted px-1 rounded">User.Read.All</code></li>
+                  </ul>
+                </li>
+                <li>Click "Grant admin consent"</li>
+              </ol>
+
+              <h4 className="font-medium pt-2">Create Client Secret:</h4>
+              <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
+                <li>Go to "Certificates & secrets"</li>
+                <li>Click "New client secret"</li>
+                <li>Copy the secret value immediately</li>
+              </ol>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Enable Toggle */}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="space-y-0.5">
+            <Label>Enable Graph API globally</Label>
+            <p className="text-sm text-muted-foreground">
+              All workspaces can use this for calendar sync
+            </p>
+          </div>
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={handleToggle}
+            disabled={toggleEnabled.isPending || !isConfigured}
+          />
+        </div>
+
+        {isEnabled && (
+          <div className="text-xs text-muted-foreground bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+            <p className="font-medium text-green-700 dark:text-green-400">🎉 Global integration active!</p>
+            <p>Workspaces can now enable calendar sync by entering their calendar email in Settings → Integrations.</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
