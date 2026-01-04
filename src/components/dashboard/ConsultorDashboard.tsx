@@ -31,6 +31,7 @@ import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { ConsultantWorkloadWidget } from '@/components/staff/ConsultantWorkloadWidget';
 import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
+import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import {
@@ -286,6 +287,8 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           <CockpitQuickActions workspaces={workspaces} />
           <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
           <StaffTasksPanel compact />
+          {/* P1.2: Integration Errors for observability */}
+          <IntegrationErrorsPanel compact />
         </div>
       </div>
 

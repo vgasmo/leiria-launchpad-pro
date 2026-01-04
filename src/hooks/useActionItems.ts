@@ -2,8 +2,28 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
+import { Json } from '@/integrations/supabase/types';
 
 type ActionStatus = Database['public']['Enums']['action_status'];
+
+// P1.2: Helper to log activity
+async function logActivity(action: string, entityType: string, entityId: string, workspaceId: string, metadata?: Record<string, unknown>) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      workspace_id: workspaceId,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      metadata: (metadata || {}) as Json,
+    });
+  } catch (e) {
+    console.error('Failed to log activity:', e);
+  }
+}
 
 export interface ActionItem {
   id: string;
@@ -104,6 +124,9 @@ export function useUpdateActionItem(workspaceId: string) {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+
+      // P1.2: Log activity
+      logActivity('updated', 'action_item', result.data.id, workspaceId, { title: result.title });
 
       // P0.1: Trigger Teams notification when action is assigned to someone
       if (result.ownerAssigned) {

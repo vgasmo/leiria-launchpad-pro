@@ -1,6 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { syncOutlookCalendar, sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
+import { Json } from '@/integrations/supabase/types';
+
+// P1.2: Helper to log activity
+async function logActivity(action: string, entityType: string, entityId: string, workspaceId: string, metadata?: Record<string, unknown>) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      workspace_id: workspaceId,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      metadata: (metadata || {}) as Json,
+    });
+  } catch (e) {
+    console.error('Failed to log activity:', e);
+  }
+}
+
 export interface Session {
   id: string;
   workspace_id: string;
@@ -127,6 +148,9 @@ export function useCreateSession(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
 
+      // P1.2: Log activity
+      logActivity('created', 'session', data.id, workspaceId, { title: data.title });
+
       // P0.1: Auto-trigger Outlook sync (graceful fail)
       syncOutlookCalendar({
         sessionId: data.id,
@@ -180,6 +204,9 @@ export function useUpdateSession(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ['calendar-sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-sessions', workspaceId] });
 
+      // P1.2: Log activity
+      logActivity('updated', 'session', result.session.id, workspaceId, { title: result.session.title });
+
       // P0.1: Auto-trigger Outlook sync if date/time/duration changed
       if (result.needsSync) {
         syncOutlookCalendar({
@@ -216,6 +243,9 @@ export function useDeleteSession(workspaceId: string) {
         action: 'delete',
         workspaceId,
       }).catch(() => {}); // Silent fail - non-blocking
+
+      // P1.2: Log activity before delete
+      await logActivity('deleted', 'session', sessionId, workspaceId);
 
       const { error } = await supabase
         .from('sessions')

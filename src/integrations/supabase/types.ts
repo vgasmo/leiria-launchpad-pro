@@ -4657,6 +4657,10 @@ export type Database = {
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }
       is_admin_only: { Args: never; Returns: boolean }
+      is_connected_mentor: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean

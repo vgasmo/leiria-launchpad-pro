@@ -43,6 +43,7 @@ import { EnhancedNextSteps } from '@/components/workspace/EnhancedNextSteps';
 import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
+import { OwnershipCard } from '@/components/workspace/OwnershipCard';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
@@ -434,6 +435,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
         {/* Health Score Card (new) */}
         <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={canWrite} />
+        
+        {/* P1.1: Ownership & SLA Card - visible to staff */}
+        {(isConsultor || isAdmin) && (
+          <OwnershipCard workspaceId={workspace.id} />
+        )}
         
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
