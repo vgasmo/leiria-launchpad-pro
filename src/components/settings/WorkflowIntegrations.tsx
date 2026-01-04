@@ -11,10 +11,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Zap, Bell, Slack, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Zap, Bell, Slack, ExternalLink, CheckCircle2, Database } from 'lucide-react';
 import { TeamsIntegrationCard } from './TeamsIntegrationCard';
 import { OutlookCalendarCard } from './OutlookCalendarCard';
+import { GraphApiCalendarCard } from './GraphApiCalendarCard';
 import { CalendarFeedCard } from './CalendarFeedCard';
+import { HubSpotIntegrationCard } from './HubSpotIntegrationCard';
 
 export function WorkflowIntegrations() {
   const { t } = useTranslation();
@@ -121,10 +123,11 @@ export function WorkflowIntegrations() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="microsoft" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="microsoft">Microsoft 365</TabsTrigger>
           <TabsTrigger value="slack">Slack</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="crm">CRM</TabsTrigger>
         </TabsList>
 
         {/* Microsoft 365 Tab */}
@@ -258,6 +261,11 @@ export function WorkflowIntegrations() {
         {/* Calendar Tab */}
         <TabsContent value="calendar" className="space-y-4 mt-4">
           <CalendarFeedCard />
+        </TabsContent>
+
+        {/* CRM Tab */}
+        <TabsContent value="crm" className="space-y-4 mt-4">
+          <HubSpotIntegrationCard />
         </TabsContent>
       </Tabs>
     </div>

@@ -10,6 +10,7 @@ export interface OutlookCalendarSettings {
   webhook_url: string | null;
   graph_tenant_id: string | null;
   graph_client_id: string | null;
+  graph_secret_key: string | null;
   created_at: string;
   updated_at: string;
 }
