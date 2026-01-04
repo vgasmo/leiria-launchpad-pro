@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2 } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -15,6 +15,8 @@ import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
+import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
+import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -71,6 +73,10 @@ export default function Admin() {
             <Heart className="h-4 w-4" aria-hidden="true" />
             {t('admin.healthModels')}
           </TabsTrigger>
+          <TabsTrigger value="integrations" className="gap-2">
+            <Plug className="h-4 w-4" aria-hidden="true" />
+            {t('admin.integrations', 'Integrações')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
@@ -126,6 +132,13 @@ export default function Admin() {
 
         <TabsContent value="health">
           <HealthModelViewer />
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          <div className="space-y-6">
+            <IntegrationErrorsPanel maxHeight="400px" />
+            <WorkflowIntegrations />
+          </div>
         </TabsContent>
       </Tabs>
     </AppLayout>
