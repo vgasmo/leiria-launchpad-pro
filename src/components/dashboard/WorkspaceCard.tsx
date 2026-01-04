@@ -51,7 +51,7 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
               {workspace.program?.name}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-1" data-tour="health-badge">
             <HealthBadge score={effectiveHealth as HealthScore | null} size="sm" />
             {workspace.priority_level && workspace.priority_level !== 'standard' && (
               <PriorityBadge priority={workspace.priority_level} size="sm" showLabel={false} />

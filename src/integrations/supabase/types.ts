@@ -310,6 +310,13 @@ export type Database = {
             referencedRelation: "startups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cap_table_entries_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       checkin_definitions: {
@@ -1152,6 +1159,13 @@ export type Database = {
             referencedRelation: "startups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "funding_rounds_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       global_integration_settings: {
@@ -1393,6 +1407,13 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investors_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -3014,6 +3035,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_tasks_related_startup_id_fkey"
+            columns: ["related_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "staff_tasks_source_rule_id_fkey"
             columns: ["source_rule_id"]
             isOneToOne: false
@@ -3516,6 +3544,13 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -4574,10 +4609,59 @@ export type Database = {
             referencedRelation: "startups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "workspaces_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
+      profiles_safe: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          calendar_feed_token: string | null
+          created_at: string | null
+          email: string | null
+          expertise: string[] | null
+          full_name: string | null
+          id: string | null
+          linkedin_url: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          calendar_feed_token?: string | null
+          created_at?: string | null
+          email?: never
+          expertise?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          linkedin_url?: string | null
+          phone?: never
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          calendar_feed_token?: string | null
+          created_at?: string | null
+          email?: never
+          expertise?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          linkedin_url?: string | null
+          phone?: never
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -4605,6 +4689,45 @@ export type Database = {
           full_name?: string | null
           id?: string | null
           role_display?: never
+        }
+        Relationships: []
+      }
+      startups_safe: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          description: string | null
+          founded_date: string | null
+          id: string | null
+          logo_url: string | null
+          name: string | null
+          phone: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: never
+          created_at?: string | null
+          description?: string | null
+          founded_date?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: never
+          created_at?: string | null
+          description?: string | null
+          founded_date?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
