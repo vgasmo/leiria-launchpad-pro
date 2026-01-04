@@ -161,13 +161,24 @@ export function useCreateSession(workspaceId: string) {
       // P0.1: Auto-trigger Teams notification (graceful fail)
       (async () => {
         let startupName: string | undefined;
+        let ownerName: string | undefined;
         try {
           const { data: ws } = await supabase
             .from('workspaces')
-            .select('startup:startups(name)')
+            .select('startup:startups(name), owner_user_id')
             .eq('id', workspaceId)
             .maybeSingle();
           startupName = (ws as any)?.startup?.name || undefined;
+          
+          // Fetch owner/consultant name if available
+          if ((ws as any)?.owner_user_id) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', (ws as any).owner_user_id)
+              .maybeSingle();
+            ownerName = profile?.full_name || profile?.email || undefined;
+          }
         } catch {
           // ignore
         }
@@ -180,6 +191,7 @@ export function useCreateSession(workspaceId: string) {
             summary: `Session "${data.title}" has been scheduled`,
             startup_name: startupName,
             fields: [
+              ...(ownerName ? [{ name: 'Owner', value: ownerName }] : []),
               { name: 'Date', value: new Date(data.scheduled_at).toLocaleDateString() },
               { name: 'Duration', value: `${data.duration || 60} min` },
             ],
@@ -233,13 +245,23 @@ export function useUpdateSession(workspaceId: string) {
         // Send reschedule notification
         (async () => {
           let startupName: string | undefined;
+          let ownerName: string | undefined;
           try {
             const { data: ws } = await supabase
               .from('workspaces')
-              .select('startup:startups(name)')
+              .select('startup:startups(name), owner_user_id')
               .eq('id', workspaceId)
               .maybeSingle();
             startupName = (ws as any)?.startup?.name || undefined;
+            
+            if ((ws as any)?.owner_user_id) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, email')
+                .eq('id', (ws as any).owner_user_id)
+                .maybeSingle();
+              ownerName = profile?.full_name || profile?.email || undefined;
+            }
           } catch {
             // ignore
           }
@@ -251,6 +273,10 @@ export function useUpdateSession(workspaceId: string) {
               title: 'Session Updated',
               summary: `Session "${result.session.title}" has been updated`,
               startup_name: startupName,
+              fields: [
+                ...(ownerName ? [{ name: 'Owner', value: ownerName }] : []),
+                { name: 'New Date', value: new Date(result.session.scheduled_at).toLocaleDateString() },
+              ],
               link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
               linkText: 'View Session',
             },
