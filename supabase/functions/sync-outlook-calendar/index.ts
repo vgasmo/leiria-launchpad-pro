@@ -400,38 +400,70 @@ Deno.serve(async (req: Request) => {
 
     // ========== GRAPH API MODE ==========
     } else if (outlookSettings.sync_mode === 'graph') {
-      // Validate Graph credentials
-      const { graph_tenant_id, graph_client_id, graph_secret_key } = outlookSettings;
+      // Try workspace credentials first, then fall back to global
+      let tenantId = outlookSettings.graph_tenant_id;
+      let clientId = outlookSettings.graph_client_id;
+      let clientSecret = outlookSettings.graph_secret_key;
+      let calendarEmail = outlookSettings.calendar_user_email;
       
-      if (!graph_tenant_id || !graph_client_id || !graph_secret_key) {
+      // If workspace doesn't have its own credentials, try global settings
+      if (!tenantId || !clientId || !clientSecret) {
+        log.info('Workspace has no Graph credentials, checking global settings');
+        
+        const { data: globalSettings } = await supabaseAdmin
+          .from('global_integration_settings')
+          .select('settings_json, is_enabled')
+          .eq('integration_type', 'graph_api')
+          .eq('is_enabled', true)
+          .maybeSingle();
+        
+        if (globalSettings?.settings_json) {
+          const globalJson = globalSettings.settings_json as {
+            tenant_id?: string;
+            client_id?: string;
+            client_secret?: string;
+          };
+          tenantId = globalJson.tenant_id || null;
+          clientId = globalJson.client_id || null;
+          clientSecret = globalJson.client_secret || null;
+          log.info('Using global Graph API credentials');
+        }
+      }
+      
+      if (!tenantId || !clientId || !clientSecret) {
         return corsJsonResponse({ 
           success: false, 
           reason: 'graph_not_configured',
-          message: 'Microsoft Graph API credentials not configured'
+          message: 'Microsoft Graph API credentials not configured (neither workspace nor global)'
         }, req);
       }
 
-      // Get user email for calendar operations
-      const { data: userProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('email')
-        .eq('id', user.id)
-        .single();
+      // Use workspace's calendar_user_email, or fall back to user's email
+      if (!calendarEmail) {
+        const { data: userProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('email')
+          .eq('id', user.id)
+          .single();
+        calendarEmail = userProfile?.email || null;
+      }
 
-      if (!userProfile?.email) {
+      if (!calendarEmail) {
         return corsJsonResponse({ 
           success: false, 
-          reason: 'no_user_email',
-          message: 'User email not found'
+          reason: 'no_calendar_email',
+          message: 'No calendar email configured for this workspace'
         }, req);
       }
+
+      log.info('Using calendar email', { calendarEmail });
 
       try {
         // Get Graph API access token
         const accessToken = await getGraphAccessToken(
-          graph_tenant_id,
-          graph_client_id,
-          graph_secret_key,
+          tenantId,
+          clientId,
+          clientSecret,
           log
         );
 
@@ -466,16 +498,16 @@ Deno.serve(async (req: Request) => {
         let createdEvent: GraphCalendarEvent | null = null;
 
         if (action === 'create') {
-          createdEvent = await createCalendarEvent(accessToken, userProfile.email, eventData, log);
+          createdEvent = await createCalendarEvent(accessToken, calendarEmail, eventData, log);
           eventId = createdEvent.id || null;
           teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
           
         } else if (action === 'update' && eventId) {
-          createdEvent = await updateCalendarEvent(accessToken, userProfile.email, eventId, eventData, log);
+          createdEvent = await updateCalendarEvent(accessToken, calendarEmail, eventId, eventData, log);
           teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
           
         } else if (action === 'delete' && eventId) {
-          await deleteCalendarEvent(accessToken, userProfile.email, eventId, log);
+          await deleteCalendarEvent(accessToken, calendarEmail, eventId, log);
           eventId = null;
         }
 

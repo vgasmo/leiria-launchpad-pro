@@ -13,8 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Zap, Bell, Slack, ExternalLink, CheckCircle2, Database } from 'lucide-react';
 import { TeamsIntegrationCard } from './TeamsIntegrationCard';
-import { OutlookCalendarCard } from './OutlookCalendarCard';
-import { GraphApiCalendarCard } from './GraphApiCalendarCard';
+import { GlobalGraphApiCard } from './GlobalGraphApiCard';
 import { CalendarFeedCard } from './CalendarFeedCard';
 import { HubSpotIntegrationCard } from './HubSpotIntegrationCard';
 
@@ -132,9 +131,8 @@ export function WorkflowIntegrations() {
 
         {/* Microsoft 365 Tab */}
         <TabsContent value="microsoft" className="space-y-4 mt-4">
+          <GlobalGraphApiCard />
           <TeamsIntegrationCard canEdit={true} />
-          <OutlookCalendarCard />
-          <GraphApiCalendarCard />
         </TabsContent>
 
         {/* Slack Tab */}
