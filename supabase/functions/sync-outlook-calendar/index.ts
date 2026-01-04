@@ -310,10 +310,19 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!outlookSettings) {
-      return corsJsonResponse({ 
-        success: false, 
+      // Mark session so UI shows why it didn't sync
+      await supabaseAdmin
+        .from('sessions')
+        .update({
+          outlook_sync_status: 'not_configured',
+          outlook_sync_error: 'Outlook calendar sync not enabled for this workspace',
+        })
+        .eq('id', session_id);
+
+      return corsJsonResponse({
+        success: false,
         reason: 'not_configured',
-        message: 'Outlook calendar sync not enabled for this workspace'
+        message: 'Outlook calendar sync not enabled for this workspace',
       }, req);
     }
 

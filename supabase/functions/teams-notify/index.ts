@@ -306,19 +306,30 @@ Deno.serve(async (req: Request) => {
 
     let bodyToSend: unknown;
     if (isPowerAutomate) {
-      // Power Automate flows - match their expected schema exactly
-      // Use empty strings for missing values (never null)
+      // Power Automate / Logic Apps webhooks: keep payload flat + stable.
+      // IMPORTANT: Some flows cache the schema; provide both legacy PT keys and simple lower-case aliases.
+      // Never send null values.
       const owner =
         payload.fields?.find((f) => ['owner', 'consultor', 'mentor', 'founder', 'assignee'].includes(f.name.toLowerCase()))
           ?.value || '';
 
+      const severity = payload.priority || 'medium';
+      const startup = startupName || '';
+
       bodyToSend = {
         title: `${icon} ${payload.title}`,
-        Startup: startupName,
-        Owner: owner,
-        Severidade: payload.priority || 'medium',
         message: payload.summary || '',
         link: payload.link || '',
+
+        // Legacy PT fields (used in existing flows)
+        Startup: startup,
+        Owner: owner,
+        Severidade: severity,
+
+        // Aliases (helpful when schema is strict / rebuilt)
+        startup,
+        owner,
+        severity,
       };
     } else {
       // Adaptive Card format for Teams incoming webhooks
