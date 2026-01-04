@@ -1886,6 +1886,7 @@ export type Database = {
           id: string
           sync_mode: string
           updated_at: string
+          use_custom_calendar_email: boolean
           webhook_url: string | null
           workspace_id: string
         }
@@ -1900,6 +1901,7 @@ export type Database = {
           id?: string
           sync_mode?: string
           updated_at?: string
+          use_custom_calendar_email?: boolean
           webhook_url?: string | null
           workspace_id: string
         }
@@ -1914,6 +1916,7 @@ export type Database = {
           id?: string
           sync_mode?: string
           updated_at?: string
+          use_custom_calendar_email?: boolean
           webhook_url?: string | null
           workspace_id?: string
         }
@@ -2812,6 +2815,7 @@ export type Database = {
           location: string | null
           notes: string | null
           outlook_event_id: string | null
+          outlook_owner_email: string | null
           outlook_sync_error: string | null
           outlook_sync_status: string | null
           outlook_synced_at: string | null
@@ -2842,6 +2846,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           outlook_event_id?: string | null
+          outlook_owner_email?: string | null
           outlook_sync_error?: string | null
           outlook_sync_status?: string | null
           outlook_synced_at?: string | null
@@ -2872,6 +2877,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           outlook_event_id?: string | null
+          outlook_owner_email?: string | null
           outlook_sync_error?: string | null
           outlook_sync_status?: string | null
           outlook_synced_at?: string | null
