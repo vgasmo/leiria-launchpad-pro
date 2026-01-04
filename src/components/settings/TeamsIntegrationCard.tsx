@@ -79,9 +79,15 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       toast.error('Please enter a webhook URL');
       return;
     }
-    // Basic validation for Teams webhook URL patterns
-    if (!webhookUrl.includes('webhook.office.com') && !webhookUrl.includes('logic.azure.com')) {
-      toast.error('Please enter a valid Microsoft Teams webhook URL');
+    // Basic validation for Teams webhook URL patterns (Office 365, Power Automate, Azure Logic Apps)
+    const validPatterns = [
+      'webhook.office.com',
+      'logic.azure.com',
+      'powerplatform.com',
+      'flow.microsoft.com'
+    ];
+    if (!validPatterns.some(pattern => webhookUrl.includes(pattern))) {
+      toast.error('Please enter a valid Microsoft Teams or Power Automate webhook URL');
       return;
     }
     try {
