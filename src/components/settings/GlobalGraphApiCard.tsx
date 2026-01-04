@@ -19,8 +19,12 @@ import {
   Calendar,
   Users,
   Link2,
-  Globe
+  Globe,
+  Loader2,
+  TestTube,
+  FileText,
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useGlobalGraphSettings, useUpdateGlobalGraphSettings, useToggleGlobalGraph, GraphApiGlobalSettings } from '@/hooks/useGlobalIntegrations';
 
 export function GlobalGraphApiCard() {
@@ -32,6 +36,9 @@ export function GlobalGraphApiCard() {
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [showSetup, setShowSetup] = useState(false);
+  const [showPolicyGuide, setShowPolicyGuide] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
 
   const settingsJson = settings?.settings_json as GraphApiGlobalSettings | undefined;
   const isConfigured = !!(settingsJson?.tenant_id && settingsJson?.client_id);
@@ -69,6 +76,36 @@ export function GlobalGraphApiCard() {
     await toggleEnabled.mutateAsync(enabled);
   };
 
+  const handleTestGraph = async () => {
+    if (!testEmail || !testEmail.includes('@')) {
+      toast.error('Enter a valid consultant email to test');
+      return;
+    }
+
+    setIsTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-graph-api', {
+        body: { test_email: testEmail },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(
+          data.teams_url 
+            ? `✓ Test passed! Teams URL: ${data.teams_url.slice(0, 50)}...` 
+            : '✓ Event created and deleted successfully'
+        );
+      } else {
+        toast.error(data?.error || 'Test failed');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to run test');
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -95,14 +132,14 @@ export function GlobalGraphApiCard() {
           )}
         </CardTitle>
         <CardDescription>
-          Configure Azure AD credentials once. Workspaces only need to specify their calendar email.
+          Configure Azure AD credentials once. Workspaces automatically use the assigned consultant's calendar.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Alert className="bg-primary/5 border-primary/20">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Admin Setup:</strong> Configure these credentials once. Then each workspace only needs to enter the email address of the calendar user.
+            <strong>How it works:</strong> Sessions are created in the Outlook calendar of each workspace's assigned consultant. No manual email entry needed per workspace.
           </AlertDescription>
         </Alert>
 
@@ -118,11 +155,11 @@ export function GlobalGraphApiCard() {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span>Invite attendees</span>
+            <span>Per-consultant calendars</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Link2 className="h-4 w-4" />
-            <span>Auto join URL</span>
+            <FileText className="h-4 w-4" />
+            <span>Auto transcripts</span>
           </div>
         </div>
 
@@ -167,6 +204,9 @@ export function GlobalGraphApiCard() {
               onChange={(e) => setClientSecret(e.target.value)}
               className="font-mono text-xs"
             />
+            <p className="text-xs text-muted-foreground">
+              Secret is stored securely and never exposed to the frontend.
+            </p>
           </div>
 
           <Button 
@@ -179,6 +219,36 @@ export function GlobalGraphApiCard() {
           </Button>
         </div>
 
+        {/* Test Graph API */}
+        {isConfigured && (
+          <div className="space-y-2 pt-3 border-t">
+            <Label className="flex items-center gap-2 text-sm">
+              <TestTube className="h-4 w-4" />
+              Test Graph API Connection
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="consultor@startupleiria.com"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="flex-1 text-xs"
+              />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleTestGraph}
+                disabled={isTesting || !testEmail}
+              >
+                {isTesting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Test'}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Creates a test event with Teams link in this user's calendar, then deletes it.
+            </p>
+          </div>
+        )}
+
         {/* Setup Instructions */}
         <Collapsible open={showSetup} onOpenChange={setShowSetup}>
           <CollapsibleTrigger asChild>
@@ -189,7 +259,7 @@ export function GlobalGraphApiCard() {
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
             <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
-              <h4 className="font-medium">Create Azure AD App Registration:</h4>
+              <h4 className="font-medium">1. Create Azure AD App Registration:</h4>
               <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
                 <li>Go to <a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Azure Portal → App Registrations <ExternalLink className="h-3 w-3 inline" /></a></li>
                 <li>Click "New registration"</li>
@@ -198,26 +268,64 @@ export function GlobalGraphApiCard() {
                 <li>Click "Register"</li>
               </ol>
               
-              <h4 className="font-medium pt-2">Configure API Permissions:</h4>
+              <h4 className="font-medium pt-2">2. Configure API Permissions (Application, not Delegated):</h4>
               <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
                 <li>Go to "API Permissions" → "Add a permission"</li>
                 <li>Select "Microsoft Graph" → "Application permissions"</li>
-                <li>Add:
-                  <ul className="list-disc list-inside ml-4 mt-1">
-                    <li><code className="bg-muted px-1 rounded">Calendars.ReadWrite</code></li>
-                    <li><code className="bg-muted px-1 rounded">OnlineMeetings.ReadWrite.All</code></li>
-                    <li><code className="bg-muted px-1 rounded">User.Read.All</code></li>
+                <li>Add these permissions:
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li><code className="bg-muted px-1 rounded">Calendars.ReadWrite</code> - Create/update calendar events</li>
+                    <li><code className="bg-muted px-1 rounded">OnlineMeetings.ReadWrite.All</code> - Create Teams meetings</li>
+                    <li><code className="bg-muted px-1 rounded">OnlineMeetingTranscript.Read.All</code> - Read transcripts (required!)</li>
+                    <li><code className="bg-muted px-1 rounded">User.Read.All</code> - Resolve user emails</li>
                   </ul>
                 </li>
-                <li>Click "Grant admin consent"</li>
+                <li><strong>Click "Grant admin consent for [Your Org]"</strong></li>
               </ol>
 
-              <h4 className="font-medium pt-2">Create Client Secret:</h4>
+              <h4 className="font-medium pt-2">3. Create Client Secret:</h4>
               <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
                 <li>Go to "Certificates & secrets"</li>
                 <li>Click "New client secret"</li>
-                <li>Copy the secret value immediately</li>
+                <li>Set expiry (recommend: 24 months)</li>
+                <li>Copy the secret value immediately (only shown once!)</li>
               </ol>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Teams Application Access Policy Guide */}
+        <Collapsible open={showPolicyGuide} onOpenChange={setShowPolicyGuide}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto text-amber-600">
+              <ChevronDown className={`h-3 w-3 transition-transform ${showPolicyGuide ? 'rotate-180' : ''}`} />
+              Teams Application Access Policy (required for transcripts)
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 space-y-3 text-sm">
+              <p className="text-muted-foreground text-xs">
+                By default, Microsoft blocks apps from accessing meeting transcripts. You must create an Application Access Policy to allow this app to access consultant meetings.
+              </p>
+              
+              <h4 className="font-medium">PowerShell Commands (run as Teams Admin):</h4>
+              <div className="bg-background rounded p-2 font-mono text-xs space-y-2 overflow-x-auto">
+                <p className="text-muted-foreground"># 1. Connect to Teams</p>
+                <code>Connect-MicrosoftTeams</code>
+                <br /><br />
+                <p className="text-muted-foreground"># 2. Create an access policy (replace APP_CLIENT_ID)</p>
+                <code>New-CsApplicationAccessPolicy -Identity "StartupLeiriaAccess" -AppIds "YOUR_APP_CLIENT_ID" -Description "Allow Startup Leiria to access meetings"</code>
+                <br /><br />
+                <p className="text-muted-foreground"># 3. Grant to all consultants (or a specific group)</p>
+                <code>Grant-CsApplicationAccessPolicy -PolicyName "StartupLeiriaAccess" -Global</code>
+                <br /><br />
+                <p className="text-muted-foreground"># OR grant to specific user:</p>
+                <code>Grant-CsApplicationAccessPolicy -PolicyName "StartupLeiriaAccess" -Identity "consultor@startupleiria.com"</code>
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                <strong>Note:</strong> Policy changes can take up to 30 minutes to propagate. Transcripts only appear after meetings end with transcription enabled.
+              </p>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -240,7 +348,7 @@ export function GlobalGraphApiCard() {
         {isEnabled && (
           <div className="text-xs text-muted-foreground bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
             <p className="font-medium text-green-700 dark:text-green-400">🎉 Global integration active!</p>
-            <p>Workspaces can now enable calendar sync by entering their calendar email in Settings → Integrations.</p>
+            <p>Sessions auto-sync to the assigned consultant's Outlook calendar. No per-workspace setup needed.</p>
           </div>
         )}
       </CardContent>

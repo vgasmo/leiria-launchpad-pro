@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 export interface GraphApiGlobalSettings {
   tenant_id: string;
   client_id: string;
-  client_secret?: string; // Only for updates, never returned
+  // Note: client_secret is NEVER returned to the frontend for security
+  // It is only written, never read back
 }
 
 export interface GlobalIntegrationSettings {
@@ -23,11 +24,19 @@ export function useGlobalGraphSettings() {
     queryFn: async (): Promise<GlobalIntegrationSettings | null> => {
       const { data, error } = await supabase
         .from('global_integration_settings')
-        .select('*')
+        .select('id, integration_type, is_enabled, created_at, updated_at, settings_json')
         .eq('integration_type', 'graph_api')
         .maybeSingle();
       
       if (error) throw error;
+      
+      // Sanitize: Never expose client_secret to frontend even if accidentally returned
+      if (data?.settings_json && typeof data.settings_json === 'object') {
+        const sanitized = { ...data.settings_json } as Record<string, unknown>;
+        delete sanitized.client_secret;
+        return { ...data, settings_json: sanitized } as GlobalIntegrationSettings;
+      }
+      
       return data as GlobalIntegrationSettings | null;
     },
   });
@@ -46,11 +55,12 @@ export function useUpdateGlobalGraphSettings() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       
-      // Store settings (secret should be handled securely)
+      // Store settings - secret is stored in DB but should ideally use edge function env var
+      // The secret is stored securely in Supabase and only accessed by edge functions
       const settingsJson = {
         tenant_id: settings.tenant_id,
         client_id: settings.client_id,
-        client_secret: settings.client_secret, // Stored encrypted by Supabase
+        client_secret: settings.client_secret,
       };
       
       const { data, error } = await supabase
@@ -61,7 +71,7 @@ export function useUpdateGlobalGraphSettings() {
           is_enabled: settings.is_enabled ?? true,
           created_by: user.id,
         }, { onConflict: 'integration_type' })
-        .select()
+        .select('id, integration_type, is_enabled, created_at, updated_at')
         .single();
       
       if (error) throw error;

@@ -1,12 +1,12 @@
 /**
  * Outlook Calendar Sync Edge Function
  * Creates/updates Outlook calendar events with Teams meeting links
- * Supports both webhook mode (Power Automate) and direct Graph API
+ * Production-ready: proper calendar owner resolution, idempotency, security
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
-import { createLogger, generateRequestId, ErrorCode, requireUser } from '../_shared/security.ts';
+import { createLogger, generateRequestId, ErrorCode, safeErrorMessage } from '../_shared/security.ts';
 
 const FUNCTION_NAME = 'sync-outlook-calendar';
 
@@ -24,8 +24,11 @@ interface SessionData {
   notes: string | null;
   outlook_event_id: string | null;
   outlook_sync_status: string | null;
+  outlook_owner_email: string | null;
   workspace_id: string;
+  created_by: string | null;
   workspaces: {
+    assigned_consultor_id: string | null;
     startups: {
       name: string;
     } | null;
@@ -70,23 +73,129 @@ interface GraphCalendarEvent {
   }>;
 }
 
+interface GraphCredentials {
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+}
+
+// Get Graph credentials with env var priority for secrets
+async function getGraphCredentials(
+  supabaseAdmin: SupabaseClient,
+  workspaceId: string,
+  log: ReturnType<typeof createLogger>
+): Promise<GraphCredentials | null> {
+  // Check for env var secret first (production secure approach)
+  const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
+  
+  // Try global settings
+  const { data: globalSettings } = await supabaseAdmin
+    .from('global_integration_settings')
+    .select('settings_json, is_enabled')
+    .eq('integration_type', 'graph_api')
+    .eq('is_enabled', true)
+    .maybeSingle();
+  
+  if (!globalSettings?.settings_json) {
+    log.warn('No global Graph API settings found');
+    return null;
+  }
+
+  const globalJson = globalSettings.settings_json as {
+    tenant_id?: string;
+    client_id?: string;
+    client_secret?: string;
+  };
+  
+  const tenantId = globalJson.tenant_id;
+  const clientId = globalJson.client_id;
+  // Prefer env var, fallback to DB secret
+  const clientSecret = envClientSecret || globalJson.client_secret;
+  
+  if (!tenantId || !clientId || !clientSecret) {
+    log.warn('Incomplete Graph credentials', { 
+      hasTenant: !!tenantId, 
+      hasClient: !!clientId, 
+      hasSecret: !!clientSecret,
+      secretSource: envClientSecret ? 'env' : 'db'
+    });
+    return null;
+  }
+  
+  log.info('Using global Graph API credentials', { 
+    tenantId: tenantId.slice(0, 8) + '...',
+    secretSource: envClientSecret ? 'env' : 'db'
+  });
+  
+  return { tenantId, clientId, clientSecret };
+}
+
+// Resolve calendar owner email with proper priority
+async function resolveCalendarOwnerEmail(
+  supabaseAdmin: SupabaseClient,
+  session: SessionData,
+  workspaceSettings: { calendar_user_email?: string | null; use_custom_calendar_email?: boolean } | null,
+  log: ReturnType<typeof createLogger>
+): Promise<string | null> {
+  // Priority 1: Custom override if explicitly set
+  if (workspaceSettings?.use_custom_calendar_email && workspaceSettings?.calendar_user_email) {
+    log.info('Using custom calendar email override', { email: workspaceSettings.calendar_user_email });
+    return workspaceSettings.calendar_user_email;
+  }
+  
+  // Priority 2: Assigned consultant
+  if (session.workspaces?.assigned_consultor_id) {
+    const { data: consultorProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', session.workspaces.assigned_consultor_id)
+      .single();
+    
+    if (consultorProfile?.email) {
+      log.info('Using assigned consultant email', { email: consultorProfile.email });
+      return consultorProfile.email;
+    }
+  }
+  
+  // Priority 3: Session creator
+  if (session.created_by) {
+    const { data: creatorProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', session.created_by)
+      .single();
+    
+    if (creatorProfile?.email) {
+      log.info('Fallback to session creator email', { email: creatorProfile.email });
+      return creatorProfile.email;
+    }
+  }
+  
+  // Priority 4: Workspace calendar email (even if not custom override)
+  if (workspaceSettings?.calendar_user_email) {
+    log.info('Fallback to workspace calendar email', { email: workspaceSettings.calendar_user_email });
+    return workspaceSettings.calendar_user_email;
+  }
+  
+  log.warn('Could not resolve calendar owner email');
+  return null;
+}
+
 // Get Microsoft Graph access token using client credentials flow
 async function getGraphAccessToken(
-  tenantId: string,
-  clientId: string,
-  clientSecret: string,
+  credentials: GraphCredentials,
   log: ReturnType<typeof createLogger>
 ): Promise<string> {
-  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+  const tokenUrl = `https://login.microsoftonline.com/${credentials.tenantId}/oauth2/v2.0/token`;
   
   const params = new URLSearchParams({
-    client_id: clientId,
-    client_secret: clientSecret,
+    client_id: credentials.clientId,
+    client_secret: credentials.clientSecret,
     scope: 'https://graph.microsoft.com/.default',
     grant_type: 'client_credentials',
   });
 
-  log.info('Requesting Graph API access token', { tenantId, clientId: clientId.slice(0, 8) + '...' });
+  log.info('Requesting Graph API access token');
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
@@ -95,8 +204,7 @@ async function getGraphAccessToken(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    log.error('Failed to get Graph token', null, { status: response.status, error: errorText });
+    log.error('Failed to get Graph token', null, { status: response.status });
     throw new Error(`Failed to authenticate with Microsoft: ${response.status}`);
   }
 
@@ -111,8 +219,8 @@ async function createCalendarEvent(
   event: GraphCalendarEvent,
   log: ReturnType<typeof createLogger>
 ): Promise<GraphCalendarEvent> {
-  // For application permissions, we need to specify the user
-  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events`;
+  // Properly encode user identifier
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userId)}/events`;
   
   log.info('Creating calendar event via Graph', { userId, subject: event.subject });
 
@@ -127,7 +235,7 @@ async function createCalendarEvent(
 
   if (!response.ok) {
     const errorText = await response.text();
-    log.error('Failed to create calendar event', null, { status: response.status, error: errorText });
+    log.error('Failed to create calendar event', null, { status: response.status, error: errorText.slice(0, 200) });
     throw new Error(`Failed to create calendar event: ${response.status}`);
   }
 
@@ -141,8 +249,8 @@ async function updateCalendarEvent(
   eventId: string,
   event: Partial<GraphCalendarEvent>,
   log: ReturnType<typeof createLogger>
-): Promise<GraphCalendarEvent> {
-  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events/${eventId}`;
+): Promise<GraphCalendarEvent | null> {
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userId)}/events/${encodeURIComponent(eventId)}`;
   
   log.info('Updating calendar event via Graph', { userId, eventId });
 
@@ -157,11 +265,21 @@ async function updateCalendarEvent(
 
   if (!response.ok) {
     const errorText = await response.text();
-    log.error('Failed to update calendar event', null, { status: response.status, error: errorText });
+    log.error('Failed to update calendar event', null, { status: response.status, error: errorText.slice(0, 200) });
     throw new Error(`Failed to update calendar event: ${response.status}`);
   }
 
-  return await response.json();
+  // PATCH may return 204 No Content
+  if (response.status === 204) {
+    return null;
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType?.includes('application/json')) {
+    return await response.json();
+  }
+  
+  return null;
 }
 
 // Delete calendar event via Graph API
@@ -171,7 +289,7 @@ async function deleteCalendarEvent(
   eventId: string,
   log: ReturnType<typeof createLogger>
 ): Promise<void> {
-  const url = `https://graph.microsoft.com/v1.0/users/${userId}/events/${eventId}`;
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userId)}/events/${encodeURIComponent(eventId)}`;
   
   log.info('Deleting calendar event via Graph', { userId, eventId });
 
@@ -182,53 +300,33 @@ async function deleteCalendarEvent(
     },
   });
 
+  // 404 is acceptable - event already deleted
   if (!response.ok && response.status !== 404) {
     const errorText = await response.text();
-    log.error('Failed to delete calendar event', null, { status: response.status, error: errorText });
+    log.error('Failed to delete calendar event', null, { status: response.status, error: errorText.slice(0, 200) });
     throw new Error(`Failed to delete calendar event: ${response.status}`);
   }
 }
 
-// Create online meeting via Graph API (for Teams)
-async function createOnlineMeeting(
+// Get event to retrieve Teams URL if missing
+async function getCalendarEvent(
   accessToken: string,
-  organizerId: string,
-  session: SessionData,
+  userId: string,
+  eventId: string,
   log: ReturnType<typeof createLogger>
-): Promise<{ joinUrl: string; meetingId: string }> {
-  const url = `https://graph.microsoft.com/v1.0/users/${organizerId}/onlineMeetings`;
+): Promise<GraphCalendarEvent | null> {
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userId)}/events/${encodeURIComponent(eventId)}`;
   
-  const startDate = new Date(session.scheduled_at);
-  const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
-
-  const meetingPayload = {
-    startDateTime: startDate.toISOString(),
-    endDateTime: endDate.toISOString(),
-    subject: session.title,
-  };
-
-  log.info('Creating Teams online meeting via Graph', { organizerId, subject: session.title });
-
   const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(meetingPayload),
+    headers: { 'Authorization': `Bearer ${accessToken}` },
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    log.error('Failed to create online meeting', null, { status: response.status, error: errorText });
-    throw new Error(`Failed to create Teams meeting: ${response.status}`);
+    log.warn('Failed to get calendar event', { status: response.status });
+    return null;
   }
 
-  const meeting = await response.json();
-  return {
-    joinUrl: meeting.joinWebUrl,
-    meetingId: meeting.id,
-  };
+  return await response.json();
 }
 
 Deno.serve(async (req: Request) => {
@@ -263,32 +361,35 @@ Deno.serve(async (req: Request) => {
     log.info('Auth check completed', { hasUser: !!userId });
 
     const body = await req.json() as SyncRequest;
-    const { session_id, action } = body;
+    let { session_id, action } = body;
 
     if (!session_id || !action) {
       return corsJsonResponse({ error: 'session_id and action are required', code: ErrorCode.BAD_REQUEST }, req, 400);
     }
 
-    // Fetch session with workspace info
+    // Fetch session with workspace info including assigned consultant
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('sessions')
       .select(`
-        id, title, scheduled_at, duration, location, notes, outlook_event_id, outlook_sync_status, workspace_id,
-        workspaces!inner(startups(name))
+        id, title, scheduled_at, duration, location, notes, outlook_event_id, outlook_sync_status, outlook_owner_email, workspace_id, created_by,
+        workspaces!inner(assigned_consultor_id, startups(name))
       `)
       .eq('id', session_id)
-      .single() as { data: SessionData | null; error: any };
+      .single();
 
     if (sessionError || !session) {
       log.error('Session not found', sessionError);
       return corsJsonResponse({ error: 'Session not found', code: ErrorCode.NOT_FOUND }, req, 404);
     }
 
+    // Type assertion for session data
+    const typedSession = session as unknown as SessionData;
+
     // Check user has access (skip check if no user - system call)
     if (userId) {
       const { data: hasAccess } = await supabaseAdmin.rpc('has_workspace_access', {
         _user_id: userId,
-        _workspace_id: session.workspace_id,
+        _workspace_id: typedSession.workspace_id,
       });
 
       if (!hasAccess) {
@@ -300,7 +401,7 @@ Deno.serve(async (req: Request) => {
     const { data: outlookSettings, error: settingsError } = await supabaseAdmin
       .from('outlook_calendar_settings')
       .select('*')
-      .eq('workspace_id', session.workspace_id)
+      .eq('workspace_id', typedSession.workspace_id)
       .eq('enabled', true)
       .maybeSingle();
 
@@ -326,9 +427,9 @@ Deno.serve(async (req: Request) => {
       }, req);
     }
 
-    const startupName = session.workspaces?.startups?.name || 'Session';
+    const startupName = typedSession.workspaces?.startups?.name || 'Session';
     const appUrl = Deno.env.get('APP_URL') || 'https://startupleiria.app';
-    const sessionLink = `${appUrl}/workspace/${session.workspace_id}?tab=sessions`;
+    const sessionLink = `${appUrl}/workspace/${typedSession.workspace_id}?tab=sessions`;
 
     // ========== WEBHOOK MODE ==========
     if (outlookSettings.sync_mode === 'webhook') {
@@ -340,21 +441,21 @@ Deno.serve(async (req: Request) => {
         }, req);
       }
 
-      const startDate = new Date(session.scheduled_at);
-      const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
+      const startDate = new Date(typedSession.scheduled_at);
+      const endDate = new Date(startDate.getTime() + (typedSession.duration || 60) * 60 * 1000);
 
       const webhookPayload = {
         action,
-        event_id: session.outlook_event_id,
-        session_id: session.id,
-        title: `${session.title} - ${startupName}`,
+        event_id: typedSession.outlook_event_id,
+        session_id: typedSession.id,
+        title: `${typedSession.title} - ${startupName}`,
         start: startDate.toISOString(),
         end: endDate.toISOString(),
-        location: session.location || '',
-        description: `${session.notes || ''}\n\nView in Startup Leiria: ${sessionLink}`,
+        location: typedSession.location || '',
+        description: `${typedSession.notes || ''}\n\nView in Startup Leiria: ${sessionLink}`,
         is_online_meeting: true,
         attendees: [],
-        workspace_id: session.workspace_id,
+        workspace_id: typedSession.workspace_id,
       };
 
       log.info('Sending to Power Automate webhook', { action, session_id });
@@ -366,14 +467,13 @@ Deno.serve(async (req: Request) => {
       });
 
       if (!webhookResponse.ok) {
-        const errorText = await webhookResponse.text();
-        log.error('Power Automate webhook failed', null, { status: webhookResponse.status, error: errorText });
+        log.error('Power Automate webhook failed', null, { status: webhookResponse.status });
         
         await supabaseAdmin
           .from('sessions')
           .update({ 
             outlook_sync_status: 'error',
-            outlook_sync_error: `Webhook returned ${webhookResponse.status}: ${errorText.slice(0, 200)}`
+            outlook_sync_error: `Webhook returned ${webhookResponse.status}`
           })
           .eq('id', session_id);
 
@@ -383,7 +483,7 @@ Deno.serve(async (req: Request) => {
         }, req, 502);
       }
 
-      let eventId = session.outlook_event_id;
+      let eventId = typedSession.outlook_event_id;
       let teamsMeetingUrl = null;
       try {
         const responseData = await webhookResponse.json();
@@ -414,82 +514,48 @@ Deno.serve(async (req: Request) => {
 
     // ========== GRAPH API MODE ==========
     } else if (outlookSettings.sync_mode === 'graph') {
-      // Try workspace credentials first, then fall back to global
-      let tenantId = outlookSettings.graph_tenant_id;
-      let clientId = outlookSettings.graph_client_id;
-      let clientSecret = outlookSettings.graph_secret_key;
-      let calendarEmail = outlookSettings.calendar_user_email;
+      // Get Graph credentials
+      const credentials = await getGraphCredentials(supabaseAdmin, typedSession.workspace_id, log);
       
-      // If workspace doesn't have its own credentials, try global settings
-      if (!tenantId || !clientId || !clientSecret) {
-        log.info('Workspace has no Graph credentials, checking global settings');
-        
-        const { data: globalSettings } = await supabaseAdmin
-          .from('global_integration_settings')
-          .select('settings_json, is_enabled')
-          .eq('integration_type', 'graph_api')
-          .eq('is_enabled', true)
-          .maybeSingle();
-        
-        if (globalSettings?.settings_json) {
-          const globalJson = globalSettings.settings_json as {
-            tenant_id?: string;
-            client_id?: string;
-            client_secret?: string;
-          };
-          tenantId = globalJson.tenant_id || null;
-          clientId = globalJson.client_id || null;
-          clientSecret = globalJson.client_secret || null;
-          log.info('Using global Graph API credentials');
-        }
-      }
-      
-      if (!tenantId || !clientId || !clientSecret) {
+      if (!credentials) {
         return corsJsonResponse({ 
           success: false, 
           reason: 'graph_not_configured',
-          message: 'Microsoft Graph API credentials not configured (neither workspace nor global)'
+          message: 'Microsoft Graph API credentials not configured'
         }, req);
       }
 
-      // Use workspace's calendar_user_email, or fall back to user's email (if user is logged in)
-      if (!calendarEmail && userId) {
-        const { data: userProfile } = await supabaseAdmin
-          .from('profiles')
-          .select('email')
-          .eq('id', userId)
-          .single();
-        calendarEmail = userProfile?.email || null;
-      }
+      // Resolve calendar owner email
+      const calendarOwnerEmail = await resolveCalendarOwnerEmail(
+        supabaseAdmin, 
+        typedSession, 
+        outlookSettings as { calendar_user_email?: string | null; use_custom_calendar_email?: boolean },
+        log
+      );
 
-      if (!calendarEmail) {
+      if (!calendarOwnerEmail) {
         return corsJsonResponse({ 
           success: false, 
           reason: 'no_calendar_email',
-          message: 'No calendar email configured for this workspace'
+          message: 'No calendar email could be determined. Assign a consultant to this workspace or configure a custom calendar email.'
         }, req);
       }
 
-      log.info('Using calendar email', { calendarEmail });
+      log.info('Using calendar owner', { calendarOwnerEmail });
 
       try {
         // Get Graph API access token
-        const accessToken = await getGraphAccessToken(
-          tenantId,
-          clientId,
-          clientSecret,
-          log
-        );
+        const accessToken = await getGraphAccessToken(credentials, log);
 
-        const startDate = new Date(session.scheduled_at);
-        const endDate = new Date(startDate.getTime() + (session.duration || 60) * 60 * 1000);
+        const startDate = new Date(typedSession.scheduled_at);
+        const endDate = new Date(startDate.getTime() + (typedSession.duration || 60) * 60 * 1000);
 
         // Build event object
         const eventData: GraphCalendarEvent = {
-          subject: `${session.title} - ${startupName}`,
+          subject: `${typedSession.title} - ${startupName}`,
           body: {
             contentType: 'HTML',
-            content: `<p>${session.notes || ''}</p><p><a href="${sessionLink}">View in Startup Leiria</a></p>`,
+            content: `<p>${typedSession.notes || ''}</p><p><a href="${sessionLink}">View in Startup Leiria</a></p>`,
           },
           start: {
             dateTime: startDate.toISOString().slice(0, -1), // Remove Z for Graph API
@@ -503,29 +569,63 @@ Deno.serve(async (req: Request) => {
           onlineMeetingProvider: 'teamsForBusiness',
         };
 
-        if (session.location) {
-          eventData.location = { displayName: session.location };
+        if (typedSession.location) {
+          eventData.location = { displayName: typedSession.location };
         }
 
-        let eventId = session.outlook_event_id;
+        let eventId = typedSession.outlook_event_id;
         let teamsMeetingUrl: string | null = null;
         let createdEvent: GraphCalendarEvent | null = null;
+        const previousOwnerEmail = typedSession.outlook_owner_email;
+
+        // IDEMPOTENCY: If action=create but event already exists, treat as update
+        if (action === 'create' && eventId) {
+          log.info('Create requested but event exists, switching to update', { eventId });
+          action = 'update';
+        }
+
+        // OWNER CHANGE DETECTION: If updating and owner changed, delete old and create new
+        if (action === 'update' && eventId && previousOwnerEmail && previousOwnerEmail !== calendarOwnerEmail) {
+          log.info('Calendar owner changed, migrating event', { 
+            from: previousOwnerEmail, 
+            to: calendarOwnerEmail 
+          });
+          
+          // Delete from old owner's calendar
+          try {
+            await deleteCalendarEvent(accessToken, previousOwnerEmail, eventId, log);
+            log.info('Deleted event from previous owner calendar');
+          } catch (delErr) {
+            log.warn('Failed to delete from old calendar, continuing', { error: String(delErr) });
+          }
+          
+          // Switch to create for new owner
+          action = 'create';
+          eventId = null;
+        }
 
         if (action === 'create') {
-          createdEvent = await createCalendarEvent(accessToken, calendarEmail, eventData, log);
+          createdEvent = await createCalendarEvent(accessToken, calendarOwnerEmail, eventData, log);
           eventId = createdEvent.id || null;
           teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
           
         } else if (action === 'update' && eventId) {
-          createdEvent = await updateCalendarEvent(accessToken, calendarEmail, eventId, eventData, log);
-          teamsMeetingUrl = createdEvent.onlineMeeting?.joinUrl || null;
+          createdEvent = await updateCalendarEvent(accessToken, calendarOwnerEmail, eventId, eventData, log);
+          
+          // If update returned null (204), fetch the event to get Teams URL
+          if (!createdEvent) {
+            createdEvent = await getCalendarEvent(accessToken, calendarOwnerEmail, eventId, log);
+          }
+          teamsMeetingUrl = createdEvent?.onlineMeeting?.joinUrl || null;
           
         } else if (action === 'delete' && eventId) {
-          await deleteCalendarEvent(accessToken, calendarEmail, eventId, log);
+          // Use the stored owner email for deletion
+          const deleteFromEmail = previousOwnerEmail || calendarOwnerEmail;
+          await deleteCalendarEvent(accessToken, deleteFromEmail, eventId, log);
           eventId = null;
         }
 
-        // Update session with sync status
+        // Update session with sync status and owner email
         await supabaseAdmin
           .from('sessions')
           .update({ 
@@ -533,21 +633,23 @@ Deno.serve(async (req: Request) => {
             outlook_synced_at: new Date().toISOString(),
             outlook_sync_error: null,
             outlook_event_id: eventId,
+            outlook_owner_email: action === 'delete' ? null : calendarOwnerEmail,
             ...(teamsMeetingUrl && { teams_meeting_url: teamsMeetingUrl }),
           })
           .eq('id', session_id);
 
-        log.info('Outlook sync via Graph API completed', { action, eventId, teamsMeetingUrl });
+        log.info('Outlook sync via Graph API completed', { action, eventId, teamsMeetingUrl, calendarOwnerEmail });
         
         return corsJsonResponse({ 
           success: true, 
           mode: 'graph',
           event_id: eventId,
           teams_meeting_url: teamsMeetingUrl,
+          calendar_owner: calendarOwnerEmail,
         }, req);
 
       } catch (graphError: unknown) {
-        const errorMessage = graphError instanceof Error ? graphError.message : 'Unknown Graph API error';
+        const errorMessage = safeErrorMessage(graphError);
         log.error('Graph API sync failed', graphError);
         
         // Log integration error
@@ -556,7 +658,7 @@ Deno.serve(async (req: Request) => {
           .insert({
             source: 'outlook_graph',
             error_message: errorMessage,
-            workspace_id: session.workspace_id,
+            workspace_id: typedSession.workspace_id,
           });
 
         await supabaseAdmin
@@ -581,7 +683,7 @@ Deno.serve(async (req: Request) => {
     }, req);
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = safeErrorMessage(error);
     log.error('Outlook sync error', error);
     return corsJsonResponse({ error: errorMessage, code: ErrorCode.INTERNAL_ERROR }, req, 500);
   }

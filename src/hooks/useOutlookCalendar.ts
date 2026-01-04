@@ -12,6 +12,7 @@ export interface OutlookCalendarSettings {
   graph_client_id: string | null;
   graph_secret_key: string | null;
   calendar_user_email: string | null;
+  use_custom_calendar_email: boolean;
   created_at: string;
   updated_at: string;
 }
