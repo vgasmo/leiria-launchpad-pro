@@ -124,67 +124,48 @@ export function useUpdateTeamsSettings(workspaceId?: string, programId?: string)
 
 export function useTestTeamsWebhook() {
   return useMutation({
-    mutationFn: async (webhookUrl: string) => {
-      // Power Automate / Teams Workflows expect a simpler JSON structure
-      // We'll try a simple format that works with most webhook types
-      const isPowerAutomate = webhookUrl.includes('powerplatform.com') || webhookUrl.includes('flow.microsoft.com');
-      
-      let payload;
-      if (isPowerAutomate) {
-        // Simple JSON for Power Automate triggers
-        payload = {
-          title: '✅ Startup Leiria Integration Test',
-          message: 'Your Microsoft Teams integration is working! You will receive notifications here.',
-          timestamp: new Date().toISOString(),
-        };
-      } else {
-        // Adaptive Card format for Office 365 Connectors
-        payload = {
-          type: 'message',
-          attachments: [
-            {
-              contentType: 'application/vnd.microsoft.card.adaptive',
-              contentUrl: null,
-              content: {
-                $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-                type: 'AdaptiveCard',
-                version: '1.4',
-                body: [
-                  {
-                    type: 'TextBlock',
-                    size: 'Medium',
-                    weight: 'Bolder',
-                    text: '✅ Startup Leiria Integration Test',
-                    wrap: true,
-                  },
-                  {
-                    type: 'TextBlock',
-                    text: 'Your Microsoft Teams integration is working! You will receive notifications here.',
-                    wrap: true,
-                    spacing: 'Small',
-                  },
-                ],
-              },
-            },
-          ],
-        };
-      }
+    mutationFn: async () => {
+      // Test via backend function to avoid browser CORS/header limitations
+      const { data: settings, error: settingsError } = await supabase
+        .from('teams_integration_settings')
+        .select('enabled, webhook_url')
+        .is('workspace_id', null)
+        .is('program_id', null)
+        .maybeSingle();
 
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'no-cors', // Teams webhooks don't return CORS headers
-        body: JSON.stringify(payload),
+      if (settingsError) throw settingsError;
+      if (!settings?.webhook_url) throw new Error('No Teams webhook configured');
+
+      const { data, error } = await supabase.functions.invoke('teams-notify', {
+        body: {
+          event_type: 'test',
+          payload: {
+            title: 'Teste',
+            summary: 'Mensagem de teste do workflow.',
+            fields: [
+              { name: 'Startup', value: 'Demo Startup' },
+              { name: 'Owner', value: 'Vítor' },
+              { name: 'Severidade', value: 'info' },
+            ],
+            link: 'https://example.com',
+            link_text: 'Abrir',
+            priority: 'low',
+          },
+        },
       });
 
-      // With no-cors, we can't read the response, but if no error thrown, assume success
-      return { success: true };
+      if (error) throw error;
+      if (data?.success === false) {
+        throw new Error(data?.error || 'Teams webhook failed');
+      }
+
+      return data;
     },
     onSuccess: () => {
-      toast.success('Test message sent to Teams! Check your Power Automate flow execution history.');
+      toast.success('Test message queued/sent to Teams.');
     },
     onError: (error: Error) => {
-      toast.error(`Failed to send test: ${error.message}`);
+      toast.error(`Test failed: ${error.message}`);
     },
   });
 }

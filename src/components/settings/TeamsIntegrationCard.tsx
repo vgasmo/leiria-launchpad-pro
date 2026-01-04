@@ -103,7 +103,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       toast.error('Please save a webhook URL first');
       return;
     }
-    testWebhook.mutate(currentWebhookUrl);
+    testWebhook.mutate();
   };
 
   const handleEventToggle = async (eventKey: string, enabled: boolean) => {
