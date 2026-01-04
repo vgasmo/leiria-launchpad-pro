@@ -4531,6 +4531,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          created_at: string | null
           expertise: string[] | null
           full_name: string | null
           id: string | null
@@ -4539,6 +4540,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          created_at?: string | null
           expertise?: string[] | null
           full_name?: string | null
           id?: string | null
@@ -4547,6 +4549,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          created_at?: string | null
           expertise?: string[] | null
           full_name?: string | null
           id?: string | null
@@ -4650,12 +4653,22 @@ export type Database = {
       is_admin:
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }
+      is_admin_only: { Args: never; Returns: boolean }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
       is_founder: { Args: { _workspace_id: string }; Returns: boolean }
       is_founder_user: { Args: never; Returns: boolean }
+      is_startup_founder: { Args: { _startup_id: string }; Returns: boolean }
+      is_team_member_of_startup: {
+        Args: { _startup_id: string }
+        Returns: boolean
+      }
+      shares_workspace_with: {
+        Args: { _target_user_id: string }
+        Returns: boolean
+      }
       submit_checkin: {
         Args: { p_instance_id: string; p_responses: Json }
         Returns: string
