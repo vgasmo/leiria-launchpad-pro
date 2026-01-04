@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { HelpCircle, RefreshCw, Edit2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { HelpCircle, RefreshCw, Edit2, TrendingUp, TrendingDown, Minus, ChevronDown, Activity, Calendar, BarChart3, ClipboardCheck, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,11 +26,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWorkspaceHealth, useSetHealthOverride, useRecomputeHealthScores, getHealthScoreConfig, HealthExplanationFactor } from '@/hooks/useHealthScore';
 import { useAuth } from '@/contexts/AuthContext';
-import { HealthModelBreakdown } from './HealthModelBreakdown';
 import type { Database } from '@/integrations/supabase/types';
 
 type HealthScore = Database['public']['Enums']['health_score'];
@@ -38,6 +44,24 @@ interface HealthScoreCardProps {
   programId?: string | null;
   canManage?: boolean;
 }
+
+interface HealthModel {
+  weights_json: {
+    actions: number;
+    sessions: number;
+    kpis: number;
+    checkins: number;
+  };
+  thresholds_json: {
+    thriving: number;
+    healthy: number;
+    stable: number;
+    at_risk: number;
+  };
+  is_enabled: boolean;
+}
+
+const DEFAULT_WEIGHTS = { actions: 30, sessions: 20, kpis: 30, checkins: 20 };
 
 export function HealthScoreCard({ workspaceId, programId, canManage = false }: HealthScoreCardProps) {
   const { roles } = useAuth();
@@ -49,6 +73,24 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
   const [showOverrideDialog, setShowOverrideDialog] = useState(false);
   const [overrideValue, setOverrideValue] = useState<HealthScore | 'none'>('none');
   const [overrideReason, setOverrideReason] = useState('');
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // Fetch program health model for breakdown
+  const { data: model } = useQuery({
+    queryKey: ['program-health-model', programId],
+    queryFn: async () => {
+      if (!programId) return null;
+      const { data, error } = await supabase
+        .from('program_health_model')
+        .select('*')
+        .eq('program_id', programId)
+        .eq('is_enabled', true)
+        .maybeSingle();
+      if (error) throw error;
+      return data as unknown as HealthModel | null;
+    },
+    enabled: !!programId,
+  });
 
   if (isLoading) {
     return (
@@ -71,6 +113,8 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
   const hasOverride = !!health?.health_score_override;
   const numericScore = health?.health_score_numeric || 0;
   const explanation = health?.health_score_explanation || [];
+  const weights = model?.weights_json || DEFAULT_WEIGHTS;
+  const components = (health?.health_score_components as { actions: number; sessions: number; kpis: number; checkins: number } | null) || null;
 
   const handleOverrideSave = () => {
     setOverride.mutate({
@@ -189,6 +233,67 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
             </div>
           )}
 
+          {/* Collapsible: How Health is Calculated */}
+          <Collapsible open={showBreakdown} onOpenChange={setShowBreakdown}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full border-t pt-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                <span>Como é calculado?</span>
+              </div>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showBreakdown ? 'rotate-180' : ''}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3 space-y-3">
+              {/* Weights Grid */}
+              <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                <div className="p-2 rounded bg-muted">
+                  <Activity className="h-4 w-4 mx-auto mb-1" />
+                  <div>Ações</div>
+                  <div className="font-bold">{weights.actions}%</div>
+                </div>
+                <div className="p-2 rounded bg-muted">
+                  <Calendar className="h-4 w-4 mx-auto mb-1" />
+                  <div>Sessões</div>
+                  <div className="font-bold">{weights.sessions}%</div>
+                </div>
+                <div className="p-2 rounded bg-muted">
+                  <BarChart3 className="h-4 w-4 mx-auto mb-1" />
+                  <div>KPIs</div>
+                  <div className="font-bold">{weights.kpis}%</div>
+                </div>
+                <div className="p-2 rounded bg-muted">
+                  <ClipboardCheck className="h-4 w-4 mx-auto mb-1" />
+                  <div>Check-ins</div>
+                  <div className="font-bold">{weights.checkins}%</div>
+                </div>
+              </div>
+
+              {/* Component Scores if available */}
+              {components && (
+                <div className="space-y-2">
+                  {(['actions', 'sessions', 'kpis', 'checkins'] as const).map((key) => {
+                    const score = components[key] || 0;
+                    const weight = weights[key];
+                    const weighted = (score * weight) / 100;
+                    const labels: Record<string, string> = { actions: 'Ações', sessions: 'Sessões', kpis: 'KPIs', checkins: 'Check-ins' };
+                    return (
+                      <div key={key} className="flex items-center gap-2 text-xs">
+                        <span className="w-16 text-muted-foreground">{labels[key]}</span>
+                        <Progress value={score} className="flex-1 h-2" />
+                        <span className="w-8 text-right">{score}</span>
+                        <span className="text-muted-foreground">× {weight}% =</span>
+                        <span className="w-8 font-medium">{weighted.toFixed(0)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                Score final = soma ponderada dos componentes. Atualizado automaticamente.
+              </p>
+            </CollapsibleContent>
+          </Collapsible>
+
           {/* Last updated */}
           {health?.health_score_updated_at && (
             <p className="text-xs text-muted-foreground text-right">
@@ -202,9 +307,6 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
           )}
         </CardContent>
       </Card>
-
-      {/* Health Model Breakdown */}
-      <HealthModelBreakdown workspaceId={workspaceId} programId={programId || null} />
 
       {/* Override Dialog */}
       <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>

@@ -32,7 +32,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { HealthModelBreakdown } from '@/components/workspace/HealthModelBreakdown';
+import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { StartupStage, HealthScore } from '@/types/database';
 
 interface JourneyHeaderProps {
@@ -140,10 +140,10 @@ export function JourneyHeader({
                   {t('journey.healthExplanationDesc')}
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-6">
-                <HealthModelBreakdown workspaceId={workspace.id} programId={workspace.program_id} />
+              <div className="mt-6 space-y-4">
+                <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} />
                 {workspace.health_notes && (
-                  <div className="mt-4 p-3 rounded-lg bg-muted/50 text-sm">
+                  <div className="p-3 rounded-lg bg-muted/50 text-sm">
                     <p className="font-medium mb-1">{t('journey.aiInsight')}</p>
                     <p className="text-muted-foreground">{workspace.health_notes}</p>
                   </div>
