@@ -70,8 +70,12 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
     
     setIsGenerating(true);
     try {
-      // Generate a secure random token
-      const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, '');
+      // Generate a cryptographically secure 256-bit token (64 hex chars)
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      const token = Array.from(tokenBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
       
       const { error } = await supabase
         .from('profiles')
