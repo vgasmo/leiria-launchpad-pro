@@ -20,11 +20,11 @@ export interface TeamsIntegrationSettings {
 }
 
 export function useTeamsSettings(workspaceId?: string, programId?: string) {
+  const isGlobal = !workspaceId && !programId;
+  
   return useQuery({
-    queryKey: ['teams-settings', workspaceId, programId],
+    queryKey: ['teams-settings', workspaceId ?? 'global', programId],
     queryFn: async (): Promise<TeamsIntegrationSettings | null> => {
-      if (!workspaceId && !programId) return null;
-      
       let query = supabase
         .from('teams_integration_settings')
         .select('*');
@@ -33,6 +33,9 @@ export function useTeamsSettings(workspaceId?: string, programId?: string) {
         query = query.eq('workspace_id', workspaceId);
       } else if (programId) {
         query = query.eq('program_id', programId);
+      } else {
+        // Global settings: no workspace_id and no program_id
+        query = query.is('workspace_id', null).is('program_id', null);
       }
       
       const { data, error } = await query.maybeSingle();
@@ -40,28 +43,67 @@ export function useTeamsSettings(workspaceId?: string, programId?: string) {
       if (error) throw error;
       return data as TeamsIntegrationSettings | null;
     },
-    enabled: !!(workspaceId || programId),
   });
 }
 
 export function useUpdateTeamsSettings(workspaceId?: string, programId?: string) {
   const queryClient = useQueryClient();
+  const isGlobal = !workspaceId && !programId;
   
   return useMutation({
     mutationFn: async (settings: Partial<TeamsIntegrationSettings>) => {
-      if (!workspaceId && !programId) throw new Error('Workspace or program ID required');
-      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       
-      const upsertData = {
+      const upsertData: Record<string, any> = {
         ...settings,
-        ...(workspaceId ? { workspace_id: workspaceId } : { program_id: programId }),
         created_by: user.id,
       };
       
+      // Set workspace_id or program_id, or keep both null for global
+      if (workspaceId) {
+        upsertData.workspace_id = workspaceId;
+      } else if (programId) {
+        upsertData.program_id = programId;
+      }
+      // For global settings, both remain null
+      
       // Remove id from upsert data if present (let DB generate it)
       delete upsertData.id;
+      
+      // For global settings, we need a different approach since there's no unique constraint on null values
+      if (isGlobal) {
+        // Check if global settings already exist
+        const { data: existing } = await supabase
+          .from('teams_integration_settings')
+          .select('id')
+          .is('workspace_id', null)
+          .is('program_id', null)
+          .maybeSingle();
+        
+        if (existing) {
+          // Update existing global settings
+          const { data, error } = await supabase
+            .from('teams_integration_settings')
+            .update(upsertData)
+            .eq('id', existing.id)
+            .select()
+            .single();
+          
+          if (error) throw error;
+          return data;
+        } else {
+          // Insert new global settings
+          const { data, error } = await supabase
+            .from('teams_integration_settings')
+            .insert(upsertData)
+            .select()
+            .single();
+          
+          if (error) throw error;
+          return data;
+        }
+      }
       
       const { data, error } = await supabase
         .from('teams_integration_settings')
@@ -75,7 +117,7 @@ export function useUpdateTeamsSettings(workspaceId?: string, programId?: string)
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teams-settings', workspaceId, programId] });
+      queryClient.invalidateQueries({ queryKey: ['teams-settings', workspaceId ?? 'global', programId] });
     },
   });
 }
