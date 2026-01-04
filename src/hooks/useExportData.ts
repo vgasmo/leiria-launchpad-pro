@@ -2,6 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths, startOfMonth } from 'date-fns';
 
+/**
+ * Sanitize cell content to prevent CSV formula injection attacks.
+ * Cells starting with =, +, -, @, or tab could be interpreted as formulas.
+ */
+function sanitizeCsvCell(value: string): string {
+  if (!value) return '';
+  // Remove leading characters that could trigger formula evaluation
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r', '\n'];
+  let sanitized = value;
+  if (dangerousChars.some(char => sanitized.startsWith(char))) {
+    sanitized = `'${sanitized}`; // Prefix with single quote to prevent formula execution
+  }
+  // Escape double quotes for CSV
+  return sanitized.replace(/"/g, '""');
+}
 export interface KpiExportData {
   kpiName: string;
   category: string | null;
@@ -48,18 +63,18 @@ export function useExportKpis(workspaceId: string) {
 export function exportToCsv(data: KpiExportData[], filename: string) {
   const headers = ['KPI Name', 'Category', 'Period', 'Value', 'Target', 'Unit', 'Notes'];
   const rows = data.map(row => [
-    row.kpiName,
-    row.category || '',
-    row.period,
+    sanitizeCsvCell(row.kpiName),
+    sanitizeCsvCell(row.category || ''),
+    sanitizeCsvCell(row.period),
     row.value?.toString() || '',
     row.targetValue?.toString() || '',
-    row.unit || '',
-    row.notes || '',
+    sanitizeCsvCell(row.unit || ''),
+    sanitizeCsvCell(row.notes || ''),
   ]);
 
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -108,17 +123,17 @@ export function useExportSessions(workspaceId: string) {
 export function exportSessionsToCsv(data: SessionExportData[], filename: string) {
   const headers = ['Title', 'Date', 'Duration (min)', 'Agenda', 'Notes', 'Decisions'];
   const rows = data.map(row => [
-    row.title,
+    sanitizeCsvCell(row.title),
     format(new Date(row.scheduledAt), 'yyyy-MM-dd HH:mm'),
     row.duration?.toString() || '',
-    row.agenda || '',
-    row.notes || '',
-    row.decisions || '',
+    sanitizeCsvCell(row.agenda || ''),
+    sanitizeCsvCell(row.notes || ''),
+    sanitizeCsvCell(row.decisions || ''),
   ]);
 
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -180,19 +195,19 @@ export function useExportActions(workspaceId: string) {
 export function exportActionsToCsv(data: ActionExportData[], filename: string) {
   const headers = ['Title', 'Description', 'Status', 'Priority', 'Due Date', 'Owner', 'Created', 'Completed'];
   const rows = data.map(row => [
-    row.title,
-    row.description || '',
-    row.status,
-    row.priority || '',
-    row.dueDate || '',
-    row.owner || '',
+    sanitizeCsvCell(row.title),
+    sanitizeCsvCell(row.description || ''),
+    sanitizeCsvCell(row.status),
+    sanitizeCsvCell(row.priority || ''),
+    sanitizeCsvCell(row.dueDate || ''),
+    sanitizeCsvCell(row.owner || ''),
     format(new Date(row.createdAt), 'yyyy-MM-dd'),
     row.completedAt ? format(new Date(row.completedAt), 'yyyy-MM-dd') : '',
   ]);
 
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

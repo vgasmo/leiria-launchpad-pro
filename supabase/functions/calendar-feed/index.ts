@@ -48,17 +48,16 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
-    const userId = url.searchParams.get('user_id');
-    const workspaceId = url.searchParams.get('workspace_id');
     const token = url.searchParams.get('token');
+    const workspaceId = url.searchParams.get('workspace_id');
     
-    log.info('Calendar feed request', { userId: !!userId, workspaceId: !!workspaceId, hasToken: !!token });
+    log.info('Calendar feed request', { hasToken: !!token, workspaceId: !!workspaceId });
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Authentication: Either JWT from header OR a pre-shared token
+    // Authentication: Either JWT from header OR a secure calendar token
     let authenticatedUserId: string | null = null;
     
     const authHeader = req.headers.get('Authorization');
@@ -70,12 +69,29 @@ Deno.serve(async (req: Request) => {
       }
     }
     
-    // If no auth, require user_id parameter (for calendar subscription URL)
-    // In production, you'd want a more secure token-based approach
-    const targetUserId = authenticatedUserId || userId;
+    // If no JWT auth, check for calendar feed token
+    if (!authenticatedUserId && token) {
+      // Validate token (stored in profiles.calendar_feed_token)
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('calendar_feed_token', token)
+        .maybeSingle();
+      
+      if (profile && !error) {
+        authenticatedUserId = profile.id;
+        log.info('Token validated for user', { userId: profile.id });
+      } else {
+        log.warn('Invalid calendar token');
+        return new Response('Invalid or expired token', {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+        });
+      }
+    }
     
-    if (!targetUserId && !workspaceId) {
-      return new Response('Unauthorized - provide user_id or workspace_id parameter', {
+    if (!authenticatedUserId && !workspaceId) {
+      return new Response('Unauthorized - provide token parameter or Authorization header', {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
       });
@@ -103,12 +119,12 @@ Deno.serve(async (req: Request) => {
         throw error;
       }
       sessions = (data || []) as Session[];
-    } else if (targetUserId) {
+    } else if (authenticatedUserId) {
       // Fetch sessions for all workspaces the user has access to
       const { data: userWorkspaces } = await supabase
         .from('workspace_users')
         .select('workspace_id')
-        .eq('user_id', targetUserId)
+        .eq('user_id', authenticatedUserId)
         .eq('active', true);
       
       if (userWorkspaces && userWorkspaces.length > 0) {

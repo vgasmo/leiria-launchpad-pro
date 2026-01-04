@@ -54,12 +54,12 @@ export const AppConfig = {
     return this.buildLink(`/workspace/${workspaceId}?tab=actions&action=${actionId}`);
   },
   
-  // Calendar feed URL
-  calendarFeedUrl(userId: string): string {
-    return `${this.functionsUrl}/calendar-feed?user_id=${userId}`;
+  // Calendar feed URL (with secure token)
+  calendarFeedUrl(token: string): string {
+    return `${this.functionsUrl}/calendar-feed?token=${token}`;
   },
   
-  // Calendar feed URL for workspace
+  // Calendar feed URL for workspace (requires auth)
   workspaceCalendarUrl(workspaceId: string): string {
     return `${this.functionsUrl}/calendar-feed?workspace_id=${workspaceId}`;
   },
