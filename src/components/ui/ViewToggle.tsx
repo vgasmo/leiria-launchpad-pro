@@ -12,7 +12,7 @@ interface ViewToggleProps {
 
 export function ViewToggle({ view, onChange, className }: ViewToggleProps) {
   return (
-    <div className={cn('inline-flex rounded-lg border bg-muted p-1', className)}>
+    <div className={cn('inline-flex rounded-lg border bg-muted p-1', className)} data-tour="view-toggle">
       <Button
         variant="ghost"
         size="sm"
