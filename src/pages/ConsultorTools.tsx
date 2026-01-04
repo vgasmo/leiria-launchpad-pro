@@ -44,7 +44,7 @@ export default function ConsultorTools() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -56,9 +56,18 @@ export default function ConsultorTools() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Automatic quality scoring appears on sessions and proposals.
+                Quality scoring automatically appears on sessions and proposals based on criteria like:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Clear title and agenda defined</li>
+                <li>Scheduled time and duration set</li>
+                <li>Expected outputs documented</li>
+                <li>Action items captured after session</li>
+              </ul>
+              <p className="text-xs text-muted-foreground italic">
+                Look for the "Quality Check" card on any session detail page.
               </p>
             </CardContent>
           </Card>

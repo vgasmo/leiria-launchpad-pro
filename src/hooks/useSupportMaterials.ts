@@ -31,6 +31,7 @@ export function useSupportMaterials(filters?: {
       let query = supabase
         .from('support_materials')
         .select('*')
+        .eq('status', 'approved') // Only show approved materials
         .order('title');
 
       if (filters?.startupType) {
