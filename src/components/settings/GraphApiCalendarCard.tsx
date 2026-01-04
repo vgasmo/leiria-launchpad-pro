@@ -24,14 +24,14 @@ import {
 import { useOutlookSettings, useUpdateOutlookSettings } from '@/hooks/useOutlookCalendar';
 
 interface GraphApiCalendarCardProps {
-  workspaceId: string;
-  canEdit: boolean;
+  workspaceId?: string;
+  canEdit?: boolean;
 }
 
-export function GraphApiCalendarCard({ workspaceId, canEdit }: GraphApiCalendarCardProps) {
+export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCalendarCardProps) {
   const { t } = useTranslation();
-  const { data: settings, isLoading } = useOutlookSettings(workspaceId);
-  const updateSettings = useUpdateOutlookSettings(workspaceId);
+  const { data: settings, isLoading } = useOutlookSettings(workspaceId || '');
+  const updateSettings = useUpdateOutlookSettings(workspaceId || '');
   
   const [tenantId, setTenantId] = useState('');
   const [clientId, setClientId] = useState('');
@@ -93,7 +93,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit }: GraphApiCalendarC
     }
   };
 
-  if (isLoading) {
+  if (isLoading && workspaceId) {
     return (
       <Card>
         <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
@@ -101,6 +101,9 @@ export function GraphApiCalendarCard({ workspaceId, canEdit }: GraphApiCalendarC
       </Card>
     );
   }
+
+  // Admin view (no workspaceId) - show reference only
+  const isAdminView = !workspaceId;
 
   return (
     <Card>
@@ -123,6 +126,16 @@ export function GraphApiCalendarCard({ workspaceId, canEdit }: GraphApiCalendarC
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isAdminView && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              This is configured per workspace in each workspace's Settings → Integrations tab. 
+              Below are the setup instructions for reference.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Features */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">

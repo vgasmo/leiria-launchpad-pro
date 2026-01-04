@@ -29,14 +29,14 @@ const OutlookIcon = ({ className }: { className?: string }) => (
 );
 
 interface OutlookCalendarCardProps {
-  workspaceId: string;
-  canEdit: boolean;
+  workspaceId?: string;
+  canEdit?: boolean;
 }
 
-export function OutlookCalendarCard({ workspaceId, canEdit }: OutlookCalendarCardProps) {
+export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCalendarCardProps) {
   const { t } = useTranslation();
-  const { data: settings, isLoading } = useOutlookSettings(workspaceId);
-  const updateSettings = useUpdateOutlookSettings(workspaceId);
+  const { data: settings, isLoading } = useOutlookSettings(workspaceId || '');
+  const updateSettings = useUpdateOutlookSettings(workspaceId || '');
   
   const [webhookUrl, setWebhookUrl] = useState('');
   const [showSetup, setShowSetup] = useState(false);
@@ -83,7 +83,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit }: OutlookCalendarCar
     }
   };
 
-  if (isLoading) {
+  if (isLoading && workspaceId) {
     return (
       <Card>
         <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
@@ -91,6 +91,9 @@ export function OutlookCalendarCard({ workspaceId, canEdit }: OutlookCalendarCar
       </Card>
     );
   }
+
+  // Admin view (no workspaceId) - show reference only
+  const isAdminView = !workspaceId;
 
   return (
     <Card>
@@ -110,6 +113,16 @@ export function OutlookCalendarCard({ workspaceId, canEdit }: OutlookCalendarCar
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isAdminView && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              This is configured per workspace in each workspace's Settings → Integrations tab.
+              Below are the setup instructions for reference.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Sync Mode Selection */}
         <div className="space-y-3">
           <Label>Sync method</Label>

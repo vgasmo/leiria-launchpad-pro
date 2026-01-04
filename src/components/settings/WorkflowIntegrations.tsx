@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Zap, Bell, Slack, ExternalLink, CheckCircle2, Database } from 'lucide-react';
 import { TeamsIntegrationCard } from './TeamsIntegrationCard';
+import { OutlookCalendarCard } from './OutlookCalendarCard';
+import { GraphApiCalendarCard } from './GraphApiCalendarCard';
 import { CalendarFeedCard } from './CalendarFeedCard';
 import { HubSpotIntegrationCard } from './HubSpotIntegrationCard';
 
@@ -131,48 +133,8 @@ export function WorkflowIntegrations() {
         {/* Microsoft 365 Tab */}
         <TabsContent value="microsoft" className="space-y-4 mt-4">
           <TeamsIntegrationCard canEdit={true} />
-          
-          {/* Admin-level M365 documentation */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-[#0078D4]" />
-                Outlook Calendar & Graph API
-              </CardTitle>
-              <CardDescription>
-                Calendar sync and Teams meeting integration is configured per workspace in workspace Settings → Integrations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Power Automate webhook</span>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Microsoft Graph API</span>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Teams meeting links</span>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Auto-invite attendees</span>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => window.open('/integrations-setup', '_blank')}
-              >
-                <ExternalLink className="h-4 w-4" />
-                View Setup Guide
-              </Button>
-            </CardContent>
-          </Card>
+          <OutlookCalendarCard />
+          <GraphApiCalendarCard />
         </TabsContent>
 
         {/* Slack Tab */}
