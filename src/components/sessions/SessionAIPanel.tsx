@@ -12,7 +12,10 @@ import {
   ChevronUp,
   Plus,
   Loader2,
+  Video,
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +38,7 @@ interface SessionAIPanelProps {
     notes?: string | null;
     agenda?: string | null;
     raw_transcript?: string | null;
+    teams_meeting_url?: string | null;
     ai_summary?: string | null;
     ai_decisions?: string[] | null;
     ai_risks?: { risk: string; severity: string }[] | null;
@@ -51,6 +55,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const [showImport, setShowImport] = useState(false);
   const [transcript, setTranscript] = useState(session.raw_transcript || '');
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
+  const [isFetchingTeams, setIsFetchingTeams] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     summary: true,
     decisions: true,
@@ -100,6 +105,40 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const handleSaveTranscript = async () => {
     if (!transcript.trim()) return;
     await saveTranscriptMutation.mutateAsync({ sessionId, transcript: transcript.trim() });
+  };
+
+  const handleFetchFromTeams = async () => {
+    setIsFetchingTeams(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('import-teams-transcript', {
+        body: { session_id: sessionId },
+      });
+
+      if (error) {
+        toast.error('Erro ao importar transcrição do Teams');
+        console.error('Teams transcript import error:', error);
+        return;
+      }
+
+      if (data?.success && data?.status === 'ok' && data?.transcript_text) {
+        setTranscript(data.transcript_text);
+        toast.success('Transcrição importada e guardada com sucesso');
+        onRefresh?.();
+      } else if (data?.status === 'not_ready') {
+        toast.info('Ainda não há transcrição disponível. Tenta novamente após a reunião terminar.');
+      } else if (data?.status === 'no_meeting_url') {
+        toast.warning('Esta sessão não tem link do Teams associado.');
+      } else if (data?.status === 'forbidden_policy') {
+        toast.error('Falta Application Access Policy no Teams. Contacte o administrador.');
+      } else {
+        toast.error(data?.error || 'Erro ao importar transcrição');
+      }
+    } catch (err) {
+      console.error('Teams transcript fetch error:', err);
+      toast.error('Erro ao comunicar com o servidor');
+    } finally {
+      setIsFetchingTeams(false);
+    }
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -165,7 +204,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                   rows={6}
                   className="font-mono text-sm"
                 />
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -179,7 +218,26 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     )}
                     Save Transcript
                   </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleFetchFromTeams}
+                    disabled={isFetchingTeams}
+                    title={!session.teams_meeting_url ? 'Transcrição só disponível após reunião Teams com transcrição ativa terminar' : 'Importar transcrição do Teams'}
+                  >
+                    {isFetchingTeams ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Video className="h-4 w-4 mr-2" />
+                    )}
+                    Fetch from Teams
+                  </Button>
                 </div>
+                {!session.teams_meeting_url && (
+                  <p className="text-xs text-muted-foreground">
+                    💡 A transcrição do Teams só aparece se a transcrição tiver sido ativada durante a reunião e a reunião já tiver terminado.
+                  </p>
+                )}
               </div>
             </CardContent>
           )}
