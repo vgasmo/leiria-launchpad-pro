@@ -4658,8 +4658,10 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      is_external_mentor: { Args: { _user_id: string }; Returns: boolean }
       is_founder: { Args: { _workspace_id: string }; Returns: boolean }
       is_founder_user: { Args: never; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
       is_startup_founder: { Args: { _startup_id: string }; Returns: boolean }
       is_team_member_of_startup: {
         Args: { _startup_id: string }
