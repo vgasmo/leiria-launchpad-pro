@@ -126,10 +126,11 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
+    // Log detailed error server-side only
     console.error("Error in get-shared-workspace:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
+    // Return generic error to client to prevent information leakage
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
