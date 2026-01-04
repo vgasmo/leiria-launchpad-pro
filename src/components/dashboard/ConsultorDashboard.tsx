@@ -29,7 +29,7 @@ import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { PendingCheckinsPanel } from '@/components/checkins/PendingCheckinsPanel';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
-import { ConsultantWorkloadWidget } from '@/components/staff/ConsultantWorkloadWidget';
+
 import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
@@ -283,11 +283,8 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
 
         {/* Right Sidebar: Quick Actions + Quick Glance */}
         <div className="space-y-4">
-          {/* P0.4: Quick Actions for daily operations */}
           <CockpitQuickActions workspaces={workspaces} />
-          <ConsultantWorkloadWidget workspaces={workspaces} isLoading={false} />
           <StaffTasksPanel compact />
-          {/* P1.2: Integration Errors for observability */}
           <IntegrationErrorsPanel compact />
         </div>
       </div>
