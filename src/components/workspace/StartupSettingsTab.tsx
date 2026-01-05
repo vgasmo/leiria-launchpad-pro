@@ -10,7 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin, Mail, BadgeCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin, Mail, BadgeCheck, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { IntegrationSettings } from './IntegrationSettings';
 
@@ -36,9 +38,12 @@ interface StartupSettingsTabProps {
 }
 
 export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }: StartupSettingsTabProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [formData, setFormData] = useState({
     name: startup.name,
     description: startup.description || '',
@@ -51,10 +56,60 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     main_contact_email: startup.main_contact_email || '',
     main_contact_phone: startup.main_contact_phone || '',
     has_startup_portugal_status: !!startup.has_startup_portugal_status,
+    startup_portugal_document_path: startup.startup_portugal_document_path || '',
   });
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(t('admin.startupsManager.invalidFileType'));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('admin.startupsManager.fileTooLarge'));
+      return;
+    }
+
+    setIsUploadingDoc(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${startupId}/startup-portugal-doc.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('startup-documents')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('startup-documents')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, startup_portugal_document_path: publicUrl }));
+      
+      // Also update the database immediately
+      await supabase.from('startups').update({ startup_portugal_document_path: publicUrl }).eq('id', startupId);
+      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
+      
+      toast.success(t('admin.startupsManager.documentUploaded'));
+    } catch (error: any) {
+      toast.error(`${t('common.error')}: ${error.message}`);
+    } finally {
+      setIsUploadingDoc(false);
+      if (docInputRef.current) docInputRef.current.value = '';
+    }
+  };
 
   const updateMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      // Validate document requirement
+      if (data.has_startup_portugal_status && !data.startup_portugal_document_path) {
+        throw new Error(t('admin.startupsManager.documentRequired'));
+      }
+
       const { error } = await supabase
         .from('startups')
         .update({
@@ -69,6 +124,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           main_contact_email: data.main_contact_email || null,
           main_contact_phone: data.main_contact_phone || null,
           has_startup_portugal_status: !!data.has_startup_portugal_status,
+          startup_portugal_document_path: data.startup_portugal_document_path || null,
         })
         .eq('id', startupId);
       if (error) throw error;
@@ -76,7 +132,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      toast.success('Startup profile updated');
+      toast.success(t('settings.profileUpdated', 'Startup profile updated'));
     },
     onError: (error) => toast.error(`Error: ${error.message}`),
   });
@@ -265,11 +321,79 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
                 />
                 <Label htmlFor="has_startup_portugal_status" className="cursor-pointer flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-muted-foreground" />
-                  Startup com estatuto Startup Portugal
+                  {t('admin.startupsManager.startupPortugalStatus')}
                 </Label>
               </div>
             </div>
           </div>
+
+          {/* Startup Portugal Document Upload */}
+          {formData.has_startup_portugal_status && (
+            <div className="p-4 rounded-lg border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 space-y-3">
+              <Label className="text-sm flex items-center gap-2 font-medium">
+                <FileText className="h-4 w-4" />
+                {t('admin.startupsManager.certificationDocument')} *
+              </Label>
+              
+              {formData.startup_portugal_document_path ? (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    {t('admin.startupsManager.documentAttached')}
+                  </Badge>
+                  <a 
+                    href={formData.startup_portugal_document_path} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    {t('admin.startupsManager.viewDocument')}
+                  </a>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, startup_portugal_document_path: '' })}
+                  >
+                    {t('common.remove')}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    ref={docInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={handleDocumentUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => docInputRef.current?.click()}
+                    disabled={isUploadingDoc}
+                  >
+                    {isUploadingDoc ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    {isUploadingDoc ? t('common.loading') : t('admin.startupsManager.uploadDocument')}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    {t('admin.startupsManager.acceptedFormats')}
+                  </p>
+
+                  <Alert variant="destructive" className="py-2 mt-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      {t('admin.startupsManager.documentRequiredWarning')}
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="rounded-lg border bg-muted/30 p-4 space-y-4">
             <div className="flex items-center gap-2">
