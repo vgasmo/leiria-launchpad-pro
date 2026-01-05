@@ -53,10 +53,12 @@ serve(async (req) => {
 
     console.log(`Generating AI review for financial model: ${version_id}, mode: ${mode}`);
 
-    // Get version with workspace details
+    // Get version with workspace details (explicit FK to avoid ambiguous embeds)
     const { data: version, error: versionError } = await supabase
       .from("financial_model_versions")
-      .select("*, workspaces(id, stage, program_id, health_score, health_label, startup_id)")
+      .select(
+        "*, workspace:workspaces!financial_model_versions_workspace_id_fkey(id, stage, program_id, health_score, health_label, startup_id)"
+      )
       .eq("id", version_id)
       .single();
 
@@ -92,8 +94,15 @@ serve(async (req) => {
       }, req, 429);
     }
 
-    const metrics = version.key_metrics_json as Record<string, number | null> || {};
-    const workspace = version.workspaces;
+    const metrics = (version.key_metrics_json as Record<string, number | null>) || {};
+    const workspace = (version as any).workspace as {
+      id: string;
+      stage: string | null;
+      program_id: string | null;
+      health_score: number | null;
+      health_label: string | null;
+      startup_id: string | null;
+    } | null;
 
     // Get recent sessions
     const { data: recentSessions } = await supabase
