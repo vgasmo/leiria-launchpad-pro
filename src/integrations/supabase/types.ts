@@ -3483,6 +3483,197 @@ export type Database = {
           },
         ]
       }
+      survey_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          name: string
+          program_id: string | null
+          reminder_days: number[] | null
+          starts_at: string
+          status: string
+          survey_definition_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          name: string
+          program_id?: string | null
+          reminder_days?: number[] | null
+          starts_at?: string
+          status?: string
+          survey_definition_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          name?: string
+          program_id?: string | null
+          reminder_days?: number[] | null
+          starts_at?: string
+          status?: string
+          survey_definition_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_campaigns_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_campaigns_survey_definition_id_fkey"
+            columns: ["survey_definition_id"]
+            isOneToOne: false
+            referencedRelation: "survey_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_definitions: {
+        Row: {
+          auto_fill_mappings: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          questions_json: Json
+          updated_at: string
+        }
+        Insert: {
+          auto_fill_mappings?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          questions_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          auto_fill_mappings?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          questions_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      survey_instances: {
+        Row: {
+          auto_filled_data: Json | null
+          campaign_id: string
+          created_at: string
+          id: string
+          last_reminder_sent_at: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          auto_filled_data?: Json | null
+          campaign_id: string
+          created_at?: string
+          id?: string
+          last_reminder_sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          auto_filled_data?: Json | null
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          last_reminder_sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_instances_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "survey_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_instances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          created_at: string
+          id: string
+          instance_id: string
+          is_auto_filled: boolean | null
+          question_id: string
+          response_json: Json | null
+          response_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instance_id: string
+          is_auto_filled?: boolean | null
+          question_id: string
+          response_json?: Json | null
+          response_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instance_id?: string
+          is_auto_filled?: boolean | null
+          question_id?: string
+          response_json?: Json | null
+          response_value?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "survey_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           color: string | null

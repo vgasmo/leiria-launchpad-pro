@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -19,6 +19,7 @@ import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPane
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
+import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -78,6 +79,10 @@ export default function Admin() {
           <TabsTrigger value="health" className="gap-2">
             <Heart className="h-4 w-4" aria-hidden="true" />
             {t('admin.healthModels')}
+          </TabsTrigger>
+          <TabsTrigger value="surveys" className="gap-2">
+            <ClipboardList className="h-4 w-4" aria-hidden="true" />
+            {t('admin.surveys.title', 'Surveys')}
           </TabsTrigger>
           <TabsTrigger value="integrations" className="gap-2">
             <Plug className="h-4 w-4" aria-hidden="true" />
@@ -142,6 +147,10 @@ export default function Admin() {
 
         <TabsContent value="health">
           <HealthModelViewer />
+        </TabsContent>
+
+        <TabsContent value="surveys">
+          <AdminSurveysManager />
         </TabsContent>
 
         <TabsContent value="integrations">
