@@ -205,6 +205,53 @@ export type Database = {
           },
         ]
       }
+      admin_announcements: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_read: boolean
+          message: string | null
+          read_at: string | null
+          title: string
+          workspace_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          title: string
+          workspace_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          title?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_announcements_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_rate_limits: {
         Row: {
           created_at: string
@@ -3418,8 +3465,8 @@ export type Database = {
           created_at: string
           description: string | null
           founded_date: string | null
+          has_startup_portugal_status: boolean | null
           id: string
-          is_legally_recognized: boolean | null
           logo_url: string | null
           main_contact_email: string | null
           main_contact_name: string | null
@@ -3427,6 +3474,7 @@ export type Database = {
           name: string
           nif: string | null
           phone: string | null
+          startup_portugal_document_path: string | null
           updated_at: string
           website: string | null
         }
@@ -3435,8 +3483,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           founded_date?: string | null
+          has_startup_portugal_status?: boolean | null
           id?: string
-          is_legally_recognized?: boolean | null
           logo_url?: string | null
           main_contact_email?: string | null
           main_contact_name?: string | null
@@ -3444,6 +3492,7 @@ export type Database = {
           name: string
           nif?: string | null
           phone?: string | null
+          startup_portugal_document_path?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -3452,8 +3501,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           founded_date?: string | null
+          has_startup_portugal_status?: boolean | null
           id?: string
-          is_legally_recognized?: boolean | null
           logo_url?: string | null
           main_contact_email?: string | null
           main_contact_name?: string | null
@@ -3461,6 +3510,7 @@ export type Database = {
           name?: string
           nif?: string | null
           phone?: string | null
+          startup_portugal_document_path?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -4789,6 +4839,9 @@ export type Database = {
         Row: {
           active_financial_model_version_id: string | null
           assigned_consultor_id: string | null
+          blocked_at: string | null
+          blocked_by: string | null
+          blocked_reason: string | null
           created_at: string
           external_id: string | null
           health_confidence: string | null
@@ -4823,6 +4876,9 @@ export type Database = {
         Insert: {
           active_financial_model_version_id?: string | null
           assigned_consultor_id?: string | null
+          blocked_at?: string | null
+          blocked_by?: string | null
+          blocked_reason?: string | null
           created_at?: string
           external_id?: string | null
           health_confidence?: string | null
@@ -4857,6 +4913,9 @@ export type Database = {
         Update: {
           active_financial_model_version_id?: string | null
           assigned_consultor_id?: string | null
+          blocked_at?: string | null
+          blocked_by?: string | null
+          blocked_reason?: string | null
           created_at?: string
           external_id?: string | null
           health_confidence?: string | null

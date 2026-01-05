@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 import { AdminStartupsManager } from '@/components/admin/AdminStartupsManager';
 import { AdminWorkspacesManager } from '@/components/admin/AdminWorkspacesManager';
+import { AdminAnnouncementsManager } from '@/components/admin/AdminAnnouncementsManager';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { ActivityLogViewerEnhanced } from '@/components/admin/ActivityLogViewerEnhanced';
 import { ComplianceDashboard } from '@/components/admin/ComplianceDashboard';
@@ -47,6 +48,10 @@ export default function Admin() {
           <TabsTrigger value="workspaces" className="gap-2">
             <Briefcase className="h-4 w-4" aria-hidden="true" />
             {t('admin.workspaces')}
+          </TabsTrigger>
+          <TabsTrigger value="announcements" className="gap-2">
+            <Bell className="h-4 w-4" aria-hidden="true" />
+            {t('admin.announcements.tab')}
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" aria-hidden="true" />
@@ -108,6 +113,10 @@ export default function Admin() {
 
         <TabsContent value="workspaces">
           <AdminWorkspacesManager />
+        </TabsContent>
+
+        <TabsContent value="announcements">
+          <AdminAnnouncementsManager />
         </TabsContent>
 
         <TabsContent value="users">
