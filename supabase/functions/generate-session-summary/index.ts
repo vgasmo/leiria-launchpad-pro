@@ -25,6 +25,41 @@ interface KpiPrompt {
   suggestedAction: string;
 }
 
+/**
+ * Validates the request payload
+ */
+function validateRequest(payload: unknown): { valid: true; data: GenerateSummaryRequest } | { valid: false; error: string } {
+  if (!payload || typeof payload !== 'object') {
+    return { valid: false, error: 'Invalid request body' };
+  }
+  
+  const data = payload as Record<string, unknown>;
+  
+  // Validate sessionId is a UUID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!data.sessionId || typeof data.sessionId !== 'string' || !uuidRegex.test(data.sessionId)) {
+    return { valid: false, error: 'Invalid session ID format' };
+  }
+  
+  // Validate transcript if provided (max 100KB)
+  if (data.transcript !== undefined) {
+    if (typeof data.transcript !== 'string') {
+      return { valid: false, error: 'Transcript must be a string' };
+    }
+    if (data.transcript.length > 100000) {
+      return { valid: false, error: 'Transcript exceeds maximum length (100KB)' };
+    }
+  }
+  
+  return {
+    valid: true,
+    data: {
+      sessionId: data.sessionId,
+      transcript: data.transcript as string | undefined,
+    },
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -64,14 +99,26 @@ serve(async (req) => {
       });
     }
 
-    const { sessionId, transcript }: GenerateSummaryRequest = await req.json();
-
-    if (!sessionId) {
-      return new Response(JSON.stringify({ error: "Session ID is required" }), {
+    // Parse and validate request body
+    let rawPayload: unknown;
+    try {
+      rawPayload = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    
+    const validation = validateRequest(rawPayload);
+    if (!validation.valid) {
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    const { sessionId, transcript } = validation.data;
 
     // Use service role to fetch session and validate access
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
@@ -260,9 +307,10 @@ Respond ONLY with this JSON structure:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
-    console.error("Error in generate-session-summary:", error);
-    const message = error instanceof Error ? error.message : "Internal server error";
-    return new Response(JSON.stringify({ error: message }), {
+    // Log full error server-side for debugging
+    console.error("Error in generate-session-summary:", error instanceof Error ? error.message : error);
+    // Return sanitized error to client
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

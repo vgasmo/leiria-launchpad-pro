@@ -249,10 +249,23 @@ serve(async (req) => {
       });
     }
 
-    const { version_id } = await req.json();
+    // Parse and validate request body
+    let body: { version_id?: unknown };
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
-    if (!version_id) {
-      return new Response(JSON.stringify({ error: "version_id is required" }), {
+    const { version_id } = body;
+    
+    // Validate version_id is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!version_id || typeof version_id !== 'string' || !uuidRegex.test(version_id)) {
+      return new Response(JSON.stringify({ error: "Invalid version_id format" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -377,11 +390,12 @@ serve(async (req) => {
     });
 
   } catch (error: unknown) {
-    console.error("[import-financial-model] Error:", error);
-    const message = error instanceof Error ? error.message : "Failed to parse financial model";
+    // Log full error server-side
+    console.error("[import-financial-model] Error:", error instanceof Error ? error.message : error);
+    // Return sanitized error to client
     return new Response(JSON.stringify({ 
       success: false,
-      error: message
+      error: "Failed to parse financial model"
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

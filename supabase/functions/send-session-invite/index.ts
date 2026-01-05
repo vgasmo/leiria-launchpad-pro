@@ -354,10 +354,11 @@ serve(async (req) => {
     );
 
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("Error in send-session-invite:", err);
+    // Log full error server-side for debugging
+    console.error("Error in send-session-invite:", err instanceof Error ? err.message : err);
+    // Return sanitized error to client
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
