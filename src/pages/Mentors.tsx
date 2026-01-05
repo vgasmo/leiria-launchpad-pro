@@ -14,7 +14,8 @@ import {
   BarChart3,
   CalendarDays,
   Mail,
-  ExternalLink
+  UserPlus,
+  Search
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +30,9 @@ import { toast } from 'sonner';
 import { MentorAvailabilitySettings } from '@/components/mentors/MentorAvailabilitySettings';
 import { MentorImpactDashboard } from '@/components/mentors/MentorImpactDashboard';
 import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
+import { FounderMentorRequestPanel } from '@/components/mentors/FounderMentorRequestPanel';
+import { PendingMentorRequestsPanel } from '@/components/mentors/PendingMentorRequestsPanel';
+import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
@@ -159,13 +163,14 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
 }
 
 export default function Mentors() {
-  const { user, roles, isLoading: authLoading, isAuthReady } = useAuth();
+  const { user, roles, isLoading: authLoading, isAuthReady, isAdmin, isConsultor } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const isFounder = roles.includes('founder');
   const isMentor = roles.includes('mentor_externo');
+  const isStaff = isAdmin || isConsultor;
 
   // Check NDA acceptance for external mentors
   const { data: ndaAcceptance, isLoading: ndaLoading } = useQuery({
@@ -181,7 +186,7 @@ export default function Mentors() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user && isMentor,
+    enabled: !!user && isMentor && !isStaff,
   });
 
   const { data: assignedMentors, isLoading: loadingAssigned } = useAssignedMentors(
@@ -193,7 +198,7 @@ export default function Mentors() {
   );
 
   // Redirect external mentors to NDA page if not accepted
-  if (isMentor && isAuthReady && !ndaLoading && !ndaAcceptance) {
+  if (isMentor && !isStaff && isAuthReady && !ndaLoading && !ndaAcceptance) {
     return <Navigate to="/mentor-nda" replace />;
   }
 
@@ -263,11 +268,45 @@ export default function Mentors() {
     ? [...new Map(assignedMentors.map(m => [m.user_id, m])).values()]
     : [];
 
+  // Determine page title based on role
+  const getPageTitle = () => {
+    if (isStaff) return t('mentorsPage.findAndAssign');
+    if (isFounder) return t('mentorsPage.myMentors');
+    if (isMentor) return t('mentorsPage.connectionRequests');
+    return t('mentorsPage.myMentors');
+  };
+
   return (
-    <AppLayout title={isFounder ? t('mentorsPage.myMentors') : t('mentorsPage.connectionRequests')}>
-      {isFounder ? (
-        // FOUNDER VIEW: Show assigned mentors only (no browse/connect)
+    <AppLayout title={getPageTitle()}>
+      {/* STAFF VIEW: Find & Assign + Pending Requests */}
+      {isStaff ? (
+        <Tabs defaultValue="requests" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="requests" className="gap-2">
+              <Clock className="h-4 w-4" />
+              {t('mentorsPage.pendingMentorRequests')}
+            </TabsTrigger>
+            <TabsTrigger value="mentors" className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              {t('mentorsPage.findAndAssign')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requests">
+            <PendingMentorRequestsPanel />
+          </TabsContent>
+
+          <TabsContent value="mentors">
+            <AdminExternalMentorsManager />
+          </TabsContent>
+        </Tabs>
+      ) : isFounder ? (
+        // FOUNDER VIEW: Request mentor + assigned mentors + booking
         <div className="space-y-6">
+          {/* Request a Mentor Section */}
+          <FounderMentorRequestPanel />
+
+          {/* Assigned Mentors */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
