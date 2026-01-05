@@ -108,7 +108,8 @@
     "findMentors": "Encontrar Mentores",
     "settings": "Definições",
     "admin": "Admin",
-    "adminPanel": "Painel de Admin"
+    "adminPanel": "Painel de Admin",
+    "helpGlossary": "Ajuda e Glossário"
   },
   "dashboard": {
     "portfolio": "Visão do Portfólio",
@@ -393,7 +394,11 @@
     "onTarget": "Na meta",
     "aboveTarget": "Acima da meta",
     "belowTarget": "Abaixo da meta",
-    "noChange": "Sem alteração"
+    "noChange": "Sem alteração",
+    "viewGlossary": "Ver glossário",
+    "whatAreKpis": "O que são KPIs?",
+    "kpisExplanation": "KPIs (Key Performance Indicators) são métricas que medem o progresso da sua startup. Exemplos:",
+    "learnMore": "Aprender mais no glossário →"
   },
   "templates": {
     "title": "Templates",
@@ -541,7 +546,9 @@
     "holderType": "Tipo de Detentor",
     "shares": "Ações",
     "shareType": "Tipo de Ação",
-    "investmentAmount": "Valor do Investimento"
+    "investmentAmount": "Valor do Investimento",
+    "concepts": "Conceitos:",
+    "viewGlossary": "Ver glossário"
   },
   "notes": {
     "title": "Notas e Tarefas",
@@ -1833,6 +1840,14 @@
   },
   "glossary": {
     "title": "Glossário",
+    "subtitle": "Conceitos essenciais para founders",
+    "searchPlaceholder": "Pesquisar conceitos...",
+    "concepts": "conceitos",
+    "noResults": "Nenhum conceito encontrado para",
+    "categoryMetrics": "Métricas Financeiras",
+    "categoryProduct": "Produto",
+    "categoryMarket": "Mercado",
+    "categoryFunding": "Financiamento",
     "unitEconomics": "Unit Economics",
     "unitEconomicsDesc": "Métricas que mostram a rentabilidade por cliente ou unidade de produto. Inclui CAC, LTV e margem bruta.",
     "mvp": "MVP (Produto Mínimo Viável)",

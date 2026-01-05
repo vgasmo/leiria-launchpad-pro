@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,8 @@ import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { KpiImportDialog } from './KpiImportDialog';
+import { QuickHelp } from '@/components/ui/GlossaryTooltip';
+import { Link } from 'react-router-dom';
 
 interface KpisTabProps {
   workspaceId: string;
@@ -264,6 +266,34 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
           <p className="text-muted-foreground mb-4">
             {t('kpis.noKpisDesc')}
           </p>
+          
+          {/* Educational hint */}
+          <div className="mb-6 p-4 rounded-lg bg-muted/50 max-w-md mx-auto text-left">
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>{t('kpis.whatAreKpis', 'O que são KPIs?')}</strong>
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              {t('kpis.kpisExplanation', 'KPIs (Key Performance Indicators) são métricas que medem o progresso da sua startup. Exemplos:')}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 text-xs">
+                <QuickHelp term="mrr" /> MRR
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs">
+                <QuickHelp term="cac" /> CAC
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs">
+                <QuickHelp term="ltv" /> LTV
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs">
+                <QuickHelp term="runway" /> Runway
+              </span>
+            </div>
+            <Link to="/help" className="text-xs text-primary hover:underline mt-2 inline-block">
+              {t('kpis.learnMore', 'Aprender mais no glossário →')}
+            </Link>
+          </div>
+          
           {canConfigureKpis && (
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button onClick={handleApplyDefaults} disabled={applyDefaults.isPending}>
@@ -325,26 +355,39 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header with month selector */}
+      {/* Header with month selector and help */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handlePrevMonth}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="min-w-[140px] text-center">
-            <span className="font-medium">{format(selectedMonth, 'MMMM yyyy')}</span>
-            {isCurrentMonth && (
-              <Badge variant="secondary" className="ml-2 text-xs">{t('kpis.current')}</Badge>
-            )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="min-w-[140px] text-center">
+              <span className="font-medium">{format(selectedMonth, 'MMMM yyyy')}</span>
+              {isCurrentMonth && (
+                <Badge variant="secondary" className="ml-2 text-xs">{t('kpis.current')}</Badge>
+              )}
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleNextMonth}
+              disabled={isCurrentMonth}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleNextMonth}
-            disabled={isCurrentMonth}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          
+          {/* Quick glossary hints */}
+          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground border-l pl-3">
+            <QuickHelp term="mrr" />
+            <QuickHelp term="cac" />
+            <QuickHelp term="ltv" />
+            <QuickHelp term="runway" />
+            <Link to="/help" className="ml-1 text-primary hover:underline text-xs">
+              {t('kpis.viewGlossary', 'Ver glossário')}
+            </Link>
+          </div>
         </div>
 
         <div className="flex gap-2">

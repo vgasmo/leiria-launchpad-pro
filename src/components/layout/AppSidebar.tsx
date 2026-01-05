@@ -11,6 +11,7 @@ import {
   Users,
   MessageCircle,
   Lightbulb,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -304,6 +305,43 @@ export function AppSidebar() {
             )}
           </Link>
         ) : null}
+
+        {/* Help/Glossary - visible to founders */}
+        {isFounder && (
+          <div className={cn("mx-3 mb-2", collapsed ? "text-center" : "")}>
+            {collapsed ? (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/help"
+                    className={cn(
+                      "flex items-center justify-center h-10 w-10 rounded-lg transition-colors",
+                      location.pathname === '/help' 
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground" 
+                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    )}
+                  >
+                    <HelpCircle className="h-5 w-5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t('nav.helpGlossary', 'Ajuda e Glossário')}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Link
+                to="/help"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 w-full",
+                  location.pathname === '/help' 
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" 
+                    : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                )}
+              >
+                <HelpCircle className="h-5 w-5" />
+                {t('nav.helpGlossary', 'Ajuda e Glossário')}
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Messaging button */}
         <div className={cn("mx-3 mb-2", collapsed ? "text-center" : "")}>

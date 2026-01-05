@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useFundingRounds, useInvestors, useCapTable, useCreateFundingRound, useCreateInvestor, useCreateCapTableEntry, useDeleteInvestor, useDeleteCapTableEntry } from '@/hooks/useFunding';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { DollarSign, Users, PieChartIcon, Plus, Trash2 } from 'lucide-react';
+import { DollarSign, Users, PieChartIcon, Plus, Trash2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { QuickHelp } from '@/components/ui/GlossaryTooltip';
 
 const ROUND_TYPES = ['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'bridge', 'convertible-note'];
 const INVESTOR_TYPES = ['angel', 'vc', 'corporate', 'accelerator', 'family-office'];
@@ -125,6 +127,20 @@ export function FundingTrackerTab({ startupId }: FundingTrackerTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Help bar for funding concepts */}
+      <div className="flex items-center gap-3 text-xs text-muted-foreground p-2 rounded-lg bg-muted/30">
+        <span className="font-medium">{t('funding.concepts', 'Conceitos:')}</span>
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1"><QuickHelp term="capTable" /> Cap Table</span>
+          <span className="inline-flex items-center gap-1"><QuickHelp term="dilution" /> Diluição</span>
+          <span className="inline-flex items-center gap-1"><QuickHelp term="vesting" /> Vesting</span>
+          <span className="inline-flex items-center gap-1"><QuickHelp term="preemption" /> Pre-emption</span>
+        </div>
+        <Link to="/help" className="ml-auto text-primary hover:underline">
+          {t('funding.viewGlossary', 'Ver glossário')}
+        </Link>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
