@@ -145,8 +145,8 @@
     "applicationBeingReviewed": "Your startup application is being reviewed by our team. You'll receive access to your workspace once approved.",
     "pending": "Pending",
     "responseTime": "We typically respond within 2-3 business days",
-    "startYourJourney": "Start Your Journey",
-    "startYourJourneyDesc": "Create your startup profile to join our mentorship program and get access to expert guidance, resources, and a dedicated workspace.",
+    "startYourJourney": "Start Your Startup Journey",
+    "startYourJourneyDesc": "Register your startup to access mentorship, track your progress, and prepare for your next funding round.",
     "createYourStartup": "Create Your Startup",
     "openWorkspace": "Open Workspace",
     "nextMeeting": "Next Meeting",
@@ -156,7 +156,32 @@
     "quickActions": "Quick Actions",
     "commonTasks": "Common tasks for your workspace",
     "updateKpis": "Update KPIs",
-    "viewActions": "View Actions"
+    "viewActions": "View Actions",
+    "learnMore": "Learn More"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to your startup journey!",
+    "welcomeDescription": "This platform helps you track progress, connect with mentors, and prepare for investment. Let's get you set up in just a few steps.",
+    "getStarted": "Get Started",
+    "viewWorkspace": "View Workspace",
+    "exploreMentors": "Explore Mentors",
+    "checklistTitle": "Getting Started",
+    "completeProfile": "Complete your profile",
+    "completeProfileDesc": "Help mentors and consultants understand who you are",
+    "editProfile": "Edit Profile",
+    "addStartup": "Register your startup",
+    "addStartupDesc": "Set up your company to start tracking progress",
+    "createStartup": "Create Startup",
+    "setKpis": "Define your KPIs",
+    "setKpisDesc": "Track what matters most to your growth",
+    "addKpis": "Add KPIs",
+    "uploadDeck": "Upload your pitch deck",
+    "uploadDeckDesc": "Get feedback and share with investors",
+    "connectMentor": "Connect with a mentor",
+    "connectMentorDesc": "Get guidance from experienced professionals",
+    "findMentors": "Find Mentors",
+    "allComplete": "You're all set!",
+    "allCompleteDesc": "Great job completing your setup. You're ready to make progress."
   },
   "mentor": {
     "noStartupsAssigned": "No startups assigned yet",
@@ -1618,13 +1643,16 @@
     }
   },
   "emptyState": {
-    "noMatchingWorkspaces": "No matching workspaces",
-    "adjustFilters": "Try adjusting your search or filters to find what you're looking for.",
-    "clearFilters": "Clear Filters",
-    "welcomeToWorkspace": "Welcome to your workspace",
-    "founderNoStartups": "You don't have any startups yet. Create your first startup to get started with tracking KPIs, managing milestones, and growing your business.",
-    "noAccess": "You don't have access to any workspaces yet. Contact an administrator to get assigned to a startup.",
-    "createFirstStartup": "Create Your First Startup"
+    "noMatchingWorkspaces": "No matching results",
+    "adjustFilters": "Try adjusting your filters or search terms to find what you're looking for.",
+    "clearFilters": "Clear All Filters",
+    "welcomeToWorkspace": "Welcome to Workspaces",
+    "welcomeFounder": "Start Your Startup Journey",
+    "founderNoStartups": "Register your startup to track progress, connect with mentors, and prepare for investment.",
+    "founderValue": "Get guidance from mentors and track your KPIs in one place.",
+    "noAccess": "You don't have access to any workspaces yet. Contact an administrator or join a program.",
+    "createFirstStartup": "Create Your Startup",
+    "explorePrograms": "Explore Programs"
   },
   "integrations": {
     "title": "Integrations & Capture",

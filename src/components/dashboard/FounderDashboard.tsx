@@ -11,7 +11,8 @@ import {
   Plus,
   Rocket,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday, isPast } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,8 +23,10 @@ import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FounderWelcomePanel } from '@/components/founder/FounderWelcomePanel';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -40,9 +43,17 @@ export function FounderDashboard({
 }: FounderDashboardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { profile } = useAuth();
 
   // Get the primary workspace (founders typically have 1)
   const workspace = workspaces[0];
+  
+  // Calculate checklist progress
+  const hasProfile = Boolean(profile?.full_name);
+  const hasStartup = Boolean(workspace);
+  const hasKpis = Boolean(workspace?.hasCurrentMonthKpi);
+  const hasDocuments = Boolean(workspace?.lastSession); // Simplified check
+  const hasMentor = false; // Would need mentor connection data
 
   if (isLoading) {
     return (
@@ -108,20 +119,44 @@ export function FounderDashboard({
     );
   }
 
-  // No workspace yet
+  // No workspace yet - show welcome panel with getting started
   if (!workspace) {
     return (
-      <Card className="p-12 text-center">
-        <Rocket className="h-16 w-16 mx-auto text-primary mb-6" />
-        <h3 className="text-2xl font-bold mb-2">{t('founder.startYourJourney')}</h3>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          {t('founder.startYourJourneyDesc')}
-        </p>
-        <Button size="lg" onClick={onCreateStartup}>
-          <Plus className="mr-2 h-5 w-5" />
-          {t('founder.createYourStartup')}
-        </Button>
-      </Card>
+      <div className="space-y-6">
+        <FounderWelcomePanel
+          hasStartup={false}
+          hasProfile={hasProfile}
+          hasKpis={false}
+          hasMentor={false}
+          hasDocuments={false}
+          onCreateStartup={onCreateStartup}
+        />
+        
+        {/* Motivational empty state */}
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <CardContent className="relative p-8 md:p-12 text-center">
+            <div className="h-20 w-20 mx-auto rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
+              <Rocket className="h-10 w-10 text-primary-foreground" />
+            </div>
+            <h3 className="font-heading text-2xl md:text-3xl font-bold mb-3">
+              {t('founder.startYourJourney', 'Start Your Startup Journey')}
+            </h3>
+            <p className="text-muted-foreground mb-8 max-w-lg mx-auto text-base">
+              {t('founder.startYourJourneyDesc', 'Register your startup to access mentorship, track your progress, and prepare for your next funding round.')}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button size="lg" onClick={onCreateStartup} className="gap-2 shadow-lg">
+                <Plus className="h-5 w-5" />
+                {t('founder.createYourStartup', 'Create Your Startup')}
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => navigate('/help')}>
+                {t('founder.learnMore', 'Learn More')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -129,6 +164,17 @@ export function FounderDashboard({
 
   return (
     <div className="space-y-4 md:space-y-6">
+      {/* Welcome Panel with Checklist (dismissible) */}
+      <FounderWelcomePanel
+        hasStartup={hasStartup}
+        hasProfile={hasProfile}
+        hasKpis={hasKpis}
+        hasMentor={hasMentor}
+        hasDocuments={hasDocuments}
+        onCreateStartup={onCreateStartup}
+        workspaceId={workspace.id}
+      />
+      
       {/* Startup Header Card - Mobile Optimized */}
       <Card className="overflow-hidden animate-fade-in">
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 md:p-6">
