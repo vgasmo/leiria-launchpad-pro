@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
 
 export interface KeyMetrics {
@@ -332,12 +333,12 @@ export function useParseFinancialModel() {
 
   return useMutation({
     mutationFn: async (versionId: string) => {
-      const { data, error } = await supabase.functions.invoke('import-financial-model', {
+      const { data, error } = await invokeWithAuth('import-financial-model', {
         body: { version_id: versionId },
       });
 
       if (error) throw error;
-      if (!data.success) throw new Error(data.error || 'Parse failed');
+      if (!data?.success) throw new Error((data as any)?.error || 'Parse failed');
       return data;
     },
     onSuccess: (_, versionId) => {
