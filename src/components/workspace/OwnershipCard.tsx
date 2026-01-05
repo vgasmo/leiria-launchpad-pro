@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { User, Calendar, Clock, MessageSquare, Edit2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -33,6 +34,7 @@ interface OwnershipCardProps {
 }
 
 export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardProps) {
+  const { t } = useTranslation();
   const { isConsultor, isAdmin } = useAuth();
   const canEdit = isConsultor || isAdmin;
 
@@ -68,7 +70,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Owner & SLA</CardTitle>
+          <CardTitle className="text-base">{t('ownership.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-16 w-full" />
@@ -77,7 +79,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
     );
   }
 
-  const slaStatus = getSlaStatus(ownership?.last_contact_at, ownership?.next_followup_at);
+  const slaStatus = getSlaStatus(ownership?.last_contact_at, ownership?.next_followup_at, t);
 
   if (compact) {
     return (
@@ -91,7 +93,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
             </AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium truncate max-w-[100px]">
-            {ownership?.consultor?.full_name || 'Unassigned'}
+            {ownership?.consultor?.full_name || t('ownership.unassigned')}
           </span>
         </div>
 
@@ -121,14 +123,14 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <User className="h-4 w-4" />
-          Owner & SLA
+          {t('ownership.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Assigned Consultor */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">
-            Assigned Consultor
+            {t('ownership.assignedConsultor')}
           </label>
           {isEditingOwner && canEdit ? (
             <Select
@@ -136,10 +138,10 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
               onValueChange={handleAssignConsultor}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select consultor" />
+                <SelectValue placeholder={t('ownership.selectConsultor')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Unassigned</SelectItem>
+                <SelectItem value="none">{t('ownership.unassigned')}</SelectItem>
                 {consultors?.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.full_name || c.email}
@@ -157,7 +159,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
               </Avatar>
               <div className="flex-1">
                 <p className="font-medium">
-                  {ownership?.consultor?.full_name || 'Unassigned'}
+                  {ownership?.consultor?.full_name || t('ownership.unassigned')}
                 </p>
                 {ownership?.consultor?.email && (
                   <p className="text-xs text-muted-foreground">{ownership.consultor.email}</p>
@@ -176,13 +178,13 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <MessageSquare className="h-3.5 w-3.5" />
-            Last Contact
+            {t('ownership.lastContact')}
           </label>
           <div className="flex items-center justify-between">
             <p className="text-sm">
               {ownership?.last_contact_at
                 ? formatDistanceToNow(new Date(ownership.last_contact_at), { addSuffix: true })
-                : 'Never'}
+                : t('ownership.never')}
             </p>
             {canEdit && (
               <Button
@@ -192,7 +194,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
                 disabled={markContact.isPending}
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Log Contact
+                {t('ownership.logContact')}
               </Button>
             )}
           </div>
@@ -202,7 +204,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5" />
-            Next Follow-up
+            {t('ownership.nextFollowup')}
           </label>
           <div className="flex items-center justify-between">
             {isEditingFollowup && canEdit ? (
@@ -211,7 +213,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
                   <Button variant="outline" size="sm">
                     {ownership?.next_followup_at
                       ? format(new Date(ownership.next_followup_at), 'MMM d, yyyy')
-                      : 'Set date'}
+                      : t('ownership.setDate')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -228,7 +230,7 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
                 <p className="text-sm">
                   {ownership?.next_followup_at
                     ? format(new Date(ownership.next_followup_at), 'MMM d, yyyy')
-                    : 'Not set'}
+                    : t('ownership.notSet')}
                 </p>
                 {canEdit && (
                   <Button variant="ghost" size="icon" onClick={() => setIsEditingFollowup(true)}>
@@ -252,18 +254,18 @@ export function OwnershipCard({ workspaceId, compact = false }: OwnershipCardPro
   );
 }
 
-function getSlaStatus(lastContact: string | null | undefined, nextFollowup: string | null | undefined) {
+function getSlaStatus(lastContact: string | null | undefined, nextFollowup: string | null | undefined, t: (key: string, options?: any) => string) {
   const now = new Date();
 
   // Check if follow-up is overdue
   if (nextFollowup) {
     const followupDate = new Date(nextFollowup);
     if (followupDate < now) {
-      return { label: 'Follow-up Overdue', variant: 'destructive' };
+      return { label: t('ownership.followupOverdue'), variant: 'destructive' };
     }
     const daysUntil = Math.ceil((followupDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     if (daysUntil <= 2) {
-      return { label: `Follow-up in ${daysUntil}d`, variant: 'warning' };
+      return { label: t('ownership.followupInDays', { days: daysUntil }), variant: 'warning' };
     }
   }
 
@@ -272,13 +274,13 @@ function getSlaStatus(lastContact: string | null | undefined, nextFollowup: stri
     const contactDate = new Date(lastContact);
     const daysSince = Math.floor((now.getTime() - contactDate.getTime()) / (1000 * 60 * 60 * 24));
     if (daysSince > 30) {
-      return { label: 'No contact in 30+ days', variant: 'destructive' };
+      return { label: t('ownership.noContact30Days'), variant: 'destructive' };
     }
     if (daysSince > 14) {
-      return { label: 'No contact in 14+ days', variant: 'warning' };
+      return { label: t('ownership.noContact14Days'), variant: 'warning' };
     }
-    return { label: 'On Track', variant: 'default' };
+    return { label: t('ownership.onTrack'), variant: 'default' };
   }
 
-  return { label: 'No contact recorded', variant: 'secondary' };
+  return { label: t('ownership.noContactRecorded'), variant: 'secondary' };
 }

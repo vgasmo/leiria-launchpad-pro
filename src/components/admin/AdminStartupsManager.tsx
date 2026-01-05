@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Download, Search, Building2, Phone, Mail, CheckCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { startupSchema } from '@/lib/validations';
 
@@ -38,6 +39,7 @@ const EMPTY_FORM: FormState = {
 };
 
 export function AdminStartupsManager() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStartup, setEditingStartup] = useState<{ id: string } | null>(null);
@@ -82,10 +84,10 @@ export function AdminStartupsManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
-      toast.success('Startup created');
+      toast.success(t('admin.startupsManager.startupCreated'));
       resetForm();
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
   const updateMutation = useMutation({
@@ -104,10 +106,10 @@ export function AdminStartupsManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
-      toast.success('Startup updated');
+      toast.success(t('admin.startupsManager.startupUpdated'));
       resetForm();
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
   const deleteMutation = useMutation({
@@ -117,9 +119,9 @@ export function AdminStartupsManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
-      toast.success('Startup deleted');
+      toast.success(t('admin.startupsManager.startupDeleted'));
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
   const resetForm = () => {
@@ -185,11 +187,11 @@ export function AdminStartupsManager() {
   // Export to CSV
   const handleExport = () => {
     if (!filteredStartups?.length) {
-      toast.error('No startups to export');
+      toast.error(t('admin.startupsManager.noDataToExport'));
       return;
     }
 
-    const headers = ['Name', 'NIF', 'Main Contact', 'Contact Email', 'Contact Phone', 'Stage', 'Program', 'Website', 'Legally Recognized', 'Description'];
+    const headers = [t('admin.startupsManager.name'), t('admin.startupsManager.nif'), t('admin.startupsManager.mainContact'), t('admin.startupsManager.contactEmail'), t('admin.startupsManager.contactPhone'), t('admin.startupsManager.stage'), 'Program', t('admin.startupsManager.website'), t('admin.startupsManager.legallyRecognized'), t('admin.startupsManager.description')];
     const rows = filteredStartups.map(s => {
       const workspace = s.workspaces?.[0];
       return [
@@ -216,7 +218,7 @@ export function AdminStartupsManager() {
     link.href = URL.createObjectURL(blob);
     link.download = `startups-export-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    toast.success(`Exported ${filteredStartups.length} startups`);
+    toast.success(t('admin.startupsManager.exported', { count: filteredStartups.length }));
   };
 
   const uniqueStages = [...new Set(startups?.flatMap(s => s.workspaces?.map(w => w.stage) || []).filter(Boolean))];
@@ -224,12 +226,12 @@ export function AdminStartupsManager() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
-        <CardTitle>Startups</CardTitle>
+        <CardTitle>{t('admin.startupsManager.title')}</CardTitle>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder={t('admin.startupsManager.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 w-48"
@@ -237,10 +239,10 @@ export function AdminStartupsManager() {
           </div>
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger className="w-36">
-              <SelectValue placeholder="All Stages" />
+              <SelectValue placeholder={t('admin.startupsManager.allStages')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Stages</SelectItem>
+              <SelectItem value="all">{t('admin.startupsManager.allStages')}</SelectItem>
               {uniqueStages.map(stage => (
                 <SelectItem key={stage} value={stage}>{stage}</SelectItem>
               ))}
@@ -248,20 +250,20 @@ export function AdminStartupsManager() {
           </Select>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            {t('admin.startupsManager.exportCsv')}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4 mr-2" />Add Startup</Button>
+              <Button size="sm"><Plus className="h-4 w-4 mr-2" />{t('admin.startupsManager.addStartup')}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingStartup ? 'Edit Startup' : 'Create Startup'}</DialogTitle>
+                <DialogTitle>{editingStartup ? t('admin.startupsManager.editStartup') : t('admin.startupsManager.createStartup')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <Label htmlFor="name">Name *</Label>
+                    <Label htmlFor="name">{t('admin.startupsManager.name')} *</Label>
                     <Input 
                       id="name" 
                       value={formData.name} 
@@ -275,7 +277,7 @@ export function AdminStartupsManager() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="nif">NIF (Tax ID)</Label>
+                    <Label htmlFor="nif">{t('admin.startupsManager.taxId')}</Label>
                     <Input 
                       id="nif" 
                       value={formData.nif} 
@@ -293,7 +295,7 @@ export function AdminStartupsManager() {
                         onCheckedChange={(checked) => setFormData({ ...formData, is_legally_recognized: !!checked })} 
                       />
                       <Label htmlFor="is_legally_recognized" className="cursor-pointer">
-                        Startup Reconhecida por Lei
+                        {t('admin.startupsManager.legallyRecognized')}
                       </Label>
                     </div>
                   </div>
@@ -302,11 +304,11 @@ export function AdminStartupsManager() {
                 <div className="border-t pt-4">
                   <p className="text-sm font-medium mb-3 flex items-center gap-2">
                     <Phone className="h-4 w-4" />
-                    Main Contact
+                    {t('admin.startupsManager.mainContact')}
                   </p>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
-                      <Label htmlFor="main_contact_name">Contact Name</Label>
+                      <Label htmlFor="main_contact_name">{t('admin.startupsManager.contactName')}</Label>
                       <Input 
                         id="main_contact_name" 
                         value={formData.main_contact_name} 
@@ -315,7 +317,7 @@ export function AdminStartupsManager() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="main_contact_email">Contact Email</Label>
+                      <Label htmlFor="main_contact_email">{t('admin.startupsManager.contactEmail')}</Label>
                       <Input 
                         id="main_contact_email" 
                         type="email"
@@ -325,7 +327,7 @@ export function AdminStartupsManager() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="main_contact_phone">Contact Phone</Label>
+                      <Label htmlFor="main_contact_phone">{t('admin.startupsManager.contactPhone')}</Label>
                       <Input 
                         id="main_contact_phone" 
                         value={formData.main_contact_phone} 
@@ -337,7 +339,7 @@ export function AdminStartupsManager() {
                 </div>
 
                 <div className="border-t pt-4">
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="website">{t('admin.startupsManager.website')}</Label>
                   <Input 
                     id="website" 
                     value={formData.website} 
@@ -350,7 +352,7 @@ export function AdminStartupsManager() {
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('admin.startupsManager.description')}</Label>
                   <Textarea 
                     id="description" 
                     value={formData.description} 
@@ -363,7 +365,7 @@ export function AdminStartupsManager() {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full">{editingStartup ? 'Update' : 'Create'}</Button>
+                <Button type="submit" className="w-full">{editingStartup ? t('admin.startupsManager.update') : t('admin.startupsManager.create')}</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -371,17 +373,17 @@ export function AdminStartupsManager() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('admin.startupsManager.loading')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>NIF</TableHead>
-                <TableHead>Main Contact</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
+                <TableHead>{t('admin.startupsManager.name')}</TableHead>
+                <TableHead>{t('admin.startupsManager.nif')}</TableHead>
+                <TableHead>{t('admin.startupsManager.mainContact')}</TableHead>
+                <TableHead>{t('admin.startupsManager.stage')}</TableHead>
+                <TableHead>{t('admin.startupsManager.status')}</TableHead>
+                <TableHead className="w-24">{t('admin.startupsManager.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -395,7 +397,7 @@ export function AdminStartupsManager() {
                         {startup.is_legally_recognized && (
                           <Badge variant="outline" className="text-xs">
                             <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
-                            Legal
+                            {t('admin.startupsManager.legal')}
                           </Badge>
                         )}
                       </div>
@@ -435,7 +437,7 @@ export function AdminStartupsManager() {
                 );
               })}
               {filteredStartups?.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No startups found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('admin.startupsManager.noStartups')}</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

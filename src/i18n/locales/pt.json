@@ -96,7 +96,8 @@
     "continue": "Continuar",
     "start": "Iniciar",
     "previous": "Anterior",
-    "next": "Seguinte"
+    "next": "Seguinte",
+    "details": "Detalhes"
   },
   "nav": {
     "myWorkspaces": "Os Meus Workspaces",
@@ -871,6 +872,38 @@
     "cancel": "Cancelar",
     "startupApproved": "Startup aprovada e ativada!",
     "applicationRejected": "Candidatura rejeitada",
+    "startupsManager": {
+      "title": "Startups",
+      "search": "Pesquisar...",
+      "allStages": "Todas as Fases",
+      "exportCsv": "Exportar CSV",
+      "addStartup": "Adicionar Startup",
+      "editStartup": "Editar Startup",
+      "createStartup": "Criar Startup",
+      "name": "Nome",
+      "nif": "NIF",
+      "mainContact": "Contacto Principal",
+      "stage": "Fase",
+      "status": "Estado",
+      "actions": "Ações",
+      "noStartups": "Nenhuma startup encontrada",
+      "loading": "A carregar...",
+      "startupCreated": "Startup criada",
+      "startupUpdated": "Startup atualizada",
+      "startupDeleted": "Startup eliminada",
+      "exported": "Exportadas {{count}} startups",
+      "noDataToExport": "Sem startups para exportar",
+      "legallyRecognized": "Startup Reconhecida por Lei",
+      "taxId": "NIF (Número de Contribuinte)",
+      "contactName": "Nome do Contacto",
+      "contactEmail": "Email do Contacto",
+      "contactPhone": "Telefone do Contacto",
+      "website": "Website",
+      "description": "Descrição",
+      "update": "Atualizar",
+      "create": "Criar",
+      "legal": "Legal"
+    },
     "mentors": {
       "title": "Mentores Externos",
       "description": "Gerir mentores externos, atribuição a startups e estado do NDA",
@@ -1083,6 +1116,24 @@
     "uploadImageFile": "Por favor carregue um ficheiro de imagem",
     "imageTooLarge": "A imagem deve ter menos de 5MB",
     "avatarUploaded": "Avatar carregado! Clique em Guardar para aplicar as alterações."
+  },
+  "ownership": {
+    "title": "Proprietário e SLA",
+    "assignedConsultor": "Consultor Atribuído",
+    "selectConsultor": "Selecionar consultor",
+    "unassigned": "Não atribuído",
+    "lastContact": "Último Contacto",
+    "never": "Nunca",
+    "logContact": "Registar Contacto",
+    "nextFollowup": "Próximo Acompanhamento",
+    "setDate": "Definir data",
+    "notSet": "Não definido",
+    "followupOverdue": "Acompanhamento Atrasado",
+    "followupInDays": "Acompanhamento em {{days}}d",
+    "noContact30Days": "Sem contacto há 30+ dias",
+    "noContact14Days": "Sem contacto há 14+ dias",
+    "onTrack": "Em Dia",
+    "noContactRecorded": "Sem contacto registado"
   },
   "relativeTime": {
     "justNow": "agora mesmo",
@@ -1772,5 +1823,14 @@
     "vestingDesc": "Período durante o qual ações são 'ganhas' gradualmente. Tipicamente 4 anos com cliff de 1 ano.",
     "cliff": "Cliff",
     "cliffDesc": "Período inicial de vesting onde nenhuma ação é ganha. Protege a empresa se alguém sair cedo."
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "backHome": "Voltar ao Início"
+  },
+  "accessDenied": {
+    "title": "Acesso Negado",
+    "message": "Não tem permissão para ver este conteúdo. Por favor contacte um administrador se acredita que isto é um erro.",
+    "backToWorkspaces": "Voltar aos Workspaces"
   }
 }

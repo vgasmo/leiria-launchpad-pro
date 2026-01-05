@@ -95,7 +95,8 @@
     "continue": "Continue",
     "start": "Start",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "details": "Details"
   },
   "nav": {
     "myWorkspaces": "My Workspaces",
@@ -870,6 +871,38 @@
     "cancel": "Cancel",
     "startupApproved": "Startup approved and activated!",
     "applicationRejected": "Application rejected",
+    "startupsManager": {
+      "title": "Startups",
+      "search": "Search...",
+      "allStages": "All Stages",
+      "exportCsv": "Export CSV",
+      "addStartup": "Add Startup",
+      "editStartup": "Edit Startup",
+      "createStartup": "Create Startup",
+      "name": "Name",
+      "nif": "Tax ID",
+      "mainContact": "Main Contact",
+      "stage": "Stage",
+      "status": "Status",
+      "actions": "Actions",
+      "noStartups": "No startups found",
+      "loading": "Loading...",
+      "startupCreated": "Startup created",
+      "startupUpdated": "Startup updated",
+      "startupDeleted": "Startup deleted",
+      "exported": "Exported {{count}} startups",
+      "noDataToExport": "No startups to export",
+      "legallyRecognized": "Legally Recognized Startup",
+      "taxId": "Tax ID (NIF)",
+      "contactName": "Contact Name",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone",
+      "website": "Website",
+      "description": "Description",
+      "update": "Update",
+      "create": "Create",
+      "legal": "Legal"
+    },
     "mentors": {
       "title": "External Mentors",
       "description": "Manage external mentors, startup assignments, and NDA status",
@@ -1082,6 +1115,24 @@
     "uploadImageFile": "Please upload an image file",
     "imageTooLarge": "Image must be less than 5MB",
     "avatarUploaded": "Avatar uploaded! Click Save to apply changes."
+  },
+  "ownership": {
+    "title": "Owner & SLA",
+    "assignedConsultor": "Assigned Consultor",
+    "selectConsultor": "Select consultor",
+    "unassigned": "Unassigned",
+    "lastContact": "Last Contact",
+    "never": "Never",
+    "logContact": "Log Contact",
+    "nextFollowup": "Next Follow-up",
+    "setDate": "Set date",
+    "notSet": "Not set",
+    "followupOverdue": "Follow-up Overdue",
+    "followupInDays": "Follow-up in {{days}}d",
+    "noContact30Days": "No contact in 30+ days",
+    "noContact14Days": "No contact in 14+ days",
+    "onTrack": "On Track",
+    "noContactRecorded": "No contact recorded"
   },
   "relativeTime": {
     "justNow": "just now",
@@ -1702,5 +1753,14 @@
     "vestingDesc": "Period during which shares are 'earned' gradually. Typically 4 years with 1-year cliff.",
     "cliff": "Cliff",
     "cliffDesc": "Initial vesting period where no shares are earned. Protects the company if someone leaves early."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "backHome": "Return to Home"
+  },
+  "accessDenied": {
+    "title": "Access Denied",
+    "message": "You don't have permission to view this content. Please contact an administrator if you believe this is an error.",
+    "backToWorkspaces": "Back to Workspaces"
   }
 }
