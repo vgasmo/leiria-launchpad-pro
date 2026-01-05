@@ -3374,8 +3374,13 @@ export type Database = {
           description: string | null
           founded_date: string | null
           id: string
+          is_legally_recognized: boolean | null
           logo_url: string | null
+          main_contact_email: string | null
+          main_contact_name: string | null
+          main_contact_phone: string | null
           name: string
+          nif: string | null
           phone: string | null
           updated_at: string
           website: string | null
@@ -3386,8 +3391,13 @@ export type Database = {
           description?: string | null
           founded_date?: string | null
           id?: string
+          is_legally_recognized?: boolean | null
           logo_url?: string | null
+          main_contact_email?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
           name: string
+          nif?: string | null
           phone?: string | null
           updated_at?: string
           website?: string | null
@@ -3398,8 +3408,13 @@ export type Database = {
           description?: string | null
           founded_date?: string | null
           id?: string
+          is_legally_recognized?: boolean | null
           logo_url?: string | null
+          main_contact_email?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
           name?: string
+          nif?: string | null
           phone?: string | null
           updated_at?: string
           website?: string | null

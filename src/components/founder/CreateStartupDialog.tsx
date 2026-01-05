@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { Rocket, Building2, Globe, Calendar, FileText } from 'lucide-react';
+import { Rocket, Building2, Globe, Calendar, FileText, Phone, Mail, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,11 @@ const startupSchema = z.object({
   website: z.string().url().optional().or(z.literal('')),
   stage: z.enum(['ideation', 'validation', 'mvp', 'growth', 'scale']),
   programId: z.string().uuid('Please select a program'),
+  nif: z.string().max(20).optional(),
+  mainContactName: z.string().max(100).optional(),
+  mainContactEmail: z.string().email().optional().or(z.literal('')),
+  mainContactPhone: z.string().max(30).optional(),
+  isLegallyRecognized: z.boolean().optional(),
 });
 
 interface CreateStartupDialogProps {
@@ -40,6 +46,11 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
   const [website, setWebsite] = useState('');
   const [stage, setStage] = useState<StartupStage>('ideation');
   const [programId, setProgramId] = useState('');
+  const [nif, setNif] = useState('');
+  const [mainContactName, setMainContactName] = useState('');
+  const [mainContactEmail, setMainContactEmail] = useState('');
+  const [mainContactPhone, setMainContactPhone] = useState('');
+  const [isLegallyRecognized, setIsLegallyRecognized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,7 +59,10 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     setError(null);
 
     // Validate
-    const result = startupSchema.safeParse({ name, description, website, stage, programId });
+    const result = startupSchema.safeParse({ 
+      name, description, website, stage, programId,
+      nif, mainContactName, mainContactEmail, mainContactPhone, isLegallyRecognized
+    });
     if (!result.success) {
       setError(result.error.errors[0].message);
       return;
@@ -62,13 +76,18 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     setIsSubmitting(true);
 
     try {
-      // 1. Create the startup
+      // 1. Create the startup with new fields
       const { data: startup, error: startupError } = await supabase
         .from('startups')
         .insert({
           name: result.data.name,
           description: result.data.description || null,
           website: result.data.website || null,
+          nif: result.data.nif || null,
+          main_contact_name: result.data.mainContactName || null,
+          main_contact_email: result.data.mainContactEmail || null,
+          main_contact_phone: result.data.mainContactPhone || null,
+          is_legally_recognized: result.data.isLegallyRecognized || false,
         })
         .select()
         .single();
@@ -110,6 +129,11 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       setWebsite('');
       setStage('ideation');
       setProgramId('');
+      setNif('');
+      setMainContactName('');
+      setMainContactEmail('');
+      setMainContactPhone('');
+      setIsLegallyRecognized(false);
       
     } catch (err: any) {
       console.error('Error creating startup:', err);
@@ -121,7 +145,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-full bg-primary/10">
@@ -181,6 +205,74 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
               onChange={(e) => setWebsite(e.target.value)}
               placeholder={t('createStartup.websitePlaceholder')}
             />
+          </div>
+
+          {/* NIF and Legal Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startup-nif">NIF (Tax ID)</Label>
+              <Input
+                id="startup-nif"
+                value={nif}
+                onChange={(e) => setNif(e.target.value)}
+                placeholder="PT123456789"
+                maxLength={20}
+              />
+            </div>
+            <div className="flex items-end pb-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="is-legally-recognized" 
+                  checked={isLegallyRecognized} 
+                  onCheckedChange={(checked) => setIsLegallyRecognized(!!checked)} 
+                />
+                <Label htmlFor="is-legally-recognized" className="cursor-pointer text-sm">
+                  <CheckCircle className="h-3.5 w-3.5 inline mr-1 text-green-600" />
+                  Startup Reconhecida por Lei
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Contact */}
+          <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+            <p className="text-sm font-medium flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              Contacto Principal
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2 space-y-1">
+                <Label htmlFor="main-contact-name" className="text-xs">Nome</Label>
+                <Input
+                  id="main-contact-name"
+                  value={mainContactName}
+                  onChange={(e) => setMainContactName(e.target.value)}
+                  placeholder="João Silva"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="main-contact-email" className="text-xs">
+                  <Mail className="h-3 w-3 inline mr-1" />
+                  Email
+                </Label>
+                <Input
+                  id="main-contact-email"
+                  type="email"
+                  value={mainContactEmail}
+                  onChange={(e) => setMainContactEmail(e.target.value)}
+                  placeholder="joao@startup.pt"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="main-contact-phone" className="text-xs">Telefone</Label>
+                <Input
+                  id="main-contact-phone"
+                  value={mainContactPhone}
+                  onChange={(e) => setMainContactPhone(e.target.value)}
+                  placeholder="+351 912 345 678"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
