@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Search, UserPlus, Users2, Shield, ShieldCheck, Building2, Trash2 } from 'lucide-react';
+import { Search, UserPlus, Users2, Shield, ShieldCheck, Building2, Trash2, Plus, X, Linkedin } from 'lucide-react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,12 +20,21 @@ interface ExternalMentor {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  linkedin_url: string | null;
+  bio: string | null;
+  expertise: string[] | null;
   ndaAccepted: boolean;
   ndaAcceptedAt: string | null;
   workspaces: Array<{
     id: string;
     startup_name: string;
   }>;
+}
+
+interface AvailableWorkspace {
+  id: string;
+  startup_name: string;
+  program_name: string | null;
 }
 
 function useExternalMentors() {
@@ -46,7 +55,7 @@ function useExternalMentors() {
       // Get mentor profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url')
+        .select('id, email, full_name, avatar_url, linkedin_url, bio, expertise')
         .in('id', mentorIds);
 
       if (profilesError) throw profilesError;
@@ -91,9 +100,36 @@ function useExternalMentors() {
         email: p.email,
         full_name: p.full_name,
         avatar_url: p.avatar_url,
+        linkedin_url: p.linkedin_url,
+        bio: p.bio,
+        expertise: p.expertise,
         ndaAccepted: ndaMap.has(p.id),
         ndaAcceptedAt: ndaMap.get(p.id) || null,
         workspaces: workspaceMap.get(p.id) || [],
+      }));
+    },
+  });
+}
+
+function useAvailableWorkspaces() {
+  return useQuery({
+    queryKey: ['available-workspaces-for-mentors'],
+    queryFn: async (): Promise<AvailableWorkspace[]> => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select(`
+          id,
+          startup:startups(name),
+          program:programs(name)
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []).map(w => ({
+        id: w.id,
+        startup_name: (w.startup as any)?.name || 'Unknown',
+        program_name: (w.program as any)?.name || null,
       }));
     },
   });
@@ -169,17 +205,62 @@ function useRemoveMentorRole() {
   });
 }
 
+function useAssignMentorToWorkspace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ mentorId, workspaceId }: { mentorId: string; workspaceId: string }) => {
+      const { error } = await supabase
+        .from('workspace_users')
+        .upsert({
+          user_id: mentorId,
+          workspace_id: workspaceId,
+          role: 'mentor_externo',
+          active: true,
+        }, {
+          onConflict: 'workspace_id,user_id',
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-external-mentors'] });
+    },
+  });
+}
+
+function useRemoveMentorFromWorkspace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ mentorId, workspaceId }: { mentorId: string; workspaceId: string }) => {
+      const { error } = await supabase
+        .from('workspace_users')
+        .delete()
+        .eq('user_id', mentorId)
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'mentor_externo');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-external-mentors'] });
+    },
+  });
+}
+
 export function AdminExternalMentorsManager() {
   const { t } = useTranslation();
   const { data: mentors, isLoading } = useExternalMentors();
   const { data: availableUsers } = useNonMentorUsers();
+  const { data: availableWorkspaces } = useAvailableWorkspaces();
   const addMentorRole = useAddMentorRole();
   const removeMentorRole = useRemoveMentorRole();
+  const assignMentor = useAssignMentorToWorkspace();
+  const unassignMentor = useRemoveMentorFromWorkspace();
 
   const [search, setSearch] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [removeTarget, setRemoveTarget] = useState<ExternalMentor | null>(null);
+  const [assignDialogMentor, setAssignDialogMentor] = useState<ExternalMentor | null>(null);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState('');
 
   const filteredMentors = mentors?.filter(m => 
     m.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -207,6 +288,37 @@ export function AdminExternalMentorsManager() {
       },
       onError: () => toast.error(t('admin.mentors.failedToRemoveMentor')),
     });
+  };
+
+  const handleAssignWorkspace = () => {
+    if (!assignDialogMentor || !selectedWorkspaceId) return;
+    assignMentor.mutate(
+      { mentorId: assignDialogMentor.id, workspaceId: selectedWorkspaceId },
+      {
+        onSuccess: () => {
+          toast.success(t('admin.mentors.workspaceAssigned'));
+          setAssignDialogMentor(null);
+          setSelectedWorkspaceId('');
+        },
+        onError: () => toast.error(t('admin.mentors.failedToAssign')),
+      }
+    );
+  };
+
+  const handleUnassignWorkspace = (mentorId: string, workspaceId: string) => {
+    unassignMentor.mutate(
+      { mentorId, workspaceId },
+      {
+        onSuccess: () => toast.success(t('admin.mentors.workspaceUnassigned')),
+        onError: () => toast.error(t('admin.mentors.failedToUnassign')),
+      }
+    );
+  };
+
+  // Get workspaces that mentor is not yet assigned to
+  const getAvailableWorkspacesForMentor = (mentor: ExternalMentor) => {
+    const assignedIds = new Set(mentor.workspaces.map(w => w.id));
+    return availableWorkspaces?.filter(w => !assignedIds.has(w.id)) || [];
   };
 
   if (isLoading) {
@@ -258,7 +370,7 @@ export function AdminExternalMentorsManager() {
               {filteredMentors.map((mentor) => (
                 <Card key={mentor.id} className="p-4">
                   <div className="flex items-start gap-4">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-12 w-12">
                       <AvatarImage src={mentor.avatar_url || undefined} />
                       <AvatarFallback>
                         {mentor.full_name?.charAt(0) || mentor.email.charAt(0).toUpperCase()}
@@ -266,10 +378,20 @@ export function AdminExternalMentorsManager() {
                     </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-medium truncate">
                           {mentor.full_name || mentor.email}
                         </h3>
+                        {mentor.linkedin_url && (
+                          <a
+                            href={mentor.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary"
+                          >
+                            <Linkedin className="h-4 w-4" />
+                          </a>
+                        )}
                         {mentor.ndaAccepted ? (
                           <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
                             <ShieldCheck className="h-3 w-3" />
@@ -285,30 +407,64 @@ export function AdminExternalMentorsManager() {
                       
                       <p className="text-sm text-muted-foreground">{mentor.email}</p>
                       
+                      {mentor.bio && (
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{mentor.bio}</p>
+                      )}
+
+                      {mentor.expertise && mentor.expertise.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {mentor.expertise.slice(0, 4).map(exp => (
+                            <Badge key={exp} variant="outline" className="text-xs">
+                              {exp}
+                            </Badge>
+                          ))}
+                          {mentor.expertise.length > 4 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{mentor.expertise.length - 4}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                      
                       {mentor.ndaAcceptedAt && (
                         <p className="text-xs text-muted-foreground mt-1">
                           {t('admin.mentors.ndaAcceptedOn', { date: format(new Date(mentor.ndaAcceptedAt), 'PP') })}
                         </p>
                       )}
 
-                      <div className="mt-2">
-                        <p className="text-xs text-muted-foreground mb-1">
+                      <div className="mt-3">
+                        <p className="text-xs text-muted-foreground mb-2">
                           {t('admin.mentors.assignedWorkspaces')}:
                         </p>
-                        {mentor.workspaces.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {mentor.workspaces.map((ws) => (
-                              <Badge key={ws.id} variant="secondary" className="text-xs">
-                                <Building2 className="h-3 w-3 mr-1" />
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          {mentor.workspaces.length > 0 ? (
+                            mentor.workspaces.map((ws) => (
+                              <Badge key={ws.id} variant="secondary" className="text-xs gap-1 group">
+                                <Building2 className="h-3 w-3" />
                                 {ws.startup_name}
+                                <button
+                                  onClick={() => handleUnassignWorkspace(mentor.id, ws.id)}
+                                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
                               </Badge>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">
-                            {t('admin.mentors.noWorkspaces')}
-                          </span>
-                        )}
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">
+                              {t('admin.mentors.noWorkspaces')}
+                            </span>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 text-xs"
+                            onClick={() => setAssignDialogMentor(mentor)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            {t('admin.mentors.assignWorkspace')}
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
@@ -355,6 +511,40 @@ export function AdminExternalMentorsManager() {
             </Button>
             <Button onClick={handleAddMentor} disabled={!selectedUserId || addMentorRole.isPending}>
               {t('common.add')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign to Workspace Dialog */}
+      <Dialog open={!!assignDialogMentor} onOpenChange={(open) => !open && setAssignDialogMentor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('admin.mentors.assignToWorkspace')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.mentors.assignToWorkspaceDesc', { name: assignDialogMentor?.full_name || assignDialogMentor?.email })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('admin.mentors.selectWorkspace')} />
+              </SelectTrigger>
+              <SelectContent>
+                {assignDialogMentor && getAvailableWorkspacesForMentor(assignDialogMentor).map((ws) => (
+                  <SelectItem key={ws.id} value={ws.id}>
+                    {ws.startup_name} {ws.program_name && <span className="text-muted-foreground">({ws.program_name})</span>}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogMentor(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspaceId || assignMentor.isPending}>
+              {t('admin.mentors.assign')}
             </Button>
           </DialogFooter>
         </DialogContent>
