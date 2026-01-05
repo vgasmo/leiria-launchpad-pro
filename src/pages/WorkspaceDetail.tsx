@@ -108,7 +108,7 @@ export default function WorkspaceDetail() {
       />
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
+        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1 animate-fade-in">
           <TabsTrigger value="overview">{t('workspace.overview')}</TabsTrigger>
           <TabsTrigger value="sessions">{t('workspace.sessions')}</TabsTrigger>
           <TabsTrigger value="actions">{t('workspace.actions')}</TabsTrigger>
@@ -161,6 +161,7 @@ export default function WorkspaceDetail() {
           </TabsTrigger>
         </TabsList>
 
+        <div className="animate-fade-in">
         <TabsContent value="overview">
           <WorkspaceOverview 
             workspace={{
@@ -250,6 +251,7 @@ export default function WorkspaceDetail() {
             />
           )}
         </TabsContent>
+        </div>
       </Tabs>
     </AppLayout>
   );

@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SortableList } from '@/components/ui/SortableList';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -135,14 +136,18 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
           <TabsTrigger value="timeline">{t('milestones.timeline')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="list" className="space-y-2">
+        <TabsContent value="list" className="space-y-2 animate-fade-in">
           {sortedMilestones.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                {t('milestones.noMilestonesDesc')}
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Target}
+              title={t('emptyStates.milestones.title')}
+              description={t('emptyStates.milestones.description')}
+              action={canWrite ? {
+                label: t('milestones.addMilestone'),
+                onClick: () => setCreateDialogOpen(true),
+                icon: Plus,
+              } : undefined}
+            />
           ) : (
             <SortableList
               items={sortedMilestones}
@@ -366,12 +371,12 @@ function TimelineView({ milestones }: TimelineViewProps) {
   
   if (milestones.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          {t('milestones.noMilestonesTimeline')}
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={Target}
+        title={t('emptyStates.milestones.title')}
+        description={t('emptyStates.milestones.description')}
+        variant="inline"
+      />
     );
   }
 

@@ -1935,5 +1935,27 @@
     "title": "Acesso Negado",
     "message": "Não tem permissão para ver este conteúdo. Por favor contacte um administrador se acredita que isto é um erro.",
     "backToWorkspaces": "Voltar aos Workspaces"
+  },
+  "emptyStates": {
+    "milestones": {
+      "title": "Transforme caos em progresso",
+      "description": "Milestones ajudam a dividir a jornada em objetivos alcançáveis. Comece com os objetivos das próximas 2 semanas."
+    },
+    "sessions": {
+      "title": "Sessões geram momentum",
+      "description": "Agende a primeira sessão de mentoria para acelerar decisões e obter insights valiosos."
+    },
+    "documents": {
+      "title": "O seu deck fecha negócios",
+      "description": "Investidores não leem documentos longos. Carregue o pitch deck e mantenha documentos importantes organizados."
+    },
+    "actions": {
+      "title": "Ações geram resultados",
+      "description": "Crie milestones primeiro, depois divida-os em tarefas específicas e acionáveis com responsáveis claros."
+    },
+    "kpis": {
+      "title": "Meça o que importa",
+      "description": "KPIs ajudam a medir progresso e contar a história de crescimento para investidores. Comece com 3-5 métricas chave."
+    }
   }
 }

@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -162,15 +163,16 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
         </div>
       ) : filteredSessions?.length === 0 ? (
-        <Card className="bg-muted/50">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="font-heading text-lg font-semibold mb-2">{t('sessions.noSessions')}</h3>
-            <p className="text-muted-foreground text-center max-w-sm">
-              {search ? t('sessions.tryAdjustingSearch') : t('sessions.createFirstSession')}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title={search ? t('sessions.noSearchResults') : t('emptyStates.sessions.title')}
+          description={search ? t('sessions.tryAdjustingSearch') : t('emptyStates.sessions.description')}
+          action={!search && canWrite ? {
+            label: t('sessions.createSession'),
+            onClick: () => setShowCreateDialog(true),
+            icon: Plus,
+          } : undefined}
+        />
       ) : (
         <div className="space-y-3">
           {filteredSessions?.map(session => (

@@ -1865,5 +1865,27 @@
     "title": "Access Denied",
     "message": "You don't have permission to view this content. Please contact an administrator if you believe this is an error.",
     "backToWorkspaces": "Back to Workspaces"
+  },
+  "emptyStates": {
+    "milestones": {
+      "title": "Turn chaos into progress",
+      "description": "Milestones help you break your journey into achievable goals. Start with your next 2-week objectives."
+    },
+    "sessions": {
+      "title": "Sessions build momentum",
+      "description": "Schedule your first mentoring session to accelerate decisions and get valuable insights."
+    },
+    "documents": {
+      "title": "Your deck wins deals",
+      "description": "Investors don't read long docs. Upload your pitch deck and keep your important documents organized."
+    },
+    "actions": {
+      "title": "Actions drive results",
+      "description": "Create milestones first, then break them into specific, actionable tasks with clear owners."
+    },
+    "kpis": {
+      "title": "Track what matters",
+      "description": "KPIs help you measure progress and tell your growth story to investors. Start with 3-5 key metrics."
+    }
   }
 }
