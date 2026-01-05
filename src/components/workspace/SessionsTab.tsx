@@ -88,6 +88,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
   const [search, setSearch] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [facilitatorSession, setFacilitatorSession] = useState<any>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
@@ -191,14 +192,19 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
 
       {/* Edit Session Dialog */}
       {selectedSession && (
-        <SessionDetailDialog
-          workspaceId={workspaceId}
-          session={selectedSession}
-          canWrite={canWrite}
-          open={!!selectedSession}
-          onOpenChange={(open) => !open && setSelectedSession(null)}
-        />
+         <SessionDetailDialog
+           workspaceId={workspaceId}
+           session={selectedSession}
+           canWrite={canWrite}
+           open={!!selectedSession}
+           onOpenChange={(open) => !open && setSelectedSession(null)}
+           onOpenFacilitator={(session) => {
+             setSelectedSession(null);
+             setFacilitatorSession(session);
+           }}
+         />
       )}
+
 
       {/* Delete Confirmation */}
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
@@ -217,6 +223,19 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Facilitator Mode (rendered outside dialog context) */}
+      {facilitatorSession && (
+        <FacilitatorMode
+          session={facilitatorSession}
+          onClose={() => setFacilitatorSession(null)}
+          onCreateAction={() => {
+            setFacilitatorSession(null);
+            setSelectedSession(facilitatorSession);
+          }}
+        />
+      )}
+
     </div>
   );
 }
@@ -603,12 +622,13 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   );
 }
 
-function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChange }: {
+function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChange, onOpenFacilitator }: {
   workspaceId: string;
   session: any;
   canWrite: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenFacilitator: (session: any) => void;
 }) {
   const { t } = useTranslation();
   const [notes, setNotes] = useState(session.notes || '');
@@ -617,7 +637,6 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   const [isResending, setIsResending] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [showFacilitatorMode, setShowFacilitatorMode] = useState(false);
 
   const updateMutation = useUpdateSession(workspaceId);
   const { data: actionItems, isLoading: actionsLoading, refetch: refetchActions } = useSessionActionItems(session.id);
@@ -731,13 +750,14 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                   {session.duration && ` • ${session.duration} min`}
                 </DialogDescription>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setShowFacilitatorMode(true);
+                  onOpenFacilitator(session);
                 }}
                 className="shrink-0"
               >
@@ -943,17 +963,6 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
         onOpenChange={setShowActionDialog}
       />
 
-      {/* Facilitator Mode */}
-      {showFacilitatorMode && (
-        <FacilitatorMode
-          session={session}
-          onClose={() => setShowFacilitatorMode(false)}
-          onCreateAction={() => {
-            setShowFacilitatorMode(false);
-            setShowActionDialog(true);
-          }}
-        />
-      )}
     </>
   );
 }

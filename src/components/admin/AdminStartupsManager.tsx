@@ -44,7 +44,7 @@ export function AdminStartupsManager() {
   const [formData, setFormData] = useState<FormState>(EMPTY_FORM);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
-  const [stageFilter, setStageFilter] = useState<string>('');
+  const [stageFilter, setStageFilter] = useState<string>('all');
 
   const { data: startups, isLoading } = useQuery({
     queryKey: ['admin-startups'],
@@ -177,7 +177,7 @@ export function AdminStartupsManager() {
       startup.main_contact_name?.toLowerCase().includes(search.toLowerCase());
     
     const workspaceStage = startup.workspaces?.[0]?.stage;
-    const matchesStage = !stageFilter || workspaceStage === stageFilter;
+    const matchesStage = stageFilter === 'all' || !stageFilter || workspaceStage === stageFilter;
     
     return matchesSearch && matchesStage;
   });
@@ -240,7 +240,7 @@ export function AdminStartupsManager() {
               <SelectValue placeholder="All Stages" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Stages</SelectItem>
+              <SelectItem value="all">All Stages</SelectItem>
               {uniqueStages.map(stage => (
                 <SelectItem key={stage} value={stage}>{stage}</SelectItem>
               ))}

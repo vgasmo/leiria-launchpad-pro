@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin } from 'lucide-react';
+import { Building2, Upload, Loader2, Globe, Calendar, Phone, MapPin, Mail, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { IntegrationSettings } from './IntegrationSettings';
 
@@ -24,6 +25,11 @@ interface StartupSettingsTabProps {
     founded_date: string | null;
     phone: string | null;
     address: string | null;
+    nif: string | null;
+    main_contact_name: string | null;
+    main_contact_email: string | null;
+    main_contact_phone: string | null;
+    is_legally_recognized: boolean | null;
   };
   canEdit: boolean;
 }
@@ -39,6 +45,11 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     founded_date: startup.founded_date || '',
     phone: startup.phone || '',
     address: startup.address || '',
+    nif: startup.nif || '',
+    main_contact_name: startup.main_contact_name || '',
+    main_contact_email: startup.main_contact_email || '',
+    main_contact_phone: startup.main_contact_phone || '',
+    is_legally_recognized: !!startup.is_legally_recognized,
   });
 
   const updateMutation = useMutation({
@@ -52,6 +63,11 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           founded_date: data.founded_date || null,
           phone: data.phone || null,
           address: data.address || null,
+          nif: data.nif || null,
+          main_contact_name: data.main_contact_name || null,
+          main_contact_email: data.main_contact_email || null,
+          main_contact_phone: data.main_contact_phone || null,
+          is_legally_recognized: !!data.is_legally_recognized,
         })
         .eq('id', startupId);
       if (error) throw error;
@@ -223,6 +239,78 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
                   placeholder="https://..."
                   className="pl-9"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="nif">NIF (Tax ID)</Label>
+              <Input
+                id="nif"
+                value={formData.nif}
+                onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
+                placeholder="PT123456789"
+              />
+            </div>
+            <div className="flex items-end">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_legally_recognized"
+                  checked={formData.is_legally_recognized}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_legally_recognized: !!checked })
+                  }
+                />
+                <Label htmlFor="is_legally_recognized" className="cursor-pointer flex items-center gap-2">
+                  <BadgeCheck className="h-4 w-4 text-muted-foreground" />
+                  Startup reconhecida por lei
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium">Main contact</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="main_contact_name">Contact name</Label>
+                <Input
+                  id="main_contact_name"
+                  value={formData.main_contact_name}
+                  onChange={(e) => setFormData({ ...formData, main_contact_name: e.target.value })}
+                  placeholder="João Silva"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="main_contact_email">Contact email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="main_contact_email"
+                    type="email"
+                    value={formData.main_contact_email}
+                    onChange={(e) => setFormData({ ...formData, main_contact_email: e.target.value })}
+                    placeholder="joao@startup.pt"
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="main_contact_phone">Contact phone</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="main_contact_phone"
+                    value={formData.main_contact_phone}
+                    onChange={(e) => setFormData({ ...formData, main_contact_phone: e.target.value })}
+                    placeholder="+351 912 345 678"
+                    className="pl-9"
+                  />
+                </div>
               </div>
             </div>
           </div>
