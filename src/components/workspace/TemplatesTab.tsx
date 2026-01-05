@@ -170,7 +170,9 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
         </div>
       ))}
 
-      {/* Template Editor Dialog */}
+      </TabsContent>
+
+      {/* Template Editor Dialog - outside TabsContent to avoid ref issues */}
       <TemplateEditorDialog
         template={selectedTemplate}
         instance={selectedInstance}
@@ -179,7 +181,6 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
         isFounder={isFounder}
         onClose={handleCloseEditor}
       />
-      </TabsContent>
     </Tabs>
   );
 }
