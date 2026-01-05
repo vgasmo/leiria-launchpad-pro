@@ -37,7 +37,7 @@ import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
 import { PendingSurveysBanner } from '@/components/surveys/PendingSurveysBanner';
 import { SurveyForm } from '@/components/surveys/SurveyForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
@@ -174,7 +174,10 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       <Dialog open={!!activeSurveyId} onOpenChange={() => setActiveSurveyId(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('surveys.fillSurvey', 'Complete Survey')}</DialogTitle>
+            <DialogTitle>{t('surveys.completeSurvey', 'Complete Survey')}</DialogTitle>
+            <DialogDescription>
+              {t('surveys.pendingSurveysDesc', 'You have surveys waiting to be completed')}
+            </DialogDescription>
           </DialogHeader>
           {activeSurveyId && (
             <SurveyForm 
