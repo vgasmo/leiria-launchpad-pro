@@ -224,11 +224,11 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onCreateAction}>
+          <Button variant="outline" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCreateAction?.(); }}>
             <Plus className="h-4 w-4 mr-1" />
             Quick Action
           </Button>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}>
             <X className="h-5 w-5" />
           </Button>
         </div>
