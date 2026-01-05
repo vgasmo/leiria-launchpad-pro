@@ -24,8 +24,8 @@ import {
   TestTube,
   FileText,
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useGlobalGraphSettings, useUpdateGlobalGraphSettings, useToggleGlobalGraph, GraphApiGlobalSettings } from '@/hooks/useGlobalIntegrations';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 export function GlobalGraphApiCard() {
   const { data: settings, isLoading } = useGlobalGraphSettings();
@@ -101,8 +101,8 @@ export function GlobalGraphApiCard() {
     setIsTesting(true);
     try {
       console.log('[GlobalGraphApiCard] Testing Graph API with email:', testEmail);
-      
-      const { data, error } = await supabase.functions.invoke('test-graph-api', {
+
+      const { data, error } = await invokeWithAuth('test-graph-api', {
         body: { test_email: testEmail },
       });
 

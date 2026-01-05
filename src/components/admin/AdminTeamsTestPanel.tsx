@@ -22,6 +22,7 @@ import {
   Info
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 // Microsoft Teams icon component
 const TeamsIcon = ({ className }: { className?: string }) => (
@@ -95,7 +96,7 @@ export function AdminTeamsTestPanel() {
         ? workspaces?.find(w => w.id === workspaceId)?.name || 'Unknown'
         : 'Global Test';
 
-      const { data, error } = await supabase.functions.invoke('teams-notify', {
+      const { data, error } = await invokeWithAuth('teams-notify', {
         body: {
           workspace_id: workspaceId,
           event_type: 'test',

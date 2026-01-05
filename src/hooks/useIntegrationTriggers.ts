@@ -9,6 +9,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { useLogActivity } from '@/hooks/useActivityLog';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 interface SyncOutlookParams {
   sessionId: string;
@@ -74,7 +75,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
  */
 export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<IntegrationResult> {
   try {
-    const { data, error } = await supabase.functions.invoke('teams-notify', {
+    const { data, error } = await invokeWithAuth('teams-notify', {
       body: {
         workspace_id: params.workspaceId,
         event_type: params.eventType,
