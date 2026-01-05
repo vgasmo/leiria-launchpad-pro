@@ -734,9 +734,9 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  // Close the dialog to avoid Radix focus-lock/overlay interfering with portal interactions
-                  onOpenChange(false);
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   setShowFacilitatorMode(true);
                 }}
                 className="shrink-0"
