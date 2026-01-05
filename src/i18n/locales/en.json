@@ -107,7 +107,8 @@
     "findMentors": "Find Mentors",
     "settings": "Settings",
     "admin": "Admin",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "helpGlossary": "Help & Glossary"
   },
   "dashboard": {
     "portfolio": "Portfolio Overview",
@@ -372,7 +373,11 @@
     "onTarget": "On target",
     "aboveTarget": "Above target",
     "belowTarget": "Below target",
-    "noChange": "No change"
+    "noChange": "No change",
+    "viewGlossary": "View glossary",
+    "whatAreKpis": "What are KPIs?",
+    "kpisExplanation": "KPIs (Key Performance Indicators) are metrics that measure your startup's progress. Examples:",
+    "learnMore": "Learn more in the glossary →"
   },
   "templates": {
     "title": "Templates",
@@ -520,7 +525,9 @@
     "holderType": "Holder Type",
     "shares": "Shares",
     "shareType": "Share Type",
-    "investmentAmount": "Investment Amount"
+    "investmentAmount": "Investment Amount",
+    "concepts": "Concepts:",
+    "viewGlossary": "View glossary"
   },
   "notes": {
     "title": "Notes & Tasks",
@@ -1763,6 +1770,14 @@
   },
   "glossary": {
     "title": "Glossary",
+    "subtitle": "Essential concepts for founders",
+    "searchPlaceholder": "Search concepts...",
+    "concepts": "concepts",
+    "noResults": "No concept found for",
+    "categoryMetrics": "Financial Metrics",
+    "categoryProduct": "Product",
+    "categoryMarket": "Market",
+    "categoryFunding": "Funding",
     "unitEconomics": "Unit Economics",
     "unitEconomicsDesc": "Metrics that show profitability per customer or product unit. Includes CAC, LTV, and gross margin.",
     "mvp": "MVP (Minimum Viable Product)",
