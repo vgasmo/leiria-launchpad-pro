@@ -65,6 +65,7 @@ function SurveyCard({
   onOpen: () => void;
   locale?: Locale;
 }) {
+  const { t } = useTranslation();
   const deadline = survey.campaign?.ends_at ? new Date(survey.campaign.ends_at) : null;
   const isUrgent = deadline && deadline.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
 
@@ -80,17 +81,19 @@ function SurveyCard({
         </span>
         {isUrgent && (
           <Badge variant="destructive" className="text-xs">
-            Urgent
+            {t("common.overdue", "Urgent")}
           </Badge>
         )}
       </div>
       {deadline && (
         <span className="text-xs text-muted-foreground mt-1">
-          Due: {format(deadline, "dd MMM", { locale })}
+          {t("surveys.deadline", "Deadline")}: {format(deadline, "dd MMM", { locale })}
         </span>
       )}
       <div className="flex items-center gap-1 text-xs text-primary mt-1">
-        {survey.status === "in_progress" ? "Continue" : "Start"}
+        {survey.status === "in_progress" 
+          ? t("common.continue", "Continue") 
+          : t("common.start", "Start")}
         <ArrowRight className="h-3 w-3" />
       </div>
     </Button>

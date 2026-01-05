@@ -27,6 +27,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -169,6 +170,9 @@ export function AdminSurveysManager() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("admin.surveys.templateEditor", "Survey Templates")}</DialogTitle>
+            <DialogDescription>
+              {t("admin.surveys.description", "Create and manage survey templates")}
+            </DialogDescription>
           </DialogHeader>
           <SurveyTemplateEditor definitions={definitions} />
         </DialogContent>
@@ -181,6 +185,9 @@ export function AdminSurveysManager() {
             <DialogTitle>
               {selectedCampaign?.name} - {t("admin.surveys.responses", "Responses")}
             </DialogTitle>
+            <DialogDescription>
+              {t("admin.surveys.viewResponses", "View and export survey responses")}
+            </DialogDescription>
           </DialogHeader>
           {selectedCampaign && <SurveyResponsesViewer campaignId={selectedCampaign.id} />}
         </DialogContent>
@@ -339,6 +346,9 @@ function CreateCampaignDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("admin.surveys.createCampaign", "Create Survey Campaign")}</DialogTitle>
+          <DialogDescription>
+            {t("admin.surveys.noCampaignsDesc", "Create a survey campaign to collect ecosystem data")}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

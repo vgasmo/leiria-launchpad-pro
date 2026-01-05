@@ -155,7 +155,7 @@ export function SurveyForm({ instanceId, onComplete }: SurveyFormProps) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
-          Loading survey...
+          {t("surveys.loading", "Loading survey...")}
         </CardContent>
       </Card>
     );
@@ -165,7 +165,7 @@ export function SurveyForm({ instanceId, onComplete }: SurveyFormProps) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
-          Survey not found
+          {t("surveys.surveyNotFound", "Survey not found")}
         </CardContent>
       </Card>
     );
@@ -190,12 +190,12 @@ export function SurveyForm({ instanceId, onComplete }: SurveyFormProps) {
             {isSubmitted ? (
               <Badge className="bg-green-500/20 text-green-700">
                 <Check className="h-3 w-3 mr-1" />
-                Submitted
+                {t("surveys.submitted", "Submitted")}
               </Badge>
             ) : (
               deadline && (
                 <Badge variant="outline">
-                  Deadline: {format(deadline, "dd MMM yyyy", { locale })}
+                  {t("surveys.deadline", "Deadline")}: {format(deadline, "dd MMM yyyy", { locale })}
                 </Badge>
               )
             )}
@@ -321,6 +321,8 @@ function QuestionField({
   isAutoFilled,
   disabled,
 }: QuestionFieldProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
@@ -329,7 +331,7 @@ function QuestionField({
         {isAutoFilled && (
           <Badge variant="secondary" className="text-xs">
             <Lock className="h-3 w-3 mr-1" />
-            Auto-preenchido
+            {t("surveys.autoFilled", "Auto-filled")}
           </Badge>
         )}
       </Label>
