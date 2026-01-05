@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import JSZip from "https://esm.sh/jszip@3.10.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,91 +20,171 @@ interface KeyMetrics {
   treasury_need: number | null;
 }
 
-// Simple CSV parser
-function parseCSV(content: string): Record<string, string>[] {
-  const lines = content.trim().split('\n');
-  if (lines.length < 2) return [];
-  
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/["\s]/g, '_'));
-  const rows: Record<string, string>[] = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-    const row: Record<string, string> = {};
-    headers.forEach((h, idx) => {
-      row[h] = values[idx] || '';
-    });
-    rows.push(row);
-  }
-  
-  return rows;
-}
-
 // Extract number from cell value
-function extractNumber(value: string | undefined | null): number | null {
-  if (!value) return null;
+function extractNumber(value: string | number | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') return isNaN(value) ? null : value;
   const cleaned = String(value).replace(/[^0-9.,\-]/g, '').replace(',', '.');
   const num = parseFloat(cleaned);
   return isNaN(num) ? null : num;
 }
 
-// Look for metric by various label patterns
-function findMetricValue(rows: Record<string, string>[], patterns: string[]): number | null {
-  for (const row of rows) {
-    const keys = Object.keys(row);
-    const labelKey = keys.find(k => k.includes('label') || k.includes('metric') || k.includes('name') || keys[0] === k);
-    const valueKey = keys.find(k => k.includes('value') || k.includes('amount') || (keys.length > 1 && k !== labelKey));
-    
-    if (labelKey && valueKey) {
-      const label = (row[labelKey] || '').toLowerCase();
-      if (patterns.some(p => label.includes(p))) {
-        return extractNumber(row[valueKey]);
-      }
-    }
-    
-    // Also check all string values that might be labels
-    for (const [key, val] of Object.entries(row)) {
-      if (typeof val === 'string' && patterns.some(p => val.toLowerCase().includes(p))) {
-        // Look for adjacent numeric value
-        const numKey = Object.keys(row).find(k => k !== key && extractNumber(row[k]) !== null);
-        if (numKey) return extractNumber(row[numKey]);
+// Normalize label for matching
+function normalizeLabel(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Metric patterns for matching (supports EN and PT labels)
+const METRIC_PATTERNS: Record<keyof KeyMetrics, string[]> = {
+  runway_months: ['runway', 'monthsrunway', 'cashrunway', 'runwaymonths', 'mesesrunway'],
+  burn_rate_monthly: ['burn', 'burnrate', 'monthlyburn', 'cashburn', 'taxaqueima', 'burnmensal'],
+  gross_margin_pct: ['grossmargin', 'gm', 'margembruta', 'margem'],
+  cac: ['cac', 'customeracquisition', 'acquisitioncost', 'custoacquisicao'],
+  churn_monthly_pct: ['churn', 'monthlychurn', 'churnrate', 'taxachurn'],
+  ltv: ['ltv', 'lifetimevalue', 'customerlifetime', 'valorvida'],
+  ltv_cac: ['ltvcac', 'ltvcacratio'],
+  payback_months: ['payback', 'cacpayback', 'paybackperiod', 'periodopayback'],
+  cash_end: ['cashend', 'endingcash', 'cashbalance', 'treasury', 'tesouraria', 'caixa', 'saldocaixa'],
+  treasury_need: ['treasuryneed', 'fundingneed', 'capitalrequired', 'necessidadecapital'],
+};
+
+// Find metric value from key-value pairs
+function findMetricFromPairs(pairs: [string, string | number][], metricKey: keyof KeyMetrics): number | null {
+  const patterns = METRIC_PATTERNS[metricKey];
+  
+  for (const [label, value] of pairs) {
+    const normalizedLabel = normalizeLabel(label);
+    for (const pattern of patterns) {
+      if (normalizedLabel.includes(pattern)) {
+        return extractNumber(value);
       }
     }
   }
   return null;
 }
 
-// Extract metrics from parsed CSV data
-function extractMetricsFromCSV(rows: Record<string, string>[]): KeyMetrics {
-  return {
-    runway_months: findMetricValue(rows, ['runway', 'months_runway', 'cash_runway']),
-    burn_rate_monthly: findMetricValue(rows, ['burn', 'burn_rate', 'monthly_burn', 'cash_burn']),
-    gross_margin_pct: findMetricValue(rows, ['gross_margin', 'gm', 'margin']),
-    cac: findMetricValue(rows, ['cac', 'customer_acquisition', 'acquisition_cost']),
-    churn_monthly_pct: findMetricValue(rows, ['churn', 'monthly_churn', 'churn_rate']),
-    ltv: findMetricValue(rows, ['ltv', 'lifetime_value', 'customer_lifetime']),
-    ltv_cac: findMetricValue(rows, ['ltv_cac', 'ltv/cac', 'ltv:cac']),
-    payback_months: findMetricValue(rows, ['payback', 'cac_payback', 'payback_period']),
-    cash_end: findMetricValue(rows, ['cash_end', 'ending_cash', 'cash_balance', 'treasury']),
-    treasury_need: findMetricValue(rows, ['treasury_need', 'funding_need', 'capital_required']),
-  };
+// Parse CSV content
+function parseCSV(content: string): [string, string | number][] {
+  const pairs: [string, string | number][] = [];
+  const lines = content.trim().split(/\r?\n/);
+  
+  for (const line of lines) {
+    // Handle both comma and semicolon separators
+    const separator = line.includes(';') ? ';' : ',';
+    const cells = line.split(separator).map(c => c.trim().replace(/^["']|["']$/g, ''));
+    
+    for (let i = 0; i < cells.length - 1; i++) {
+      const label = cells[i];
+      const value = cells[i + 1];
+      if (label && value) {
+        const numValue = extractNumber(value);
+        pairs.push([label, numValue !== null ? numValue : value]);
+      }
+    }
+  }
+  
+  return pairs;
+}
+
+// Parse XLSX/XLSM file (which is a ZIP with XML inside)
+async function parseExcel(arrayBuffer: ArrayBuffer): Promise<[string, string | number][]> {
+  const pairs: [string, string | number][] = [];
+  
+  try {
+    const zip = new JSZip();
+    const contents = await zip.loadAsync(arrayBuffer);
+    
+    // Get shared strings (text values are stored separately in XLSX)
+    const sharedStringsFile = contents.file('xl/sharedStrings.xml');
+    const sharedStrings: string[] = [];
+    
+    if (sharedStringsFile) {
+      const ssXml = await sharedStringsFile.async('string');
+      // Extract all <t> elements (text content)
+      const matches = ssXml.matchAll(/<t[^>]*>([^<]*)<\/t>/g);
+      for (const match of matches) {
+        sharedStrings.push(match[1]);
+      }
+    }
+    
+    // Find all sheet XML files
+    const sheetFiles = Object.keys(contents.files).filter(
+      name => name.startsWith('xl/worksheets/') && name.endsWith('.xml')
+    );
+    
+    for (const sheetPath of sheetFiles) {
+      const sheetFile = contents.file(sheetPath);
+      if (!sheetFile) continue;
+      
+      const sheetXml = await sheetFile.async('string');
+      
+      // Parse rows - look for <row> elements
+      const rowMatches = sheetXml.matchAll(/<row[^>]*>(.*?)<\/row>/gs);
+      
+      for (const rowMatch of rowMatches) {
+        const rowContent = rowMatch[1];
+        // Parse cells within the row
+        const cellMatches = rowContent.matchAll(/<c[^>]*r="([A-Z]+)(\d+)"[^>]*(?:t="([^"]*)")?[^>]*>(?:<v>([^<]*)<\/v>)?/g);
+        
+        const rowCells: { col: string; value: string | number }[] = [];
+        
+        for (const cellMatch of cellMatches) {
+          const col = cellMatch[1];
+          const cellType = cellMatch[3];
+          const rawValue = cellMatch[4] || '';
+          
+          let value: string | number;
+          if (cellType === 's') {
+            // Shared string reference
+            const idx = parseInt(rawValue, 10);
+            value = sharedStrings[idx] || '';
+          } else if (cellType === 'str' || cellType === 'inlineStr') {
+            value = rawValue;
+          } else {
+            // Numeric value
+            const num = parseFloat(rawValue);
+            value = isNaN(num) ? rawValue : num;
+          }
+          
+          rowCells.push({ col, value });
+        }
+        
+        // Sort cells by column
+        rowCells.sort((a, b) => a.col.localeCompare(b.col));
+        
+        // Create pairs from adjacent cells
+        for (let i = 0; i < rowCells.length - 1; i++) {
+          const label = rowCells[i].value;
+          const val = rowCells[i + 1].value;
+          if (typeof label === 'string' && label.trim()) {
+            pairs.push([label.trim(), val]);
+          }
+        }
+      }
+    }
+    
+    console.log(`[parseExcel] Extracted ${pairs.length} pairs from ${sheetFiles.length} sheets`);
+    
+  } catch (err) {
+    console.error('[parseExcel] Error parsing Excel:', err);
+    throw new Error('Failed to parse Excel file. Please try exporting as CSV.');
+  }
+  
+  return pairs;
 }
 
 // Calculate derived metrics if missing
 function calculateDerivedMetrics(metrics: KeyMetrics): KeyMetrics {
   const result = { ...metrics };
   
-  // Calculate LTV/CAC if missing
   if (result.ltv_cac === null && result.ltv !== null && result.cac !== null && result.cac > 0) {
     result.ltv_cac = Math.round((result.ltv / result.cac) * 100) / 100;
   }
   
-  // Calculate runway if we have cash and burn rate
   if (result.runway_months === null && result.cash_end !== null && result.burn_rate_monthly !== null && result.burn_rate_monthly > 0) {
     result.runway_months = Math.round(result.cash_end / result.burn_rate_monthly);
   }
   
-  // Calculate payback if we have CAC and monthly revenue per customer (approximated from LTV/12)
   if (result.payback_months === null && result.cac !== null && result.ltv !== null && result.churn_monthly_pct !== null) {
     const avgLifetimeMonths = result.churn_monthly_pct > 0 ? 1 / (result.churn_monthly_pct / 100) : 12;
     const monthlyRevenue = result.ltv / avgLifetimeMonths;
@@ -123,6 +204,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("No authorization header provided");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -134,17 +216,17 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // SECURITY: Validate user authentication
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
+      console.error("Auth error:", authError?.message);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { workspace_id, document_id, version_id } = await req.json();
+    const { version_id } = await req.json();
     
     if (!version_id) {
       return new Response(JSON.stringify({ error: "version_id is required" }), {
@@ -153,29 +235,13 @@ serve(async (req) => {
       });
     }
 
-    // SECURITY: Validate workspace access
-    if (workspace_id) {
-      const { data: hasAccess } = await supabase.rpc("has_workspace_access", {
-        _user_id: user.id,
-        _workspace_id: workspace_id,
-      });
-      if (!hasAccess) {
-        return new Response(JSON.stringify({ error: "Access denied" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
+    console.log(`[import-financial-model] User ${user.id} parsing version: ${version_id}`);
 
-    console.log(`Parsing financial model version: ${version_id}`);
-
-    // Update status to parsing
     await supabase
       .from("financial_model_versions")
       .update({ status: "parsing" })
       .eq("id", version_id);
 
-    // Get version details
     const { data: version, error: versionError } = await supabase
       .from("financial_model_versions")
       .select("*, documents(*)")
@@ -186,12 +252,22 @@ serve(async (req) => {
       throw new Error(`Version not found: ${versionError?.message}`);
     }
 
+    const { data: hasAccess } = await supabase.rpc("has_workspace_access", {
+      _user_id: user.id,
+      _workspace_id: version.workspace_id,
+    });
+    if (!hasAccess) {
+      return new Response(JSON.stringify({ error: "Access denied" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const document = version.documents;
     if (!document?.file_path) {
       throw new Error("Document has no file path");
     }
 
-    // Download file from storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("workspace-documents")
       .download(document.file_path);
@@ -200,68 +276,40 @@ serve(async (req) => {
       throw new Error(`Failed to download file: ${downloadError?.message}`);
     }
 
-    let keyMetrics: KeyMetrics;
-    const fileName = document.name.toLowerCase();
+    console.log(`[import-financial-model] Downloaded file: ${document.name}, size: ${fileData.size}`);
 
-    // Parse based on file type
+    const fileName = document.name.toLowerCase();
+    let pairs: [string, string | number][] = [];
+
     if (fileName.endsWith('.csv')) {
       const text = await fileData.text();
-      const rows = parseCSV(text);
-      
-      if (rows.length === 0) {
-        throw new Error("CSV file is empty or invalid format");
-      }
-      
-      keyMetrics = extractMetricsFromCSV(rows);
+      pairs = parseCSV(text);
     } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.xlsm')) {
-      // For Excel files, we need a more sophisticated parser
-      // Since we can't run full xlsx parsing in Deno easily, we'll return a specific error
-      // prompting the user to export as CSV or use a future enhanced parser
-      
-      // For now, attempt to extract any text-based content
-      const text = await fileData.text();
-      
-      // Check if there's any readable content (sometimes Excel XML format)
-      if (text.includes('<?xml') || text.includes('<worksheet')) {
-        // Attempt to extract values from XML format
-        const numberMatches = text.match(/<v>([0-9.]+)<\/v>/g) || [];
-        const textMatches = text.match(/<t>([^<]+)<\/t>/g) || [];
-        
-        // Build a simple key-value structure
-        const extractedRows: Record<string, string>[] = [];
-        textMatches.forEach((t, idx) => {
-          const label = t.replace(/<\/?t>/g, '');
-          const value = numberMatches[idx]?.replace(/<\/?v>/g, '') || '';
-          extractedRows.push({ label, value });
-        });
-        
-        keyMetrics = extractMetricsFromCSV(extractedRows);
-      } else {
-        // Binary Excel format - return guidance
-        await supabase
-          .from("financial_model_versions")
-          .update({ 
-            status: "failed",
-            parse_error: "Excel binary format detected. Please open in Excel/Sheets, ensure all formulas are calculated, then export as CSV and re-upload."
-          })
-          .eq("id", version_id);
-
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: "Please export your Excel file as CSV for automatic parsing, or use the manual mapping feature."
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const arrayBuffer = await fileData.arrayBuffer();
+      pairs = await parseExcel(arrayBuffer);
     } else {
       throw new Error(`Unsupported file type: ${fileName}`);
     }
+    
+    console.log(`[import-financial-model] Total pairs extracted: ${pairs.length}`);
+    
+    let keyMetrics: KeyMetrics = {
+      runway_months: findMetricFromPairs(pairs, 'runway_months'),
+      burn_rate_monthly: findMetricFromPairs(pairs, 'burn_rate_monthly'),
+      gross_margin_pct: findMetricFromPairs(pairs, 'gross_margin_pct'),
+      cac: findMetricFromPairs(pairs, 'cac'),
+      churn_monthly_pct: findMetricFromPairs(pairs, 'churn_monthly_pct'),
+      ltv: findMetricFromPairs(pairs, 'ltv'),
+      ltv_cac: findMetricFromPairs(pairs, 'ltv_cac'),
+      payback_months: findMetricFromPairs(pairs, 'payback_months'),
+      cash_end: findMetricFromPairs(pairs, 'cash_end'),
+      treasury_need: findMetricFromPairs(pairs, 'treasury_need'),
+    };
 
-    // Calculate derived metrics
     keyMetrics = calculateDerivedMetrics(keyMetrics);
+    
+    console.log(`[import-financial-model] Extracted metrics:`, JSON.stringify(keyMetrics));
 
-    // Check if we extracted any useful data
     const hasData = Object.values(keyMetrics).some(v => v !== null);
     
     if (!hasData) {
@@ -269,20 +317,19 @@ serve(async (req) => {
         .from("financial_model_versions")
         .update({ 
           status: "failed",
-          parse_error: "Could not extract key metrics from the file. Please ensure the file contains labeled metrics (e.g., 'Runway', 'CAC', 'LTV', 'Burn Rate', etc.) or use manual mapping."
+          parse_error: "Could not extract key metrics from the file. Please ensure the file contains labeled metrics (e.g., 'Runway', 'CAC', 'LTV', 'Burn Rate', 'Caixa', 'Tesouraria', etc.)."
         })
         .eq("id", version_id);
 
       return new Response(JSON.stringify({ 
         success: false,
-        error: "No metrics could be extracted. Please check file format."
+        error: "No metrics could be extracted. Please check file format and ensure metrics are labeled."
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Update version with parsed data
     const { error: updateError } = await supabase
       .from("financial_model_versions")
       .update({
@@ -296,7 +343,7 @@ serve(async (req) => {
       throw updateError;
     }
 
-    console.log(`Successfully parsed financial model: ${version_id}`);
+    console.log(`[import-financial-model] Successfully parsed version: ${version_id}`);
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -307,7 +354,7 @@ serve(async (req) => {
     });
 
   } catch (error: unknown) {
-    console.error("Error parsing financial model:", error);
+    console.error("[import-financial-model] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to parse financial model";
     return new Response(JSON.stringify({ 
       success: false,
