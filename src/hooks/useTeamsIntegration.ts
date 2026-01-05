@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
 
 export interface TeamsIntegrationSettings {
@@ -136,7 +137,7 @@ export function useTestTeamsWebhook() {
       if (settingsError) throw settingsError;
       if (!settings?.webhook_url) throw new Error('No Teams webhook configured');
 
-      const { data, error } = await supabase.functions.invoke('teams-notify', {
+      const { data, error } = await invokeWithAuth('teams-notify', {
         body: {
           event_type: 'test',
           payload: {
