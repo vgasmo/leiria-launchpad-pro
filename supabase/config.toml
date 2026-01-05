@@ -18,8 +18,10 @@ verify_jwt = true
 [functions.generate-investor-update]
 verify_jwt = true
 
+# NOTE: verify_jwt disabled to avoid gateway-level "Invalid JWT" failures.
+# This function validates the bearer token at runtime.
 [functions.import-financial-model]
-verify_jwt = true
+verify_jwt = false
 
 [functions.sync-financial-kpis]
 verify_jwt = true
