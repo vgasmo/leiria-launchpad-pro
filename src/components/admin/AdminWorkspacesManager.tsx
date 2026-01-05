@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, UserPlus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2, UserPlus, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
@@ -16,8 +19,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { StartupStage, HealthScore } from '@/types/database';
 
 export function AdminWorkspacesManager() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [workspaceToBlock, setWorkspaceToBlock] = useState<{ id: string; name: string } | null>(null);
+  const [blockReason, setBlockReason] = useState('');
   const [selectedStartup, setSelectedStartup] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [selectedStage, setSelectedStage] = useState<StartupStage>('ideation');
@@ -106,9 +113,41 @@ export function AdminWorkspacesManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
-      toast.success('Workspace deleted');
+      toast.success(t('admin.workspacesManager.deleted'));
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
+  const blockMutation = useMutation({
+    mutationFn: async ({ workspaceId, reason }: { workspaceId: string; reason?: string }) => {
+      const { error } = await supabase.rpc('block_workspace', {
+        _workspace_id: workspaceId,
+        _reason: reason || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
+      toast.success(t('admin.workspacesManager.blocked'));
+      setBlockDialogOpen(false);
+      setWorkspaceToBlock(null);
+      setBlockReason('');
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
+  const unblockMutation = useMutation({
+    mutationFn: async (workspaceId: string) => {
+      const { error } = await supabase.rpc('unblock_workspace', {
+        _workspace_id: workspaceId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
+      toast.success(t('admin.workspacesManager.unblocked'));
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
   const resetForm = () => {
@@ -251,51 +290,128 @@ export function AdminWorkspacesManager() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Startup</TableHead>
-                <TableHead>Program</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Health</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
+                <TableHead>{t('admin.workspacesManager.startup')}</TableHead>
+                <TableHead>{t('admin.workspacesManager.program')}</TableHead>
+                <TableHead>{t('admin.workspacesManager.stage')}</TableHead>
+                <TableHead>{t('admin.workspacesManager.health')}</TableHead>
+                <TableHead>{t('admin.workspacesManager.status')}</TableHead>
+                <TableHead className="w-32">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workspaces?.map((ws) => (
-                <TableRow key={ws.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6 rounded">
-                        <AvatarImage src={(ws.startup as { logo_url: string | null } | null)?.logo_url || undefined} />
-                        <AvatarFallback className="rounded text-xs">
-                          {(ws.startup as { name: string } | null)?.name?.slice(0, 2).toUpperCase() || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      {(ws.startup as { name: string } | null)?.name || '-'}
-                    </div>
-                  </TableCell>
-                  <TableCell>{(ws.program as { name: string } | null)?.name || '-'}</TableCell>
-                  <TableCell><StageBadge stage={ws.stage} /></TableCell>
-                  <TableCell><HealthBadge score={(ws.health_score_override || ws.health_score) as HealthScore | null} /></TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ws.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {workspaces?.map((ws) => {
+                const isBlocked = !!(ws as any).blocked_at;
+                const startupName = (ws.startup as { name: string } | null)?.name || '-';
+                return (
+                  <TableRow key={ws.id} className={isBlocked ? 'opacity-60' : ''}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6 rounded">
+                          <AvatarImage src={(ws.startup as { logo_url: string | null } | null)?.logo_url || undefined} />
+                          <AvatarFallback className="rounded text-xs">
+                            {startupName.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {startupName}
+                      </div>
+                    </TableCell>
+                    <TableCell>{(ws.program as { name: string } | null)?.name || '-'}</TableCell>
+                    <TableCell><StageBadge stage={ws.stage} /></TableCell>
+                    <TableCell><HealthBadge score={(ws.health_score_override || ws.health_score) as HealthScore | null} /></TableCell>
+                    <TableCell>
+                      {isBlocked ? (
+                        <Badge variant="destructive" className="gap-1">
+                          <Ban className="h-3 w-3" />
+                          {t('admin.workspacesManager.blockedStatus')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-green-600 border-green-600 gap-1">
+                          <CheckCircle className="h-3 w-3" />
+                          {t('admin.workspacesManager.activeStatus')}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {isBlocked ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => unblockMutation.mutate(ws.id)}
+                            disabled={unblockMutation.isPending}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            {t('admin.workspacesManager.unblock')}
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setWorkspaceToBlock({ id: ws.id, name: startupName });
+                              setBlockDialogOpen(true);
+                            }}
+                          >
+                            <Ban className="h-4 w-4 mr-1" />
+                            {t('admin.workspacesManager.block')}
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ws.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {workspaces?.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No workspaces yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('admin.workspacesManager.noWorkspaces')}</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
         )}
       </CardContent>
+
+      {/* Block Workspace Dialog */}
+      <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('admin.workspacesManager.blockTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.workspacesManager.blockDescription', { name: workspaceToBlock?.name })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>{t('admin.workspacesManager.blockReason')}</Label>
+              <Textarea
+                value={blockReason}
+                onChange={(e) => setBlockReason(e.target.value)}
+                placeholder={t('admin.workspacesManager.blockReasonPlaceholder')}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBlockDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => workspaceToBlock && blockMutation.mutate({ workspaceId: workspaceToBlock.id, reason: blockReason })}
+              disabled={blockMutation.isPending}
+            >
+              <Ban className="h-4 w-4 mr-2" />
+              {blockMutation.isPending ? t('common.loading') : t('admin.workspacesManager.confirmBlock')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

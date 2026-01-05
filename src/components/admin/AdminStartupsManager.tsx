@@ -24,7 +24,8 @@ interface FormState {
   main_contact_name: string;
   main_contact_email: string;
   main_contact_phone: string;
-  is_legally_recognized: boolean;
+  has_startup_portugal_status: boolean;
+  startup_portugal_document_path: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -35,7 +36,8 @@ const EMPTY_FORM: FormState = {
   main_contact_name: '',
   main_contact_email: '',
   main_contact_phone: '',
-  is_legally_recognized: false,
+  has_startup_portugal_status: false,
+  startup_portugal_document_path: '',
 };
 
 export function AdminStartupsManager() {
@@ -78,7 +80,8 @@ export function AdminStartupsManager() {
         main_contact_name: data.main_contact_name || null,
         main_contact_email: data.main_contact_email || null,
         main_contact_phone: data.main_contact_phone || null,
-        is_legally_recognized: data.is_legally_recognized || false,
+        has_startup_portugal_status: data.has_startup_portugal_status || false,
+        startup_portugal_document_path: data.startup_portugal_document_path || null,
       }]);
       if (error) throw error;
     },
@@ -100,7 +103,8 @@ export function AdminStartupsManager() {
         main_contact_name: data.main_contact_name || null,
         main_contact_email: data.main_contact_email || null,
         main_contact_phone: data.main_contact_phone || null,
-        is_legally_recognized: data.is_legally_recognized || false,
+        has_startup_portugal_status: data.has_startup_portugal_status || false,
+        startup_portugal_document_path: data.startup_portugal_document_path || null,
       }).eq('id', id);
       if (error) throw error;
     },
@@ -166,7 +170,8 @@ export function AdminStartupsManager() {
       main_contact_name: startup.main_contact_name || '',
       main_contact_email: startup.main_contact_email || '',
       main_contact_phone: startup.main_contact_phone || '',
-      is_legally_recognized: startup.is_legally_recognized || false,
+      has_startup_portugal_status: startup.has_startup_portugal_status || false,
+      startup_portugal_document_path: startup.startup_portugal_document_path || '',
     });
     setIsDialogOpen(true);
   };
@@ -203,7 +208,7 @@ export function AdminStartupsManager() {
         workspace?.stage || '',
         (workspace?.program as any)?.name || '',
         s.website || '',
-        s.is_legally_recognized ? 'Yes' : 'No',
+        s.has_startup_portugal_status ? 'Yes' : 'No',
         s.description?.replace(/"/g, '""') || '',
       ];
     });
@@ -290,12 +295,12 @@ export function AdminStartupsManager() {
                   <div className="flex items-end">
                     <div className="flex items-center space-x-2">
                       <Checkbox 
-                        id="is_legally_recognized" 
-                        checked={formData.is_legally_recognized} 
-                        onCheckedChange={(checked) => setFormData({ ...formData, is_legally_recognized: !!checked })} 
+                        id="has_startup_portugal_status" 
+                        checked={formData.has_startup_portugal_status} 
+                        onCheckedChange={(checked) => setFormData({ ...formData, has_startup_portugal_status: !!checked })} 
                       />
-                      <Label htmlFor="is_legally_recognized" className="cursor-pointer">
-                        {t('admin.startupsManager.legallyRecognized')}
+                      <Label htmlFor="has_startup_portugal_status" className="cursor-pointer text-sm">
+                        {t('admin.startupsManager.startupPortugalStatus')}
                       </Label>
                     </div>
                   </div>
@@ -394,10 +399,10 @@ export function AdminStartupsManager() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{startup.name}</span>
-                        {startup.is_legally_recognized && (
+                        {startup.has_startup_portugal_status && (
                           <Badge variant="outline" className="text-xs">
                             <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
-                            {t('admin.startupsManager.legal')}
+                            {t('admin.startupsManager.startupPortugal')}
                           </Badge>
                         )}
                       </div>

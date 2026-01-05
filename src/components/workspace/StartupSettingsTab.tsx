@@ -29,7 +29,8 @@ interface StartupSettingsTabProps {
     main_contact_name: string | null;
     main_contact_email: string | null;
     main_contact_phone: string | null;
-    is_legally_recognized: boolean | null;
+    has_startup_portugal_status: boolean | null;
+    startup_portugal_document_path: string | null;
   };
   canEdit: boolean;
 }
@@ -49,7 +50,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     main_contact_name: startup.main_contact_name || '',
     main_contact_email: startup.main_contact_email || '',
     main_contact_phone: startup.main_contact_phone || '',
-    is_legally_recognized: !!startup.is_legally_recognized,
+    has_startup_portugal_status: !!startup.has_startup_portugal_status,
   });
 
   const updateMutation = useMutation({
@@ -67,7 +68,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           main_contact_name: data.main_contact_name || null,
           main_contact_email: data.main_contact_email || null,
           main_contact_phone: data.main_contact_phone || null,
-          is_legally_recognized: !!data.is_legally_recognized,
+          has_startup_portugal_status: !!data.has_startup_portugal_status,
         })
         .eq('id', startupId);
       if (error) throw error;
@@ -256,15 +257,15 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
             <div className="flex items-end">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="is_legally_recognized"
-                  checked={formData.is_legally_recognized}
+                  id="has_startup_portugal_status"
+                  checked={formData.has_startup_portugal_status}
                   onCheckedChange={(checked) =>
-                    setFormData({ ...formData, is_legally_recognized: !!checked })
+                    setFormData({ ...formData, has_startup_portugal_status: !!checked })
                   }
                 />
-                <Label htmlFor="is_legally_recognized" className="cursor-pointer flex items-center gap-2">
+                <Label htmlFor="has_startup_portugal_status" className="cursor-pointer flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-muted-foreground" />
-                  Startup reconhecida por lei
+                  Startup com estatuto Startup Portugal
                 </Label>
               </div>
             </div>
