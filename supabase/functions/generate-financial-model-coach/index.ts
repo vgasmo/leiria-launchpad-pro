@@ -57,7 +57,7 @@ serve(async (req) => {
     const { data: version, error: versionError } = await supabase
       .from("financial_model_versions")
       .select(
-        "*, workspace:workspaces!financial_model_versions_workspace_id_fkey(id, stage, program_id, health_score, health_label, startup_id)"
+        "*, workspace:workspaces!financial_model_versions_workspace_id_fkey(id, stage, program_id, health_score, health_score_numeric, startup_id)"
       )
       .eq("id", version_id)
       .single();
@@ -99,8 +99,8 @@ serve(async (req) => {
       id: string;
       stage: string | null;
       program_id: string | null;
-      health_score: number | null;
-      health_label: string | null;
+      health_score: string | null;
+      health_score_numeric: number | null;
       startup_id: string | null;
     } | null;
 
@@ -138,8 +138,8 @@ serve(async (req) => {
     const context = {
       metrics,
       stage: workspace?.stage || "unknown",
-      health_score: workspace?.health_score,
-      health_label: workspace?.health_label,
+      health_score: workspace?.health_score_numeric,
+      health_label: workspace?.health_score,
       recent_sessions: recentSessions?.map(s => ({
         title: s.title,
         notes: s.notes?.slice(0, 500),
