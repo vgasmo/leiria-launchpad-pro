@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -39,14 +39,30 @@ export function GlobalGraphApiCard() {
   const [showPolicyGuide, setShowPolicyGuide] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [isTesting, setIsTesting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const settingsJson = settings?.settings_json as GraphApiGlobalSettings | undefined;
   const isConfigured = !!(settingsJson?.tenant_id && settingsJson?.client_id);
   const isEnabled = settings?.is_enabled && isConfigured;
+  
+  // Pre-populate fields with current values when data loads
+  React.useEffect(() => {
+    if (settingsJson && !isInitialized) {
+      setTenantId(settingsJson.tenant_id || '');
+      setClientId(settingsJson.client_id || '');
+      setIsInitialized(true);
+    }
+  }, [settingsJson, isInitialized]);
 
   const handleSaveCredentials = async () => {
-    if (!tenantId || !clientId || !clientSecret) {
-      toast.error('All Azure AD credentials are required');
+    // For new setup, require all fields. For update, secret is optional.
+    if (!tenantId || !clientId) {
+      toast.error('Tenant ID and Client ID are required');
+      return;
+    }
+    
+    if (!isConfigured && !clientSecret) {
+      toast.error('Client Secret is required for initial setup');
       return;
     }
 
@@ -63,7 +79,7 @@ export function GlobalGraphApiCard() {
     await updateSettings.mutateAsync({
       tenant_id: tenantId,
       client_id: clientId,
-      client_secret: clientSecret,
+      client_secret: clientSecret || undefined, // Only send if provided
     });
     setClientSecret('');
   };
@@ -211,7 +227,7 @@ export function GlobalGraphApiCard() {
 
           <Button 
             onClick={handleSaveCredentials}
-            disabled={(!tenantId || !clientId || !clientSecret) || updateSettings.isPending}
+            disabled={(!tenantId || !clientId || (!clientSecret && !isConfigured)) || updateSettings.isPending}
             size="sm"
             className="w-full"
           >
