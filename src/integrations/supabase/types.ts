@@ -2001,6 +2001,51 @@ export type Database = {
           },
         ]
       }
+      playbook_template_assignments: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_required: boolean | null
+          order_index: number | null
+          playbook_id: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_required?: boolean | null
+          order_index?: number | null
+          playbook_id: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_required?: boolean | null
+          order_index?: number | null
+          playbook_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_template_assignments_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "playbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_template_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbooks: {
         Row: {
           created_at: string
@@ -4648,6 +4693,63 @@ export type Database = {
           },
         ]
       }
+      workspace_template_tasks: {
+        Row: {
+          assigned_by: string
+          completed_at: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          status: string | null
+          template_id: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          assigned_by: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          status?: string | null
+          template_id: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          assigned_by?: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          status?: string | null
+          template_id?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_template_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_template_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_users: {
         Row: {
           active: boolean
@@ -5017,6 +5119,10 @@ export type Database = {
       }
     }
     Functions: {
+      block_workspace: {
+        Args: { _reason?: string; _workspace_id: string }
+        Returns: undefined
+      }
       can_edit_workspace: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -5142,6 +5248,7 @@ export type Database = {
         Args: { p_instance_id: string; p_responses: Json }
         Returns: string
       }
+      unblock_workspace: { Args: { _workspace_id: string }; Returns: undefined }
     }
     Enums: {
       action_status: "pending" | "in_progress" | "completed" | "cancelled"
