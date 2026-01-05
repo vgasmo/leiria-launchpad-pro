@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { 
   Upload, 
   Link as LinkIcon, 
@@ -327,13 +328,20 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
 
       {/* Documents List */}
       {sortedCategories.length === 0 || (sortedCategories.length === 1 && !documents?.some(d => d.category !== 'Financial Model')) ? (
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-            <p>{t('documents.noDocumentsDesc')}</p>
-            {canWrite && <p className="text-sm mt-2">{t('documents.getStarted')}</p>}
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title={t('emptyStates.documents.title')}
+          description={t('emptyStates.documents.description')}
+          action={canWrite ? {
+            label: t('documents.uploadFile'),
+            onClick: () => setUploadOpen(true),
+            icon: Upload,
+          } : undefined}
+          secondaryAction={canWrite ? {
+            label: t('documents.addLink'),
+            onClick: () => setLinkOpen(true),
+          } : undefined}
+        />
       ) : (
         sortedCategories
           .filter(cat => cat !== 'Financial Model')

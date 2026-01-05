@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, useBulkUpdateActions, useBulkDeleteActions, type ActionItem } from '@/hooks/useActionItems';
 import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
@@ -362,13 +363,16 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
 
       {/* Milestones with nested actions */}
       {(!milestones || milestones.length === 0) ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>{t('actions.noMilestones')}</p>
-            <p className="text-xs mt-1">{t('actions.actionsBelongToMilestones')}</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Target}
+          title={t('emptyStates.actions.title')}
+          description={t('emptyStates.actions.description')}
+          action={canWrite ? {
+            label: t('milestones.addMilestone'),
+            onClick: () => {},
+            icon: Plus,
+          } : undefined}
+        />
       ) : (
         <div className="space-y-3">
           {milestones.map(milestone => {
