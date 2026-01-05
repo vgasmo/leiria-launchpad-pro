@@ -67,7 +67,7 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.test-graph-api]
-verify_jwt = true
+verify_jwt = false
 
 # ============================================
 # PUBLIC FUNCTIONS (Token-based auth)
