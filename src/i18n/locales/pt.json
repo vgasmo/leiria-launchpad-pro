@@ -146,8 +146,8 @@
     "applicationBeingReviewed": "A sua candidatura de startup está a ser revista pela nossa equipa. Terá acesso ao seu workspace após a aprovação.",
     "pending": "Pendente",
     "responseTime": "Normalmente respondemos em 2-3 dias úteis",
-    "startYourJourney": "Inicie a Sua Jornada",
-    "startYourJourneyDesc": "Crie o perfil da sua startup para se juntar ao nosso programa de mentoria e ter acesso a orientação especializada, recursos e um workspace dedicado.",
+    "startYourJourney": "Inicie a Sua Jornada Startup",
+    "startYourJourneyDesc": "Registe a sua startup para aceder a mentoria, acompanhar o progresso e preparar a próxima ronda de financiamento.",
     "createYourStartup": "Criar a Sua Startup",
     "openWorkspace": "Abrir Workspace",
     "nextMeeting": "Próxima Reunião",
@@ -157,7 +157,32 @@
     "quickActions": "Ações Rápidas",
     "commonTasks": "Tarefas comuns para o seu workspace",
     "updateKpis": "Atualizar KPIs",
-    "viewActions": "Ver Ações"
+    "viewActions": "Ver Ações",
+    "learnMore": "Saber Mais"
+  },
+  "onboarding": {
+    "welcomeTitle": "Bem-vindo à sua jornada startup!",
+    "welcomeDescription": "Esta plataforma ajuda-o a acompanhar o progresso, conectar com mentores e preparar para investimento. Vamos configurar tudo em poucos passos.",
+    "getStarted": "Começar",
+    "viewWorkspace": "Ver Workspace",
+    "exploreMentors": "Explorar Mentores",
+    "checklistTitle": "Primeiros Passos",
+    "completeProfile": "Complete o seu perfil",
+    "completeProfileDesc": "Ajude mentores e consultores a entender quem é",
+    "editProfile": "Editar Perfil",
+    "addStartup": "Registe a sua startup",
+    "addStartupDesc": "Configure a sua empresa para começar a acompanhar o progresso",
+    "createStartup": "Criar Startup",
+    "setKpis": "Defina os seus KPIs",
+    "setKpisDesc": "Acompanhe o que é mais importante para o seu crescimento",
+    "addKpis": "Adicionar KPIs",
+    "uploadDeck": "Carregue o seu pitch deck",
+    "uploadDeckDesc": "Obtenha feedback e partilhe com investidores",
+    "connectMentor": "Conecte-se com um mentor",
+    "connectMentorDesc": "Obtenha orientação de profissionais experientes",
+    "findMentors": "Encontrar Mentores",
+    "allComplete": "Está tudo pronto!",
+    "allCompleteDesc": "Excelente trabalho a completar a configuração. Está pronto para progredir."
   },
   "mentor": {
     "noStartupsAssigned": "Nenhuma startup atribuída ainda",
@@ -1688,13 +1713,16 @@
     }
   },
   "emptyState": {
-    "noMatchingWorkspaces": "Nenhum workspace encontrado",
-    "adjustFilters": "Tente ajustar a sua pesquisa ou filtros para encontrar o que procura.",
-    "clearFilters": "Limpar Filtros",
-    "welcomeToWorkspace": "Bem-vindo ao seu workspace",
-    "founderNoStartups": "Ainda não tem nenhuma startup. Crie a sua primeira startup para começar a acompanhar KPIs, gerir marcos e fazer crescer o seu negócio.",
-    "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador para ser atribuído a uma startup.",
-    "createFirstStartup": "Criar a Sua Primeira Startup"
+    "noMatchingWorkspaces": "Sem resultados",
+    "adjustFilters": "Tente ajustar os seus filtros ou termos de pesquisa para encontrar o que procura.",
+    "clearFilters": "Limpar Todos os Filtros",
+    "welcomeToWorkspace": "Bem-vindo aos Workspaces",
+    "welcomeFounder": "Inicie a Sua Jornada Startup",
+    "founderNoStartups": "Registe a sua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.",
+    "founderValue": "Obtenha orientação de mentores e acompanhe os seus KPIs num só lugar.",
+    "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador ou junte-se a um programa.",
+    "createFirstStartup": "Criar a Sua Startup",
+    "explorePrograms": "Explorar Programas"
   },
   "integrations": {
     "title": "Integrações e Captura",
