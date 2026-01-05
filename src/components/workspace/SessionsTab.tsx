@@ -558,12 +558,15 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="joinUrl">Meeting Link</Label>
+            <Label htmlFor="joinUrl">
+              Meeting Link
+              <span className="text-muted-foreground text-xs ml-1">(optional if using Teams sync)</span>
+            </Label>
             <Input
               id="joinUrl"
               value={joinUrl}
               onChange={(e) => setJoinUrl(e.target.value)}
-              placeholder="https://meet.google.com/..."
+              placeholder="Optional - Teams link added automatically if synced"
             />
           </div>
           
