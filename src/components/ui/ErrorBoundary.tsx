@@ -11,20 +11,78 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  errorId: string | null;
+}
+
+/**
+ * Sanitize error message for production display.
+ * Never expose stack traces, internal paths, or sensitive data.
+ */
+function getSafeErrorMessage(error: Error | null, isDev: boolean): string | null {
+  if (!error) return null;
+  
+  // In development, show full message for debugging
+  if (isDev) {
+    return error.message;
+  }
+  
+  // In production, only show safe generic messages
+  // Check for known safe error patterns
+  const safePatterns = [
+    /network/i,
+    /timeout/i,
+    /not found/i,
+    /unauthorized/i,
+    /forbidden/i,
+  ];
+  
+  const message = error.message;
+  
+  // If it matches a safe pattern, show a sanitized version
+  if (safePatterns.some(p => p.test(message))) {
+    if (/network/i.test(message)) return 'Network error. Please check your connection.';
+    if (/timeout/i.test(message)) return 'Request timed out. Please try again.';
+    if (/not found/i.test(message)) return 'The requested resource was not found.';
+    if (/unauthorized/i.test(message)) return 'You are not authorized to perform this action.';
+    if (/forbidden/i.test(message)) return 'Access denied.';
+  }
+  
+  // For all other errors, return null (show generic message only)
+  return null;
+}
+
+/**
+ * Generate a unique error ID for support reference
+ */
+function generateErrorId(): string {
+  return `ERR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    errorId: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { 
+      hasError: true, 
+      error,
+      errorId: generateErrorId(),
+    };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    // Log error with error ID for debugging (safe - server-side logs only)
+    console.error(`[${this.state.errorId}] Uncaught error:`, {
+      message: error.message,
+      name: error.name,
+      componentStack: errorInfo.componentStack,
+    });
+    
+    // TODO: In production, send to error monitoring service
+    // Example: sendToMonitoring({ errorId: this.state.errorId, error, errorInfo });
   }
 
   private handleReload = () => {
@@ -41,6 +99,9 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const isDev = import.meta.env.DEV;
+      const safeMessage = getSafeErrorMessage(this.state.error, isDev);
+
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
           <Card className="max-w-md w-full">
@@ -54,13 +115,22 @@ export class ErrorBoundary extends Component<Props, State> {
               <p className="text-muted-foreground mb-4">
                 An unexpected error occurred. Please try refreshing the page or return to the dashboard.
               </p>
-              {this.state.error && (
+              
+              {/* Error ID for support reference (always safe to show) */}
+              {this.state.errorId && (
+                <p className="text-xs text-muted-foreground mb-4">
+                  Error ID: <code className="bg-muted px-1 rounded">{this.state.errorId}</code>
+                </p>
+              )}
+              
+              {/* Only show error details in development or for safe messages */}
+              {safeMessage && (
                 <details className="text-left bg-muted/50 rounded-lg p-3 text-xs">
                   <summary className="cursor-pointer font-medium text-muted-foreground">
-                    Error details
+                    {isDev ? 'Error details (dev only)' : 'More info'}
                   </summary>
                   <pre className="mt-2 whitespace-pre-wrap break-words text-destructive">
-                    {this.state.error.message}
+                    {safeMessage}
                   </pre>
                 </details>
               )}
