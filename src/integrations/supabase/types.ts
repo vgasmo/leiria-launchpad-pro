@@ -4905,8 +4905,13 @@ export type Database = {
           description: string | null
           founded_date: string | null
           id: string | null
+          is_legally_recognized: boolean | null
           logo_url: string | null
+          main_contact_email: string | null
+          main_contact_name: string | null
+          main_contact_phone: string | null
           name: string | null
+          nif: string | null
           phone: string | null
           updated_at: string | null
           website: string | null
@@ -4917,8 +4922,13 @@ export type Database = {
           description?: string | null
           founded_date?: string | null
           id?: string | null
+          is_legally_recognized?: boolean | null
           logo_url?: string | null
+          main_contact_email?: never
+          main_contact_name?: never
+          main_contact_phone?: never
           name?: string | null
+          nif?: never
           phone?: never
           updated_at?: string | null
           website?: string | null
@@ -4929,13 +4939,81 @@ export type Database = {
           description?: string | null
           founded_date?: string | null
           id?: string | null
+          is_legally_recognized?: boolean | null
           logo_url?: string | null
+          main_contact_email?: never
+          main_contact_name?: never
+          main_contact_phone?: never
           name?: string | null
+          nif?: never
           phone?: never
           updated_at?: string | null
           website?: string | null
         }
         Relationships: []
+      }
+      team_members_safe: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          is_founder: boolean | null
+          joined_at: string | null
+          left_at: string | null
+          linkedin_url: string | null
+          phone: string | null
+          role: string | null
+          startup_id: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: never
+          full_name?: string | null
+          id?: string | null
+          is_founder?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          linkedin_url?: never
+          phone?: never
+          role?: string | null
+          startup_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: never
+          full_name?: string | null
+          id?: string | null
+          is_founder?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          linkedin_url?: never
+          phone?: never
+          role?: string | null
+          startup_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -4945,6 +5023,10 @@ export type Database = {
       }
       can_manage_startup: { Args: { _startup_id: string }; Returns: boolean }
       can_see_startup_pii: { Args: { _startup_id: string }; Returns: boolean }
+      can_see_team_member_pii: {
+        Args: { _startup_id: string }
+        Returns: boolean
+      }
       can_view_quality_result: {
         Args: { _entity_id: string; _entity_type: string }
         Returns: boolean
