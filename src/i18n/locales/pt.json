@@ -960,7 +960,9 @@
       "date": "Data",
       "status": "Estado",
       "read": "Lido",
-      "unread": "Por ler"
+      "unread": "Por ler",
+      "sendToAll": "Enviar para todas as startups",
+      "selected": "selecionada(s)"
     },
     "mentors": {
       "title": "Mentores Externos",
