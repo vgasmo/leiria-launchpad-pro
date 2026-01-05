@@ -35,6 +35,9 @@ import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboa
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
 import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
+import { PendingSurveysBanner } from '@/components/surveys/PendingSurveysBanner';
+import { SurveyForm } from '@/components/surveys/SurveyForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { WorkspaceAlertsSection } from '@/components/workspace/WorkspaceAlertsSection';
 import { HealthScoreCard } from '@/components/workspace/HealthScoreCard';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
@@ -91,6 +94,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
+  const [activeSurveyId, setActiveSurveyId] = useState<string | null>(null);
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   
   // Check if workspace is "empty" and should show onboarding prompt
@@ -157,6 +161,29 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 
       {/* Weekly Check-in Banner for Founders */}
       {isFounder && <WeeklyCheckinBanner workspaceId={workspace.id} />}
+
+      {/* Pending Surveys Banner for Founders */}
+      {isFounder && (
+        <PendingSurveysBanner 
+          workspaceId={workspace.id} 
+          onOpenSurvey={setActiveSurveyId} 
+        />
+      )}
+
+      {/* Survey Form Dialog */}
+      <Dialog open={!!activeSurveyId} onOpenChange={() => setActiveSurveyId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('surveys.fillSurvey', 'Complete Survey')}</DialogTitle>
+          </DialogHeader>
+          {activeSurveyId && (
+            <SurveyForm 
+              instanceId={activeSurveyId} 
+              onComplete={() => setActiveSurveyId(null)} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Onboarding Wizard */}
       <WorkspaceOnboardingWizard
