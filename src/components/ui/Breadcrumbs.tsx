@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface BreadcrumbItem {
@@ -14,9 +15,10 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   
   // Auto-generate breadcrumbs from path if not provided
-  const breadcrumbs: BreadcrumbItem[] = items || generateBreadcrumbs(location.pathname);
+  const breadcrumbs: BreadcrumbItem[] = items || generateBreadcrumbs(location.pathname, t);
 
   if (breadcrumbs.length === 0) return null;
 
@@ -53,16 +55,16 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   );
 }
 
-function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
+function generateBreadcrumbs(pathname: string, t: (key: string) => string): BreadcrumbItem[] {
   const pathSegments = pathname.split('/').filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
 
   const routeLabels: Record<string, string> = {
-    'my-workspaces': 'Workspaces',
+    'my-workspaces': t('nav.myWorkspaces'),
     'workspace': 'Workspace',
-    'admin': 'Admin',
-    'settings': 'Settings',
-    'mentors': 'Find Mentors',
+    'admin': t('nav.admin'),
+    'settings': t('nav.settings'),
+    'mentors': t('nav.mentors'),
   };
 
   let currentPath = '';
@@ -77,7 +79,7 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
     if (isUuid) {
       // For UUIDs, we'll show a generic label or skip
       breadcrumbs.push({
-        label: 'Details',
+        label: t('common.details') || 'Details',
         href: currentPath,
       });
     } else {
