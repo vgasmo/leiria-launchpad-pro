@@ -65,7 +65,7 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="support-materials" className="gap-2">
             <BookOpen className="h-4 w-4" aria-hidden="true" />
-            {t('admin.supportMaterials', 'Support Materials')}
+            {t('admin.supportMaterials.title', 'Support Materials')}
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-2">
             <Activity className="h-4 w-4" aria-hidden="true" />

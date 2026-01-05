@@ -49,19 +49,39 @@ export function useUpdateGlobalGraphSettings() {
     mutationFn: async (settings: {
       tenant_id: string;
       client_id: string;
-      client_secret: string;
+      client_secret?: string; // Optional for updates
       is_enabled?: boolean;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       
-      // Store settings - secret is stored in DB but should ideally use edge function env var
-      // The secret is stored securely in Supabase and only accessed by edge functions
-      const settingsJson = {
+      // Build settings object - only include secret if provided
+      const settingsJson: Record<string, string> = {
         tenant_id: settings.tenant_id,
         client_id: settings.client_id,
-        client_secret: settings.client_secret,
       };
+      
+      // Only include secret if provided (for updates, it's optional)
+      if (settings.client_secret) {
+        settingsJson.client_secret = settings.client_secret;
+      }
+      
+      // If no secret provided, we need to preserve the existing one
+      if (!settings.client_secret) {
+        // Fetch existing settings to preserve the secret
+        const { data: existing } = await supabase
+          .from('global_integration_settings')
+          .select('settings_json')
+          .eq('integration_type', 'graph_api')
+          .maybeSingle();
+        
+        if (existing?.settings_json && typeof existing.settings_json === 'object') {
+          const existingJson = existing.settings_json as Record<string, unknown>;
+          if (existingJson.client_secret) {
+            settingsJson.client_secret = existingJson.client_secret as string;
+          }
+        }
+      }
       
       const { data, error } = await supabase
         .from('global_integration_settings')
