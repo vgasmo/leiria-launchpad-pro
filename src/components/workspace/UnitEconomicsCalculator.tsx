@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Calculator, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info, Save, Loader2, ChevronLeft, ChevronRight, History } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Calculator, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info, Save, Loader2, ChevronLeft, ChevronRight, History, BookOpen } from 'lucide-react';
 import { format, startOfMonth, subMonths, addMonths, isSameMonth } from 'date-fns';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { QuickHelp, GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import {
   useUnitEconomicsHistory,
   useCurrentMonthUnitEconomics,
@@ -482,13 +489,60 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
           </div>
         </div>
 
-        {/* Benchmarks */}
-        <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-          <p><strong>Benchmarks:</strong></p>
-          <p>• LTV:CAC ratio should be ≥ 3x for a healthy business</p>
-          <p>• CAC payback period should be ≤ 12 months</p>
-          <p>• Monthly churn rate of 5% = ~20 month customer lifetime</p>
-        </div>
+        {/* Educational Section */}
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start gap-2 text-sm">
+              <BookOpen className="h-4 w-4" />
+              O que significam estas métricas?
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                <div className="font-medium flex items-center gap-2">
+                  <GlossaryTooltip term="cac" showIcon={false}>
+                    <span className="cursor-help underline decoration-dotted">CAC</span>
+                  </GlossaryTooltip>
+                </div>
+                <p className="text-xs text-muted-foreground">Custo para adquirir um cliente. Divida os custos de marketing e vendas pelo número de novos clientes.</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                <div className="font-medium flex items-center gap-2">
+                  <GlossaryTooltip term="ltv" showIcon={false}>
+                    <span className="cursor-help underline decoration-dotted">LTV</span>
+                  </GlossaryTooltip>
+                </div>
+                <p className="text-xs text-muted-foreground">Valor total que um cliente gera durante toda a relação. Quanto maior, melhor.</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                <div className="font-medium flex items-center gap-2">
+                  <GlossaryTooltip term="ltvCacRatio" showIcon={false}>
+                    <span className="cursor-help underline decoration-dotted">Rácio LTV:CAC</span>
+                  </GlossaryTooltip>
+                </div>
+                <p className="text-xs text-muted-foreground">Deve ser ≥3x para um negócio saudável. Abaixo de 1x significa que está a perder dinheiro por cliente.</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                <div className="font-medium flex items-center gap-2">
+                  <GlossaryTooltip term="paybackPeriod" showIcon={false}>
+                    <span className="cursor-help underline decoration-dotted">Payback</span>
+                  </GlossaryTooltip>
+                </div>
+                <p className="text-xs text-muted-foreground">Meses para recuperar o CAC. Idealmente ≤12 meses para startups early-stage.</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-sm font-medium text-primary mb-2">💡 Dicas para founders:</p>
+              <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Churn de 5%/mês significa perder metade dos clientes em ~14 meses</li>
+                <li>Margem bruta típica para SaaS é 70-90%</li>
+                <li>Foque em reduzir CAC ou aumentar LTV antes de escalar</li>
+              </ul>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
