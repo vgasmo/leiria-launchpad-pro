@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle, Upload, FileText, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { startupSchema } from '@/lib/validations';
 
@@ -49,6 +50,8 @@ export function AdminStartupsManager() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+  const docInputRef = useRef<HTMLInputElement>(null);
 
   const { data: startups, isLoading } = useQuery({
     queryKey: ['admin-startups'],
@@ -135,9 +138,56 @@ export function AdminStartupsManager() {
     setIsDialogOpen(false);
   };
 
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>, startupId?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(t('admin.startupsManager.invalidFileType'));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('admin.startupsManager.fileTooLarge'));
+      return;
+    }
+
+    setIsUploadingDoc(true);
+    try {
+      const targetId = startupId || editingStartup?.id || 'new';
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${targetId}/startup-portugal-doc.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('startup-documents')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('startup-documents')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, startup_portugal_document_path: publicUrl }));
+      toast.success(t('admin.startupsManager.documentUploaded'));
+    } catch (error: any) {
+      toast.error(`${t('common.error')}: ${error.message}`);
+    } finally {
+      setIsUploadingDoc(false);
+      if (docInputRef.current) docInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationErrors({});
+
+    // Validate Startup Portugal document requirement
+    if (formData.has_startup_portugal_status && !formData.startup_portugal_document_path) {
+      toast.error(t('admin.startupsManager.documentRequired'));
+      return;
+    }
 
     const parseResult = startupSchema.safeParse({ name: formData.name, description: formData.description, website: formData.website });
     
@@ -292,7 +342,7 @@ export function AdminStartupsManager() {
                     />
                   </div>
                   
-                  <div className="flex items-end">
+                  <div className="col-span-2 space-y-3">
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="has_startup_portugal_status" 
@@ -303,6 +353,77 @@ export function AdminStartupsManager() {
                         {t('admin.startupsManager.startupPortugalStatus')}
                       </Label>
                     </div>
+
+                    {/* Document upload for Startup Portugal certification */}
+                    {formData.has_startup_portugal_status && (
+                      <div className="ml-6 p-3 rounded-lg border bg-muted/30 space-y-2">
+                        <Label className="text-sm flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t('admin.startupsManager.certificationDocument')} *
+                        </Label>
+                        
+                        {formData.startup_portugal_document_path ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              {t('admin.startupsManager.documentAttached')}
+                            </Badge>
+                            <a 
+                              href={formData.startup_portugal_document_path} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              {t('admin.startupsManager.viewDocument')}
+                            </a>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setFormData({ ...formData, startup_portugal_document_path: '' })}
+                            >
+                              {t('common.remove')}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div>
+                            <input
+                              ref={docInputRef}
+                              type="file"
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              onChange={(e) => handleDocumentUpload(e)}
+                              className="hidden"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => docInputRef.current?.click()}
+                              disabled={isUploadingDoc}
+                            >
+                              {isUploadingDoc ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="h-4 w-4 mr-2" />
+                              )}
+                              {isUploadingDoc ? t('common.loading') : t('admin.startupsManager.uploadDocument')}
+                            </Button>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {t('admin.startupsManager.acceptedFormats')}
+                            </p>
+                          </div>
+                        )}
+
+                        {formData.has_startup_portugal_status && !formData.startup_portugal_document_path && (
+                          <Alert variant="destructive" className="py-2">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription className="text-xs">
+                              {t('admin.startupsManager.documentRequiredWarning')}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
