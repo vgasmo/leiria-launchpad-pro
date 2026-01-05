@@ -64,7 +64,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.import-teams-transcript]
-verify_jwt = true
+verify_jwt = false
 
 [functions.test-graph-api]
 verify_jwt = false
