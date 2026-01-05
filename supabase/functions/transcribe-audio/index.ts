@@ -79,11 +79,32 @@ Deno.serve(async (req) => {
       }, req, 429);
     }
 
-    const { audio, workspace_id } = await req.json();
+    // Parse and validate request body
+    let body: { audio?: unknown; workspace_id?: unknown };
+    try {
+      body = await req.json();
+    } catch {
+      return corsJsonResponse({ error: 'Invalid JSON body', code: 'BAD_REQUEST' }, req, 400);
+    }
+    
+    const { audio, workspace_id } = body;
 
-    if (!audio) {
+    if (!audio || typeof audio !== 'string') {
       log.error('No audio data provided');
       return corsJsonResponse({ error: 'No audio data provided', code: 'BAD_REQUEST' }, req, 400);
+    }
+    
+    // Validate audio size (max 10MB base64 ~ 7.5MB raw)
+    const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10MB
+    if (audio.length > MAX_AUDIO_SIZE) {
+      log.error('Audio data too large', { size: audio.length, max: MAX_AUDIO_SIZE });
+      return corsJsonResponse({ error: 'Audio file too large (max 10MB)', code: 'BAD_REQUEST' }, req, 400);
+    }
+    
+    // Validate base64 format
+    if (!/^[A-Za-z0-9+/=]+$/.test(audio)) {
+      log.error('Invalid base64 audio format');
+      return corsJsonResponse({ error: 'Invalid audio format', code: 'BAD_REQUEST' }, req, 400);
     }
 
     log.info('Processing audio', { audioLength: audio.length, workspaceId: workspace_id });
@@ -159,7 +180,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     log.error('Fatal error', error);
-    const message = error instanceof Error ? error.message : 'Transcription failed';
-    return corsJsonResponse({ error: message, code: 'INTERNAL_ERROR' }, req, 500);
+    // Return sanitized error to client
+    return corsJsonResponse({ error: 'Transcription failed', code: 'INTERNAL_ERROR' }, req, 500);
   }
 });

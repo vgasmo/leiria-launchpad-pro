@@ -58,6 +58,46 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Validates that a color value is a safe CSS color string.
+ * Prevents CSS injection by only allowing known-safe color formats.
+ */
+function isValidCssColor(color: string | undefined): boolean {
+  if (!color) return false;
+  
+  // Allow HSL values (with or without alpha)
+  // e.g., "215 20.2% 65.1%", "hsl(215, 20.2%, 65.1%)", "hsla(215, 20.2%, 65.1%, 0.5)"
+  if (/^[\d\s.%,()hslargb]+$/i.test(color)) return true;
+  
+  // Allow hex colors: #fff, #ffffff, #ffffffff
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return true;
+  
+  // Allow named colors (common ones)
+  const namedColors = [
+    'transparent', 'currentColor', 'inherit',
+    'black', 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'purple',
+    'gray', 'grey', 'pink', 'cyan', 'magenta', 'lime', 'navy', 'teal',
+  ];
+  if (namedColors.includes(color.toLowerCase())) return true;
+  
+  // Allow CSS variables: var(--something)
+  if (/^var\(--[\w-]+\)$/.test(color)) return true;
+  
+  return false;
+}
+
+/**
+ * Sanitizes a CSS color value, returning undefined if invalid.
+ */
+function sanitizeCssColor(color: string | undefined): string | undefined {
+  if (!color) return undefined;
+  if (!isValidCssColor(color)) {
+    console.warn(`[chart] Invalid CSS color value blocked: ${color.slice(0, 50)}`);
+    return undefined;
+  }
+  return color;
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -65,23 +105,31 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  // Build CSS string with sanitized colors
+  const cssContent = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const cssVars = colorConfig
+        .map(([key, itemConfig]) => {
+          const rawColor = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+          const safeColor = sanitizeCssColor(rawColor);
+          return safeColor ? `  --color-${key}: ${safeColor};` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+      
+      return cssVars ? `${prefix} [data-chart=${id}] {\n${cssVars}\n}` : null;
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  if (!cssContent) {
+    return null;
+  }
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join("\n")}
-}
-`,
-          )
-          .join("\n"),
+        __html: cssContent,
       }}
     />
   );
