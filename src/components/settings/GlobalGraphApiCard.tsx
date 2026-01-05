@@ -100,11 +100,18 @@ export function GlobalGraphApiCard() {
 
     setIsTesting(true);
     try {
+      console.log('[GlobalGraphApiCard] Testing Graph API with email:', testEmail);
+      
       const { data, error } = await supabase.functions.invoke('test-graph-api', {
         body: { test_email: testEmail },
       });
 
-      if (error) throw error;
+      console.log('[GlobalGraphApiCard] Test response:', { data, error });
+
+      if (error) {
+        console.error('[GlobalGraphApiCard] Edge function error:', error);
+        throw error;
+      }
 
       if (data?.success) {
         toast.success(
@@ -113,10 +120,11 @@ export function GlobalGraphApiCard() {
             : '✓ Event created and deleted successfully'
         );
       } else {
-        toast.error(data?.error || 'Test failed');
+        toast.error(data?.error || 'Test failed - check console for details');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to run test');
+      console.error('[GlobalGraphApiCard] Test failed:', err);
+      toast.error(err.message || 'Failed to run test - are you logged in as admin?');
     } finally {
       setIsTesting(false);
     }
