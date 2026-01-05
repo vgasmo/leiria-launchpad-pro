@@ -12,8 +12,10 @@ verify_jwt = true
 [functions.generate-template-coach]
 verify_jwt = true
 
+# NOTE: verify_jwt disabled to avoid gateway-level "Invalid JWT" failures.
+# This function validates the bearer token at runtime.
 [functions.generate-financial-model-coach]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-investor-update]
 verify_jwt = true
