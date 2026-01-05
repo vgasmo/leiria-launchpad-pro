@@ -86,90 +86,113 @@ function parseCSV(content: string): [string, string | number][] {
   return pairs;
 }
 
-// Parse XLSX/XLSM file (which is a ZIP with XML inside)
+// Parse XLSX/XLSM file (ZIP with XML inside)
 async function parseExcel(arrayBuffer: ArrayBuffer): Promise<[string, string | number][]> {
   const pairs: [string, string | number][] = [];
-  
+
+  const colToIndex = (col: string) => {
+    let n = 0;
+    for (const ch of col) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return n;
+  };
+
+  const getAttr = (attrs: string, name: string) => {
+    const m = attrs.match(new RegExp(`${name}="([^"]*)"`));
+    return m?.[1] ?? null;
+  };
+
+  const extractTexts = (xml: string) => {
+    const out: string[] = [];
+    for (const m of xml.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)) out.push(m[1]);
+    return out.join('');
+  };
+
   try {
     const zip = new JSZip();
     const contents = await zip.loadAsync(arrayBuffer);
-    
-    // Get shared strings (text values are stored separately in XLSX)
-    const sharedStringsFile = contents.file('xl/sharedStrings.xml');
+
+    // Shared strings: each <si> may have multiple <t> (rich text)
     const sharedStrings: string[] = [];
-    
+    const sharedStringsFile = contents.file('xl/sharedStrings.xml');
     if (sharedStringsFile) {
       const ssXml = await sharedStringsFile.async('string');
-      // Extract all <t> elements (text content)
-      const matches = ssXml.matchAll(/<t[^>]*>([^<]*)<\/t>/g);
-      for (const match of matches) {
-        sharedStrings.push(match[1]);
+      for (const si of ssXml.matchAll(/<si[^>]*>([\s\S]*?)<\/si>/g)) {
+        sharedStrings.push(extractTexts(si[1]));
       }
     }
-    
-    // Find all sheet XML files
+
     const sheetFiles = Object.keys(contents.files).filter(
-      name => name.startsWith('xl/worksheets/') && name.endsWith('.xml')
+      (name) => name.startsWith('xl/worksheets/') && name.endsWith('.xml')
     );
-    
+
     for (const sheetPath of sheetFiles) {
       const sheetFile = contents.file(sheetPath);
       if (!sheetFile) continue;
-      
+
       const sheetXml = await sheetFile.async('string');
-      
-      // Parse rows - look for <row> elements
-      const rowMatches = sheetXml.matchAll(/<row[^>]*>(.*?)<\/row>/gs);
-      
-      for (const rowMatch of rowMatches) {
-        const rowContent = rowMatch[1];
-        // Parse cells within the row
-        const cellMatches = rowContent.matchAll(/<c[^>]*r="([A-Z]+)(\d+)"[^>]*(?:t="([^"]*)")?[^>]*>(?:<v>([^<]*)<\/v>)?/g);
-        
-        const rowCells: { col: string; value: string | number }[] = [];
-        
-        for (const cellMatch of cellMatches) {
-          const col = cellMatch[1];
-          const cellType = cellMatch[3];
-          const rawValue = cellMatch[4] || '';
-          
-          let value: string | number;
-          if (cellType === 's') {
-            // Shared string reference
-            const idx = parseInt(rawValue, 10);
-            value = sharedStrings[idx] || '';
-          } else if (cellType === 'str' || cellType === 'inlineStr') {
-            value = rawValue;
+
+      for (const rowMatch of sheetXml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
+        const rowXml = rowMatch[1];
+        const rowCells: { idx: number; value: string | number }[] = [];
+
+        for (const cellMatch of rowXml.matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/g)) {
+          const attrs = cellMatch[1];
+          const inner = cellMatch[2];
+
+          const r = getAttr(attrs, 'r');
+          if (!r) continue;
+
+          const colLetters = (r.match(/^([A-Z]+)/)?.[1] ?? '');
+          if (!colLetters) continue;
+
+          const idx = colToIndex(colLetters);
+          const t = getAttr(attrs, 't');
+
+          // inlineStr stores text inside <is><t>...</t></is>
+          let raw: string | null = null;
+          if (t === 'inlineStr') {
+            const isXml = inner.match(/<is[^>]*>([\s\S]*?)<\/is>/)?.[1] ?? '';
+            raw = extractTexts(isXml);
           } else {
-            // Numeric value
-            const num = parseFloat(rawValue);
-            value = isNaN(num) ? rawValue : num;
+            raw = inner.match(/<v>([\s\S]*?)<\/v>/)?.[1] ?? null;
           }
-          
-          rowCells.push({ col, value });
+
+          if (raw === null) continue;
+
+          let value: string | number = raw;
+          if (t === 's') {
+            const ssIndex = parseInt(raw, 10);
+            value = sharedStrings[ssIndex] ?? '';
+          } else {
+            const num = extractNumber(raw);
+            value = num !== null ? num : String(raw);
+          }
+
+          // skip empty strings
+          if (typeof value === 'string' && !value.trim()) continue;
+
+          rowCells.push({ idx, value });
         }
-        
-        // Sort cells by column
-        rowCells.sort((a, b) => a.col.localeCompare(b.col));
-        
-        // Create pairs from adjacent cells
+
+        rowCells.sort((a, b) => a.idx - b.idx);
+
+        // Create pairs from adjacent cells (label -> value)
         for (let i = 0; i < rowCells.length - 1; i++) {
-          const label = rowCells[i].value;
-          const val = rowCells[i + 1].value;
-          if (typeof label === 'string' && label.trim()) {
-            pairs.push([label.trim(), val]);
+          const left = rowCells[i].value;
+          const right = rowCells[i + 1].value;
+          if (typeof left === 'string' && left.trim()) {
+            pairs.push([left.trim(), right]);
           }
         }
       }
     }
-    
+
     console.log(`[parseExcel] Extracted ${pairs.length} pairs from ${sheetFiles.length} sheets`);
-    
   } catch (err) {
     console.error('[parseExcel] Error parsing Excel:', err);
     throw new Error('Failed to parse Excel file. Please try exporting as CSV.');
   }
-  
+
   return pairs;
 }
 
