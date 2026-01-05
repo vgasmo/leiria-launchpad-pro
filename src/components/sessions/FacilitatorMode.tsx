@@ -152,28 +152,64 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleNext = (keepRunning = false) => {
-    if (currentItemIndex < agendaItems.length - 1) {
-      setCurrentItemIndex(currentItemIndex + 1);
-      setTimer(0);
-      setUnblockIndex(0);
-      if (!keepRunning) setIsRunning(false);
-    }
-  };
+  const handleNext = useCallback((e?: React.MouseEvent, keepRunning = false) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setCurrentItemIndex((i) => {
+      if (i < agendaItems.length - 1) {
+        setTimer(0);
+        setUnblockIndex(0);
+        if (!keepRunning) setIsRunning(false);
+        return i + 1;
+      }
+      return i;
+    });
+  }, [agendaItems.length]);
 
-  const handlePrev = () => {
-    if (currentItemIndex > 0) {
-      setCurrentItemIndex(currentItemIndex - 1);
-      setTimer(0);
-      setUnblockIndex(0);
-      setIsRunning(false);
-    }
-  };
+  const handlePrev = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setCurrentItemIndex((i) => {
+      if (i > 0) {
+        setTimer(0);
+        setUnblockIndex(0);
+        setIsRunning(false);
+        return i - 1;
+      }
+      return i;
+    });
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     setTimer(0);
     setIsRunning(false);
-  };
+  }, []);
+
+  const handleTogglePlay = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setIsRunning((v) => !v);
+  }, []);
+
+  const handleToggleUnblock = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setShowUnblockQuestions((v) => !v);
+  }, []);
+
+  const handleUnblockPrev = useCallback((e?: React.MouseEvent, questionsLength: number = 1) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setUnblockIndex((i) => (i - 1 + questionsLength) % questionsLength);
+  }, []);
+
+  const handleUnblockNext = useCallback((e?: React.MouseEvent, questionsLength: number = 1) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setUnblockIndex((i) => (i + 1) % questionsLength);
+  }, []);
 
   const isOvertime = timer > targetSeconds && targetSeconds > 0;
 
@@ -219,7 +255,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
                 type="button"
                 variant={isRunning ? 'secondary' : 'default'}
                 size="icon"
-                onClick={() => setIsRunning((v) => !v)}
+                onClick={handleTogglePlay}
               >
                 {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </Button>
@@ -283,7 +319,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
             </Button>
             <Button
               type="button"
-              onClick={() => handleNext(isRunning)}
+              onClick={(e) => handleNext(e, isRunning)}
               disabled={currentItemIndex === agendaItems.length - 1}
             >
               Next
@@ -321,7 +357,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
               variant="ghost"
               size="sm"
               className="w-full justify-start"
-              onClick={() => setShowUnblockQuestions((v) => !v)}
+              onClick={handleToggleUnblock}
             >
               <Lightbulb className="h-4 w-4 mr-2" />
               Unblock Questions
@@ -354,7 +390,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => setUnblockIndex((i) => (i - 1 + questions.length) % questions.length)}
+                      onClick={(e) => handleUnblockPrev(e, questions.length)}
                       disabled={questions.length <= 1}
                     >
                       Previous
@@ -363,7 +399,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
                       type="button"
                       size="sm"
                       className="flex-1"
-                      onClick={() => setUnblockIndex((i) => (i + 1) % questions.length)}
+                      onClick={(e) => handleUnblockNext(e, questions.length)}
                       disabled={questions.length <= 1}
                     >
                       Next
