@@ -1719,6 +1719,56 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_requests: {
+        Row: {
+          assigned_mentor_id: string | null
+          created_at: string
+          description: string | null
+          expertise_tags: string[]
+          fulfilled_at: string | null
+          fulfilled_by: string | null
+          id: string
+          requested_by: string
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_mentor_id?: string | null
+          created_at?: string
+          description?: string | null
+          expertise_tags?: string[]
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          requested_by: string
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_mentor_id?: string | null
+          created_at?: string
+          description?: string | null
+          expertise_tags?: string[]
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
