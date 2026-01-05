@@ -59,6 +59,7 @@ import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Select,
   SelectContent,
@@ -78,6 +79,7 @@ import { QualityGateCard } from '@/components/consultor/QualityGateCard';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 import { SessionSyncStatus } from '@/components/sessions/SessionSyncStatus';
 
+
 interface SessionsTabProps {
   workspaceId: string;
   canWrite: boolean;
@@ -85,6 +87,9 @@ interface SessionsTabProps {
 
 export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useAuth();
+  const canUseFacilitator = isAdmin || isConsultor;
+
   const [search, setSearch] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
@@ -95,6 +100,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
   const { data: sessions, isLoading } = useSessions(workspaceId);
   const deleteMutation = useDeleteSession(workspaceId);
   const { refetch: fetchExportData } = useExportSessions(workspaceId);
+
 
   const handleExport = async () => {
     const { data } = await fetchExportData();
@@ -199,6 +205,10 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
            open={!!selectedSession}
            onOpenChange={(open) => !open && setSelectedSession(null)}
            onOpenFacilitator={(session) => {
+             if (!canUseFacilitator) {
+               toast.error('Facilitator Mode is only available for consultants.');
+               return;
+             }
              setSelectedSession(null);
              setFacilitatorSession(session);
            }}
@@ -225,7 +235,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
       </AlertDialog>
 
       {/* Facilitator Mode (rendered outside dialog context) */}
-      {facilitatorSession && (
+      {facilitatorSession && canUseFacilitator && (
         <FacilitatorMode
           session={facilitatorSession}
           onClose={() => setFacilitatorSession(null)}
@@ -631,6 +641,9 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   onOpenFacilitator: (session: any) => void;
 }) {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useAuth();
+  const canUseFacilitator = isAdmin || isConsultor;
+
   const [notes, setNotes] = useState(session.notes || '');
   const [decisions, setDecisions] = useState(session.decisions || '');
   const [showActionDialog, setShowActionDialog] = useState(false);
@@ -750,20 +763,22 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                   {session.duration && ` • ${session.duration} min`}
                 </DialogDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onOpenFacilitator(session);
-                }}
-                className="shrink-0"
-              >
-                <Play className="h-4 w-4 mr-1" />
-                Facilitator Mode
-              </Button>
+              {canUseFacilitator && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onOpenFacilitator(session);
+                  }}
+                  className="shrink-0"
+                >
+                  <Play className="h-4 w-4 mr-1" />
+                  Facilitator Mode
+                </Button>
+              )}
             </div>
           </DialogHeader>
 
