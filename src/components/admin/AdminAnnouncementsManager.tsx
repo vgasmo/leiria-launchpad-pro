@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -21,17 +22,19 @@ import { pt } from 'date-fns/locale';
 type AnnouncementCategory = 'mail' | 'package' | 'general' | 'urgent';
 
 interface FormState {
-  workspace_id: string;
+  workspace_ids: string[];
   category: AnnouncementCategory;
   title: string;
   message: string;
+  sendToAll: boolean;
 }
 
 const EMPTY_FORM: FormState = {
-  workspace_id: '',
+  workspace_ids: [],
   category: 'general',
   title: '',
   message: '',
+  sendToAll: false,
 };
 
 const CATEGORY_CONFIG: Record<AnnouncementCategory, { icon: typeof Mail; label: string; color: string }> = {
@@ -78,13 +81,21 @@ export function AdminAnnouncementsManager() {
 
   const createMutation = useMutation({
     mutationFn: async (data: FormState) => {
-      const { error } = await supabase.from('admin_announcements').insert({
-        workspace_id: data.workspace_id,
+      const targetIds = data.sendToAll 
+        ? workspaces?.map(ws => ws.id) || []
+        : data.workspace_ids;
+      
+      if (targetIds.length === 0) throw new Error('No workspaces selected');
+      
+      const inserts = targetIds.map(workspace_id => ({
+        workspace_id,
         category: data.category,
         title: data.title,
         message: data.message || null,
         created_by: user?.id,
-      });
+      }));
+      
+      const { error } = await supabase.from('admin_announcements').insert(inserts);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -110,11 +121,24 @@ export function AdminAnnouncementsManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.workspace_id || !formData.title) {
+    if (!formData.sendToAll && formData.workspace_ids.length === 0) {
+      toast.error(t('admin.announcements.requiredFields'));
+      return;
+    }
+    if (!formData.title) {
       toast.error(t('admin.announcements.requiredFields'));
       return;
     }
     createMutation.mutate(formData);
+  };
+
+  const toggleWorkspace = (workspaceId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      workspace_ids: prev.workspace_ids.includes(workspaceId)
+        ? prev.workspace_ids.filter(id => id !== workspaceId)
+        : [...prev.workspace_ids, workspaceId]
+    }));
   };
 
   const unreadCount = announcements?.filter(a => !a.is_read).length || 0;
@@ -143,22 +167,46 @@ export function AdminAnnouncementsManager() {
               <DialogTitle>{t('admin.announcements.newTitle')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>{t('admin.announcements.startup')} *</Label>
-                <Select value={formData.workspace_id} onValueChange={(v) => setFormData({ ...formData, workspace_id: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('admin.announcements.selectStartup')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <ScrollArea className="h-48">
-                      {workspaces?.map((ws) => (
-                        <SelectItem key={ws.id} value={ws.id}>
-                          {(ws.startup as { name: string } | null)?.name || 'Unknown'}
-                        </SelectItem>
-                      ))}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="sendToAll"
+                    checked={formData.sendToAll}
+                    onCheckedChange={(checked) => setFormData({ ...formData, sendToAll: !!checked, workspace_ids: [] })}
+                  />
+                  <Label htmlFor="sendToAll" className="flex items-center gap-2 cursor-pointer">
+                    <Users className="h-4 w-4" />
+                    {t('admin.announcements.sendToAll')}
+                  </Label>
+                </div>
+                
+                {!formData.sendToAll && (
+                  <div>
+                    <Label>{t('admin.announcements.startup')} *</Label>
+                    <ScrollArea className="h-48 border rounded-md p-2 mt-1">
+                      {workspaces?.map((ws) => {
+                        const startupName = (ws.startup as { name: string } | null)?.name || 'Unknown';
+                        return (
+                          <div key={ws.id} className="flex items-center space-x-2 py-1.5">
+                            <Checkbox
+                              id={ws.id}
+                              checked={formData.workspace_ids.includes(ws.id)}
+                              onCheckedChange={() => toggleWorkspace(ws.id)}
+                            />
+                            <Label htmlFor={ws.id} className="cursor-pointer flex-1">
+                              {startupName}
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </ScrollArea>
-                  </SelectContent>
-                </Select>
+                    {formData.workspace_ids.length > 0 && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {formData.workspace_ids.length} {t('admin.announcements.selected')}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>

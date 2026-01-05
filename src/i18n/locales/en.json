@@ -959,7 +959,9 @@
       "date": "Date",
       "status": "Status",
       "read": "Read",
-      "unread": "Unread"
+      "unread": "Unread",
+      "sendToAll": "Send to all startups",
+      "selected": "selected"
     },
     "mentors": {
       "title": "External Mentors",
