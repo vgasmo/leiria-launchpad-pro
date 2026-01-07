@@ -76,6 +76,18 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     setIsSubmitting(true);
 
     try {
+      // 0. Ensure the user has a founder role (some legacy accounts may be missing roles)
+      // If the user already has roles, the DB policy will block this insert (that's OK).
+      // If the role already exists, unique constraint will be hit (that's OK too).
+      const { error: ensureRoleError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: 'founder' });
+
+      if (ensureRoleError && ensureRoleError.code !== '23505') {
+        // Don't block onboarding for benign cases; the next insert will still enforce RLS.
+        console.warn('Could not ensure founder role:', ensureRoleError);
+      }
+
       // 1. Create the startup with new fields
       const { data: startup, error: startupError } = await supabase
         .from('startups')
