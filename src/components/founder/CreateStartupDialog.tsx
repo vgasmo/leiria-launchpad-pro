@@ -76,60 +76,31 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     setIsSubmitting(true);
 
     try {
-      // 0. Ensure the user has a founder role (some accounts may be missing roles)
-      // Do this via a SECURITY DEFINER function to avoid RLS dead-ends.
-      const { error: ensureRoleError } = await supabase.rpc('ensure_founder_role');
-
-      if (ensureRoleError) {
-        console.warn('Could not ensure founder role:', ensureRoleError);
-      }
-      // 1. Create the startup with new fields
-      const { data: startup, error: startupError } = await supabase
-        .from('startups')
-        .insert({
-          name: result.data.name,
-          description: result.data.description || null,
-          website: result.data.website || null,
-          nif: result.data.nif || null,
-          main_contact_name: result.data.mainContactName || null,
-          main_contact_email: result.data.mainContactEmail || null,
-          main_contact_phone: result.data.mainContactPhone || null,
-          has_startup_portugal_status: result.data.hasStartupPortugalStatus || false,
+      // Create everything server-side (startup + pending workspace + membership)
+      const { data, error: createError } = await supabase
+        .rpc('create_startup_application', {
+          p_name: result.data.name,
+          p_stage: result.data.stage,
+          p_program_id: result.data.programId,
+          p_description: result.data.description || null,
+          p_website: result.data.website || null,
+          p_nif: result.data.nif || null,
+          p_main_contact_name: result.data.mainContactName || null,
+          p_main_contact_email: result.data.mainContactEmail || null,
+          p_main_contact_phone: result.data.mainContactPhone || null,
+          p_has_startup_portugal_status: result.data.hasStartupPortugalStatus || false,
         })
-        .select()
         .single();
 
-      if (startupError) throw startupError;
-
-      // 2. Create a pending workspace
-      const { data: workspace, error: workspaceError } = await supabase
-        .from('workspaces')
-        .insert({
-          startup_id: startup.id,
-          program_id: result.data.programId,
-          stage: result.data.stage,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (workspaceError) throw workspaceError;
-
-      // 3. Add the founder to the workspace
-      const { error: memberError } = await supabase
-        .from('workspace_users')
-        .insert({
-          workspace_id: workspace.id,
-          user_id: user.id,
-          role: 'founder',
-          active: true,
-        });
-
-      if (memberError) throw memberError;
+      if (createError) throw createError;
 
       toast.success(t('createStartup.successMessage'));
       onOpenChange(false);
-      
+
+      const workspaceId = (data as any)?.workspace_id as string | undefined;
+      if (workspaceId) {
+        navigate(`/workspace/${workspaceId}`);
+      }
       // Reset form
       setName('');
       setDescription('');
