@@ -31,7 +31,8 @@ export function IntegrationSettings({ workspaceId, emailAlias, canEdit }: Integr
   const [showMeetingGuide, setShowMeetingGuide] = useState(false);
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const meetingWebhookUrl = `${supabaseUrl}/functions/v1/webhook-meeting-ingest?workspace_id=${workspaceId}`;
+  // Webhook URL without workspace_id in query string - ID should be in POST body for security
+  const meetingWebhookUrl = `${supabaseUrl}/functions/v1/webhook-meeting-ingest`;
   const displayEmailAlias = emailAlias || `workspace-${workspaceId.slice(0, 8)}@capture.startupleiria.com`;
 
   const copyToClipboard = async (text: string, type: 'email' | 'webhook') => {
@@ -159,11 +160,12 @@ export function IntegrationSettings({ workspaceId, emailAlias, canEdit }: Integr
                   <h4 className="font-medium mb-2">{t('integrations.testPayload')}</h4>
                   <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
 {`{
-  "title": "Session with Startup X",
+  "workspace_id": "${workspaceId}",
+  "meeting_title": "Session with Startup X",
   "start_time": "2026-01-03T10:00:00Z",
   "end_time": "2026-01-03T11:00:00Z",
   "participants": ["founder@startup.com"],
-  "transcript": "Discussion notes...",
+  "transcript_text": "Discussion notes...",
   "summary": "Key takeaways..."
 }`}
                   </pre>
