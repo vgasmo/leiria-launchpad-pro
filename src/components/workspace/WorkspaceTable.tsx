@@ -56,23 +56,24 @@ export const WorkspaceTable = memo(function WorkspaceTable({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          {selectionEnabled && (
-            <TableHead className="w-[40px]">
-              <span className="sr-only">Select</span>
-            </TableHead>
-          )}
-          <TableHead className="w-[200px]">Startup</TableHead>
-          <TableHead>Program</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead>Health</TableHead>
-          <TableHead className="text-center">Overdue</TableHead>
-          <TableHead>Next Meeting</TableHead>
-          <TableHead className="w-[200px]">Last Session</TableHead>
-        </TableRow>
-      </TableHeader>
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <Table className="min-w-[800px]">
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            {selectionEnabled && (
+              <TableHead className="w-[40px]">
+                <span className="sr-only">Select</span>
+              </TableHead>
+            )}
+            <TableHead className="w-[180px] sm:w-[200px]">Startup</TableHead>
+            <TableHead className="hidden sm:table-cell">Program</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Health</TableHead>
+            <TableHead className="text-center">Overdue</TableHead>
+            <TableHead className="hidden md:table-cell">Next Meeting</TableHead>
+            <TableHead className="hidden lg:table-cell w-[200px]">Last Session</TableHead>
+          </TableRow>
+        </TableHeader>
       <TableBody>
         {workspaces.map((workspace) => {
           const effectiveHealth = workspace.health_score_override || workspace.health_score;
@@ -112,7 +113,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                   </div>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 <Badge variant="outline" className="font-normal">
                   {workspace.program?.name || '-'}
                 </Badge>
@@ -132,13 +133,13 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                   <span className="text-muted-foreground">0</span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                   {formatMeetingDate(workspace.nextMeetingDate)}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden lg:table-cell">
                 {workspace.lastSession ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -164,7 +165,8 @@ export const WorkspaceTable = memo(function WorkspaceTable({
             </TableRow>
           );
         })}
-      </TableBody>
-    </Table>
+        </TableBody>
+      </Table>
+    </div>
   );
 });

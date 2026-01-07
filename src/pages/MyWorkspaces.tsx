@@ -231,23 +231,24 @@ export default function MyWorkspaces() {
       title={getPageTitle()}
       subtitle={getPageSubtitle()}
       actions={
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {(showConsultorDashboard || showMentorDashboard) && (
-            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)}>
-              <FileText className="h-4 w-4 mr-2" />
-              {t('myWorkspaces.viewAll')}
+            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="text-xs sm:text-sm">
+              <FileText className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('myWorkspaces.viewAll')}</span>
             </Button>
           )}
           {showDetailedView && (
-            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)}>
-              <TrendingUp className="h-4 w-4 mr-2" />
-              {t('myWorkspaces.dashboard')}
+            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)} className="text-xs sm:text-sm">
+              <TrendingUp className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
           )}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (
-            <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
+            <Button onClick={() => setShowCreateStartup(true)} className="gap-1 sm:gap-2 text-xs sm:text-sm" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
-              {t('myWorkspaces.createStartup')}
+              <span className="hidden sm:inline">{t('myWorkspaces.createStartup')}</span>
+              <span className="sm:hidden">New</span>
             </Button>
           )}
         </div>

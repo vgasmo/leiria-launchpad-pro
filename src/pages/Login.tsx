@@ -179,8 +179,8 @@ export default function Login() {
             ))}
           </div>
 
-          {/* Benefits Section */}
-          <div className={`mt-12 grid grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          {/* Benefits Section - hidden on smaller screens within left panel */}
+          <div className={`mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { 
                 title: t('login.benefitMentorship'), 

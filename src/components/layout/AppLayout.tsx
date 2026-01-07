@@ -102,7 +102,7 @@ function MobileBottomNav() {
   const location = useLocation();
   
   const navItems = [
-    { href: '/my-workspaces', icon: Building2, label: 'Workspaces' },
+    { href: '/my-workspaces', icon: Building2, label: 'Home' },
     { href: '/mentors', icon: Users, label: 'Mentors' },
     { href: '/settings', icon: Settings, label: 'Settings' },
   ];

@@ -69,18 +69,18 @@ export function GlobalSearchInput() {
   return (
     <Popover open={open && query.length >= 2} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="relative w-full max-w-sm">
+        <div className="relative w-full max-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={inputRef}
-            placeholder="Pesquisar... (⌘K)"
+            placeholder="Pesquisar..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               if (e.target.value.length >= 2) setOpen(true);
             }}
             onFocus={() => query.length >= 2 && setOpen(true)}
-            className="pl-9 pr-8"
+            className="pl-9 pr-8 text-sm"
           />
           {query && (
             <button
@@ -92,7 +92,7 @@ export function GlobalSearchInput() {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0" align="start">
+      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0" align="start">
         <ScrollArea className="max-h-[400px]">
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">A pesquisar...</div>

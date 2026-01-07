@@ -41,18 +41,19 @@ export function TopBar() {
           : t('roles.team_member');
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Global Search */}
-      <GlobalSearchInput />
+    <div className="flex items-center gap-1 sm:gap-2">
+      {/* Global Search - hidden on small mobile */}
+      <div className="hidden sm:block">
+        <GlobalSearchInput />
+      </div>
       
-      {/* Language Selector */}
-      <LanguageSelector />
+      {/* Language Selector - hidden on mobile */}
+      <div className="hidden md:block">
+        <LanguageSelector />
+      </div>
       
       {/* Theme Toggle */}
       <ThemeToggle className="text-muted-foreground" />
-
-      {/* Notifications */}
-      <NotificationCenter />
 
       {/* User Menu */}
       <DropdownMenu>
