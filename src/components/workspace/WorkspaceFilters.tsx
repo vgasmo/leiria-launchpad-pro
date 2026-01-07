@@ -80,8 +80,9 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
   onClearFilters,
 }: WorkspaceFiltersProps) {
   return (
-    <div className="mb-6 flex flex-col lg:flex-row gap-4">
-      <div className="relative flex-1 max-w-md">
+    <div className="mb-6 space-y-4">
+      {/* Search - always full width on mobile */}
+      <div className="relative w-full lg:max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search startups..."
@@ -91,12 +92,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
         />
       </div>
 
-      <div className="flex gap-2 flex-wrap items-center">
+      {/* Filters row - scrollable on mobile */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:overflow-visible lg:flex-wrap items-center">
         <ViewToggle view={viewMode} onChange={onViewModeChange} />
 
         <Select value={sortBy} onValueChange={(v) => onSortByChange(v as SortOption)}>
-          <SelectTrigger className="w-[150px]">
-            <ArrowUpDown className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-[130px] sm:w-[150px] flex-shrink-0">
+            <ArrowUpDown className="h-4 w-4 mr-1 sm:mr-2" />
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -109,7 +111,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
         </Select>
 
         <Select value={programFilter} onValueChange={onProgramFilterChange}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-[130px] sm:w-[160px] flex-shrink-0">
             <SelectValue placeholder="Program" />
           </SelectTrigger>
           <SelectContent>
@@ -122,11 +124,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           </SelectContent>
         </Select>
 
-        <Select
+        {/* Hidden on mobile, shown on sm+ */}
+        <div className="hidden sm:contents">
+          <Select
           value={stageFilter}
           onValueChange={(v) => onStageFilterChange(v as StartupStage | 'all')}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
@@ -143,7 +147,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           value={healthFilter}
           onValueChange={(v) => onHealthFilterChange(v as HealthScore | 'all')}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
             <SelectValue placeholder="Health" />
           </SelectTrigger>
           <SelectContent>
@@ -160,7 +164,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           value={priorityFilter}
           onValueChange={(v) => onPriorityFilterChange(v as WorkspacePriority | 'all')}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
@@ -172,12 +176,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
             ))}
           </SelectContent>
         </Select>
+        </div>
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-1 sm:gap-2 flex-shrink-0">
               <Filter className="h-4 w-4" />
-              More
+              <span className="hidden sm:inline">More</span>
               {activeFiltersCount > 0 && (
                 <Badge
                   variant="secondary"
