@@ -219,8 +219,8 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
               <Phone className="h-4 w-4" />
               Contacto Principal
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="col-span-2 space-y-1">
+            <div className="space-y-3">
+              <div className="space-y-1">
                 <Label htmlFor="main-contact-name" className="text-xs">Nome</Label>
                 <Input
                   id="main-contact-name"
@@ -240,6 +240,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
                   value={mainContactEmail}
                   onChange={(e) => setMainContactEmail(e.target.value)}
                   placeholder="joao@startup.pt"
+                  className="w-full"
                 />
               </div>
               <div className="space-y-1">

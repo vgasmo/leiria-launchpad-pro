@@ -140,7 +140,14 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
           marginRight: 8,
         },
         buttonSkip: {
-          color: isDark ? 'hsl(var(--muted-foreground))' : '#999',
+          color: isDark ? 'hsl(var(--muted-foreground))' : '#666',
+          fontSize: '14px',
+          fontWeight: 500,
+        },
+        buttonClose: {
+          color: isDark ? 'hsl(var(--muted-foreground))' : '#666',
+          width: 14,
+          height: 14,
         },
         tooltip: {
           borderRadius: '0.75rem',
