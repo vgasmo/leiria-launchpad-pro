@@ -42,9 +42,10 @@ Deno.serve(async (req: Request) => {
       source = 'webhook',
     } = body;
 
+    // Log without sensitive IDs - only log metadata for debugging
     console.log('Received meeting ingest webhook:', { 
-      workspace_id, 
-      workspace_external_id, 
+      has_workspace_id: !!workspace_id, 
+      has_workspace_external_id: !!workspace_external_id, 
       meeting_title, 
       source 
     });
