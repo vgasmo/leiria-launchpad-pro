@@ -5269,6 +5269,7 @@ export type Database = {
         Args: { _workspace_id: string }
         Returns: string
       }
+      ensure_founder_role: { Args: never; Returns: undefined }
       generate_weekly_checkins: { Args: never; Returns: number }
       get_dataroom_workspace_id: {
         Args: { _dataroom_id: string }
