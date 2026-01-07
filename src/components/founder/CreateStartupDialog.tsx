@@ -27,7 +27,7 @@ const startupSchema = z.object({
   mainContactName: z.string().max(100).optional(),
   mainContactEmail: z.string().email().optional().or(z.literal('')),
   mainContactPhone: z.string().max(30).optional(),
-  isLegallyRecognized: z.boolean().optional(),
+  hasStartupPortugalStatus: z.boolean().optional(),
 });
 
 interface CreateStartupDialogProps {
@@ -50,7 +50,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
   const [mainContactName, setMainContactName] = useState('');
   const [mainContactEmail, setMainContactEmail] = useState('');
   const [mainContactPhone, setMainContactPhone] = useState('');
-  const [isLegallyRecognized, setIsLegallyRecognized] = useState(false);
+  const [hasStartupPortugalStatus, setHasStartupPortugalStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,7 +61,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     // Validate
     const result = startupSchema.safeParse({ 
       name, description, website, stage, programId,
-      nif, mainContactName, mainContactEmail, mainContactPhone, isLegallyRecognized
+      nif, mainContactName, mainContactEmail, mainContactPhone, hasStartupPortugalStatus
     });
     if (!result.success) {
       setError(result.error.errors[0].message);
@@ -87,7 +87,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           main_contact_name: result.data.mainContactName || null,
           main_contact_email: result.data.mainContactEmail || null,
           main_contact_phone: result.data.mainContactPhone || null,
-          is_legally_recognized: result.data.isLegallyRecognized || false,
+          has_startup_portugal_status: result.data.hasStartupPortugalStatus || false,
         })
         .select()
         .single();
@@ -133,7 +133,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       setMainContactName('');
       setMainContactEmail('');
       setMainContactPhone('');
-      setIsLegallyRecognized(false);
+      setHasStartupPortugalStatus(false);
       
     } catch (err: any) {
       console.error('Error creating startup:', err);
@@ -208,7 +208,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           </div>
 
           {/* NIF and Legal Status */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startup-nif">NIF (Tax ID)</Label>
               <Input
@@ -219,16 +219,16 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
                 maxLength={20}
               />
             </div>
-            <div className="flex items-end pb-2">
+            <div className="flex items-center sm:items-end sm:pb-2">
               <div className="flex items-center space-x-2">
                 <Checkbox 
-                  id="is-legally-recognized" 
-                  checked={isLegallyRecognized} 
-                  onCheckedChange={(checked) => setIsLegallyRecognized(!!checked)} 
+                  id="startup-portugal-status" 
+                  checked={hasStartupPortugalStatus} 
+                  onCheckedChange={(checked) => setHasStartupPortugalStatus(!!checked)} 
                 />
-                <Label htmlFor="is-legally-recognized" className="cursor-pointer text-sm">
+                <Label htmlFor="startup-portugal-status" className="cursor-pointer text-sm">
                   <CheckCircle className="h-3.5 w-3.5 inline mr-1 text-green-600" />
-                  Startup Reconhecida por Lei
+                  Estatuto Startup Portugal
                 </Label>
               </div>
             </div>
@@ -240,7 +240,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
               <Phone className="h-4 w-4" />
               Contacto Principal
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="col-span-2 space-y-1">
                 <Label htmlFor="main-contact-name" className="text-xs">Nome</Label>
                 <Input
@@ -275,7 +275,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startup-program">{t('createStartup.programLabel')} *</Label>
               <Select value={programId} onValueChange={setProgramId} required>
