@@ -5265,6 +5265,24 @@ export type Database = {
         }
         Returns: string
       }
+      create_startup_application: {
+        Args: {
+          p_description?: string
+          p_has_startup_portugal_status?: boolean
+          p_main_contact_email?: string
+          p_main_contact_name?: string
+          p_main_contact_phone?: string
+          p_name: string
+          p_nif?: string
+          p_program_id: string
+          p_stage: string
+          p_website?: string
+        }
+        Returns: {
+          startup_id: string
+          workspace_id: string
+        }[]
+      }
       ensure_dataroom_exists: {
         Args: { _workspace_id: string }
         Returns: string
