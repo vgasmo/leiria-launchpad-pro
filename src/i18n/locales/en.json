@@ -2076,5 +2076,41 @@
     "description": "Ask your mentor or consultant for feedback on this document",
     "send": "Send Request",
     "sent": "Feedback request sent"
+  },
+  "sessionTimeout": {
+    "title": "Session Timeout Warning",
+    "description": "Your session will expire in {{time}} due to inactivity.",
+    "clickContinue": "Click \"Continue Session\" to stay logged in.",
+    "logOut": "Log Out",
+    "continue": "Continue Session"
+  },
+  "weeklyWins": {
+    "pending": "Weekly Wins Pending",
+    "overdue": "Overdue",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueOn": "Due {{date}}",
+    "skip": "Skip",
+    "complete": "Complete",
+    "title": "Weekly Wins",
+    "yourAnswer": "Your answer...",
+    "enterNumber": "Enter a number...",
+    "kpisThisMonth": "KPIs this month",
+    "enterKpi": "Enter {{name}}...",
+    "submitting": "Submitting...",
+    "submit": "Submit Weekly Wins"
+  },
+  "fab": {
+    "updateKpis": "Update KPIs",
+    "newAction": "New Action",
+    "scheduleSession": "Schedule Session",
+    "checkin": "Check-in"
+  },
+  "streakHero": {
+    "weeksStreak": "week streak",
+    "weeksStreak_plural": "weeks streak",
+    "milestone": "Milestone!",
+    "onFire": "You're on fire! Keep the momentum going.",
+    "keepItUp": "Keep coming back weekly to build your streak."
   }
 }

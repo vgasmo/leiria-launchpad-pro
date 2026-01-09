@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Save, Plus, Calendar, CheckSquare, MessageSquare, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Calendar, CheckSquare, MessageSquare, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -25,16 +26,17 @@ export function QuickActionsFab({
   onCompleteCheckin,
   className,
 }: QuickActionsFabProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const actions: QuickAction[] = [
-    { id: 'kpis', label: 'Atualizar KPIs', icon: <BarChart3 className="h-4 w-4" />, onClick: onUpdateKpis },
-    { id: 'action', label: 'Nova Ação', icon: <CheckSquare className="h-4 w-4" />, onClick: onAddAction },
-    { id: 'session', label: 'Agendar Sessão', icon: <Calendar className="h-4 w-4" />, onClick: onScheduleSession },
+    { id: 'kpis', label: t('fab.updateKpis', 'Update KPIs'), icon: <BarChart3 className="h-4 w-4" />, onClick: onUpdateKpis },
+    { id: 'action', label: t('fab.newAction', 'New Action'), icon: <CheckSquare className="h-4 w-4" />, onClick: onAddAction },
+    { id: 'session', label: t('fab.scheduleSession', 'Schedule Session'), icon: <Calendar className="h-4 w-4" />, onClick: onScheduleSession },
   ];
 
   if (onCompleteCheckin) {
-    actions.push({ id: 'checkin', label: 'Check-in', icon: <MessageSquare className="h-4 w-4" />, onClick: onCompleteCheckin });
+    actions.push({ id: 'checkin', label: t('fab.checkin', 'Check-in'), icon: <MessageSquare className="h-4 w-4" />, onClick: onCompleteCheckin });
   }
 
   const handleActionClick = (action: QuickAction) => {
@@ -43,7 +45,7 @@ export function QuickActionsFab({
   };
 
   return (
-    <div className={cn("fixed bottom-6 right-6 z-50", className)}>
+    <div className={cn("fixed bottom-6 right-6 z-50 md:hidden", className)}>
       {/* Action buttons */}
       <div className={cn(
         "flex flex-col-reverse gap-2 mb-2 transition-all duration-200",

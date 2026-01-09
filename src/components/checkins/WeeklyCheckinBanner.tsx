@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePendingCheckin, useSubmitCheckin, useSkipCheckin, CheckinQuestion, SubmitCheckinPayload } from '@/hooks/useCheckins';
 import { useAllKpiDefinitions, KpiDefinition } from '@/hooks/useKpis';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -9,8 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ClipboardCheck, Clock, AlertTriangle, Send } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { differenceInDays } from 'date-fns';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 
 interface WeeklyCheckinBannerProps {
@@ -18,6 +18,7 @@ interface WeeklyCheckinBannerProps {
 }
 
 export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
+  const { t, i18n } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [responses, setResponses] = useState<Record<string, string | number>>({});
   
@@ -26,6 +27,16 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
   const submitCheckin = useSubmitCheckin();
   const skipCheckin = useSkipCheckin();
   const { showQuickWin } = useQuickWinToast();
+
+  // i18n-aware date formatting
+  const formatDate = (date: Date) => {
+    const locale = i18n.language === 'pt' ? 'pt-PT' : 'en-US';
+    return new Intl.DateTimeFormat(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+  };
 
   if (isLoading || !pendingCheckin) return null;
 
@@ -89,30 +100,30 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
       >
         <ClipboardCheck className="h-4 w-4" />
         <AlertTitle className="flex items-center gap-2">
-          Weekly Wins Pending
+          {t('weeklyWins.pending', 'Weekly Wins Pending')}
           {isOverdue ? (
             <Badge variant="destructive" className="text-xs">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              Overdue
+              {t('weeklyWins.overdue', 'Overdue')}
             </Badge>
           ) : daysUntilDue <= 1 ? (
             <Badge variant="secondary" className="text-xs">
               <Clock className="h-3 w-3 mr-1" />
-              Due {daysUntilDue === 0 ? 'today' : 'tomorrow'}
+              {daysUntilDue === 0 ? t('weeklyWins.dueToday', 'Due today') : t('weeklyWins.dueTomorrow', 'Due tomorrow')}
             </Badge>
           ) : null}
         </AlertTitle>
         <AlertDescription className="flex items-center justify-between mt-2">
           <span>
-            Due {format(new Date(pendingCheckin.due_date), "EEEE, d 'de' MMMM", { locale: pt })}
+            {t('weeklyWins.dueOn', 'Due {{date}}', { date: formatDate(new Date(pendingCheckin.due_date)) })}
           </span>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={handleSkip}>
-              Skip
+              {t('weeklyWins.skip', 'Skip')}
             </Button>
             <Button size="sm" onClick={() => setShowForm(true)}>
               <Send className="h-4 w-4 mr-1" />
-              Complete
+              {t('weeklyWins.complete', 'Complete')}
             </Button>
           </div>
         </AlertDescription>
@@ -123,7 +134,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5" />
-              {definition?.name || 'Weekly Wins'}
+              {definition?.name || t('weeklyWins.title', 'Weekly Wins')}
             </DialogTitle>
           </DialogHeader>
 
@@ -137,7 +148,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                     id={q.id}
                     value={responses[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
-                    placeholder="Your answer..."
+                    placeholder={t('weeklyWins.yourAnswer', 'Your answer...')}
                   />
                 ) : q.type === 'scale' ? (
                   <div className="flex gap-2">
@@ -158,7 +169,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                     type="number"
                     value={responses[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
-                    placeholder="Enter a number..."
+                    placeholder={t('weeklyWins.enterNumber', 'Enter a number...')}
                   />
                 )}
               </div>
@@ -167,7 +178,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
             {/* KPIs */}
             {kpiIds.length > 0 && (
               <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">KPIs deste mês</h4>
+                <h4 className="font-medium mb-3">{t('weeklyWins.kpisThisMonth', 'KPIs this month')}</h4>
                 {kpiIds.map(kpiId => {
                   const kpi = kpiDefsMap.get(kpiId) as KpiDefinition | undefined;
                   if (!kpi) return null;
@@ -181,7 +192,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                         type="number"
                         value={responses[`kpi_${kpiId}`] || ''}
                         onChange={(e) => handleInputChange(`kpi_${kpiId}`, e.target.value)}
-                        placeholder={`Enter ${kpi.name}...`}
+                        placeholder={t('weeklyWins.enterKpi', 'Enter {{name}}...', { name: kpi.name })}
                       />
                     </div>
                   );
@@ -192,10 +203,10 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={submitCheckin.isPending}>
-              {submitCheckin.isPending ? 'Submitting...' : 'Submit Weekly Wins'}
+              {submitCheckin.isPending ? t('weeklyWins.submitting', 'Submitting...') : t('weeklyWins.submit', 'Submit Weekly Wins')}
             </Button>
           </DialogFooter>
         </DialogContent>

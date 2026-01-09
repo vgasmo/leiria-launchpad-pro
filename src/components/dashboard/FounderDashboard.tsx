@@ -12,24 +12,22 @@ import {
   Rocket,
   FileText,
   AlertCircle,
-  Sparkles,
-  Flame,
   RotateCcw,
 } from 'lucide-react';
-import { format, formatDistanceToNow, isToday, isPast } from 'date-fns';
+import { format, formatDistanceToNow, isToday } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FounderWelcomePanel } from '@/components/founder/FounderWelcomePanel';
 import { YourWeekCard } from '@/components/dashboard/YourWeekCard';
+import { StreakHero } from '@/components/dashboard/StreakHero';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { MentorRecommendationsCard } from '@/components/mentors/MentorRecommendationsCard';
-import { HealthScoreTooltip } from '@/components/workspace/HealthScoreTooltip';
+import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
@@ -183,6 +181,11 @@ export function FounderDashboard({
 
   const health = workspace.health_score_override || workspace.health_score;
 
+  // FAB handlers
+  const handleUpdateKpis = () => navigate(`/workspace/${workspace.id}?tab=kpis`);
+  const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=actions`);
+  const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=sessions`);
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Welcome Panel with Checklist (dismissible) */}
@@ -195,6 +198,9 @@ export function FounderDashboard({
         onCreateStartup={onCreateStartup}
         workspaceId={workspace.id}
       />
+
+      {/* Streak Hero - P0: Make momentum visible immediately */}
+      <StreakHero streakWeeks={streakWeeks} />
 
       {/* Your Week Summary Card - P0 Dashboard Feature */}
       <YourWeekCard workspace={workspace} streakWeeks={streakWeeks} />
@@ -213,12 +219,6 @@ export function FounderDashboard({
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
                 <h1 className="text-xl md:text-2xl font-bold truncate">{workspace.startup?.name}</h1>
                 <HealthBadge score={health as HealthScore | null} />
-                {streakWeeks > 0 && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Flame className="h-3 w-3 text-orange-500" />
-                    {t('yourWeek.streak', { count: streakWeeks })}
-                  </Badge>
-                )}
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 <Badge variant="outline" className="text-xs md:text-sm">
@@ -404,6 +404,13 @@ export function FounderDashboard({
           </Button>
         </div>
       )}
+
+      {/* Mobile Quick Actions FAB - P1: Easy mobile access */}
+      <QuickActionsFab
+        onUpdateKpis={handleUpdateKpis}
+        onAddAction={handleAddAction}
+        onScheduleSession={handleScheduleSession}
+      />
     </div>
   );
 }
