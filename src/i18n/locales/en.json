@@ -2013,6 +2013,52 @@
     "breakdown": "Score Breakdown",
     "contributing": "Contributing factors"
   },
+  "healthTooltip": {
+    "title": "How is health calculated?",
+    "description": "Your health score is based on 4 factors weighted by importance:",
+    "actions": "Action completion",
+    "sessions": "Session attendance",
+    "kpis": "KPI updates",
+    "checkins": "Weekly wins",
+    "totalScore": "Total score",
+    "tip": "Tip: Complete your weekly wins and update KPIs to improve your score!",
+    "whyThisScore": "Why this score?"
+  },
+  "mentors": {
+    "recommendedMentors": "Recommended Mentors",
+    "basedOnStage": "Based on your stage and needs",
+    "expressInterest": "Express Interest",
+    "expressInterestTitle": "Express Interest in Mentors",
+    "expressInterestDesc": "Select up to 3 mentors you'd like to connect with. They'll be notified of your interest.",
+    "interestExpressed": "Interest expressed! Your request has been sent.",
+    "failedToExpress": "Failed to express interest. Please try again.",
+    "selectAtLeastOne": "Please select at least one mentor.",
+    "optionalMessage": "Message (optional)",
+    "messagePlaceholder": "Briefly describe what you're looking for help with...",
+    "sendRequest": "Send Request"
+  },
+  "documentFeedback": {
+    "requestFeedback": "Request Feedback",
+    "feedback": "Feedback",
+    "title": "Request Feedback",
+    "description": "Ask for feedback on \"{{name}}\" from your mentors or consultants.",
+    "whatFeedback": "What feedback are you looking for?",
+    "placeholder": "e.g., Please review my pitch deck structure and financial projections...",
+    "orShare": "Or share a link for feedback:",
+    "copyLink": "Copy Share Link",
+    "linkCopied": "Link copied! Share it to request feedback.",
+    "sendRequest": "Send Request",
+    "requestSent": "Feedback request sent!",
+    "requestFailed": "Failed to send request. Please try again.",
+    "requestTitle": "Feedback requested",
+    "requestMessage": "{{user}} requested feedback on \"{{doc}}\""
+  },
+  "stageKpis": {
+    "suggestedForStage": "Suggested for {{stage}} stage",
+    "recommendedKpis": "Recommended KPIs",
+    "addAll": "Add All",
+    "basedOnStage": "Based on your current stage"
+  },
   "checklistRecovery": {
     "restoreChecklist": "Show onboarding checklist",
     "restored": "Checklist restored"

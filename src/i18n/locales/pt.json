@@ -2083,6 +2083,52 @@
     "breakdown": "Decomposição do Score",
     "contributing": "Fatores contribuintes"
   },
+  "healthTooltip": {
+    "title": "Como é calculado o health?",
+    "description": "O seu score de health é baseado em 4 fatores ponderados por importância:",
+    "actions": "Conclusão de ações",
+    "sessions": "Presença em sessões",
+    "kpis": "Atualização de KPIs",
+    "checkins": "Vitórias semanais",
+    "totalScore": "Score total",
+    "tip": "Dica: Complete as vitórias semanais e atualize KPIs para melhorar o score!",
+    "whyThisScore": "Porquê este score?"
+  },
+  "mentors": {
+    "recommendedMentors": "Mentores Recomendados",
+    "basedOnStage": "Baseado na sua fase e necessidades",
+    "expressInterest": "Expressar Interesse",
+    "expressInterestTitle": "Expressar Interesse em Mentores",
+    "expressInterestDesc": "Selecione até 3 mentores com quem gostaria de conectar. Eles serão notificados do seu interesse.",
+    "interestExpressed": "Interesse expresso! O seu pedido foi enviado.",
+    "failedToExpress": "Falha ao expressar interesse. Por favor tente novamente.",
+    "selectAtLeastOne": "Por favor selecione pelo menos um mentor.",
+    "optionalMessage": "Mensagem (opcional)",
+    "messagePlaceholder": "Descreva brevemente em que precisa de ajuda...",
+    "sendRequest": "Enviar Pedido"
+  },
+  "documentFeedback": {
+    "requestFeedback": "Pedir Feedback",
+    "feedback": "Feedback",
+    "title": "Pedir Feedback",
+    "description": "Peça feedback sobre \"{{name}}\" aos seus mentores ou consultores.",
+    "whatFeedback": "Que feedback procura?",
+    "placeholder": "ex: Por favor reveja a estrutura do meu pitch deck e projeções financeiras...",
+    "orShare": "Ou partilhe um link para feedback:",
+    "copyLink": "Copiar Link de Partilha",
+    "linkCopied": "Link copiado! Partilhe para pedir feedback.",
+    "sendRequest": "Enviar Pedido",
+    "requestSent": "Pedido de feedback enviado!",
+    "requestFailed": "Falha ao enviar pedido. Por favor tente novamente.",
+    "requestTitle": "Feedback solicitado",
+    "requestMessage": "{{user}} pediu feedback sobre \"{{doc}}\""
+  },
+  "stageKpis": {
+    "suggestedForStage": "Sugeridos para fase {{stage}}",
+    "recommendedKpis": "KPIs Recomendados",
+    "addAll": "Adicionar Todos",
+    "basedOnStage": "Baseado na sua fase atual"
+  },
   "checklistRecovery": {
     "restoreChecklist": "Mostrar checklist de onboarding",
     "restored": "Checklist restaurada"
