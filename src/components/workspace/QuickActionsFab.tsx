@@ -36,7 +36,7 @@ export function QuickActionsFab({
   ];
 
   if (onCompleteCheckin) {
-    actions.push({ id: 'checkin', label: t('fab.checkin', 'Check-in'), icon: <MessageSquare className="h-4 w-4" />, onClick: onCompleteCheckin });
+    actions.push({ id: 'weeklyWins', label: t('fab.weeklyWins', 'Weekly Wins'), icon: <MessageSquare className="h-4 w-4" />, onClick: onCompleteCheckin });
   }
 
   const handleActionClick = (action: QuickAction) => {

@@ -27,12 +27,14 @@ This document summarizes the production readiness audit findings and implemented
 
 | File | Change Type | Why |
 |------|-------------|-----|
-| `vite.config.ts` | Modified | Fixed PWA navigateFallback + skipWaiting + clientsClaim |
+| `vite.config.ts` | Modified | Fixed PWA + Vite alias for unified Supabase client |
+| `tsconfig.typecheck.json` | Created | TypeScript paths for typecheck with alias |
+| `src/lib/supabaseClient.ts` | Created | Production Supabase wrapper with detectSessionInUrl |
 | `public/_redirects` | Created | Netlify SPA fallback |
 | `netlify.toml` | Created | Netlify full config (build + redirects) |
 | `vercel.json` | Created | Vercel SPA rewrite |
 | `scripts/smoke-test.sh` | Created | Production smoke test script |
-| `.github/workflows/ci.yml` | Modified | Added lockfile check + build verification |
+| `.github/workflows/ci.yml` | Modified | TypeScript check uses tsconfig.typecheck.json |
 | `src/lib/env.ts` | Modified | Friendly error screen for missing env vars |
 | `PRODUCTION_READINESS.md` | Modified | Updated with deployment checklist |
 
@@ -67,7 +69,16 @@ The repo now includes configs for common hosts:
 - **Auto-update enabled**: New versions install immediately via `skipWaiting` + `clientsClaim`
 - **Navigate fallback**: Routes to index.html (SPA behavior)
 - **API requests NOT cached**: Supabase API, auth, storage, and functions are in denylist
+- **Cache cleanup**: `cleanupOutdatedCaches: true` removes stale bundles after redeploy
 - **Cache busting**: Vite hashes assets; SW updates when bundle changes
+
+#### Verifying No Stale Bundles After Deploy
+
+After a deploy, check for `ChunkLoadError`:
+1. Open browser DevTools Console
+2. Hard-refresh the page (Ctrl+Shift+R)
+3. Check console for errors like `ChunkLoadError: Loading chunk X failed`
+4. If errors appear, clear the SW cache: DevTools → Application → Storage → Clear site data
 
 ---
 

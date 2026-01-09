@@ -680,6 +680,7 @@
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
+    "signOut": "Sign out",
     "email": "Email",
     "password": "Password",
     "forgotPassword": "Forgot password?",
@@ -695,7 +696,9 @@
     "updatePassword": "Update Password",
     "passwordResetSuccess": "Password updated successfully!",
     "redirecting": "Redirecting you to the app...",
-    "resetPasswordError": "Failed to reset password. Please try again."
+    "resetPasswordError": "Failed to reset password. Please try again.",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
   },
   "workspace": {
     "overview": "Overview",
@@ -827,16 +830,6 @@
     "replaceModel": "Replace Model",
     "noFinancialModel": "No financial model uploaded yet",
     "uploadToTrack": "Upload your financial model to enable valuation tracking and projections"
-  },
-  "auth": {
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "signOut": "Sign out",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot password?",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
   },
   "login": {
     "welcome": "Welcome",
@@ -2099,7 +2092,7 @@
     "updateKpis": "Update KPIs",
     "newAction": "New Action",
     "scheduleSession": "Schedule Session",
-    "checkin": "Check-in"
+    "weeklyWins": "Weekly Wins"
   },
   "streakHero": {
     "weeksStreak": "week streak",
