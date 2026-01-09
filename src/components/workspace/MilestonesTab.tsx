@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import type { Database } from '@/integrations/supabase/types';
 
 type MilestoneStatus = Database['public']['Enums']['milestone_status'];
@@ -43,6 +44,7 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
   const updateMilestone = useUpdateMilestone(workspaceId);
   const deleteMilestone = useDeleteMilestone(workspaceId);
   const reorderMilestones = useReorderMilestones(workspaceId);
+  const { showQuickWin } = useQuickWinToast();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Milestone | null>(null);
@@ -75,6 +77,9 @@ export function MilestonesTab({ workspaceId, canWrite }: MilestonesTabProps) {
     if (!canWrite) return;
     try {
       await updateMilestone.mutateAsync({ id: milestone.id, status });
+      if (status === 'completed') {
+        showQuickWin('milestone_completed');
+      }
     } catch {
       toast.error(t('milestones.failedToUpdate'));
     }

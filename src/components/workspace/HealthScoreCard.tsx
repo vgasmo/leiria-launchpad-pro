@@ -35,6 +35,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWorkspaceHealth, useSetHealthOverride, useRecomputeHealthScores, getHealthScoreConfig, HealthExplanationFactor } from '@/hooks/useHealthScore';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { HealthScoreTooltip } from './HealthScoreTooltip';
 import type { Database } from '@/integrations/supabase/types';
 
 type HealthScore = Database['public']['Enums']['health_score'];
@@ -64,6 +66,7 @@ interface HealthModel {
 const DEFAULT_WEIGHTS = { actions: 30, sessions: 20, kpis: 30, checkins: 20 };
 
 export function HealthScoreCard({ workspaceId, programId, canManage = false }: HealthScoreCardProps) {
+  const { t } = useTranslation();
   const { roles } = useAuth();
   const isStaff = roles.includes('admin') || roles.includes('consultor');
   const { data: health, isLoading } = useWorkspaceHealth(workspaceId);
@@ -141,6 +144,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Health Score
+              <HealthScoreTooltip components={components} numericScore={numericScore} />
             </CardTitle>
             <div className="flex items-center gap-1">
               {isStaff && (

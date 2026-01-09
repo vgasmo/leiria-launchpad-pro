@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ClipboardCheck, Clock, AlertTriangle, Send } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 
 interface WeeklyCheckinBannerProps {
   workspaceId: string;
@@ -24,6 +25,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
   const { data: kpiDefinitions } = useAllKpiDefinitions();
   const submitCheckin = useSubmitCheckin();
   const skipCheckin = useSkipCheckin();
+  const { showQuickWin } = useQuickWinToast();
 
   if (isLoading || !pendingCheckin) return null;
 
@@ -68,6 +70,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
       instanceId: pendingCheckin.id,
       responses: payload,
     });
+    showQuickWin('weekly_wins_submitted');
     setShowForm(false);
     setResponses({});
   };
@@ -86,7 +89,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
       >
         <ClipboardCheck className="h-4 w-4" />
         <AlertTitle className="flex items-center gap-2">
-          Weekly Check-in Pending
+          Weekly Wins Pending
           {isOverdue ? (
             <Badge variant="destructive" className="text-xs">
               <AlertTriangle className="h-3 w-3 mr-1" />
@@ -120,7 +123,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5" />
-              {definition?.name || 'Weekly Check-in'}
+              {definition?.name || 'Weekly Wins'}
             </DialogTitle>
           </DialogHeader>
 
@@ -192,7 +195,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={submitCheckin.isPending}>
-              {submitCheckin.isPending ? 'Submitting...' : 'Submit Check-in'}
+              {submitCheckin.isPending ? 'Submitting...' : 'Submit Weekly Wins'}
             </Button>
           </DialogFooter>
         </DialogContent>
