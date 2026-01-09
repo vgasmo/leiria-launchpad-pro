@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabaseClient";
 
 type InvokeOptions = Parameters<typeof supabase.functions.invoke>[1];
 
