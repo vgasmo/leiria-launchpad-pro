@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Shield, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
