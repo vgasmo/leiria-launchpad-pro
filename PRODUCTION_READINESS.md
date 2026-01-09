@@ -99,6 +99,111 @@ npm run preview
 
 ---
 
+## Security Architecture
+
+### Access Control Model
+
+The application implements a role-based access control (RBAC) system with workspace-scoped permissions:
+
+| Role | Scope | Capabilities |
+|------|-------|--------------|
+| `admin` | Global | Full system access, manage programs, block workspaces |
+| `consultor` | Global + Workspace | Access all workspaces, manage playbooks, view all data |
+| `founder` | Workspace | Own startup's data, submit check-ins, manage team |
+| `mentor_externo` | Workspace | Assigned workspaces only, session management |
+
+### Row-Level Security (RLS) Patterns
+
+All 108 tables have RLS enabled with RESTRICTIVE policies. Common patterns:
+
+```sql
+-- Workspace-scoped access (most tables)
+has_workspace_access(workspace_id)
+
+-- Write access for founders/staff/mentors
+can_write_workspace(workspace_id)
+
+-- Startup-scoped access (financial data)
+is_startup_founder(startup_id)
+can_manage_startup(startup_id)
+
+-- Staff-only operations
+is_staff()  -- admin OR consultor
+is_admin()  -- admin only
+```
+
+### SECURITY DEFINER Functions
+
+All security functions implement:
+- `SET search_path TO 'public'` to prevent search_path attacks
+- `auth.uid()` validation for user context
+- Workspace/startup scoping for least privilege
+- Boolean returns (no data leakage)
+
+Key functions:
+- `has_workspace_access(workspace_id)` - Core access check
+- `can_write_workspace(workspace_id)` - Write permission check
+- `is_staff()` - Staff role verification
+- `can_manage_startup(startup_id)` - Startup-level access
+
+### PII-Masking Views (SECURITY INVOKER)
+
+Sensitive tables expose data through safe views that mask PII:
+
+| View | Base Table | Masked Fields | Access Function |
+|------|------------|---------------|-----------------|
+| `profiles_safe` | `profiles` | email, phone | Owner or admin only |
+| `startups_safe` | `startups` | nif, phone, address, main_contact_* | `can_see_startup_pii()` |
+| `team_members_safe` | `team_members` | email, phone, linkedin_url | `can_see_team_member_pii()` |
+
+### Edge Function Authentication Patterns
+
+```typescript
+// Category A - User-facing (JWT required)
+const authResult = await requireUser(req, supabaseClient);
+if ('error' in authResult) return authResult.error;
+
+// Category B - Cron/System (CRON_SECRET header)
+const cronResult = requireCronSecret(req);
+if ('error' in cronResult) return cronResult.error;
+
+// Category C - Webhooks (WEBHOOK_SECRET header)
+const webhookResult = requireWebhookSecret(req);
+if ('error' in webhookResult) return webhookResult.error;
+
+// Category D - Public (token-based validation)
+// Token validated against database hash, no auth header
+```
+
+### Secrets Management Rules
+
+1. **Never commit secrets** - All sensitive values in environment variables
+2. **Use Lovable Cloud secrets** - Stored encrypted, injected at runtime
+3. **Rotate via dashboard** - No secret values in code or logs
+4. **Separate secrets by function**:
+   - `CRON_SECRET` - Scheduled job authentication
+   - `WEBHOOK_SECRET` - External webhook validation
+   - `RESEND_API_KEY` - Email delivery
+   - Service role key - Backend-only, never exposed to client
+
+### Audit Trail Integrity
+
+These tables are effectively append-only (no UPDATE/DELETE for non-admins):
+- `activity_log` - All user actions
+- `email_log` - Delivery records
+- `mentor_nda_acceptances` - Legal compliance
+
+### Security Regression Tests
+
+Run `scripts/rls-regression-tests.sql` to verify:
+- Cross-workspace data isolation
+- Private consultant notes protection
+- Financial data (cap table, funding) isolation
+- PII masking in safe views
+- Audit log immutability
+
+---
+
 ## Previous Audit Findings & Resolutions
 
 ---
