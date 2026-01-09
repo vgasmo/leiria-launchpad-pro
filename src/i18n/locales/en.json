@@ -2100,5 +2100,35 @@
     "milestone": "Milestone!",
     "onFire": "You're on fire! Keep the momentum going.",
     "keepItUp": "Keep coming back weekly to build your streak."
+  },
+  "playbooks": {
+    "emptyTitle": "Launch Faster with Playbooks",
+    "emptyDescription": "Playbooks are step-by-step roadmaps tailored to your startup stage. Each one creates milestones and actions automatically.",
+    "emptyValue": "Founders who follow playbooks move 2x faster through key milestones.",
+    "introTitle": "Your Roadmap to Success",
+    "introDescription": "Playbooks create milestones and actions with smart deadlines. Activate one to get a structured plan aligned with your stage.",
+    "recommended": "Recommended for {{stage}}",
+    "dismissed": "Dismissed",
+    "milestonesCount": "{{count}} milestone",
+    "milestonesCount_plural": "{{count}} milestones",
+    "actionsCount": "{{count}} action",
+    "actionsCount_plural": "{{count}} actions",
+    "category": "Category",
+    "preview": "What you'll get",
+    "moreItems": "+{{count}} more",
+    "activate": "Activate Playbook",
+    "dismiss": "Not now",
+    "allAppliedTitle": "All Playbooks Activated!",
+    "allAppliedDescription": "You've activated all available playbooks for this stage. Keep executing!",
+    "applied": "Active Playbooks",
+    "appliedOn": "Activated {{date}}",
+    "appliedBadge": "Active",
+    "stages": {
+      "ideation": "Ideation",
+      "validation": "Validation",
+      "mvp": "MVP",
+      "growth": "Growth",
+      "scale": "Scale"
+    }
   }
 }

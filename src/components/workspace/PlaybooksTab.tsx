@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Lightbulb } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
+import { formatShortDate } from '@/lib/dateUtils';
 import type { Database } from '@/integrations/supabase/types';
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
@@ -19,15 +20,20 @@ interface PlaybooksTabProps {
 }
 
 export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }: PlaybooksTabProps) {
+  const { t } = useTranslation();
   const stage = currentStage || 'ideation';
   const { data: playbooks, isLoading } = usePlaybooksForStage(stage, programId);
   const { data: instances } = useWorkspacePlaybookInstances(workspaceId);
   const instantiate = useInstantiatePlaybook();
   const dismiss = useDismissPlaybook();
-  const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
 
   const getInstanceStatus = (playbookId: string) => {
     return instances?.find(i => i.playbook_id === playbookId)?.status;
+  };
+
+  // Get stage display name
+  const getStageLabel = (stageKey: string) => {
+    return t(`playbooks.stages.${stageKey}`, stageKey.charAt(0).toUpperCase() + stageKey.slice(1));
   };
 
   if (isLoading) {
@@ -51,38 +57,53 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
         (meta.kpi_names as string[]).forEach(k => kpis.add(k));
       }
       if (meta?.kpi_categories) {
-        (meta.kpi_categories as string[]).forEach(k => kpis.add(`Category: ${k}`));
+        (meta.kpi_categories as string[]).forEach(k => kpis.add(`${t('playbooks.category')}: ${k}`));
       }
     });
     return Array.from(kpis);
   };
 
+  // No playbooks available at all - show value-driven empty state
+  if (!playbooks?.length && !instantiatedPlaybooks.length) {
+    return (
+      <EmptyState
+        icon={Rocket}
+        title={t('playbooks.emptyTitle')}
+        description={t('playbooks.emptyDescription')}
+        value={t('playbooks.emptyValue')}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Playbooks intro */}
-      <Alert className="bg-primary/5 border-primary/20">
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Playbooks</strong> criam automaticamente milestones e ações com datas relativas. 
-          Cada playbook está alinhado com os KPIs da fase e ajuda a estruturar o progresso.
-        </AlertDescription>
-      </Alert>
+      {/* Founder-centric intro - benefit first */}
+      <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+        <CardContent className="py-4">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full p-2 bg-primary/10">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-1">
+                {t('playbooks.introTitle')}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {t('playbooks.introDescription')}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recommended Playbooks */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
-          Playbooks Recomendados para {stage.charAt(0).toUpperCase() + stage.slice(1)}
-        </h3>
+      {availablePlaybooks.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            {t('playbooks.recommended', { stage: getStageLabel(stage) })}
+          </h3>
 
-        {availablePlaybooks.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500" />
-              <p>Todos os playbooks desta fase já foram aplicados!</p>
-            </CardContent>
-          </Card>
-        ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {availablePlaybooks.map(playbook => {
               const status = getInstanceStatus(playbook.id);
@@ -91,15 +112,17 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               const kpiHints = getKpiHints(playbook.items);
 
               return (
-                <Card key={playbook.id} className="hover:shadow-md transition-shadow">
+                <Card key={playbook.id} className="hover:shadow-md transition-shadow group">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-lg">{playbook.title}</CardTitle>
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {playbook.title}
+                        </CardTitle>
                         <CardDescription>{playbook.description}</CardDescription>
                       </div>
                       {status === 'dismissed' && (
-                        <Badge variant="secondary">Descartado</Badge>
+                        <Badge variant="secondary">{t('playbooks.dismissed')}</Badge>
                       )}
                     </div>
                   </CardHeader>
@@ -107,15 +130,15 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Target className="h-4 w-4" />
-                        {milestones.length} milestones
+                        {t('playbooks.milestonesCount', { count: milestones.length })}
                       </span>
                       <span className="flex items-center gap-1">
                         <ListTodo className="h-4 w-4" />
-                        {actions.length} ações
+                        {t('playbooks.actionsCount', { count: actions.length })}
                       </span>
                     </div>
 
-                    {/* KPI Connections */}
+                    {/* KPI Connections - show value */}
                     {kpiHints.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         <TrendingUp className="h-3 w-3 text-primary mt-0.5" />
@@ -126,11 +149,12 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                         ))}
                       </div>
                     )}
+
                     {/* Preview items */}
                     {playbook.items && playbook.items.length > 0 && (
                       <div className="mb-4 p-3 rounded-lg bg-muted/50 max-h-40 overflow-y-auto">
-                        <p className="text-xs font-medium mb-2">Preview:</p>
-                        {playbook.items.slice(0, 5).map((item, idx) => (
+                        <p className="text-xs font-medium mb-2">{t('playbooks.preview')}:</p>
+                        {playbook.items.slice(0, 5).map((item) => (
                           <div key={item.id} className="flex items-center gap-2 text-xs py-1">
                             {item.item_type === 'milestone' ? (
                               <Target className="h-3 w-3 text-primary" />
@@ -148,7 +172,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                         ))}
                         {playbook.items.length > 5 && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            +{playbook.items.length - 5} mais...
+                            {t('playbooks.moreItems', { count: playbook.items.length - 5 })}
                           </p>
                         )}
                       </div>
@@ -156,18 +180,19 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
 
                     <div className="flex gap-2">
                       <Button
-                        className="flex-1"
+                        className="flex-1 gap-2"
                         onClick={() => instantiate.mutate({ workspaceId, playbookId: playbook.id })}
-                        disabled={instantiate.isPending}
+                        disabled={instantiate.isPending || !canWrite}
                       >
-                        <Play className="h-4 w-4 mr-2" />
-                        {instantiate.isPending ? 'A criar...' : 'Instanciar'}
+                        <Play className="h-4 w-4" />
+                        {instantiate.isPending ? t('common.creating') : t('playbooks.activate')}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => dismiss.mutate({ workspaceId, playbookId: playbook.id })}
-                        disabled={dismiss.isPending}
+                        disabled={dismiss.isPending || !canWrite}
+                        title={t('playbooks.dismiss')}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -177,28 +202,46 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Already Instantiated */}
+      {/* All applied - success state */}
+      {availablePlaybooks.length === 0 && instantiatedPlaybooks.length > 0 && (
+        <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+          <CardContent className="py-6 text-center">
+            <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500" />
+            <h3 className="font-semibold text-green-700 dark:text-green-400 mb-1">
+              {t('playbooks.allAppliedTitle')}
+            </h3>
+            <p className="text-sm text-green-600 dark:text-green-500">
+              {t('playbooks.allAppliedDescription')}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Already Instantiated - celebration section */}
       {instantiatedPlaybooks.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            Playbooks Aplicados
+            {t('playbooks.applied')}
           </h3>
           <div className="space-y-2">
             {instantiatedPlaybooks.map(instance => (
-              <div key={instance.id} className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <div 
+                key={instance.id} 
+                className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800"
+              >
                 <div>
                   <p className="font-medium">{instance.playbook?.title}</p>
                   <p className="text-sm text-muted-foreground">
-                    Aplicado em {new Date(instance.instantiated_at!).toLocaleDateString('pt-PT')}
+                    {t('playbooks.appliedOn', { date: formatShortDate(instance.instantiated_at) })}
                   </p>
                 </div>
-                <Badge variant="outline" className="border-green-500 text-green-600">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Aplicado
+                <Badge variant="outline" className="border-green-500 text-green-600 gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  {t('playbooks.appliedBadge')}
                 </Badge>
               </div>
             ))}
