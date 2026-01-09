@@ -2203,6 +2203,9 @@
     "applied": "Playbooks Ativos",
     "appliedOn": "Ativado {{date}}",
     "appliedBadge": "Ativo",
+    "reviewMilestones": "Rever Marcos",
+    "continueActions": "Continuar com Ações",
+    "requestAdvanced": "Pedir Playbook Personalizado",
     "stages": {
       "ideation": "Ideação",
       "validation": "Validação",
@@ -2210,5 +2213,35 @@
       "growth": "Crescimento",
       "scale": "Escala"
     }
+  },
+  "playbookProgress": {
+    "noActivePlaybook": "Sem playbook ativo",
+    "activateToTrack": "Ative um playbook para acompanhar o progresso",
+    "viewPlaybooks": "Ver Playbooks",
+    "activePlaybook": "Playbook Ativo",
+    "overdueCount": "{{count}} atrasada",
+    "overdueCount_plural": "{{count}} atrasadas",
+    "pendingCount": "{{count}} pendente",
+    "pendingCount_plural": "{{count}} pendentes",
+    "allComplete": "Todas as ações completas!",
+    "nextDue": "Próxima",
+    "viewActions": "Ver Ações",
+    "viewMilestones": "Marcos"
+  },
+  "requestPlaybook": {
+    "trigger": "Pedir Playbook",
+    "title": "Pedir um Playbook Personalizado",
+    "description": "Precisa de um roteiro para algo específico? Informe o seu consultor sobre o que está a trabalhar.",
+    "goalLabel": "O que está a tentar alcançar?",
+    "goalPlaceholder": "ex: Preparar para Série A, Lançar em novo mercado, Construir equipa de vendas...",
+    "urgencyLabel": "Quando precisa disto?",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mês",
+    "contextLabel": "Algum contexto para o seu consultor?",
+    "contextPlaceholder": "Opcional: Partilhe detalhes relevantes...",
+    "submit": "Enviar Pedido",
+    "submitted": "Pedido enviado! O seu consultor vai analisá-lo em breve.",
+    "failed": "Falha ao enviar pedido. Por favor tente novamente.",
+    "goalRequired": "Por favor descreva o que está a tentar alcançar."
   }
 }

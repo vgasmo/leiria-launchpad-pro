@@ -1,12 +1,14 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight, MessageSquarePlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
+import { usePlaybookProgress } from '@/hooks/usePlaybookProgress';
+import { RequestPlaybookDialog } from '@/components/workspace/RequestPlaybookDialog';
 import { formatShortDate } from '@/lib/dateUtils';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -21,9 +23,11 @@ interface PlaybooksTabProps {
 
 export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }: PlaybooksTabProps) {
   const { t } = useTranslation();
+  const [, setSearchParams] = useSearchParams();
   const stage = currentStage || 'ideation';
   const { data: playbooks, isLoading } = usePlaybooksForStage(stage, programId);
   const { data: instances } = useWorkspacePlaybookInstances(workspaceId);
+  const { data: progress } = usePlaybookProgress(workspaceId);
   const instantiate = useInstantiatePlaybook();
   const dismiss = useDismissPlaybook();
 
@@ -63,15 +67,22 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     return Array.from(kpis);
   };
 
-  // No playbooks available at all - show value-driven empty state
+  // No playbooks available at all - show value-driven empty state with request option
   if (!playbooks?.length && !instantiatedPlaybooks.length) {
     return (
-      <EmptyState
-        icon={Rocket}
-        title={t('playbooks.emptyTitle')}
-        description={t('playbooks.emptyDescription')}
-        value={t('playbooks.emptyValue')}
-      />
+      <div className="space-y-6">
+        <EmptyState
+          icon={Rocket}
+          title={t('playbooks.emptyTitle')}
+          description={t('playbooks.emptyDescription')}
+          value={t('playbooks.emptyValue')}
+        />
+        {canWrite && (
+          <div className="flex justify-center">
+            <RequestPlaybookDialog workspaceId={workspaceId} />
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -205,17 +216,51 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
         </div>
       )}
 
-      {/* All applied - success state */}
+      {/* All applied - ENHANCED success state with next actions */}
       {availablePlaybooks.length === 0 && instantiatedPlaybooks.length > 0 && (
         <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
-          <CardContent className="py-6 text-center">
-            <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500" />
-            <h3 className="font-semibold text-green-700 dark:text-green-400 mb-1">
-              {t('playbooks.allAppliedTitle')}
-            </h3>
-            <p className="text-sm text-green-600 dark:text-green-500">
-              {t('playbooks.allAppliedDescription')}
-            </p>
+          <CardContent className="py-6">
+            <div className="text-center mb-6">
+              <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500" />
+              <h3 className="font-semibold text-green-700 dark:text-green-400 mb-1">
+                {t('playbooks.allAppliedTitle')}
+              </h3>
+              <p className="text-sm text-green-600 dark:text-green-500">
+                {t('playbooks.allAppliedDescription')}
+              </p>
+            </div>
+
+            {/* Next actions - keep momentum */}
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => setSearchParams({ tab: 'milestones' })}
+              >
+                <Target className="h-4 w-4" />
+                {t('playbooks.reviewMilestones')}
+              </Button>
+              <Button 
+                variant="outline"
+                className="gap-2"
+                onClick={() => setSearchParams({ tab: 'actions' })}
+              >
+                <ListTodo className="h-4 w-4" />
+                {t('playbooks.continueActions')}
+                <ArrowRight className="h-3 w-3" />
+              </Button>
+              {canWrite && (
+                <RequestPlaybookDialog 
+                  workspaceId={workspaceId}
+                  trigger={
+                    <Button variant="ghost" className="gap-2">
+                      <MessageSquarePlus className="h-4 w-4" />
+                      {t('playbooks.requestAdvanced')}
+                    </Button>
+                  }
+                />
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
