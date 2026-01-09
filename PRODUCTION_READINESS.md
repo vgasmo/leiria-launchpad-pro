@@ -1,6 +1,6 @@
 # Production Readiness Audit Report
 
-**Audit Date**: 2026-01-05  
+**Audit Date**: 2026-01-09 (Updated)  
 **Status**: ✅ Production Ready
 
 ---
@@ -11,84 +11,95 @@ This document summarizes the production readiness audit findings and implemented
 
 ---
 
-## Audit Findings & Resolutions
+## What Was Breaking After Publish
 
-### P0 - Critical (Must Fix Before Production)
-
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| ErrorBoundary exposes raw error.message in production | ✅ Fixed | Sanitized error display; only safe messages shown in production, full details in dev only |
-| Edge functions expose raw error messages | ✅ Fixed | Updated `webhook-meeting-ingest` and `inbound-email-webhook` to return generic "Internal server error" |
-| .env should be in .gitignore | ⚠️ Read-only | File is managed by Lovable - .env is not committed |
-
-### P1 - High Priority
-
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Environment validation | ✅ Added | Created `src/lib/env.ts` with Zod validation; fail-fast in dev, graceful in prod |
-| CI missing typecheck step | ✅ Fixed | Added `npx tsc --noEmit` step to `.github/workflows/ci.yml` |
-| Auth context readiness | ✅ Already Good | `isAuthReady` flag prevents flash of wrong content |
-| Edge function security patterns | ✅ Already Good | Shared `_shared/security.ts` provides consistent auth/secret validation |
-| i18n implementation | ✅ Already Good | EN + PT translations with ~1900 strings each |
-| Language preference persistence | ✅ Already Good | Saved to localStorage in `LanguageSelector` |
-
-### P2 - Improvements
-
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Updated .env.example documentation | ✅ Done | More comprehensive with clear sections |
-| Package manager standardization | ✅ OK | Using npm (package-lock.json present) |
+| # | Symptom | Root Cause | Fix |
+|---|---------|------------|-----|
+| 1 | SPA routes return 404 on page refresh | PWA `navigateFallback: null` + no host config | Set `navigateFallback: '/index.html'` with denylist + added netlify.toml/vercel.json/_redirects |
+| 2 | PWA caches stale bundles after deploy | Missing `skipWaiting` + `clientsClaim` | Added both to workbox config for immediate updates |
+| 3 | Dual lockfiles cause CI inconsistency | Both bun.lockb and package-lock.json present | Added CI warning; project uses npm |
+| 4 | No way to verify build before publish | No smoke test | Added `scripts/smoke-test.sh` |
+| 5 | Silent env failures in production | Env validation only logs | Added friendly error screen for critical missing vars |
 
 ---
 
-## Security Checklist
+## Files Changed
 
-- [x] **RLS Policies**: Enabled on all tables via `has_workspace_access` and role-based checks
-- [x] **Edge Function Auth**: Category A functions verify JWT, Category B/C use secrets
-- [x] **Error Sanitization**: No sensitive data in client-facing error responses
-- [x] **Rate Limiting**: AI functions use `check_ai_rate_limit` RPC
-- [x] **CORS**: Consistent headers across all edge functions
-- [x] **Secrets**: Stored in Lovable Cloud, not in code (CRON_SECRET, WEBHOOK_SECRET, RESEND_API_KEY)
+| File | Change Type | Why |
+|------|-------------|-----|
+| `vite.config.ts` | Modified | Fixed PWA navigateFallback + skipWaiting + clientsClaim |
+| `public/_redirects` | Created | Netlify SPA fallback |
+| `netlify.toml` | Created | Netlify full config (build + redirects) |
+| `vercel.json` | Created | Vercel SPA rewrite |
+| `scripts/smoke-test.sh` | Created | Production smoke test script |
+| `.github/workflows/ci.yml` | Modified | Added lockfile check + build verification |
+| `src/lib/env.ts` | Modified | Friendly error screen for missing env vars |
+| `PRODUCTION_READINESS.md` | Modified | Updated with deployment checklist |
 
 ---
 
-## Deployment Safety Notes
+## Deployment Checklist
 
-### No Breaking Changes
+### Required Environment Variables
 
-This audit implemented **additive changes only**:
+These must be set in your deployment platform:
 
-1. **Environment Variables**: No names changed; existing `VITE_SUPABASE_*` vars work as before
-2. **Edge Functions**: Behavior unchanged; only error messages sanitized
-3. **API Endpoints**: All URLs/routes remain stable
-4. **Database**: No migrations required
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_SUPABASE_URL` | ✅ Yes | Your Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅ Yes | Supabase anon/public key |
+| `VITE_SUPABASE_PROJECT_ID` | ✅ Yes | Supabase project ID |
+| `VITE_APP_URL` | ❌ No | Optional override for app URL |
 
-### Verification Plan
+### Host Configuration (SPA Fallback)
 
-After deploying, verify these flows still work:
+The repo now includes configs for common hosts:
+
+| Host | Config File | Notes |
+|------|-------------|-------|
+| Netlify | `netlify.toml` + `public/_redirects` | Both included for maximum compatibility |
+| Vercel | `vercel.json` | Rewrite rule for SPA |
+| Lovable | Built-in | Lovable handles SPA routing automatically |
+| Other (Nginx, Apache, etc.) | Manual | Configure to serve index.html for unknown routes |
+
+### PWA/Service Worker Notes
+
+- **Auto-update enabled**: New versions install immediately via `skipWaiting` + `clientsClaim`
+- **Navigate fallback**: Routes to index.html (SPA behavior)
+- **API requests NOT cached**: Supabase API, auth, storage, and functions are in denylist
+- **Cache busting**: Vite hashes assets; SW updates when bundle changes
+
+---
+
+## Verification Checklist
+
+Run these checks after deployment:
 
 ```bash
-# 1. Auth Flows
-- [ ] Login with email/password
-- [ ] Password reset flow
-- [ ] Session persistence across refresh
+# Local verification (run before deploy)
+npm run build
+npm run preview
+# In another terminal: ./scripts/smoke-test.sh http://localhost:4173
 
-# 2. Core Features
-- [ ] View workspaces list
-- [ ] Open workspace detail
-- [ ] Create/update KPIs
-- [ ] Create sessions
-
-# 3. Edge Functions (sample)
-- [ ] Health score recomputation (cron trigger)
-- [ ] Meeting webhook ingestion
-- [ ] Email notifications
-
-# 4. i18n
-- [ ] Switch language to Portuguese
-- [ ] Verify strings update correctly
-- [ ] Language persists on refresh
+# Production verification (after deploy)
+./scripts/smoke-test.sh https://your-production-url.com
 ```
+
+### Manual Checks
+
+- [ ] Build passes (`npm run build`)
+- [ ] Preview passes (`npm run preview`)
+- [ ] Auth login works
+- [ ] Auth logout works
+- [ ] Protected routes work on direct URL access
+- [ ] Protected routes work on browser refresh
+- [ ] Dashboard loads with data
+- [ ] Create/update a KPI (write action)
+- [ ] Edge function calls work (e.g., AI template coach)
+
+---
+
+## Previous Audit Findings & Resolutions
 
 ---
 
