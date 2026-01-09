@@ -20,6 +20,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Ensure consistent lockfile (npm only)
+      - name: Verify lockfile
+        run: |
+          if [ -f "bun.lockb" ] || [ -f "bun.lock" ]; then
+            echo "⚠️ Warning: bun lockfiles detected. This project uses npm."
+            echo "Consider removing bun.lockb/bun.lock to avoid CI inconsistencies."
+          fi
+
       - name: Install dependencies
         run: npm ci
 
@@ -35,3 +43,13 @@ jobs:
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: dummy-key-for-build
           VITE_SUPABASE_PROJECT_ID: example
+
+      # Verify build output exists
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build failed: dist directory not found"
+            exit 1
+          fi
+          echo "✅ Build successful: dist directory exists"
+          ls -la dist/

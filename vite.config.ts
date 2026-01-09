@@ -46,11 +46,25 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // SPA fallback: serve index.html for navigation requests to unknown routes
+        navigateFallback: '/index.html',
         // P0 SECURITY: Do NOT cache authenticated Supabase API requests
         // This prevents stale/leaked data between sessions
-        navigateFallback: null,
+        navigateFallbackDenylist: [
+          // Don't fallback for API/auth requests
+          /^\/api\//,
+          /\/rest\/v1\//,
+          /\/auth\/v1\//,
+          /\/storage\/v1\//,
+          /\/functions\/v1\//,
+          // Don't fallback for asset requests
+          /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/,
+        ],
         // Increase the size limit to 3 MB to handle large bundles
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Skip waiting for faster updates
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             // Cache only static assets from CDNs, not Supabase API

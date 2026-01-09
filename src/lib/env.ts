@@ -26,7 +26,7 @@ export type Env = z.infer<typeof envSchema>;
 
 /**
  * Validates environment variables and returns typed env object.
- * Throws descriptive error in development, silent fallback in production.
+ * Throws descriptive error in development, shows friendly screen in production.
  */
 export function validateEnv(): Env {
   const result = envSchema.safeParse({
@@ -48,10 +48,29 @@ export function validateEnv(): Env {
       throw new Error(message);
     }
 
-    // In production, log error but don't crash (graceful degradation)
-    console.error(message);
+    // In production, log error and show friendly screen
+    console.error('[ENV] Configuration error - some features may not work correctly');
     
-    // Return partial env to avoid crash
+    // Show a friendly error screen if critical vars are missing
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+      const root = document.getElementById('root');
+      if (root) {
+        root.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;padding:20px;text-align:center;">
+            <h1 style="color:#c82333;margin-bottom:16px;">Configuration Error</h1>
+            <p style="color:#666;max-width:400px;">
+              The application is not configured correctly. 
+              Please contact support or check deployment settings.
+            </p>
+            <p style="color:#999;font-size:12px;margin-top:24px;">
+              Error Code: ENV_MISSING
+            </p>
+          </div>
+        `;
+      }
+    }
+    
+    // Return partial env to allow non-critical pages to work
     return {
       VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
       VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
