@@ -2180,5 +2180,35 @@
     "milestone": "Marco!",
     "onFire": "Está a arrasar! Continue assim.",
     "keepItUp": "Volte semanalmente para construir o seu streak."
+  },
+  "playbooks": {
+    "emptyTitle": "Lance Mais Rápido com Playbooks",
+    "emptyDescription": "Playbooks são roteiros passo-a-passo adaptados à sua fase. Cada um cria marcos e ações automaticamente.",
+    "emptyValue": "Founders que seguem playbooks avançam 2x mais rápido nos marcos-chave.",
+    "introTitle": "O Seu Roteiro para o Sucesso",
+    "introDescription": "Playbooks criam marcos e ações com prazos inteligentes. Ative um para ter um plano estruturado alinhado com a sua fase.",
+    "recommended": "Recomendados para {{stage}}",
+    "dismissed": "Descartado",
+    "milestonesCount": "{{count}} marco",
+    "milestonesCount_plural": "{{count}} marcos",
+    "actionsCount": "{{count}} ação",
+    "actionsCount_plural": "{{count}} ações",
+    "category": "Categoria",
+    "preview": "O que vai receber",
+    "moreItems": "+{{count}} mais",
+    "activate": "Ativar Playbook",
+    "dismiss": "Agora não",
+    "allAppliedTitle": "Todos os Playbooks Ativados!",
+    "allAppliedDescription": "Ativou todos os playbooks disponíveis para esta fase. Continue a executar!",
+    "applied": "Playbooks Ativos",
+    "appliedOn": "Ativado {{date}}",
+    "appliedBadge": "Ativo",
+    "stages": {
+      "ideation": "Ideação",
+      "validation": "Validação",
+      "mvp": "MVP",
+      "growth": "Crescimento",
+      "scale": "Escala"
+    }
   }
 }
