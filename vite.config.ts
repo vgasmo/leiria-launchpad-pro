@@ -62,9 +62,11 @@ export default defineConfig(({ mode }) => ({
         ],
         // Increase the size limit to 3 MB to handle large bundles
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        // Skip waiting for faster updates
+        // Skip waiting for faster updates - ensures new deploys are used immediately
         skipWaiting: true,
         clientsClaim: true,
+        // CRITICAL: Remove old cached bundles after deploy to prevent stale JS errors
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             // Cache only static assets from CDNs, not Supabase API
@@ -84,6 +86,9 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
+      // CRITICAL: Redirect all imports of generated client to production wrapper
+      // This ensures detectSessionInUrl: true is used everywhere
+      "@/integrations/supabase/client": path.resolve(__dirname, "./src/lib/supabaseClient.ts"),
       "@": path.resolve(__dirname, "./src"),
     },
   },
