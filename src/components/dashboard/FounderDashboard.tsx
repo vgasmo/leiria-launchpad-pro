@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Sparkles,
   Flame,
+  RotateCcw,
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday, isPast } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -27,10 +28,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { FounderWelcomePanel } from '@/components/founder/FounderWelcomePanel';
 import { YourWeekCard } from '@/components/dashboard/YourWeekCard';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
+import { MentorRecommendationsCard } from '@/components/mentors/MentorRecommendationsCard';
+import { HealthScoreTooltip } from '@/components/workspace/HealthScoreTooltip';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
+import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
+import { toast } from 'sonner';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -49,6 +54,12 @@ export function FounderDashboard({
   const { t } = useTranslation();
   const { profile } = useAuth();
   const { streakWeeks, recordActivity } = useProgressStreak();
+  const { canRestore, restoreChecklist } = useChecklistRecovery();
+
+  const handleRestoreChecklist = () => {
+    restoreChecklist();
+    toast.success(t('checklistRecovery.restored', 'Checklist restored'));
+  };
 
   // Record activity on dashboard view
   useEffect(() => {
@@ -325,49 +336,74 @@ export function FounderDashboard({
         </Card>
       </div>
 
-      {/* Quick Actions - Mobile Optimized */}
-      <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
-        <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
-          <CardTitle className="text-base md:text-lg">{t('founder.quickActions')}</CardTitle>
-          <CardDescription className="text-xs md:text-sm">{t('founder.commonTasks')}</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-          <div className="grid gap-2 md:gap-3 grid-cols-2 md:grid-cols-4">
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
-              onClick={() => navigate(`/workspace/${workspace.id}?tab=kpis`)}
-            >
-              <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              <span>{t('founder.updateKpis')}</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
-              onClick={() => navigate(`/workspace/${workspace.id}?tab=actions`)}
-            >
-              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              <span>{t('founder.viewActions')}</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
-              onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}
-            >
-              <Target className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              <span>{t('milestones.title')}</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
-              onClick={() => navigate(`/workspace/${workspace.id}?tab=documents`)}
-            >
-              <FileText className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              <span>{t('documents.title')}</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Mentor Recommendations + Quick Actions Row */}
+      <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+        {/* Mentor Recommendations - Item I */}
+        <MentorRecommendationsCard 
+          workspaceId={workspace.id} 
+          stage={workspace.stage}
+          className="md:col-span-1"
+        />
+        
+        {/* Quick Actions - Mobile Optimized */}
+        <Card className="animate-fade-in md:col-span-2" style={{ animationDelay: '250ms' }}>
+          <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
+            <CardTitle className="text-base md:text-lg">{t('founder.quickActions')}</CardTitle>
+            <CardDescription className="text-xs md:text-sm">{t('founder.commonTasks')}</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+            <div className="grid gap-2 md:gap-3 grid-cols-2 md:grid-cols-4">
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+                onClick={() => navigate(`/workspace/${workspace.id}?tab=kpis`)}
+              >
+                <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span>{t('founder.updateKpis')}</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+                onClick={() => navigate(`/workspace/${workspace.id}?tab=actions`)}
+              >
+                <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span>{t('founder.viewActions')}</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+                onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}
+              >
+                <Target className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span>{t('milestones.title')}</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 
+                onClick={() => navigate(`/workspace/${workspace.id}?tab=documents`)}
+              >
+                <FileText className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span>{t('documents.title')}</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Checklist Recovery Footer - Item L */}
+      {canRestore && (
+        <div className="flex justify-center pt-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRestoreChecklist}
+            className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
+          >
+            <RotateCcw className="h-3 w-3" />
+            {t('checklistRecovery.restoreChecklist', 'Show onboarding checklist')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
