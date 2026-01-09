@@ -1916,6 +1916,119 @@
     "kpis": {
       "title": "Track what matters",
       "description": "KPIs help you measure progress and tell your growth story to investors. Start with 3-5 key metrics."
+    },
+    "dataroom": {
+      "title": "Your investor toolkit",
+      "description": "Organize your pitch deck, financials, and updates in one secure place for investor sharing."
+    },
+    "mentors": {
+      "title": "Get expert guidance",
+      "description": "Request a mentor to help navigate challenges and accelerate your growth."
     }
+  },
+  "yourWeek": {
+    "title": "Your Week",
+    "streak": "{{count}} week streak",
+    "streak_plural": "{{count}} weeks streak",
+    "overdueActions": "{{count}} overdue action",
+    "overdueActions_plural": "{{count}} overdue actions",
+    "overdueActionsDesc": "Complete these to stay on track",
+    "pendingActions": "{{count}} pending action",
+    "pendingActions_plural": "{{count}} pending actions",
+    "pendingActionsDesc": "Tasks waiting for your attention",
+    "updateKpis": "Update your KPIs",
+    "kpisThisMonth": "Add this month's metrics",
+    "upcomingSession": "Session coming up",
+    "prepare": "Prepare",
+    "viewActions": "View Actions",
+    "addKpis": "Add KPIs",
+    "allCaughtUp": "You're all caught up!",
+    "greatWork": "Great work staying on top of things",
+    "dueThisWeek": "Due this week",
+    "sessionThisWeek": "Mentoring session"
+  },
+  "tabGroups": {
+    "progress": "Progress",
+    "investor": "Investor",
+    "program": "Program"
+  },
+  "investorReadiness": {
+    "title": "Investor Readiness",
+    "whyMattersTitle": "Why this matters",
+    "whyMatters": "Investors evaluate startups on preparation and organization. A complete profile shows you're serious.",
+    "itemsComplete": "items complete",
+    "pitchDeck": "Pitch Deck",
+    "pitchDeckDesc": "Upload your investor presentation",
+    "uploadDeck": "Upload Deck",
+    "investorUpdate": "Investor Update",
+    "investorUpdateDesc": "Share recent progress with stakeholders",
+    "createUpdate": "Create Update",
+    "dataroomLink": "Share Link",
+    "dataroomLinkDesc": "Create a secure link for investors",
+    "createLink": "Create Link"
+  },
+  "quickWins": {
+    "pitchDeckUploaded": {
+      "title": "🎉 Pitch deck uploaded!",
+      "description": "Your investor readiness just improved"
+    },
+    "kpiAdded": {
+      "title": "📊 KPI tracked!",
+      "description": "Data-driven founders win"
+    },
+    "milestoneCompleted": {
+      "title": "🏆 Milestone completed!",
+      "description": "Another step toward your goals"
+    },
+    "weeklyWinsSubmitted": {
+      "title": "✅ Weekly wins submitted!",
+      "description": "Keeping momentum strong"
+    },
+    "investorUpdateCreated": {
+      "title": "📈 Investor update ready!",
+      "description": "Stakeholders will appreciate the transparency"
+    },
+    "dataroomLinkCreated": {
+      "title": "🔗 Share link created!",
+      "description": "Ready to share with investors"
+    },
+    "firstSessionScheduled": {
+      "title": "📅 Session scheduled!",
+      "description": "Mentorship accelerates growth"
+    },
+    "mentorRequested": {
+      "title": "🤝 Mentor requested!",
+      "description": "We'll match you with the right expert"
+    }
+  },
+  "weeklyWins": {
+    "title": "Weekly Wins",
+    "description": "Share your progress and celebrate wins",
+    "pending": "Time to share your wins!",
+    "submit": "Submit Wins",
+    "skip": "Skip this week"
+  },
+  "healthScore": {
+    "whyThisScore": "Why this score?",
+    "breakdown": "Score Breakdown",
+    "contributing": "Contributing factors"
+  },
+  "checklistRecovery": {
+    "restoreChecklist": "Show onboarding checklist",
+    "restored": "Checklist restored"
+  },
+  "sessionsEmpty": {
+    "noSessionsYet": "No sessions scheduled yet",
+    "description": "Your consultant or program will schedule your first session soon.",
+    "meanwhile": "Meanwhile, here are some things you can do:",
+    "updateKpis": "Update your KPIs",
+    "uploadDeck": "Upload your pitch deck",
+    "setMilestones": "Set your milestones"
+  },
+  "requestFeedback": {
+    "title": "Request Feedback",
+    "description": "Ask your mentor or consultant for feedback on this document",
+    "send": "Send Request",
+    "sent": "Feedback request sent"
   }
 }

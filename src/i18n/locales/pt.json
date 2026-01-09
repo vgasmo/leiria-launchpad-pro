@@ -1986,6 +1986,119 @@
     "kpis": {
       "title": "Meça o que importa",
       "description": "KPIs ajudam a medir progresso e contar a história de crescimento para investidores. Comece com 3-5 métricas chave."
+    },
+    "dataroom": {
+      "title": "O seu kit de investidor",
+      "description": "Organize pitch deck, financeiros e updates num só lugar seguro para partilhar com investidores."
+    },
+    "mentors": {
+      "title": "Obtenha orientação especializada",
+      "description": "Peça um mentor para ajudar a navegar desafios e acelerar o crescimento."
     }
+  },
+  "yourWeek": {
+    "title": "A Sua Semana",
+    "streak": "{{count}} semana consecutiva",
+    "streak_plural": "{{count}} semanas consecutivas",
+    "overdueActions": "{{count}} ação atrasada",
+    "overdueActions_plural": "{{count}} ações atrasadas",
+    "overdueActionsDesc": "Complete para manter o ritmo",
+    "pendingActions": "{{count}} ação pendente",
+    "pendingActions_plural": "{{count}} ações pendentes",
+    "pendingActionsDesc": "Tarefas à espera da sua atenção",
+    "updateKpis": "Atualize os seus KPIs",
+    "kpisThisMonth": "Adicione as métricas deste mês",
+    "upcomingSession": "Sessão a chegar",
+    "prepare": "Preparar",
+    "viewActions": "Ver Ações",
+    "addKpis": "Adicionar KPIs",
+    "allCaughtUp": "Está tudo em dia!",
+    "greatWork": "Excelente trabalho a manter tudo organizado",
+    "dueThisWeek": "Para esta semana",
+    "sessionThisWeek": "Sessão de mentoria"
+  },
+  "tabGroups": {
+    "progress": "Progresso",
+    "investor": "Investidor",
+    "program": "Programa"
+  },
+  "investorReadiness": {
+    "title": "Prontidão para Investidor",
+    "whyMattersTitle": "Porque isto importa",
+    "whyMatters": "Investidores avaliam startups pela preparação e organização. Um perfil completo mostra que é sério.",
+    "itemsComplete": "itens completos",
+    "pitchDeck": "Pitch Deck",
+    "pitchDeckDesc": "Carregue a sua apresentação para investidores",
+    "uploadDeck": "Carregar Deck",
+    "investorUpdate": "Investor Update",
+    "investorUpdateDesc": "Partilhe progresso recente com stakeholders",
+    "createUpdate": "Criar Update",
+    "dataroomLink": "Link de Partilha",
+    "dataroomLinkDesc": "Crie um link seguro para investidores",
+    "createLink": "Criar Link"
+  },
+  "quickWins": {
+    "pitchDeckUploaded": {
+      "title": "🎉 Pitch deck carregado!",
+      "description": "A sua prontidão para investidor melhorou"
+    },
+    "kpiAdded": {
+      "title": "📊 KPI registado!",
+      "description": "Founders orientados por dados vencem"
+    },
+    "milestoneCompleted": {
+      "title": "🏆 Marco concluído!",
+      "description": "Mais um passo em direção aos objetivos"
+    },
+    "weeklyWinsSubmitted": {
+      "title": "✅ Vitórias semanais submetidas!",
+      "description": "A manter o momentum forte"
+    },
+    "investorUpdateCreated": {
+      "title": "📈 Investor update pronto!",
+      "description": "Stakeholders vão apreciar a transparência"
+    },
+    "dataroomLinkCreated": {
+      "title": "🔗 Link de partilha criado!",
+      "description": "Pronto para partilhar com investidores"
+    },
+    "firstSessionScheduled": {
+      "title": "📅 Sessão agendada!",
+      "description": "Mentoria acelera o crescimento"
+    },
+    "mentorRequested": {
+      "title": "🤝 Mentor solicitado!",
+      "description": "Vamos encontrar o especialista certo"
+    }
+  },
+  "weeklyWins": {
+    "title": "Vitórias Semanais",
+    "description": "Partilhe o seu progresso e celebre vitórias",
+    "pending": "Hora de partilhar as suas vitórias!",
+    "submit": "Submeter Vitórias",
+    "skip": "Saltar esta semana"
+  },
+  "healthScore": {
+    "whyThisScore": "Porquê este score?",
+    "breakdown": "Decomposição do Score",
+    "contributing": "Fatores contribuintes"
+  },
+  "checklistRecovery": {
+    "restoreChecklist": "Mostrar checklist de onboarding",
+    "restored": "Checklist restaurada"
+  },
+  "sessionsEmpty": {
+    "noSessionsYet": "Ainda não há sessões agendadas",
+    "description": "O seu consultor ou programa vai agendar a primeira sessão em breve.",
+    "meanwhile": "Entretanto, aqui estão algumas coisas que pode fazer:",
+    "updateKpis": "Atualizar os seus KPIs",
+    "uploadDeck": "Carregar o seu pitch deck",
+    "setMilestones": "Definir os seus marcos"
+  },
+  "requestFeedback": {
+    "title": "Pedir Feedback",
+    "description": "Peça ao seu mentor ou consultor feedback sobre este documento",
+    "send": "Enviar Pedido",
+    "sent": "Pedido de feedback enviado"
   }
 }

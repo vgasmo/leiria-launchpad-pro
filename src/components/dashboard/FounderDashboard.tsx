@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -12,7 +12,8 @@ import {
   Rocket,
   FileText,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Flame,
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday, isPast } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,9 +25,12 @@ import { StageBadge } from '@/components/ui/StageBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FounderWelcomePanel } from '@/components/founder/FounderWelcomePanel';
+import { YourWeekCard } from '@/components/dashboard/YourWeekCard';
+import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProgressStreak } from '@/hooks/useProgressStreak';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -44,6 +48,12 @@ export function FounderDashboard({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { profile } = useAuth();
+  const { streakWeeks, recordActivity } = useProgressStreak();
+
+  // Record activity on dashboard view
+  useEffect(() => {
+    recordActivity();
+  }, []);
 
   // Get the primary workspace (founders typically have 1)
   const workspace = workspaces[0];
@@ -174,6 +184,9 @@ export function FounderDashboard({
         onCreateStartup={onCreateStartup}
         workspaceId={workspace.id}
       />
+
+      {/* Your Week Summary Card - P0 Dashboard Feature */}
+      <YourWeekCard workspace={workspace} streakWeeks={streakWeeks} />
       
       {/* Startup Header Card - Mobile Optimized */}
       <Card className="overflow-hidden animate-fade-in">
@@ -189,6 +202,12 @@ export function FounderDashboard({
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
                 <h1 className="text-xl md:text-2xl font-bold truncate">{workspace.startup?.name}</h1>
                 <HealthBadge score={health as HealthScore | null} />
+                {streakWeeks > 0 && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Flame className="h-3 w-3 text-orange-500" />
+                    {t('yourWeek.streak', { count: streakWeeks })}
+                  </Badge>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 <Badge variant="outline" className="text-xs md:text-sm">
@@ -210,6 +229,11 @@ export function FounderDashboard({
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
+        </div>
+        
+        {/* Investor Readiness Widget - Header Level */}
+        <div className="px-4 pb-4 md:px-6 md:pb-6">
+          <InvestorReadinessWidget workspaceId={workspace.id} compact />
         </div>
       </Card>
 
