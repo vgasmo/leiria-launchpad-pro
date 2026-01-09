@@ -1,9 +1,120 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import {
+  validateUUID,
+  validateOptionalUUID,
+  validateOptionalString,
+  validateOptionalISODate,
+  validateOptionalURL,
+  validateStringArray,
+  parseAndValidateBody,
+  sanitizeString,
+  sanitizeErrorForClient,
+  validationErrorResponse,
+  SIZE_LIMITS,
+} from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
 };
+
+interface MeetingIngestPayload {
+  workspace_id?: string;
+  workspace_external_id?: string;
+  meeting_title?: string;
+  start_time?: string;
+  end_time?: string;
+  participants?: string[];
+  transcript_text?: string;
+  summary?: string;
+  join_url?: string;
+  source?: string;
+}
+
+/**
+ * Validate meeting ingest request body
+ */
+function validateMeetingPayload(body: MeetingIngestPayload): { valid: true; data: MeetingIngestPayload } | { valid: false; error: string } {
+  // Validate workspace_id if provided
+  const workspaceIdResult = validateOptionalUUID(body.workspace_id, 'workspace_id');
+  if (!workspaceIdResult.valid) {
+    return { valid: false, error: workspaceIdResult.error! };
+  }
+
+  // Validate workspace_external_id if provided
+  const externalIdResult = validateOptionalString(body.workspace_external_id, 'workspace_external_id', 255);
+  if (!externalIdResult.valid) {
+    return { valid: false, error: externalIdResult.error! };
+  }
+
+  // At least one workspace identifier required
+  if (!workspaceIdResult.value && !externalIdResult.value) {
+    return { valid: false, error: 'Either workspace_id or workspace_external_id is required' };
+  }
+
+  // Validate meeting_title
+  const titleResult = validateOptionalString(body.meeting_title, 'meeting_title', SIZE_LIMITS.MEETING_TITLE);
+  if (!titleResult.valid) {
+    return { valid: false, error: titleResult.error! };
+  }
+
+  // Validate dates
+  const startTimeResult = validateOptionalISODate(body.start_time, 'start_time');
+  if (!startTimeResult.valid) {
+    return { valid: false, error: startTimeResult.error! };
+  }
+
+  const endTimeResult = validateOptionalISODate(body.end_time, 'end_time');
+  if (!endTimeResult.valid) {
+    return { valid: false, error: endTimeResult.error! };
+  }
+
+  // Validate participants
+  const participantsResult = validateStringArray(body.participants, 'participants', { maxItems: 100, maxItemLength: 255 });
+  if (!participantsResult.valid) {
+    return { valid: false, error: participantsResult.error! };
+  }
+
+  // Validate transcript_text with size limit
+  const transcriptResult = validateOptionalString(body.transcript_text, 'transcript_text', SIZE_LIMITS.TRANSCRIPT);
+  if (!transcriptResult.valid) {
+    return { valid: false, error: transcriptResult.error! };
+  }
+
+  // Validate summary
+  const summaryResult = validateOptionalString(body.summary, 'summary', SIZE_LIMITS.DESCRIPTION);
+  if (!summaryResult.valid) {
+    return { valid: false, error: summaryResult.error! };
+  }
+
+  // Validate join_url
+  const urlResult = validateOptionalURL(body.join_url, 'join_url');
+  if (!urlResult.valid) {
+    return { valid: false, error: urlResult.error! };
+  }
+
+  // Validate source
+  const sourceResult = validateOptionalString(body.source, 'source', 50);
+  if (!sourceResult.valid) {
+    return { valid: false, error: sourceResult.error! };
+  }
+
+  return {
+    valid: true,
+    data: {
+      workspace_id: workspaceIdResult.value,
+      workspace_external_id: externalIdResult.value,
+      meeting_title: titleResult.value ? sanitizeString(titleResult.value, SIZE_LIMITS.MEETING_TITLE) : undefined,
+      start_time: startTimeResult.value,
+      end_time: endTimeResult.value,
+      participants: participantsResult.value,
+      transcript_text: transcriptResult.value ? sanitizeString(transcriptResult.value, SIZE_LIMITS.TRANSCRIPT) : undefined,
+      summary: summaryResult.value ? sanitizeString(summaryResult.value, SIZE_LIMITS.DESCRIPTION) : undefined,
+      join_url: urlResult.value,
+      source: sourceResult.value || 'webhook',
+    },
+  };
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -15,7 +126,6 @@ Deno.serve(async (req: Request) => {
     const webhookSecret = req.headers.get('X-Webhook-Secret');
     const expectedSecret = Deno.env.get('WEBHOOK_SECRET');
     
-    
     if (!webhookSecret || webhookSecret !== expectedSecret) {
       console.error('Invalid or missing webhook secret');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
@@ -24,11 +134,18 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Parse and validate request body with size limit
+    const bodyResult = await parseAndValidateBody<MeetingIngestPayload>(req, SIZE_LIMITS.JSON_PAYLOAD);
+    if (!bodyResult.valid) {
+      return validationErrorResponse(bodyResult.error!, corsHeaders);
+    }
 
-    const body = await req.json();
+    // Validate all fields
+    const validation = validateMeetingPayload(bodyResult.value!);
+    if (!validation.valid) {
+      return validationErrorResponse(validation.error, corsHeaders);
+    }
+
     const {
       workspace_id,
       workspace_external_id,
@@ -39,14 +156,18 @@ Deno.serve(async (req: Request) => {
       transcript_text,
       summary,
       join_url,
-      source = 'webhook',
-    } = body;
+      source,
+    } = validation.data;
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Log without sensitive IDs - only log metadata for debugging
     console.log('Received meeting ingest webhook:', { 
       has_workspace_id: !!workspace_id, 
       has_workspace_external_id: !!workspace_external_id, 
-      meeting_title, 
+      has_meeting_title: !!meeting_title, 
       source 
     });
 
@@ -67,7 +188,7 @@ Deno.serve(async (req: Request) => {
 
     if (!resolvedWorkspaceId) {
       return new Response(JSON.stringify({ 
-        error: 'Could not resolve workspace. Provide workspace_id or valid workspace_external_id' 
+        error: 'Invalid workspace identifier' 
       }), { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -97,7 +218,7 @@ Deno.serve(async (req: Request) => {
       session_type: 'meeting',
     };
 
-    if (end_time) {
+    if (end_time && start_time) {
       sessionData.duration_minutes = Math.round(
         (new Date(end_time).getTime() - new Date(start_time).getTime()) / 60000
       );
@@ -112,13 +233,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // Check for existing session with same title and time (deduplication)
+    const searchTime = start_time || new Date().toISOString();
     const { data: existingSession } = await supabase
       .from('sessions')
       .select('id')
       .eq('workspace_id', resolvedWorkspaceId)
       .eq('title', sessionData.title)
-      .gte('scheduled_at', new Date(new Date(start_time).getTime() - 3600000).toISOString()) // Within 1 hour
-      .lte('scheduled_at', new Date(new Date(start_time).getTime() + 3600000).toISOString())
+      .gte('scheduled_at', new Date(new Date(searchTime).getTime() - 3600000).toISOString()) // Within 1 hour
+      .lte('scheduled_at', new Date(new Date(searchTime).getTime() + 3600000).toISOString())
       .maybeSingle();
 
     let sessionId: string;
@@ -191,9 +313,8 @@ Deno.serve(async (req: Request) => {
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     // Log full error for debugging (server-side only)
-    console.error('Meeting ingest error:', errorMessage);
+    console.error('Meeting ingest error:', error);
     // Return sanitized error to client
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,

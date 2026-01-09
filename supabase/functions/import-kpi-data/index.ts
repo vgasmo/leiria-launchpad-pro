@@ -1,5 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { format, startOfMonth } from 'https://esm.sh/date-fns@3.6.0';
+import {
+  validateUUID,
+  validateString,
+  validateOptionalUUID,
+  parseAndValidateBody,
+  sanitizeErrorForClient,
+  validationErrorResponse,
+} from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +18,48 @@ interface ImportConfig {
   workspace_id: string;
   source: 'stripe' | 'manual';
   kpi_mappings?: Record<string, string>; // source_metric -> kpi_definition_id
+}
+
+/**
+ * Validate import config
+ */
+function validateImportConfig(body: ImportConfig): { valid: true; data: ImportConfig } | { valid: false; error: string } {
+  // Validate workspace_id (required)
+  const workspaceResult = validateUUID(body.workspace_id, 'workspace_id');
+  if (!workspaceResult.valid) {
+    return { valid: false, error: workspaceResult.error! };
+  }
+
+  // Validate source
+  const validSources = ['stripe', 'manual'];
+  if (!body.source || !validSources.includes(body.source)) {
+    return { valid: false, error: 'source must be one of: stripe, manual' };
+  }
+
+  // Validate kpi_mappings if provided
+  if (body.kpi_mappings && typeof body.kpi_mappings === 'object') {
+    const mappings: Record<string, string> = {};
+    for (const [key, value] of Object.entries(body.kpi_mappings)) {
+      if (typeof key === 'string' && typeof value === 'string') {
+        // Validate each UUID in mappings
+        const uuidResult = validateUUID(value, `kpi_mappings.${key}`);
+        if (!uuidResult.valid) {
+          return { valid: false, error: uuidResult.error! };
+        }
+        mappings[key.slice(0, 50)] = uuidResult.value!;
+      }
+    }
+    body.kpi_mappings = mappings;
+  }
+
+  return {
+    valid: true,
+    data: {
+      workspace_id: workspaceResult.value!,
+      source: body.source,
+      kpi_mappings: body.kpi_mappings,
+    },
+  };
 }
 
 Deno.serve(async (req) => {
@@ -42,14 +92,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { workspace_id, source, kpi_mappings } = await req.json() as ImportConfig;
-
-    if (!workspace_id) {
-      return new Response(
-        JSON.stringify({ error: 'workspace_id is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Parse and validate request body
+    const bodyResult = await parseAndValidateBody<ImportConfig>(req);
+    if (!bodyResult.valid) {
+      return validationErrorResponse(bodyResult.error!, corsHeaders);
     }
+
+    // Validate all fields
+    const validation = validateImportConfig(bodyResult.value!);
+    if (!validation.valid) {
+      return validationErrorResponse(validation.error, corsHeaders);
+    }
+
+    const { workspace_id, source, kpi_mappings } = validation.data;
 
     // SECURITY: Validate user has access to this workspace
     const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
@@ -59,7 +114,7 @@ Deno.serve(async (req) => {
 
     if (!hasAccess) {
       return new Response(
-        JSON.stringify({ error: 'Access denied to this workspace' }),
+        JSON.stringify({ error: 'Access denied' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -71,7 +126,7 @@ Deno.serve(async (req) => {
       if (!stripeSecretKey) {
         return new Response(
           JSON.stringify({ 
-            error: 'Stripe not configured',
+            error: 'Integration not configured',
             message: 'Please enable Stripe integration to import financial KPIs'
           }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -147,7 +202,7 @@ Deno.serve(async (req) => {
         { metric: 'monthly_revenue', value: Math.round(monthlyRevenue * 100) / 100 }
       );
 
-      console.log(`[import-kpi-data] Stripe metrics imported: MRR=${mrr}, Customers=${activeCustomers.size}, Revenue=${monthlyRevenue}`);
+      console.log(`[import-kpi-data] Metrics imported: count=${importedKpis.length}`);
     }
 
     // If mappings provided, save to kpi_values
@@ -169,7 +224,7 @@ Deno.serve(async (req) => {
             });
 
           if (error) {
-            console.error(`[import-kpi-data] Error saving KPI ${kpi.metric}:`, error);
+            console.error(`[import-kpi-data] Error saving KPI:`, error);
           } else {
             kpi.kpi_id = kpiDefId;
           }
@@ -195,16 +250,16 @@ Deno.serve(async (req) => {
         success: true,
         period_month: periodMonth,
         imported: importedKpis,
-        message: `Imported ${importedKpis.length} metrics from ${source}`,
+        message: `Imported ${importedKpis.length} metrics`,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('[import-kpi-data] Error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    // Return sanitized error
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

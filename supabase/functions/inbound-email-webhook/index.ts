@@ -1,9 +1,89 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import {
+  validateString,
+  validateOptionalString,
+  validateOptionalEmail,
+  parseAndValidateBody,
+  sanitizeString,
+  validationErrorResponse,
+  SIZE_LIMITS,
+} from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
 };
+
+interface EmailWebhookPayload {
+  alias?: string;
+  from?: string;
+  subject?: string;
+  body_text?: string;
+  body_html?: string;
+  attachments_meta?: Array<{ name: string; size: number; type: string }>;
+}
+
+/**
+ * Validate email webhook payload
+ */
+function validateEmailPayload(body: EmailWebhookPayload): { valid: true; data: EmailWebhookPayload } | { valid: false; error: string } {
+  // Validate alias (required)
+  const aliasResult = validateString(body.alias, 'alias', { required: true, maxLength: SIZE_LIMITS.ALIAS });
+  if (!aliasResult.valid) {
+    return { valid: false, error: aliasResult.error! };
+  }
+
+  // Validate from email
+  const fromResult = validateOptionalEmail(body.from, 'from');
+  if (!fromResult.valid) {
+    return { valid: false, error: fromResult.error! };
+  }
+
+  // Validate subject
+  const subjectResult = validateOptionalString(body.subject, 'subject', SIZE_LIMITS.SUBJECT);
+  if (!subjectResult.valid) {
+    return { valid: false, error: subjectResult.error! };
+  }
+
+  // Validate body_text
+  const bodyTextResult = validateOptionalString(body.body_text, 'body_text', SIZE_LIMITS.EMAIL_BODY);
+  if (!bodyTextResult.valid) {
+    return { valid: false, error: bodyTextResult.error! };
+  }
+
+  // Validate body_html
+  const bodyHtmlResult = validateOptionalString(body.body_html, 'body_html', SIZE_LIMITS.EMAIL_BODY);
+  if (!bodyHtmlResult.valid) {
+    return { valid: false, error: bodyHtmlResult.error! };
+  }
+
+  // Validate attachments_meta if provided
+  let attachmentsMeta: Array<{ name: string; size: number; type: string }> | undefined;
+  if (body.attachments_meta && Array.isArray(body.attachments_meta)) {
+    if (body.attachments_meta.length > 50) {
+      return { valid: false, error: 'Too many attachments (max 50)' };
+    }
+    attachmentsMeta = body.attachments_meta
+      .slice(0, 50)
+      .map(att => ({
+        name: typeof att.name === 'string' ? att.name.slice(0, 255) : 'unknown',
+        size: typeof att.size === 'number' ? att.size : 0,
+        type: typeof att.type === 'string' ? att.type.slice(0, 100) : 'unknown',
+      }));
+  }
+
+  return {
+    valid: true,
+    data: {
+      alias: sanitizeString(aliasResult.value!, SIZE_LIMITS.ALIAS),
+      from: fromResult.value,
+      subject: subjectResult.value ? sanitizeString(subjectResult.value, SIZE_LIMITS.SUBJECT) : undefined,
+      body_text: bodyTextResult.value ? sanitizeString(bodyTextResult.value, SIZE_LIMITS.EMAIL_BODY) : undefined,
+      body_html: bodyHtmlResult.value,
+      attachments_meta: attachmentsMeta,
+    },
+  };
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -23,11 +103,18 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Parse and validate request body with size limit
+    const bodyResult = await parseAndValidateBody<EmailWebhookPayload>(req, SIZE_LIMITS.JSON_PAYLOAD);
+    if (!bodyResult.valid) {
+      return validationErrorResponse(bodyResult.error!, corsHeaders);
+    }
 
-    const body = await req.json();
+    // Validate all fields
+    const validation = validateEmailPayload(bodyResult.value!);
+    if (!validation.valid) {
+      return validationErrorResponse(validation.error, corsHeaders);
+    }
+
     const {
       alias,
       from,
@@ -35,16 +122,13 @@ Deno.serve(async (req: Request) => {
       body_text,
       body_html,
       attachments_meta,
-    } = body;
+    } = validation.data;
 
-    console.log('Received inbound email:', { alias, from, subject });
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    if (!alias) {
-      return new Response(JSON.stringify({ error: 'Email alias is required' }), { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
-    }
+    console.log('Received inbound email:', { alias, has_from: !!from, has_subject: !!subject });
 
     // Resolve workspace by alias
     const { data: emailAlias, error: aliasError } = await supabase
@@ -93,8 +177,8 @@ Deno.serve(async (req: Request) => {
       entity_id: logEntry.id,
       action: 'email_received',
       metadata: {
-        from,
-        subject,
+        has_from: !!from,
+        has_subject: !!subject,
         has_attachments: !!attachments_meta?.length,
       },
     });
@@ -110,9 +194,8 @@ Deno.serve(async (req: Request) => {
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     // Log full error server-side for debugging
-    console.error('Inbound email error:', errorMessage);
+    console.error('Inbound email error:', error);
     // Return sanitized error to client
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
