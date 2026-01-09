@@ -390,6 +390,7 @@
     "actual": "Real",
     "trend": "Tendência",
     "export": "Exportar",
+    "import": "Importar",
     "configure": "Configurar",
     "configureKpis": "Configurar KPIs",
     "configureManually": "Configurar Manualmente",
@@ -2074,9 +2075,19 @@
   "weeklyWins": {
     "title": "Vitórias Semanais",
     "description": "Partilhe o seu progresso e celebre vitórias",
-    "pending": "Hora de partilhar as suas vitórias!",
-    "submit": "Submeter Vitórias",
-    "skip": "Saltar esta semana"
+    "pending": "Vitórias Semanais Pendentes",
+    "overdue": "Atrasado",
+    "dueToday": "Para hoje",
+    "dueTomorrow": "Para amanhã",
+    "dueOn": "Para {{date}}",
+    "skip": "Saltar",
+    "complete": "Completar",
+    "yourAnswer": "A sua resposta...",
+    "enterNumber": "Introduza um número...",
+    "kpisThisMonth": "KPIs deste mês",
+    "enterKpi": "Introduza {{name}}...",
+    "submitting": "A submeter...",
+    "submit": "Submeter Vitórias Semanais"
   },
   "healthScore": {
     "whyThisScore": "Porquê este score?",
@@ -2153,22 +2164,6 @@
     "clickContinue": "Clique em \"Continuar Sessão\" para permanecer ligado.",
     "logOut": "Terminar Sessão",
     "continue": "Continuar Sessão"
-  },
-  "weeklyWins": {
-    "pending": "Vitórias Semanais Pendentes",
-    "overdue": "Atrasado",
-    "dueToday": "Para hoje",
-    "dueTomorrow": "Para amanhã",
-    "dueOn": "Para {{date}}",
-    "skip": "Saltar",
-    "complete": "Completar",
-    "title": "Vitórias Semanais",
-    "yourAnswer": "A sua resposta...",
-    "enterNumber": "Introduza um número...",
-    "kpisThisMonth": "KPIs deste mês",
-    "enterKpi": "Introduza {{name}}...",
-    "submitting": "A submeter...",
-    "submit": "Submeter Vitórias Semanais"
   },
   "fab": {
     "updateKpis": "Atualizar KPIs",

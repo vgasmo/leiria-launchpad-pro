@@ -369,6 +369,7 @@
     "actual": "Actual",
     "trend": "Trend",
     "export": "Export",
+    "import": "Import",
     "configure": "Configure",
     "configureKpis": "Configure KPIs",
     "configureManually": "Configure Manually",
@@ -2004,9 +2005,19 @@
   "weeklyWins": {
     "title": "Weekly Wins",
     "description": "Share your progress and celebrate wins",
-    "pending": "Time to share your wins!",
-    "submit": "Submit Wins",
-    "skip": "Skip this week"
+    "pending": "Weekly Wins Pending",
+    "overdue": "Overdue",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueOn": "Due {{date}}",
+    "skip": "Skip",
+    "complete": "Complete",
+    "yourAnswer": "Your answer...",
+    "enterNumber": "Enter a number...",
+    "kpisThisMonth": "KPIs this month",
+    "enterKpi": "Enter {{name}}...",
+    "submitting": "Submitting...",
+    "submit": "Submit Weekly Wins"
   },
   "healthScore": {
     "whyThisScore": "Why this score?",
@@ -2083,22 +2094,6 @@
     "clickContinue": "Click \"Continue Session\" to stay logged in.",
     "logOut": "Log Out",
     "continue": "Continue Session"
-  },
-  "weeklyWins": {
-    "pending": "Weekly Wins Pending",
-    "overdue": "Overdue",
-    "dueToday": "Due today",
-    "dueTomorrow": "Due tomorrow",
-    "dueOn": "Due {{date}}",
-    "skip": "Skip",
-    "complete": "Complete",
-    "title": "Weekly Wins",
-    "yourAnswer": "Your answer...",
-    "enterNumber": "Enter a number...",
-    "kpisThisMonth": "KPIs this month",
-    "enterKpi": "Enter {{name}}...",
-    "submitting": "Submitting...",
-    "submit": "Submit Weekly Wins"
   },
   "fab": {
     "updateKpis": "Update KPIs",

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { format, isThisWeek, differenceInDays } from 'date-fns';
+import { isThisWeek, differenceInDays } from 'date-fns';
+import { formatWeekdayDate } from '@/lib/dateUtils';
 import { 
   Zap,
   Calendar,
@@ -88,7 +89,7 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
         items.push({
           id: 'meeting',
           label: t('yourWeek.upcomingSession'),
-          description: format(meetingDate, 'EEEE, MMM d'),
+          description: formatWeekdayDate(meetingDate),
           icon: <Calendar className="h-4 w-4" />,
           urgency: daysUntil <= 1 ? 'high' : 'low',
           action: t('yourWeek.prepare'),

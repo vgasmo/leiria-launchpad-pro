@@ -14,7 +14,8 @@ import {
   AlertCircle,
   RotateCcw,
 } from 'lucide-react';
-import { format, formatDistanceToNow, isToday } from 'date-fns';
+import { isToday } from 'date-fns';
+import { formatShortDate, formatTime, formatMonthYear, formatRelativeTime } from '@/lib/dateUtils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -281,11 +282,11 @@ export function FounderDashboard({
                 <div className={`text-lg md:text-xl font-bold ${isToday(new Date(workspace.nextMeetingDate)) ? 'text-primary' : ''}`}>
                   {isToday(new Date(workspace.nextMeetingDate)) 
                     ? t('common.today') 
-                    : format(new Date(workspace.nextMeetingDate), 'MMM d')
+                    : formatShortDate(workspace.nextMeetingDate)
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(workspace.nextMeetingDate), 'h:mm a')}
+                  {formatTime(workspace.nextMeetingDate)}
                 </p>
               </>
             ) : (
@@ -307,7 +308,7 @@ export function FounderDashboard({
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {workspace.lastKpiMonth 
-                ? `${t('common.last')}: ${format(new Date(workspace.lastKpiMonth), 'MMM yyyy')}`
+                ? `${t('common.last')}: ${formatMonthYear(workspace.lastKpiMonth)}`
                 : t('common.noEntriesYet')
               }
             </p>
@@ -326,7 +327,7 @@ export function FounderDashboard({
               <>
                 <div className="text-sm md:text-lg font-medium truncate">{workspace.lastSession.title}</div>
                 <p className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(workspace.lastSession.scheduled_at), { addSuffix: true })}
+                  {formatRelativeTime(workspace.lastSession.scheduled_at)}
                 </p>
               </>
             ) : (
