@@ -2146,5 +2146,41 @@
     "description": "Peça ao seu mentor ou consultor feedback sobre este documento",
     "send": "Enviar Pedido",
     "sent": "Pedido de feedback enviado"
+  },
+  "sessionTimeout": {
+    "title": "Aviso de Expiração de Sessão",
+    "description": "A sua sessão vai expirar em {{time}} devido a inatividade.",
+    "clickContinue": "Clique em \"Continuar Sessão\" para permanecer ligado.",
+    "logOut": "Terminar Sessão",
+    "continue": "Continuar Sessão"
+  },
+  "weeklyWins": {
+    "pending": "Vitórias Semanais Pendentes",
+    "overdue": "Atrasado",
+    "dueToday": "Para hoje",
+    "dueTomorrow": "Para amanhã",
+    "dueOn": "Para {{date}}",
+    "skip": "Saltar",
+    "complete": "Completar",
+    "title": "Vitórias Semanais",
+    "yourAnswer": "A sua resposta...",
+    "enterNumber": "Introduza um número...",
+    "kpisThisMonth": "KPIs deste mês",
+    "enterKpi": "Introduza {{name}}...",
+    "submitting": "A submeter...",
+    "submit": "Submeter Vitórias Semanais"
+  },
+  "fab": {
+    "updateKpis": "Atualizar KPIs",
+    "newAction": "Nova Ação",
+    "scheduleSession": "Agendar Sessão",
+    "checkin": "Check-in"
+  },
+  "streakHero": {
+    "weeksStreak": "semana consecutiva",
+    "weeksStreak_plural": "semanas consecutivas",
+    "milestone": "Marco!",
+    "onFire": "Está a arrasar! Continue assim.",
+    "keepItUp": "Volte semanalmente para construir o seu streak."
   }
 }

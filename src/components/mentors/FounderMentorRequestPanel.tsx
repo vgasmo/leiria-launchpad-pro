@@ -247,6 +247,9 @@ export function FounderMentorRequestPanel() {
               <Clock className="h-5 w-5" />
               {t('mentorsPage.pendingRequests')}
             </CardTitle>
+            <CardDescription>
+              {t('mentorsPage.expectedResponse', 'Our team typically matches mentors within 2-3 business days')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {pendingRequests.map(req => (
@@ -256,6 +259,10 @@ export function FounderMentorRequestPanel() {
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {t('mentorsPage.awaitingMatch', 'Awaiting Match')}
+                    </Badge>
                     <Badge variant="secondary">{getWorkspaceName(req.workspace_id)}</Badge>
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(req.created_at), 'PP')}
@@ -277,6 +284,7 @@ export function FounderMentorRequestPanel() {
                   size="sm"
                   onClick={() => cancelRequest.mutate(req.id)}
                   disabled={cancelRequest.isPending}
+                  title={t('mentorsPage.cancelRequest', 'Cancel request')}
                 >
                   <XCircle className="h-4 w-4" />
                 </Button>

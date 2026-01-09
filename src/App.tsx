@@ -61,7 +61,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   return (
     <>
-      <SessionTimeoutWarning timeoutMs={30 * 60 * 1000} warningTimeMs={5 * 60 * 1000} />
+      <SessionTimeoutWarning timeoutMs={24 * 60 * 60 * 1000} warningTimeMs={10 * 60 * 1000} />
       <GlobalQuickActions />
       {children}
     </>

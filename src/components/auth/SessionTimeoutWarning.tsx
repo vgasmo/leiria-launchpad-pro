@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,19 +11,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SessionTimeoutWarningProps {
-  warningTimeMs?: number; // Time before timeout to show warning (default: 5 minutes)
-  timeoutMs?: number; // Total inactivity timeout (default: 30 minutes)
+  warningTimeMs?: number; // Time before timeout to show warning (default: 10 minutes)
+  timeoutMs?: number; // Total inactivity timeout (default: 24 hours for founders)
 }
 
 export function SessionTimeoutWarning({
-  warningTimeMs = 5 * 60 * 1000, // 5 minutes
-  timeoutMs = 30 * 60 * 1000, // 30 minutes
+  warningTimeMs = 10 * 60 * 1000, // 10 minutes warning
+  timeoutMs = 24 * 60 * 60 * 1000, // 24 hours (founder-friendly)
 }: SessionTimeoutWarningProps) {
-  const { signOut } = useAuth();
+  const { t } = useTranslation();
+  const { signOut, session } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [lastActivity, setLastActivity] = useState(Date.now());
@@ -30,6 +32,21 @@ export function SessionTimeoutWarning({
   const resetActivity = useCallback(() => {
     setLastActivity(Date.now());
     setShowWarning(false);
+  }, []);
+
+  // Attempt to refresh the session gracefully
+  const refreshSession = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.refreshSession();
+      if (error) {
+        console.error('Session refresh failed:', error);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Session refresh error:', err);
+      return false;
+    }
   }, []);
 
   // Track user activity
@@ -61,7 +78,7 @@ export function SessionTimeoutWarning({
       const timeUntilTimeout = timeoutMs - timeSinceActivity;
 
       if (timeUntilTimeout <= 0) {
-        // Session timed out
+        // Session timed out - sign out gracefully
         signOut();
       } else if (timeUntilTimeout <= warningTimeMs && !showWarning) {
         // Show warning
@@ -77,7 +94,21 @@ export function SessionTimeoutWarning({
     return () => clearInterval(checkTimeout);
   }, [lastActivity, timeoutMs, warningTimeMs, showWarning, signOut]);
 
-  const handleContinue = () => {
+  // Proactively refresh session periodically to prevent 401s
+  useEffect(() => {
+    // Refresh every 50 minutes to stay ahead of token expiry
+    const refreshInterval = setInterval(async () => {
+      if (session) {
+        await refreshSession();
+      }
+    }, 50 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, [session, refreshSession]);
+
+  const handleContinue = async () => {
+    // Refresh session when user clicks continue
+    await refreshSession();
     resetActivity();
   };
 
@@ -97,21 +128,21 @@ export function SessionTimeoutWarning({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Session Timeout Warning
+            {t('sessionTimeout.title', 'Session Timeout Warning')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Your session will expire in <strong className="text-foreground">{formatTime(countdown)}</strong> due to inactivity.
+            {t('sessionTimeout.description', 'Your session will expire in {{time}} due to inactivity.', { time: formatTime(countdown) })}
             <br /><br />
-            Click "Continue Session" to stay logged in.
+            {t('sessionTimeout.clickContinue', 'Click "Continue Session" to stay logged in.')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleLogout}>
-            Log Out
+            {t('sessionTimeout.logOut', 'Log Out')}
           </AlertDialogCancel>
           <AlertDialogAction onClick={handleContinue}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Continue Session
+            {t('sessionTimeout.continue', 'Continue Session')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
