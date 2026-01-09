@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell, Zap } from 'lucide-react';
+import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell, Zap, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +19,7 @@ import { profileUpdateSchema, validateFormData } from '@/lib/validations';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { MentorNdaStatus } from '@/components/mentors/MentorNdaStatus';
+import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -48,7 +49,13 @@ export default function Settings() {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const isMentor = roles.includes('mentor_externo');
+  const isFounder = roles.includes('founder');
+  const { canRestore, restoreChecklist } = useChecklistRecovery();
 
+  const handleRestoreChecklist = () => {
+    restoreChecklist();
+    toast.success(t('checklistRecovery.restored', 'Checklist restored'));
+  };
   const initials = profile?.full_name
     ?.split(' ')
     .map(n => n[0])
@@ -441,6 +448,22 @@ export default function Settings() {
                       </>
                     )}
                   </Button>
+
+                  {/* Checklist Recovery - Item L */}
+                  {isFounder && canRestore && (
+                    <div className="pt-4 border-t">
+                      <Button 
+                        type="button"
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleRestoreChecklist}
+                        className="text-muted-foreground hover:text-foreground gap-2"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        {t('checklistRecovery.restoreChecklist')}
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </CardContent>
             </Card>

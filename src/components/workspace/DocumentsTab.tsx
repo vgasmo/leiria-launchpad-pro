@@ -24,8 +24,11 @@ import {
   FileAudio,
   FileSpreadsheet,
   Presentation,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
 } from 'lucide-react';
+import { DocumentFeedbackButton } from './DocumentFeedbackButton';
+import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import { format } from 'date-fns';
 import { 
   useDocuments, 
@@ -400,6 +403,10 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
+                            {/* Request Feedback button for pitch decks */}
+                            {(doc.category === 'Pitch Deck' || doc.name.toLowerCase().includes('pitch')) && (
+                              <DocumentFeedbackButton documentId={doc.id} documentName={doc.name} workspaceId={workspaceId} />
+                            )}
                             <Button
                               variant="ghost"
                               size="icon"

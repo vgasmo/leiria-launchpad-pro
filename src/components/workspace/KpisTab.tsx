@@ -39,6 +39,8 @@ import { useTranslation } from 'react-i18next';
 import { KpiImportDialog } from './KpiImportDialog';
 import { QuickHelp } from '@/components/ui/GlossaryTooltip';
 import { Link } from 'react-router-dom';
+import { KpiSparkline } from './KpiSparkline';
+import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 
 interface KpisTabProps {
   workspaceId: string;
@@ -60,6 +62,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const applyDefaults = useApplyStageDefaults(workspaceId);
   const unlockKpi = useUnlockKpiValue(workspaceId);
   const { refetch: fetchExportData } = useExportKpis(workspaceId);
+  const { showQuickWin } = useQuickWinToast();
 
   const handleExport = async () => {
     const { data } = await fetchExportData();
@@ -226,6 +229,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         return next;
       });
       toast.success(t('kpis.kpiAdded'));
+      showQuickWin('kpi_added');
     } catch {
       toast.error(t('kpis.failedToAdd'));
     }
