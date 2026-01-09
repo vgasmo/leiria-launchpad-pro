@@ -47,6 +47,7 @@ import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
 import { OwnershipCard } from '@/components/workspace/OwnershipCard';
+import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
@@ -414,6 +415,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
+        
+        {/* Playbook Progress Widget for Founders */}
+        {isFounder && (
+          <PlaybookProgressWidget workspaceId={workspace.id} />
+        )}
         
         {/* Investor Readiness Checklist for Founders */}
         {isFounder && (

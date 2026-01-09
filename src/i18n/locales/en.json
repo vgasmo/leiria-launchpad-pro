@@ -2123,6 +2123,9 @@
     "applied": "Active Playbooks",
     "appliedOn": "Activated {{date}}",
     "appliedBadge": "Active",
+    "reviewMilestones": "Review Milestones",
+    "continueActions": "Continue with Actions",
+    "requestAdvanced": "Request Custom Playbook",
     "stages": {
       "ideation": "Ideation",
       "validation": "Validation",
@@ -2130,5 +2133,35 @@
       "growth": "Growth",
       "scale": "Scale"
     }
+  },
+  "playbookProgress": {
+    "noActivePlaybook": "No active playbook",
+    "activateToTrack": "Activate a playbook to track your progress",
+    "viewPlaybooks": "View Playbooks",
+    "activePlaybook": "Active Playbook",
+    "overdueCount": "{{count}} overdue",
+    "overdueCount_plural": "{{count}} overdue",
+    "pendingCount": "{{count}} pending",
+    "pendingCount_plural": "{{count}} pending",
+    "allComplete": "All actions complete!",
+    "nextDue": "Next due",
+    "viewActions": "View Actions",
+    "viewMilestones": "Milestones"
+  },
+  "requestPlaybook": {
+    "trigger": "Request Playbook",
+    "title": "Request a Custom Playbook",
+    "description": "Need a roadmap for something specific? Let your consultant know what you're working towards.",
+    "goalLabel": "What are you trying to achieve?",
+    "goalPlaceholder": "e.g., Prepare for Series A, Launch in new market, Build sales team...",
+    "urgencyLabel": "When do you need this?",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "contextLabel": "Any context for your consultant?",
+    "contextPlaceholder": "Optional: Share any relevant details...",
+    "submit": "Send Request",
+    "submitted": "Request sent! Your consultant will review it soon.",
+    "failed": "Failed to send request. Please try again.",
+    "goalRequired": "Please describe what you're trying to achieve."
   }
 }
