@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight, MessageSquarePlus } from 'lucide-react';
+import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight, MessageSquarePlus, Settings, Users, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useWo
 import { usePlaybookProgress } from '@/hooks/usePlaybookProgress';
 import { RequestPlaybookDialog } from '@/components/workspace/RequestPlaybookDialog';
 import { formatShortDate } from '@/lib/dateUtils';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
@@ -24,6 +25,9 @@ interface PlaybooksTabProps {
 export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }: PlaybooksTabProps) {
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
+  const { isConsultor, isAdmin } = useAuth();
+  const isStaff = isConsultor || isAdmin;
+  
   const stage = currentStage || 'ideation';
   const { data: playbooks, isLoading } = usePlaybooksForStage(stage, programId);
   const { data: instances } = useWorkspacePlaybookInstances(workspaceId);
@@ -35,7 +39,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     return instances?.find(i => i.playbook_id === playbookId)?.status;
   };
 
-  // Get stage display name
+  // Get stage display name with i18n
   const getStageLabel = (stageKey: string) => {
     return t(`playbooks.stages.${stageKey}`, stageKey.charAt(0).toUpperCase() + stageKey.slice(1));
   };
@@ -67,17 +71,17 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     return Array.from(kpis);
   };
 
-  // No playbooks available at all - show value-driven empty state with request option
+  // No playbooks available at all - show appropriate empty state
   if (!playbooks?.length && !instantiatedPlaybooks.length) {
     return (
       <div className="space-y-6">
         <EmptyState
           icon={Rocket}
-          title={t('playbooks.emptyTitle')}
-          description={t('playbooks.emptyDescription')}
-          value={t('playbooks.emptyValue')}
+          title={isStaff ? t('playbooks.staff.emptyTitle') : t('playbooks.emptyTitle')}
+          description={isStaff ? t('playbooks.staff.emptyDescription') : t('playbooks.emptyDescription')}
+          value={isStaff ? t('playbooks.staff.emptyValue') : t('playbooks.emptyValue')}
         />
-        {canWrite && (
+        {canWrite && !isStaff && (
           <div className="flex justify-center">
             <RequestPlaybookDialog workspaceId={workspaceId} />
           </div>
@@ -88,31 +92,66 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
 
   return (
     <div className="space-y-6">
-      {/* Founder-centric intro - benefit first */}
-      <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-        <CardContent className="py-4">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full p-2 bg-primary/10">
-              <Sparkles className="h-5 w-5 text-primary" />
+      {/* Role-based intro card */}
+      {isStaff ? (
+        // Staff/Consultant view - Management focused
+        <Card className="bg-gradient-to-r from-accent/5 to-primary/5 border-accent/20">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full p-2 bg-accent/10">
+                <Settings className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground mb-1">
+                  {t('playbooks.staff.introTitle')}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t('playbooks.staff.introDescription')}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="outline" className="gap-1">
+                  <BookOpen className="h-3 w-3" />
+                  {availablePlaybooks.length} {t('playbooks.staff.available')}
+                </Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  {instantiatedPlaybooks.length} {t('playbooks.staff.deployed')}
+                </Badge>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground mb-1">
-                {t('playbooks.introTitle')}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {t('playbooks.introDescription')}
-              </p>
+          </CardContent>
+        </Card>
+      ) : (
+        // Founder view - Benefit/value focused
+        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full p-2 bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-1">
+                  {t('playbooks.introTitle')}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t('playbooks.introDescription')}
+                </p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Recommended Playbooks */}
+      {/* Available/Recommended Playbooks */}
       {availablePlaybooks.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
-            {t('playbooks.recommended', { stage: getStageLabel(stage) })}
+            {isStaff 
+              ? t('playbooks.staff.availableFor', { stage: getStageLabel(stage) })
+              : t('playbooks.recommended', { stage: getStageLabel(stage) })
+            }
           </h3>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -196,7 +235,12 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                         disabled={instantiate.isPending || !canWrite}
                       >
                         <Play className="h-4 w-4" />
-                        {instantiate.isPending ? t('common.creating') : t('playbooks.activate')}
+                        {instantiate.isPending 
+                          ? t('common.creating') 
+                          : isStaff 
+                            ? t('playbooks.staff.deploy') 
+                            : t('playbooks.activate')
+                        }
                       </Button>
                       <Button
                         variant="ghost"
@@ -216,17 +260,17 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
         </div>
       )}
 
-      {/* All applied - ENHANCED success state with next actions */}
+      {/* All applied - Role-specific success state */}
       {availablePlaybooks.length === 0 && instantiatedPlaybooks.length > 0 && (
         <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
           <CardContent className="py-6">
             <div className="text-center mb-6">
               <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500" />
               <h3 className="font-semibold text-green-700 dark:text-green-400 mb-1">
-                {t('playbooks.allAppliedTitle')}
+                {isStaff ? t('playbooks.staff.allDeployedTitle') : t('playbooks.allAppliedTitle')}
               </h3>
               <p className="text-sm text-green-600 dark:text-green-500">
-                {t('playbooks.allAppliedDescription')}
+                {isStaff ? t('playbooks.staff.allDeployedDescription') : t('playbooks.allAppliedDescription')}
               </p>
             </div>
 
@@ -249,7 +293,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                 {t('playbooks.continueActions')}
                 <ArrowRight className="h-3 w-3" />
               </Button>
-              {canWrite && (
+              {canWrite && !isStaff && (
                 <RequestPlaybookDialog 
                   workspaceId={workspaceId}
                   trigger={
@@ -265,12 +309,12 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
         </Card>
       )}
 
-      {/* Already Instantiated - celebration section */}
+      {/* Already Instantiated/Deployed */}
       {instantiatedPlaybooks.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            {t('playbooks.applied')}
+            {isStaff ? t('playbooks.staff.deployed') : t('playbooks.applied')}
           </h3>
           <div className="space-y-2">
             {instantiatedPlaybooks.map(instance => (
@@ -281,12 +325,15 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                 <div>
                   <p className="font-medium">{instance.playbook?.title}</p>
                   <p className="text-sm text-muted-foreground">
-                    {t('playbooks.appliedOn', { date: formatShortDate(instance.instantiated_at) })}
+                    {isStaff 
+                      ? t('playbooks.staff.deployedOn', { date: formatShortDate(instance.instantiated_at) })
+                      : t('playbooks.appliedOn', { date: formatShortDate(instance.instantiated_at) })
+                    }
                   </p>
                 </div>
                 <Badge variant="outline" className="border-green-500 text-green-600 gap-1">
                   <CheckCircle className="h-3 w-3" />
-                  {t('playbooks.appliedBadge')}
+                  {isStaff ? t('playbooks.staff.deployedBadge') : t('playbooks.appliedBadge')}
                 </Badge>
               </div>
             ))}
