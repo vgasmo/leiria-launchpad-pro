@@ -2106,13 +2106,18 @@
     "emptyDescription": "Playbooks are step-by-step roadmaps tailored to your startup stage. Each one creates milestones and actions automatically.",
     "emptyValue": "Founders who follow playbooks move 2x faster through key milestones.",
     "introTitle": "Your Roadmap to Success",
-    "introDescription": "Playbooks create milestones and actions with smart deadlines. Activate one to get a structured plan aligned with your stage.",
+    "introDescription": "Playbooks create milestones and actions with smart deadlines. Request one to get a structured plan aligned with your stage.",
+    "founderHint": "Your consultant will activate playbooks when they're right for your journey.",
     "recommended": "Recommended for {{stage}}",
     "dismissed": "Dismissed",
+    "dismissedSuccess": "Playbook dismissed",
+    "requested": "Requested",
+    "requestThis": "Request This Playbook",
     "milestonesCount": "{{count}} milestone",
     "milestonesCount_plural": "{{count}} milestones",
     "actionsCount": "{{count}} action",
     "actionsCount_plural": "{{count}} actions",
+    "effortEstimate": "~{{weeks}} week effort",
     "category": "Category",
     "preview": "What you'll get",
     "moreItems": "+{{count}} more",
@@ -2133,6 +2138,22 @@
       "growth": "Growth",
       "scale": "Scale"
     },
+    "errors": {
+      "notAuthenticated": "You must be logged in",
+      "alreadyInstantiated": "Playbook already deployed in this workspace",
+      "noItems": "Playbook has no items",
+      "dismissFailed": "Failed to dismiss playbook",
+      "createFailed": "Failed to create playbook",
+      "updateFailed": "Failed to update playbook",
+      "itemAddFailed": "Failed to add item",
+      "itemRemoveFailed": "Failed to remove item"
+    },
+    "admin": {
+      "created": "Playbook created",
+      "updated": "Playbook updated",
+      "itemAdded": "Item added",
+      "itemRemoved": "Item removed"
+    },
     "staff": {
       "emptyTitle": "No Playbooks Configured",
       "emptyDescription": "No playbooks are available for this stage. Configure playbooks in the Admin panel to enable deployment.",
@@ -2146,7 +2167,13 @@
       "deployedBadge": "Deployed",
       "available": "available",
       "allDeployedTitle": "All Playbooks Deployed",
-      "allDeployedDescription": "All available playbooks for this stage have been deployed. Monitor progress in Milestones and Actions."
+      "allDeployedDescription": "All available playbooks for this stage have been deployed. Monitor progress in Milestones and Actions.",
+      "confirmDeployTitle": "Deploy Playbook?",
+      "confirmDeployDesc": "This will create {{milestones}} milestones and {{actions}} actions from \"{{title}}\".",
+      "confirmDeploy": "Deploy",
+      "deploySuccess": "Playbook deployed: {{milestones}} milestones and {{actions}} actions created",
+      "deployFailed": "Failed to deploy playbook",
+      "alreadyDeployed": "This playbook is already deployed"
     }
   },
   "playbookProgress": {
@@ -2166,9 +2193,13 @@
   "requestPlaybook": {
     "trigger": "Request Playbook",
     "title": "Request a Custom Playbook",
+    "titleSpecific": "Request \"{{title}}\"",
     "description": "Need a roadmap for something specific? Let your consultant know what you're working towards.",
+    "descriptionSpecific": "Your consultant will review and deploy this playbook when it's right for your stage.",
+    "playbookLabel": "Playbook",
     "goalLabel": "What are you trying to achieve?",
     "goalPlaceholder": "e.g., Prepare for Series A, Launch in new market, Build sales team...",
+    "prefillGoal": "I'd like to activate the \"{{title}}\" playbook",
     "urgencyLabel": "When do you need this?",
     "thisWeek": "This week",
     "thisMonth": "This month",

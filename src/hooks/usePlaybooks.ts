@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addDays, format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
@@ -131,14 +132,15 @@ export function useWorkspacePlaybookInstances(workspaceId: string | undefined) {
   });
 }
 
-// Instantiate a playbook (create milestones and actions)
+// Instantiate a playbook (create milestones and actions) - Staff only
 export function useInstantiatePlaybook() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ workspaceId, playbookId }: { workspaceId: string; playbookId: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error(t('playbooks.errors.notAuthenticated'));
 
       // Check if already instantiated
       const { data: existing } = await supabase
@@ -149,7 +151,7 @@ export function useInstantiatePlaybook() {
         .single();
 
       if (existing?.status === 'instantiated') {
-        throw new Error('Playbook já foi instanciado neste workspace');
+        throw new Error(t('playbooks.errors.alreadyInstantiated'));
       }
 
       // Get playbook items
@@ -161,7 +163,7 @@ export function useInstantiatePlaybook() {
 
       if (itemsError) throw itemsError;
       if (!items || items.length === 0) {
-        throw new Error('Playbook não tem itens');
+        throw new Error(t('playbooks.errors.noItems'));
       }
 
       // Create or update instance
@@ -289,10 +291,11 @@ export function useInstantiatePlaybook() {
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
-      toast.success(`Playbook instanciado: ${result.milestonesCreated} milestones e ${result.actionsCreated} ações criadas`);
+      // Success toast handled in component for customization
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      // Error toast handled in component for customization
+      console.error('Playbook instantiation error:', error.message);
     },
   });
 }
@@ -300,6 +303,7 @@ export function useInstantiatePlaybook() {
 // Dismiss a playbook suggestion
 export function useDismissPlaybook() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ workspaceId, playbookId }: { workspaceId: string; playbookId: string }) => {
@@ -329,10 +333,11 @@ export function useDismissPlaybook() {
     },
     onSuccess: (_, { workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ['workspace-playbook-instances', workspaceId] });
-      toast.success('Playbook descartado');
+      toast.success(t('playbooks.dismissedSuccess'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(t('playbooks.errors.dismissFailed'));
+      console.error('Playbook dismiss error:', error.message);
     },
   });
 }
@@ -340,6 +345,7 @@ export function useDismissPlaybook() {
 // Admin: Create playbook
 export function useCreatePlaybook() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (playbook: Omit<Playbook, 'id' | 'created_at' | 'updated_at'>) => {
@@ -354,10 +360,11 @@ export function useCreatePlaybook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
-      toast.success('Playbook criado');
+      toast.success(t('playbooks.admin.created'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(t('playbooks.errors.createFailed'));
+      console.error('Playbook create error:', error.message);
     },
   });
 }
@@ -365,6 +372,7 @@ export function useCreatePlaybook() {
 // Admin: Update playbook
 export function useUpdatePlaybook() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Playbook> & { id: string }) => {
@@ -380,10 +388,11 @@ export function useUpdatePlaybook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
-      toast.success('Playbook atualizado');
+      toast.success(t('playbooks.admin.updated'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(t('playbooks.errors.updateFailed'));
+      console.error('Playbook update error:', error.message);
     },
   });
 }
@@ -391,12 +400,23 @@ export function useUpdatePlaybook() {
 // Admin: Create playbook item
 export function useCreatePlaybookItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (item: Omit<PlaybookItem, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
         .from('playbook_items')
-        .insert(item as any)
+        .insert([{
+          playbook_id: item.playbook_id,
+          item_type: item.item_type,
+          title: item.title,
+          description: item.description,
+          relative_due_days: item.relative_due_days,
+          priority: item.priority,
+          order_index: item.order_index,
+          default_owner_role: item.default_owner_role,
+          metadata_json: item.metadata_json as unknown as Database['public']['Tables']['playbook_items']['Insert']['metadata_json'],
+        }])
         .select()
         .single();
 
@@ -406,10 +426,11 @@ export function useCreatePlaybookItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['playbook-items', variables.playbook_id] });
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
-      toast.success('Item adicionado');
+      toast.success(t('playbooks.admin.itemAdded'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(t('playbooks.errors.itemAddFailed'));
+      console.error('Playbook item create error:', error.message);
     },
   });
 }
@@ -417,6 +438,7 @@ export function useCreatePlaybookItem() {
 // Admin: Delete playbook item
 export function useDeletePlaybookItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, playbookId }: { id: string; playbookId: string }) => {
@@ -431,10 +453,11 @@ export function useDeletePlaybookItem() {
     onSuccess: (playbookId) => {
       queryClient.invalidateQueries({ queryKey: ['playbook-items', playbookId] });
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
-      toast.success('Item removido');
+      toast.success(t('playbooks.admin.itemRemoved'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(t('playbooks.errors.itemRemoveFailed'));
+      console.error('Playbook item delete error:', error.message);
     },
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquarePlus, Send } from 'lucide-react';
 import {
@@ -19,14 +19,22 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface RequestPlaybookDialogProps {
   workspaceId: string;
+  playbookId?: string;
+  playbookTitle?: string;
   trigger?: React.ReactNode;
 }
 
 /**
- * Dialog for founders to request a custom/advanced playbook.
- * Uses existing consultant_notes table to avoid schema changes.
+ * Dialog for founders to request a specific or custom playbook.
+ * Uses existing consultant_notes table with machine-readable tags to avoid schema changes.
+ * Supports prefilling when requesting a specific playbook.
  */
-export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookDialogProps) {
+export function RequestPlaybookDialog({ 
+  workspaceId, 
+  playbookId, 
+  playbookTitle,
+  trigger 
+}: RequestPlaybookDialogProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -34,6 +42,13 @@ export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookD
   const [urgency, setUrgency] = useState<'this_week' | 'this_month'>('this_month');
   const [context, setContext] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Prefill goal when requesting a specific playbook
+  useEffect(() => {
+    if (open && playbookTitle) {
+      setGoal(t('requestPlaybook.prefillGoal', { title: playbookTitle }));
+    }
+  }, [open, playbookTitle, t]);
 
   const handleSubmit = async () => {
     if (!goal.trim()) {
@@ -47,10 +62,17 @@ export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookD
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Create a structured note as a playbook request
+      // Create a structured note as a playbook request with machine-readable tag
+      const machineTag = playbookId 
+        ? `[PLAYBOOK_REQUEST] playbook_id=${playbookId}` 
+        : '[PLAYBOOK_REQUEST] playbook_id=custom';
+
       const requestContent = [
         `📋 **${t('requestPlaybook.title')}**`,
         '',
+        machineTag,
+        '',
+        playbookTitle ? `**${t('requestPlaybook.playbookLabel')}:** ${playbookTitle}` : '',
         `**${t('requestPlaybook.goalLabel')}:** ${goal}`,
         `**${t('requestPlaybook.urgencyLabel')}:** ${urgency === 'this_week' ? t('requestPlaybook.thisWeek') : t('requestPlaybook.thisMonth')}`,
         context ? `**${t('requestPlaybook.contextLabel')}:** ${context}` : '',
@@ -62,7 +84,7 @@ export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookD
         author_id: user.id,
         content: requestContent,
         is_private: false,
-        visibility: 'staff', // Visible to consultants/admins
+        visibility: 'staff', // Visible to consultants/admins only
       });
 
       if (error) throw error;
@@ -70,10 +92,11 @@ export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookD
       toast.success(t('requestPlaybook.submitted'));
       queryClient.invalidateQueries({ queryKey: ['consultant-notes', workspaceId] });
       setOpen(false);
+      // Reset form
       setGoal('');
       setContext('');
       setUrgency('this_month');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to submit playbook request:', error);
       toast.error(t('requestPlaybook.failed'));
     } finally {
@@ -93,9 +116,17 @@ export function RequestPlaybookDialog({ workspaceId, trigger }: RequestPlaybookD
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('requestPlaybook.title')}</DialogTitle>
+          <DialogTitle>
+            {playbookTitle 
+              ? t('requestPlaybook.titleSpecific', { title: playbookTitle })
+              : t('requestPlaybook.title')
+            }
+          </DialogTitle>
           <DialogDescription>
-            {t('requestPlaybook.description')}
+            {playbookTitle 
+              ? t('requestPlaybook.descriptionSpecific')
+              : t('requestPlaybook.description')
+            }
           </DialogDescription>
         </DialogHeader>
 

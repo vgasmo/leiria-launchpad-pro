@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight, MessageSquarePlus, Settings, Users, BookOpen } from 'lucide-react';
+import { Play, CheckCircle, X, Target, ListTodo, Clock, TrendingUp, Rocket, Sparkles, ArrowRight, MessageSquarePlus, Settings, BookOpen, HelpCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,20 @@ import { usePlaybookProgress } from '@/hooks/usePlaybookProgress';
 import { RequestPlaybookDialog } from '@/components/workspace/RequestPlaybookDialog';
 import { formatShortDate } from '@/lib/dateUtils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConsultantNotes } from '@/hooks/useConsultantNotes';
+import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
 
@@ -25,13 +38,14 @@ interface PlaybooksTabProps {
 export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }: PlaybooksTabProps) {
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
-  const { isConsultor, isAdmin } = useAuth();
+  const { isConsultor, isAdmin, user } = useAuth();
   const isStaff = isConsultor || isAdmin;
   
   const stage = currentStage || 'ideation';
   const { data: playbooks, isLoading } = usePlaybooksForStage(stage, programId);
   const { data: instances } = useWorkspacePlaybookInstances(workspaceId);
   const { data: progress } = usePlaybookProgress(workspaceId);
+  const { data: consultantNotes } = useConsultantNotes(workspaceId);
   const instantiate = useInstantiatePlaybook();
   const dismiss = useDismissPlaybook();
 
@@ -39,9 +53,41 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     return instances?.find(i => i.playbook_id === playbookId)?.status;
   };
 
+  // Check if founder has requested a specific playbook (via consultant_notes)
+  const hasRequestedPlaybook = (playbookId: string) => {
+    if (!consultantNotes || !user) return false;
+    return consultantNotes.some(note => 
+      note.author_id === user.id && 
+      note.content.includes('[PLAYBOOK_REQUEST]') &&
+      note.content.includes(`playbook_id=${playbookId}`)
+    );
+  };
+
   // Get stage display name with i18n
   const getStageLabel = (stageKey: string) => {
     return t(`playbooks.stages.${stageKey}`, stageKey.charAt(0).toUpperCase() + stageKey.slice(1));
+  };
+
+  // Handle staff deploy with confirmation
+  const handleDeploy = (playbookId: string, playbookTitle: string, milestonesCount: number, actionsCount: number) => {
+    instantiate.mutate(
+      { workspaceId, playbookId },
+      {
+        onSuccess: () => {
+          toast.success(t('playbooks.staff.deploySuccess', { 
+            milestones: milestonesCount, 
+            actions: actionsCount 
+          }));
+        },
+        onError: (error: Error) => {
+          if (error.message.includes('already')) {
+            toast.info(t('playbooks.staff.alreadyDeployed'));
+          } else {
+            toast.error(t('playbooks.staff.deployFailed'));
+          }
+        }
+      }
+    );
   };
 
   if (isLoading) {
@@ -130,12 +176,16 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               <div className="rounded-full p-2 bg-primary/10">
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-foreground mb-1">
                   {t('playbooks.introTitle')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t('playbooks.introDescription')}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                  <HelpCircle className="h-3 w-3" />
+                  {t('playbooks.founderHint')}
                 </p>
               </div>
             </div>
@@ -160,6 +210,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               const milestones = playbook.items?.filter(i => i.item_type === 'milestone') || [];
               const actions = playbook.items?.filter(i => i.item_type === 'action') || [];
               const kpiHints = getKpiHints(playbook.items);
+              const isRequested = hasRequestedPlaybook(playbook.id);
 
               return (
                 <Card key={playbook.id} className="hover:shadow-md transition-shadow group">
@@ -174,6 +225,12 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                       {status === 'dismissed' && (
                         <Badge variant="secondary">{t('playbooks.dismissed')}</Badge>
                       )}
+                      {isRequested && !isStaff && (
+                        <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
+                          <Clock className="h-3 w-3" />
+                          {t('playbooks.requested')}
+                        </Badge>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -187,6 +244,13 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                         {t('playbooks.actionsCount', { count: actions.length })}
                       </span>
                     </div>
+
+                    {/* Effort estimate */}
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {t('playbooks.effortEstimate', { 
+                        weeks: Math.max(1, Math.ceil((milestones.length + actions.length) / 4))
+                      })}
+                    </p>
 
                     {/* KPI Connections - show value */}
                     {kpiHints.length > 0 && (
@@ -229,19 +293,69 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                     )}
 
                     <div className="flex gap-2">
-                      <Button
-                        className="flex-1 gap-2"
-                        onClick={() => instantiate.mutate({ workspaceId, playbookId: playbook.id })}
-                        disabled={instantiate.isPending || !canWrite}
-                      >
-                        <Play className="h-4 w-4" />
-                        {instantiate.isPending 
-                          ? t('common.creating') 
-                          : isStaff 
-                            ? t('playbooks.staff.deploy') 
-                            : t('playbooks.activate')
-                        }
-                      </Button>
+                      {isStaff ? (
+                        // Staff: Deploy with confirmation
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              className="flex-1 gap-2"
+                              disabled={instantiate.isPending || !canWrite}
+                            >
+                              <Play className="h-4 w-4" />
+                              {instantiate.isPending 
+                                ? t('common.creating') 
+                                : t('playbooks.staff.deploy')
+                              }
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('playbooks.staff.confirmDeployTitle')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('playbooks.staff.confirmDeployDesc', {
+                                  title: playbook.title,
+                                  milestones: milestones.length,
+                                  actions: actions.length
+                                })}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeploy(playbook.id, playbook.title, milestones.length, actions.length)}
+                              >
+                                {t('playbooks.staff.confirmDeploy')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : (
+                        // Founder: Request playbook
+                        <RequestPlaybookDialog
+                          workspaceId={workspaceId}
+                          playbookId={playbook.id}
+                          playbookTitle={playbook.title}
+                          trigger={
+                            <Button
+                              className="flex-1 gap-2"
+                              variant={isRequested ? "secondary" : "default"}
+                              disabled={!canWrite || isRequested}
+                            >
+                              {isRequested ? (
+                                <>
+                                  <Clock className="h-4 w-4" />
+                                  {t('playbooks.requested')}
+                                </>
+                              ) : (
+                                <>
+                                  <MessageSquarePlus className="h-4 w-4" />
+                                  {t('playbooks.requestThis')}
+                                </>
+                              )}
+                            </Button>
+                          }
+                        />
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
