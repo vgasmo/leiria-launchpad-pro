@@ -2186,13 +2186,18 @@
     "emptyDescription": "Playbooks são roteiros passo-a-passo adaptados à sua fase. Cada um cria marcos e ações automaticamente.",
     "emptyValue": "Founders que seguem playbooks avançam 2x mais rápido nos marcos-chave.",
     "introTitle": "O Seu Roteiro para o Sucesso",
-    "introDescription": "Playbooks criam marcos e ações com prazos inteligentes. Ative um para ter um plano estruturado alinhado com a sua fase.",
+    "introDescription": "Playbooks criam marcos e ações com prazos inteligentes. Peça um para ter um plano estruturado alinhado com a sua fase.",
+    "founderHint": "O seu consultor vai ativar playbooks quando forem adequados para a sua jornada.",
     "recommended": "Recomendados para {{stage}}",
     "dismissed": "Descartado",
+    "dismissedSuccess": "Playbook descartado",
+    "requested": "Pedido",
+    "requestThis": "Pedir Este Playbook",
     "milestonesCount": "{{count}} marco",
     "milestonesCount_plural": "{{count}} marcos",
     "actionsCount": "{{count}} ação",
     "actionsCount_plural": "{{count}} ações",
+    "effortEstimate": "~{{weeks}} semana de esforço",
     "category": "Categoria",
     "preview": "O que vai receber",
     "moreItems": "+{{count}} mais",
@@ -2213,6 +2218,22 @@
       "growth": "Crescimento",
       "scale": "Escala"
     },
+    "errors": {
+      "notAuthenticated": "Tem de ter sessão iniciada",
+      "alreadyInstantiated": "Playbook já implantado neste workspace",
+      "noItems": "Playbook não tem itens",
+      "dismissFailed": "Falha ao descartar playbook",
+      "createFailed": "Falha ao criar playbook",
+      "updateFailed": "Falha ao atualizar playbook",
+      "itemAddFailed": "Falha ao adicionar item",
+      "itemRemoveFailed": "Falha ao remover item"
+    },
+    "admin": {
+      "created": "Playbook criado",
+      "updated": "Playbook atualizado",
+      "itemAdded": "Item adicionado",
+      "itemRemoved": "Item removido"
+    },
     "staff": {
       "emptyTitle": "Nenhum Playbook Configurado",
       "emptyDescription": "Não há playbooks disponíveis para esta fase. Configure playbooks no painel Admin para permitir o deployment.",
@@ -2226,7 +2247,13 @@
       "deployedBadge": "Implantado",
       "available": "disponíveis",
       "allDeployedTitle": "Todos os Playbooks Implantados",
-      "allDeployedDescription": "Todos os playbooks disponíveis para esta fase foram implantados. Acompanhe o progresso em Marcos e Ações."
+      "allDeployedDescription": "Todos os playbooks disponíveis para esta fase foram implantados. Acompanhe o progresso em Marcos e Ações.",
+      "confirmDeployTitle": "Implantar Playbook?",
+      "confirmDeployDesc": "Isto vai criar {{milestones}} marcos e {{actions}} ações de \"{{title}}\".",
+      "confirmDeploy": "Implantar",
+      "deploySuccess": "Playbook implantado: {{milestones}} marcos e {{actions}} ações criadas",
+      "deployFailed": "Falha ao implantar playbook",
+      "alreadyDeployed": "Este playbook já está implantado"
     }
   },
   "playbookProgress": {
@@ -2246,9 +2273,13 @@
   "requestPlaybook": {
     "trigger": "Pedir Playbook",
     "title": "Pedir um Playbook Personalizado",
+    "titleSpecific": "Pedir \"{{title}}\"",
     "description": "Precisa de um roteiro para algo específico? Informe o seu consultor sobre o que está a trabalhar.",
+    "descriptionSpecific": "O seu consultor vai analisar e implantar este playbook quando for adequado para a sua fase.",
+    "playbookLabel": "Playbook",
     "goalLabel": "O que está a tentar alcançar?",
     "goalPlaceholder": "ex: Preparar para Série A, Lançar em novo mercado, Construir equipa de vendas...",
+    "prefillGoal": "Gostaria de ativar o playbook \"{{title}}\"",
     "urgencyLabel": "Quando precisa disto?",
     "thisWeek": "Esta semana",
     "thisMonth": "Este mês",
