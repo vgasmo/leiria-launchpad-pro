@@ -2212,6 +2212,21 @@
       "mvp": "MVP",
       "growth": "Crescimento",
       "scale": "Escala"
+    },
+    "staff": {
+      "emptyTitle": "Nenhum Playbook Configurado",
+      "emptyDescription": "Não há playbooks disponíveis para esta fase. Configure playbooks no painel Admin para permitir o deployment.",
+      "emptyValue": "Playbooks ajudam founders a seguir roteiros estruturados para cada fase da startup.",
+      "introTitle": "Gestão de Playbooks",
+      "introDescription": "Implante playbooks para criar marcos e ações para esta startup. Acompanhe o progresso e ajuste conforme necessário.",
+      "availableFor": "Disponíveis para Fase {{stage}}",
+      "deploy": "Implantar Playbook",
+      "deployed": "Playbooks Implantados",
+      "deployedOn": "Implantado {{date}}",
+      "deployedBadge": "Implantado",
+      "available": "disponíveis",
+      "allDeployedTitle": "Todos os Playbooks Implantados",
+      "allDeployedDescription": "Todos os playbooks disponíveis para esta fase foram implantados. Acompanhe o progresso em Marcos e Ações."
     }
   },
   "playbookProgress": {

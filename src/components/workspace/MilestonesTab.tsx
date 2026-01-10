@@ -18,6 +18,7 @@ import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilesto
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
+import { toTitleCase } from '@/lib/textUtils';
 import type { Database } from '@/integrations/supabase/types';
 
 type MilestoneStatus = Database['public']['Enums']['milestone_status'];
@@ -299,7 +300,7 @@ function MilestoneListItem({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className={`font-medium ${milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
-                  {milestone.title}
+                  {toTitleCase(milestone.title)}
                 </h4>
                 {milestone.description && (
                   <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
@@ -425,7 +426,7 @@ function TimelineView({ milestones }: TimelineViewProps) {
                         <h4 className={`text-sm font-medium ${
                           milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''
                         }`}>
-                          {milestone.title}
+                          {toTitleCase(milestone.title)}
                         </h4>
                         {milestone.description && (
                           <p className="text-xs text-muted-foreground mt-0.5">

@@ -2132,6 +2132,21 @@
       "mvp": "MVP",
       "growth": "Growth",
       "scale": "Scale"
+    },
+    "staff": {
+      "emptyTitle": "No Playbooks Configured",
+      "emptyDescription": "No playbooks are available for this stage. Configure playbooks in the Admin panel to enable deployment.",
+      "emptyValue": "Playbooks help founders follow structured roadmaps for each startup stage.",
+      "introTitle": "Playbook Management",
+      "introDescription": "Deploy playbooks to create milestones and actions for this startup. Review progress and adjust as needed.",
+      "availableFor": "Available for {{stage}} Stage",
+      "deploy": "Deploy Playbook",
+      "deployed": "Deployed Playbooks",
+      "deployedOn": "Deployed {{date}}",
+      "deployedBadge": "Deployed",
+      "available": "available",
+      "allDeployedTitle": "All Playbooks Deployed",
+      "allDeployedDescription": "All available playbooks for this stage have been deployed. Monitor progress in Milestones and Actions."
     }
   },
   "playbookProgress": {
