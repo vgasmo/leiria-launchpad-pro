@@ -1,26 +1,53 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
-// Simple in-memory rate limiting (per token, resets on function cold start)
+// Simple in-memory rate limiting (per IP address, resets on function cold start)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 30;
 
-function checkRateLimit(tokenHash: string): boolean {
+// Secondary rate limiting for valid tokens (stricter)
+const tokenRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const TOKEN_RATE_LIMIT_MAX_REQUESTS = 10;
+
+function checkRateLimit(key: string, limitMap: Map<string, { count: number; resetAt: number }>, maxRequests: number): boolean {
   const now = Date.now();
-  const entry = rateLimitMap.get(tokenHash);
+  const entry = limitMap.get(key);
   
   if (!entry || now >= entry.resetAt) {
-    rateLimitMap.set(tokenHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    limitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return true;
   }
   
-  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+  if (entry.count >= maxRequests) {
     return false;
   }
   
   entry.count++;
   return true;
+}
+
+// Get client IP from request headers
+function getClientIp(req: Request): string {
+  // Check standard proxy headers
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    // Take the first IP in the chain (original client)
+    return forwardedFor.split(',')[0].trim();
+  }
+  
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) {
+    return realIp.trim();
+  }
+  
+  // Fallback - use a hash of available identifying info
+  const cfConnectingIp = req.headers.get('cf-connecting-ip');
+  if (cfConnectingIp) {
+    return cfConnectingIp.trim();
+  }
+  
+  return 'unknown';
 }
 
 // SHA-256 hash function
@@ -39,6 +66,13 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // SECURITY: Apply IP-based rate limiting BEFORE any token processing
+    // This prevents token enumeration attacks by limiting requests per IP
+    const clientIp = getClientIp(req);
+    if (!checkRateLimit(clientIp, rateLimitMap, RATE_LIMIT_MAX_REQUESTS)) {
+      return corsJsonResponse({ error: 'Too many requests. Please try again later.' }, req, 429);
+    }
+
     // Parse request body
     const { token } = await req.json();
 
@@ -46,13 +80,11 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'Token is required' }, req, 400);
     }
 
-    // Hash the token
+    // Hash the token for database lookup
     const tokenHash = await sha256(token);
 
-    // Check rate limit
-    if (!checkRateLimit(tokenHash)) {
-      return corsJsonResponse({ error: 'Too many requests. Please try again later.' }, req, 429);
-    }
+    // Secondary rate limiting per valid token (after DB validation succeeds)
+    // This is applied later after we confirm the token exists
 
     // Create Supabase client with service role for bypassing RLS
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -81,6 +113,12 @@ Deno.serve(async (req: Request) => {
 
     if (linkError || !shareLink) {
       return corsJsonResponse({ error: 'Invalid or expired link' }, req, 404);
+    }
+
+    // SECURITY: Apply secondary rate limiting per valid token
+    // This provides additional protection for valid share links
+    if (!checkRateLimit(tokenHash, tokenRateLimitMap, TOKEN_RATE_LIMIT_MAX_REQUESTS)) {
+      return corsJsonResponse({ error: 'Too many requests for this link. Please try again later.' }, req, 429);
     }
 
     // Check if revoked
