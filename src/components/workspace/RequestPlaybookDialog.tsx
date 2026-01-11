@@ -84,7 +84,11 @@ export function RequestPlaybookDialog({
       setUrgency('this_month');
     } catch (error: unknown) {
       console.error('Failed to submit playbook request:', error);
-      toast.error(t('requestPlaybook.failed'));
+      // Keep dialog open on failure so user can retry
+      toast.error(t('requestPlaybook.failed'), {
+        description: t('requestPlaybook.failedHint'),
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }

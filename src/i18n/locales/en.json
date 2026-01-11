@@ -2121,6 +2121,7 @@
     "category": "Category",
     "preview": "What you'll get",
     "moreItems": "+{{count}} more",
+    "undoDismiss": "Restore",
     "activate": "Activate Playbook",
     "dismiss": "Not now",
     "allAppliedTitle": "All Playbooks Activated!",
@@ -2208,6 +2209,7 @@
     "submit": "Send Request",
     "submitted": "Request sent! Your consultant will review it soon.",
     "failed": "Failed to send request. Please try again.",
+    "failedHint": "Check your connection and try again.",
     "goalRequired": "Please describe what you're trying to achieve."
   }
 }
