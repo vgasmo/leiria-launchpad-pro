@@ -207,50 +207,57 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
           <div className="grid gap-4 md:grid-cols-2">
             {availablePlaybooks.map(playbook => {
               const status = getInstanceStatus(playbook.id);
+              const isDismissed = status === 'dismissed';
               const milestones = playbook.items?.filter(i => i.item_type === 'milestone') || [];
               const actions = playbook.items?.filter(i => i.item_type === 'action') || [];
               const kpiHints = getKpiHints(playbook.items);
               const isRequested = hasRequestedPlaybook(playbook.id);
+              const estimatedWeeks = Math.max(1, Math.ceil((milestones.length + actions.length) / 4));
 
               return (
-                <Card key={playbook.id} className="hover:shadow-md transition-shadow group">
+                <Card 
+                  key={playbook.id} 
+                  className={`hover:shadow-md transition-shadow group ${isDismissed ? 'opacity-60' : ''}`}
+                >
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg group-hover:text-primary transition-colors">
                           {playbook.title}
                         </CardTitle>
-                        <CardDescription>{playbook.description}</CardDescription>
+                        <CardDescription className="line-clamp-2">{playbook.description}</CardDescription>
                       </div>
-                      {status === 'dismissed' && (
-                        <Badge variant="secondary">{t('playbooks.dismissed')}</Badge>
-                      )}
-                      {isRequested && !isStaff && (
-                        <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
-                          <Clock className="h-3 w-3" />
-                          {t('playbooks.requested')}
-                        </Badge>
-                      )}
+                      <div className="flex flex-col gap-1 shrink-0">
+                        {isDismissed && (
+                          <Badge variant="secondary" className="text-muted-foreground">
+                            {t('playbooks.dismissed')}
+                          </Badge>
+                        )}
+                        {isRequested && !isStaff && !isDismissed && (
+                          <Badge variant="outline" className="gap-1 border-amber-500 text-amber-600">
+                            <Clock className="h-3 w-3" />
+                            {t('playbooks.requested')}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
+                    {/* Value metadata - what this creates */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
-                        <Target className="h-4 w-4" />
+                        <Target className="h-4 w-4 text-primary" />
                         {t('playbooks.milestonesCount', { count: milestones.length })}
                       </span>
                       <span className="flex items-center gap-1">
-                        <ListTodo className="h-4 w-4" />
+                        <ListTodo className="h-4 w-4 text-primary" />
                         {t('playbooks.actionsCount', { count: actions.length })}
                       </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {t('playbooks.effortEstimate', { weeks: estimatedWeeks })}
+                      </span>
                     </div>
-
-                    {/* Effort estimate */}
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {t('playbooks.effortEstimate', { 
-                        weeks: Math.max(1, Math.ceil((milestones.length + actions.length) / 4))
-                      })}
-                    </p>
 
                     {/* KPI Connections - show value */}
                     {kpiHints.length > 0 && (
@@ -265,7 +272,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                     )}
 
                     {/* Preview items */}
-                    {playbook.items && playbook.items.length > 0 && (
+                    {playbook.items && playbook.items.length > 0 && !isDismissed && (
                       <div className="mb-4 p-3 rounded-lg bg-muted/50 max-h-40 overflow-y-auto">
                         <p className="text-xs font-medium mb-2">{t('playbooks.preview')}:</p>
                         {playbook.items.slice(0, 5).map((item) => (
@@ -292,80 +299,95 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                       </div>
                     )}
 
-                    <div className="flex gap-2">
-                      {isStaff ? (
-                        // Staff: Deploy with confirmation
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              className="flex-1 gap-2"
-                              disabled={instantiate.isPending || !canWrite}
-                            >
-                              <Play className="h-4 w-4" />
-                              {instantiate.isPending 
-                                ? t('common.creating') 
-                                : t('playbooks.staff.deploy')
-                              }
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t('playbooks.staff.confirmDeployTitle')}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t('playbooks.staff.confirmDeployDesc', {
-                                  title: playbook.title,
-                                  milestones: milestones.length,
-                                  actions: actions.length
-                                })}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeploy(playbook.id, playbook.title, milestones.length, actions.length)}
+                    {/* Action buttons - different for dismissed state */}
+                    {isDismissed ? (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground"
+                          onClick={() => dismiss.mutate({ workspaceId, playbookId: playbook.id })}
+                          disabled={dismiss.isPending || !canWrite}
+                        >
+                          {t('playbooks.undoDismiss', 'Restore')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        {isStaff ? (
+                          // Staff: Deploy with confirmation
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                className="flex-1 gap-2"
+                                disabled={instantiate.isPending || !canWrite}
                               >
-                                {t('playbooks.staff.confirmDeploy')}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        // Founder: Request playbook
-                        <RequestPlaybookDialog
-                          workspaceId={workspaceId}
-                          playbookId={playbook.id}
-                          playbookTitle={playbook.title}
-                          trigger={
-                            <Button
-                              className="flex-1 gap-2"
-                              variant={isRequested ? "secondary" : "default"}
-                              disabled={!canWrite || isRequested}
-                            >
-                              {isRequested ? (
-                                <>
-                                  <Clock className="h-4 w-4" />
-                                  {t('playbooks.requested')}
-                                </>
-                              ) : (
-                                <>
-                                  <MessageSquarePlus className="h-4 w-4" />
-                                  {t('playbooks.requestThis')}
-                                </>
-                              )}
-                            </Button>
-                          }
-                        />
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => dismiss.mutate({ workspaceId, playbookId: playbook.id })}
-                        disabled={dismiss.isPending || !canWrite}
-                        title={t('playbooks.dismiss')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                                <Play className="h-4 w-4" />
+                                {instantiate.isPending 
+                                  ? t('common.creating') 
+                                  : t('playbooks.staff.deploy')
+                                }
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('playbooks.staff.confirmDeployTitle')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t('playbooks.staff.confirmDeployDesc', {
+                                    title: playbook.title,
+                                    milestones: milestones.length,
+                                    actions: actions.length
+                                  })}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeploy(playbook.id, playbook.title, milestones.length, actions.length)}
+                                >
+                                  {t('playbooks.staff.confirmDeploy')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        ) : (
+                          // Founder: Request playbook (disabled if already requested)
+                          <RequestPlaybookDialog
+                            workspaceId={workspaceId}
+                            playbookId={playbook.id}
+                            playbookTitle={playbook.title}
+                            trigger={
+                              <Button
+                                className="flex-1 gap-2"
+                                variant={isRequested ? "secondary" : "default"}
+                                disabled={!canWrite || isRequested}
+                              >
+                                {isRequested ? (
+                                  <>
+                                    <Clock className="h-4 w-4" />
+                                    {t('playbooks.requested')}
+                                  </>
+                                ) : (
+                                  <>
+                                    <MessageSquarePlus className="h-4 w-4" />
+                                    {t('playbooks.requestThis')}
+                                  </>
+                                )}
+                              </Button>
+                            }
+                          />
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => dismiss.mutate({ workspaceId, playbookId: playbook.id })}
+                          disabled={dismiss.isPending || !canWrite}
+                          title={t('playbooks.dismiss')}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
