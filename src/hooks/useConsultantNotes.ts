@@ -7,6 +7,7 @@ export interface ConsultantNote {
   author_id: string;
   content: string;
   is_private: boolean;
+  visibility?: string | null;
   created_at: string;
   updated_at: string;
   author?: {

@@ -26,8 +26,7 @@ interface RequestPlaybookDialogProps {
 
 /**
  * Dialog for founders to request a specific or custom playbook.
- * Uses existing consultant_notes table with machine-readable tags to avoid schema changes.
- * Supports prefilling when requesting a specific playbook.
+ * Uses edge function to create consultant_notes since founders cannot insert directly.
  */
 export function RequestPlaybookDialog({ 
   workspaceId, 
@@ -59,35 +58,22 @@ export function RequestPlaybookDialog({
     setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      // Create a structured note as a playbook request with machine-readable tag
-      const machineTag = playbookId 
-        ? `[PLAYBOOK_REQUEST] playbook_id=${playbookId}` 
-        : '[PLAYBOOK_REQUEST] playbook_id=custom';
-
-      const requestContent = [
-        `📋 **${t('requestPlaybook.title')}**`,
-        '',
-        machineTag,
-        '',
-        playbookTitle ? `**${t('requestPlaybook.playbookLabel')}:** ${playbookTitle}` : '',
-        `**${t('requestPlaybook.goalLabel')}:** ${goal}`,
-        `**${t('requestPlaybook.urgencyLabel')}:** ${urgency === 'this_week' ? t('requestPlaybook.thisWeek') : t('requestPlaybook.thisMonth')}`,
-        context ? `**${t('requestPlaybook.contextLabel')}:** ${context}` : '',
-      ].filter(Boolean).join('\n');
-
-      // Insert as consultant note (visible to staff)
-      const { error } = await supabase.from('consultant_notes').insert({
-        workspace_id: workspaceId,
-        author_id: user.id,
-        content: requestContent,
-        is_private: false,
-        visibility: 'staff', // Visible to consultants/admins only
+      // Call edge function to create the request (bypasses RLS)
+      const response = await supabase.functions.invoke('request-playbook', {
+        body: {
+          workspaceId,
+          playbookId,
+          playbookTitle,
+          goal,
+          urgency,
+          context,
+        },
       });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
 
       toast.success(t('requestPlaybook.submitted'));
       queryClient.invalidateQueries({ queryKey: ['consultant-notes', workspaceId] });
