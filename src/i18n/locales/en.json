@@ -223,6 +223,36 @@
     "viewActions": "View Actions",
     "learnMore": "Learn More"
   },
+  "founderHome": {
+    "bookFirstContact": "Book Your First Meeting",
+    "bookFirstContactDesc": "Connect with a consultant to kickstart your startup journey.",
+    "scheduleFirstMeeting": "Schedule First Meeting",
+    "yourConsultant": "Your Consultant",
+    "noUpcomingSessions": "No upcoming sessions",
+    "bookNextSession": "Book your next check-in with your consultant",
+    "bookSession": "Book Session",
+    "viewSessions": "View Sessions"
+  },
+  "oneThingToday": {
+    "focusToday": "Focus Today",
+    "allCaughtUp": "You're all caught up!",
+    "keepMomentum": "Keep the momentum going.",
+    "submitCheckin": "Submit your monthly check-in",
+    "checkinWhy": "Check-ins keep your consultant informed and help track your progress.",
+    "updateKpis": "Update your KPIs for this month",
+    "kpiWhy": "Up-to-date metrics help you make better decisions and show progress to investors.",
+    "prepSession": "Prepare for your upcoming session",
+    "sessionPrepWhy": "Being prepared helps you get more value from your session.",
+    "overdueWhy": "This action is {{days}} days overdue. Completing it unblocks your progress.",
+    "actionWhy": "Completing actions moves you closer to your milestones."
+  },
+  "stageProgress": {
+    "yourJourney": "Your Journey",
+    "stageProgress": "Stage Progress",
+    "milestones": "Milestones",
+    "complete": "complete",
+    "viewMilestones": "View milestones & playbooks"
+  },
   "onboarding": {
     "welcomeTitle": "Welcome to your startup journey!",
     "welcomeDescription": "This platform helps you track progress, connect with mentors, and prepare for investment. Let's get you set up in just a few steps.",
