@@ -38,9 +38,16 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
   
-  // Get founder's primary workspace for contact info
+  // Get founder's workspace for contact info
+  // - If the founder is inside a specific workspace route, use that workspace id
+  // - Otherwise, fall back to the first workspace (e.g. on /my-workspaces)
   const { data: workspaces = [] } = useWorkspaces();
-  const founderWorkspaceId = isFounder && workspaces.length > 0 ? workspaces[0].id : null;
+  const workspaceIdFromRoute = location.pathname.startsWith('/workspace/')
+    ? location.pathname.split('/')[2]
+    : null;
+  const founderWorkspaceId = isFounder
+    ? (workspaceIdFromRoute || (workspaces.length > 0 ? workspaces[0].id : null))
+    : null;
 
   const navigation = [
     { name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 },
