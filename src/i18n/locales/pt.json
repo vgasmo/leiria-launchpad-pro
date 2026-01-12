@@ -978,6 +978,7 @@
       "stage": "Fase",
       "health": "Saúde",
       "status": "Estado",
+      "consultant": "Consultor",
       "blockedStatus": "Bloqueado",
       "activeStatus": "Ativo",
       "block": "Bloquear",
@@ -990,7 +991,13 @@
       "blocked": "Workspace bloqueado",
       "unblocked": "Workspace desbloqueado",
       "deleted": "Workspace eliminado",
-      "noWorkspaces": "Nenhum workspace criado"
+      "noWorkspaces": "Nenhum workspace criado",
+      "stageChanged": "Fase atualizada",
+      "consultorAssigned": "Consultor atribuído",
+      "consultorRemoved": "Consultor removido",
+      "assignConsultant": "Atribuir",
+      "searchConsultant": "Pesquisar consultor...",
+      "removeConsultant": "Remover Consultor"
     },
     "announcements": {
       "tab": "Avisos",

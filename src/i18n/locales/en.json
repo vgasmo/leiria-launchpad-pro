@@ -1036,6 +1036,7 @@
       "stage": "Stage",
       "health": "Health",
       "status": "Status",
+      "consultant": "Consultant",
       "blockedStatus": "Blocked",
       "activeStatus": "Active",
       "block": "Block",
@@ -1048,7 +1049,13 @@
       "blocked": "Workspace blocked",
       "unblocked": "Workspace unblocked",
       "deleted": "Workspace deleted",
-      "noWorkspaces": "No workspaces created yet"
+      "noWorkspaces": "No workspaces created yet",
+      "stageChanged": "Stage updated",
+      "consultorAssigned": "Consultant assigned",
+      "consultorRemoved": "Consultant removed",
+      "assignConsultant": "Assign",
+      "searchConsultant": "Search consultant...",
+      "removeConsultant": "Remove Consultant"
     },
     "announcements": {
       "tab": "Announcements",
