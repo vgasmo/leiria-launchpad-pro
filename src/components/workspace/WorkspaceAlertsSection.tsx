@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle, EyeOff, ExternalLink, Info, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ interface WorkspaceAlertsSectionProps {
 }
 
 export function WorkspaceAlertsSection({ workspaceId, canManage = false }: WorkspaceAlertsSectionProps) {
+  const { t } = useTranslation();
   const { roles } = useAuth();
   const isStaff = roles.includes('admin') || roles.includes('consultor');
   const { data: alerts, isLoading } = useWorkspaceAlerts(workspaceId);
@@ -30,7 +32,7 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Alertas
+            {t('alerts.title', 'Alerts')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -48,14 +50,14 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            Alertas
+            {t('alerts.title', 'Alerts')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <CheckCircle className="h-10 w-10 mx-auto mb-2 text-green-500 opacity-50" />
-            <p className="font-medium">Sem alertas ativos</p>
-            <p className="text-sm">Tudo está a correr bem!</p>
+            <p className="font-medium">{t('alerts.noActiveAlerts', 'No active alerts')}</p>
+            <p className="text-sm">{t('alerts.everythingOnTrack', 'Everything is on track!')}</p>
           </div>
         </CardContent>
       </Card>
@@ -71,14 +73,14 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className={`h-5 w-5 ${criticalCount > 0 ? 'text-red-600' : 'text-amber-600'}`} />
-            Alertas
+            {t('alerts.title', 'Alerts')}
           </CardTitle>
           <div className="flex gap-1">
             {criticalCount > 0 && (
-              <Badge variant="destructive">{criticalCount} crítico{criticalCount > 1 ? 's' : ''}</Badge>
+              <Badge variant="destructive">{criticalCount} {t('alerts.critical', 'critical')}</Badge>
             )}
             {warningCount > 0 && (
-              <Badge variant="outline" className="border-amber-500 text-amber-600">{warningCount} atenção</Badge>
+              <Badge variant="outline" className="border-amber-500 text-amber-600">{warningCount} {t('alerts.warning', 'warning')}</Badge>
             )}
           </div>
         </div>
@@ -116,7 +118,7 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
                         <TooltipTrigger asChild>
                           <button className="flex items-center gap-1 text-xs text-muted-foreground mt-1 hover:text-foreground">
                             <Info className="h-3 w-3" />
-                            Ver detalhes
+                            {t('alerts.viewDetails', 'View details')}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="max-w-xs">
@@ -154,7 +156,7 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
                               <CheckCircle className="h-4 w-4 text-green-600" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Marcar como resolvido</TooltipContent>
+                          <TooltipContent>{t('alerts.markResolved', 'Mark as resolved')}</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -168,7 +170,7 @@ export function WorkspaceAlertsSection({ workspaceId, canManage = false }: Works
                               <EyeOff className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Ignorar alerta</TooltipContent>
+                          <TooltipContent>{t('alerts.ignoreAlert', 'Ignore alert')}</TooltipContent>
                         </Tooltip>
                       </div>
                     )}

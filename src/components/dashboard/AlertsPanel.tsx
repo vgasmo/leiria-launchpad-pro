@@ -36,7 +36,7 @@ export function AlertsPanel() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Alertas Ativos
+            {t('alerts.activeAlerts', 'Active Alerts')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -54,7 +54,7 @@ export function AlertsPanel() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <AlertTriangle className={`h-5 w-5 ${criticalCount > 0 ? 'text-red-600' : 'text-amber-600'}`} />
-            <CardTitle>Alertas Ativos</CardTitle>
+            <CardTitle>{t('alerts.activeAlerts', 'Active Alerts')}</CardTitle>
             <div className="flex gap-1 ml-2">
               {criticalCount > 0 && (
                 <Badge variant="destructive">{criticalCount}</Badge>
@@ -71,10 +71,10 @@ export function AlertsPanel() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="critical">🔴 Crítico</SelectItem>
-                <SelectItem value="warning">🟠 Atenção</SelectItem>
-                <SelectItem value="info">🔵 Info</SelectItem>
+                <SelectItem value="all">{t('common.all', 'All')}</SelectItem>
+                <SelectItem value="critical">🔴 {t('alerts.critical', 'Critical')}</SelectItem>
+                <SelectItem value="warning">🟠 {t('alerts.warning', 'Warning')}</SelectItem>
+                <SelectItem value="info">🔵 {t('alerts.info', 'Info')}</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -84,7 +84,7 @@ export function AlertsPanel() {
               disabled={recompute.isPending}
             >
               <RefreshCw className={`h-4 w-4 mr-1 ${recompute.isPending ? 'animate-spin' : ''}`} />
-              Recalcular
+              {t('alerts.recalculate', 'Recalculate')}
             </Button>
           </div>
         </div>
@@ -93,8 +93,8 @@ export function AlertsPanel() {
         {filteredAlerts.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500 opacity-50" />
-            <p className="font-medium">Sem alertas ativos</p>
-            <p className="text-sm">Todas as startups estão no bom caminho!</p>
+            <p className="font-medium">{t('alerts.noActiveAlerts', 'No active alerts')}</p>
+            <p className="text-sm">{t('alerts.allOnTrack', 'All startups are on track!')}</p>
           </div>
         ) : (
           <div className="space-y-3 max-h-[500px] overflow-y-auto">

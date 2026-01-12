@@ -5333,6 +5333,7 @@ export type Database = {
         Args: { _nda_version?: string; _user_id: string }
         Returns: boolean
       }
+      has_active_workspace_access: { Args: { ws_id: string }; Returns: boolean }
       has_any_role: { Args: { _user_id: string }; Returns: boolean }
       has_program_access: { Args: { _program_id: string }; Returns: boolean }
       has_role: {

@@ -19,7 +19,7 @@ import { StartupStage } from '@/types/database';
 
 const startupSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
-  description: z.string().trim().max(500).optional(),
+  description: z.string().trim().min(20, 'Description must be at least 20 characters').max(500),
   website: z.string().url().optional().or(z.literal('')),
   stage: z.enum(['ideation', 'validation', 'mvp', 'growth', 'scale']),
   programId: z.string().uuid('Please select a program'),
@@ -27,7 +27,6 @@ const startupSchema = z.object({
   mainContactName: z.string().max(100).optional(),
   mainContactEmail: z.string().email().optional().or(z.literal('')),
   mainContactPhone: z.string().max(30).optional(),
-  hasStartupPortugalStatus: z.boolean().optional(),
 });
 
 interface CreateStartupDialogProps {
@@ -50,7 +49,6 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
   const [mainContactName, setMainContactName] = useState('');
   const [mainContactEmail, setMainContactEmail] = useState('');
   const [mainContactPhone, setMainContactPhone] = useState('');
-  const [hasStartupPortugalStatus, setHasStartupPortugalStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,7 +59,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
     // Validate
     const result = startupSchema.safeParse({ 
       name, description, website, stage, programId,
-      nif, mainContactName, mainContactEmail, mainContactPhone, hasStartupPortugalStatus
+      nif, mainContactName, mainContactEmail, mainContactPhone
     });
     if (!result.success) {
       setError(result.error.errors[0].message);
@@ -88,7 +86,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           p_main_contact_name: result.data.mainContactName || null,
           p_main_contact_email: result.data.mainContactEmail || null,
           p_main_contact_phone: result.data.mainContactPhone || null,
-          p_has_startup_portugal_status: result.data.hasStartupPortugalStatus || false,
+          p_has_startup_portugal_status: false,
         })
         .single();
 
@@ -111,7 +109,6 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       setMainContactName('');
       setMainContactEmail('');
       setMainContactPhone('');
-      setHasStartupPortugalStatus(false);
       
     } catch (err: any) {
       console.error('Error creating startup:', err);
@@ -161,7 +158,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           <div className="space-y-2">
             <Label htmlFor="startup-description">
               <FileText className="h-3.5 w-3.5 inline mr-1.5" />
-              {t('createStartup.descriptionLabel')}
+              {t('createStartup.descriptionLabel')} *
             </Label>
             <Textarea
               id="startup-description"
@@ -169,7 +166,12 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('createStartup.descriptionPlaceholder')}
               rows={3}
+              required
+              minLength={20}
             />
+            <p className="text-xs text-muted-foreground">
+              {t('createStartup.descriptionHint', 'Minimum 20 characters. Describe what your startup does.')}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -186,31 +188,16 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
             />
           </div>
 
-          {/* NIF and Legal Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startup-nif">NIF (Tax ID)</Label>
-              <Input
-                id="startup-nif"
-                value={nif}
-                onChange={(e) => setNif(e.target.value)}
-                placeholder="PT123456789"
-                maxLength={20}
-              />
-            </div>
-            <div className="flex items-center sm:items-end sm:pb-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="startup-portugal-status" 
-                  checked={hasStartupPortugalStatus} 
-                  onCheckedChange={(checked) => setHasStartupPortugalStatus(!!checked)} 
-                />
-                <Label htmlFor="startup-portugal-status" className="cursor-pointer text-sm">
-                  <CheckCircle className="h-3.5 w-3.5 inline mr-1 text-green-600" />
-                  Estatuto Startup Portugal
-                </Label>
-              </div>
-            </div>
+          {/* NIF */}
+          <div className="space-y-2">
+            <Label htmlFor="startup-nif">NIF (Tax ID)</Label>
+            <Input
+              id="startup-nif"
+              value={nif}
+              onChange={(e) => setNif(e.target.value)}
+              placeholder="PT123456789"
+              maxLength={20}
+            />
           </div>
 
           {/* Main Contact */}
