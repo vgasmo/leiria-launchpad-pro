@@ -749,7 +749,8 @@
     "responsibleConsultant": "Consultor Responsável",
     "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve.",
     "yourConsultant": "Seu Consultor",
-    "yourMentor": "Seu Mentor"
+    "yourMentor": "Seu Mentor",
+    "noTeamAssigned": "Equipa ainda não atribuída"
   },
   "investorUpdates": {
     "title": "Atualizações para Investidores",

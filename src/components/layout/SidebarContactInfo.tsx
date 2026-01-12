@@ -21,7 +21,7 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
 
   const consultant = members?.find(m => m.role === 'consultor');
-  const mentor = members?.find(m => m.role === 'mentor');
+  const mentor = members?.find(m => m.role === 'mentor_externo');
 
   if (isLoading) {
     return (
@@ -38,7 +38,18 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
     );
   }
 
-  if (!consultant && !mentor) return null;
+  // If no consultant and no mentor, show a placeholder for the founder to know this area exists
+  if (!consultant && !mentor) {
+    if (collapsed) return null;
+    return (
+      <div className="mx-3 mb-3 rounded-lg p-3 bg-muted/30 border border-dashed border-muted-foreground/20">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <User className="h-4 w-4" />
+          <span className="text-xs">{t('workspace.noTeamAssigned', 'Team not assigned yet')}</span>
+        </div>
+      </div>
+    );
+  }
 
   const ContactItem = ({ 
     profile, 
