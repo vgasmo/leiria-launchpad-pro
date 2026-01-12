@@ -64,7 +64,7 @@ import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { generateTimeSlots, useConsultantAvailability, useValidateBookingSlot } from '@/hooks/useConsultantCalendar';
+import { useConsultantAvailability, useValidateBookingSlot } from '@/hooks/useConsultantCalendar';
 import {
   Select,
   SelectContent,
@@ -428,12 +428,12 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
     const durationMinutes = Number.parseInt(duration || '60', 10);
 
-    // Consultant: if calendar integration exists, use it; otherwise fall back to generic working-hours slots.
+    // Consultant: only show slots when calendar availability was actually verified.
     if (meetingWith === 'consultor') {
-      if (consultantAvailability?.slots?.length) {
+      if (consultantAvailability?.success && consultantAvailability?.slots?.length) {
         return consultantAvailability.slots.filter((slot) => slot.available).map((slot) => slot.start);
       }
-      return generateTimeSlots(dateStr, durationMinutes);
+      return [];
     }
 
     // Mentor: use mentor weekly availability (no calendar free/busy).
@@ -856,12 +856,6 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                         })}
                       </div>
 
-                      {/* De onde vêm os slots */}
-                      {meetingWith === 'consultor' && (!consultantAvailability?.slots || consultantAvailability.slots.length === 0) && (
-                        <p className="text-xs text-muted-foreground">
-                          {t('sessions.slotsGeneratedHint', 'Slots estimados (09:00–18:00). Não está a ler o calendário do consultor.')}
-                        </p>
-                      )}
                     </>
                   )}
                   
