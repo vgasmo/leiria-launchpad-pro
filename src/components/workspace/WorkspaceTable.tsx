@@ -1,8 +1,9 @@
 import { memo } from 'react';
 import { format, isToday } from 'date-fns';
-import { Calendar, FileText } from 'lucide-react';
+import { Calendar, FileText, ExternalLink } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
@@ -107,9 +108,23 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="font-semibold truncate">
-                      {workspace.startup?.name || 'Unnamed'}
-                    </p>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className="font-semibold truncate">{workspace.startup?.name || 'Unnamed'}</p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRowClick(workspace.id);
+                        }}
+                        aria-label="Abrir workspace"
+                        title="Abrir workspace"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </TableCell>

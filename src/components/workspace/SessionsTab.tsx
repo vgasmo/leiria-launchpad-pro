@@ -444,13 +444,11 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
     const slots: string[] = [];
     for (const w of windows) {
-      const [startH, startM] = w.start_time.split(':').map(Number);
-      const [endH, endM] = w.end_time.split(':').map(Number);
-      const start = new Date(`${dateStr}T${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}:00`);
-      const end = new Date(`${dateStr}T${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}:00`);
+      const start = new Date(`${dateStr}T${w.start_time}:00`);
+      const end = new Date(`${dateStr}T${w.end_time}:00`);
 
-      for (let cur = new Date(start); cur.getTime() + durationMinutes * 60000 <= end.getTime(); cur = addDays(cur, 0)) {
-        // step 30 min
+      let cur = new Date(start);
+      while (cur.getTime() + durationMinutes * 60000 <= end.getTime()) {
         slots.push(cur.toISOString());
         cur = new Date(cur.getTime() + 30 * 60000);
       }
@@ -632,7 +630,70 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
             />
           </div>
 
-          {/* Toggle between calendar availability and manual input */}
+          {/* Com quem é a sessão? */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t('sessions.meetingWith', 'Sessão com')}</Label>
+              <Select
+                value={meetingWith}
+                onValueChange={(v) => {
+                  const next = v as 'consultor' | 'mentor_externo';
+                  setMeetingWith(next);
+                  setParticipantId('');
+                  setSelectedSlot('');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="consultor">{t('sessions.withConsultant', 'Consultor')}</SelectItem>
+                  <SelectItem value="mentor_externo">{t('sessions.withMentor', 'Mentor')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('sessions.participant', 'Participante')}</Label>
+              <Select
+                value={participantId}
+                onValueChange={(v) => {
+                  setParticipantId(v);
+                  setSelectedSlot('');
+                }}
+                disabled={meetingWith === 'consultor' ? !assignedConsultant?.user_id : assignedMentors.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('sessions.selectParticipant', 'Selecionar...')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {meetingWith === 'consultor' ? (
+                    assignedConsultant ? (
+                      <SelectItem value={assignedConsultant.user_id}>
+                        {assignedConsultant.profile?.full_name || assignedConsultant.profile?.email || 'Consultor'}
+                      </SelectItem>
+                    ) : (
+                      <SelectItem value="__none" disabled>
+                        {t('sessions.noConsultantAssigned', 'Sem consultor atribuído')}
+                      </SelectItem>
+                    )
+                  ) : assignedMentors.length > 0 ? (
+                    assignedMentors.map((m) => (
+                      <SelectItem key={m.user_id} value={m.user_id}>
+                        {m.profile?.full_name || m.profile?.email || 'Mentor'}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__none" disabled>
+                      {t('sessions.noMentorAssigned', 'Sem mentor atribuído')}
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Toggle entre disponibilidade e manual */}
           <div className="flex items-center gap-2 text-sm">
             <button
               type="button"
@@ -711,23 +772,23 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               {/* Time slots */}
               {selectedDate && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>{t('sessions.selectTimeSlot', 'Select Time Slot *')}</Label>
-                    {loadingConsultantAvailability && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        {t('sessions.checkingAvailability', 'Checking availability...')}
-                      </span>
-                    )}
-                  </div>
+                   <div className="flex items-center justify-between">
+                     <Label>{t('sessions.selectTimeSlot', 'Select Time Slot *')}</Label>
+                     {meetingWith === 'consultor' && loadingConsultantAvailability && (
+                       <span className="text-xs text-muted-foreground flex items-center gap-1">
+                         <Loader2 className="h-3 w-3 animate-spin" />
+                         {t('sessions.checkingAvailability', 'Checking availability...')}
+                       </span>
+                     )}
+                   </div>
                   
-                  {loadingConsultantAvailability ? (
-                    <div className="grid grid-cols-3 gap-2">
-                      {[1, 2, 3, 4, 5, 6].map(i => (
-                        <Skeleton key={i} className="h-9" />
-                      ))}
-                    </div>
-                  ) : availableSlots.length === 0 ? (
+                   {meetingWith === 'consultor' && loadingConsultantAvailability ? (
+                     <div className="grid grid-cols-3 gap-2">
+                       {[1, 2, 3, 4, 5, 6].map(i => (
+                         <Skeleton key={i} className="h-9" />
+                       ))}
+                     </div>
+                   ) : availableSlots.length === 0 ? (
                     <div className="text-center py-4 bg-muted/30 rounded-lg">
                       <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
@@ -743,29 +804,38 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                       </Button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-                      {availableSlots.map((slotStart) => {
-                        const slotTime = new Date(slotStart);
-                        const timeStr = format(slotTime, 'HH:mm');
-                        const isSelected = selectedSlot === slotStart;
+                    <>
+                      <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                        {availableSlots.map((slotStart) => {
+                          const slotTime = new Date(slotStart);
+                          const timeStr = format(slotTime, 'HH:mm');
+                          const isSelected = selectedSlot === slotStart;
 
-                        return (
-                          <Button
-                            key={slotStart}
-                            type="button"
-                            variant={isSelected ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSelectedSlot(slotStart)}
-                            className="text-xs"
-                          >
-                            {timeStr}
-                          </Button>
-                        );
-                      })}
-                    </div>
+                          return (
+                            <Button
+                              key={slotStart}
+                              type="button"
+                              variant={isSelected ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setSelectedSlot(slotStart)}
+                              className="text-xs"
+                            >
+                              {timeStr}
+                            </Button>
+                          );
+                        })}
+                      </div>
+
+                      {/* De onde vêm os slots */}
+                      {meetingWith === 'consultor' && (!consultantAvailability?.slots || consultantAvailability.slots.length === 0) && (
+                        <p className="text-xs text-muted-foreground">
+                          {t('sessions.slotsGeneratedHint', 'Slots estimados (09:00–18:00). Não está a ler o calendário do consultor.')}
+                        </p>
+                      )}
+                    </>
                   )}
                   
-                  {consultantAvailability?.warning && (
+                  {meetingWith === 'consultor' && consultantAvailability?.warning && (
                     <p className="text-xs text-amber-600 flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3" />
                       {consultantAvailability.warning}

@@ -10,6 +10,7 @@ import {
   Clock,
   Plus,
   Users,
+  ArrowRight,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -241,7 +242,19 @@ export default function MyWorkspaces() {
       subtitle={getPageSubtitle()}
       actions={
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Consultant: Toggle assigned/all */}
+          {isFounder && !showDetailedView && (workspaces || []).length === 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/workspace/${(workspaces || [])[0].id}`)}
+              className="gap-1 text-xs sm:text-sm"
+              aria-label="Abrir workspace"
+              title="Abrir workspace"
+            >
+              <ArrowRight className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('founder.openWorkspace', 'Abrir')}</span>
+            </Button>
+          )}
           {isConsultor && !isAdmin && (
             <Button 
               variant={showAssignedOnly ? "default" : "outline"} 
