@@ -274,75 +274,80 @@ Deno.serve(async (req: Request) => {
 
     // Check if Graph API is configured
     const credentials = await getGraphCredentials(supabaseAdmin);
-    
+
     if (!credentials) {
-      // Return all slots as available if Graph not configured
-      log.info('Graph API not configured, returning all working hours as available');
-      const availabilityView = '0'.repeat(18); // 9 hours * 2 slots/hour
-      const slots = generateDaySlots(date, availabilityView, durationMinutes);
-      
-      return corsJsonResponse({ 
-        success: true,
-        reason: 'no_graph_integration',
-        consultantEmail,
-        consultantName,
-        slots: slots.filter(s => s.available),
-      }, req);
+      // Do NOT guess availability. Force manual scheduling when calendar integration isn't configured.
+      log.info('Graph API not configured; refusing to generate estimated availability');
+      return corsJsonResponse(
+        {
+          success: false,
+          reason: 'no_graph_integration',
+          consultantEmail,
+          consultantName,
+          slots: [],
+          warning: 'Calendário do consultor não está ligado; use "Manual Time" ou ligue a integração.',
+        },
+        req,
+      );
     }
 
     // Get Graph access token and free/busy schedule
     try {
       const accessToken = await getGraphAccessToken(credentials);
-      
+
       const startTime = `${date}T09:00:00`;
       const endTime = `${date}T18:00:00`;
-      
+
       const schedule = await getFreeBusySchedule(accessToken, consultantEmail, startTime, endTime);
-      
+
       if (!schedule.value || schedule.value.length === 0) {
-        // If no schedule returned, assume all slots available
-        const availabilityView = '0'.repeat(18);
-        const slots = generateDaySlots(date, availabilityView, durationMinutes);
-        
-        return corsJsonResponse({ 
+        // If Graph didn't return any schedule, treat as unverifiable (don't guess).
+        return corsJsonResponse(
+          {
+            success: false,
+            reason: 'no_schedule',
+            consultantEmail,
+            consultantName,
+            slots: [],
+            warning: 'Não foi possível obter o free/busy do consultor para este dia.',
+          },
+          req,
+        );
+      }
+
+      const consultantSchedule = schedule.value[0];
+      const slots = generateDaySlots(date, consultantSchedule.availabilityView || '', durationMinutes);
+
+      log.info('Availability check complete', {
+        date,
+        availableSlots: slots.filter((s) => s.available).length,
+        totalSlots: slots.length,
+      });
+
+      return corsJsonResponse(
+        {
           success: true,
           consultantEmail,
           consultantName,
-          slots: slots.filter(s => s.available),
-        }, req);
-      }
-      
-      const consultantSchedule = schedule.value[0];
-      const slots = generateDaySlots(date, consultantSchedule.availabilityView || '0'.repeat(18), durationMinutes);
-      
-      log.info('Availability check complete', { 
-        date, 
-        availableSlots: slots.filter(s => s.available).length,
-        totalSlots: slots.length,
-      });
-      
-      return corsJsonResponse({ 
-        success: true,
-        consultantEmail,
-        consultantName,
-        slots: slots.filter(s => s.available),
-      }, req);
-      
+          slots: slots.filter((s) => s.available),
+        },
+        req,
+      );
     } catch (graphError) {
       log.error('Graph API error', graphError);
-      
-      // Return all slots on Graph error (graceful degradation)
-      const availabilityView = '0'.repeat(18);
-      const slots = generateDaySlots(date, availabilityView, durationMinutes);
-      
-      return corsJsonResponse({ 
-        success: true,
-        reason: 'graph_error',
-        consultantEmail,
-        consultantName,
-        slots: slots.filter(s => s.available),
-        warning: 'Could not verify calendar availability',
-      }, req);
+
+      // On Graph error, do NOT guess.
+      return corsJsonResponse(
+        {
+          success: false,
+          reason: 'graph_error',
+          consultantEmail,
+          consultantName,
+          slots: [],
+          warning: 'Erro ao validar disponibilidade no calendário do consultor. Use "Manual Time" e confirme com o consultor.',
+        },
+        req,
+      );
     }
 
   } catch (error) {
