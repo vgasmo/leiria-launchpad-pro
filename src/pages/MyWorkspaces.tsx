@@ -221,7 +221,10 @@ export default function MyWorkspaces() {
     if (showDetailedView) return t('myWorkspaces.allStartups');
     if (showConsultorDashboard) return t('myWorkspaces.portfolioOverview');
     if (showMentorDashboard) return t('myWorkspaces.myMentorships');
-    if (showFounderDashboard) return t('myWorkspaces.myStartup');
+    if (showFounderDashboard) {
+      const onlyWorkspace = (workspaces || []).length === 1 ? (workspaces || [])[0] : null;
+      return onlyWorkspace?.startup?.name || t('myWorkspaces.myStartup');
+    }
     return t('myWorkspaces.title');
   };
 

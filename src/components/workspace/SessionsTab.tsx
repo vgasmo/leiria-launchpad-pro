@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, addDays, startOfDay } from 'date-fns';
 import { 
@@ -64,7 +64,7 @@ import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { useConsultantAvailability } from '@/hooks/useConsultantCalendar';
+import { generateTimeSlots, useConsultantAvailability } from '@/hooks/useConsultantCalendar';
 import {
   Select,
   SelectContent,
@@ -84,6 +84,7 @@ import { FacilitatorMode } from '@/components/sessions/FacilitatorMode';
 import { QualityGateCard } from '@/components/consultor/QualityGateCard';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 import { SessionSyncStatus } from '@/components/sessions/SessionSyncStatus';
+import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 
 
 interface SessionsTabProps {
@@ -387,19 +388,76 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const createMutation = useCreateSession(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
   const { data: sessionTemplates } = useSessionTemplates();
-  
-  // Get consultant availability for selected date
-  const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
-  const { data: availability, isLoading: loadingAvailability } = useConsultantAvailability(
-    workspaceId, 
-    dateStr
+
+  const assignedConsultant = useMemo(
+    () => members?.find((m) => m.role === 'consultor') || null,
+    [members]
+  );
+  const assignedMentors = useMemo(
+    () => (members || []).filter((m) => m.role === 'mentor_externo'),
+    [members]
   );
 
-  // Filter available slots based on duration
+  const [meetingWith, setMeetingWith] = useState<'consultor' | 'mentor_externo'>('consultor');
+  const [participantId, setParticipantId] = useState<string>('');
+
+  // Initialize participant defaults when members load
+  useEffect(() => {
+    if (participantId) return;
+    if (meetingWith === 'consultor' && assignedConsultant?.user_id) {
+      setParticipantId(assignedConsultant.user_id);
+      return;
+    }
+    if (meetingWith === 'mentor_externo' && assignedMentors[0]?.user_id) {
+      setParticipantId(assignedMentors[0].user_id);
+    }
+  }, [participantId, meetingWith, assignedConsultant?.user_id, assignedMentors]);
+
+  // Availability
+  const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+  const { data: consultantAvailability, isLoading: loadingConsultantAvailability } = useConsultantAvailability(
+    workspaceId,
+    meetingWith === 'consultor' ? dateStr : undefined
+  );
+  const { data: mentorWeeklyAvailability } = useMentorAvailability(
+    meetingWith === 'mentor_externo' ? participantId : undefined
+  );
+
   const availableSlots = useMemo(() => {
-    if (!availability?.slots) return [];
-    return availability.slots.filter(slot => slot.available);
-  }, [availability]);
+    if (!dateStr || useManualTime) return [];
+
+    const durationMinutes = Number.parseInt(duration || '60', 10);
+
+    // Consultant: if calendar integration exists, use it; otherwise fall back to generic working-hours slots.
+    if (meetingWith === 'consultor') {
+      if (consultantAvailability?.slots?.length) {
+        return consultantAvailability.slots.filter((slot) => slot.available).map((slot) => slot.start);
+      }
+      return generateTimeSlots(dateStr, durationMinutes);
+    }
+
+    // Mentor: use mentor weekly availability (no calendar free/busy).
+    const date = new Date(`${dateStr}T00:00:00`);
+    const day = date.getDay(); // 0..6
+    const windows = (mentorWeeklyAvailability || []).filter((w) => w.day_of_week === day && w.is_active);
+    if (windows.length === 0) return [];
+
+    const slots: string[] = [];
+    for (const w of windows) {
+      const [startH, startM] = w.start_time.split(':').map(Number);
+      const [endH, endM] = w.end_time.split(':').map(Number);
+      const start = new Date(`${dateStr}T${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}:00`);
+      const end = new Date(`${dateStr}T${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}:00`);
+
+      for (let cur = new Date(start); cur.getTime() + durationMinutes * 60000 <= end.getTime(); cur = addDays(cur, 0)) {
+        // step 30 min
+        slots.push(cur.toISOString());
+        cur = new Date(cur.getTime() + 30 * 60000);
+      }
+    }
+    // Deduplicate
+    return Array.from(new Set(slots)).sort();
+  }, [dateStr, duration, meetingWith, consultantAvailability, mentorWeeklyAvailability, useManualTime]);
 
   // Get workspace and startup info for the email
   const getWorkspaceInfo = async () => {
@@ -529,7 +587,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   };
 
   const memberCount = members?.filter(m => m.profile?.email).length || 0;
-  const hasConsultant = availability?.consultantName || availability?.consultantEmail;
+  const hasConsultant = consultantAvailability?.consultantName || consultantAvailability?.consultantEmail;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -538,7 +596,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
           <DialogTitle>{t('sessions.scheduleSession', 'Schedule Session')}</DialogTitle>
           <DialogDescription>
             {hasConsultant 
-              ? t('sessions.scheduleWithConsultant', 'Schedule based on {{name}}\'s availability', { name: availability?.consultantName || availability?.consultantEmail })
+              ? t('sessions.scheduleWithConsultant', 'Schedule based on {{name}}\'s availability', { name: consultantAvailability?.consultantName || consultantAvailability?.consultantEmail })
               : t('sessions.scheduleSessionDesc', 'Schedule a new mentoring session')
             }
           </DialogDescription>
@@ -655,7 +713,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>{t('sessions.selectTimeSlot', 'Select Time Slot *')}</Label>
-                    {loadingAvailability && (
+                    {loadingConsultantAvailability && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Loader2 className="h-3 w-3 animate-spin" />
                         {t('sessions.checkingAvailability', 'Checking availability...')}
@@ -663,7 +721,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                     )}
                   </div>
                   
-                  {loadingAvailability ? (
+                  {loadingConsultantAvailability ? (
                     <div className="grid grid-cols-3 gap-2">
                       {[1, 2, 3, 4, 5, 6].map(i => (
                         <Skeleton key={i} className="h-9" />
@@ -686,18 +744,18 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-                      {availableSlots.map((slot) => {
-                        const slotTime = new Date(slot.start);
+                      {availableSlots.map((slotStart) => {
+                        const slotTime = new Date(slotStart);
                         const timeStr = format(slotTime, 'HH:mm');
-                        const isSelected = selectedSlot === slot.start;
-                        
+                        const isSelected = selectedSlot === slotStart;
+
                         return (
                           <Button
-                            key={slot.start}
+                            key={slotStart}
                             type="button"
                             variant={isSelected ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setSelectedSlot(slot.start)}
+                            onClick={() => setSelectedSlot(slotStart)}
                             className="text-xs"
                           >
                             {timeStr}
@@ -707,10 +765,10 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                     </div>
                   )}
                   
-                  {availability?.warning && (
+                  {consultantAvailability?.warning && (
                     <p className="text-xs text-amber-600 flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3" />
-                      {availability.warning}
+                      {consultantAvailability.warning}
                     </p>
                   )}
 
