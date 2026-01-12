@@ -54,6 +54,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const { data: instances, isLoading: loadingInstances } = useTemplateInstances(workspaceId);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [selectedInstance, setSelectedInstance] = useState<TemplateInstance | null>(null);
+  const [activeTab, setActiveTab] = useState('templates');
 
   // Group templates by category
   const templatesByCategory = useMemo(() => {
@@ -76,6 +77,13 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   }, [instances]);
 
   const handleOpenTemplate = (template: Template) => {
+    // If it's a canvas template, switch to the appropriate tab instead of opening dialog
+    const canvasType = isCanvasTemplate(template);
+    if (canvasType) {
+      setActiveTab(canvasType);
+      return;
+    }
+    
     const existingInstance = instancesByTemplateId[template.id];
     setSelectedTemplate(template);
     setSelectedInstance(existingInstance || null);
@@ -117,7 +125,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const leanInstance = leanTemplate ? instancesByTemplateId[leanTemplate.id] : null;
 
   return (
-    <Tabs defaultValue="templates" className="space-y-6">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
       <TabsList className="flex-wrap h-auto gap-1">
         <TabsTrigger value="templates" className="gap-2">
           <FileText className="h-4 w-4" />
