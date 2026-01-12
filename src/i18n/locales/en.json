@@ -772,7 +772,8 @@
     "responsibleConsultant": "Your Consultant",
     "noConsultantAssigned": "No consultant assigned yet. Contact the program team for assistance.",
     "yourConsultant": "Your Consultant",
-    "yourMentor": "Your Mentor"
+    "yourMentor": "Your Mentor",
+    "noTeamAssigned": "Team not assigned yet"
   },
   "investorUpdates": {
     "title": "Investor Updates",
