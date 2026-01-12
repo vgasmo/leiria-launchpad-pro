@@ -23,6 +23,7 @@ import { DataroomTab } from '@/components/workspace/DataroomTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
+import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -66,6 +67,23 @@ export default function WorkspaceDetail() {
 
   const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null; nif: string | null; main_contact_name: string | null; main_contact_email: string | null; main_contact_phone: string | null; has_startup_portugal_status: boolean | null; startup_portugal_document_path: string | null } | null;
   const program = workspace.program as { name: string } | null;
+  const workspaceStatus = (workspace as any).status as string | undefined;
+  
+  // Check if workspace is pending and user is founder (not staff)
+  const isPendingWorkspace = workspaceStatus === 'pending';
+  const isStaff = isAdmin || isConsultor;
+  
+  // If workspace is pending and user is founder (not staff), show restricted view
+  if (isPendingWorkspace && !isStaff && isFounder) {
+    return (
+      <AppLayout title={startup?.name || 'Workspace'}>
+        <PendingWorkspaceView 
+          workspaceName={startup?.name || 'Your Startup'}
+          programName={program?.name}
+        />
+      </AppLayout>
+    );
+  }
   
   // Get the current tab from URL params
   const currentTab = searchParams.get('tab') || 'overview';

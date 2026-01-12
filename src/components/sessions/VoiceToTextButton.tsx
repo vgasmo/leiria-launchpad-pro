@@ -21,8 +21,35 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Get supported mimeType for MediaRecorder
+  const getSupportedMimeType = useCallback((): string => {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus',
+      'audio/ogg',
+      'audio/wav',
+      ''  // Empty string means browser default
+    ];
+    
+    for (const type of types) {
+      if (type === '' || MediaRecorder.isTypeSupported(type)) {
+        console.log('Using mimeType:', type || 'browser default');
+        return type;
+      }
+    }
+    return '';
+  }, []);
+
   const startRecording = useCallback(async () => {
     try {
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        toast.error(t('sessions.browserNotSupported', 'Your browser does not support audio recording'));
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -31,9 +58,16 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
         },
       });
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus',
-      });
+      const mimeType = getSupportedMimeType();
+      const options: MediaRecorderOptions = mimeType ? { mimeType } : {};
+      
+      let mediaRecorder: MediaRecorder;
+      try {
+        mediaRecorder = new MediaRecorder(stream, options);
+      } catch (e) {
+        console.warn('Failed with options, trying without:', e);
+        mediaRecorder = new MediaRecorder(stream);
+      }
 
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -45,9 +79,10 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+        const audioBlob = new Blob(chunksRef.current, { type: actualMimeType });
         stream.getTracks().forEach(track => track.stop());
-        await processAudio(audioBlob);
+        await processAudio(audioBlob, actualMimeType);
       };
 
       mediaRecorder.start(1000); // Capture in 1 second chunks
@@ -61,9 +96,15 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
 
     } catch (error: any) {
       console.error('Error accessing microphone:', error);
-      toast.error(t('sessions.microphoneError'));
+      if (error.name === 'NotAllowedError') {
+        toast.error(t('sessions.microphonePermissionDenied', 'Microphone permission denied. Please allow access.'));
+      } else if (error.name === 'NotFoundError') {
+        toast.error(t('sessions.noMicrophoneFound', 'No microphone found on this device.'));
+      } else {
+        toast.error(t('sessions.microphoneError'));
+      }
     }
-  }, [t]);
+  }, [t, getSupportedMimeType]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
@@ -77,7 +118,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
     }
   }, [isRecording]);
 
-  const processAudio = async (audioBlob: Blob) => {
+  const processAudio = async (audioBlob: Blob, mimeType: string) => {
     setIsProcessing(true);
     
     try {
@@ -93,9 +134,12 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
 
-      // Call edge function for transcription
+      // Call edge function for transcription with mimeType hint
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-        body: { audio: base64Audio },
+        body: { 
+          audio: base64Audio,
+          mimeType: mimeType,
+        },
       });
 
       if (error) throw error;
@@ -114,7 +158,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       } else if (error.message?.includes('402')) {
         toast.error(t('sessions.creditsError'));
       } else {
-        toast.error(t('sessions.transcriptionFailed'));
+        toast.error(t('sessions.transcriptionFailed', 'Transcription failed. Please try again.'));
       }
     } finally {
       setIsProcessing(false);

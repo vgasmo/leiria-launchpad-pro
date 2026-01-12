@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Bell, BellOff, Check, Clock, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useHealthAlerts, useAcknowledgeAlert, useSnoozeAlert, HealthAlert } from '@/hooks/useHealthHistory';
 import { formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -23,6 +23,7 @@ interface HealthAlertsCardProps {
 }
 
 export function HealthAlertsCard({ workspaceId, canManage = false, className }: HealthAlertsCardProps) {
+  const { t } = useTranslation();
   const { data: alerts, isLoading } = useHealthAlerts(workspaceId);
   const acknowledgeAlert = useAcknowledgeAlert();
   const snoozeAlert = useSnoozeAlert();
@@ -33,18 +34,18 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
   const handleAcknowledge = async (alert: HealthAlert) => {
     try {
       await acknowledgeAlert.mutateAsync({ alertId: alert.id, workspaceId });
-      toast.success('Alerta reconhecido');
+      toast.success(t('alerts.acknowledged', 'Alert acknowledged'));
     } catch (error) {
-      toast.error('Erro ao reconhecer alerta');
+      toast.error(t('alerts.acknowledgeFailed', 'Failed to acknowledge alert'));
     }
   };
 
   const handleSnooze = async (alert: HealthAlert, days: number) => {
     try {
       await snoozeAlert.mutateAsync({ alertId: alert.id, workspaceId, days });
-      toast.success(`Alerta silenciado por ${days} dias`);
+      toast.success(t('alerts.snoozedDays', 'Alert snoozed for {{days}} days', { days }));
     } catch (error) {
-      toast.error('Erro ao silenciar alerta');
+      toast.error(t('alerts.snoozeFailed', 'Failed to snooze alert'));
     }
   };
 
@@ -52,7 +53,7 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
     return (
       <Card className={className}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Alertas de Saúde</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('alerts.healthAlerts', 'Health Alerts')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-20 w-full" />
@@ -81,11 +82,11 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Bell className="h-4 w-4 text-primary" />
-            Alertas de Saúde
+            {t('alerts.healthAlerts', 'Health Alerts')}
           </CardTitle>
           {activeAlerts.length > 0 && (
             <Badge variant="destructive" className="text-xs">
-              {activeAlerts.length} ativo{activeAlerts.length > 1 ? 's' : ''}
+              {activeAlerts.length} {t('alerts.active', 'active')}
             </Badge>
           )}
         </div>
@@ -94,7 +95,7 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
         {recentAlerts.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground text-sm">
             <Check className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            Sem alertas recentes
+            {t('alerts.noRecentAlerts', 'No recent alerts')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -111,7 +112,7 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
                   <p className="text-sm font-medium truncate">{alert.reason}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true, locale: pt })}
+                      {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
                     </span>
                     <Badge variant="outline" className="text-xs capitalize">
                       {alert.status}
@@ -128,15 +129,15 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleAcknowledge(alert)}>
                         <Check className="h-4 w-4 mr-2" />
-                        Reconhecer
+                        {t('alerts.acknowledge', 'Acknowledge')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleSnooze(alert, 1)}>
                         <BellOff className="h-4 w-4 mr-2" />
-                        Silenciar 1 dia
+                        {t('alerts.snooze1Day', 'Snooze 1 day')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleSnooze(alert, 7)}>
                         <BellOff className="h-4 w-4 mr-2" />
-                        Silenciar 7 dias
+                        {t('alerts.snooze7Days', 'Snooze 7 days')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

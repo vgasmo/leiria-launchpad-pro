@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Clock,
   Plus,
+  Users,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -43,6 +44,9 @@ export default function MyWorkspaces() {
   const { isConsultor, isMentor, isAdmin, roles } = useAuth();
   const isFounder = roles.includes('founder');
   const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
+  
+  // Consultant view mode - assigned only by default
+  const [showAssignedOnly, setShowAssignedOnly] = useState(isConsultor && !isAdmin);
   
   // Filter state
   const [search, setSearch] = useState('');
@@ -101,6 +105,8 @@ export default function MyWorkspaces() {
   const showListView = showDetailedView || (!showConsultorDashboard && !showMentorDashboard && !showFounderDashboard);
 
   const { data: programs } = usePrograms();
+  
+  // Use assigned workspaces for consultors if showAssignedOnly is true
   const { data: workspaces, isLoading, error } = useWorkspaces({
     search,
     programId: programFilter,
@@ -110,7 +116,7 @@ export default function MyWorkspaces() {
     missingKpi,
     overdueActions,
     sortBy,
-  });
+  }, showAssignedOnly);
   
   const { data: pendingWorkspaces } = useMyPendingWorkspaces();
 
@@ -232,6 +238,18 @@ export default function MyWorkspaces() {
       subtitle={getPageSubtitle()}
       actions={
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Consultant: Toggle assigned/all */}
+          {isConsultor && !isAdmin && (
+            <Button 
+              variant={showAssignedOnly ? "default" : "outline"} 
+              size="sm" 
+              onClick={() => setShowAssignedOnly(!showAssignedOnly)}
+              className="text-xs sm:text-sm gap-1"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">{showAssignedOnly ? t('myWorkspaces.myPortfolio', 'My Portfolio') : t('myWorkspaces.allStartups', 'All Startups')}</span>
+            </Button>
+          )}
           {(showConsultorDashboard || showMentorDashboard) && (
             <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="text-xs sm:text-sm">
               <FileText className="h-4 w-4 sm:mr-2" />
