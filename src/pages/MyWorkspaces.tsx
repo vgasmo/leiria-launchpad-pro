@@ -262,7 +262,7 @@ export default function MyWorkspaces() {
               <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
           )}
-          {isFounder && !showConsultorDashboard && !showMentorDashboard && (
+          {isFounder && !showConsultorDashboard && !showMentorDashboard && (workspaces || []).length === 0 && (
             <Button onClick={() => setShowCreateStartup(true)} className="gap-1 sm:gap-2 text-xs sm:text-sm" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.createStartup')}</span>

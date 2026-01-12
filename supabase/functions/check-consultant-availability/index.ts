@@ -1,0 +1,355 @@
+/**
+ * Check Consultant Calendar Availability via Microsoft Graph API
+ * Returns free/busy slots for session scheduling
+ */
+
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { createLogger, generateRequestId, ErrorCode, safeErrorMessage } from '../_shared/security.ts';
+
+const FUNCTION_NAME = 'check-consultant-availability';
+
+interface AvailabilityRequest {
+  workspaceId: string;
+  date: string; // YYYY-MM-DD format
+  durationMinutes?: number;
+}
+
+interface TimeSlot {
+  start: string;
+  end: string;
+  available: boolean;
+}
+
+interface GraphFreeBusyResponse {
+  value: Array<{
+    scheduleId: string;
+    availabilityView: string;
+    scheduleItems: Array<{
+      status: string;
+      start: { dateTime: string; timeZone: string };
+      end: { dateTime: string; timeZone: string };
+    }>;
+  }>;
+}
+
+// Get Graph credentials with env var priority
+async function getGraphCredentials(supabaseAdmin: SupabaseClient): Promise<{
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+} | null> {
+  const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
+  
+  const { data: globalSettings } = await supabaseAdmin
+    .from('global_integration_settings')
+    .select('settings_json, is_enabled')
+    .eq('integration_type', 'graph_api')
+    .eq('is_enabled', true)
+    .maybeSingle();
+  
+  if (!globalSettings?.settings_json) return null;
+
+  const globalJson = globalSettings.settings_json as {
+    tenant_id?: string;
+    client_id?: string;
+    client_secret?: string;
+  };
+  
+  const tenantId = globalJson.tenant_id;
+  const clientId = globalJson.client_id;
+  const clientSecret = envClientSecret || globalJson.client_secret;
+  
+  if (!tenantId || !clientId || !clientSecret) return null;
+  
+  return { tenantId, clientId, clientSecret };
+}
+
+// Get Microsoft Graph access token
+async function getGraphAccessToken(credentials: {
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+}): Promise<string> {
+  const tokenUrl = `https://login.microsoftonline.com/${credentials.tenantId}/oauth2/v2.0/token`;
+  
+  const params = new URLSearchParams({
+    client_id: credentials.clientId,
+    client_secret: credentials.clientSecret,
+    scope: 'https://graph.microsoft.com/.default',
+    grant_type: 'client_credentials',
+  });
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get Graph token: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+// Get free/busy schedule from Graph API
+async function getFreeBusySchedule(
+  accessToken: string,
+  userEmail: string,
+  startTime: string,
+  endTime: string
+): Promise<GraphFreeBusyResponse> {
+  const url = 'https://graph.microsoft.com/v1.0/me/calendar/getSchedule';
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      schedules: [userEmail],
+      startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
+      endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
+      availabilityViewInterval: 30, // 30-minute slots
+    }),
+  });
+
+  if (!response.ok) {
+    // Try user-specific endpoint
+    const userUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userEmail)}/calendar/getSchedule`;
+    const userResponse = await fetch(userUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        schedules: [userEmail],
+        startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
+        endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
+        availabilityViewInterval: 30,
+      }),
+    });
+    
+    if (!userResponse.ok) {
+      throw new Error(`Failed to get schedule: ${userResponse.status}`);
+    }
+    
+    return await userResponse.json();
+  }
+
+  return await response.json();
+}
+
+// Generate time slots for a day with availability info
+function generateDaySlots(
+  date: string,
+  availabilityView: string,
+  durationMinutes: number = 60
+): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+  const workStart = 9; // 9 AM
+  const workEnd = 18; // 6 PM
+  
+  // availabilityView is a string where each char represents 30 min
+  // 0 = free, 1 = tentative, 2 = busy, 3 = out of office, 4 = working elsewhere
+  
+  for (let hour = workStart; hour < workEnd; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const slotEndHour = hour + Math.floor((minute + durationMinutes) / 60);
+      const slotEndMinute = (minute + durationMinutes) % 60;
+      
+      if (slotEndHour > workEnd || (slotEndHour === workEnd && slotEndMinute > 0)) {
+        continue; // Slot would exceed working hours
+      }
+      
+      const startStr = `${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
+      const endStr = `${date}T${slotEndHour.toString().padStart(2, '0')}:${slotEndMinute.toString().padStart(2, '0')}:00`;
+      
+      // Calculate which 30-min blocks this slot spans
+      const slotStartIndex = (hour - workStart) * 2 + (minute === 30 ? 1 : 0);
+      const blocksNeeded = Math.ceil(durationMinutes / 30);
+      
+      let isAvailable = true;
+      for (let i = 0; i < blocksNeeded && slotStartIndex + i < availabilityView.length; i++) {
+        const status = availabilityView[slotStartIndex + i];
+        if (status !== '0') {
+          isAvailable = false;
+          break;
+        }
+      }
+      
+      slots.push({
+        start: startStr,
+        end: endStr,
+        available: isAvailable,
+      });
+    }
+  }
+  
+  return slots;
+}
+
+Deno.serve(async (req: Request) => {
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
+  if (req.method === 'OPTIONS') {
+    return handleCorsOptions(req);
+  }
+
+  try {
+    log.info('Checking consultant availability');
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify user authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return corsJsonResponse({ error: 'Unauthorized', code: ErrorCode.UNAUTHORIZED }, req, 401);
+    }
+    
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    const { data: { user } } = await supabaseUser.auth.getUser();
+    
+    if (!user) {
+      return corsJsonResponse({ error: 'Unauthorized', code: ErrorCode.UNAUTHORIZED }, req, 401);
+    }
+
+    const body = await req.json() as AvailabilityRequest;
+    const { workspaceId, date, durationMinutes = 60 } = body;
+
+    if (!workspaceId || !date) {
+      return corsJsonResponse({ error: 'workspaceId and date are required', code: ErrorCode.BAD_REQUEST }, req, 400);
+    }
+
+    // Check user has access to workspace
+    const { data: hasAccess } = await supabaseAdmin.rpc('has_workspace_access', {
+      _user_id: user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (!hasAccess) {
+      return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
+    }
+
+    // Get workspace consultant
+    const { data: consultorMember } = await supabaseAdmin
+      .from('workspace_users')
+      .select('user_id, profiles!inner(email, full_name)')
+      .eq('workspace_id', workspaceId)
+      .eq('role', 'consultor')
+      .eq('active', true)
+      .maybeSingle();
+
+    if (!consultorMember) {
+      return corsJsonResponse({ 
+        success: false, 
+        reason: 'no_consultant',
+        message: 'No consultant assigned to this workspace',
+        slots: [],
+      }, req);
+    }
+
+    const consultantEmail = (consultorMember.profiles as any)?.email;
+    const consultantName = (consultorMember.profiles as any)?.full_name;
+    
+    if (!consultantEmail) {
+      return corsJsonResponse({ 
+        success: false, 
+        reason: 'no_email',
+        message: 'Consultant has no email configured',
+        slots: [],
+      }, req);
+    }
+
+    // Check if Graph API is configured
+    const credentials = await getGraphCredentials(supabaseAdmin);
+    
+    if (!credentials) {
+      // Return all slots as available if Graph not configured
+      log.info('Graph API not configured, returning all working hours as available');
+      const availabilityView = '0'.repeat(18); // 9 hours * 2 slots/hour
+      const slots = generateDaySlots(date, availabilityView, durationMinutes);
+      
+      return corsJsonResponse({ 
+        success: true,
+        reason: 'no_graph_integration',
+        consultantEmail,
+        consultantName,
+        slots: slots.filter(s => s.available),
+      }, req);
+    }
+
+    // Get Graph access token and free/busy schedule
+    try {
+      const accessToken = await getGraphAccessToken(credentials);
+      
+      const startTime = `${date}T09:00:00`;
+      const endTime = `${date}T18:00:00`;
+      
+      const schedule = await getFreeBusySchedule(accessToken, consultantEmail, startTime, endTime);
+      
+      if (!schedule.value || schedule.value.length === 0) {
+        // If no schedule returned, assume all slots available
+        const availabilityView = '0'.repeat(18);
+        const slots = generateDaySlots(date, availabilityView, durationMinutes);
+        
+        return corsJsonResponse({ 
+          success: true,
+          consultantEmail,
+          consultantName,
+          slots: slots.filter(s => s.available),
+        }, req);
+      }
+      
+      const consultantSchedule = schedule.value[0];
+      const slots = generateDaySlots(date, consultantSchedule.availabilityView || '0'.repeat(18), durationMinutes);
+      
+      log.info('Availability check complete', { 
+        date, 
+        availableSlots: slots.filter(s => s.available).length,
+        totalSlots: slots.length,
+      });
+      
+      return corsJsonResponse({ 
+        success: true,
+        consultantEmail,
+        consultantName,
+        slots: slots.filter(s => s.available),
+      }, req);
+      
+    } catch (graphError) {
+      log.error('Graph API error', graphError);
+      
+      // Return all slots on Graph error (graceful degradation)
+      const availabilityView = '0'.repeat(18);
+      const slots = generateDaySlots(date, availabilityView, durationMinutes);
+      
+      return corsJsonResponse({ 
+        success: true,
+        reason: 'graph_error',
+        consultantEmail,
+        consultantName,
+        slots: slots.filter(s => s.available),
+        warning: 'Could not verify calendar availability',
+      }, req);
+    }
+
+  } catch (error) {
+    log.error('Check availability failed', error);
+    return corsJsonResponse({ 
+      error: safeErrorMessage(error), 
+      code: ErrorCode.INTERNAL_ERROR
+    }, req, 500);
+  }
+});
