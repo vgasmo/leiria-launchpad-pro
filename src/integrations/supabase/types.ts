@@ -603,6 +603,78 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          contract_type: string | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          file_url: string | null
+          funnel_item_id: string | null
+          id: string
+          notes: string | null
+          signed_at: string | null
+          signed_by: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+          value_amount: number | null
+          value_currency: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          contract_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          file_url?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          value_amount?: number | null
+          value_currency?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          contract_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          file_url?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          value_amount?: number | null
+          value_currency?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -1252,6 +1324,152 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funnel_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          from_stage: string | null
+          funnel_item_id: string
+          id: string
+          metadata: Json | null
+          performed_by: string | null
+          to_stage: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          from_stage?: string | null
+          funnel_item_id: string
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_stage?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          from_stage?: string | null
+          funnel_item_id?: string
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_events_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funnel_items: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          converted_at: string | null
+          created_at: string
+          first_contact_at: string | null
+          id: string
+          linked_contract_id: string | null
+          linked_startup_id: string | null
+          linked_workspace_id: string | null
+          notes: string | null
+          organization_name: string | null
+          owner_consultant_id: string | null
+          program_id: string | null
+          qualified_at: string | null
+          source: string | null
+          stage: string
+          tags: string[] | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_at?: string | null
+          created_at?: string
+          first_contact_at?: string | null
+          id?: string
+          linked_contract_id?: string | null
+          linked_startup_id?: string | null
+          linked_workspace_id?: string | null
+          notes?: string | null
+          organization_name?: string | null
+          owner_consultant_id?: string | null
+          program_id?: string | null
+          qualified_at?: string | null
+          source?: string | null
+          stage?: string
+          tags?: string[] | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_at?: string | null
+          created_at?: string
+          first_contact_at?: string | null
+          id?: string
+          linked_contract_id?: string | null
+          linked_startup_id?: string | null
+          linked_workspace_id?: string | null
+          notes?: string | null
+          organization_name?: string | null
+          owner_consultant_id?: string | null
+          program_id?: string | null
+          qualified_at?: string | null
+          source?: string | null
+          stage?: string
+          tags?: string[] | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_items_linked_contract_id_fkey"
+            columns: ["linked_contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_items_linked_startup_id_fkey"
+            columns: ["linked_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_items_linked_startup_id_fkey"
+            columns: ["linked_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_items_linked_workspace_id_fkey"
+            columns: ["linked_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_items_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
