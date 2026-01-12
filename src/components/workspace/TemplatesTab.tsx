@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { TemplateCoachPanel } from './TemplateCoachPanel';
+import { CanvasTemplate } from './CanvasTemplate';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -33,6 +34,18 @@ interface TemplatesTabProps {
   workspaceId: string;
   canWrite: boolean;
   isFounder?: boolean;
+}
+
+// Check if a template is a canvas type (BMC or Lean Canvas)
+function isCanvasTemplate(template: Template): 'bmc' | 'lean' | null {
+  const name = template.name.toLowerCase();
+  if (name.includes('business model canvas') || name.includes('bmc')) {
+    return 'bmc';
+  }
+  if (name.includes('lean canvas')) {
+    return 'lean';
+  }
+  return null;
 }
 
 export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: TemplatesTabProps) {
@@ -97,13 +110,31 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
 
   const categories = Object.keys(templatesByCategory).sort();
 
+  // Find canvas templates for dedicated tabs
+  const bmcTemplate = templates?.find(t => isCanvasTemplate(t) === 'bmc');
+  const leanTemplate = templates?.find(t => isCanvasTemplate(t) === 'lean');
+  const bmcInstance = bmcTemplate ? instancesByTemplateId[bmcTemplate.id] : null;
+  const leanInstance = leanTemplate ? instancesByTemplateId[leanTemplate.id] : null;
+
   return (
     <Tabs defaultValue="templates" className="space-y-6">
-      <TabsList>
+      <TabsList className="flex-wrap h-auto gap-1">
         <TabsTrigger value="templates" className="gap-2">
           <FileText className="h-4 w-4" />
           {t('templates.title')}
         </TabsTrigger>
+        {bmcTemplate && (
+          <TabsTrigger value="bmc" className="gap-2">
+            <LayoutGrid className="h-4 w-4" />
+            BMC
+          </TabsTrigger>
+        )}
+        {leanTemplate && (
+          <TabsTrigger value="lean" className="gap-2">
+            <LayoutGrid className="h-4 w-4" />
+            Lean
+          </TabsTrigger>
+        )}
         <TabsTrigger value="calculator" className="gap-2">
           <Calculator className="h-4 w-4" />
           {t('templates.unitEconomics', 'Unit Economics')}
@@ -113,6 +144,32 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       <TabsContent value="calculator">
         <UnitEconomicsCalculator workspaceId={workspaceId} />
       </TabsContent>
+
+      {/* BMC Canvas Tab */}
+      {bmcTemplate && (
+        <TabsContent value="bmc">
+          <CanvasTemplateWrapper
+            template={bmcTemplate}
+            instance={bmcInstance}
+            workspaceId={workspaceId}
+            canWrite={canWrite}
+            type="bmc"
+          />
+        </TabsContent>
+      )}
+
+      {/* Lean Canvas Tab */}
+      {leanTemplate && (
+        <TabsContent value="lean">
+          <CanvasTemplateWrapper
+            template={leanTemplate}
+            instance={leanInstance}
+            workspaceId={workspaceId}
+            canWrite={canWrite}
+            type="lean"
+          />
+        </TabsContent>
+      )}
 
       <TabsContent value="templates" className="space-y-6">
       {categories.map(category => (
@@ -182,6 +239,64 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
         onClose={handleCloseEditor}
       />
     </Tabs>
+  );
+}
+
+// Wrapper for canvas templates with save functionality
+interface CanvasTemplateWrapperProps {
+  template: Template;
+  instance: TemplateInstance | null;
+  workspaceId: string;
+  canWrite: boolean;
+  type: 'bmc' | 'lean';
+}
+
+function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type }: CanvasTemplateWrapperProps) {
+  const upsertInstance = useUpsertTemplateInstance(workspaceId);
+  const [canvasData, setCanvasData] = useState<Record<string, string>>({});
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    if (instance?.data_json) {
+      setCanvasData(instance.data_json as Record<string, string>);
+    }
+  }, [instance?.data_json]);
+
+  const handleChange = (data: Record<string, string>) => {
+    setCanvasData(data);
+    setHasChanges(true);
+    // Auto-save after a short delay
+    const timeout = setTimeout(async () => {
+      try {
+        await upsertInstance.mutateAsync({
+          template_id: template.id,
+          data_json: data,
+          existingId: instance?.id,
+        });
+        setHasChanges(false);
+        toast.success('Canvas saved');
+      } catch {
+        toast.error('Failed to save canvas');
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  };
+
+  return (
+    <div className="space-y-4">
+      {hasChanges && (
+        <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+          Saving...
+        </div>
+      )}
+      <CanvasTemplate
+        type={type}
+        data={canvasData}
+        onChange={handleChange}
+        disabled={!canWrite}
+      />
+    </div>
   );
 }
 
