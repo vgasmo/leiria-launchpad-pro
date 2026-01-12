@@ -89,6 +89,21 @@ verify_jwt = false
 [functions.calendar-feed]
 verify_jwt = false
 
+[functions.public-get-availability]
+verify_jwt = false
+
+[functions.public-book-first-contact]
+verify_jwt = false
+
+[functions.check-consultant-availability]
+verify_jwt = false
+
+[functions.validate-booking-slot]
+verify_jwt = false
+
+[functions.request-playbook]
+verify_jwt = false
+
 # ============================================
 # CRON/SYSTEM FUNCTIONS (Category B)
 # No JWT - requires x-cron-secret header
