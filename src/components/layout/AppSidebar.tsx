@@ -72,8 +72,8 @@ export function AppSidebar() {
             src={startupLeiriaLogo} 
             alt="FoundersBook" 
             className={cn(
-              "transition-all duration-300 brightness-0 invert",
-              collapsed ? "h-8 w-8 object-contain" : "h-10 w-auto"
+              "transition-all duration-300",
+              collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
             )}
           />
         </div>
