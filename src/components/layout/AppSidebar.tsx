@@ -66,21 +66,16 @@ export function AppSidebar() {
         {/* Logo */}
         <div className={cn(
           "flex h-16 items-center border-b border-sidebar-border transition-all duration-300",
-          collapsed ? "justify-center px-2" : "gap-3 px-4"
+          collapsed ? "justify-center px-2" : "justify-center px-4"
         )}>
           <img 
             src={startupLeiriaLogo} 
-            alt="Startup Leiria" 
+            alt="FoundersBook" 
             className={cn(
-              "transition-all duration-300",
+              "transition-all duration-300 brightness-0 invert",
               collapsed ? "h-8 w-8 object-contain" : "h-10 w-auto"
             )}
           />
-          {!collapsed && (
-            <span className="font-heading font-semibold text-sidebar-foreground text-sm animate-fade-in">
-              Startup Leiria
-            </span>
-          )}
         </div>
 
         {/* Collapse toggle */}

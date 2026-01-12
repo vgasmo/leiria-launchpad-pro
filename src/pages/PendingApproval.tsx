@@ -1,0 +1,50 @@
+import { useTranslation } from 'react-i18next';
+import { LogOut, Clock, Mail } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+
+export default function PendingApproval() {
+  const { t } = useTranslation();
+  const { profile, signOut } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md text-center">
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <img 
+              src={startupLeiriaLogo} 
+              alt="FoundersBook" 
+              className="h-16 w-auto"
+            />
+          </div>
+          <div className="flex justify-center">
+            <div className="p-4 rounded-full bg-amber-100 dark:bg-amber-900/30">
+              <Clock className="h-8 w-8 text-amber-600" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">{t('approval.pendingTitle', 'Account Pending Approval')}</CardTitle>
+          <CardDescription className="text-base">
+            {t('approval.pendingDescription', 'Your account is being reviewed by our team. You\'ll receive access once approved.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Mail className="h-4 w-4" />
+              <span className="font-medium">{profile?.email}</span>
+            </div>
+            <p>{t('approval.responseTime', 'We typically respond within 2-3 business days.')}</p>
+          </div>
+
+          <Button variant="outline" onClick={() => signOut()} className="w-full">
+            <LogOut className="h-4 w-4 mr-2" />
+            {t('auth.signOut')}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

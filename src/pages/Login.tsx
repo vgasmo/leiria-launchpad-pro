@@ -161,23 +161,6 @@ export default function Login() {
           <p className="text-lg text-background/70 mb-10 leading-relaxed">
             {t('login.platformSubtitle')}
           </p>
-          
-          <div className="flex justify-center gap-6 flex-wrap">
-            {[
-              { icon: '📈', label: t('login.trackProgress'), delay: '0ms' },
-              { icon: '🤝', label: t('login.manageSessions'), delay: '100ms' },
-              { icon: '🎯', label: t('login.achieveGoals'), delay: '200ms' },
-            ].map((item) => (
-              <div 
-                key={item.label}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full bg-background/10 backdrop-blur-sm text-background/80 text-sm transition-all duration-500 hover:bg-background/20 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-                style={{ transitionDelay: item.delay }}
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </div>
-            ))}
-          </div>
 
           {/* Benefits Section - hidden on smaller screens within left panel */}
           <div className={`mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
