@@ -63,8 +63,11 @@ export function useFunnelItems(filters?: { stage?: FunnelStage; consultantId?: s
 
       return (data || []).map(item => ({
         ...item,
+        stage: item.stage as FunnelStage,
+        type: item.type as FunnelType,
+        tags: item.tags || [],
         owner: item.owner_consultant_id ? owners[item.owner_consultant_id] || null : null,
-      }));
+      })) as FunnelItem[];
     },
   });
 }

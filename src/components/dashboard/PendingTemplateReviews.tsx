@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { usePendingTemplateReviews } from '@/hooks/useTemplates';
 import { formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface PendingTemplateReviewsProps {
   showEmpty?: boolean;
@@ -85,7 +85,7 @@ export function PendingTemplateReviews({ showEmpty = false }: PendingTemplateRev
                   <span className="ml-1">
                     {formatDistanceToNow(new Date(review.updated_at), { 
                       addSuffix: true, 
-                      locale: pt 
+                      locale: enUS 
                     })}
                   </span>
                 </p>

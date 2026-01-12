@@ -1,0 +1,359 @@
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Download, Building2, Calendar, Heart, User, Filter, X } from 'lucide-react';
+import { StageBadge } from '@/components/ui/StageBadge';
+import { HealthBadge } from '@/components/ui/HealthBadge';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+
+interface EcosystemItem {
+  workspace_id: string;
+  startup_name: string;
+  program_name: string | null;
+  stage: string;
+  status: string;
+  health_score: string | number | null;
+  assigned_consultant_name: string | null;
+  assigned_consultant_id: string | null;
+  next_session_date: string | null;
+  last_checkin_date: string | null;
+  created_at: string;
+}
+
+export function AdminEcosystemManager() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [stageFilter, setStageFilter] = useState<string>('all');
+  const [programFilter, setProgramFilter] = useState<string>('all');
+  const [consultantFilter, setConsultantFilter] = useState<string>('all');
+
+  // Fetch unified ecosystem data
+  const { data: ecosystemData, isLoading } = useQuery({
+    queryKey: ['ecosystem-unified'],
+    queryFn: async (): Promise<EcosystemItem[]> => {
+      const { data: workspaces, error } = await supabase
+        .from('workspaces')
+        .select(`
+          id,
+          stage,
+          status,
+          health_score,
+          assigned_consultor_id,
+          created_at,
+          startup:startups(id, name),
+          program:programs(id, name),
+          consultant:profiles!workspaces_assigned_consultor_id_fkey(id, full_name)
+        `)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Get next sessions for each workspace
+      const workspaceIds = workspaces?.map(w => w.id) || [];
+      const { data: sessions } = await supabase
+        .from('sessions')
+        .select('workspace_id, scheduled_at')
+        .in('workspace_id', workspaceIds)
+        .gte('scheduled_at', new Date().toISOString())
+        .order('scheduled_at', { ascending: true });
+
+      // Get last check-ins
+      const { data: checkins } = await supabase
+        .from('checkin_instances')
+        .select('workspace_id, submitted_at')
+        .in('workspace_id', workspaceIds)
+        .eq('status', 'submitted')
+        .order('submitted_at', { ascending: false });
+
+      const sessionMap: Record<string, string> = {};
+      sessions?.forEach(s => {
+        if (!sessionMap[s.workspace_id]) {
+          sessionMap[s.workspace_id] = s.scheduled_at;
+        }
+      });
+
+      const checkinMap: Record<string, string> = {};
+      checkins?.forEach(c => {
+        if (c.submitted_at && !checkinMap[c.workspace_id]) {
+          checkinMap[c.workspace_id] = c.submitted_at;
+        }
+      });
+
+      return (workspaces || []).map(w => ({
+        workspace_id: w.id,
+        startup_name: (w.startup as unknown as { name: string })?.name || 'Unknown',
+        program_name: (w.program as unknown as { name: string })?.name || null,
+        stage: w.stage as string,
+        status: w.status,
+        health_score: w.health_score,
+        assigned_consultant_name: (w.consultant as unknown as { full_name: string })?.full_name || null,
+        assigned_consultant_id: w.assigned_consultor_id,
+        next_session_date: sessionMap[w.id] || null,
+        last_checkin_date: checkinMap[w.id] || null,
+        created_at: w.created_at,
+      }));
+    },
+  });
+
+  // Fetch programs and consultants for filters
+  const { data: programs } = useQuery({
+    queryKey: ['programs-list'],
+    queryFn: async () => {
+      const { data } = await supabase.from('programs').select('id, name').order('name');
+      return data || [];
+    },
+  });
+
+  const { data: consultants } = useQuery({
+    queryKey: ['consultants-list'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('user_id, profiles!inner(id, full_name)')
+        .eq('role', 'consultor');
+      return (data || []).map(d => ({
+        id: (d.profiles as any)?.id,
+        name: (d.profiles as any)?.full_name,
+      }));
+    },
+  });
+
+  // Apply filters
+  const filteredData = useMemo(() => {
+    if (!ecosystemData) return [];
+    
+    return ecosystemData.filter(item => {
+      const matchesSearch = search.trim() === '' ||
+        item.startup_name.toLowerCase().includes(search.toLowerCase()) ||
+        item.program_name?.toLowerCase().includes(search.toLowerCase());
+      
+      const matchesStage = stageFilter === 'all' || item.stage === stageFilter;
+      const matchesProgram = programFilter === 'all' || item.program_name === programFilter;
+      const matchesConsultant = consultantFilter === 'all' || item.assigned_consultant_id === consultantFilter;
+      
+      return matchesSearch && matchesStage && matchesProgram && matchesConsultant;
+    });
+  }, [ecosystemData, search, stageFilter, programFilter, consultantFilter]);
+
+  const clearFilters = () => {
+    setSearch('');
+    setStageFilter('all');
+    setProgramFilter('all');
+    setConsultantFilter('all');
+  };
+
+  const healthScoreNum = (score: string | number | null): number => {
+    if (score === null) return 0;
+    if (typeof score === 'number') return score;
+    return 0;
+  };
+
+  const hasActiveFilters = search || stageFilter !== 'all' || programFilter !== 'all' || consultantFilter !== 'all';
+
+  const handleExport = () => {
+    const csvContent = [
+      ['Startup', 'Program', 'Stage', 'Status', 'Health Score', 'Consultant', 'Next Session', 'Last Check-in'].join(','),
+      ...filteredData.map(item => [
+        `"${item.startup_name}"`,
+        `"${item.program_name || ''}"`,
+        item.stage,
+        item.status,
+        item.health_score?.toString() || '',
+        `"${item.assigned_consultant_name || ''}"`,
+        item.next_session_date ? format(new Date(item.next_session_date), 'yyyy-MM-dd') : '',
+        item.last_checkin_date ? format(new Date(item.last_checkin_date), 'yyyy-MM-dd') : '',
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ecosystem-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+  };
+
+  const stages = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            {t('admin.ecosystem.title', 'Unified Ecosystem View')}
+          </CardTitle>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            {t('common.export', 'Export')}
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('common.search', 'Search...')}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          
+          <Select value={stageFilter} onValueChange={setStageFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Stage" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stages</SelectItem>
+              {stages.map(s => (
+                <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              {programs?.map(p => (
+                <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={consultantFilter} onValueChange={setConsultantFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Consultant" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Consultants</SelectItem>
+              {consultants?.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <X className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="flex gap-4 text-sm text-muted-foreground">
+          <span>{filteredData.length} startups</span>
+          <span>•</span>
+          <span>{filteredData.filter(d => d.status === 'active').length} active</span>
+          <span>•</span>
+          <span>{filteredData.filter(d => healthScoreNum(d.health_score) < 50 && d.health_score !== null).length} need attention</span>
+        </div>
+
+        {/* Table */}
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map(i => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Startup</TableHead>
+                  <TableHead>Program</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead>Health</TableHead>
+                  <TableHead>Consultant</TableHead>
+                  <TableHead>Next Session</TableHead>
+                  <TableHead>Last Check-in</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No startups found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredData.map(item => (
+                    <TableRow 
+                      key={item.workspace_id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => navigate(`/workspace/${item.workspace_id}`)}
+                    >
+                      <TableCell className="font-medium">{item.startup_name}</TableCell>
+                      <TableCell>
+                        {item.program_name || <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell>
+                        <StageBadge stage={item.stage as any} />
+                      </TableCell>
+                      <TableCell>
+                        {item.health_score !== null ? (
+                          <span className={`text-sm font-medium ${
+                            healthScoreNum(item.health_score) >= 70 ? 'text-green-600' :
+                            healthScoreNum(item.health_score) >= 50 ? 'text-yellow-600' : 'text-red-600'
+                          }`}>
+                            {typeof item.health_score === 'number' ? item.health_score : '—'}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.assigned_consultant_name ? (
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3 text-muted-foreground" />
+                            {item.assigned_consultant_name}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Unassigned</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.next_session_date ? (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                            {format(new Date(item.next_session_date), 'MMM d')}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.last_checkin_date ? (
+                          format(new Date(item.last_checkin_date), 'MMM d')
+                        ) : (
+                          <span className="text-muted-foreground">Never</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
