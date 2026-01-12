@@ -1,4 +1,36 @@
 {
+  "programSetup": {
+    "cloneFrom": "Clonar de programa existente",
+    "selectToClone": "Selecione um programa para clonar...",
+    "cloneDescription": "Isto irá copiar etapas, KPIs, playbooks e regras de alerta do programa selecionado.",
+    "programName": "Nome do Programa",
+    "programNamePlaceholder": "ex: Acelerador 2024",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Descreva os objetivos e áreas de foco do programa...",
+    "startDate": "Data de Início",
+    "endDate": "Data de Fim",
+    "programMode": "Modo do Programa",
+    "programModeDescription": "Escolha como as startups neste programa serão geridas",
+    "standardMode": "Standard",
+    "basicMode": "Básico",
+    "standardModeDesc": "Funcionalidades completas: KPIs, health scores, milestones, playbooks e mais.",
+    "basicModeDesc": "Leve: Foco em sessões, tarefas, templates e mentoria.",
+    "customizeModules": "Personalizar módulos (opcional)",
+    "modules": {
+      "kpis": "KPIs",
+      "kpisDesc": "Métricas e indicadores",
+      "health": "Health Score",
+      "healthDesc": "Pontuação de saúde",
+      "milestones": "Milestones",
+      "milestonesDesc": "Marcos e objetivos",
+      "alerts": "Alertas",
+      "alertsDesc": "Notificações automáticas",
+      "playbooks": "Playbooks",
+      "playbooksDesc": "Guias de crescimento",
+      "financialModel": "Modelo Financeiro",
+      "financialModelDesc": "Análise financeira"
+    }
+  },
   "dataroom": {
     "title": "Dataroom",
     "description": "Documentos e relatórios para investidores",
