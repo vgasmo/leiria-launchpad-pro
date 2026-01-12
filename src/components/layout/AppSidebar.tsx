@@ -46,7 +46,7 @@ export function AppSidebar() {
     ? location.pathname.split('/')[2]
     : null;
   const founderWorkspaceId = isFounder
-    ? (workspaceIdFromRoute || (workspaces.length > 0 ? workspaces[0].id : null))
+    ? (workspaceIdFromRoute || (workspaces.length === 1 ? workspaces[0].id : null))
     : null;
 
   const navigation = [
