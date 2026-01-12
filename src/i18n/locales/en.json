@@ -750,7 +750,9 @@
     "reports": "Reports",
     "governance": "Governance",
     "notAccessible": "Workspace Not Accessible",
-    "noPermission": "This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator."
+    "noPermission": "This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator.",
+    "responsibleConsultant": "Your Consultant",
+    "noConsultantAssigned": "No consultant assigned yet. Contact the program team for assistance."
   },
   "investorUpdates": {
     "title": "Investor Updates",
@@ -1338,8 +1340,8 @@
     "addMilestoneDesc": "Set a new goal",
     "uploadDocument": "Upload Document",
     "uploadDocumentDesc": "Add files to workspace",
-    "weeklyCheckin": "Weekly Check-in",
-    "weeklyCheckinDesc": "Submit your weekly update",
+    "monthlyCheckin": "Monthly Check-in",
+    "monthlyCheckinDesc": "Submit your monthly update",
     "addKpi": "Add KPI",
     "addAction": "Add Action",
     "requestSession": "Request Session"
@@ -1364,7 +1366,8 @@
     "overdueActions_plural": "{{count}} overdue actions",
     "completeOrReschedule": "Complete or reschedule these tasks",
     "viewActions": "View Actions",
-    "weeklyCheckinPending": "Weekly check-in pending",
+    "weeklyCheckinPending": "Monthly check-in pending",
+    "monthlyCheckinPending": "Monthly check-in pending",
     "dueOn": "Due {{date}}",
     "completeCheckin": "Complete Check-in",
     "updateKpisForMonth": "Update KPIs for this month",
@@ -2025,6 +2028,10 @@
     "mentorRequested": {
       "title": "🤝 Mentor requested!",
       "description": "We'll match you with the right expert"
+    },
+    "monthlyWinsSubmitted": {
+      "title": "✅ Monthly wins submitted!",
+      "description": "Great job tracking your progress this month!"
     }
   },
   "weeklyWins": {
@@ -2043,6 +2050,23 @@
     "enterKpi": "Enter {{name}}...",
     "submitting": "Submitting...",
     "submit": "Submit Weekly Wins"
+  },
+  "monthlyWins": {
+    "title": "Monthly Wins",
+    "description": "Share your monthly progress and celebrate wins",
+    "pending": "Monthly Wins Pending",
+    "overdue": "Overdue",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueOn": "Due {{date}}",
+    "skip": "Skip",
+    "complete": "Complete",
+    "yourAnswer": "Your answer...",
+    "enterNumber": "Enter a number...",
+    "kpisThisMonth": "KPIs this month",
+    "enterKpi": "Enter {{name}}...",
+    "submitting": "Submitting...",
+    "submit": "Submit Monthly Wins"
   },
   "healthScore": {
     "whyThisScore": "Why this score?",

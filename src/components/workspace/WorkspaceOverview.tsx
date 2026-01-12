@@ -34,7 +34,7 @@ import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
-import { WeeklyCheckinBanner } from '@/components/checkins/WeeklyCheckinBanner';
+import { MonthlyCheckinBanner } from '@/components/checkins/MonthlyCheckinBanner';
 import { PendingSurveysBanner } from '@/components/surveys/PendingSurveysBanner';
 import { SurveyForm } from '@/components/surveys/SurveyForm';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -47,6 +47,7 @@ import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
 import { OwnershipCard } from '@/components/workspace/OwnershipCard';
+import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
@@ -160,8 +161,8 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         />
       )}
 
-      {/* Weekly Check-in Banner for Founders */}
-      {isFounder && <WeeklyCheckinBanner workspaceId={workspace.id} />}
+      {/* Monthly Check-in Banner for Founders */}
+      {isFounder && <MonthlyCheckinBanner workspaceId={workspace.id} />}
 
       {/* Pending Surveys Banner for Founders */}
       {isFounder && (
@@ -411,6 +412,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         {/* P1.1: Ownership & SLA Card - visible to staff */}
         {(isConsultor || isAdmin) && (
           <OwnershipCard workspaceId={workspace.id} />
+        )}
+        
+        {/* Responsible Consultant Card - visible to founders */}
+        {isFounder && (
+          <ResponsibleConsultantCard workspaceId={workspace.id} />
         )}
         
         {/* Workspace Alerts Section */}

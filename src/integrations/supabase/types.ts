@@ -2428,6 +2428,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          settings_json: Json | null
           start_date: string | null
           status: string | null
           updated_at: string
@@ -2439,6 +2440,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          settings_json?: Json | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
@@ -2450,6 +2452,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          settings_json?: Json | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
