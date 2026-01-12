@@ -7,6 +7,7 @@ type QuickWinType =
   | 'kpi_added'
   | 'milestone_completed'
   | 'weekly_wins_submitted'
+  | 'monthly_wins_submitted'
   | 'investor_update_created'
   | 'dataroom_link_created'
   | 'first_session_scheduled'
@@ -38,6 +39,10 @@ export function useQuickWinToast() {
       weekly_wins_submitted: {
         title: t('quickWins.weeklyWinsSubmitted.title'),
         description: t('quickWins.weeklyWinsSubmitted.description'),
+      },
+      monthly_wins_submitted: {
+        title: t('quickWins.monthlyWinsSubmitted.title', 'Monthly Wins Submitted! 🎉'),
+        description: t('quickWins.monthlyWinsSubmitted.description', 'Great job tracking your progress this month!'),
       },
       investor_update_created: {
         title: t('quickWins.investorUpdateCreated.title'),

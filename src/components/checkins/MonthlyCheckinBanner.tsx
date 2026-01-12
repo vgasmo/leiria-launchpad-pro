@@ -13,11 +13,11 @@ import { ClipboardCheck, Clock, AlertTriangle, Send } from 'lucide-react';
 import { differenceInDays } from 'date-fns';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 
-interface WeeklyCheckinBannerProps {
+interface MonthlyCheckinBannerProps {
   workspaceId: string;
 }
 
-export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
+export function MonthlyCheckinBanner({ workspaceId }: MonthlyCheckinBannerProps) {
   const { t, i18n } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [responses, setResponses] = useState<Record<string, string | number>>({});
@@ -81,7 +81,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
       instanceId: pendingCheckin.id,
       responses: payload,
     });
-    showQuickWin('weekly_wins_submitted');
+    showQuickWin('monthly_wins_submitted');
     setShowForm(false);
     setResponses({});
   };
@@ -100,30 +100,30 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
       >
         <ClipboardCheck className="h-4 w-4" />
         <AlertTitle className="flex items-center gap-2">
-          {t('weeklyWins.pending', 'Weekly Wins Pending')}
+          {t('monthlyWins.pending', 'Monthly Wins Pending')}
           {isOverdue ? (
             <Badge variant="destructive" className="text-xs">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              {t('weeklyWins.overdue', 'Overdue')}
+              {t('monthlyWins.overdue', 'Overdue')}
             </Badge>
           ) : daysUntilDue <= 1 ? (
             <Badge variant="secondary" className="text-xs">
               <Clock className="h-3 w-3 mr-1" />
-              {daysUntilDue === 0 ? t('weeklyWins.dueToday', 'Due today') : t('weeklyWins.dueTomorrow', 'Due tomorrow')}
+              {daysUntilDue === 0 ? t('monthlyWins.dueToday', 'Due today') : t('monthlyWins.dueTomorrow', 'Due tomorrow')}
             </Badge>
           ) : null}
         </AlertTitle>
         <AlertDescription className="flex items-center justify-between mt-2">
           <span>
-            {t('weeklyWins.dueOn', 'Due {{date}}', { date: formatDate(new Date(pendingCheckin.due_date)) })}
+            {t('monthlyWins.dueOn', 'Due {{date}}', { date: formatDate(new Date(pendingCheckin.due_date)) })}
           </span>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={handleSkip}>
-              {t('weeklyWins.skip', 'Skip')}
+              {t('monthlyWins.skip', 'Skip')}
             </Button>
             <Button size="sm" onClick={() => setShowForm(true)}>
               <Send className="h-4 w-4 mr-1" />
-              {t('weeklyWins.complete', 'Complete')}
+              {t('monthlyWins.complete', 'Complete')}
             </Button>
           </div>
         </AlertDescription>
@@ -134,7 +134,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5" />
-              {definition?.name || t('weeklyWins.title', 'Weekly Wins')}
+              {definition?.name || t('monthlyWins.title', 'Monthly Wins')}
             </DialogTitle>
           </DialogHeader>
 
@@ -148,7 +148,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                     id={q.id}
                     value={responses[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
-                    placeholder={t('weeklyWins.yourAnswer', 'Your answer...')}
+                    placeholder={t('monthlyWins.yourAnswer', 'Your answer...')}
                   />
                 ) : q.type === 'scale' ? (
                   <div className="flex gap-2">
@@ -169,7 +169,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                     type="number"
                     value={responses[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
-                    placeholder={t('weeklyWins.enterNumber', 'Enter a number...')}
+                    placeholder={t('monthlyWins.enterNumber', 'Enter a number...')}
                   />
                 )}
               </div>
@@ -178,7 +178,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
             {/* KPIs */}
             {kpiIds.length > 0 && (
               <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">{t('weeklyWins.kpisThisMonth', 'KPIs this month')}</h4>
+                <h4 className="font-medium mb-3">{t('monthlyWins.kpisThisMonth', 'KPIs this month')}</h4>
                 {kpiIds.map(kpiId => {
                   const kpi = kpiDefsMap.get(kpiId) as KpiDefinition | undefined;
                   if (!kpi) return null;
@@ -192,7 +192,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
                         type="number"
                         value={responses[`kpi_${kpiId}`] || ''}
                         onChange={(e) => handleInputChange(`kpi_${kpiId}`, e.target.value)}
-                        placeholder={t('weeklyWins.enterKpi', 'Enter {{name}}...', { name: kpi.name })}
+                        placeholder={t('monthlyWins.enterKpi', 'Enter {{name}}...', { name: kpi.name })}
                       />
                     </div>
                   );
@@ -206,7 +206,7 @@ export function WeeklyCheckinBanner({ workspaceId }: WeeklyCheckinBannerProps) {
               {t('common.cancel', 'Cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={submitCheckin.isPending}>
-              {submitCheckin.isPending ? t('weeklyWins.submitting', 'Submitting...') : t('weeklyWins.submit', 'Submit Weekly Wins')}
+              {submitCheckin.isPending ? t('monthlyWins.submitting', 'Submitting...') : t('monthlyWins.submit', 'Submit Monthly Wins')}
             </Button>
           </DialogFooter>
         </DialogContent>
