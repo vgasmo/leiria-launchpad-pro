@@ -747,7 +747,9 @@
     "notAccessible": "Workspace Não Acessível",
     "noPermission": "Este workspace não existe ou não tem permissão para o visualizar. Se acredita que deveria ter acesso, contacte um administrador.",
     "responsibleConsultant": "Consultor Responsável",
-    "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve."
+    "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve.",
+    "yourConsultant": "Seu Consultor",
+    "yourMentor": "Seu Mentor"
   },
   "investorUpdates": {
     "title": "Atualizações para Investidores",

@@ -770,7 +770,9 @@
     "notAccessible": "Workspace Not Accessible",
     "noPermission": "This workspace doesn't exist or you don't have permission to view it. If you believe you should have access, please contact an administrator.",
     "responsibleConsultant": "Your Consultant",
-    "noConsultantAssigned": "No consultant assigned yet. Contact the program team for assistance."
+    "noConsultantAssigned": "No consultant assigned yet. Contact the program team for assistance.",
+    "yourConsultant": "Your Consultant",
+    "yourMentor": "Your Mentor"
   },
   "investorUpdates": {
     "title": "Investor Updates",
