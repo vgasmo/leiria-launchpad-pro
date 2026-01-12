@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter, Network } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -23,9 +23,13 @@ import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
 import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsManager';
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
+import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
+import { AdminEcosystemManager } from '@/components/admin/AdminEcosystemManager';
+import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 
 export default function Admin() {
   const { t } = useTranslation();
+  const funnelEnabled = useFeatureFlag('funnel_ui');
   
   return (
     <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
@@ -98,6 +102,16 @@ export default function Admin() {
           <TabsTrigger value="flags" className="gap-2">
             <Flag className="h-4 w-4" aria-hidden="true" />
             {t('admin.featureFlags.tab', 'Feature Flags')}
+          </TabsTrigger>
+          {funnelEnabled && (
+            <TabsTrigger value="funnel" className="gap-2">
+              <Filter className="h-4 w-4" aria-hidden="true" />
+              {t('admin.funnel.tab', 'Funnel')}
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="ecosystem" className="gap-2">
+            <Network className="h-4 w-4" aria-hidden="true" />
+            {t('admin.ecosystem.tab', 'Ecosystem')}
           </TabsTrigger>
         </TabsList>
 
@@ -179,6 +193,16 @@ export default function Admin() {
 
         <TabsContent value="flags">
           <AdminFeatureFlagsManager />
+        </TabsContent>
+
+        {funnelEnabled && (
+          <TabsContent value="funnel">
+            <AdminFunnelManager />
+          </TabsContent>
+        )}
+
+        <TabsContent value="ecosystem">
+          <AdminEcosystemManager />
         </TabsContent>
       </Tabs>
     </AppLayout>
