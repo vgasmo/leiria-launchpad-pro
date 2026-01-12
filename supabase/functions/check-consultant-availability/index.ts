@@ -242,34 +242,65 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
     }
 
-    // Get workspace consultant
-    const { data: consultorMember } = await supabaseAdmin
+    // Get workspace consultant membership (avoid embedded profile relationship dependencies)
+    const { data: consultantMembership, error: consultantErr } = await supabaseAdmin
       .from('workspace_users')
-      .select('user_id, profiles!inner(email, full_name)')
+      .select('user_id')
       .eq('workspace_id', workspaceId)
       .eq('role', 'consultor')
       .eq('active', true)
       .maybeSingle();
 
-    if (!consultorMember) {
-      return corsJsonResponse({ 
-        success: false, 
-        reason: 'no_consultant',
-        message: 'No consultant assigned to this workspace',
-        slots: [],
-      }, req);
+    if (consultantErr) {
+      log.error('Failed to fetch consultant membership', { consultantErr });
+      return corsJsonResponse(
+        {
+          success: false,
+          reason: 'consultant_query_error',
+          message: 'Failed to load consultant for this workspace',
+          slots: [],
+        },
+        req,
+      );
     }
 
-    const consultantEmail = (consultorMember.profiles as any)?.email;
-    const consultantName = (consultorMember.profiles as any)?.full_name;
-    
+    if (!consultantMembership?.user_id) {
+      log.info('No consultant membership found', { workspaceId });
+      return corsJsonResponse(
+        {
+          success: false,
+          reason: 'no_consultant',
+          message: 'No consultant assigned to this workspace',
+          slots: [],
+        },
+        req,
+      );
+    }
+
+    const { data: consultantProfile, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', consultantMembership.user_id)
+      .maybeSingle();
+
+    if (profileErr) {
+      log.error('Failed to fetch consultant profile', { profileErr, userId: consultantMembership.user_id });
+    }
+
+    const consultantEmail = consultantProfile?.email;
+    const consultantName = consultantProfile?.full_name;
+
     if (!consultantEmail) {
-      return corsJsonResponse({ 
-        success: false, 
-        reason: 'no_email',
-        message: 'Consultant has no email configured',
-        slots: [],
-      }, req);
+      log.info('Consultant has no email on profile', { workspaceId, userId: consultantMembership.user_id });
+      return corsJsonResponse(
+        {
+          success: false,
+          reason: 'no_email',
+          message: 'Consultant has no email configured',
+          slots: [],
+        },
+        req,
+      );
     }
 
     // Check if Graph API is configured
