@@ -52,12 +52,12 @@ import { triggerConfetti } from '@/lib/confetti';
 
 type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
-const STEPS: { key: WizardStep; label: string; icon: React.ElementType }[] = [
+const ALL_STEPS: { key: WizardStep; label: string; icon: React.ElementType; standardOnly?: boolean }[] = [
   { key: 'basics', label: 'Basics', icon: Building2 },
-  { key: 'stages', label: 'Stages', icon: Layers },
-  { key: 'kpis', label: 'KPIs', icon: BarChart3 },
-  { key: 'playbooks', label: 'Playbooks', icon: BookOpen },
-  { key: 'alerts', label: 'Alert Rules', icon: Bell },
+  { key: 'stages', label: 'Stages', icon: Layers, standardOnly: true },
+  { key: 'kpis', label: 'KPIs', icon: BarChart3, standardOnly: true },
+  { key: 'playbooks', label: 'Playbooks', icon: BookOpen, standardOnly: true },
+  { key: 'alerts', label: 'Alert Rules', icon: Bell, standardOnly: true },
   { key: 'review', label: 'Review', icon: CheckCircle },
 ];
 
@@ -78,8 +78,14 @@ export default function ProgramSetupWizard() {
   const discardDraft = useDiscardProgramDraft();
   const publishDraft = usePublishProgramDraft();
 
+  // Determine which steps to show based on program mode
+  const isBasicMode = draft?.draft_json.basics?.settings?.program_mode === 'basic';
+  const STEPS = ALL_STEPS.filter(step => !step.standardOnly || !isBasicMode);
+
   // Helper for step transitions
   const goToStep = (step: WizardStep) => {
+    // Ensure step is valid for current mode
+    if (!STEPS.some(s => s.key === step)) return;
     setPrevStep(currentStep);
     setCurrentStep(step);
   };
@@ -156,26 +162,30 @@ export default function ProgramSetupWizard() {
     if (!draft) return errors;
 
     const { basics, stages, coreKpis, alertRules, healthModel } = draft.draft_json;
+    const programIsBasic = basics?.settings?.program_mode === 'basic';
 
     if (!basics?.name?.trim()) errors.push('Program name is required');
     
-    const activeStages = stages?.filter((s) => s.is_active) || [];
-    if (activeStages.length === 0) errors.push('At least one stage must be active');
+    // Standard mode validations
+    if (!programIsBasic) {
+      const activeStages = stages?.filter((s) => s.is_active) || [];
+      if (activeStages.length === 0) errors.push('At least one stage must be active');
 
-    const coreCount = coreKpis?.length || 0;
-    if (coreCount < 3) errors.push('At least 3 core KPIs required');
-    if (coreCount > 6) errors.push('Maximum 6 core KPIs allowed');
+      const coreCount = coreKpis?.length || 0;
+      if (coreCount < 3) errors.push('At least 3 core KPIs required');
+      if (coreCount > 6) errors.push('Maximum 6 core KPIs allowed');
 
-    // Check alert thresholds
-    for (const rule of alertRules || []) {
-      if (rule.threshold < 0) errors.push(`Alert rule "${rule.rule_type}" has negative threshold`);
-    }
+      // Check alert thresholds
+      for (const rule of alertRules || []) {
+        if (rule.threshold < 0) errors.push(`Alert rule "${rule.rule_type}" has negative threshold`);
+      }
 
-    // Check health model weights
-    if (healthModel?.is_enabled) {
-      const weights = Object.values(healthModel.weights_json || {});
-      const sum = weights.reduce((a, b) => a + b, 0);
-      if (Math.abs(sum - 100) > 0.1) errors.push(`Health weights must sum to 100 (current: ${sum})`);
+      // Check health model weights
+      if (healthModel?.is_enabled) {
+        const weights = Object.values(healthModel.weights_json || {});
+        const sum = weights.reduce((a, b) => a + b, 0);
+        if (Math.abs(sum - 100) > 0.1) errors.push(`Health weights must sum to 100 (current: ${sum})`);
+      }
     }
 
     return errors;
