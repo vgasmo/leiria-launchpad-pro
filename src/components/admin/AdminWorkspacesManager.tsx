@@ -35,6 +35,7 @@ export function AdminWorkspacesManager() {
   const [selectedFounder, setSelectedFounder] = useState('');
   const [founderSearch, setFounderSearch] = useState('');
   const [consultorSearch, setConsultorSearch] = useState('');
+  const [openConsultorPopover, setOpenConsultorPopover] = useState<string | null>(null);
 
   // Fetch workspaces with consultant info
   const { data: workspaces, isLoading } = useQuery({
@@ -253,6 +254,7 @@ export function AdminWorkspacesManager() {
       queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
       toast.success(t('admin.workspacesManager.consultorAssigned', 'Consultant assigned'));
       setConsultorSearch('');
+      setOpenConsultorPopover(null);
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -270,6 +272,7 @@ export function AdminWorkspacesManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
       toast.success(t('admin.workspacesManager.consultorRemoved', 'Consultant removed'));
+      setOpenConsultorPopover(null);
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -481,7 +484,7 @@ export function AdminWorkspacesManager() {
                       
                       {/* Consultor Column with Inline Assignment */}
                       <TableCell>
-                        <Popover>
+                        <Popover open={openConsultorPopover === ws.id} onOpenChange={(open) => setOpenConsultorPopover(open ? ws.id : null)}>
                           <PopoverTrigger asChild>
                             <button className="flex items-center gap-2 hover:bg-muted px-2 py-1 rounded-md transition-colors">
                               {consultor ? (
