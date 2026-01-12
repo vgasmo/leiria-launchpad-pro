@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -21,6 +21,8 @@ import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
+import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsManager';
+import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -91,7 +93,11 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="integrations" className="gap-2">
             <Plug className="h-4 w-4" aria-hidden="true" />
-            {t('admin.integrations', 'Integrações')}
+            {t('admin.integrations', 'Integrations')}
+          </TabsTrigger>
+          <TabsTrigger value="flags" className="gap-2">
+            <Flag className="h-4 w-4" aria-hidden="true" />
+            {t('admin.featureFlags.tab', 'Feature Flags')}
           </TabsTrigger>
         </TabsList>
 
@@ -164,10 +170,15 @@ export default function Admin() {
 
         <TabsContent value="integrations">
           <div className="space-y-6">
+            <IntegrationTestHarness />
             <AdminTeamsTestPanel />
             <IntegrationErrorsPanel maxHeight="400px" />
             <WorkflowIntegrations />
           </div>
+        </TabsContent>
+
+        <TabsContent value="flags">
+          <AdminFeatureFlagsManager />
         </TabsContent>
       </Tabs>
     </AppLayout>
