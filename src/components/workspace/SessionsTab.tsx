@@ -71,6 +71,7 @@ import {
 import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
 import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
 import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
+import { RoleSpecificPrepCard } from '@/components/sessions/RoleSpecificPrepCard';
 import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
 import { VoiceToTextButton } from '@/components/sessions/VoiceToTextButton';
 import { SessionTranscriptsViewer } from '@/components/sessions/SessionTranscriptsViewer';
@@ -643,8 +644,9 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
   onOpenFacilitator: (session: any) => void;
 }) {
   const { t } = useTranslation();
-  const { isAdmin, isConsultor } = useAuth();
-  const canUseFacilitator = isAdmin || isConsultor;
+  const { isAdmin, isConsultor, isFounder } = useAuth();
+  const isStaff = isAdmin || isConsultor;
+  const canUseFacilitator = isStaff;
 
   const [notes, setNotes] = useState(session.notes || '');
   const [decisions, setDecisions] = useState(session.decisions || '');
@@ -785,37 +787,52 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="prep">Prep</TabsTrigger>
-              <TabsTrigger value="details">Details & Notes</TabsTrigger>
-              <TabsTrigger value="ai" className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                AI
-              </TabsTrigger>
+            {/* Role-specific tab structure */}
+            <TabsList className={`grid w-full ${isStaff ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              <TabsTrigger value="prep">{t('sessions.prep', 'Prep')}</TabsTrigger>
+              <TabsTrigger value="details">{t('sessions.detailsNotes', 'Details & Notes')}</TabsTrigger>
+              {isStaff && (
+                <TabsTrigger value="ai" className="gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  {t('sessions.ai', 'AI')}
+                </TabsTrigger>
+              )}
             </TabsList>
             
-            {/* Session Prep Tab */}
+            {/* Session Prep Tab - Role-specific content */}
             <TabsContent value="prep" className="mt-4 space-y-4">
-              <QualityGateCard
-                entityType="session"
-                entityId={session.id}
-                entityData={session}
-                workspaceId={workspaceId}
-              />
-              <SessionPrepCard sessionId={session.id} workspaceId={workspaceId} />
-              <SessionExercisesPicker sessionId={session.id} canEdit={canWrite} />
+              {/* Role-specific prep view */}
+              <RoleSpecificPrepCard sessionId={session.id} workspaceId={workspaceId} />
+              
+              {/* Staff-only: Quality gates and exercise picker */}
+              {isStaff && (
+                <>
+                  <QualityGateCard
+                    entityType="session"
+                    entityId={session.id}
+                    entityData={session}
+                    workspaceId={workspaceId}
+                  />
+                  <SessionExercisesPicker sessionId={session.id} canEdit={canWrite} />
+                </>
+              )}
+              
+              {/* Founders see simplified prep */}
+              {!isStaff && (
+                <SessionPrepCard sessionId={session.id} workspaceId={workspaceId} />
+              )}
             </TabsContent>
             
             <TabsContent value="details" className="space-y-6 mt-4">
-              {/* Resend Invites */}
-              {canWrite && (
+              {/* Staff-only: Calendar Invites */}
+              {isStaff && canWrite && (
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Calendar Invites</p>
+                      <p className="text-sm font-medium">{t('sessions.calendarInvites', 'Calendar Invites')}</p>
                       <p className="text-xs text-muted-foreground">
-                        {members?.filter(m => m.profile?.email).length || 0} workspace members
+                        {members?.filter(m => m.profile?.email).length || 0} {t('sessions.workspaceMembers', 'workspace members')}
                       </p>
                     </div>
                   </div>
@@ -826,77 +843,80 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                     disabled={isResending}
                   >
                     <Mail className="h-4 w-4 mr-1" />
-                    {isResending ? 'Sending...' : 'Resend Invites'}
+                    {isResending ? t('common.sending', 'Sending...') : t('sessions.resendInvites', 'Resend Invites')}
                   </Button>
                 </div>
               )}
 
-              {/* Agenda */}
+              {/* Agenda - visible to all */}
               {session.agenda && (
                 <div>
-                  <Label className="text-muted-foreground">Agenda</Label>
+                  <Label className="text-muted-foreground">{t('sessions.agenda', 'Agenda')}</Label>
                   <p className="mt-1 text-sm whitespace-pre-wrap">{session.agenda}</p>
                 </div>
               )}
 
-              {/* Notes */}
+              {/* Notes Section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="notes">Session Notes</Label>
-                  {canWrite && (
+                  <Label htmlFor="notes">{t('sessions.sessionNotes', 'Session Notes')}</Label>
+                  {isStaff && canWrite && (
                     <VoiceToTextButton 
                       onTranscript={handleVoiceTranscript} 
                     />
                   )}
                 </div>
-                {canWrite ? (
+                {/* Staff can edit notes, founders can only view */}
+                {isStaff && canWrite ? (
                   <CollaborativeNotesEditor
                     value={notes}
                     onChange={setNotes}
                     workspaceId={workspaceId}
                     sessionId={session.id}
-                    placeholder="Add notes from this session..."
+                    placeholder={t('sessions.addNotesPlaceholder', 'Add notes from this session...')}
                     members={members || []}
                   />
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
-                    {notes || 'No notes recorded'}
+                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg min-h-[80px]">
+                    {notes || t('sessions.noNotesRecorded', 'No notes recorded')}
                   </p>
                 )}
               </div>
 
-              {/* Decisions */}
+              {/* Decisions Section - Staff can edit, founders view */}
               <div className="space-y-2">
-                <Label htmlFor="decisions">Key Decisions</Label>
-                {canWrite ? (
+                <Label htmlFor="decisions">{t('sessions.keyDecisions', 'Key Decisions')}</Label>
+                {isStaff && canWrite ? (
                   <Textarea
                     id="decisions"
                     value={decisions}
                     onChange={(e) => setDecisions(e.target.value)}
-                    placeholder="Key decisions made during this session..."
+                    placeholder={t('sessions.keyDecisionsPlaceholder', 'Key decisions made during this session...')}
                     rows={3}
                   />
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
-                    {decisions || 'No decisions recorded'}
+                  <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-lg min-h-[60px]">
+                    {decisions || t('sessions.noDecisionsRecorded', 'No decisions recorded')}
                   </p>
                 )}
               </div>
 
-              {/* Session Transcripts */}
-              <div className="space-y-2">
-                <Label>Session Transcripts</Label>
-                <SessionTranscriptsViewer sessionId={session.id} />
-              </div>
+              {/* Transcripts - Staff only */}
+              {isStaff && (
+                <div className="space-y-2">
+                  <Label>{t('sessions.sessionTranscripts', 'Session Transcripts')}</Label>
+                  <SessionTranscriptsViewer sessionId={session.id} />
+                </div>
+              )}
 
-              {/* Action Items from this session */}
+              {/* Action Items - visible to all */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Action Items from this Session</Label>
-                  {canWrite && (
+                  <Label>{t('sessions.actionItemsFromSession', 'Action Items from this Session')}</Label>
+                  {isStaff && canWrite && (
                     <Button variant="outline" size="sm" onClick={() => setShowActionDialog(true)}>
                       <Plus className="h-4 w-4 mr-1" />
-                      Add Action Item
+                      {t('sessions.addActionItem', 'Add Action Item')}
                     </Button>
                   )}
                 </div>
@@ -905,7 +925,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                 ) : actionItems?.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground bg-muted/50 rounded-lg">
                     <CheckCircle2 className="h-6 w-6 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No action items from this session</p>
+                    <p className="text-sm">{t('sessions.noActionItems', 'No action items from this session')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -919,7 +939,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                           <p className="font-medium text-sm truncate">{item.title}</p>
                           {item.due_date && (
                             <p className="text-xs text-muted-foreground">
-                              Due: {format(new Date(item.due_date), 'MMM d, yyyy')}
+                              {t('sessions.dueDate', 'Due')}: {format(new Date(item.due_date), 'MMM d, yyyy')}
                             </p>
                           )}
                         </div>
@@ -935,28 +955,31 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                 )}
               </div>
 
-              {/* Session Feedback */}
+              {/* Session Feedback - visible to all for past sessions */}
               {isPastSession && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
-                    Session Feedback
+                    {t('sessions.sessionFeedback', 'Session Feedback')}
                   </Label>
                   <SessionFeedbackCard sessionId={session.id} sessionTitle={session.title} />
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="ai" className="mt-4">
-              <SessionAIPanel 
-                key={refreshKey}
-                workspaceId={workspaceId}
-                sessionId={session.id}
-                session={session}
-                canWrite={canWrite}
-                onRefresh={handleRefreshAI}
-              />
-            </TabsContent>
+            {/* AI Tab - Staff only */}
+            {isStaff && (
+              <TabsContent value="ai" className="mt-4">
+                <SessionAIPanel 
+                  key={refreshKey}
+                  workspaceId={workspaceId}
+                  sessionId={session.id}
+                  session={session}
+                  canWrite={canWrite}
+                  onRefresh={handleRefreshAI}
+                />
+              </TabsContent>
+            )}
           </Tabs>
 
           {canWrite && (
