@@ -417,7 +417,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
   const { data: consultantAvailability, isLoading: loadingConsultantAvailability } = useConsultantAvailability(
     workspaceId,
-    meetingWith === 'consultor' ? dateStr : undefined
+    meetingWith === 'consultor' ? dateStr : undefined,
+    Number(duration)
   );
   const { data: mentorWeeklyAvailability } = useMentorAvailability(
     meetingWith === 'mentor_externo' ? participantId : undefined
@@ -430,10 +431,12 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
     // Consultant: only show slots when calendar availability was actually verified.
     if (meetingWith === 'consultor') {
-      if (consultantAvailability?.success && consultantAvailability?.slots?.length) {
-        return consultantAvailability.slots.filter((slot) => slot.available).map((slot) => slot.start);
-      }
-      return [];
+      // Robust parsing: backend may return slots as strings or objects
+      const rawSlots = consultantAvailability?.slots ?? [];
+      const slotStarts = rawSlots
+        .map((s: unknown) => (typeof s === 'string' ? s : (s as { start?: string })?.start))
+        .filter(Boolean) as string[];
+      return slotStarts;
     }
 
     // Mentor: use mentor weekly availability (no calendar free/busy).
@@ -837,8 +840,11 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                     <>
                       <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
                         {availableSlots.map((slotStart) => {
-                          const slotTime = new Date(slotStart);
-                          const timeStr = format(slotTime, 'HH:mm');
+                          // Robust time extraction: avoid Date parsing quirks for timezone-less strings
+                          const timeStr =
+                            typeof slotStart === 'string' && slotStart.includes('T')
+                              ? slotStart.slice(11, 16)
+                              : format(new Date(slotStart), 'HH:mm');
                           const isSelected = selectedSlot === slotStart;
 
                           return (

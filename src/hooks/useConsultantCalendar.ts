@@ -18,21 +18,21 @@ interface FreeBusyResult {
 
 /**
  * Hook to check consultant's calendar availability via Graph API integration
+ * @param durationMinutes - optional duration filter (sent to backend for correctness)
  */
 export function useConsultantAvailability(
   workspaceId: string | undefined,
-  date: string | undefined
+  date: string | undefined,
+  durationMinutes?: number
 ) {
   return useQuery({
-    queryKey: ['consultant-availability', workspaceId, date],
+    queryKey: ['consultant-availability', workspaceId, date, durationMinutes],
     queryFn: async (): Promise<FreeBusyResult | null> => {
       if (!workspaceId || !date) return null;
 
-      console.log('[useConsultantAvailability] Checking availability for', { workspaceId, date });
-
       // Always ask backend; it will gracefully degrade (and can return warnings/reasons)
       const { data, error } = await supabase.functions.invoke('check-consultant-availability', {
-        body: { workspaceId, date },
+        body: { workspaceId, date, durationMinutes },
       });
 
       if (error) {
@@ -40,12 +40,11 @@ export function useConsultantAvailability(
         return null;
       }
 
-      console.log('[useConsultantAvailability] Got availability result:', data);
       return data;
     },
     enabled: !!workspaceId && !!date,
-    staleTime: 30000, // 30 seconds (was 1 minute)
-    gcTime: 60000, // garbage collect after 1 minute
+    staleTime: 30000,
+    gcTime: 60000,
     retry: 1,
     refetchOnWindowFocus: true,
   });
