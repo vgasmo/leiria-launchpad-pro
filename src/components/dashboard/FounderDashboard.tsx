@@ -28,6 +28,7 @@ import { YourWeekCard } from '@/components/dashboard/YourWeekCard';
 import { StreakHero } from '@/components/dashboard/StreakHero';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { MentorRecommendationsCard } from '@/components/mentors/MentorRecommendationsCard';
+import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
@@ -337,8 +338,11 @@ export function FounderDashboard({
         </Card>
       </div>
 
-      {/* Mentor Recommendations + Quick Actions Row */}
+      {/* Consultant + Mentor + Quick Actions Row */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+        {/* Responsible Consultant Card - Show who's helping you */}
+        <ResponsibleConsultantCard workspaceId={workspace.id} />
+        
         {/* Mentor Recommendations - Item I */}
         <MentorRecommendationsCard 
           workspaceId={workspace.id} 
@@ -347,13 +351,13 @@ export function FounderDashboard({
         />
         
         {/* Quick Actions - Mobile Optimized */}
-        <Card className="animate-fade-in md:col-span-2" style={{ animationDelay: '250ms' }}>
+        <Card className="animate-fade-in md:col-span-1" style={{ animationDelay: '250ms' }}>
           <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
             <CardTitle className="text-base md:text-lg">{t('founder.quickActions')}</CardTitle>
             <CardDescription className="text-xs md:text-sm">{t('founder.commonTasks')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-            <div className="grid gap-2 md:gap-3 grid-cols-2 md:grid-cols-4">
+            <div className="grid gap-2 md:gap-3 grid-cols-2">
               <Button 
                 variant="outline" 
                 className="h-auto py-3 md:py-4 flex-col gap-1 md:gap-2 text-xs md:text-sm" 

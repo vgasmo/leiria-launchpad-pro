@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { TemplateCoachPanel } from './TemplateCoachPanel';
-import { CanvasTemplate } from './CanvasTemplate';
+import { CanvasTemplate, CanvasType, getCanvasType } from './CanvasTemplate';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -34,18 +34,6 @@ interface TemplatesTabProps {
   workspaceId: string;
   canWrite: boolean;
   isFounder?: boolean;
-}
-
-// Check if a template is a canvas type (BMC or Lean Canvas)
-function isCanvasTemplate(template: Template): 'bmc' | 'lean' | null {
-  const name = template.name.toLowerCase();
-  if (name.includes('business model canvas') || name.includes('bmc')) {
-    return 'bmc';
-  }
-  if (name.includes('lean canvas')) {
-    return 'lean';
-  }
-  return null;
 }
 
 export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: TemplatesTabProps) {
@@ -78,7 +66,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
 
   const handleOpenTemplate = (template: Template) => {
     // If it's a canvas template, switch to the appropriate tab instead of opening dialog
-    const canvasType = isCanvasTemplate(template);
+    const canvasType = getCanvasType(template.name);
     if (canvasType) {
       setActiveTab(canvasType);
       return;
@@ -119,10 +107,22 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const categories = Object.keys(templatesByCategory).sort();
 
   // Find canvas templates for dedicated tabs
-  const bmcTemplate = templates?.find(t => isCanvasTemplate(t) === 'bmc');
-  const leanTemplate = templates?.find(t => isCanvasTemplate(t) === 'lean');
-  const bmcInstance = bmcTemplate ? instancesByTemplateId[bmcTemplate.id] : null;
-  const leanInstance = leanTemplate ? instancesByTemplateId[leanTemplate.id] : null;
+  const findCanvasTemplate = (type: CanvasType) => 
+    templates?.find(t => getCanvasType(t.name) === type);
+  
+  const bmcTemplate = findCanvasTemplate('bmc');
+  const leanTemplate = findCanvasTemplate('lean');
+  const valuePropTemplate = findCanvasTemplate('value_prop');
+  const empathyTemplate = findCanvasTemplate('empathy');
+  const swotTemplate = findCanvasTemplate('swot');
+
+  const canvasTemplates: { type: CanvasType; template: Template | undefined; label: string; icon: React.ReactNode }[] = [
+    { type: 'bmc', template: bmcTemplate, label: 'BMC', icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'lean', template: leanTemplate, label: 'Lean', icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'value_prop', template: valuePropTemplate, label: 'Value Prop', icon: <Target className="h-4 w-4" /> },
+    { type: 'empathy', template: empathyTemplate, label: 'Empathy', icon: <Users className="h-4 w-4" /> },
+    { type: 'swot', template: swotTemplate, label: 'SWOT', icon: <Crosshair className="h-4 w-4" /> },
+  ];
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -131,17 +131,13 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
           <FileText className="h-4 w-4" />
           {t('templates.title')}
         </TabsTrigger>
-        {bmcTemplate && (
-          <TabsTrigger value="bmc" className="gap-2">
-            <LayoutGrid className="h-4 w-4" />
-            BMC
-          </TabsTrigger>
-        )}
-        {leanTemplate && (
-          <TabsTrigger value="lean" className="gap-2">
-            <LayoutGrid className="h-4 w-4" />
-            Lean
-          </TabsTrigger>
+        {canvasTemplates.map(({ type, template, label, icon }) => 
+          template && (
+            <TabsTrigger key={type} value={type} className="gap-2">
+              {icon}
+              {label}
+            </TabsTrigger>
+          )
         )}
         <TabsTrigger value="calculator" className="gap-2">
           <Calculator className="h-4 w-4" />
@@ -153,30 +149,19 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
         <UnitEconomicsCalculator workspaceId={workspaceId} />
       </TabsContent>
 
-      {/* BMC Canvas Tab */}
-      {bmcTemplate && (
-        <TabsContent value="bmc">
-          <CanvasTemplateWrapper
-            template={bmcTemplate}
-            instance={bmcInstance}
-            workspaceId={workspaceId}
-            canWrite={canWrite}
-            type="bmc"
-          />
-        </TabsContent>
-      )}
-
-      {/* Lean Canvas Tab */}
-      {leanTemplate && (
-        <TabsContent value="lean">
-          <CanvasTemplateWrapper
-            template={leanTemplate}
-            instance={leanInstance}
-            workspaceId={workspaceId}
-            canWrite={canWrite}
-            type="lean"
-          />
-        </TabsContent>
+      {/* Canvas Tabs */}
+      {canvasTemplates.map(({ type, template }) => 
+        template && (
+          <TabsContent key={type} value={type}>
+            <CanvasTemplateWrapper
+              template={template}
+              instance={instancesByTemplateId[template.id] || null}
+              workspaceId={workspaceId}
+              canWrite={canWrite}
+              type={type}
+            />
+          </TabsContent>
+        )
       )}
 
       <TabsContent value="templates" className="space-y-6">
@@ -256,7 +241,7 @@ interface CanvasTemplateWrapperProps {
   instance: TemplateInstance | null;
   workspaceId: string;
   canWrite: boolean;
-  type: 'bmc' | 'lean';
+  type: CanvasType;
 }
 
 function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type }: CanvasTemplateWrapperProps) {
