@@ -9,7 +9,11 @@ interface TimeSlot {
 
 interface FreeBusyResult {
   slots: TimeSlot[];
-  consultantEmail: string;
+  consultantEmail?: string;
+  consultantName?: string;
+  warning?: string;
+  success?: boolean;
+  reason?: string;
 }
 
 /**

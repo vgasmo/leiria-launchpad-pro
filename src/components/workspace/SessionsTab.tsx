@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format, isPast } from 'date-fns';
+import { format, isPast, addDays, startOfDay } from 'date-fns';
 import { 
   Search, 
   Plus, 
@@ -19,6 +19,7 @@ import {
   Play,
   Video,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +64,7 @@ import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConsultantAvailability } from '@/hooks/useConsultantCalendar';
 import {
   Select,
   SelectContent,
@@ -368,7 +372,8 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
-  const [scheduledAt, setScheduledAt] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [duration, setDuration] = useState('60');
   const [agenda, setAgenda] = useState('');
   const [location, setLocation] = useState('');
@@ -376,10 +381,25 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   const [sendInvites, setSendInvites] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [useManualTime, setUseManualTime] = useState(false);
+  const [manualDateTime, setManualDateTime] = useState('');
 
   const createMutation = useCreateSession(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
   const { data: sessionTemplates } = useSessionTemplates();
+  
+  // Get consultant availability for selected date
+  const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+  const { data: availability, isLoading: loadingAvailability } = useConsultantAvailability(
+    workspaceId, 
+    dateStr
+  );
+
+  // Filter available slots based on duration
+  const availableSlots = useMemo(() => {
+    if (!availability?.slots) return [];
+    return availability.slots.filter(slot => slot.available);
+  }, [availability]);
 
   // Get workspace and startup info for the email
   const getWorkspaceInfo = async () => {
@@ -408,16 +428,28 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !scheduledAt) {
-      toast.error(t('common.error'));
-      return;
+    
+    let scheduledAtISO: string;
+    
+    if (useManualTime) {
+      if (!title.trim() || !manualDateTime) {
+        toast.error(t('common.error'));
+        return;
+      }
+      scheduledAtISO = new Date(manualDateTime).toISOString();
+    } else {
+      if (!title.trim() || !selectedDate || !selectedSlot) {
+        toast.error(t('sessions.selectDateAndSlot', 'Please select a date and time slot'));
+        return;
+      }
+      scheduledAtISO = new Date(selectedSlot).toISOString();
     }
 
     setIsSending(true);
     try {
       const session = await createMutation.mutateAsync({
         title: title.trim(),
-        scheduled_at: new Date(scheduledAt).toISOString(),
+        scheduled_at: scheduledAtISO,
         duration: parseInt(duration),
         agenda: agenda.trim() || null,
         notes: null,
@@ -444,7 +476,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
                 sessionId: session.id,
                 workspaceId,
                 title: title.trim(),
-                scheduledAt: new Date(scheduledAt).toISOString(),
+                scheduledAt: scheduledAtISO,
                 duration: parseInt(duration),
                 agenda: agenda.trim() || undefined,
                 location: location.trim() || undefined,
@@ -457,21 +489,14 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
             if (error) {
               console.error('Failed to send invites:', error);
-              toast.success(t('sessions.sessionCreated'));
-            } else {
-              toast.success(t('sessions.sessionCreated'));
             }
-          } else {
-            toast.success(t('sessions.sessionCreated'));
           }
         } catch (emailError) {
           console.error('Email sending error:', emailError);
-          toast.success(t('sessions.sessionCreated'));
         }
-      } else {
-        toast.success(t('sessions.sessionCreated'));
       }
-
+      
+      toast.success(t('sessions.sessionCreated'));
       onOpenChange(false);
       resetForm();
     } catch (error) {
@@ -483,7 +508,9 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
 
   const resetForm = () => {
     setTitle('');
-    setScheduledAt('');
+    setSelectedDate(undefined);
+    setSelectedSlot('');
+    setManualDateTime('');
     setDuration('60');
     setAgenda('');
     setLocation('');
@@ -502,14 +529,18 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
   };
 
   const memberCount = members?.filter(m => m.profile?.email).length || 0;
+  const hasConsultant = availability?.consultantName || availability?.consultantEmail;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('sessions.scheduleSession', 'Schedule Session')}</DialogTitle>
           <DialogDescription>
-            {t('sessions.scheduleSessionDesc', 'Schedule a new mentoring session')}
+            {hasConsultant 
+              ? t('sessions.scheduleWithConsultant', 'Schedule based on {{name}}\'s availability', { name: availability?.consultantName || availability?.consultantEmail })
+              : t('sessions.scheduleSessionDesc', 'Schedule a new mentoring session')
+            }
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -542,34 +573,166 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="scheduled_at">{t('sessions.dateTime', 'Date & Time *')}</Label>
-              <Input
-                id="scheduled_at"
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duration</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="15">15 min</SelectItem>
-                  <SelectItem value="30">30 min</SelectItem>
-                  <SelectItem value="45">45 min</SelectItem>
-                  <SelectItem value="60">60 min</SelectItem>
-                  <SelectItem value="90">90 min</SelectItem>
-                  <SelectItem value="120">120 min</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+          {/* Toggle between calendar availability and manual input */}
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-md transition-colors ${!useManualTime ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
+              onClick={() => setUseManualTime(false)}
+            >
+              <Calendar className="h-3.5 w-3.5 inline mr-1.5" />
+              {t('sessions.availableSlots', 'Available Slots')}
+            </button>
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-md transition-colors ${useManualTime ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
+              onClick={() => setUseManualTime(true)}
+            >
+              <Clock className="h-3.5 w-3.5 inline mr-1.5" />
+              {t('sessions.manualTime', 'Manual Time')}
+            </button>
           </div>
+
+          {useManualTime ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="scheduled_at">{t('sessions.dateTime', 'Date & Time *')}</Label>
+                <Input
+                  id="scheduled_at"
+                  type="datetime-local"
+                  value={manualDateTime}
+                  onChange={(e) => setManualDateTime(e.target.value)}
+                  required={useManualTime}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration</Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                    <SelectItem value="60">60 min</SelectItem>
+                    <SelectItem value="90">90 min</SelectItem>
+                    <SelectItem value="120">120 min</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Calendar date picker */}
+              <div className="space-y-2">
+                <Label>{t('sessions.selectDate', 'Select Date *')}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {selectedDate ? format(selectedDate, 'PPP') : t('sessions.pickDate', 'Pick a date')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setSelectedSlot(''); // Reset slot when date changes
+                      }}
+                      fromDate={startOfDay(new Date())}
+                      toDate={addDays(new Date(), 60)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Time slots */}
+              {selectedDate && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{t('sessions.selectTimeSlot', 'Select Time Slot *')}</Label>
+                    {loadingAvailability && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        {t('sessions.checkingAvailability', 'Checking availability...')}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {loadingAvailability ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 2, 3, 4, 5, 6].map(i => (
+                        <Skeleton key={i} className="h-9" />
+                      ))}
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="text-center py-4 bg-muted/30 rounded-lg">
+                      <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('sessions.noSlotsAvailable', 'No available slots for this date')}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={() => setUseManualTime(true)}
+                      >
+                        {t('sessions.useManualTimeInstead', 'Use manual time instead')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                      {availableSlots.map((slot) => {
+                        const slotTime = new Date(slot.start);
+                        const timeStr = format(slotTime, 'HH:mm');
+                        const isSelected = selectedSlot === slot.start;
+                        
+                        return (
+                          <Button
+                            key={slot.start}
+                            type="button"
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedSlot(slot.start)}
+                            className="text-xs"
+                          >
+                            {timeStr}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
+                  {availability?.warning && (
+                    <p className="text-xs text-amber-600 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {availability.warning}
+                    </p>
+                  )}
+
+                  {/* Duration selector */}
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="duration">Duration</Label>
+                    <Select value={duration} onValueChange={setDuration}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 min</SelectItem>
+                        <SelectItem value="60">60 min</SelectItem>
+                        <SelectItem value="90">90 min</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="agenda">Agenda</Label>
             <Textarea
