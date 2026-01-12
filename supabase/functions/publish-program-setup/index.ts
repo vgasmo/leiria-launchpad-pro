@@ -5,12 +5,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ProgramModeSettings {
+  program_mode: 'standard' | 'basic';
+  enable_kpis: boolean;
+  enable_health: boolean;
+  enable_milestones: boolean;
+  enable_alerts: boolean;
+  enable_playbooks: boolean;
+  enable_financial_model: boolean;
+}
+
 interface DraftData {
   basics: {
     name: string;
     description?: string;
     start_date?: string;
     end_date?: string;
+    settings?: ProgramModeSettings;
   };
   stages: {
     stage_key: string;
@@ -148,16 +159,22 @@ Deno.serve(async (req) => {
 
     const draftData = draft.draft_json as DraftData;
 
-    // Validate draft
     const validationErrors: string[] = [];
     if (!draftData.basics?.name?.trim()) validationErrors.push('Program name is required');
     
     const activeStages = draftData.stages?.filter(s => s.is_active) || [];
     if (activeStages.length === 0) validationErrors.push('At least one stage must be active');
     
-    const coreKpiCount = draftData.coreKpis?.length || 0;
-    if (coreKpiCount < 3 || coreKpiCount > 6) {
-      validationErrors.push('Core KPIs must be between 3 and 6');
+    // Core KPI validation only for standard mode with KPIs enabled
+    const settings = draftData.basics?.settings;
+    const isBasicMode = settings?.program_mode === 'basic';
+    const kpisEnabled = settings?.enable_kpis !== false;
+    
+    if (!isBasicMode && kpisEnabled) {
+      const coreKpiCount = draftData.coreKpis?.length || 0;
+      if (coreKpiCount < 3 || coreKpiCount > 6) {
+        validationErrors.push('Core KPIs must be between 3 and 6 for standard mode');
+      }
     }
 
     // Check for duplicate KPIs in same stage
@@ -197,6 +214,16 @@ Deno.serve(async (req) => {
     let programId = draft.program_id;
 
     // 1. Upsert program
+    const settingsJson = draftData.basics.settings || {
+      program_mode: 'standard',
+      enable_kpis: true,
+      enable_health: true,
+      enable_milestones: true,
+      enable_alerts: true,
+      enable_playbooks: true,
+      enable_financial_model: true,
+    };
+
     if (programId) {
       // Update existing program
       const { error: updateError } = await supabase
@@ -206,6 +233,7 @@ Deno.serve(async (req) => {
           description: draftData.basics.description || null,
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
+          settings_json: settingsJson,
           status: 'active',
           updated_at: new Date().toISOString(),
         })
@@ -222,6 +250,7 @@ Deno.serve(async (req) => {
           description: draftData.basics.description || null,
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
+          settings_json: settingsJson,
           status: 'active',
           is_active: true,
         })

@@ -5,11 +5,22 @@ import type { Database } from '@/integrations/supabase/types';
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
 
+export interface ProgramModeSettings {
+  program_mode: 'standard' | 'basic';
+  enable_kpis: boolean;
+  enable_health: boolean;
+  enable_milestones: boolean;
+  enable_alerts: boolean;
+  enable_playbooks: boolean;
+  enable_financial_model: boolean;
+}
+
 export interface DraftBasics {
   name: string;
   description?: string;
   start_date?: string;
   end_date?: string;
+  settings?: ProgramModeSettings;
 }
 
 export interface DraftStage {
@@ -331,12 +342,24 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
     });
   }
 
+  // Parse settings from program
+  const programSettings = program?.settings_json as unknown as ProgramModeSettings | null;
+
   return {
     basics: {
       name: program?.name || '',
       description: program?.description || undefined,
       start_date: program?.start_date || undefined,
       end_date: program?.end_date || undefined,
+      settings: programSettings || {
+        program_mode: 'standard',
+        enable_kpis: true,
+        enable_health: true,
+        enable_milestones: true,
+        enable_alerts: true,
+        enable_playbooks: true,
+        enable_financial_model: true,
+      },
     },
     stages: (stages || []).map((s) => ({
       stage_key: (s.stage_key || 'ideation') as StartupStage,

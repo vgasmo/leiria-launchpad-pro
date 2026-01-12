@@ -1,4 +1,36 @@
 {
+  "programSetup": {
+    "cloneFrom": "Clone from existing program",
+    "selectToClone": "Select a program to clone...",
+    "cloneDescription": "This will copy stages, KPIs, playbooks, and alert rules from the selected program.",
+    "programName": "Program Name",
+    "programNamePlaceholder": "e.g., Accelerator 2024",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the program objectives and focus areas...",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "programMode": "Program Mode",
+    "programModeDescription": "Choose how startups in this program will be managed",
+    "standardMode": "Standard",
+    "basicMode": "Basic",
+    "standardModeDesc": "Full features: KPIs, health scores, milestones, playbooks, and more.",
+    "basicModeDesc": "Lightweight: Focus on sessions, tasks, templates, and mentoring.",
+    "customizeModules": "Customize modules (optional)",
+    "modules": {
+      "kpis": "KPIs",
+      "kpisDesc": "Metrics and indicators",
+      "health": "Health Score",
+      "healthDesc": "Health scoring",
+      "milestones": "Milestones",
+      "milestonesDesc": "Goals and targets",
+      "alerts": "Alerts",
+      "alertsDesc": "Automatic notifications",
+      "playbooks": "Playbooks",
+      "playbooksDesc": "Growth guides",
+      "financialModel": "Financial Model",
+      "financialModelDesc": "Financial analysis"
+    }
+  },
   "alerts": {
     "title": "Alerts",
     "activeAlerts": "Active Alerts",
