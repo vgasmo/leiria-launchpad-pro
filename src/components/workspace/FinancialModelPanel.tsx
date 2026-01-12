@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,8 +154,8 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
     return data.publicUrl;
   };
 
-  // Check if template exists on mount
-  useState(() => {
+  // Check if template exists on mount - using useEffect instead of useState
+  useEffect(() => {
     const checkTemplate = async () => {
       try {
         const url = getTemplateUrl();
@@ -166,7 +166,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
       }
     };
     checkTemplate();
-  });
+  }, []);
 
   const handleDownloadTemplate = async () => {
     const url = getTemplateUrl();

@@ -1,19 +1,33 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-import { AppRole, Profile } from '@/types/database';
+import { AppRole } from '@/types/database';
+
+export type AccountStatus = 'pending' | 'approved' | 'suspended';
+
+export interface ProfileWithStatus {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  account_status: AccountStatus;
+  created_at: string;
+  updated_at: string;
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: Profile | null;
+  profile: ProfileWithStatus | null;
   roles: AppRole[];
   isLoading: boolean;
-  isAuthReady: boolean; // P1: New flag - true only when auth + profile/roles fully loaded
+  isAuthReady: boolean;
   isAdmin: boolean;
   isConsultor: boolean;
   isMentor: boolean;
   isFounder: boolean;
+  isAccountApproved: boolean;
+  isAccountPending: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, selectedRole?: 'founder' | 'mentor_externo') => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -24,10 +38,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileWithStatus | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthReady, setIsAuthReady] = useState(false); // P1: Track full readiness
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   const fetchUserData = useCallback(async (userId: string): Promise<void> => {
     try {
@@ -45,7 +59,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ]);
       
       if (profileResult.data) {
-        setProfile(profileResult.data as Profile);
+        // Handle case where account_status column may not exist yet
+        const profileData = profileResult.data as Record<string, unknown>;
+        setProfile({
+          id: profileData.id as string,
+          email: profileData.email as string,
+          full_name: profileData.full_name as string | null,
+          avatar_url: profileData.avatar_url as string | null,
+          account_status: (profileData.account_status as AccountStatus) || 'approved', // Default to approved for existing users
+          created_at: profileData.created_at as string,
+          updated_at: profileData.updated_at as string,
+        });
       }
       
       if (rolesResult.data) {
@@ -158,6 +182,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isConsultor = roles.includes('consultor');
   const isMentor = roles.includes('mentor_externo') || isConsultor || isAdmin;
   const isFounder = roles.includes('founder');
+  
+  // Account approval status
+  const isAccountApproved = profile?.account_status === 'approved';
+  const isAccountPending = profile?.account_status === 'pending';
 
   return (
     <AuthContext.Provider value={{
@@ -171,6 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isConsultor,
       isMentor,
       isFounder,
+      isAccountApproved,
+      isAccountPending,
       signIn,
       signUp,
       signOut

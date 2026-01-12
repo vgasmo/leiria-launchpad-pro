@@ -51,10 +51,27 @@ export interface WorkspaceWithDetails {
   } | null;
 }
 
-export function useWorkspaces(filters: WorkspaceFilters = {}) {
+export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: boolean = false) {
   return useQuery({
-    queryKey: ['workspaces', filters],
+    queryKey: ['workspaces', filters, assignedOnly],
     queryFn: async (): Promise<WorkspaceWithDetails[]> => {
+      // If assignedOnly, first get the user's assigned workspace IDs
+      let assignedWorkspaceIds: string[] | null = null;
+      
+      if (assignedOnly) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: memberships } = await supabase
+            .from('workspace_users')
+            .select('workspace_id')
+            .eq('user_id', user.id)
+            .eq('role', 'consultor')
+            .eq('active', true);
+          
+          assignedWorkspaceIds = memberships?.map(m => m.workspace_id) || [];
+        }
+      }
+      
       // Fetch workspaces with joined data
       let query = supabase
         .from('workspaces')
@@ -65,6 +82,14 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         `)
         .eq('status', 'active') // Only show active workspaces
         .order('updated_at', { ascending: false });
+
+      // If assignedOnly, filter by assigned workspace IDs
+      if (assignedOnly && assignedWorkspaceIds !== null) {
+        if (assignedWorkspaceIds.length === 0) {
+          return []; // No assigned workspaces
+        }
+        query = query.in('id', assignedWorkspaceIds);
+      }
 
       // Apply stage filter
       if (filters.stage && filters.stage !== 'all') {
@@ -86,9 +111,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}) {
         query = query.eq('priority_level', filters.priority);
       }
       const { data: workspaces, error } = await query;
-
       if (error) throw error;
-      if (!workspaces) return [];
 
       // Get workspace IDs for server-side aggregation
       const workspaceIds = workspaces.map(w => w.id);

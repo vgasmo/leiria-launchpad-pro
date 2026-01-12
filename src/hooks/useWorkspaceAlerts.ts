@@ -136,7 +136,7 @@ export function useResolveAlert() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alerta resolvido');
+      toast.success('Alert resolved');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -168,7 +168,7 @@ export function useIgnoreAlert() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alerta ignorado');
+      toast.success('Alert ignored');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -224,7 +224,7 @@ export function useUpdateAlertRule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['program-alert-rules'] });
-      toast.success('Regra atualizada');
+      toast.success('Rule updated');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -246,7 +246,7 @@ export function useRecomputeAlerts() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alertas recalculados');
+      toast.success('Alerts recalculated');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -258,15 +258,15 @@ export function useRecomputeAlerts() {
 export function getAlertCTA(ruleType: string, workspaceId: string): { label: string; href: string } | null {
   switch (ruleType) {
     case 'no_session_days':
-      return { label: 'Agendar sessão', href: `/workspace/${workspaceId}?tab=sessions` };
+      return { label: 'Schedule session', href: `/workspace/${workspaceId}?tab=sessions` };
     case 'overdue_actions_count':
-      return { label: 'Ver ações', href: `/workspace/${workspaceId}?tab=actions` };
+      return { label: 'View actions', href: `/workspace/${workspaceId}?tab=actions` };
     case 'missing_kpis_current_month':
-      return { label: 'Atualizar KPIs', href: `/workspace/${workspaceId}?tab=kpis` };
+      return { label: 'Update KPIs', href: `/workspace/${workspaceId}?tab=kpis` };
     case 'checkin_overdue_days':
-      return { label: 'Completar check-in', href: `/workspace/${workspaceId}?tab=overview` };
+      return { label: 'Complete check-in', href: `/workspace/${workspaceId}?tab=overview` };
     case 'milestone_overdue_count':
-      return { label: 'Ver milestones', href: `/workspace/${workspaceId}?tab=milestones` };
+      return { label: 'View milestones', href: `/workspace/${workspaceId}?tab=milestones` };
     default:
       return null;
   }
@@ -276,13 +276,13 @@ export function getAlertCTA(ruleType: string, workspaceId: string): { label: str
 export function getSeverityConfig(severity: string) {
   switch (severity) {
     case 'critical':
-      return { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: '🔴', label: 'Crítico' };
+      return { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: '🔴', label: 'Critical' };
     case 'warning':
-      return { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: '🟠', label: 'Atenção' };
+      return { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: '🟠', label: 'Warning' };
     case 'info':
       return { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: '🔵', label: 'Info' };
     default:
-      return { color: 'bg-muted text-muted-foreground', icon: '⚪', label: 'Desconhecido' };
+      return { color: 'bg-muted text-muted-foreground', icon: '⚪', label: 'Unknown' };
   }
 }
 
@@ -290,15 +290,15 @@ export function getSeverityConfig(severity: string) {
 export function getRuleTypeLabel(ruleType: string): string {
   switch (ruleType) {
     case 'no_session_days':
-      return 'Dias sem sessão';
+      return 'Days without session';
     case 'overdue_actions_count':
-      return 'Ações em atraso';
+      return 'Overdue actions';
     case 'missing_kpis_current_month':
-      return 'KPIs em falta';
+      return 'Missing KPIs';
     case 'checkin_overdue_days':
-      return 'Check-in atrasado';
+      return 'Overdue check-in';
     case 'milestone_overdue_count':
-      return 'Milestones em atraso';
+      return 'Overdue milestones';
     default:
       return ruleType;
   }

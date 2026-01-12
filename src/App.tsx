@@ -26,6 +26,7 @@ import ConsultorTools from "./pages/ConsultorTools";
 import ValuePropWizardPage from "./pages/ValuePropWizardPage";
 import IntegrationsSetup from "./pages/IntegrationsSetup";
 import HelpGlossary from "./pages/HelpGlossary";
+import PendingApproval from "./pages/PendingApproval";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,10 +39,9 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
-  const { user, isLoading, isAuthReady, isAdmin } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isAccountApproved, isAccountPending } = useAuth();
 
-  // P1: Wait for both auth check AND profile/roles to be fully loaded
-  // This prevents flash of wrong content or premature redirects
+  // Wait for both auth check AND profile/roles to be fully loaded
   if (isLoading || !isAuthReady) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -54,7 +54,12 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
     return <Navigate to="/login" replace />;
   }
 
-  // P1: Only check admin after isAuthReady is true (roles are loaded)
+  // Check if account is pending approval (non-staff users)
+  if (isAccountPending && !isAdmin) {
+    return <Navigate to="/pending-approval" replace />;
+  }
+
+  // Only check admin after isAuthReady is true (roles are loaded)
   if (adminOnly && !isAdmin) {
     return <Navigate to="/my-workspaces" replace />;
   }
@@ -73,6 +78,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/share/:token" element={<SharedWorkspace />} />
       <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
       <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
