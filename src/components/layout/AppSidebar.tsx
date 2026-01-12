@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAttentionCount } from '@/hooks/useAttentionCount';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/tooltip';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
+import { SidebarContactInfo } from './SidebarContactInfo';
 
 export function AppSidebar() {
   const location = useLocation();
@@ -35,6 +37,10 @@ export function AppSidebar() {
   const showConsultorTools = isAdmin || isConsultor || roles.includes('consultor');
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
+  
+  // Get founder's primary workspace for contact info
+  const { data: workspaces = [] } = useWorkspaces();
+  const founderWorkspaceId = isFounder && workspaces.length > 0 ? workspaces[0].id : null;
 
   const navigation = [
     { name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 },
@@ -300,6 +306,11 @@ export function AppSidebar() {
             )}
           </Link>
         ) : null}
+
+        {/* Contact Info - Consultant/Mentor for founders */}
+        {isFounder && founderWorkspaceId && (
+          <SidebarContactInfo workspaceId={founderWorkspaceId} collapsed={collapsed} />
+        )}
 
         {/* Help/Glossary - visible to founders */}
         {isFounder && (

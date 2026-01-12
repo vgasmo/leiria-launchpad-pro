@@ -28,7 +28,6 @@ import { YourWeekCard } from '@/components/dashboard/YourWeekCard';
 import { StreakHero } from '@/components/dashboard/StreakHero';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { MentorRecommendationsCard } from '@/components/mentors/MentorRecommendationsCard';
-import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
@@ -338,20 +337,16 @@ export function FounderDashboard({
         </Card>
       </div>
 
-      {/* Consultant + Mentor + Quick Actions Row */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-3">
-        {/* Responsible Consultant Card - Show who's helping you */}
-        <ResponsibleConsultantCard workspaceId={workspace.id} />
-        
+      {/* Mentor Recommendations + Quick Actions Row */}
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         {/* Mentor Recommendations - Item I */}
         <MentorRecommendationsCard 
           workspaceId={workspace.id} 
           stage={workspace.stage}
-          className="md:col-span-1"
         />
         
         {/* Quick Actions - Mobile Optimized */}
-        <Card className="animate-fade-in md:col-span-1" style={{ animationDelay: '250ms' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
           <CardHeader className="p-4 md:p-6 pb-2 md:pb-4">
             <CardTitle className="text-base md:text-lg">{t('founder.quickActions')}</CardTitle>
             <CardDescription className="text-xs md:text-sm">{t('founder.commonTasks')}</CardDescription>
