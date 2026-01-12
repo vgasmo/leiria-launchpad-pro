@@ -28,21 +28,26 @@ export function useConsultantAvailability(
     queryFn: async (): Promise<FreeBusyResult | null> => {
       if (!workspaceId || !date) return null;
 
+      console.log('[useConsultantAvailability] Checking availability for', { workspaceId, date });
+
       // Always ask backend; it will gracefully degrade (and can return warnings/reasons)
       const { data, error } = await supabase.functions.invoke('check-consultant-availability', {
         body: { workspaceId, date },
       });
 
       if (error) {
-        console.error('Failed to check availability:', error);
+        console.error('[useConsultantAvailability] Failed to check availability:', error);
         return null;
       }
 
+      console.log('[useConsultantAvailability] Got availability result:', data);
       return data;
     },
     enabled: !!workspaceId && !!date,
-    staleTime: 60000, // 1 minute
-    retry: false,
+    staleTime: 30000, // 30 seconds (was 1 minute)
+    gcTime: 60000, // garbage collect after 1 minute
+    retry: 1,
+    refetchOnWindowFocus: true,
   });
 }
 
