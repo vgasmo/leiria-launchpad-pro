@@ -27,6 +27,7 @@ import ValuePropWizardPage from "./pages/ValuePropWizardPage";
 import IntegrationsSetup from "./pages/IntegrationsSetup";
 import HelpGlossary from "./pages/HelpGlossary";
 import PendingApproval from "./pages/PendingApproval";
+import PublicBooking from "./pages/PublicBooking";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +82,7 @@ function AppRoutes() {
       <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/share/:token" element={<SharedWorkspace />} />
       <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
+      <Route path="/book/:token" element={<PublicBooking />} />
       <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
       <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
