@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Save, Edit2, X } from 'lucide-react';
+import { Save, Edit2, X, Download, Send, CheckCircle, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface CanvasSection {
@@ -15,13 +15,16 @@ interface CanvasSection {
   color: string;
 }
 
-export type CanvasType = 'bmc' | 'lean' | 'value_prop' | 'empathy' | 'swot';
+export type CanvasType = 'bmc' | 'lean' | 'value_prop' | 'empathy' | 'swot' | 'gtm' | 'icp' | 'pricing' | 'growth_loops' | 'okrs' | 'fundraising' | 'sales_pipeline' | 'roadmap';
 
 interface CanvasTemplateProps {
   type: CanvasType;
   data: Record<string, string>;
   onChange: (data: Record<string, string>) => void;
   disabled?: boolean;
+  reviewStatus?: 'draft' | 'pending_review' | 'approved' | 'needs_changes';
+  onSubmitForReview?: () => void;
+  onExport?: () => void;
 }
 
 const BMC_SECTIONS: CanvasSection[] = [
@@ -71,6 +74,63 @@ const SWOT_SECTIONS: CanvasSection[] = [
   { id: 'weaknesses', label: 'Weaknesses', placeholder: 'What could you improve? What are you lacking? What should you avoid?', gridArea: 'weaknesses', color: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800' },
   { id: 'opportunities', label: 'Opportunities', placeholder: 'What trends could you take advantage of? What opportunities are available?', gridArea: 'opportunities', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
   { id: 'threats', label: 'Threats', placeholder: 'What threats could harm you? What is your competition doing?', gridArea: 'threats', color: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800' },
+];
+
+// New visual canvas sections
+const GTM_SECTIONS: CanvasSection[] = [
+  { id: 'target_market', label: 'Target Market', placeholder: 'Who is your ideal customer? Demographics, firmographics, psychographics.', gridArea: 'market', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'positioning', label: 'Positioning', placeholder: 'How do you want to be perceived vs competitors?', gridArea: 'positioning', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'channels', label: 'Channels', placeholder: 'How will you reach customers? (Content, SEO, Paid, Partnerships)', gridArea: 'channels', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'launch', label: 'Launch Plan', placeholder: 'Key milestones and dates for your go-to-market launch.', gridArea: 'launch', color: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' },
+];
+
+const ICP_SECTIONS: CanvasSection[] = [
+  { id: 'company_profile', label: 'Company Profile', placeholder: 'Size, industry, tech stack, budget.', gridArea: 'company', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'buyer_persona', label: 'Buyer Persona', placeholder: 'Title, demographics, goals, motivations.', gridArea: 'persona', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'pain_points', label: 'Pain Points', placeholder: 'Key frustrations and problems.', gridArea: 'pains', color: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800' },
+  { id: 'buying_behavior', label: 'Buying Behavior', placeholder: 'How they research, buy, who influences them.', gridArea: 'buying', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+];
+
+const PRICING_SECTIONS: CanvasSection[] = [
+  { id: 'pricing_model', label: 'Pricing Model', placeholder: 'Subscription, usage-based, one-time, freemium?', gridArea: 'model', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'tiers', label: 'Tier Structure', placeholder: 'Free, Starter, Pro, Enterprise tiers.', gridArea: 'tiers', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'value_metric', label: 'Value Metric', placeholder: 'What unit do you charge for?', gridArea: 'metric', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'competition', label: 'Competitive Positioning', placeholder: 'How do competitors price? Where do you position?', gridArea: 'competition', color: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' },
+];
+
+const GROWTH_LOOPS_SECTIONS: CanvasSection[] = [
+  { id: 'trigger', label: 'Loop Trigger', placeholder: 'What action triggers the loop? (signup, usage)', gridArea: 'trigger', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'value', label: 'Value Creation', placeholder: 'What value is created that can be shared?', gridArea: 'value', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'acquisition', label: 'New User Acquisition', placeholder: 'How does value create new users?', gridArea: 'acquisition', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'retention', label: 'Retention Loops', placeholder: 'What creates habitual usage?', gridArea: 'retention', color: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' },
+];
+
+const OKRS_SECTIONS: CanvasSection[] = [
+  { id: 'north_star', label: 'North Star Metric', placeholder: 'The single metric that captures the value you deliver.', gridArea: 'northstar', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'objective_1', label: 'Objective 1', placeholder: 'Ambitious qualitative goal.', gridArea: 'obj1', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'key_results_1', label: 'Key Results 1', placeholder: 'Measurable outcomes for Objective 1.', gridArea: 'kr1', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'objective_2', label: 'Objective 2', placeholder: 'Second major objective.', gridArea: 'obj2', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'key_results_2', label: 'Key Results 2', placeholder: 'Measurable outcomes for Objective 2.', gridArea: 'kr2', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+];
+
+const FUNDRAISING_SECTIONS: CanvasSection[] = [
+  { id: 'round_target', label: 'Round Target', placeholder: 'Amount raising and use of funds.', gridArea: 'target', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'metrics', label: 'Key Metrics', placeholder: 'MRR, growth rate, CAC/LTV, retention.', gridArea: 'metrics', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'materials', label: 'Materials Checklist', placeholder: 'Pitch deck, financials, data room status.', gridArea: 'materials', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'investors', label: 'Target Investors', placeholder: 'Top 20 target investors with status.', gridArea: 'investors', color: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' },
+];
+
+const SALES_PIPELINE_SECTIONS: CanvasSection[] = [
+  { id: 'pipeline_overview', label: 'Pipeline Overview', placeholder: 'Total value, weighted value, avg deal size.', gridArea: 'overview', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'stages', label: 'Stage Breakdown', placeholder: 'Lead, Qualified, Proposal, Negotiation counts.', gridArea: 'stages', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'metrics', label: 'Sales Metrics', placeholder: 'Cycle time, win rate, forecast.', gridArea: 'metrics', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+];
+
+const ROADMAP_SECTIONS: CanvasSection[] = [
+  { id: 'now', label: 'Now (This Quarter)', placeholder: 'Features currently in development.', gridArea: 'now', color: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
+  { id: 'next', label: 'Next (Next Quarter)', placeholder: 'Features planned for next cycle.', gridArea: 'next', color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' },
+  { id: 'later', label: 'Later (6+ Months)', placeholder: 'Vision features and long-term bets.', gridArea: 'later', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800' },
+  { id: 'not_doing', label: 'Not Doing', placeholder: 'Explicitly not building and why.', gridArea: 'notdoing', color: 'bg-gray-50 dark:bg-gray-950/30 border-gray-200 dark:border-gray-700' },
 ];
 
 const CANVAS_CONFIG: Record<CanvasType, { sections: CanvasSection[]; title: string; author: string; gridStyle: React.CSSProperties }> = {
@@ -161,9 +221,128 @@ const CANVAS_CONFIG: Record<CanvasType, { sections: CanvasSection[]; title: stri
       `,
     },
   },
+  gtm: {
+    sections: GTM_SECTIONS,
+    title: 'Go-To-Market Canvas',
+    author: 'Strategic Planning',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(2, minmax(160px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "market positioning"
+        "channels launch"
+      `,
+    },
+  },
+  icp: {
+    sections: ICP_SECTIONS,
+    title: 'ICP & Persona Board',
+    author: 'Customer Discovery',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(2, minmax(160px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "company persona"
+        "pains buying"
+      `,
+    },
+  },
+  pricing: {
+    sections: PRICING_SECTIONS,
+    title: 'Pricing & Packaging Canvas',
+    author: 'Monetization Strategy',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(2, minmax(160px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "model tiers"
+        "metric competition"
+      `,
+    },
+  },
+  growth_loops: {
+    sections: GROWTH_LOOPS_SECTIONS,
+    title: 'Growth Loops Canvas',
+    author: 'Growth Strategy',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(2, minmax(160px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "trigger value"
+        "acquisition retention"
+      `,
+    },
+  },
+  okrs: {
+    sections: OKRS_SECTIONS,
+    title: 'OKRs & North Star Canvas',
+    author: 'Goal Setting',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(3, minmax(120px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "northstar northstar"
+        "obj1 kr1"
+        "obj2 kr2"
+      `,
+    },
+  },
+  fundraising: {
+    sections: FUNDRAISING_SECTIONS,
+    title: 'Fundraising Readiness Canvas',
+    author: 'Investor Relations',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateRows: 'repeat(2, minmax(160px, auto))',
+      gap: '8px',
+      gridTemplateAreas: `
+        "target metrics"
+        "materials investors"
+      `,
+    },
+  },
+  sales_pipeline: {
+    sections: SALES_PIPELINE_SECTIONS,
+    title: 'Sales Pipeline Canvas',
+    author: 'Revenue Operations',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateRows: 'minmax(200px, auto)',
+      gap: '8px',
+      gridTemplateAreas: `
+        "overview stages metrics"
+      `,
+    },
+  },
+  roadmap: {
+    sections: ROADMAP_SECTIONS,
+    title: 'Product Roadmap Canvas',
+    author: 'Product Strategy',
+    gridStyle: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(4, 1fr)',
+      gridTemplateRows: 'minmax(200px, auto)',
+      gap: '8px',
+      gridTemplateAreas: `
+        "now next later notdoing"
+      `,
+    },
+  },
 };
 
-export function CanvasTemplate({ type, data, onChange, disabled = false }: CanvasTemplateProps) {
+export function CanvasTemplate({ type, data, onChange, disabled = false, reviewStatus, onSubmitForReview, onExport }: CanvasTemplateProps) {
   const { t } = useTranslation();
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -189,6 +368,22 @@ export function CanvasTemplate({ type, data, onChange, disabled = false }: Canva
     setEditValue('');
   };
 
+  const handleExport = () => {
+    // Generate text export
+    let exportText = `${config.title}\n${'='.repeat(config.title.length)}\n\n`;
+    sections.forEach(section => {
+      exportText += `## ${section.label}\n${data[section.id] || '(empty)'}\n\n`;
+    });
+    
+    const blob = new Blob([exportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${config.title.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
@@ -198,7 +393,28 @@ export function CanvasTemplate({ type, data, onChange, disabled = false }: Canva
             <Badge variant="outline" className="ml-2">
               {config.author}
             </Badge>
+            {reviewStatus === 'pending_review' && (
+              <Badge className="bg-amber-100 text-amber-700">Pending Review</Badge>
+            )}
+            {reviewStatus === 'approved' && (
+              <Badge className="bg-green-100 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>
+            )}
+            {reviewStatus === 'needs_changes' && (
+              <Badge className="bg-red-100 text-red-700"><MessageSquare className="h-3 w-3 mr-1" />Needs Changes</Badge>
+            )}
           </CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onExport || handleExport}>
+              <Download className="h-4 w-4 mr-1" />
+              Export
+            </Button>
+            {!disabled && onSubmitForReview && reviewStatus !== 'pending_review' && reviewStatus !== 'approved' && (
+              <Button variant="default" size="sm" onClick={onSubmitForReview}>
+                <Send className="h-4 w-4 mr-1" />
+                Submit for Review
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-2">
@@ -283,5 +499,13 @@ export function getCanvasType(templateName: string): CanvasType | null {
   if (name.includes('value proposition')) return 'value_prop';
   if (name.includes('empathy map')) return 'empathy';
   if (name.includes('swot')) return 'swot';
+  if (name.includes('go-to-market') || name.includes('gtm')) return 'gtm';
+  if (name.includes('icp') || name.includes('persona')) return 'icp';
+  if (name.includes('pricing')) return 'pricing';
+  if (name.includes('growth loop')) return 'growth_loops';
+  if (name.includes('okr') || name.includes('north star')) return 'okrs';
+  if (name.includes('fundraising') || name.includes('readiness')) return 'fundraising';
+  if (name.includes('sales pipeline')) return 'sales_pipeline';
+  if (name.includes('roadmap')) return 'roadmap';
   return null;
 }

@@ -25,11 +25,9 @@ import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsMa
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { AdminEcosystemManager } from '@/components/admin/AdminEcosystemManager';
-import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 
 export default function Admin() {
   const { t } = useTranslation();
-  const funnelEnabled = useFeatureFlag('funnel_ui');
   
   return (
     <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
@@ -103,12 +101,10 @@ export default function Admin() {
             <Flag className="h-4 w-4" aria-hidden="true" />
             {t('admin.featureFlags.tab', 'Feature Flags')}
           </TabsTrigger>
-          {funnelEnabled && (
-            <TabsTrigger value="funnel" className="gap-2">
-              <Filter className="h-4 w-4" aria-hidden="true" />
-              {t('admin.funnel.tab', 'Funnel')}
-            </TabsTrigger>
-          )}
+          <TabsTrigger value="funnel" className="gap-2">
+            <Filter className="h-4 w-4" aria-hidden="true" />
+            {t('admin.funnel.tab', 'Funnel')}
+          </TabsTrigger>
           <TabsTrigger value="ecosystem" className="gap-2">
             <Network className="h-4 w-4" aria-hidden="true" />
             {t('admin.ecosystem.tab', 'Ecosystem')}
@@ -195,11 +191,9 @@ export default function Admin() {
           <AdminFeatureFlagsManager />
         </TabsContent>
 
-        {funnelEnabled && (
-          <TabsContent value="funnel">
-            <AdminFunnelManager />
-          </TabsContent>
-        )}
+        <TabsContent value="funnel">
+          <AdminFunnelManager />
+        </TabsContent>
 
         <TabsContent value="ecosystem">
           <AdminEcosystemManager />
