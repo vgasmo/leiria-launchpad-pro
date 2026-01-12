@@ -11,12 +11,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, UserPlus, Ban, CheckCircle } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Plus, Trash2, UserPlus, Ban, CheckCircle, ChevronDown, User, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
 import type { StartupStage, HealthScore } from '@/types/database';
+
+const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 
 export function AdminWorkspacesManager() {
   const { t } = useTranslation();
@@ -30,7 +34,9 @@ export function AdminWorkspacesManager() {
   const [selectedStage, setSelectedStage] = useState<StartupStage>('ideation');
   const [selectedFounder, setSelectedFounder] = useState('');
   const [founderSearch, setFounderSearch] = useState('');
+  const [consultorSearch, setConsultorSearch] = useState('');
 
+  // Fetch workspaces with consultant info
   const { data: workspaces, isLoading } = useQuery({
     queryKey: ['admin-workspaces'],
     queryFn: async () => {
@@ -44,6 +50,33 @@ export function AdminWorkspacesManager() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch workspace users to get consultants
+  const { data: workspaceUsers } = useQuery({
+    queryKey: ['admin-workspace-users'],
+    queryFn: async () => {
+      // Get workspace users
+      const { data: wsUsers, error } = await supabase
+        .from('workspace_users')
+        .select('workspace_id, user_id, role, active')
+        .in('role', ['consultor', 'founder'])
+        .eq('active', true);
+      if (error) throw error;
+
+      // Get profiles for these users
+      const userIds = [...new Set(wsUsers?.map(wu => wu.user_id) || [])];
+      const { data: userProfiles } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url')
+        .in('id', userIds);
+
+      // Combine data
+      return wsUsers?.map(wu => ({
+        ...wu,
+        profile: userProfiles?.find(p => p.id === wu.user_id) || null,
+      }));
     },
   });
 
@@ -74,15 +107,50 @@ export function AdminWorkspacesManager() {
     },
   });
 
+  // Get consultors only (users with consultor role)
+  const { data: consultors } = useQuery({
+    queryKey: ['admin-consultors-list'],
+    queryFn: async () => {
+      // Get consultor user IDs
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'consultor');
+      if (error) throw error;
+
+      const userIds = roleData?.map(r => r.user_id) || [];
+      if (userIds.length === 0) return [];
+
+      // Get profiles for these users
+      const { data: consultorProfiles } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url')
+        .in('id', userIds);
+
+      return consultorProfiles || [];
+    },
+  });
+
+  // Helper to get consultant for a workspace
+  const getWorkspaceConsultor = (workspaceId: string) => {
+    const wsUser = workspaceUsers?.find(wu => wu.workspace_id === workspaceId && wu.role === 'consultor');
+    return wsUser?.profile as { id: string; email: string; full_name: string | null; avatar_url: string | null } | null | undefined;
+  };
+
   const filteredProfiles = profiles?.filter(p => 
     !founderSearch || 
     p.email.toLowerCase().includes(founderSearch.toLowerCase()) ||
     p.full_name?.toLowerCase().includes(founderSearch.toLowerCase())
   );
 
+  const filteredConsultors = consultors?.filter(c =>
+    !consultorSearch ||
+    c.email.toLowerCase().includes(consultorSearch.toLowerCase()) ||
+    c.full_name?.toLowerCase().includes(consultorSearch.toLowerCase())
+  );
+
   const createMutation = useMutation({
     mutationFn: async (data: { startup_id: string; program_id: string; stage: StartupStage; founder_id?: string }) => {
-      // Create workspace
       const { data: workspace, error: wsError } = await supabase
         .from('workspaces')
         .insert({ startup_id: data.startup_id, program_id: data.program_id, stage: data.stage })
@@ -90,7 +158,6 @@ export function AdminWorkspacesManager() {
         .single();
       if (wsError) throw wsError;
 
-      // If founder selected, assign them
       if (data.founder_id && workspace) {
         const { error: userError } = await supabase
           .from('workspace_users')
@@ -150,6 +217,63 @@ export function AdminWorkspacesManager() {
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
+  // Change stage mutation
+  const changeStageMutation = useMutation({
+    mutationFn: async ({ workspaceId, stage }: { workspaceId: string; stage: StartupStage }) => {
+      const { error } = await supabase
+        .from('workspaces')
+        .update({ stage })
+        .eq('id', workspaceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
+      toast.success(t('admin.workspacesManager.stageChanged', 'Stage updated'));
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
+  // Assign consultor mutation
+  const assignConsultorMutation = useMutation({
+    mutationFn: async ({ workspaceId, consultorId }: { workspaceId: string; consultorId: string }) => {
+      // First, remove any existing consultor
+      await supabase
+        .from('workspace_users')
+        .delete()
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'consultor');
+
+      // Then add new one
+      const { error } = await supabase
+        .from('workspace_users')
+        .insert({ workspace_id: workspaceId, user_id: consultorId, role: 'consultor', active: true });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      toast.success(t('admin.workspacesManager.consultorAssigned', 'Consultant assigned'));
+      setConsultorSearch('');
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
+  // Remove consultor mutation
+  const removeConsultorMutation = useMutation({
+    mutationFn: async (workspaceId: string) => {
+      const { error } = await supabase
+        .from('workspace_users')
+        .delete()
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'consultor');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      toast.success(t('admin.workspacesManager.consultorRemoved', 'Consultant removed'));
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
   const resetForm = () => {
     setSelectedStartup('');
     setSelectedProgram('');
@@ -172,8 +296,6 @@ export function AdminWorkspacesManager() {
       founder_id: selectedFounder || undefined,
     });
   };
-
-  const stages: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 
   const selectedFounderProfile = profiles?.find(p => p.id === selectedFounder);
 
@@ -217,7 +339,7 @@ export function AdminWorkspacesManager() {
                 <Select value={selectedStage} onValueChange={(v) => setSelectedStage(v as StartupStage)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {stages.map((s) => (
+                    {STAGES.map((s) => (
                       <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
                     ))}
                   </SelectContent>
@@ -292,88 +414,202 @@ export function AdminWorkspacesManager() {
         {isLoading ? (
           <p className="text-muted-foreground">{t('common.loading')}</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('admin.workspacesManager.startup')}</TableHead>
-                <TableHead>{t('admin.workspacesManager.program')}</TableHead>
-                <TableHead>{t('admin.workspacesManager.stage')}</TableHead>
-                <TableHead>{t('admin.workspacesManager.health')}</TableHead>
-                <TableHead>{t('admin.workspacesManager.status')}</TableHead>
-                <TableHead className="w-32">{t('common.actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {workspaces?.map((ws) => {
-                const isBlocked = !!(ws as any).blocked_at;
-                const startupName = (ws.startup as { name: string } | null)?.name || '-';
-                return (
-                  <TableRow key={ws.id} className={isBlocked ? 'opacity-60' : ''}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6 rounded">
-                          <AvatarImage src={(ws.startup as { logo_url: string | null } | null)?.logo_url || undefined} />
-                          <AvatarFallback className="rounded text-xs">
-                            {startupName.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {startupName}
-                      </div>
-                    </TableCell>
-                    <TableCell>{(ws.program as { name: string } | null)?.name || '-'}</TableCell>
-                    <TableCell><StageBadge stage={ws.stage} /></TableCell>
-                    <TableCell><HealthBadge score={(ws.health_score_override || ws.health_score) as HealthScore | null} /></TableCell>
-                    <TableCell>
-                      {isBlocked ? (
-                        <Badge variant="destructive" className="gap-1">
-                          <Ban className="h-3 w-3" />
-                          {t('admin.workspacesManager.blockedStatus')}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-green-600 border-green-600 gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          {t('admin.workspacesManager.activeStatus')}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('admin.workspacesManager.startup')}</TableHead>
+                  <TableHead>{t('admin.workspacesManager.program')}</TableHead>
+                  <TableHead>{t('admin.workspacesManager.stage')}</TableHead>
+                  <TableHead>{t('admin.workspacesManager.health')}</TableHead>
+                  <TableHead>{t('admin.workspacesManager.consultant', 'Consultant')}</TableHead>
+                  <TableHead>{t('admin.workspacesManager.status')}</TableHead>
+                  <TableHead className="w-40">{t('common.actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {workspaces?.map((ws) => {
+                  const isBlocked = !!(ws as any).blocked_at;
+                  const startupName = (ws.startup as { name: string } | null)?.name || '-';
+                  const consultor = getWorkspaceConsultor(ws.id);
+                  
+                  return (
+                    <TableRow key={ws.id} className={isBlocked ? 'opacity-60' : ''}>
+                      <TableCell className="font-medium">
+                        <Link to={`/workspace/${ws.id}`} className="flex items-center gap-2 hover:underline">
+                          <Avatar className="h-6 w-6 rounded">
+                            <AvatarImage src={(ws.startup as { logo_url: string | null } | null)?.logo_url || undefined} />
+                            <AvatarFallback className="rounded text-xs">
+                              {startupName.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {startupName}
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </Link>
+                      </TableCell>
+                      <TableCell>{(ws.program as { name: string } | null)?.name || '-'}</TableCell>
+                      
+                      {/* Inline Stage Selector */}
+                      <TableCell>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-1 hover:opacity-80">
+                              <StageBadge stage={ws.stage} />
+                              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-40 p-1" align="start">
+                            <div className="space-y-1">
+                              {STAGES.map((stage) => (
+                                <button
+                                  key={stage}
+                                  onClick={() => changeStageMutation.mutate({ workspaceId: ws.id, stage })}
+                                  className={`w-full text-left px-2 py-1.5 rounded text-sm hover:bg-muted capitalize ${
+                                    ws.stage === stage ? 'bg-muted font-medium' : ''
+                                  }`}
+                                  disabled={changeStageMutation.isPending}
+                                >
+                                  {stage}
+                                </button>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TableCell>
+                      
+                      <TableCell><HealthBadge score={(ws.health_score_override || ws.health_score) as HealthScore | null} /></TableCell>
+                      
+                      {/* Consultor Column with Inline Assignment */}
+                      <TableCell>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-2 hover:bg-muted px-2 py-1 rounded-md transition-colors">
+                              {consultor ? (
+                                <>
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={consultor.avatar_url || undefined} />
+                                    <AvatarFallback className="text-xs">
+                                      {(consultor.full_name || consultor.email).slice(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm truncate max-w-24">
+                                    {consultor.full_name || consultor.email.split('@')[0]}
+                                  </span>
+                                  <ChevronDown className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                </>
+                              ) : (
+                                <>
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">{t('admin.workspacesManager.assignConsultant', 'Assign')}</span>
+                                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                                </>
+                              )}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-2" align="start">
+                            <div className="space-y-2">
+                              <Input
+                                placeholder={t('admin.workspacesManager.searchConsultant', 'Search consultant...')}
+                                value={consultorSearch}
+                                onChange={(e) => setConsultorSearch(e.target.value)}
+                                className="h-8"
+                              />
+                              <div className="max-h-40 overflow-y-auto space-y-1">
+                                {filteredConsultors?.map((c) => (
+                                  <button
+                                    key={c.id}
+                                    onClick={() => assignConsultorMutation.mutate({ workspaceId: ws.id, consultorId: c.id })}
+                                    className={`w-full flex items-center gap-2 p-2 rounded hover:bg-muted text-left ${
+                                      consultor?.id === c.id ? 'bg-muted' : ''
+                                    }`}
+                                    disabled={assignConsultorMutation.isPending}
+                                  >
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage src={c.avatar_url || undefined} />
+                                      <AvatarFallback className="text-xs">{c.email.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm truncate">{c.full_name || c.email}</p>
+                                      {c.full_name && <p className="text-xs text-muted-foreground truncate">{c.email}</p>}
+                                    </div>
+                                    {consultor?.id === c.id && (
+                                      <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                                    )}
+                                  </button>
+                                ))}
+                                {filteredConsultors?.length === 0 && (
+                                  <p className="text-sm text-muted-foreground p-2">{t('common.noResults', 'No results')}</p>
+                                )}
+                              </div>
+                              {consultor && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full text-destructive hover:text-destructive"
+                                  onClick={() => removeConsultorMutation.mutate(ws.id)}
+                                  disabled={removeConsultorMutation.isPending}
+                                >
+                                  {t('admin.workspacesManager.removeConsultant', 'Remove Consultant')}
+                                </Button>
+                              )}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TableCell>
+                      
+                      <TableCell>
                         {isBlocked ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => unblockMutation.mutate(ws.id)}
-                            disabled={unblockMutation.isPending}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            {t('admin.workspacesManager.unblock')}
-                          </Button>
+                          <Badge variant="destructive" className="gap-1">
+                            <Ban className="h-3 w-3" />
+                            {t('admin.workspacesManager.blockedStatus')}
+                          </Badge>
                         ) : (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              setWorkspaceToBlock({ id: ws.id, name: startupName });
-                              setBlockDialogOpen(true);
-                            }}
-                          >
-                            <Ban className="h-4 w-4 mr-1" />
-                            {t('admin.workspacesManager.block')}
-                          </Button>
+                          <Badge variant="outline" className="text-green-600 border-green-600 gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            {t('admin.workspacesManager.activeStatus')}
+                          </Badge>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ws.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {workspaces?.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('admin.workspacesManager.noWorkspaces')}</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {isBlocked ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => unblockMutation.mutate(ws.id)}
+                              disabled={unblockMutation.isPending}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              {t('admin.workspacesManager.unblock')}
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setWorkspaceToBlock({ id: ws.id, name: startupName });
+                                setBlockDialogOpen(true);
+                              }}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              {t('admin.workspacesManager.block')}
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ws.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {workspaces?.length === 0 && (
+                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">{t('admin.workspacesManager.noWorkspaces')}</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
 
