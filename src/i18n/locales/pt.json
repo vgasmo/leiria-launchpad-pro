@@ -727,7 +727,9 @@
     "reports": "Relatórios",
     "governance": "Governança",
     "notAccessible": "Workspace Não Acessível",
-    "noPermission": "Este workspace não existe ou não tem permissão para o visualizar. Se acredita que deveria ter acesso, contacte um administrador."
+    "noPermission": "Este workspace não existe ou não tem permissão para o visualizar. Se acredita que deveria ter acesso, contacte um administrador.",
+    "responsibleConsultant": "Consultor Responsável",
+    "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve."
   },
   "investorUpdates": {
     "title": "Atualizações para Investidores",
@@ -1280,8 +1282,8 @@
     "addMilestoneDesc": "Definir um novo objetivo",
     "uploadDocument": "Carregar Documento",
     "uploadDocumentDesc": "Adicionar ficheiros ao workspace",
-    "weeklyCheckin": "Check-in Semanal",
-    "weeklyCheckinDesc": "Submeter a sua atualização semanal",
+    "monthlyCheckin": "Check-in Mensal",
+    "monthlyCheckinDesc": "Submeter a sua atualização mensal",
     "addKpi": "Adicionar KPI",
     "addAction": "Adicionar Ação",
     "requestSession": "Solicitar Sessão"
@@ -1306,7 +1308,8 @@
     "overdueActions_plural": "{{count}} ações atrasadas",
     "completeOrReschedule": "Conclua ou reagende estas tarefas",
     "viewActions": "Ver Ações",
-    "weeklyCheckinPending": "Check-in semanal pendente",
+    "weeklyCheckinPending": "Check-in mensal pendente",
+    "monthlyCheckinPending": "Check-in mensal pendente",
     "dueOn": "Vence {{date}}",
     "completeCheckin": "Completar Check-in",
     "updateKpisForMonth": "Atualizar KPIs deste mês",
@@ -2036,6 +2039,10 @@
     "mentorRequested": {
       "title": "🤝 Mentor solicitado!",
       "description": "Vamos encontrar o especialista certo"
+    },
+    "monthlyWinsSubmitted": {
+      "title": "✅ Vitórias mensais submetidas!",
+      "description": "Excelente trabalho a acompanhar o progresso deste mês!"
     }
   },
   "weeklyWins": {
@@ -2054,6 +2061,23 @@
     "enterKpi": "Introduza {{name}}...",
     "submitting": "A submeter...",
     "submit": "Submeter Vitórias Semanais"
+  },
+  "monthlyWins": {
+    "title": "Vitórias Mensais",
+    "description": "Partilhe o seu progresso mensal e celebre vitórias",
+    "pending": "Vitórias Mensais Pendentes",
+    "overdue": "Atrasado",
+    "dueToday": "Para hoje",
+    "dueTomorrow": "Para amanhã",
+    "dueOn": "Para {{date}}",
+    "skip": "Saltar",
+    "complete": "Completar",
+    "yourAnswer": "A sua resposta...",
+    "enterNumber": "Introduza um número...",
+    "kpisThisMonth": "KPIs deste mês",
+    "enterKpi": "Introduza {{name}}...",
+    "submitting": "A submeter...",
+    "submit": "Submeter Vitórias Mensais"
   },
   "healthScore": {
     "whyThisScore": "Porquê este score?",
