@@ -78,8 +78,13 @@ export default function WorkspaceDetail() {
     return (
       <AppLayout title={startup?.name || 'Workspace'}>
         <PendingWorkspaceView 
-          workspaceName={startup?.name || 'Your Startup'}
-          programName={program?.name}
+          workspace={{
+            id: workspace.id,
+            stage: workspace.stage,
+            created_at: workspace.created_at,
+            startup: startup ? { name: startup.name, description: startup.description } : null,
+            program: program,
+          }}
         />
       </AppLayout>
     );
