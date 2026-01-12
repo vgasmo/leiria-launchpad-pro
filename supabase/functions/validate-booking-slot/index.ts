@@ -182,21 +182,33 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
     }
 
-    // Get workspace consultant email
-    const { data: consultorMember } = await supabaseAdmin
+    // Get workspace consultant email (avoid embedded profile relationship dependencies)
+    const { data: consultantMembership, error: membershipErr } = await supabaseAdmin
       .from('workspace_users')
-      .select('user_id, profiles!inner(email, full_name)')
+      .select('user_id')
       .eq('workspace_id', workspaceId)
       .eq('role', 'consultor')
       .eq('active', true)
       .maybeSingle();
 
-    const consultantEmail = (consultorMember?.profiles as any)?.email as string | undefined;
+    if (membershipErr) {
+      log.error('Failed to fetch consultant membership', { membershipErr });
+      return corsJsonResponse({ available: true, checked: false, reason: 'consultant_query_error' }, req);
+    }
+
+    if (!consultantMembership?.user_id) {
+      return corsJsonResponse({ available: true, checked: false, reason: 'no_consultant' }, req);
+    }
+
+    const { data: consultantProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', consultantMembership.user_id)
+      .maybeSingle();
+
+    const consultantEmail = consultantProfile?.email as string | undefined;
     if (!consultantEmail) {
-      return corsJsonResponse(
-        { available: true, checked: false, reason: 'no_consultant_email' },
-        req,
-      );
+      return corsJsonResponse({ available: true, checked: false, reason: 'no_consultant_email' }, req);
     }
 
     const credentials = await getGraphCredentials(supabaseAdmin);
