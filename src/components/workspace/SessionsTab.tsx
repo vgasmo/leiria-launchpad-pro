@@ -64,7 +64,7 @@ import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { generateTimeSlots, useConsultantAvailability } from '@/hooks/useConsultantCalendar';
+import { generateTimeSlots, useConsultantAvailability, useValidateBookingSlot } from '@/hooks/useConsultantCalendar';
 import {
   Select,
   SelectContent,
@@ -482,11 +482,13 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
     return data;
   };
 
+  const validateSlotMutation = useValidateBookingSlot();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let scheduledAtISO: string;
-    
+
     if (useManualTime) {
       if (!title.trim() || !manualDateTime) {
         toast.error(t('common.error'));
@@ -498,6 +500,34 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
         toast.error(t('sessions.selectDateAndSlot', 'Please select a date and time slot'));
         return;
       }
+
+      // Hard gate for consultant bookings: validate the chosen slot before creating the session.
+      if (meetingWith === 'consultor') {
+        const durationMinutes = Number.parseInt(duration || '60', 10);
+        const start = new Date(selectedSlot);
+        const end = new Date(start.getTime() + durationMinutes * 60000);
+
+        const validation = await validateSlotMutation.mutateAsync({
+          workspaceId,
+          startTime: selectedSlot,
+          endTime: end.toISOString(),
+        });
+
+        if (validation.checked && !validation.available) {
+          toast.error(t('sessions.slotBusy', 'Esse horário está ocupado no calendário do consultor.'));
+          return;
+        }
+
+        if (!validation.checked && validation.reason) {
+          toast.warning(
+            t(
+              'sessions.slotNotVerified',
+              'Não foi possível confirmar a disponibilidade no calendário; por favor confirme com o consultor.',
+            ),
+          );
+        }
+      }
+
       scheduledAtISO = new Date(selectedSlot).toISOString();
     }
 
@@ -551,7 +581,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
           console.error('Email sending error:', emailError);
         }
       }
-      
+
       toast.success(t('sessions.sessionCreated'));
       onOpenChange(false);
       resetForm();

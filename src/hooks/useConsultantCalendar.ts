@@ -20,7 +20,7 @@ interface FreeBusyResult {
  * Hook to check consultant's calendar availability via Graph API integration
  */
 export function useConsultantAvailability(
-  workspaceId: string | undefined, 
+  workspaceId: string | undefined,
   date: string | undefined
 ) {
   return useQuery({
@@ -28,21 +28,9 @@ export function useConsultantAvailability(
     queryFn: async (): Promise<FreeBusyResult | null> => {
       if (!workspaceId || !date) return null;
 
-      // Check if Graph API is configured for this workspace
-      const { data: settings } = await supabase
-        .from('outlook_calendar_settings')
-        .select('enabled, graph_client_id, calendar_user_email')
-        .eq('workspace_id', workspaceId)
-        .maybeSingle();
-
-      if (!settings?.enabled || !settings.graph_client_id) {
-        // No calendar integration - return null, booking will proceed without validation
-        return null;
-      }
-
-      // Call the free/busy check edge function
+      // Always ask backend; it will gracefully degrade (and can return warnings/reasons)
       const { data, error } = await supabase.functions.invoke('check-consultant-availability', {
-        body: { workspaceId, date }
+        body: { workspaceId, date },
       });
 
       if (error) {
@@ -63,23 +51,23 @@ export function useConsultantAvailability(
  */
 export function useValidateBookingSlot() {
   return useMutation({
-    mutationFn: async ({ 
-      workspaceId, 
-      startTime, 
-      endTime 
-    }: { 
-      workspaceId: string; 
-      startTime: string; 
+    mutationFn: async ({
+      workspaceId,
+      startTime,
+      endTime,
+    }: {
+      workspaceId: string;
+      startTime: string;
       endTime: string;
-    }): Promise<{ available: boolean; conflict?: string }> => {
+    }): Promise<{ available: boolean; checked: boolean; conflict?: string; reason?: string }> => {
       const { data, error } = await supabase.functions.invoke('validate-booking-slot', {
-        body: { workspaceId, startTime, endTime }
+        body: { workspaceId, startTime, endTime },
       });
 
       if (error) {
         console.error('Validation error:', error);
-        // If validation fails, allow booking with warning
-        return { available: true };
+        // Fail open (checked=false) so UI may warn but not block in case of temporary issues
+        return { available: true, checked: false, reason: 'validation_error' };
       }
 
       return data;
