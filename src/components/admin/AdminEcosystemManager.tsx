@@ -41,62 +41,71 @@ export function AdminEcosystemManager() {
   const { data: ecosystemData, isLoading } = useQuery({
     queryKey: ['ecosystem-unified'],
     queryFn: async (): Promise<EcosystemItem[]> => {
+      // Fetch workspaces with basic data only to avoid deep type recursion
       const { data: workspaces, error } = await supabase
         .from('workspaces')
-        .select(`
-          id,
-          stage,
-          status,
-          health_score,
-          assigned_consultor_id,
-          created_at,
-          startup:startups(id, name),
-          program:programs(id, name),
-          consultant:profiles!workspaces_assigned_consultor_id_fkey(id, full_name)
-        `)
+        .select('id, stage, status, health_score, assigned_consultor_id, created_at, startup_id, program_id')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
+      if (!workspaces || workspaces.length === 0) return [];
 
-      // Get next sessions for each workspace
-      const workspaceIds = workspaces?.map(w => w.id) || [];
-      const { data: sessions } = await supabase
-        .from('sessions')
-        .select('workspace_id, scheduled_at')
-        .in('workspace_id', workspaceIds)
-        .gte('scheduled_at', new Date().toISOString())
-        .order('scheduled_at', { ascending: true });
+      const workspaceIds = workspaces.map(w => w.id);
+      const startupIds = workspaces.map(w => w.startup_id).filter(Boolean) as string[];
+      const programIds = [...new Set(workspaces.map(w => w.program_id).filter(Boolean))] as string[];
+      const consultantIds = [...new Set(workspaces.map(w => w.assigned_consultor_id).filter(Boolean))] as string[];
 
-      // Get last check-ins
-      const { data: checkins } = await supabase
-        .from('checkin_instances')
-        .select('workspace_id, submitted_at')
-        .in('workspace_id', workspaceIds)
-        .eq('status', 'submitted')
-        .order('submitted_at', { ascending: false });
+      // Fetch related data in parallel
+      const [startupsRes, programsRes, consultantsRes, sessionsRes, checkinsRes] = await Promise.all([
+        startupIds.length > 0
+          ? supabase.from('startups').select('id, name').in('id', startupIds)
+          : Promise.resolve({ data: [] }),
+        programIds.length > 0
+          ? supabase.from('programs').select('id, name').in('id', programIds)
+          : Promise.resolve({ data: [] }),
+        consultantIds.length > 0
+          ? supabase.from('profiles').select('id, full_name').in('id', consultantIds)
+          : Promise.resolve({ data: [] }),
+        supabase
+          .from('sessions')
+          .select('workspace_id, scheduled_at')
+          .in('workspace_id', workspaceIds)
+          .gte('scheduled_at', new Date().toISOString())
+          .order('scheduled_at', { ascending: true }),
+        supabase
+          .from('checkin_instances')
+          .select('workspace_id, submitted_at')
+          .in('workspace_id', workspaceIds)
+          .eq('status', 'submitted')
+          .order('submitted_at', { ascending: false }),
+      ]);
+
+      const startupMap = new Map((startupsRes.data || []).map(s => [s.id, s.name]));
+      const programMap = new Map((programsRes.data || []).map(p => [p.id, p.name]));
+      const consultantMap = new Map((consultantsRes.data || []).map(c => [c.id, c.full_name]));
 
       const sessionMap: Record<string, string> = {};
-      sessions?.forEach(s => {
+      (sessionsRes.data || []).forEach(s => {
         if (!sessionMap[s.workspace_id]) {
           sessionMap[s.workspace_id] = s.scheduled_at;
         }
       });
 
       const checkinMap: Record<string, string> = {};
-      checkins?.forEach(c => {
+      (checkinsRes.data || []).forEach(c => {
         if (c.submitted_at && !checkinMap[c.workspace_id]) {
           checkinMap[c.workspace_id] = c.submitted_at;
         }
       });
 
-      return (workspaces || []).map(w => ({
+      return workspaces.map(w => ({
         workspace_id: w.id,
-        startup_name: (w.startup as unknown as { name: string })?.name || 'Unknown',
-        program_name: (w.program as unknown as { name: string })?.name || null,
+        startup_name: startupMap.get(w.startup_id) || 'Unknown',
+        program_name: w.program_id ? programMap.get(w.program_id) || null : null,
         stage: w.stage as string,
         status: w.status,
         health_score: w.health_score,
-        assigned_consultant_name: (w.consultant as unknown as { full_name: string })?.full_name || null,
+        assigned_consultant_name: w.assigned_consultor_id ? consultantMap.get(w.assigned_consultor_id) || null : null,
         assigned_consultant_id: w.assigned_consultor_id,
         next_session_date: sessionMap[w.id] || null,
         last_checkin_date: checkinMap[w.id] || null,
