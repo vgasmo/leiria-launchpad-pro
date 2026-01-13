@@ -15,15 +15,16 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Search, Download, Building2, Calendar, User, X, Plus, 
-  ChevronDown, Ban, CheckCircle, ExternalLink, Trash2, AlertTriangle 
+  ChevronDown, Ban, CheckCircle, ExternalLink, Trash2, AlertTriangle, Star
 } from 'lucide-react';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import type { StartupStage } from '@/types/database';
+import type { StartupStage, WorkspacePriority } from '@/types/database';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
+const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
 
 interface BackofficeItem {
   workspace_id: string;
@@ -36,6 +37,7 @@ interface BackofficeItem {
   stage: string;
   status: string;
   health_score: number | null;
+  priority_level: string | null;
   assigned_consultant_id: string | null;
   assigned_consultant_name: string | null;
   next_session_date: string | null;
@@ -64,7 +66,7 @@ export function AdminBackoffice() {
     queryFn: async (): Promise<BackofficeItem[]> => {
       const { data: workspaces, error } = await supabase
         .from('workspaces')
-        .select('id, stage, status, health_score, assigned_consultor_id, created_at, startup_id, program_id')
+        .select('id, stage, status, health_score, priority_level, assigned_consultor_id, created_at, startup_id, program_id')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -130,6 +132,7 @@ export function AdminBackoffice() {
           stage: w.stage as string,
           status: w.status,
           health_score: typeof w.health_score === 'number' ? w.health_score : null,
+          priority_level: (w as any).priority_level || null,
           assigned_consultant_id: w.assigned_consultor_id,
           assigned_consultant_name: w.assigned_consultor_id ? consultantMap.get(w.assigned_consultor_id) || null : null,
           next_session_date: sessionMap[w.id] || null,
@@ -169,6 +172,18 @@ export function AdminBackoffice() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
       toast.success(t('admin.backoffice.stageUpdated', 'Stage updated'));
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
+  const changePriorityMutation = useMutation({
+    mutationFn: async ({ workspaceId, priority }: { workspaceId: string; priority: WorkspacePriority }) => {
+      const { error } = await supabase.from('workspaces').update({ priority_level: priority }).eq('id', workspaceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
+      toast.success(t('admin.backoffice.priorityUpdated', 'Priority updated'));
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -405,6 +420,7 @@ export function AdminBackoffice() {
                   <TableHead>{t('admin.backoffice.startup', 'Startup')}</TableHead>
                   <TableHead>{t('admin.backoffice.program', 'Program')}</TableHead>
                   <TableHead>{t('admin.backoffice.stage', 'Stage')}</TableHead>
+                  <TableHead>{t('admin.backoffice.priority', 'Priority')}</TableHead>
                   <TableHead>{t('admin.backoffice.health', 'Health')}</TableHead>
                   <TableHead>{t('admin.backoffice.consultant', 'Consultant')}</TableHead>
                   <TableHead>{t('admin.backoffice.nextSession', 'Next Session')}</TableHead>
@@ -415,7 +431,7 @@ export function AdminBackoffice() {
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       {t('admin.backoffice.noStartups', 'No startups found')}
                     </TableCell>
                   </TableRow>
@@ -458,6 +474,37 @@ export function AdminBackoffice() {
                                 className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded capitalize"
                               >
                                 {s}
+                              </button>
+                            ))}
+                          </PopoverContent>
+                        </Popover>
+                      </TableCell>
+                      
+                      {/* Priority - inline editable */}
+                      <TableCell>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-1 hover:bg-muted rounded px-1 -ml-1">
+                              {item.priority_level === 'star' && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                              {item.priority_level === 'high' && <Star className="h-4 w-4 text-orange-500" />}
+                              {item.priority_level === 'standard' && <span className="text-sm text-muted-foreground">—</span>}
+                              {item.priority_level === 'maintenance' && <span className="text-xs text-muted-foreground">🔧</span>}
+                              {!item.priority_level && <span className="text-sm text-muted-foreground">—</span>}
+                              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-40 p-1">
+                            {PRIORITY_LEVELS.map(p => (
+                              <button
+                                key={p}
+                                onClick={() => changePriorityMutation.mutate({ workspaceId: item.workspace_id, priority: p })}
+                                className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded flex items-center gap-2"
+                              >
+                                {p === 'star' && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                                {p === 'high' && <Star className="h-4 w-4 text-orange-500" />}
+                                {p === 'standard' && <span className="h-4 w-4 text-center">—</span>}
+                                {p === 'maintenance' && <span className="h-4 w-4 text-center">🔧</span>}
+                                <span className="capitalize">{p}</span>
                               </button>
                             ))}
                           </PopoverContent>
