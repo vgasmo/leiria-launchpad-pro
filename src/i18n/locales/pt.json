@@ -631,6 +631,118 @@
     "submittedForReview": "Submetido para revisão",
     "submitFailed": "Falha ao submeter",
     "canvasReviewSection": "Revisão de Canvas",
+    "aiCoachNotes": {
+      "summaryHeading": "## Resumo do AI Coach",
+      "strengthsHeading": "### Pontos Fortes",
+      "gapsHeading": "### Lacunas a Resolver",
+      "redFlagsHeading": "### Alertas",
+      "agendaHeading": "### Agenda da Próxima Sessão"
+    },
+    "severity": {
+      "high": "ALTO",
+      "medium": "MÉDIO",
+      "low": "BAIXO"
+    },
+    "priority": {
+      "urgent": "Urgente",
+      "high": "Alta",
+      "medium": "Média",
+      "low": "Baixa"
+    },
+    "ownerHint": {
+      "founder": "Fundador",
+      "team": "Equipa",
+      "consultant": "Consultor",
+      "mentor": "Mentor"
+    },
+    "dueInDaysShort": "{{count}}d",
+    "dueAndOwner": "{{days}} • {{owner}}",
+    "catalog": {
+      "unit_economics": {
+        "title": "Economia Unitária",
+        "desc": "Métricas financeiras chave por cliente"
+      },
+      "fundraising_readiness": {
+        "title": "Preparação para Angariação de Capital",
+        "desc": "Avalie a sua preparação para levantar capital"
+      },
+      "investor_meeting_prep": {
+        "title": "Preparação de Reunião com Investidores",
+        "desc": "Checklist de preparação para reuniões com investidores"
+      },
+      "pitch_deck_checklist": {
+        "title": "Checklist do Pitch Deck",
+        "desc": "Slides essenciais para o seu pitch de investidores"
+      },
+      "quarterly_okrs": {
+        "title": "OKRs Trimestrais",
+        "desc": "Objetivos e Resultados Chave para o trimestre"
+      },
+      "go_to_market_plan": {
+        "title": "Plano Go-to-Market",
+        "desc": "Estratégia para lançar e crescer o seu produto"
+      },
+      "mvp_definition": {
+        "title": "Definição de MVP",
+        "desc": "Framework para definir o seu Produto Mínimo Viável"
+      },
+      "product_roadmap": {
+        "title": "Roadmap de Produto",
+        "desc": "Template de planeamento trimestral de roadmap de produto"
+      },
+      "business_model_canvas": {
+        "title": "Business Model Canvas",
+        "desc": "Visão geral do modelo de negócio"
+      },
+      "lean_canvas": {
+        "title": "Lean Canvas",
+        "desc": "Modelo de negócio de uma página para startups"
+      },
+      "swot_analysis": {
+        "title": "Análise SWOT",
+        "desc": "Analise forças, fraquezas, oportunidades e ameaças da sua startup"
+      },
+      "value_proposition_canvas": {
+        "title": "Value Proposition Canvas",
+        "desc": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços"
+      },
+      "empathy_map": {
+        "title": "Mapa de Empatia",
+        "desc": "Compreenda o que os seus clientes pensam, sentem, veem, ouvem, dizem e fazem"
+      },
+      "icp_and_persona_board": {
+        "title": "ICP e Quadro de Personas",
+        "desc": "Defina o seu perfil de cliente ideal e personas de comprador"
+      },
+      "go_to_market_canvas": {
+        "title": "Canvas Go-to-Market",
+        "desc": "Estratégia go-to-market completa"
+      },
+      "pricing_and_packaging": {
+        "title": "Preços e Pacotes",
+        "desc": "Estratégia de preços e estrutura de planos"
+      },
+      "growth_loops_canvas": {
+        "title": "Canvas de Loops de Crescimento",
+        "desc": "Desenhe loops de crescimento sustentáveis"
+      },
+      "okrs_and_north_star": {
+        "title": "OKRs e North Star",
+        "desc": "Defina a sua métrica North Star e OKRs"
+      },
+      "fundraising_canvas": {
+        "title": "Canvas de Angariação de Capital",
+        "desc": "Prepare-se para levantar a sua próxima ronda"
+      },
+      "sales_pipeline_canvas": {
+        "title": "Canvas de Pipeline de Vendas",
+        "desc": "Gira e analise o seu pipeline de vendas"
+      },
+      "product_roadmap_canvas": {
+        "title": "Canvas de Roadmap de Produto",
+        "desc": "Planeie o roadmap de produto por trimestre"
+      }
+    },
     "canvasTabLabels": {
       "pricing": "Preços",
       "growth": "Crescimento",

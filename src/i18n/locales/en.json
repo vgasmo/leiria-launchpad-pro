@@ -671,6 +671,118 @@
     "submittedForReview": "Submitted for review",
     "submitFailed": "Failed to submit",
     "canvasReviewSection": "Canvas Review",
+    "aiCoachNotes": {
+      "summaryHeading": "## AI Coach Summary",
+      "strengthsHeading": "### Strengths",
+      "gapsHeading": "### Gaps to Address",
+      "redFlagsHeading": "### Red Flags",
+      "agendaHeading": "### Next Session Agenda"
+    },
+    "severity": {
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "ownerHint": {
+      "founder": "Founder",
+      "team": "Team",
+      "consultant": "Consultant",
+      "mentor": "Mentor"
+    },
+    "dueInDaysShort": "{{count}}d",
+    "dueAndOwner": "{{days}} • {{owner}}",
+    "catalog": {
+      "unit_economics": {
+        "title": "Unit Economics",
+        "desc": "Key financial metrics per customer"
+      },
+      "fundraising_readiness": {
+        "title": "Fundraising Readiness",
+        "desc": "Assess your readiness for raising capital"
+      },
+      "investor_meeting_prep": {
+        "title": "Investor Meeting Prep",
+        "desc": "Preparation checklist for investor meetings"
+      },
+      "pitch_deck_checklist": {
+        "title": "Pitch Deck Checklist",
+        "desc": "Essential slides for your investor pitch"
+      },
+      "quarterly_okrs": {
+        "title": "Quarterly OKRs",
+        "desc": "Objectives and Key Results for the quarter"
+      },
+      "go_to_market_plan": {
+        "title": "Go-to-Market Plan",
+        "desc": "Strategy for launching and growing your product"
+      },
+      "mvp_definition": {
+        "title": "MVP Definition",
+        "desc": "Framework for defining your Minimum Viable Product"
+      },
+      "product_roadmap": {
+        "title": "Product Roadmap",
+        "desc": "Quarterly product roadmap planning template"
+      },
+      "business_model_canvas": {
+        "title": "Business Model Canvas",
+        "desc": "High-level business model overview"
+      },
+      "lean_canvas": {
+        "title": "Lean Canvas",
+        "desc": "One-page business model for startups"
+      },
+      "swot_analysis": {
+        "title": "SWOT Analysis",
+        "desc": "Analyze your startup strengths, weaknesses, opportunities and threats"
+      },
+      "value_proposition_canvas": {
+        "title": "Value Proposition Canvas",
+        "desc": "Map customer jobs, pains and gains to your products and services"
+      },
+      "empathy_map": {
+        "title": "Empathy Map",
+        "desc": "Understand what your customers think, feel, see, hear, say and do"
+      },
+      "icp_and_persona_board": {
+        "title": "ICP & Persona Board",
+        "desc": "Define your ideal customer profile and buyer personas"
+      },
+      "go_to_market_canvas": {
+        "title": "Go-To-Market Canvas",
+        "desc": "Complete go-to-market strategy"
+      },
+      "pricing_and_packaging": {
+        "title": "Pricing & Packaging",
+        "desc": "Pricing strategy and tier structure"
+      },
+      "growth_loops_canvas": {
+        "title": "Growth Loops Canvas",
+        "desc": "Design sustainable growth loops"
+      },
+      "okrs_and_north_star": {
+        "title": "OKRs & North Star",
+        "desc": "Define your North Star metric and OKRs"
+      },
+      "fundraising_canvas": {
+        "title": "Fundraising Canvas",
+        "desc": "Prepare for your next funding round"
+      },
+      "sales_pipeline_canvas": {
+        "title": "Sales Pipeline Canvas",
+        "desc": "Manage and analyze your sales pipeline"
+      },
+      "product_roadmap_canvas": {
+        "title": "Product Roadmap Canvas",
+        "desc": "Plan product roadmap by quarter"
+      }
+    },
     "canvasTabLabels": {
       "pricing": "Pricing",
       "growth": "Growth",

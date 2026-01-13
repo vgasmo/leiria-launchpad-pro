@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UnitEconomicsCalculator } from './UnitEconomicsCalculator';
 import { TemplateCoachPanel } from './TemplateCoachPanel';
 import { CanvasTemplate, CanvasType, getCanvasType } from './CanvasTemplate';
+import { getLocalizedTemplateMeta, getLocalizedCategoryLabel } from '@/lib/templateCatalogI18n';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -44,13 +45,13 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const [selectedInstance, setSelectedInstance] = useState<TemplateInstance | null>(null);
   const [activeTab, setActiveTab] = useState('templates');
 
-  // Group templates by category
+  // Group templates by category KEY (stable for grouping, then display localized label)
   const templatesByCategory = useMemo(() => {
     if (!templates) return {};
-    return templates.reduce((acc, t) => {
-      const cat = t.category || 'Other';
+    return templates.reduce((acc, tmpl) => {
+      const cat = tmpl.category || 'Other';
       if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(t);
+      acc[cat].push(tmpl);
       return acc;
     }, {} as Record<string, Template[]>);
   }, [templates]);
@@ -189,14 +190,14 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
 
       <TabsContent value="templates" className="space-y-6">
       {categories.map(category => {
-        // Use i18n for category with fallback
-        const translatedCategory = t(`templates.categories.${category}`, category);
+        // Get localized category label using our helper
+        const categoryLabel = getLocalizedCategoryLabel(category, t);
         
         return (
           <div key={category}>
             <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
-              {translatedCategory}
+              {categoryLabel}
             </h3>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {templatesByCategory[category].map(template => {
@@ -204,11 +205,8 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
                 const isCompleted = instance?.status === 'completed';
                 const isStarted = !!instance;
                 
-                // Use i18n for template name and description with fallback to DB value
-                const templateName = t(`templates.names.${template.name}`, template.name);
-                const templateDesc = template.description 
-                  ? t(`templates.descriptions.${template.name}`, template.description)
-                  : undefined;
+                // Get fully localized template metadata
+                const meta = getLocalizedTemplateMeta(template, t);
 
                 return (
                   <Card 
@@ -220,12 +218,12 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm flex items-center gap-2">
-                            {templateName}
+                            {meta.title}
                             {isCompleted && <Check className="h-4 w-4 text-green-600" />}
                           </h4>
-                          {templateDesc && (
+                          {meta.description && (
                             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {templateDesc}
+                              {meta.description}
                             </p>
                           )}
                         </div>
@@ -562,13 +560,13 @@ function TemplateEditorDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{t(`templates.names.${template.name}`, template.name)}</span>
+            <span>{getLocalizedTemplateMeta(template, t).title}</span>
             {instance?.status === 'completed' && (
               <Badge className="bg-green-100 text-green-700">{t('templates.completed', 'Completed')}</Badge>
             )}
           </DialogTitle>
           {template.description && (
-            <p className="text-sm text-muted-foreground">{t(`templates.descriptions.${template.name}`, template.description)}</p>
+            <p className="text-sm text-muted-foreground">{getLocalizedTemplateMeta(template, t).description}</p>
           )}
         </DialogHeader>
         
