@@ -204,34 +204,34 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
           <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
             <p className="text-sm font-medium flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              Contacto Principal
+              {t('createStartup.mainContact', 'Main Contact')}
             </p>
             <div className="space-y-3">
               <div className="space-y-1">
-                <Label htmlFor="main-contact-name" className="text-xs">Nome</Label>
+                <Label htmlFor="main-contact-name" className="text-xs">{t('createStartup.contactName', 'Name')}</Label>
                 <Input
                   id="main-contact-name"
                   value={mainContactName}
                   onChange={(e) => setMainContactName(e.target.value)}
-                  placeholder="João Silva"
+                  placeholder={t('createStartup.contactNamePlaceholder', 'John Smith')}
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="main-contact-email" className="text-xs">
                   <Mail className="h-3 w-3 inline mr-1" />
-                  Email
+                  {t('auth.email', 'Email')}
                 </Label>
                 <Input
                   id="main-contact-email"
                   type="email"
                   value={mainContactEmail}
                   onChange={(e) => setMainContactEmail(e.target.value)}
-                  placeholder="joao@startup.pt"
+                  placeholder={t('createStartup.contactEmailPlaceholder', 'john@startup.com')}
                   className="w-full"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="main-contact-phone" className="text-xs">Telefone</Label>
+                <Label htmlFor="main-contact-phone" className="text-xs">{t('createStartup.contactPhone', 'Phone')}</Label>
                 <Input
                   id="main-contact-phone"
                   value={mainContactPhone}
