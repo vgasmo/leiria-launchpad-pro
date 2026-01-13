@@ -565,6 +565,19 @@
       "Validation": "Validation",
       "Other": "Other"
     },
+    "categories": {
+      "Finance": "Finance",
+      "Fundraising": "Fundraising",
+      "Goals": "Goals",
+      "Strategy": "Strategy",
+      "Product": "Product",
+      "Team": "Team",
+      "Customer": "Customer",
+      "Sales": "Sales",
+      "Marketing": "Marketing",
+      "Operations": "Operations",
+      "Other": "Other"
+    },
     "names": {
       "Unit Economics": "Unit Economics",
       "Fundraising Readiness": "Fundraising Readiness",
@@ -585,7 +598,15 @@
       "Team Retrospective": "Team Retrospective",
       "Customer Persona": "Customer Persona",
       "Empathy Map": "Empathy Map",
-      "Problem Discovery Interview": "Problem Discovery Interview"
+      "Problem Discovery Interview": "Problem Discovery Interview",
+      "ICP & Persona Board": "ICP & Persona Board",
+      "Pricing & Packaging": "Pricing & Packaging",
+      "Growth Loops Canvas": "Growth Loops Canvas",
+      "OKRs & North Star": "OKRs & North Star",
+      "Fundraising Canvas": "Fundraising Canvas",
+      "Sales Pipeline Canvas": "Sales Pipeline Canvas",
+      "Product Roadmap Canvas": "Product Roadmap Canvas",
+      "Go-To-Market Canvas": "Go-To-Market Canvas"
     },
     "descriptions": {
       "Unit Economics": "Key financial metrics per customer",
@@ -607,7 +628,15 @@
       "Team Retrospective": "Framework for team retrospective meetings",
       "Customer Persona": "Detailed customer persona template for understanding target users",
       "Empathy Map": "Understand what your customers think, feel, see, hear, say and do",
-      "Problem Discovery Interview": "Script for conducting customer discovery interviews to validate problem-solution fit"
+      "Problem Discovery Interview": "Script for conducting customer discovery interviews to validate problem-solution fit",
+      "ICP & Persona Board": "Define your ideal customer profile and buyer personas",
+      "Pricing & Packaging": "Pricing strategy and tier structure",
+      "Growth Loops Canvas": "Design sustainable growth loops",
+      "OKRs & North Star": "Define your North Star metric and OKRs",
+      "Fundraising Canvas": "Prepare for your next funding round",
+      "Sales Pipeline Canvas": "Manage and analyze your sales pipeline",
+      "Product Roadmap Canvas": "Plan product roadmap by quarter",
+      "Go-To-Market Canvas": "Complete go-to-market strategy"
     },
     "noSchemaConfigured": "This template has no form schema configured.",
     "completed": "Completed",
@@ -652,6 +681,12 @@
     "submittedForReview": "Submitted for review",
     "submitFailed": "Failed to submit",
     "canvasReviewSection": "Canvas Review",
+    "canvasTabLabels": {
+      "pricing": "Pricing",
+      "growth": "Growth",
+      "fundraising": "Fund",
+      "pipeline": "Pipeline"
+    },
     "formFields": {
       "investorName": "Investor/Firm Name",
       "meetingDate": "Meeting Date",
