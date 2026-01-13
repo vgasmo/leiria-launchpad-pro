@@ -77,7 +77,7 @@ export function TemplateCoachPanel({
     }
     
     onCopyToNotes(notes.trim());
-    toast.success('Copied to review notes');
+    toast.success(t('templates.copiedToNotes', 'Copied to review notes'));
   };
 
   const handleApplyReview = (decision: 'approved' | 'needs_changes') => {

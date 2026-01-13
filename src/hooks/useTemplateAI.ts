@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import i18n from '@/i18n';
 
 export interface AICoachFeedback {
   summary: string;
@@ -29,6 +30,7 @@ export interface GenerateCoachResponse {
 // Generate AI Coach feedback for a template instance
 export function useGenerateTemplateCoach() {
   const queryClient = useQueryClient();
+  const t = (key: string, fallback?: string) => i18n.t(key, fallback);
 
   return useMutation({
     mutationFn: async ({
@@ -50,18 +52,18 @@ export function useGenerateTemplateCoach() {
 
       return data as GenerateCoachResponse;
     },
-    onSuccess: (_, { templateInstanceId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['template-instances'] });
-      toast.success('AI Coach analysis complete');
+      toast.success(t('templates.aiCoachComplete', 'AI Coach analysis complete'));
     },
     onError: (error: Error) => {
       console.error('[useGenerateTemplateCoach] Error:', error);
       if (error.message.includes('429') || error.message.includes('rate limit')) {
-        toast.error('Rate limit exceeded. Please try again later.');
+        toast.error(t('sessions.rateLimitError', 'Rate limit exceeded. Please try again later.'));
       } else if (error.message.includes('402') || error.message.includes('credits')) {
-        toast.error('AI credits exhausted. Please add credits.');
+        toast.error(t('sessions.creditsError', 'AI credits exhausted. Please add credits.'));
       } else {
-        toast.error(error.message || 'Failed to generate AI feedback');
+        toast.error(error.message || t('templates.aiCoachFailed', 'Failed to generate AI feedback'));
       }
     },
   });
@@ -70,6 +72,7 @@ export function useGenerateTemplateCoach() {
 // Create actions from AI recommendations
 export function useCreateActionsFromAI(workspaceId: string) {
   const queryClient = useQueryClient();
+  const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => i18n.t(key, { defaultValue: fallback, ...opts });
 
   return useMutation({
     mutationFn: async (actions: AICoachFeedback['recommended_actions']) => {
@@ -100,10 +103,10 @@ export function useCreateActionsFromAI(workspaceId: string) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
-      toast.success(`Created ${data.length} action items from AI recommendations`);
+      toast.success(t('templates.actionsCreatedFromAI', 'Created {{count}} action items from AI recommendations', { count: data.length }));
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create actions');
+      toast.error(error.message || t('actions.failedToCreate', 'Failed to create actions'));
     },
   });
 }
@@ -111,6 +114,7 @@ export function useCreateActionsFromAI(workspaceId: string) {
 // Update template instance with AI feedback
 export function useSaveAIFeedback() {
   const queryClient = useQueryClient();
+  const t = (key: string, fallback?: string) => i18n.t(key, fallback);
 
   return useMutation({
     mutationFn: async ({
@@ -141,7 +145,7 @@ export function useSaveAIFeedback() {
       queryClient.invalidateQueries({ queryKey: ['template-instances'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to save AI feedback');
+      toast.error(error.message || t('templates.aiCoachFailed', 'Failed to save AI feedback'));
     },
   });
 }
