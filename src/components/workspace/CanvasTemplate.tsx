@@ -394,24 +394,24 @@ export function CanvasTemplate({ type, data, onChange, disabled = false, reviewS
               {config.author}
             </Badge>
             {reviewStatus === 'pending_review' && (
-              <Badge className="bg-amber-100 text-amber-700">Pending Review</Badge>
+              <Badge className="bg-amber-100 text-amber-700">{t('templates.pendingReview')}</Badge>
             )}
             {reviewStatus === 'approved' && (
-              <Badge className="bg-green-100 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>
+              <Badge className="bg-green-100 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />{t('templates.approved')}</Badge>
             )}
             {reviewStatus === 'needs_changes' && (
-              <Badge className="bg-red-100 text-red-700"><MessageSquare className="h-3 w-3 mr-1" />Needs Changes</Badge>
+              <Badge className="bg-red-100 text-red-700"><MessageSquare className="h-3 w-3 mr-1" />{t('templates.needsChanges')}</Badge>
             )}
           </CardTitle>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={onExport || handleExport}>
               <Download className="h-4 w-4 mr-1" />
-              Export
+              {t('templates.export')}
             </Button>
             {!disabled && onSubmitForReview && reviewStatus !== 'pending_review' && reviewStatus !== 'approved' && (
               <Button variant="default" size="sm" onClick={onSubmitForReview}>
                 <Send className="h-4 w-4 mr-1" />
-                Submit for Review
+                {t('templates.submitForReview')}
               </Button>
             )}
           </div>
