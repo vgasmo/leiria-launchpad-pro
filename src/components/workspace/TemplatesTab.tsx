@@ -555,12 +555,14 @@ function TemplateEditorDialog({
           </div>
         )}
 
-        {canWrite && (
-          <div className="flex items-center justify-between pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              {t('common.close', 'Close')}
-            </Button>
-            <div className="flex items-center gap-2">
+        {/* Footer actions - role-specific */}
+        <div className="flex items-center justify-between pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            {t('common.close', 'Close')}
+          </Button>
+          <div className="flex items-center gap-2">
+            {/* Save button - founders only when they can write */}
+            {canWrite && isFounder && (
               <Button 
                 variant="outline" 
                 onClick={handleSave} 
@@ -569,28 +571,30 @@ function TemplateEditorDialog({
                 <Save className="h-4 w-4 mr-1" />
                 {t('common.save', 'Save')}
               </Button>
-              {isFounder && instance?.review_status !== 'pending_review' && instance?.review_status !== 'approved' && (
-                <Button 
-                  variant="outline"
-                  onClick={handleSubmitForReview}
-                  disabled={submitForReview.isPending}
-                >
-                  <Send className="h-4 w-4 mr-1" />
-                  {t('templates.submitForReview')}
-                </Button>
-              )}
-              {!isFounder && instance?.status !== 'completed' && (
-                <Button 
-                  onClick={handleMarkComplete}
-                  disabled={completeInstance.isPending}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  {t('templates.markComplete', 'Mark Complete')}
-                </Button>
-              )}
-            </div>
+            )}
+            {/* Submit for review - founders only, when not already pending/approved */}
+            {canWrite && isFounder && instance?.review_status !== 'pending_review' && instance?.review_status !== 'approved' && (
+              <Button 
+                variant="outline"
+                onClick={handleSubmitForReview}
+                disabled={submitForReview.isPending}
+              >
+                <Send className="h-4 w-4 mr-1" />
+                {t('templates.submitForReview')}
+              </Button>
+            )}
+            {/* Mark Complete - founders only */}
+            {canWrite && isFounder && instance?.status !== 'completed' && (
+              <Button 
+                onClick={handleMarkComplete}
+                disabled={completeInstance.isPending}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                {t('templates.markComplete', 'Mark Complete')}
+              </Button>
+            )}
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );
