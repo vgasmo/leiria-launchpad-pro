@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle, Users } from 'lucide-react';
+import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle, Users, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -27,6 +27,7 @@ interface FormState {
   title: string;
   message: string;
   sendToAll: boolean;
+  sendEmail: boolean;
 }
 
 const EMPTY_FORM: FormState = {
@@ -35,6 +36,7 @@ const EMPTY_FORM: FormState = {
   title: '',
   message: '',
   sendToAll: false,
+  sendEmail: true, // Default to sending emails
 };
 
 const CATEGORY_CONFIG: Record<AnnouncementCategory, { icon: typeof Mail; label: string; color: string }> = {
@@ -95,12 +97,35 @@ export function AdminAnnouncementsManager() {
         created_by: user?.id,
       }));
       
-      const { error } = await supabase.from('admin_announcements').insert(inserts);
+      // Insert announcements
+      const { data: insertedAnnouncements, error } = await supabase
+        .from('admin_announcements')
+        .insert(inserts)
+        .select('id');
+      
       if (error) throw error;
+
+      // Send emails if option is enabled
+      if (data.sendEmail && insertedAnnouncements && insertedAnnouncements.length > 0) {
+        const announcementIds = insertedAnnouncements.map(a => a.id);
+        
+        const { error: emailError } = await supabase.functions.invoke('send-announcement-email', {
+          body: { announcement_ids: announcementIds },
+        });
+
+        if (emailError) {
+          console.error('Email send error:', emailError);
+          // Don't throw - announcement was created, just email failed
+          toast.warning(t('admin.announcements.emailFailed'));
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-announcements'] });
-      toast.success(t('admin.announcements.sent'));
+      toast.success(formData.sendEmail 
+        ? t('admin.announcements.sentWithEmail') 
+        : t('admin.announcements.sent')
+      );
       setFormData(EMPTY_FORM);
       setIsDialogOpen(false);
     },
@@ -249,6 +274,18 @@ export function AdminAnnouncementsManager() {
                   placeholder={t('admin.announcements.messagePlaceholder')}
                   rows={3}
                 />
+              </div>
+
+              <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+                <Checkbox
+                  id="sendEmail"
+                  checked={formData.sendEmail}
+                  onCheckedChange={(checked) => setFormData({ ...formData, sendEmail: !!checked })}
+                />
+                <Label htmlFor="sendEmail" className="flex items-center gap-2 cursor-pointer text-sm">
+                  <Send className="h-4 w-4" />
+                  {t('admin.announcements.sendEmailNotification')}
+                </Label>
               </div>
 
               <Button type="submit" className="w-full" disabled={createMutation.isPending}>
