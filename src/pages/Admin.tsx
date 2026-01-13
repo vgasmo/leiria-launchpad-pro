@@ -1,13 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Rocket, Briefcase, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter, Network } from 'lucide-react';
+import { Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter } from 'lucide-react';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
-import { AdminStartupsManager } from '@/components/admin/AdminStartupsManager';
-import { AdminWorkspacesManager } from '@/components/admin/AdminWorkspacesManager';
+import { AdminBackoffice } from '@/components/admin/AdminBackoffice';
 import { AdminAnnouncementsManager } from '@/components/admin/AdminAnnouncementsManager';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { ActivityLogViewerEnhanced } from '@/components/admin/ActivityLogViewerEnhanced';
@@ -24,7 +23,6 @@ import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
 import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsManager';
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
-import { AdminEcosystemManager } from '@/components/admin/AdminEcosystemManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 
 export default function Admin() {
@@ -42,17 +40,9 @@ export default function Admin() {
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             {t('admin.compliance')}
           </TabsTrigger>
-          <TabsTrigger value="programs" className="gap-2">
+          <TabsTrigger value="backoffice" className="gap-2">
             <Building2 className="h-4 w-4" aria-hidden="true" />
-            {t('admin.programs')}
-          </TabsTrigger>
-          <TabsTrigger value="startups" className="gap-2">
-            <Rocket className="h-4 w-4" aria-hidden="true" />
-            {t('admin.startups')}
-          </TabsTrigger>
-          <TabsTrigger value="workspaces" className="gap-2">
-            <Briefcase className="h-4 w-4" aria-hidden="true" />
-            {t('admin.workspaces')}
+            {t('admin.backoffice.tab', 'Backoffice')}
           </TabsTrigger>
           <TabsTrigger value="announcements" className="gap-2">
             <Bell className="h-4 w-4" aria-hidden="true" />
@@ -106,10 +96,6 @@ export default function Admin() {
             <Filter className="h-4 w-4" aria-hidden="true" />
             {t('admin.funnel.tab', 'Funnel')}
           </TabsTrigger>
-          <TabsTrigger value="ecosystem" className="gap-2">
-            <Network className="h-4 w-4" aria-hidden="true" />
-            {t('admin.ecosystem.tab', 'Ecosystem')}
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
@@ -120,16 +106,8 @@ export default function Admin() {
           <ComplianceDashboard />
         </TabsContent>
 
-        <TabsContent value="programs">
-          <AdminProgramsManager />
-        </TabsContent>
-
-        <TabsContent value="startups">
-          <AdminStartupsManager />
-        </TabsContent>
-
-        <TabsContent value="workspaces">
-          <AdminWorkspacesManager />
+        <TabsContent value="backoffice">
+          <AdminBackoffice />
         </TabsContent>
 
         <TabsContent value="announcements">
@@ -199,9 +177,6 @@ export default function Admin() {
           </div>
         </TabsContent>
 
-        <TabsContent value="ecosystem">
-          <AdminEcosystemManager />
-        </TabsContent>
       </Tabs>
     </AppLayout>
   );
