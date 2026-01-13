@@ -351,50 +351,32 @@ serve(async (req) => {
             if (schedule?.availabilityView) {
               const daySlots = generateSlotsFromAvailability(dateStr, schedule.availabilityView);
               slots.push(...daySlots);
-            } else {
-              // Graph didn't return schedule, add all slots as available (consultant will confirm)
-              const times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-              for (const time of times) {
-                slots.push({ date: dateStr, time, available: true });
-              }
             }
+            // If Graph didn't return schedule for this day, skip it - don't guess availability
           }
         } catch (graphError) {
-          console.error("Graph API error, falling back to default slots:", graphError);
-          // Fall back to generating default slots
-          for (let day = 1; day <= 14; day++) {
-            const date = addDays(now, day);
-            const dayOfWeek = date.getDay();
-            if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-            
-            const dateStr = format(date, "yyyy-MM-dd");
-            const times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-            
-            for (const time of times) {
-              slots.push({ date: dateStr, time, available: true });
-            }
-          }
+          console.error("Graph API error:", graphError);
+          // On Graph error, return empty slots with a warning - don't guess
+          return new Response(JSON.stringify({ 
+            slots: [],
+            consultantName,
+            graphEnabled: true,
+            warning: 'Unable to verify calendar availability. Please contact directly.',
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       } else {
-        // No Graph integration, generate default slots
-        for (let day = 1; day <= 14; day++) {
-          const date = addDays(now, day);
-          const dayOfWeek = date.getDay();
-          
-          // Skip weekends
-          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-          
-          const dateStr = format(date, "yyyy-MM-dd");
-          const times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-          
-          for (const time of times) {
-            slots.push({
-              date: dateStr,
-              time,
-              available: true,
-            });
-          }
-        }
+        // No Graph integration configured - return empty slots with warning
+        // This is critical for safety: never guess availability when calendar isn't configured
+        return new Response(JSON.stringify({ 
+          slots: [],
+          consultantName,
+          graphEnabled: false,
+          warning: 'Calendar integration not configured. Contact us to schedule.',
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       return new Response(JSON.stringify({ 

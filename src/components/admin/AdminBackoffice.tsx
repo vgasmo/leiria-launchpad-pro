@@ -188,6 +188,18 @@ export function AdminBackoffice() {
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
+  const changeProgramMutation = useMutation({
+    mutationFn: async ({ workspaceId, programId }: { workspaceId: string; programId: string | null }) => {
+      const { error } = await supabase.from('workspaces').update({ program_id: programId }).eq('id', workspaceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
+      toast.success(t('admin.backoffice.programUpdated', 'Program updated'));
+    },
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
+  });
+
   const assignConsultorMutation = useMutation({
     mutationFn: async ({ workspaceId, consultorId }: { workspaceId: string; consultorId: string }) => {
       // Update assigned_consultor_id on workspace
@@ -452,9 +464,33 @@ export function AdminBackoffice() {
                         )}
                       </TableCell>
                       
-                      {/* Program */}
+                      {/* Program - inline editable */}
                       <TableCell>
-                        {item.program_name || <span className="text-muted-foreground">—</span>}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="flex items-center gap-1 hover:bg-muted rounded px-1 -ml-1 text-sm">
+                              {item.program_name || <span className="text-muted-foreground">{t('admin.backoffice.noProgram', 'No program')}</span>}
+                              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 p-1">
+                            <button
+                              onClick={() => changeProgramMutation.mutate({ workspaceId: item.workspace_id, programId: null })}
+                              className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded text-muted-foreground"
+                            >
+                              {t('common.none', 'None')}
+                            </button>
+                            {programs?.map(p => (
+                              <button
+                                key={p.id}
+                                onClick={() => changeProgramMutation.mutate({ workspaceId: item.workspace_id, programId: p.id })}
+                                className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded"
+                              >
+                                {p.name}
+                              </button>
+                            ))}
+                          </PopoverContent>
+                        </Popover>
                       </TableCell>
                       
                       {/* Stage - inline editable */}

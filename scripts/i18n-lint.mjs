@@ -142,11 +142,31 @@ function main() {
     'ownerHint',
     'dueInDaysShort',
     'dueAndOwner',
+    'canvas',
   ];
 
   for (const k of templateKeys) {
     if (!(k in (en.templates || {}))) problems.push(`[en] Missing templates.${k}`);
     if (!(k in (pt.templates || {}))) problems.push(`[pt] Missing templates.${k}`);
+  }
+
+  // Check for English text in PT templates catalog (blacklist scan)
+  const englishBlacklist = [
+    'Fundraising Readiness',
+    'Business Model Canvas',
+    'Value Proposition',
+    'Growth Loops',
+    'Sales Pipeline',
+    'Customer Segments',
+  ];
+  
+  const ptCatalog = pt.templates?.catalog || {};
+  const ptCatalogStr = JSON.stringify(ptCatalog);
+  for (const phrase of englishBlacklist) {
+    // Only flag if the exact English phrase appears in PT catalog (not in keys)
+    if (ptCatalogStr.includes(`"title":"${phrase}"`) || ptCatalogStr.includes(`"desc":"${phrase}"`)) {
+      problems.push(`[pt] English phrase found in templates.catalog: "${phrase}"`);
+    }
   }
 
   if (problems.length) {

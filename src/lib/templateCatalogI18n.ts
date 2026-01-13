@@ -11,8 +11,9 @@ export type TemplateCatalogMeta = {
 
 /**
  * Convert any template name to a stable i18n key (snake_case)
+ * This enables i18n-driven UI without changing DB identifiers.
  */
-function toStableKey(input: string): string {
+export function toStableKey(input: string): string {
   return input
     .trim()
     .toLowerCase()
@@ -24,37 +25,34 @@ function toStableKey(input: string): string {
 /**
  * Get localized metadata for a template catalog entry.
  * Uses stable keys derived from template name, with i18n lookup and DB fallback.
+ * 
+ * Lookup order:
+ * 1. templates.catalog.<stableKey>.title  (preferred - fully localized)
+ * 2. templates.names.<exactDbName>        (legacy fallback)
+ * 3. DB raw value                         (final fallback)
  */
 export function getLocalizedTemplateMeta(
   template: Pick<Template, "name" | "description" | "category">,
   t: TFunction
 ): TemplateCatalogMeta {
   const key = toStableKey(template.name);
-  // Keep the original category case for lookup since JSON keys are case-sensitive
   const categoryKey = template.category || "Other";
 
-  // Try catalog-based keys first (snake_case), then names with original name, then raw DB value
-  const title = t(`templates.catalog.${key}.title`, {
-    defaultValue: t(`templates.names.${template.name}`, {
-      defaultValue: template.name,
-    }),
-  });
+  // Title lookup: catalog key first, then legacy names, then raw DB
+  const catalogTitle = t(`templates.catalog.${key}.title`, { defaultValue: "" });
+  const legacyTitle = t(`templates.names.${template.name}`, { defaultValue: "" });
+  const title = catalogTitle || legacyTitle || template.name;
 
+  // Description lookup: similar cascade
   const rawDesc = template.description || "";
-  const description = rawDesc
-    ? t(`templates.catalog.${key}.desc`, {
-        defaultValue: t(`templates.descriptions.${template.name}`, {
-          defaultValue: rawDesc,
-        }),
-      })
-    : undefined;
+  const catalogDesc = t(`templates.catalog.${key}.desc`, { defaultValue: "" });
+  const legacyDesc = t(`templates.descriptions.${template.name}`, { defaultValue: "" });
+  const description = catalogDesc || legacyDesc || rawDesc || undefined;
 
-  // Category lookup: try exact case first (e.g., "Finance"), then lowercase
-  const categoryLabel = t(`templates.categories.${categoryKey}`, {
-    defaultValue: t(`templates.categories.${categoryKey.toLowerCase()}`, {
-      defaultValue: categoryKey,
-    }),
-  });
+  // Category lookup: exact case first, then lowercase
+  const categoryExact = t(`templates.categories.${categoryKey}`, { defaultValue: "" });
+  const categoryLower = t(`templates.categories.${categoryKey.toLowerCase()}`, { defaultValue: "" });
+  const categoryLabel = categoryExact || categoryLower || categoryKey;
 
   return {
     key,
@@ -70,10 +68,7 @@ export function getLocalizedTemplateMeta(
  */
 export function getLocalizedCategoryLabel(category: string, t: TFunction): string {
   const cat = category || "Other";
-  // Try exact case first, then lowercase
-  return t(`templates.categories.${cat}`, {
-    defaultValue: t(`templates.categories.${cat.toLowerCase()}`, {
-      defaultValue: cat,
-    }),
-  });
+  const exact = t(`templates.categories.${cat}`, { defaultValue: "" });
+  const lower = t(`templates.categories.${cat.toLowerCase()}`, { defaultValue: "" });
+  return exact || lower || cat;
 }

@@ -1766,7 +1766,10 @@
       "unassigned": "Unassigned",
       "searchConsultant": "Search consultant...",
       "removeConsultant": "Remove consultant",
-      "nif": "Tax ID"
+      "nif": "Tax ID",
+      "programUpdated": "Program updated",
+      "noProgram": "No program",
+      "lastCheckin": "Last Check-in"
     },
     "intakeRouting": {
       "title": "Intake Routing",
