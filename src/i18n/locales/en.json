@@ -1900,7 +1900,20 @@
     "monthlyCheckinDesc": "Submit your monthly update",
     "addKpi": "Add KPI",
     "addAction": "Add Action",
-    "requestSession": "Request Session"
+    "requestSession": "Request Session",
+    "viewAlerts": "View Alerts"
+  },
+  "staffTasks": {
+    "title": "My Tasks",
+    "pending": "pending",
+    "noPendingTasks": "No pending tasks",
+    "tasksInWorkspaces": "Tasks are managed within each startup's workspace",
+    "moreTasks": "more tasks"
+  },
+  "integrationErrors": {
+    "title": "Integration Errors",
+    "allSmooth": "All integrations running smoothly",
+    "markResolved": "Mark as resolved"
   },
   "sessionPrep": {
     "title": "Session Prep",
@@ -2147,6 +2160,7 @@
   "myWorkspaces": {
     "title": "My Workspaces",
     "allStartups": "All Startups",
+    "myPortfolio": "My Portfolio",
     "portfolioOverview": "Portfolio Overview",
     "myMentorships": "My Mentorships",
     "myStartup": "My Startup",
@@ -2181,7 +2195,22 @@
     "markDone": "Mark Done",
     "snooze1Day": "Snooze 1 day",
     "snooze7Days": "Snooze 7 days",
-    "viewAll": "View all {{count}} items"
+    "viewAll": "View all {{count}} items",
+    "allTypes": "All types",
+    "open": "open",
+    "overdue": "overdue",
+    "overdueLabel": "Overdue",
+    "dueThisWeek": "due this week",
+    "types": {
+      "triage": "Triage",
+      "outreach": "Outreach",
+      "schedule_session": "Schedule Session",
+      "post_session_followup": "Follow-up",
+      "overdue_actions": "Overdue Actions",
+      "missing_kpis": "Missing KPIs",
+      "stage_gate_review": "Stage Review",
+      "escalation": "Escalation"
+    }
   },
   "triage": {
     "title": "Workspace Triage",

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import {
   CheckCircle2,
@@ -43,13 +44,14 @@ interface StaffTasksPanelProps {
  */
 export function StaffTasksPanel({ compact = false }: StaffTasksPanelProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: tasks, isLoading } = useMyStaffTasks();
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">My Tasks</CardTitle>
+          <CardTitle className="text-lg">{t('staffTasks.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -70,10 +72,10 @@ export function StaffTasksPanel({ compact = false }: StaffTasksPanelProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-primary" />
-            My Tasks
+            {t('staffTasks.title')}
           </CardTitle>
           {pendingTasks.length > 0 && (
-            <Badge variant="secondary">{pendingTasks.length} pending</Badge>
+            <Badge variant="secondary">{pendingTasks.length} {t('staffTasks.pending')}</Badge>
           )}
         </div>
       </CardHeader>
@@ -81,8 +83,8 @@ export function StaffTasksPanel({ compact = false }: StaffTasksPanelProps) {
         {pendingTasks.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No pending tasks</p>
-            <p className="text-xs mt-1">Tasks are managed within each startup's workspace</p>
+            <p>{t('staffTasks.noPendingTasks')}</p>
+            <p className="text-xs mt-1">{t('staffTasks.tasksInWorkspaces')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -99,7 +101,7 @@ export function StaffTasksPanel({ compact = false }: StaffTasksPanelProps) {
             ))}
             {pendingTasks.length > (compact ? 5 : 10) && (
               <p className="text-xs text-muted-foreground text-center pt-2">
-                +{pendingTasks.length - (compact ? 5 : 10)} more tasks
+                +{pendingTasks.length - (compact ? 5 : 10)} {t('staffTasks.moreTasks')}
               </p>
             )}
           </div>

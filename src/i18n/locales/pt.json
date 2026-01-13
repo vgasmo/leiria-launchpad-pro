@@ -1810,7 +1810,20 @@
     "monthlyCheckinDesc": "Submeter a sua atualização mensal",
     "addKpi": "Adicionar KPI",
     "addAction": "Adicionar Ação",
-    "requestSession": "Solicitar Sessão"
+    "requestSession": "Solicitar Sessão",
+    "viewAlerts": "Ver Alertas"
+  },
+  "staffTasks": {
+    "title": "As Minhas Tarefas",
+    "pending": "pendente",
+    "noPendingTasks": "Sem tarefas pendentes",
+    "tasksInWorkspaces": "As tarefas são geridas dentro de cada workspace",
+    "moreTasks": "mais tarefas"
+  },
+  "integrationErrors": {
+    "title": "Erros de Integração",
+    "allSmooth": "Todas as integrações a funcionar corretamente",
+    "markResolved": "Marcar como resolvido"
   },
   "sessionPrep": {
     "title": "Preparação da Sessão",
@@ -2125,6 +2138,7 @@
   "myWorkspaces": {
     "title": "Os Meus Workspaces",
     "allStartups": "Todas as Startups",
+    "myPortfolio": "O Meu Portfólio",
     "portfolioOverview": "Visão do Portfólio",
     "myMentorships": "As Minhas Mentorias",
     "myStartup": "A Minha Startup",
@@ -2159,7 +2173,22 @@
     "markDone": "Marcar Concluída",
     "snooze1Day": "Adiar 1 dia",
     "snooze7Days": "Adiar 7 dias",
-    "viewAll": "Ver todos os {{count}} itens"
+    "viewAll": "Ver todos os {{count}} itens",
+    "allTypes": "Todos os tipos",
+    "open": "abertas",
+    "overdue": "atrasadas",
+    "overdueLabel": "Atrasado",
+    "dueThisWeek": "esta semana",
+    "types": {
+      "triage": "Triagem",
+      "outreach": "Contacto",
+      "schedule_session": "Agendar Sessão",
+      "post_session_followup": "Follow-up",
+      "overdue_actions": "Ações Atrasadas",
+      "missing_kpis": "KPIs em Falta",
+      "stage_gate_review": "Revisão de Etapa",
+      "escalation": "Escalação"
+    }
   },
   "triage": {
     "title": "Triagem de Workspaces",

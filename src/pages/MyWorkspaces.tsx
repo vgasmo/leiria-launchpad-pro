@@ -263,7 +263,7 @@ export default function MyWorkspaces() {
               className="text-xs sm:text-sm gap-1"
             >
               <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">{showAssignedOnly ? t('myWorkspaces.myPortfolio', 'My Portfolio') : t('myWorkspaces.allStartups', 'All Startups')}</span>
+              <span className="hidden sm:inline">{showAssignedOnly ? t('myWorkspaces.myPortfolio') : t('myWorkspaces.allStartups')}</span>
             </Button>
           )}
           {(showConsultorDashboard || showMentorDashboard) && (
