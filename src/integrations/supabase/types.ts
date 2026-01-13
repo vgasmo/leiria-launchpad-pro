@@ -4340,6 +4340,10 @@ export type Database = {
       }
       template_instances: {
         Row: {
+          ai_feedback_generated_at: string | null
+          ai_feedback_generated_by: string | null
+          ai_feedback_json: Json | null
+          ai_feedback_visibility: string | null
           created_at: string
           created_by: string | null
           data_json: Json | null
@@ -4354,6 +4358,10 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          ai_feedback_generated_at?: string | null
+          ai_feedback_generated_by?: string | null
+          ai_feedback_json?: Json | null
+          ai_feedback_visibility?: string | null
           created_at?: string
           created_by?: string | null
           data_json?: Json | null
@@ -4368,6 +4376,10 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          ai_feedback_generated_at?: string | null
+          ai_feedback_generated_by?: string | null
+          ai_feedback_json?: Json | null
+          ai_feedback_visibility?: string | null
           created_at?: string
           created_by?: string | null
           data_json?: Json | null

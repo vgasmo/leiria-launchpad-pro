@@ -9,8 +9,10 @@ project_id = "apxzuslwhjujgrcsfzqw"
 [functions.analyze-template]
 verify_jwt = true
 
+# NOTE: verify_jwt disabled to avoid gateway-level "Invalid JWT" failures.
+# This function validates the bearer token at runtime.
 [functions.generate-template-coach]
-verify_jwt = true
+verify_jwt = false
 
 # NOTE: verify_jwt disabled to avoid gateway-level "Invalid JWT" failures.
 # This function validates the bearer token at runtime.
