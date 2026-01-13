@@ -55,44 +55,70 @@ export function TemplateCoachPanel({
     }
   };
 
+  const buildNotesMarkdown = () => {
+    if (!feedback) return '';
+
+    const h2Summary = t('templates.aiCoachNotes.summaryHeading', '## AI Coach Summary');
+    const h3Strengths = t('templates.aiCoachNotes.strengthsHeading', '### Strengths');
+    const h3Gaps = t('templates.aiCoachNotes.gapsHeading', '### Gaps to Address');
+    const h3RedFlags = t('templates.aiCoachNotes.redFlagsHeading', '### Red Flags');
+    const h3Agenda = t('templates.aiCoachNotes.agendaHeading', '### Next Session Agenda');
+
+    let notes = `${h2Summary}\n${feedback.summary}\n\n`;
+
+    if (feedback.strengths.length > 0) {
+      notes += `${h3Strengths}\n${feedback.strengths.map((s) => `- ${s}`).join('\n')}\n\n`;
+    }
+
+    if (feedback.gaps.length > 0) {
+      notes += `${h3Gaps}\n${feedback.gaps.map((g) => `- **${g.field}**: ${g.why}`).join('\n')}\n\n`;
+    }
+
+    if (feedback.red_flags.length > 0) {
+      notes += `${h3RedFlags}\n${feedback.red_flags
+        .map((r) => {
+          const sev = t(`templates.severity.${r.severity}`, { defaultValue: r.severity.toUpperCase() });
+          return `- [${sev}] ${r.risk}: ${r.mitigation}`;
+        })
+        .join('\n')}\n\n`;
+    }
+
+    if (feedback.next_session_agenda.length > 0) {
+      notes += `${h3Agenda}\n${feedback.next_session_agenda.map((a, i) => `${i + 1}. ${a}`).join('\n')}`;
+    }
+
+    return notes.trim();
+  };
+
   const handleCopyToNotes = () => {
     if (!feedback || !onCopyToNotes) return;
-    
-    let notes = `## AI Coach Summary\n${feedback.summary}\n\n`;
-    
-    if (feedback.strengths.length > 0) {
-      notes += `### Strengths\n${feedback.strengths.map(s => `- ${s}`).join('\n')}\n\n`;
-    }
-    
-    if (feedback.gaps.length > 0) {
-      notes += `### Gaps to Address\n${feedback.gaps.map(g => `- **${g.field}**: ${g.why}`).join('\n')}\n\n`;
-    }
-    
-    if (feedback.red_flags.length > 0) {
-      notes += `### Red Flags\n${feedback.red_flags.map(r => `- [${r.severity.toUpperCase()}] ${r.risk}: ${r.mitigation}`).join('\n')}\n\n`;
-    }
-    
-    if (feedback.next_session_agenda.length > 0) {
-      notes += `### Next Session Agenda\n${feedback.next_session_agenda.map((a, i) => `${i + 1}. ${a}`).join('\n')}`;
-    }
-    
-    onCopyToNotes(notes.trim());
-    toast.success(t('templates.copiedToNotes', 'Copied to review notes'));
+    onCopyToNotes(buildNotesMarkdown());
+    toast.success(t('templates.copiedToNotes'));
   };
 
   const handleApplyReview = (decision: 'approved' | 'needs_changes') => {
     if (!feedback || !onApplyReview) return;
-    
-    let notes = `## AI Coach Summary\n${feedback.summary}\n\n`;
-    
+
+    // More compact notes for review decisions
+    const h2Summary = t('templates.aiCoachNotes.summaryHeading', '## AI Coach Summary');
+    const h3Gaps = t('templates.aiCoachNotes.gapsHeading', '### Gaps to Address');
+    const h3RedFlags = t('templates.aiCoachNotes.redFlagsHeading', '### Red Flags');
+
+    let notes = `${h2Summary}\n${feedback.summary}\n\n`;
+
     if (feedback.gaps.length > 0) {
-      notes += `### Gaps to Address\n${feedback.gaps.map(g => `- **${g.field}**: ${g.why}`).join('\n')}\n\n`;
+      notes += `${h3Gaps}\n${feedback.gaps.map((g) => `- **${g.field}**: ${g.why}`).join('\n')}\n\n`;
     }
-    
+
     if (feedback.red_flags.length > 0) {
-      notes += `### Red Flags\n${feedback.red_flags.map(r => `- [${r.severity.toUpperCase()}] ${r.risk}`).join('\n')}\n\n`;
+      notes += `${h3RedFlags}\n${feedback.red_flags
+        .map((r) => {
+          const sev = t(`templates.severity.${r.severity}`, { defaultValue: r.severity.toUpperCase() });
+          return `- [${sev}] ${r.risk}`;
+        })
+        .join('\n')}\n\n`;
     }
-    
+
     onApplyReview(decision, notes.trim());
   };
 
@@ -110,19 +136,32 @@ export function TemplateCoachPanel({
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      case 'medium': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-      default: return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
+      case 'high':
+        return 'text-red-600 bg-red-100 dark:bg-red-900/30';
+      case 'medium':
+        return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
+      default:
+        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-700 dark:bg-red-900/30';
-      case 'high': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30';
-      case 'medium': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30';
-      default: return 'bg-muted text-muted-foreground';
+      case 'urgent':
+        return 'bg-red-100 text-red-700 dark:bg-red-900/30';
+      case 'high':
+        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30';
+      case 'medium':
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const formatDueOwner = (dueInDays: number, ownerHint: string) => {
+    const days = t('templates.dueInDaysShort', { count: dueInDays, defaultValue: '{{count}}d' });
+    const owner = t(`templates.ownerHint.${ownerHint}`, { defaultValue: ownerHint });
+    return t('templates.dueAndOwner', { days, owner, defaultValue: '{{days}} • {{owner}}' });
   };
 
   // Initial state - show generate button
@@ -232,8 +271,8 @@ export function TemplateCoachPanel({
                   {feedback.assumptions_to_test.map((a, i) => (
                     <li key={i} className="text-sm border-l-2 border-blue-300 pl-3">
                       <div className="font-medium">{a.assumption}</div>
-                      <div className="text-muted-foreground">{t('templates.test', 'Test')}: {a.test}</div>
-                      <div className="text-xs text-muted-foreground">{t('templates.metric', 'Metric')}: {a.metric}</div>
+                      <div className="text-muted-foreground">{t('templates.test')}: {a.test}</div>
+                      <div className="text-xs text-muted-foreground">{t('templates.metric')}: {a.metric}</div>
                     </li>
                   ))}
                 </ul>
@@ -253,10 +292,10 @@ export function TemplateCoachPanel({
                   {feedback.red_flags.map((r, i) => (
                     <li key={i} className="text-sm">
                       <div className="flex items-center gap-2">
-                        <Badge className={getSeverityColor(r.severity)}>{r.severity}</Badge>
+                        <Badge className={getSeverityColor(r.severity)}>{t(`templates.severity.${r.severity}`, { defaultValue: r.severity })}</Badge>
                         <span className="font-medium">{r.risk}</span>
                       </div>
-                      <div className="text-muted-foreground mt-1">{t('templates.mitigation', 'Mitigation')}: {r.mitigation}</div>
+                      <div className="text-muted-foreground mt-1">{t('templates.mitigation')}: {r.mitigation}</div>
                     </li>
                   ))}
                 </ul>
@@ -276,11 +315,9 @@ export function TemplateCoachPanel({
                   {feedback.recommended_actions.map((a, i) => (
                     <li key={i} className="text-sm p-2 rounded bg-muted/50">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge className={getPriorityColor(a.priority)}>{a.priority}</Badge>
+                        <Badge className={getPriorityColor(a.priority)}>{t(`templates.priority.${a.priority}`, { defaultValue: a.priority })}</Badge>
                         <span className="font-medium">{a.title}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {a.due_in_days}d • {a.owner_hint}
-                        </span>
+                        <span className="text-xs text-muted-foreground ml-auto">{formatDueOwner(a.due_in_days, a.owner_hint)}</span>
                       </div>
                       <div className="text-muted-foreground mt-1">{a.description}</div>
                     </li>
@@ -298,7 +335,7 @@ export function TemplateCoachPanel({
                   ) : (
                     <ListChecks className="h-4 w-4 mr-1" />
                   )}
-                  {t('templates.createNActions', 'Create {{count}} Actions', { count: feedback.recommended_actions.length })}
+                  {t('templates.createNActions', { count: feedback.recommended_actions.length, defaultValue: 'Create {{count}} Actions' })}
                 </Button>
               </Section>
             )}
@@ -346,23 +383,23 @@ export function TemplateCoachPanel({
             {/* Review Actions (when applicable) */}
             {showReviewActions && onApplyReview && feedback && (
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => handleApplyReview('approved')}
-                  className="flex-1"
-                >
-                  <ThumbsUp className="h-4 w-4 mr-1" />
-                  {t('templates.applyAndApprove', 'Apply & Approve')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleApplyReview('needs_changes')}
-                  className="flex-1"
-                >
-                  <ThumbsDown className="h-4 w-4 mr-1" />
-                  {t('templates.applyAndRequestChanges', 'Apply & Request Changes')}
-                </Button>
+                 <Button
+                   size="sm"
+                   onClick={() => handleApplyReview('approved')}
+                   className="flex-1"
+                 >
+                   <ThumbsUp className="h-4 w-4 mr-1" />
+                   {t('templates.applyAndApprove')}
+                 </Button>
+                 <Button
+                   size="sm"
+                   variant="outline"
+                   onClick={() => handleApplyReview('needs_changes')}
+                   className="flex-1"
+                 >
+                   <ThumbsDown className="h-4 w-4 mr-1" />
+                   {t('templates.applyAndRequestChanges')}
+                 </Button>
               </div>
             )}
 
@@ -376,7 +413,7 @@ export function TemplateCoachPanel({
                   className="gap-1"
                 >
                   <Copy className="h-3 w-3" />
-                  {t('templates.copyToNotes', 'Copy to Notes')}
+                  {t('templates.copyToNotes')}
                 </Button>
               )}
               <Button
@@ -387,7 +424,7 @@ export function TemplateCoachPanel({
                 className="gap-1"
               >
                 <Sparkles className="h-3 w-3" />
-                {t('templates.reanalyze', 'Re-analyze')}
+                {t('templates.reanalyze')}
               </Button>
             </div>
           </CardContent>

@@ -235,11 +235,11 @@ export function useSubmitCheckin() {
              workspaceId: result.workspaceId,
              eventType: 'checkin_submitted',
              payload: {
-               title: 'Weekly Check-in Submitted',
-               summary: 'A founder has submitted their weekly check-in',
-               startup_name: startupName,
-               link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
-               linkText: 'View Check-in',
+                title: 'Monthly Check-in Submitted',
+                summary: 'A founder has submitted their monthly check-in',
+                startup_name: startupName,
+                link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
+                linkText: 'View Check-in',
              },
            }).catch(() => {}); // Silent fail
          })().catch(() => {});
@@ -285,7 +285,7 @@ export function useManageCheckinDefinition() {
           .from('checkin_definitions')
           .insert([{
             workspace_id: definition.workspace_id,
-            name: definition.name || 'Weekly Check-in',
+            name: definition.name || 'Monthly Check-in',
             questions: (questionsJson.length > 0 ? questionsJson : []) as any,
             kpi_definition_ids: definition.kpi_definition_ids || [],
             day_of_week: definition.day_of_week || 5,

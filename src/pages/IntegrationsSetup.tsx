@@ -177,7 +177,7 @@ export default function IntegrationsSetup() {
                   <AlertTitle>Notification Types</AlertTitle>
                   <AlertDescription className="mt-2">
                     <ul className="list-disc list-inside text-sm space-y-1">
-                      <li><strong>Check-in submitted:</strong> When a startup completes their weekly check-in</li>
+                      <li><strong>Check-in submitted:</strong> When a startup completes their monthly check-in</li>
                       <li><strong>Action assigned:</strong> When a new action item is assigned to someone</li>
                       <li><strong>Action overdue:</strong> Daily reminder for overdue actions</li>
                       <li><strong>Session created:</strong> When a new session/meeting is scheduled</li>

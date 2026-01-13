@@ -157,7 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
           const { error: notifError } = await supabase.from("notifications").insert({
             user_id: founder.user_id,
             type: "checkin_reminder",
-            title: "Monthly Check-in Pending",
+            title: "Monthly check-in pending",
             message: `Your monthly check-in for ${startupName} is due on ${checkin.due_date}. Please submit your update.`,
             link: `/workspace/${checkin.workspace_id}?tab=overview`,
             metadata: {
@@ -183,22 +183,22 @@ const handler = async (req: Request): Promise<Response> => {
               const emailResult = await sendEmail(resendApiKey, {
                 from: "FoundersBook <noreply@startupleiria.com>",
                 to: [founderEmail],
-                subject: `📋 Monthly Check-in: ${startupName}`,
+                subject: `📋 Monthly check-in: ${startupName}`,
                 html: `
                   <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #333;">Hi ${founderName},</h2>
-                    <p>Your <strong>${definitionName}</strong> for <strong>${startupName}</strong> is ready to be filled out.</p>
+                    <p>Your <strong>${definitionName}</strong> for <strong>${startupName}</strong> is ready.</p>
                     <p><strong>Due date:</strong> ${new Date(checkin.due_date).toLocaleDateString("pt-PT", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
-                    <p>This monthly check-in helps us track your progress and provide better support. It only takes a few minutes!</p>
+                    <p>This monthly check-in helps us track progress and provide better support.</p>
                     <div style="margin: 24px 0;">
                       <a href="${supabaseUrl.replace(".supabase.co", ".lovableproject.com")}/workspace/${checkin.workspace_id}?tab=overview" 
                          style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                        Complete Check-in
+                        Complete monthly check-in
                       </a>
                     </div>
                     <p style="color: #666; font-size: 14px;">If you have any questions, reach out to your assigned consultant.</p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-                    <p style="color: #999; font-size: 12px;">FoundersBook - Accelerating Innovation</p>
+                    <p style="color: #999; font-size: 12px;">FoundersBook</p>
                   </div>
                 `,
               });
@@ -211,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
               await supabase.from("email_log").insert({
                 workspace_id: checkin.workspace_id,
                 email_type: "checkin_reminder",
-                subject: `📋 Monthly Check-in: ${startupName}`,
+                subject: `📋 Monthly check-in: ${startupName}`,
                 recipients: [{ email: founderEmail, name: founderName }],
                 status: "sent",
                 sent_at: new Date().toISOString(),

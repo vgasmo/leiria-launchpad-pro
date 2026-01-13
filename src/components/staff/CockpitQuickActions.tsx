@@ -313,7 +313,7 @@ function QuickSessionDialog({
           <div>
             <Label>Session Title</Label>
             <Input
-              placeholder="e.g., Weekly check-in"
+              placeholder="e.g., Monthly check-in"
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
             />

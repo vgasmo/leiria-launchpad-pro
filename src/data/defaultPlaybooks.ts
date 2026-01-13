@@ -219,8 +219,8 @@ export const DEFAULT_PLAYBOOKS: PlaybookSeed[] = [
     description: 'Prepare for and execute a successful fundraise. Build investor relationships strategically.',
     is_active: true,
     items: [
-      { item_type: 'milestone', title: 'Complete Fundraising Readiness', description: 'All materials and metrics ready for investor conversations', relative_due_days: 45, priority: 'critical', order_index: 0, metadata_json: { ref: 'ms_ready' } },
-      { item_type: 'action', title: 'Complete Fundraising Readiness template', description: 'Assess gaps in your story and metrics', relative_due_days: 10, priority: 'high', order_index: 1, metadata_json: { milestone_ref: 'ms_ready' } },
+      { item_type: 'milestone', title: 'Complete fundraise readiness', description: 'All materials and metrics ready for investor conversations', relative_due_days: 45, priority: 'critical', order_index: 0, metadata_json: { ref: 'ms_ready' } },
+      { item_type: 'action', title: 'Complete fundraise readiness template', description: 'Assess gaps in your story and metrics', relative_due_days: 10, priority: 'high', order_index: 1, metadata_json: { milestone_ref: 'ms_ready' } },
       { item_type: 'action', title: 'Create investor pitch deck (10-15 slides)', description: 'Compelling narrative with strong data', relative_due_days: 25, priority: 'high', order_index: 2, metadata_json: { milestone_ref: 'ms_ready' } },
       { item_type: 'action', title: 'Prepare data room with all due diligence materials', description: 'Financials, legal, team, metrics', relative_due_days: 40, priority: 'high', order_index: 3, metadata_json: { milestone_ref: 'ms_ready' } },
       { item_type: 'milestone', title: 'Build Investor Pipeline', description: 'Identify and warm up target investors', relative_due_days: 60, priority: 'high', order_index: 4, metadata_json: { ref: 'ms_pipeline' } },
