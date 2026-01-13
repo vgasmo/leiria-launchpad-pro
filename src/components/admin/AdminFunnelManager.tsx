@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, User, Building2, Mail, Phone, Tag, ChevronRight, UserPlus, CheckCircle2, XCircle, FileText, Rocket } from 'lucide-react';
+import { Plus, User, Building2, Mail, Phone, Tag, ChevronRight, UserPlus, CheckCircle2, XCircle, FileText, Rocket, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFunnelItems, useCreateFunnelItem, useUpdateFunnelItem, useConvertToStartup, FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
+import { IntakeRoutingManager } from './IntakeRoutingManager';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
   new: { label: 'New', color: 'bg-slate-500' },
@@ -61,31 +63,45 @@ export function AdminFunnelManager() {
   };
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="funnel" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Funnel</h2>
+          <h2 className="text-2xl font-bold">Funnel & Intake</h2>
           <p className="text-muted-foreground">Track leads from first contact to conversion</p>
         </div>
-        <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Add Lead</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Lead</DialogTitle>
-            </DialogHeader>
-            <NewLeadForm 
-              programs={programs || []}
-              consultors={consultors || []}
-              onSubmit={(data) => {
-                createItem.mutate(data, { onSuccess: () => setIsNewDialogOpen(false) });
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <TabsList>
+            <TabsTrigger value="funnel">Pipeline</TabsTrigger>
+            <TabsTrigger value="routing" className="gap-1">
+              <Settings className="h-3 w-3" />
+              Intake Routing
+            </TabsTrigger>
+          </TabsList>
+          <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Add Lead</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Lead</DialogTitle>
+              </DialogHeader>
+              <NewLeadForm 
+                programs={programs || []}
+                consultors={consultors || []}
+                onSubmit={(data) => {
+                  createItem.mutate(data, { onSuccess: () => setIsNewDialogOpen(false) });
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
+      <TabsContent value="routing">
+        <IntakeRoutingManager />
+      </TabsContent>
+
+      <TabsContent value="funnel">
       {/* Kanban Board */}
       <div className="flex gap-4 overflow-x-auto pb-4">
         {ACTIVE_STAGES.map(stage => {
@@ -144,7 +160,8 @@ export function AdminFunnelManager() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }
 

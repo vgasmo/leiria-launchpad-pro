@@ -563,17 +563,7 @@
       "Strategy": "Strategy",
       "Team": "Team",
       "Validation": "Validation",
-      "Other": "Other"
-    },
-    "categories": {
-      "Finance": "Finance",
-      "Fundraising": "Fundraising",
-      "Goals": "Goals",
-      "Strategy": "Strategy",
-      "Product": "Product",
-      "Team": "Team",
       "Customer": "Customer",
-      "Sales": "Sales",
       "Marketing": "Marketing",
       "Operations": "Operations",
       "Other": "Other"
