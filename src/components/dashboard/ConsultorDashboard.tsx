@@ -156,20 +156,20 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
 
   return (
     <div className="space-y-6">
-      {/* Compact Stats Bar */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-        <Card className="p-4">
+      {/* P0: Compact Stats Bar */}
+      <div className="grid gap-2 grid-cols-2 lg:grid-cols-5">
+        <Card className="p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">{t('dashboard.totalStartups')}</p>
-              <p className="text-2xl font-bold">{stats.total}</p>
+              <p className="text-xl font-bold">{stats.total}</p>
             </div>
-            <Users className="h-5 w-5 text-muted-foreground" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </div>
         </Card>
 
         <Card 
-          className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+          className={`p-3 cursor-pointer transition-all hover:shadow-md ${
             stats.needsAttentionCount > 0 ? 'border-amber-300 dark:border-amber-700' : ''
           }`}
           onClick={() => navigate('/my-workspaces?filter=attention')}
@@ -177,39 +177,39 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">{t('dashboard.needsAttention')}</p>
-              <p className={`text-2xl font-bold ${stats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
+              <p className={`text-xl font-bold ${stats.needsAttentionCount > 0 ? 'text-amber-600' : ''}`}>
                 {stats.needsAttentionCount}
               </p>
             </div>
-            <AlertCircle className={`h-5 w-5 ${stats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+            <AlertCircle className={`h-4 w-4 ${stats.needsAttentionCount > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">{t('dashboard.meetingsThisWeek')}</p>
-              <p className="text-2xl font-bold">{stats.upcomingMeetingsCount}</p>
+              <p className="text-xl font-bold">{stats.upcomingMeetingsCount}</p>
             </div>
-            <Calendar className="h-5 w-5 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">{t('dashboard.overdueActions')}</p>
-              <p className={`text-2xl font-bold ${stats.overdueCount > 0 ? 'text-destructive' : ''}`}>
+              <p className={`text-xl font-bold ${stats.overdueCount > 0 ? 'text-destructive' : ''}`}>
                 {stats.overdueCount}
               </p>
             </div>
-            <ClipboardList className={`h-5 w-5 ${stats.overdueCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+            <ClipboardList className={`h-4 w-4 ${stats.overdueCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
           </div>
         </Card>
 
-        <Card className="p-4 col-span-2 lg:col-span-1">
-          <p className="text-xs text-muted-foreground mb-2">{t('dashboard.healthDistribution')}</p>
-          <div className="flex gap-1 h-4">
+        <Card className="p-3 col-span-2 lg:col-span-1">
+          <p className="text-xs text-muted-foreground mb-1.5">{t('dashboard.healthDistribution')}</p>
+          <div className="flex gap-1 h-3">
             {Object.entries(stats.healthCounts).map(([health, count]) => {
               if (count === 0) return null;
               const colors: Record<string, string> = {

@@ -59,25 +59,27 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
 
   return (
     <Card className={className}>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
             <CurrentIcon className={`h-4 w-4 ${currentConfig.color}`} />
             {t('stageProgress.yourJourney', 'Your Journey')}
           </CardTitle>
-          <StageBadge stage={workspace.stage} />
+          <StageBadge stage={workspace.stage} size="sm" />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Stage Progress Bar */}
-        <div className="space-y-2">
+      <CardContent className="space-y-3 pt-0">
+        {/* P0: Compact Stage Progress Bar */}
+        <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{t('stageProgress.stageProgress', 'Stage Progress')}</span>
-            <span>{currentStageIndex + 1} / {STAGE_ORDER.length}</span>
+            <span>{currentStageIndex + 1}/{STAGE_ORDER.length} stages</span>
+            {milestones && milestones.length > 0 && (
+              <span>{milestoneStats.completed}/{milestoneStats.total} milestones</span>
+            )}
           </div>
           <div className="relative">
-            <Progress value={progressPercent} className="h-2" />
-            <div className="flex justify-between mt-1">
+            <Progress value={progressPercent} className="h-1.5" />
+            <div className="flex justify-between mt-1.5">
               {STAGE_ORDER.map((stage, index) => {
                 const config = STAGE_CONFIG[stage];
                 const Icon = config.icon;
@@ -91,7 +93,7 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
                       isPast ? 'text-muted-foreground' : isCurrent ? config.color : 'text-muted-foreground/50'
                     }`}
                   >
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center text-xs ${
+                    <div className={`h-5 w-5 rounded-full flex items-center justify-center text-xs ${
                       isPast 
                         ? 'bg-primary/20' 
                         : isCurrent 
@@ -99,12 +101,11 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
                         : 'bg-muted'
                     }`}>
                       {isPast ? (
-                        <CheckCircle2 className="h-3 w-3" />
+                        <CheckCircle2 className="h-2.5 w-2.5" />
                       ) : (
-                        <Icon className="h-3 w-3" />
+                        <Icon className="h-2.5 w-2.5" />
                       )}
                     </div>
-                    <span className="text-[10px] mt-1 hidden sm:block">{config.label}</span>
                   </div>
                 );
               })}
@@ -112,31 +113,15 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
           </div>
         </div>
 
-        {/* Milestone Progress */}
-        {milestones && milestones.length > 0 && (
-          <div className="pt-2 border-t">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">{t('stageProgress.milestones', 'Milestones')}</span>
-              <Badge variant="secondary" className="text-xs">
-                {milestoneStats.completed}/{milestoneStats.total}
-              </Badge>
-            </div>
-            <Progress value={milestoneStats.percent} className="h-1.5" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {milestoneStats.percent}% {t('stageProgress.complete', 'complete')}
-            </p>
-          </div>
-        )}
-
-        {/* Quick link to milestones/playbooks */}
+        {/* Compact CTA */}
         <Button 
           variant="ghost" 
           size="sm" 
-          className="w-full justify-between text-muted-foreground hover:text-foreground"
+          className="w-full justify-between text-xs text-muted-foreground hover:text-foreground h-8"
           onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}
         >
-          <span>{t('stageProgress.viewMilestones', 'View milestones & playbooks')}</span>
-          <ChevronRight className="h-4 w-4" />
+          <span>{t('stageProgress.viewMilestones', 'View milestones')}</span>
+          <ChevronRight className="h-3 w-3" />
         </Button>
       </CardContent>
     </Card>

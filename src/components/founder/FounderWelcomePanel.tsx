@@ -68,51 +68,34 @@ export function FounderWelcomePanel({
     setChecklistDismissed(true);
   };
 
+  // P0: Reduced to 3 essential items for less clutter
   const checklistItems: ChecklistItem[] = [
-    {
-      id: 'profile',
-      label: t('onboarding.completeProfile', 'Complete your profile'),
-      description: t('onboarding.completeProfileDesc', 'Help mentors and consultants understand who you are'),
-      completed: hasProfile,
-      action: () => navigate('/settings'),
-      actionLabel: t('onboarding.editProfile', 'Edit Profile'),
-      icon: <Users className="h-4 w-4" />,
-    },
     {
       id: 'startup',
       label: t('onboarding.addStartup', 'Register your startup'),
-      description: t('onboarding.addStartupDesc', 'Set up your company to start tracking progress'),
+      description: t('onboarding.addStartupDesc', 'Set up your company to start tracking'),
       completed: hasStartup,
       action: onCreateStartup,
-      actionLabel: t('onboarding.createStartup', 'Create Startup'),
+      actionLabel: t('onboarding.createStartup', 'Create'),
       icon: <Rocket className="h-4 w-4" />,
     },
     {
       id: 'kpis',
-      label: t('onboarding.setKpis', 'Define your KPIs'),
-      description: t('onboarding.setKpisDesc', 'Track what matters most to your growth'),
+      label: t('onboarding.setKpis', 'Track your metrics'),
+      description: t('onboarding.setKpisDesc', 'Define what matters to your growth'),
       completed: hasKpis,
       action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=kpis`),
-      actionLabel: t('onboarding.addKpis', 'Add KPIs'),
+      actionLabel: t('onboarding.addKpis', 'Add'),
       icon: <TrendingUp className="h-4 w-4" />,
     },
     {
       id: 'documents',
-      label: t('onboarding.uploadDeck', 'Upload your pitch deck'),
-      description: t('onboarding.uploadDeckDesc', 'Get feedback and share with investors'),
+      label: t('onboarding.uploadDeck', 'Upload your deck'),
+      description: t('onboarding.uploadDeckDesc', 'Share with mentors and investors'),
       completed: hasDocuments,
       action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=documents`),
-      actionLabel: t('onboarding.uploadDeck', 'Upload Deck'),
+      actionLabel: t('onboarding.uploadDeck', 'Upload'),
       icon: <FileText className="h-4 w-4" />,
-    },
-    {
-      id: 'mentor',
-      label: t('onboarding.connectMentor', 'Connect with a mentor'),
-      description: t('onboarding.connectMentorDesc', 'Get guidance from experienced professionals'),
-      completed: hasMentor,
-      action: () => navigate('/mentors'),
-      actionLabel: t('onboarding.findMentors', 'Find Mentors'),
-      icon: <Users className="h-4 w-4" />,
     },
   ];
 
@@ -178,83 +161,71 @@ export function FounderWelcomePanel({
         </Card>
       )}
 
-      {/* Progress Checklist */}
+      {/* P0: Compact Progress Checklist */}
       {!checklistDismissed && !allCompleted && (
         <Card className="relative">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-foreground"
+            className="absolute top-2 right-2 h-6 w-6 text-muted-foreground hover:text-foreground"
             onClick={dismissChecklist}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </Button>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <Target className="h-5 w-5 text-primary" />
-                <div>
-                  <h3 className="font-semibold text-foreground">
-                    {t('onboarding.checklistTitle', 'Getting Started')}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {completedCount} of {checklistItems.length} {t('common.completed', 'completed')}
-                  </p>
-                </div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Target className="h-4 w-4 text-primary" />
+              <div className="flex-1">
+                <span className="font-medium text-sm">
+                  {t('onboarding.checklistTitle', 'Getting Started')}
+                </span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  {completedCount}/{checklistItems.length}
+                </span>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-primary">{Math.round(progress)}%</span>
-              </div>
+              <Progress value={progress} className="h-1.5 w-20" />
             </div>
             
-            <Progress value={progress} className="h-2 mb-5" />
-            
-            <div className="space-y-2">
-              {checklistItems.map((item, index) => (
+            <div className="space-y-1.5">
+              {checklistItems.map((item) => (
                 <div
                   key={item.id}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg transition-all duration-200",
+                    "flex items-center gap-2.5 p-2 rounded-md transition-colors",
                     item.completed 
                       ? "bg-success/10" 
                       : "bg-muted/50 hover:bg-muted"
                   )}
-                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className={cn(
-                    "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                    "h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0",
                     item.completed
                       ? "bg-success text-success-foreground"
                       : "bg-muted-foreground/20 text-muted-foreground"
                   )}>
                     {item.completed ? (
-                      <CheckCircle2 className="h-4 w-4" />
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                     ) : (
                       item.icon
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn(
-                      "font-medium text-sm",
+                      "font-medium text-sm leading-tight",
                       item.completed && "line-through text-muted-foreground"
                     )}>
                       {item.label}
                     </p>
-                    {!item.completed && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {item.description}
-                      </p>
-                    )}
                   </div>
                   {!item.completed && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={item.action}
-                      className="text-primary hover:text-primary flex-shrink-0"
+                      className="text-primary hover:text-primary h-6 px-2 text-xs"
                     >
                       {item.actionLabel}
-                      <ChevronRight className="h-3 w-3 ml-1" />
+                      <ChevronRight className="h-3 w-3 ml-0.5" />
                     </Button>
                   )}
                 </div>

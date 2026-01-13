@@ -39,10 +39,11 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // P0: Limit to 2 priorities for less clutter
   const priorities = useMemo<PriorityItem[]>(() => {
     const items: PriorityItem[] = [];
 
-    // 1. Overdue actions
+    // 1. Overdue actions (highest priority)
     if (workspace.overdueActionsCount > 0) {
       items.push({
         id: 'overdue',
@@ -55,21 +56,8 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
       });
     }
 
-    // 2. Pending actions
-    if (workspace.pendingActionsCount > 0 && items.length < 3) {
-      items.push({
-        id: 'pending',
-        label: t('yourWeek.pendingActions', { count: workspace.pendingActionsCount }),
-        description: t('yourWeek.pendingActionsDesc'),
-        icon: <Target className="h-4 w-4" />,
-        urgency: 'medium',
-        action: t('yourWeek.viewActions'),
-        tab: 'actions',
-      });
-    }
-
-    // 3. KPIs need update
-    if (!workspace.hasCurrentMonthKpi && items.length < 3) {
+    // 2. KPIs need update (important for founder habit)
+    if (!workspace.hasCurrentMonthKpi && items.length < 2) {
       items.push({
         id: 'kpis',
         label: t('yourWeek.updateKpis'),
@@ -81,11 +69,24 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
       });
     }
 
-    // 4. Upcoming meeting
-    if (workspace.nextMeetingDate && items.length < 3) {
+    // 3. Pending actions (only if space)
+    if (workspace.pendingActionsCount > 0 && items.length < 2) {
+      items.push({
+        id: 'pending',
+        label: t('yourWeek.pendingActions', { count: workspace.pendingActionsCount }),
+        description: t('yourWeek.pendingActionsDesc'),
+        icon: <Target className="h-4 w-4" />,
+        urgency: 'medium',
+        action: t('yourWeek.viewActions'),
+        tab: 'actions',
+      });
+    }
+
+    // 4. Upcoming meeting (only if high priority slot available)
+    if (workspace.nextMeetingDate && items.length < 2) {
       const meetingDate = new Date(workspace.nextMeetingDate);
       const daysUntil = differenceInDays(meetingDate, new Date());
-      if (daysUntil <= 7 && daysUntil >= 0) {
+      if (daysUntil <= 3 && daysUntil >= 0) {
         items.push({
           id: 'meeting',
           label: t('yourWeek.upcomingSession'),
@@ -98,49 +99,36 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
       }
     }
 
-    // If nothing urgent, show "all caught up"
-    return items.slice(0, 3);
-  }, [workspace, t]);
-
-  const dueThisWeek = useMemo(() => {
-    const items: { type: string; label: string }[] = [];
-    
-    if (workspace.nextMeetingDate && isThisWeek(new Date(workspace.nextMeetingDate))) {
-      items.push({
-        type: 'session',
-        label: t('yourWeek.sessionThisWeek'),
-      });
-    }
-
-    return items;
+    // P0: Max 2 priorities for clean UX
+    return items.slice(0, 2);
   }, [workspace, t]);
 
   const primaryAction = priorities[0];
 
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-accent/5">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Zap className="h-4 w-4 text-primary" />
             {t('yourWeek.title')}
           </CardTitle>
           {streakWeeks > 0 && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="secondary" className="gap-1 text-xs">
               <Flame className="h-3 w-3 text-orange-500" />
-              {t('yourWeek.streak', { count: streakWeeks })}
+              {streakWeeks}w
             </Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Priorities */}
+      <CardContent className="space-y-3 pt-0">
+        {/* Priorities - max 2 */}
         {priorities.length > 0 ? (
           <div className="space-y-2">
-            {priorities.map((item, index) => (
+            {priorities.map((item) => (
               <div
                 key={item.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 ${
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 ${
                   item.urgency === 'high'
                     ? 'border-destructive/30 bg-destructive/5'
                     : item.urgency === 'medium'
@@ -149,8 +137,8 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
                 }`}
                 onClick={() => navigate(`/workspace/${workspace.id}?tab=${item.tab}`)}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                <div className="flex items-center gap-2.5">
+                  <div className={`h-7 w-7 rounded-full flex items-center justify-center ${
                     item.urgency === 'high'
                       ? 'bg-destructive/10 text-destructive'
                       : item.urgency === 'medium'
@@ -160,48 +148,35 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
                     {item.icon}
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{item.label}</p>
+                    <p className="font-medium text-sm leading-tight">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.description}</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50/50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
-            <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <div className="flex items-center gap-2.5 p-3 rounded-lg bg-green-50/50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+            <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="font-medium text-green-900 dark:text-green-100">
+              <p className="font-medium text-sm text-green-900 dark:text-green-100">
                 {t('yourWeek.allCaughtUp')}
               </p>
-              <p className="text-sm text-green-700 dark:text-green-300">
+              <p className="text-xs text-green-700 dark:text-green-300">
                 {t('yourWeek.greatWork')}
               </p>
             </div>
           </div>
         )}
 
-        {/* Due This Week */}
-        {dueThisWeek.length > 0 && (
-          <div className="pt-2 border-t">
-            <p className="text-xs text-muted-foreground mb-2">{t('yourWeek.dueThisWeek')}</p>
-            <div className="flex flex-wrap gap-2">
-              {dueThisWeek.map((item, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  {item.label}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Primary CTA */}
+        {/* Single primary CTA */}
         {primaryAction && (
           <Button 
-            className="w-full mt-2" 
+            className="w-full" 
+            size="sm"
             onClick={() => navigate(`/workspace/${workspace.id}?tab=${primaryAction.tab}`)}
           >
             {primaryAction.action}

@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, HelpCircle, ChevronRight } from 'lucide-react';
+import { TrendingUp, HelpCircle, ChevronRight, ChevronDown } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +9,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { useDocuments } from '@/hooks/useDocuments';
 import { useInvestorUpdates } from '@/hooks/useInvestorUpdates';
 import { useDataroomShareLinks, useDataroom } from '@/hooks/useDataroom';
@@ -21,6 +26,7 @@ interface InvestorReadinessWidgetProps {
 export function InvestorReadinessWidget({ workspaceId, compact = false }: InvestorReadinessWidgetProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
   const { data: documents } = useDocuments(workspaceId);
   const { data: updates } = useInvestorUpdates(workspaceId);
   const { data: dataroom } = useDataroom(workspaceId);
@@ -77,30 +83,23 @@ export function InvestorReadinessWidget({ workspaceId, compact = false }: Invest
     };
   }, [documents, updates, shareLinks, t]);
 
+  // Compact mode - single line
   if (compact) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">{t('investorReadiness.title')}</span>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs">
-              <p className="text-xs">{t('investorReadiness.whyMatters')}</p>
-            </TooltipContent>
-          </Tooltip>
         </div>
         <div className="flex items-center gap-2 flex-1">
-          <Progress value={progress} className="h-2 flex-1 max-w-[100px]" />
+          <Progress value={progress} className="h-1.5 flex-1 max-w-[80px]" />
           <span className="text-xs text-muted-foreground">{completedItems}/{totalItems}</span>
         </div>
         {nextStep && (
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-xs h-7 px-2"
+            className="text-xs h-6 px-2"
             onClick={() => navigate(`/workspace/${workspaceId}?tab=${nextStep.tab}`)}
           >
             {nextStep.label}
@@ -111,43 +110,55 @@ export function InvestorReadinessWidget({ workspaceId, compact = false }: Invest
     );
   }
 
+  // P0: Collapsible by default for less above-fold clutter
   return (
-    <div className="p-4 rounded-lg border bg-muted/30">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          <span className="font-medium">{t('investorReadiness.title')}</span>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs">
-              <p className="text-sm font-medium mb-1">{t('investorReadiness.whyMattersTitle')}</p>
-              <p className="text-xs">{t('investorReadiness.whyMatters')}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <span className="text-lg font-bold text-primary">{Math.round(progress)}%</span>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="rounded-lg border bg-muted/30">
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors rounded-lg">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="font-medium text-sm">{t('investorReadiness.title')}</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="text-xs">{t('investorReadiness.whyMatters')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Progress value={progress} className="h-1.5 w-16" />
+                <span className="text-sm font-medium text-primary">{completedItems}/{totalItems}</span>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <div className="px-3 pb-3 pt-1 border-t">
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-muted-foreground">
+                {t('investorReadiness.itemsComplete')}
+              </p>
+              {nextStep && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="text-xs h-auto p-0"
+                  onClick={() => navigate(`/workspace/${workspaceId}?tab=${nextStep.tab}`)}
+                >
+                  {nextStep.label}
+                  <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </CollapsibleContent>
       </div>
-      
-      <Progress value={progress} className="h-2 mb-3" />
-      
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {completedItems}/{totalItems} {t('investorReadiness.itemsComplete')}
-        </p>
-        {nextStep && (
-          <Button 
-            variant="link" 
-            size="sm" 
-            className="text-sm h-auto p-0"
-            onClick={() => navigate(`/workspace/${workspaceId}?tab=${nextStep.tab}`)}
-          >
-            {nextStep.label}
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        )}
-      </div>
-    </div>
+    </Collapsible>
   );
 }

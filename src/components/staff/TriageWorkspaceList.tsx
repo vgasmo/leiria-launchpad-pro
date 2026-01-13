@@ -179,12 +179,13 @@ export function TriageWorkspaceList({
             return (
               <div
                 key={workspace.id}
-                className="flex flex-wrap items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-center gap-2 p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => navigate(`/workspace/${workspace.id}`)}
               >
-                {/* Urgency indicator */}
+                {/* Urgency indicator - compact */}
                 {triageMode && urgencyScore !== null && (
                   <div className={cn(
-                    "w-2 h-10 rounded-full",
+                    "w-1.5 h-8 rounded-full flex-shrink-0",
                     urgencyScore >= 50 ? "bg-destructive" :
                     urgencyScore >= 30 ? "bg-warning" :
                     urgencyScore >= 15 ? "bg-yellow-500" :
@@ -192,75 +193,61 @@ export function TriageWorkspaceList({
                   )} />
                 )}
                 
-                {/* Startup info */}
-                <div className="flex-1 min-w-[150px]">
-                  <p className="font-medium text-sm">{workspace.startup?.name || 'Unknown'}</p>
-                  {workspace.program?.name && (
-                    <p className="text-xs text-muted-foreground">{workspace.program.name}</p>
-                  )}
+                {/* Startup info + health inline */}
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{workspace.startup?.name || 'Unknown'}</p>
+                    {workspace.program?.name && (
+                      <p className="text-xs text-muted-foreground truncate">{workspace.program.name}</p>
+                    )}
+                  </div>
+                  
+                  {/* Health badge inline */}
+                  <Badge 
+                    variant={
+                      workspace.health_label === 'critical' ? 'destructive' :
+                      workspace.health_label === 'at_risk' ? 'outline' :
+                      'secondary'
+                    }
+                    className="text-xs flex-shrink-0"
+                  >
+                    {workspace.health_label || 'N/A'}
+                  </Badge>
                 </div>
                 
-                {/* Health badge */}
-                <Badge 
-                  variant={
-                    workspace.health_label === 'critical' ? 'destructive' :
-                    workspace.health_label === 'at_risk' ? 'outline' :
-                    'secondary'
-                  }
-                  className="text-xs"
-                >
-                  {workspace.health_label || 'N/A'}
-                </Badge>
-                
-                {/* Stats */}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                {/* Compact stats */}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
                   {(workspace.overdue_actions_count || 0) > 0 && (
                     <span className="flex items-center gap-1 text-destructive">
                       <AlertTriangle className="h-3 w-3" />
-                      {workspace.overdue_actions_count} {t('triage.overdue', 'overdue')}
+                      {workspace.overdue_actions_count}
                     </span>
                   )}
-                  
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {daysSince !== null ? `${daysSince}d` : '-'}
                   </span>
                 </div>
                 
-                {/* Top overdue action */}
-                {workspace.top_overdue_action && (
-                  <p className="w-full text-xs text-muted-foreground truncate pl-3 border-l-2 border-destructive/30">
-                    {workspace.top_overdue_action}
-                  </p>
-                )}
-                
-                {/* Actions */}
-                <div className="flex items-center gap-2">
+                {/* Compact action buttons */}
+                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => navigate(`/workspace/${workspace.id}`)}
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </Button>
-                  
-                  {onMessage && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onMessage(workspace.id)}
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  )}
                   
                   {onScheduleSession && (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="h-7 w-7"
                       onClick={() => onScheduleSession(workspace.id)}
                     >
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3.5 w-3.5" />
                     </Button>
                   )}
                   

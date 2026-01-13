@@ -30,62 +30,63 @@ export function MentorImpactDashboard() {
   const monthlyGoal = 20; // hours per month goal
   const monthlyProgress = timeSummary ? (timeSummary.thisMonth / monthlyGoal) * 100 : 0;
 
+  // P0: Compact stats in single row for less clutter
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <TrendingUp className="h-6 w-6" />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
           Your Impact
         </h2>
-        <p className="text-muted-foreground">Track your mentoring contributions</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">{timeSummary?.totalHours.toFixed(1) || 0}h</span>
+      {/* P0: Single row compact stats */}
+      <Card>
+        <CardContent className="py-3">
+          <div className="flex items-center justify-between divide-x">
+            <div className="flex-1 text-center px-3">
+              <div className="flex items-center justify-center gap-1.5">
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="text-xl font-bold">{timeSummary?.totalHours.toFixed(0) || 0}h</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Total</p>
             </div>
-            <p className="text-sm text-muted-foreground">Total Hours Contributed</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">{timeSummary?.thisMonth.toFixed(1) || 0}h</span>
+            
+            <div className="flex-1 text-center px-3">
+              <div className="flex items-center justify-center gap-1.5">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-xl font-bold">{timeSummary?.thisMonth.toFixed(0) || 0}h</span>
+              </div>
+              <p className="text-xs text-muted-foreground">This month</p>
             </div>
-            <p className="text-sm text-muted-foreground">Hours This Month</p>
-            <div className="mt-2">
-              <Progress value={Math.min(monthlyProgress, 100)} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">{Math.round(monthlyProgress)}% of {monthlyGoal}h goal</p>
+            
+            <div className="flex-1 text-center px-3">
+              <div className="flex items-center justify-center gap-1.5">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="text-xl font-bold">{startupsHelped}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Startups</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">{startupsHelped}</span>
+            
+            <div className="flex-1 text-center px-3">
+              <div className="flex items-center justify-center gap-1.5">
+                <Star className="h-4 w-4 text-yellow-500" />
+                <span className="text-xl font-bold">{rating?.average || '-'}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{rating?.count || 0} reviews</p>
             </div>
-            <p className="text-sm text-muted-foreground">Startups Helped</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <span className="text-2xl font-bold">{rating?.average || '-'}</span>
-              <span className="text-sm text-muted-foreground">/ 5</span>
+          </div>
+          
+          {/* Monthly goal progress - compact */}
+          <div className="mt-3 pt-3 border-t">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Monthly goal</span>
+              <Progress value={Math.min(monthlyProgress, 100)} className="h-1.5 flex-1" />
+              <span className="text-xs font-medium">{Math.round(monthlyProgress)}%</span>
             </div>
-            <p className="text-sm text-muted-foreground">Average Session Rating ({rating?.count || 0} reviews)</p>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {timeSummary?.byWorkspace.length ? (
         <Card>
