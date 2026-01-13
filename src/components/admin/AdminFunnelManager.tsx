@@ -277,7 +277,9 @@ function NewLeadForm({
           <Select value={formData.owner_consultant_id} onValueChange={v => setFormData({...formData, owner_consultant_id: v})}>
             <SelectTrigger><SelectValue placeholder="Select consultant" /></SelectTrigger>
             <SelectContent>
-              {consultors.map(c => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
+              {consultors.filter(c => c.id).map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.full_name || 'Unnamed'}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
