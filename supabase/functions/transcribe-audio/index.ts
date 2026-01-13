@@ -80,14 +80,14 @@ Deno.serve(async (req) => {
     }
 
     // Parse and validate request body
-    let body: { audio?: unknown; workspace_id?: unknown };
+    let body: { audio?: unknown; workspace_id?: unknown; mimeType?: unknown };
     try {
       body = await req.json();
     } catch {
       return corsJsonResponse({ error: 'Invalid JSON body', code: 'BAD_REQUEST' }, req, 400);
     }
     
-    const { audio, workspace_id } = body;
+    const { audio, workspace_id, mimeType } = body;
 
     if (!audio || typeof audio !== 'string') {
       log.error('No audio data provided');
@@ -114,7 +114,10 @@ Deno.serve(async (req) => {
     log.info('Binary audio processed', { bytes: binaryAudio.length });
 
     // Use Gemini model with audio input capability
-    const audioDataUrl = `data:audio/webm;base64,${audio}`;
+    // Honor the mimeType from the request for cross-browser compatibility
+    const actualMimeType = typeof mimeType === 'string' && mimeType ? mimeType : 'audio/webm';
+    const audioDataUrl = `data:${actualMimeType};base64,${audio}`;
+    log.info('Using mimeType', { mimeType: actualMimeType });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

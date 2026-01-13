@@ -2718,6 +2718,50 @@ export type Database = {
         }
         Relationships: []
       }
+      public_booking_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          owner_consultant_id: string | null
+          owner_email: string | null
+          program_id: string | null
+          token_hash: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          owner_consultant_id?: string | null
+          owner_email?: string | null
+          program_id?: string | null
+          token_hash: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          owner_consultant_id?: string | null
+          owner_email?: string | null
+          program_id?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_booking_links_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quality_check_results: {
         Row: {
           coach_hints: Json | null

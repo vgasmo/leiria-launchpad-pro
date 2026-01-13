@@ -105,6 +105,17 @@ verify_jwt = false
 verify_jwt = false
 
 # ============================================
+# ADMIN FUNCTIONS (Require auth + admin role)
+# JWT disabled at gateway, validated at runtime
+# ============================================
+
+[functions.get-global-integrations]
+verify_jwt = false
+
+[functions.set-global-integrations]
+verify_jwt = false
+
+# ============================================
 # CRON/SYSTEM FUNCTIONS (Category B)
 # No JWT - requires x-cron-secret header
 # Called by scheduled jobs or internal systems

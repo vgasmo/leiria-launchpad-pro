@@ -25,6 +25,7 @@ import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsMa
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { AdminEcosystemManager } from '@/components/admin/AdminEcosystemManager';
+import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -192,7 +193,10 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="funnel">
-          <AdminFunnelManager />
+          <div className="space-y-6">
+            <BookingLinksManager />
+            <AdminFunnelManager />
+          </div>
         </TabsContent>
 
         <TabsContent value="ecosystem">

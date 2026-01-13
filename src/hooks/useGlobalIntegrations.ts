@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 export interface GraphApiGlobalSettings {
   tenant_id: string;
   client_id: string;
   // Note: client_secret is NEVER returned to the frontend for security
-  // It is only written, never read back
+  // It is only written via edge functions, never read back
 }
 
 export interface GlobalIntegrationSettings {
@@ -18,30 +19,34 @@ export interface GlobalIntegrationSettings {
   updated_at: string;
 }
 
+/**
+ * Fetch global Graph settings via secure edge function
+ * This NEVER exposes client_secret to the browser
+ */
 export function useGlobalGraphSettings() {
   return useQuery({
     queryKey: ['global-integration-settings', 'graph_api'],
     queryFn: async (): Promise<GlobalIntegrationSettings | null> => {
-      const { data, error } = await supabase
-        .from('global_integration_settings')
-        .select('id, integration_type, is_enabled, created_at, updated_at, settings_json')
-        .eq('integration_type', 'graph_api')
-        .maybeSingle();
+      // Use edge function to fetch settings - secrets are sanitized server-side
+      const { data, error } = await invokeWithAuth('get-global-integrations', {
+        body: { integration_type: 'graph_api' },
+      });
       
-      if (error) throw error;
-      
-      // Sanitize: Never expose client_secret to frontend even if accidentally returned
-      if (data?.settings_json && typeof data.settings_json === 'object') {
-        const sanitized = { ...data.settings_json } as Record<string, unknown>;
-        delete sanitized.client_secret;
-        return { ...data, settings_json: sanitized } as GlobalIntegrationSettings;
+      if (error) {
+        console.error('[useGlobalGraphSettings] Edge function error:', error);
+        throw error;
       }
       
-      return data as GlobalIntegrationSettings | null;
+      const settings = data?.settings?.[0] || null;
+      return settings as GlobalIntegrationSettings | null;
     },
   });
 }
 
+/**
+ * Update global Graph settings via secure edge function
+ * Secrets are handled server-side and never exposed
+ */
 export function useUpdateGlobalGraphSettings() {
   const queryClient = useQueryClient();
   
@@ -52,50 +57,23 @@ export function useUpdateGlobalGraphSettings() {
       client_secret?: string; // Optional for updates
       is_enabled?: boolean;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-      
-      // Build settings object - only include secret if provided
-      const settingsJson: Record<string, string> = {
-        tenant_id: settings.tenant_id,
-        client_id: settings.client_id,
-      };
-      
-      // Only include secret if provided (for updates, it's optional)
-      if (settings.client_secret) {
-        settingsJson.client_secret = settings.client_secret;
-      }
-      
-      // If no secret provided, we need to preserve the existing one
-      if (!settings.client_secret) {
-        // Fetch existing settings to preserve the secret
-        const { data: existing } = await supabase
-          .from('global_integration_settings')
-          .select('settings_json')
-          .eq('integration_type', 'graph_api')
-          .maybeSingle();
-        
-        if (existing?.settings_json && typeof existing.settings_json === 'object') {
-          const existingJson = existing.settings_json as Record<string, unknown>;
-          if (existingJson.client_secret) {
-            settingsJson.client_secret = existingJson.client_secret as string;
-          }
-        }
-      }
-      
-      const { data, error } = await supabase
-        .from('global_integration_settings')
-        .upsert({
+      // Use edge function to save settings - secrets are handled server-side
+      const { data, error } = await invokeWithAuth('set-global-integrations', {
+        body: {
           integration_type: 'graph_api',
-          settings_json: settingsJson,
+          settings: {
+            tenant_id: settings.tenant_id,
+            client_id: settings.client_id,
+            client_secret: settings.client_secret,
+          },
           is_enabled: settings.is_enabled ?? true,
-          created_by: user.id,
-        }, { onConflict: 'integration_type' })
-        .select('id, integration_type, is_enabled, created_at, updated_at')
-        .single();
+        },
+      });
       
       if (error) throw error;
-      return data;
+      if (!data?.success) throw new Error(data?.error || 'Failed to save settings');
+      
+      return data.settings;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['global-integration-settings', 'graph_api'] });
@@ -107,20 +85,41 @@ export function useUpdateGlobalGraphSettings() {
   });
 }
 
+/**
+ * Toggle global Graph API enabled/disabled
+ */
 export function useToggleGlobalGraph() {
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async (enabled: boolean) => {
-      const { data, error } = await supabase
-        .from('global_integration_settings')
-        .update({ is_enabled: enabled })
-        .eq('integration_type', 'graph_api')
-        .select()
-        .single();
+      // Fetch current settings first
+      const { data: currentData } = await invokeWithAuth('get-global-integrations', {
+        body: { integration_type: 'graph_api' },
+      });
+      
+      const current = currentData?.settings?.[0];
+      if (!current) throw new Error('No Graph API settings configured');
+      
+      const currentSettings = current.settings_json as GraphApiGlobalSettings;
+      
+      // Update with same settings but different enabled state
+      const { data, error } = await invokeWithAuth('set-global-integrations', {
+        body: {
+          integration_type: 'graph_api',
+          settings: {
+            tenant_id: currentSettings.tenant_id,
+            client_id: currentSettings.client_id,
+            // Don't send client_secret - it will be preserved server-side
+          },
+          is_enabled: enabled,
+        },
+      });
       
       if (error) throw error;
-      return data;
+      if (!data?.success) throw new Error(data?.error || 'Failed to update');
+      
+      return data.settings;
     },
     onSuccess: (_, enabled) => {
       queryClient.invalidateQueries({ queryKey: ['global-integration-settings', 'graph_api'] });
