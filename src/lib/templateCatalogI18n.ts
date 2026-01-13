@@ -5,9 +5,13 @@ export type TemplateCatalogMeta = {
   key: string;
   title: string;
   description?: string;
+  categoryKey: string;
   categoryLabel: string;
 };
 
+/**
+ * Convert any template name to a stable i18n key (snake_case)
+ */
 function toStableKey(input: string): string {
   return input
     .trim()
@@ -17,90 +21,59 @@ function toStableKey(input: string): string {
     .replace(/^_+|_+$/g, "");
 }
 
-function mapTemplateNameToKey(name: string): string {
-  const n = name.trim();
-
-  const map: Record<string, string> = {
-    // Core list templates (DB identifiers)
-    "Unit Economics": "unit_economics",
-    "Fundraising Readiness": "fundraising_readiness",
-    "Investor Meeting Prep": "investor_meeting_prep",
-    "Pitch Deck Checklist": "pitch_deck_checklist",
-
-    // Canvas templates (DB identifiers)
-    "Business Model Canvas": "bmc",
-    "Lean Canvas": "lean",
-    "Value Proposition Canvas": "value_prop",
-    "Empathy Map": "empathy",
-    "SWOT Analysis": "swot",
-    "Go-To-Market Canvas": "gtm",
-    "Go-to-Market Canvas": "gtm",
-    "ICP & Persona Board": "icp",
-    "OKRs & North Star Canvas": "okrs",
-    "OKRs & North Star": "okrs",
-    "Fundraising Canvas": "fundraising",
-    "Fundraise Readiness Canvas": "fundraising_readiness_canvas",
-    "Sales Pipeline Canvas": "pipeline",
-    "Product Roadmap Canvas": "roadmap",
-
-    // Common aliases
-    "GTM Canvas": "gtm",
-    "ICP": "icp",
-    "OKRs": "okrs",
-    "BMC": "bmc",
-  };
-
-  return map[n] ?? toStableKey(n);
-}
-
-function mapCategoryToKey(category: string): string {
-  const c = category.trim();
-  const map: Record<string, string> = {
-    Finance: "Finance",
-    Fundraising: "Fundraising",
-    Goals: "Goals",
-    Growth: "Growth",
-    Product: "Product",
-    Progress: "Progress",
-    Sales: "Sales",
-    Strategy: "Strategy",
-    Team: "Team",
-    Validation: "Validation",
-    Customer: "Customer",
-    Marketing: "Marketing",
-    Operations: "Operations",
-    Funding: "Fundraising",
-    Other: "Other",
-  };
-  return map[c] ?? c;
-}
-
+/**
+ * Get localized metadata for a template catalog entry.
+ * Uses stable keys derived from template name, with i18n lookup and DB fallback.
+ */
 export function getLocalizedTemplateMeta(
   template: Pick<Template, "name" | "description" | "category">,
-  t: TFunction,
-  language: string
+  t: TFunction
 ): TemplateCatalogMeta {
-  const key = mapTemplateNameToKey(template.name);
-  const categoryKey = mapCategoryToKey(template.category || "Other");
+  const key = toStableKey(template.name);
+  // Keep the original category case for lookup since JSON keys are case-sensitive
+  const categoryKey = template.category || "Other";
 
+  // Try catalog-based keys first (snake_case), then names with original name, then raw DB value
   const title = t(`templates.catalog.${key}.title`, {
-    defaultValue: t(`templates.names.${template.name}`, { defaultValue: template.name }),
+    defaultValue: t(`templates.names.${template.name}`, {
+      defaultValue: template.name,
+    }),
   });
 
-  const description = t(`templates.catalog.${key}.desc`, {
-    defaultValue: template.description
-      ? t(`templates.descriptions.${template.name}`, { defaultValue: template.description })
-      : "",
-  });
+  const rawDesc = template.description || "";
+  const description = rawDesc
+    ? t(`templates.catalog.${key}.desc`, {
+        defaultValue: t(`templates.descriptions.${template.name}`, {
+          defaultValue: rawDesc,
+        }),
+      })
+    : undefined;
 
+  // Category lookup: try exact case first (e.g., "Finance"), then lowercase
   const categoryLabel = t(`templates.categories.${categoryKey}`, {
-    defaultValue: template.category || t("templates.categories.Other", { defaultValue: "Other" }),
+    defaultValue: t(`templates.categories.${categoryKey.toLowerCase()}`, {
+      defaultValue: categoryKey,
+    }),
   });
 
   return {
     key,
     title,
-    description: description || undefined,
+    description,
+    categoryKey,
     categoryLabel,
   };
+}
+
+/**
+ * Get localized category label directly from a raw category string
+ */
+export function getLocalizedCategoryLabel(category: string, t: TFunction): string {
+  const cat = category || "Other";
+  // Try exact case first, then lowercase
+  return t(`templates.categories.${cat}`, {
+    defaultValue: t(`templates.categories.${cat.toLowerCase()}`, {
+      defaultValue: cat,
+    }),
+  });
 }
