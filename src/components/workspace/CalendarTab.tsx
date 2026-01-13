@@ -66,6 +66,7 @@ import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarTabProps {
   workspaceId: string;
@@ -74,6 +75,7 @@ interface CalendarTabProps {
 }
 
 export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
+  const { t } = useTranslation();
   const { data: sessions = [], isLoading } = useCalendarSessions(workspaceId);
   const { data: workspaceMembers = [] } = useWorkspaceMembers(workspaceId);
   const { data: sessionTemplates } = useSessionTemplates();
@@ -234,12 +236,12 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         }
       }
 
-      toast.success('Session scheduled');
+      toast.success(t('sessions.sessionScheduled'));
       resetForm();
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error('Error creating session:', error);
-      toast.error('Failed to schedule session');
+      toast.error(t('sessions.createSession') + ' ' + t('common.error').toLowerCase());
     }
   };
 
@@ -260,24 +262,24 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         join_url: formData.joinUrl || null,
       });
 
-      toast.success('Session updated');
+      toast.success(t('sessions.sessionUpdated'));
       resetForm();
       setEditingSession(null);
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error('Error updating session:', error);
-      toast.error('Failed to update session');
+      toast.error(t('sessions.editSession') + ' ' + t('common.error').toLowerCase());
     }
   };
 
   const handleDeleteSession = async (id: string) => {
     try {
       await deleteSession.mutateAsync(id);
-      toast.success('Session deleted');
+      toast.success(t('sessions.sessionDeleted'));
       setDeleteConfirmId(null);
     } catch (error) {
       console.error('Error deleting session:', error);
-      toast.error('Failed to delete session');
+      toast.error(t('sessions.deleteSession') + ' ' + t('common.error').toLowerCase());
     }
   };
 
@@ -572,25 +574,25 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                 setIsAddDialogOpen(true);
               }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Session
+                {t('sessions.addSession')}
               </Button>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Schedule Session</DialogTitle>
+                  <DialogTitle>{t('sessions.scheduleSession')}</DialogTitle>
                   <DialogDescription>
-                    Create a new mentoring session
+                    {t('sessions.createNewSession')}
                   </DialogDescription>
                 </DialogHeader>
                 {renderSessionFormFields(false)}
                 <DialogFooter>
                   <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); resetForm(); }}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={handleAddSession}
                     disabled={createSession.isPending || !formData.title || !formData.date || !formData.startTime}
                   >
-                    {createSession.isPending ? 'Scheduling...' : 'Schedule Session'}
+                    {createSession.isPending ? t('sessions.scheduling') : t('sessions.scheduleSession')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -646,7 +648,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                     ))}
                     {daySessions.length > 2 && (
                       <div className="text-xs text-muted-foreground px-1">
-                        +{daySessions.length - 2} more
+                        +{daySessions.length - 2} {t('sessions.more')}
                       </div>
                     )}
                   </div>
@@ -661,7 +663,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {selectedDate ? format(selectedDate, 'EEEE, MMMM d') : 'Select a date'}
+            {selectedDate ? format(selectedDate, 'EEEE, MMMM d') : t('sessions.selectDate')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -740,7 +742,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                             >
                               <Badge variant="outline" className="text-xs gap-1 hover:bg-primary/10">
                                 <Video className="h-3 w-3" />
-                                Join Call
+                                {t('sessions.joinCall')}
                               </Badge>
                             </a>
                           )}
@@ -751,7 +753,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">No sessions scheduled</p>
+                  <p className="text-sm">{t('sessions.noSessionsScheduled')}</p>
                   {canWrite && (
                     <Button
                       variant="link"
@@ -760,7 +762,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                       onClick={() => openAddDialogWithDate(selectedDate)}
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      Add session
+                      {t('sessions.addSession')}
                     </Button>
                   )}
                 </div>
@@ -768,7 +770,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             </ScrollArea>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Click on a date to view sessions
+              {t('sessions.clickToViewSessions')}
             </p>
           )}
         </CardContent>
@@ -778,21 +780,21 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => { setIsEditDialogOpen(open); if (!open) { resetForm(); setEditingSession(null); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Session</DialogTitle>
+            <DialogTitle>{t('sessions.editSession')}</DialogTitle>
             <DialogDescription>
-              Update session details
+              {t('sessions.updateSessionDetails')}
             </DialogDescription>
           </DialogHeader>
           {renderSessionFormFields(true)}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsEditDialogOpen(false); resetForm(); setEditingSession(null); }}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleEditSession}
               disabled={updateSession.isPending || !formData.title || !formData.date || !formData.startTime}
             >
-              {updateSession.isPending ? 'Saving...' : 'Save Changes'}
+              {updateSession.isPending ? t('sessions.saving') : t('sessions.saveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>
