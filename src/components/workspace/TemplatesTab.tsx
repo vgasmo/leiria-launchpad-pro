@@ -96,17 +96,17 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
 
   if (!templates?.length) {
     return (
-      <Card className="border-dashed border-2">
-        <CardContent className="py-16 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-            <FileText className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">{t('templates.emptyStateTitle', 'No templates yet')}</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {t('templates.emptyStateDesc', 'Templates help structure your thinking. Your consultant will add templates relevant to your stage.')}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="h-12 w-12 rounded-full bg-muted/60 flex items-center justify-center mb-4">
+          <FileText className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <h3 className="text-base font-medium text-foreground mb-1">
+          {t('templates.emptyStateTitle', 'No templates yet')}
+        </h3>
+        <p className="text-sm text-muted-foreground text-center max-w-xs">
+          {t('templates.emptyStateDesc', 'Templates help you structure your thinking and track progress.')}
+        </p>
+      </div>
     );
   }
 
@@ -199,59 +199,65 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
         const categoryLabel = getLocalizedCategoryLabel(category, t);
         
         return (
-          <div key={category}>
-            <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-              <FolderOpen className="h-4 w-4" />
+          <div key={category} className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2 px-1">
+              <FolderOpen className="h-3.5 w-3.5" />
               {categoryLabel}
             </h3>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
               {templatesByCategory[category].map(template => {
                 const instance = instancesByTemplateId[template.id];
                 const isCompleted = instance?.status === 'completed';
                 const isStarted = !!instance;
+                const reviewStatus = instance?.review_status;
                 
                 // Get fully localized template metadata
                 const meta = getLocalizedTemplateMeta(template, t);
 
+                // Compact status indicator
+                const getStatusIndicator = () => {
+                  if (isCompleted) return { color: 'bg-green-500', label: t('templates.approved') };
+                  if (reviewStatus === 'pending_review') return { color: 'bg-amber-500', label: t('templates.pendingReview') };
+                  if (reviewStatus === 'approved') return { color: 'bg-green-500', label: t('templates.approved') };
+                  if (reviewStatus === 'needs_changes') return { color: 'bg-red-500', label: t('templates.needsChanges') };
+                  if (isStarted) return { color: 'bg-blue-500', label: t('templates.inProgress') };
+                  return null;
+                };
+                const status = getStatusIndicator();
+
                 return (
-                  <Card 
+                  <div 
                     key={template.id}
-                    className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/40 group ${isCompleted ? 'border-green-500/40 bg-green-50/30 dark:bg-green-900/10' : 'hover:bg-muted/30'}`}
+                    className={`group relative flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-sm ${
+                      isCompleted 
+                        ? 'border-green-200 bg-green-50/50 dark:border-green-900/40 dark:bg-green-950/20' 
+                        : 'border-border/60 hover:border-primary/30 hover:bg-muted/40'
+                    }`}
                     onClick={() => handleOpenTemplate(template)}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm leading-tight flex items-center gap-2">
-                            {meta.title}
-                            {isCompleted && <Check className="h-4 w-4 text-green-600 shrink-0" />}
-                          </h4>
-                          {meta.description && (
-                            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-                              {meta.description}
-                            </p>
-                          )}
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" />
-                      </div>
-                      {(isStarted || instance?.review_status) && (
-                        <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border/50">
-                          {isStarted && !isCompleted && (
-                            <Badge variant="secondary" className="text-xs font-medium">{t('templates.inProgress')}</Badge>
-                          )}
-                          {instance?.review_status === 'pending_review' && (
-                            <Badge className="text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{t('templates.pendingReview')}</Badge>
-                          )}
-                          {instance?.review_status === 'approved' && (
-                            <Badge className="text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{t('templates.approved')}</Badge>
-                          )}
-                          {instance?.review_status === 'needs_changes' && (
-                            <Badge className="text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">{t('templates.needsChanges')}</Badge>
-                          )}
-                        </div>
+                    {/* Status dot */}
+                    {status && (
+                      <div 
+                        className={`absolute top-2 right-2 h-2 w-2 rounded-full ${status.color}`} 
+                        title={status.label}
+                      />
+                    )}
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h4 className="font-medium text-sm leading-snug text-foreground group-hover:text-primary transition-colors">
+                        {meta.title}
+                      </h4>
+                      {meta.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate" title={meta.description}>
+                          {meta.description}
+                        </p>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                    
+                    {/* Chevron */}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:text-primary/60" />
+                  </div>
                 );
               })}
             </div>

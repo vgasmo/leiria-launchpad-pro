@@ -275,20 +275,20 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg border">
+      {/* Compact Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-muted/20 rounded-lg border border-border/50">
         {canWrite && milestones && milestones.length > 0 && (
-          <Button size="sm" onClick={handleOpenCreateDialog}>
-            <Plus className="h-4 w-4 mr-1" />
+          <Button size="sm" className="h-7 text-xs" onClick={handleOpenCreateDialog}>
+            <Plus className="h-3.5 w-3.5 mr-1" />
             {t('actions.addAction')}
           </Button>
         )}
         
-        <div className="h-6 w-px bg-border" />
+        <div className="h-5 w-px bg-border/60" />
         
         <Select value={filters.owner} onValueChange={v => setFilters(f => ({ ...f, owner: v }))}>
-          <SelectTrigger className="w-[160px] h-8 text-sm">
-            <User className="h-3 w-3 mr-1" />
+          <SelectTrigger className="w-[130px] h-7 text-xs border-border/50">
+            <User className="h-3 w-3 mr-1 text-muted-foreground" />
             <SelectValue placeholder={t('actions.owner')} />
           </SelectTrigger>
           <SelectContent>
@@ -302,7 +302,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         </Select>
 
         <Select value={filters.priority} onValueChange={v => setFilters(f => ({ ...f, priority: v }))}>
-          <SelectTrigger className="w-[140px] h-8 text-sm">
+          <SelectTrigger className="w-[110px] h-7 text-xs border-border/50">
             <SelectValue placeholder={t('actions.priority')} />
           </SelectTrigger>
           <SelectContent>
@@ -316,7 +316,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         <Button 
           variant={filters.overdue ? "secondary" : "ghost"} 
           size="sm"
-          className="h-8"
+          className="h-7 text-xs px-2"
           onClick={() => setFilters(f => ({ ...f, overdue: !f.overdue }))}
         >
           <AlertTriangle className="h-3 w-3 mr-1" />
@@ -327,20 +327,19 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 text-muted-foreground"
+            className="h-7 text-xs text-muted-foreground px-2"
             onClick={() => setFilters({ owner: 'all', overdue: false, priority: 'all' })}
           >
-            {t('actions.clearFilters')}
+            ✕ {t('actions.clearFilters')}
           </Button>
         )}
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            {completedActions}/{totalActions} {t('actions.completedCount')}
+          <span className="text-xs text-muted-foreground font-medium tabular-nums">
+            {completedActions}/{totalActions}
           </span>
-          <Button variant="outline" size="sm" className="h-8" onClick={handleExport}>
-            <Download className="h-3 w-3 mr-1" />
-            {t('sessions.export')}
+          <Button variant="ghost" size="sm" className="h-7 px-2" onClick={handleExport}>
+            <Download className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

@@ -164,32 +164,30 @@ export function TemplateCoachPanel({
     return t('templates.dueAndOwner', { days, owner, defaultValue: '{{days}} • {{owner}}' });
   };
 
-  // Initial state - show generate button
+  // Initial state - compact button
   if (!feedback && !generateCoach.isPending) {
     return (
       <Button
         variant="outline"
         size="sm"
         onClick={handleGenerate}
-        className="gap-2"
+        className="h-8 text-xs gap-1.5"
       >
-        <Sparkles className="h-4 w-4" />
+        <Sparkles className="h-3.5 w-3.5" />
         {t('templates.aiCoach', 'AI Coach')}
       </Button>
     );
   }
 
-  // Loading state
+  // Loading state - compact
   if (generateCoach.isPending) {
     return (
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="py-6 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">
-            {t('templates.analyzingCoach', 'Generating coaching insights...')}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        <span className="text-xs text-muted-foreground">
+          {t('templates.analyzingCoach', 'Analyzing...')}
+        </span>
+      </div>
     );
   }
 
@@ -197,25 +195,25 @@ export function TemplateCoachPanel({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="border-primary/20">
+      <Card className="border-primary/20 shadow-sm">
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-            <CardTitle className="text-sm flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
+          <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors py-2 px-3">
+            <CardTitle className="text-xs flex items-center justify-between">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 {t('templates.aiCoach', 'AI Coach')}
               </span>
-              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </CardTitle>
           </CardHeader>
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="pt-0 space-y-4">
-            {/* Summary */}
-            <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
+          <CardContent className="pt-0 px-3 pb-3 space-y-3">
+            {/* Summary - compact */}
+            <p className="text-xs text-muted-foreground bg-muted/40 rounded-md p-2 leading-relaxed">
               {feedback.summary}
-            </div>
+            </p>
 
             {/* Strengths */}
             {feedback.strengths.length > 0 && (
@@ -445,15 +443,15 @@ interface SectionProps {
 
 function Section({ title, icon, expanded, onToggle, count, children }: SectionProps) {
   return (
-    <div className="border rounded-lg">
+    <div className="border border-border/50 rounded-lg overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-2 hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/30 transition-colors"
       >
-        <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="flex items-center gap-2 text-xs font-medium">
           {icon}
           {title}
-          <Badge variant="secondary" className="ml-1">{count}</Badge>
+          <span className="text-muted-foreground">({count})</span>
         </div>
         {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
