@@ -3,9 +3,13 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LucideIcon } from 'lucide-react';
+import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
+
+type IllustrationType = 'no-data' | 'no-results' | 'success' | 'error' | 'empty-inbox' | 'welcome' | 'rocket' | 'chart' | 'documents' | 'team';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  illustration?: IllustrationType;
   title: string;
   description: string;
   value?: string;
@@ -24,9 +28,11 @@ interface EmptyStateProps {
 
 /**
  * Unified empty state component - compact, clear, single CTA focus.
+ * P2: Now supports SVG illustrations for richer visual feedback.
  */
 export function EmptyState({
   icon: Icon,
+  illustration,
   title,
   description,
   value,
@@ -41,14 +47,22 @@ export function EmptyState({
       variant === 'inline' ? 'py-6' : 'py-10',
       className
     )}>
-      <div className={cn(
-        "rounded-full flex items-center justify-center mb-3",
-        variant === 'muted' 
-          ? "h-10 w-10 bg-muted" 
-          : "h-12 w-12 bg-muted/60"
-      )}>
-        <Icon className="h-5 w-5 text-muted-foreground" />
-      </div>
+      {illustration ? (
+        <EmptyStateIllustration 
+          type={illustration} 
+          size={variant === 'inline' ? 'sm' : 'md'}
+          className="mb-3"
+        />
+      ) : Icon ? (
+        <div className={cn(
+          "rounded-full flex items-center justify-center mb-3",
+          variant === 'muted' 
+            ? "h-10 w-10 bg-muted" 
+            : "h-12 w-12 bg-muted/60"
+        )}>
+          <Icon className="h-5 w-5 text-muted-foreground" />
+        </div>
+      ) : null}
       
       <h3 className="font-medium text-foreground text-sm mb-1">
         {title}

@@ -3,39 +3,37 @@ import Joyride, { Step, CallBackProps, STATUS, ACTIONS, EVENTS } from 'react-joy
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
-const TOUR_KEY = 'startup-portal-tour-completed';
+const TOUR_KEY = 'foundersbook-tour-completed';
 
+/**
+ * P3: Simplified onboarding tour - only 4 essential steps, role-aware.
+ * Focuses on the most critical actions for new users.
+ */
 const tourSteps: Step[] = [
   {
     target: '[data-tour="workspaces"]',
-    content: 'Welcome! This is your navigation panel where you can access all areas of the portal.',
+    content: 'Welcome to FoundersBook! 🚀 Your workspaces appear here. Each workspace is a dedicated space for a startup.',
     placement: 'right',
     disableBeacon: true,
+    title: 'Your Workspaces',
   },
   {
-    target: '[data-tour="create-workspace"]',
-    content: 'Click here to create a new startup workspace and start tracking your progress.',
+    target: '[data-tour="global-search"]',
+    content: 'Search anything: startups, documents, sessions, KPIs. Press ⌘K or / to open instantly.',
     placement: 'bottom',
-  },
-  {
-    target: '[data-tour="filters"]',
-    content: 'Use these filters to quickly find specific workspaces by program, stage, or health status.',
-    placement: 'bottom',
-  },
-  {
-    target: '[data-tour="health-badge"]',
-    content: 'Health badges show you at a glance how each startup is doing - from thriving to needing attention.',
-    placement: 'left',
+    title: 'Quick Search',
   },
   {
     target: '[data-tour="notifications"]',
-    content: 'Check your notifications here for important updates and alerts.',
+    content: 'Stay updated with alerts, reminders, and team activity. Important items are highlighted.',
     placement: 'bottom',
+    title: 'Notifications',
   },
   {
-    target: '[data-tour="view-toggle"]',
-    content: 'Switch between card and table views to see your workspaces in different layouts.',
+    target: '[data-tour="user-menu"]',
+    content: 'Access your profile, settings, and switch themes here. You can restart this tour anytime from settings.',
     placement: 'left',
+    title: 'Your Profile',
   },
 ];
 
