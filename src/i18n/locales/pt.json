@@ -514,7 +514,7 @@
     "unitEconomics": "Unit Economics",
     "categories": {
       "Finance": "Finanças",
-      "Fundraising": "Financiamento",
+      "Fundraising": "Angariação de Capital",
       "Goals": "Objetivos",
       "Growth": "Crescimento",
       "Product": "Produto",
@@ -523,19 +523,22 @@
       "Strategy": "Estratégia",
       "Team": "Equipa",
       "Validation": "Validação",
-      "Other": "Outros"
+      "Customer": "Cliente",
+      "Marketing": "Marketing",
+      "Operations": "Operações",
+      "Other": "Outro"
     },
     "names": {
-      "Unit Economics": "Unit Economics",
-      "Fundraising Readiness": "Preparação para Financiamento",
-      "Investor Meeting Prep": "Preparação para Reunião de Investidores",
-      "Pitch Deck Checklist": "Checklist de Pitch Deck",
+      "Unit Economics": "Economia Unitária",
+      "Fundraising Readiness": "Preparação para Angariação de Capital",
+      "Investor Meeting Prep": "Preparação de Reunião com Investidores",
+      "Pitch Deck Checklist": "Checklist do Pitch Deck",
       "Quarterly OKRs": "OKRs Trimestrais",
       "Go-to-Market Plan": "Plano Go-to-Market",
       "MVP Definition": "Definição de MVP",
       "Product Roadmap": "Roadmap de Produto",
-      "Weekly Progress Report": "Relatório de Progresso Semanal",
-      "Sales Pipeline Review": "Revisão de Pipeline de Vendas",
+      "Weekly Progress Report": "Relatório Semanal de Progresso",
+      "Sales Pipeline Review": "Revisão do Pipeline de Vendas",
       "Business Model Canvas": "Business Model Canvas",
       "Competitor Analysis": "Análise da Concorrência",
       "Lean Canvas": "Lean Canvas",
@@ -543,9 +546,17 @@
       "Value Proposition Canvas": "Value Proposition Canvas",
       "Hiring Plan": "Plano de Contratação",
       "Team Retrospective": "Retrospetiva de Equipa",
-      "Customer Persona": "Persona do Cliente",
+      "Customer Persona": "Persona de Cliente",
       "Empathy Map": "Mapa de Empatia",
-      "Problem Discovery Interview": "Entrevista de Descoberta de Problemas"
+      "Problem Discovery Interview": "Entrevista de Descoberta de Problemas",
+      "ICP & Persona Board": "ICP e Quadro de Personas",
+      "Pricing & Packaging": "Preços e Pacotes",
+      "Growth Loops Canvas": "Canvas de Loops de Crescimento",
+      "OKRs & North Star": "OKRs e North Star",
+      "Fundraising Canvas": "Canvas de Angariação de Capital",
+      "Sales Pipeline Canvas": "Canvas de Pipeline de Vendas",
+      "Product Roadmap Canvas": "Canvas de Roadmap de Produto",
+      "Go-To-Market Canvas": "Canvas Go-to-Market"
     },
     "descriptions": {
       "Unit Economics": "Métricas financeiras chave por cliente",
@@ -567,7 +578,15 @@
       "Team Retrospective": "Framework para reuniões retrospetivas de equipa",
       "Customer Persona": "Template detalhado de persona de cliente para compreender utilizadores-alvo",
       "Empathy Map": "Compreenda o que os seus clientes pensam, sentem, veem, ouvem, dizem e fazem",
-      "Problem Discovery Interview": "Script para conduzir entrevistas de descoberta de clientes para validar problem-solution fit"
+      "Problem Discovery Interview": "Script para conduzir entrevistas de descoberta de clientes para validar problem-solution fit",
+      "ICP & Persona Board": "Defina o seu perfil de cliente ideal e personas de comprador",
+      "Pricing & Packaging": "Estratégia de preços e estrutura de planos",
+      "Growth Loops Canvas": "Desenhe loops de crescimento sustentáveis",
+      "OKRs & North Star": "Defina a sua métrica North Star e OKRs",
+      "Fundraising Canvas": "Prepare-se para levantar a sua próxima ronda",
+      "Sales Pipeline Canvas": "Gira e analise o seu pipeline de vendas",
+      "Product Roadmap Canvas": "Planeie o roadmap de produto por trimestre",
+      "Go-To-Market Canvas": "Estratégia go-to-market completa"
     },
     "noSchemaConfigured": "Este template não tem formulário configurado.",
     "completed": "Concluído",
@@ -612,6 +631,12 @@
     "submittedForReview": "Submetido para revisão",
     "submitFailed": "Falha ao submeter",
     "canvasReviewSection": "Revisão de Canvas",
+    "canvasTabLabels": {
+      "pricing": "Preços",
+      "growth": "Crescimento",
+      "fundraising": "Financ.",
+      "pipeline": "Pipeline"
+    },
     "formFields": {
       "investorName": "Nome do Investidor/Empresa",
       "meetingDate": "Data da Reunião",

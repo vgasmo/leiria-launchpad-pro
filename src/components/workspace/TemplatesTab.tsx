@@ -110,20 +110,40 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const findCanvasTemplate = (type: CanvasType) => 
     templates?.find(t => getCanvasType(t.name) === type);
   
-  const canvasTemplates: { type: CanvasType; template: Template | undefined; label: string; icon: React.ReactNode }[] = [
-    { type: 'bmc', template: findCanvasTemplate('bmc'), label: 'BMC', icon: <LayoutGrid className="h-4 w-4" /> },
-    { type: 'lean', template: findCanvasTemplate('lean'), label: 'Lean', icon: <LayoutGrid className="h-4 w-4" /> },
-    { type: 'value_prop', template: findCanvasTemplate('value_prop'), label: 'Value Prop', icon: <Target className="h-4 w-4" /> },
-    { type: 'empathy', template: findCanvasTemplate('empathy'), label: 'Empathy', icon: <Users className="h-4 w-4" /> },
-    { type: 'swot', template: findCanvasTemplate('swot'), label: 'SWOT', icon: <Crosshair className="h-4 w-4" /> },
-    { type: 'gtm', template: findCanvasTemplate('gtm'), label: 'GTM', icon: <Rocket className="h-4 w-4" /> },
-    { type: 'icp', template: findCanvasTemplate('icp'), label: 'ICP', icon: <Users className="h-4 w-4" /> },
-    { type: 'pricing', template: findCanvasTemplate('pricing'), label: 'Pricing', icon: <DollarSign className="h-4 w-4" /> },
-    { type: 'growth_loops', template: findCanvasTemplate('growth_loops'), label: 'Growth', icon: <TrendingUp className="h-4 w-4" /> },
-    { type: 'okrs', template: findCanvasTemplate('okrs'), label: 'OKRs', icon: <Target className="h-4 w-4" /> },
-    { type: 'fundraising', template: findCanvasTemplate('fundraising'), label: 'Fundraising', icon: <DollarSign className="h-4 w-4" /> },
-    { type: 'sales_pipeline', template: findCanvasTemplate('sales_pipeline'), label: 'Pipeline', icon: <BarChart3 className="h-4 w-4" /> },
-    { type: 'roadmap', template: findCanvasTemplate('roadmap'), label: 'Roadmap', icon: <Map className="h-4 w-4" /> },
+  // Short labels for canvas tabs with translation support
+  const getCanvasTabLabel = (type: CanvasType): string => {
+    const labels: Record<CanvasType, { short: string; full: string }> = {
+      bmc: { short: 'BMC', full: t('templates.canvas.bmc.title') },
+      lean: { short: 'Lean', full: t('templates.canvas.lean.title') },
+      value_prop: { short: 'VP', full: t('templates.canvas.value_prop.title') },
+      empathy: { short: t('templates.canvas.empathy.title', 'Empathy'), full: t('templates.canvas.empathy.title') },
+      swot: { short: 'SWOT', full: t('templates.canvas.swot.title') },
+      gtm: { short: 'GTM', full: t('templates.canvas.gtm.title') },
+      icp: { short: 'ICP', full: t('templates.canvas.icp.title') },
+      pricing: { short: t('templates.canvasTabLabels.pricing', 'Pricing'), full: t('templates.canvas.pricing.title') },
+      growth_loops: { short: t('templates.canvasTabLabels.growth', 'Growth'), full: t('templates.canvas.growth_loops.title') },
+      okrs: { short: 'OKRs', full: t('templates.canvas.okrs.title') },
+      fundraising: { short: t('templates.canvasTabLabels.fundraising', 'Fund'), full: t('templates.canvas.fundraising.title') },
+      sales_pipeline: { short: t('templates.canvasTabLabels.pipeline', 'Pipeline'), full: t('templates.canvas.sales_pipeline.title') },
+      roadmap: { short: 'Roadmap', full: t('templates.canvas.roadmap.title') },
+    };
+    return labels[type]?.short || type;
+  };
+
+  const canvasTemplates: { type: CanvasType; template: Template | undefined; icon: React.ReactNode }[] = [
+    { type: 'bmc', template: findCanvasTemplate('bmc'), icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'lean', template: findCanvasTemplate('lean'), icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'value_prop', template: findCanvasTemplate('value_prop'), icon: <Target className="h-4 w-4" /> },
+    { type: 'empathy', template: findCanvasTemplate('empathy'), icon: <Users className="h-4 w-4" /> },
+    { type: 'swot', template: findCanvasTemplate('swot'), icon: <Crosshair className="h-4 w-4" /> },
+    { type: 'gtm', template: findCanvasTemplate('gtm'), icon: <Rocket className="h-4 w-4" /> },
+    { type: 'icp', template: findCanvasTemplate('icp'), icon: <Users className="h-4 w-4" /> },
+    { type: 'pricing', template: findCanvasTemplate('pricing'), icon: <DollarSign className="h-4 w-4" /> },
+    { type: 'growth_loops', template: findCanvasTemplate('growth_loops'), icon: <TrendingUp className="h-4 w-4" /> },
+    { type: 'okrs', template: findCanvasTemplate('okrs'), icon: <Target className="h-4 w-4" /> },
+    { type: 'fundraising', template: findCanvasTemplate('fundraising'), icon: <DollarSign className="h-4 w-4" /> },
+    { type: 'sales_pipeline', template: findCanvasTemplate('sales_pipeline'), icon: <BarChart3 className="h-4 w-4" /> },
+    { type: 'roadmap', template: findCanvasTemplate('roadmap'), icon: <Map className="h-4 w-4" /> },
   ];
 
   return (
@@ -133,11 +153,11 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
           <FileText className="h-4 w-4" />
           {t('templates.title')}
         </TabsTrigger>
-        {canvasTemplates.map(({ type, template, label, icon }) => 
+        {canvasTemplates.map(({ type, template, icon }) => 
           template && (
             <TabsTrigger key={type} value={type} className="gap-2">
               {icon}
-              {label}
+              {getCanvasTabLabel(type)}
             </TabsTrigger>
           )
         )}
@@ -168,66 +188,71 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       )}
 
       <TabsContent value="templates" className="space-y-6">
-      {categories.map(category => (
-        <div key={category}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" />
-            {t(`templates.categories.${category}`, category)}
-          </h3>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {templatesByCategory[category].map(template => {
-              const instance = instancesByTemplateId[template.id];
-              const isCompleted = instance?.status === 'completed';
-              const isStarted = !!instance;
-              
-              // Use i18n for template name and description with fallback to DB value
-              const templateName = t(`templates.names.${template.name}`, template.name);
-              const templateDesc = template.description 
-                ? t(`templates.descriptions.${template.name}`, template.description)
-                : undefined;
+      {categories.map(category => {
+        // Use i18n for category with fallback
+        const translatedCategory = t(`templates.categories.${category}`, category);
+        
+        return (
+          <div key={category}>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+              <FolderOpen className="h-4 w-4" />
+              {translatedCategory}
+            </h3>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {templatesByCategory[category].map(template => {
+                const instance = instancesByTemplateId[template.id];
+                const isCompleted = instance?.status === 'completed';
+                const isStarted = !!instance;
+                
+                // Use i18n for template name and description with fallback to DB value
+                const templateName = t(`templates.names.${template.name}`, template.name);
+                const templateDesc = template.description 
+                  ? t(`templates.descriptions.${template.name}`, template.description)
+                  : undefined;
 
-              return (
-                <Card 
-                  key={template.id}
-                  className={`cursor-pointer transition-all hover:border-primary/50 ${isCompleted ? 'border-green-500/50 bg-green-50/50 dark:bg-green-900/10' : ''}`}
-                  onClick={() => handleOpenTemplate(template)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm flex items-center gap-2">
-                          {templateName}
-                          {isCompleted && <Check className="h-4 w-4 text-green-600" />}
-                        </h4>
-                        {templateDesc && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {templateDesc}
-                          </p>
+                return (
+                  <Card 
+                    key={template.id}
+                    className={`cursor-pointer transition-all hover:border-primary/50 ${isCompleted ? 'border-green-500/50 bg-green-50/50 dark:bg-green-900/10' : ''}`}
+                    onClick={() => handleOpenTemplate(template)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm flex items-center gap-2">
+                            {templateName}
+                            {isCompleted && <Check className="h-4 w-4 text-green-600" />}
+                          </h4>
+                          {templateDesc && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {templateDesc}
+                            </p>
+                          )}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {isStarted && !isCompleted && (
+                          <Badge variant="secondary" className="text-xs">{t('templates.inProgress')}</Badge>
+                        )}
+                        {instance?.review_status === 'pending_review' && (
+                          <Badge className="text-xs bg-amber-100 text-amber-700">{t('templates.pendingReview')}</Badge>
+                        )}
+                        {instance?.review_status === 'approved' && (
+                          <Badge className="text-xs bg-green-100 text-green-700">{t('templates.approved')}</Badge>
+                        )}
+                        {instance?.review_status === 'needs_changes' && (
+                          <Badge className="text-xs bg-red-100 text-red-700">{t('templates.needsChanges')}</Badge>
                         )}
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {isStarted && !isCompleted && (
-                        <Badge variant="secondary" className="text-xs">{t('templates.inProgress')}</Badge>
-                      )}
-                      {instance?.review_status === 'pending_review' && (
-                        <Badge className="text-xs bg-amber-100 text-amber-700">{t('templates.pendingReview')}</Badge>
-                      )}
-                      {instance?.review_status === 'approved' && (
-                        <Badge className="text-xs bg-green-100 text-green-700">{t('templates.approved')}</Badge>
-                      )}
-                      {instance?.review_status === 'needs_changes' && (
-                        <Badge className="text-xs bg-red-100 text-red-700">{t('templates.needsChanges')}</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       </TabsContent>
 
