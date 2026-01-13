@@ -482,11 +482,20 @@
   "templates": {
     "title": "Templates",
     "noTemplates": "Nenhum template encontrado",
+    "noTemplatesDesc": "Nenhum template disponível. Peça a um administrador para criar templates.",
     "useTemplate": "Usar Template",
     "submitForReview": "Submeter para Revisão",
+    "submittedForReview": "Template submetido para revisão",
+    "submitFailed": "Falha ao submeter para revisão",
     "pendingReview": "Aguarda Revisão",
     "approved": "Aprovado",
-    "rejected": "Rejeitado"
+    "rejected": "Rejeitado",
+    "needsChanges": "Precisa de Alterações",
+    "inProgress": "Em Progresso",
+    "canvasSaved": "Canvas guardado",
+    "canvasSaveFailed": "Falha ao guardar canvas",
+    "export": "Exportar",
+    "unitEconomics": "Unit Economics"
   },
   "calendar": {
     "title": "Calendário",
