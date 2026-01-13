@@ -1685,7 +1685,10 @@
       "unassigned": "Não atribuído",
       "searchConsultant": "Pesquisar consultor...",
       "removeConsultant": "Remover consultor",
-      "nif": "NIF"
+      "nif": "NIF",
+      "programUpdated": "Programa atualizado",
+      "noProgram": "Sem programa",
+      "lastCheckin": "Último Check-in"
     },
     "intakeRouting": {
       "title": "Encaminhamento de Intake",
