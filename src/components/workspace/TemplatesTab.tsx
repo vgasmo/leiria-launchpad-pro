@@ -161,6 +161,7 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
               workspaceId={workspaceId}
               canWrite={canWrite}
               type={type}
+              isFounder={isFounder}
             />
           </TabsContent>
         )
@@ -250,15 +251,22 @@ interface CanvasTemplateWrapperProps {
   workspaceId: string;
   canWrite: boolean;
   type: CanvasType;
+  isFounder?: boolean;
 }
 
-function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type }: CanvasTemplateWrapperProps) {
+function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type, isFounder = false }: CanvasTemplateWrapperProps) {
   const { t } = useTranslation();
+  const { roles } = useAuth();
   const upsertInstance = useUpsertTemplateInstance(workspaceId);
   const submitForReview = useSubmitForReview(workspaceId);
+  const reviewInstance = useReviewTemplateInstance(workspaceId);
   const [canvasData, setCanvasData] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState('');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const canReview = roles.includes('admin') || roles.includes('consultor') || roles.includes('mentor_externo');
+  const isPendingReview = instance?.review_status === 'pending_review';
 
   useEffect(() => {
     if (instance?.data_json) {
@@ -319,6 +327,21 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
     }
   };
 
+  const handleReview = async (status: 'approved' | 'needs_changes') => {
+    if (!instance?.id) return;
+    try {
+      await reviewInstance.mutateAsync({
+        instanceId: instance.id,
+        review_status: status,
+        review_notes: reviewNotes.trim() || undefined,
+      });
+      toast.success(status === 'approved' ? t('templates.approved') : t('templates.requestChanges'));
+      setReviewNotes('');
+    } catch {
+      toast.error(t('templates.submitFailed'));
+    }
+  };
+
   return (
     <div className="space-y-4">
       {hasChanges && (
@@ -331,10 +354,51 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
         type={type}
         data={canvasData}
         onChange={handleChange}
-        disabled={!canWrite}
+        disabled={!canWrite || (canReview && !isFounder)}
         reviewStatus={instance?.review_status as 'draft' | 'pending_review' | 'approved' | 'needs_changes' | undefined}
-        onSubmitForReview={canWrite ? handleSubmitForReview : undefined}
+        onSubmitForReview={canWrite && isFounder ? handleSubmitForReview : undefined}
       />
+
+      {/* AI Coach Panel for consultants/mentors when reviewing */}
+      {canReview && instance?.id && (
+        <TemplateCoachPanel 
+          instanceId={instance.id}
+          workspaceId={workspaceId}
+          onCopyToNotes={(notes) => setReviewNotes(notes)}
+          showReviewActions={isPendingReview}
+          onApplyReview={(recommendation, notes) => {
+            setReviewNotes(notes);
+            handleReview(recommendation);
+          }}
+        />
+      )}
+
+      {/* Review section for consultants/mentors */}
+      {canReview && isPendingReview && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{t('templates.canvasReviewSection')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Label>{t('templates.reviewNotesOptional')}</Label>
+            <Textarea
+              value={reviewNotes}
+              onChange={(e) => setReviewNotes(e.target.value)}
+              placeholder={t('templates.feedbackPlaceholder')}
+              rows={2}
+            />
+            <div className="flex gap-2">
+              <Button onClick={() => handleReview('approved')} className="flex-1">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                {t('templates.approve')}
+              </Button>
+              <Button variant="outline" onClick={() => handleReview('needs_changes')} className="flex-1">
+                {t('templates.requestChanges')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -400,10 +464,10 @@ function TemplateEditorDialog({
         data_json: formData,
         existingId: instance?.id,
       });
-      toast.success('Template saved');
+      toast.success(t('templates.canvasSaved'));
       setHasChanges(false);
     } catch {
-      toast.error('Failed to save template');
+      toast.error(t('templates.canvasSaveFailed'));
     }
   };
 
@@ -414,10 +478,10 @@ function TemplateEditorDialog({
     try {
       if (instance?.id) {
         await completeInstance.mutateAsync(instance.id);
-        toast.success('Template marked as complete');
+        toast.success(t('templates.completed'));
       }
     } catch {
-      toast.error('Failed to mark as complete');
+      toast.error(t('templates.submitFailed'));
     }
   };
 
@@ -428,10 +492,10 @@ function TemplateEditorDialog({
     try {
       if (instance?.id) {
         await submitForReview.mutateAsync(instance.id);
-        toast.success('Template submitted for review');
+        toast.success(t('templates.submittedForReview'));
       }
     } catch {
-      toast.error('Failed to submit for review');
+      toast.error(t('templates.submitFailed'));
     }
   };
 
@@ -443,10 +507,10 @@ function TemplateEditorDialog({
         review_status: status,
         review_notes: reviewNotes.trim() || undefined,
       });
-      toast.success(status === 'approved' ? 'Template approved' : 'Requested changes');
+      toast.success(status === 'approved' ? t('templates.approved') : t('templates.requestChanges'));
       setReviewNotes('');
     } catch {
-      toast.error('Failed to submit review');
+      toast.error(t('templates.submitFailed'));
     }
   };
 
@@ -488,7 +552,7 @@ function TemplateEditorDialog({
             {schema.sections.map((section, sIdx) => (
               <div key={sIdx} className="space-y-4">
                 <div>
-                  <h3 className="font-medium text-sm">{section.title}</h3>
+                  <h3 className="font-medium text-sm">{translateSectionTitle(section.title, t)}</h3>
                   {section.description && (
                     <p className="text-xs text-muted-foreground mt-0.5">{section.description}</p>
                   )}
@@ -607,7 +671,59 @@ interface TemplateFormFieldProps {
   disabled: boolean;
 }
 
+// Map database field IDs/labels to translation keys
+const FIELD_LABEL_MAP: Record<string, string> = {
+  'investor_name': 'investorName',
+  'meeting_date': 'meetingDate',
+  'meeting_type': 'meetingType',
+  'investor_focus': 'investorFocus',
+  'portfolio_companies': 'portfolioCompanies',
+  'recent_investments': 'recentInvestments',
+  'unique_angle': 'uniqueAngle',
+  'expected_questions': 'expectedQuestions',
+  'your_questions': 'yourQuestions',
+  'meeting_details': 'meetingDetails',
+  'research': 'research',
+  'key_messages': 'keyMessages',
+  'summary': 'summary',
+  'highlights': 'highlights',
+  'challenges': 'challenges',
+  'next_steps': 'nextSteps',
+  'metrics': 'metrics',
+  'goals': 'goals',
+  'notes': 'notes',
+  'description': 'description',
+  'status': 'status',
+  'priority': 'priority',
+  'due_date': 'dueDate',
+  'assignee': 'assignee',
+  'category': 'category',
+  'tags': 'tags',
+  'comments': 'comments',
+};
+
+// Map section titles to translation keys
+const SECTION_TITLE_MAP: Record<string, string> = {
+  'Meeting Details': 'meetingDetails',
+  'Research': 'research',
+  'Key Messages': 'keyMessages',
+  'Summary': 'summary',
+  'Highlights': 'highlights',
+  'Challenges': 'challenges',
+  'Next Steps': 'nextSteps',
+  'Metrics': 'metrics',
+  'Goals': 'goals',
+};
+
 function TemplateFormField({ field, value, onChange, disabled }: TemplateFormFieldProps) {
+  const { t } = useTranslation();
+  
+  // Try to get translated label
+  const translationKey = FIELD_LABEL_MAP[field.id];
+  const translatedLabel = translationKey 
+    ? t(`templates.formFields.${translationKey}`, field.label)
+    : field.label;
+
   const renderField = () => {
     switch (field.type) {
       case 'text':
@@ -686,10 +802,16 @@ function TemplateFormField({ field, value, onChange, disabled }: TemplateFormFie
   return (
     <div className="space-y-1.5">
       <Label className="text-sm">
-        {field.label}
+        {translatedLabel}
         {field.required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {renderField()}
     </div>
   );
+}
+
+// Helper to translate section titles
+export function translateSectionTitle(title: string, t: ReturnType<typeof useTranslation>['t']): string {
+  const translationKey = SECTION_TITLE_MAP[title];
+  return translationKey ? t(`templates.formFields.${translationKey}`) || title : title;
 }
