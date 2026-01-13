@@ -1568,6 +1568,8 @@
       "messagePlaceholder": "Additional details about the announcement...",
       "send": "Send Announcement",
       "sent": "Announcement sent successfully",
+      "sentWithEmail": "Announcement sent and emails delivered to all team members",
+      "emailFailed": "Announcement saved, but some emails failed to send",
       "deleted": "Announcement deleted",
       "requiredFields": "Please fill in the startup and title",
       "empty": "No announcements sent yet",
@@ -1577,7 +1579,8 @@
       "read": "Read",
       "unread": "Unread",
       "sendToAll": "Send to all startups",
-      "selected": "selected"
+      "selected": "selected",
+      "sendEmailNotification": "Send email notification to all team members"
     },
     "mentors": {
       "title": "External Mentors",

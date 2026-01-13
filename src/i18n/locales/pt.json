@@ -1487,6 +1487,8 @@
       "messagePlaceholder": "Detalhes adicionais sobre o aviso...",
       "send": "Enviar Aviso",
       "sent": "Aviso enviado com sucesso",
+      "sentWithEmail": "Aviso enviado e emails entregues a todos os membros da equipa",
+      "emailFailed": "Aviso guardado, mas alguns emails falharam",
       "deleted": "Aviso removido",
       "requiredFields": "Por favor preencha a startup e o título",
       "empty": "Nenhum aviso enviado ainda",
@@ -1496,7 +1498,8 @@
       "read": "Lido",
       "unread": "Por ler",
       "sendToAll": "Enviar para todas as startups",
-      "selected": "selecionada(s)"
+      "selected": "selecionada(s)",
+      "sendEmailNotification": "Enviar email de notificação a todos os membros da equipa"
     },
     "mentors": {
       "title": "Mentores Externos",
