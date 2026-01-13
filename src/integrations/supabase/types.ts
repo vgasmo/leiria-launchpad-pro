@@ -1540,6 +1540,53 @@ export type Database = {
         }
         Relationships: []
       }
+      intake_routing: {
+        Row: {
+          active: boolean
+          consultant_ids: string[]
+          created_at: string
+          created_by: string | null
+          id: string
+          mode: string
+          program_id: string | null
+          round_robin_index: number
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          consultant_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mode?: string
+          program_id?: string | null
+          round_robin_index?: number
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          consultant_ids?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mode?: string
+          program_id?: string | null
+          round_robin_index?: number
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intake_routing_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       investor_readiness_items: {
         Row: {
           category: string
@@ -2725,6 +2772,7 @@ export type Database = {
           created_by: string | null
           expires_at: string | null
           id: string
+          intake_route_id: string | null
           owner_consultant_id: string | null
           owner_email: string | null
           program_id: string | null
@@ -2736,6 +2784,7 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string
+          intake_route_id?: string | null
           owner_consultant_id?: string | null
           owner_email?: string | null
           program_id?: string | null
@@ -2747,12 +2796,20 @@ export type Database = {
           created_by?: string | null
           expires_at?: string | null
           id?: string
+          intake_route_id?: string | null
           owner_consultant_id?: string | null
           owner_email?: string | null
           program_id?: string | null
           token_hash?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "public_booking_links_intake_route_id_fkey"
+            columns: ["intake_route_id"]
+            isOneToOne: false
+            referencedRelation: "intake_routing"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "public_booking_links_program_id_fkey"
             columns: ["program_id"]
@@ -5611,6 +5668,10 @@ export type Database = {
           p50: number
           p75: number
         }[]
+      }
+      get_next_intake_consultant: {
+        Args: { p_route_id: string }
+        Returns: string
       }
       get_session_workspace_id: {
         Args: { _session_id: string }
