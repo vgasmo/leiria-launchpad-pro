@@ -181,7 +181,7 @@ export function TemplateCoachPanel({
             {/* Strengths */}
             {feedback.strengths.length > 0 && (
               <Section
-                title="Strengths"
+                title={t('templates.strengths', 'Strengths')}
                 icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}
                 expanded={expandedSections.has('strengths')}
                 onToggle={() => toggleSection('strengths')}
@@ -201,7 +201,7 @@ export function TemplateCoachPanel({
             {/* Gaps */}
             {feedback.gaps.length > 0 && (
               <Section
-                title="Gaps to Address"
+                title={t('templates.gaps', 'Gaps to Address')}
                 icon={<HelpCircle className="h-4 w-4 text-amber-600" />}
                 expanded={expandedSections.has('gaps')}
                 onToggle={() => toggleSection('gaps')}
@@ -222,7 +222,7 @@ export function TemplateCoachPanel({
             {/* Assumptions to Test */}
             {feedback.assumptions_to_test.length > 0 && (
               <Section
-                title="Assumptions to Test"
+                title={t('templates.assumptionsToTest', 'Assumptions to Test')}
                 icon={<Lightbulb className="h-4 w-4 text-blue-600" />}
                 expanded={expandedSections.has('assumptions')}
                 onToggle={() => toggleSection('assumptions')}
@@ -232,8 +232,8 @@ export function TemplateCoachPanel({
                   {feedback.assumptions_to_test.map((a, i) => (
                     <li key={i} className="text-sm border-l-2 border-blue-300 pl-3">
                       <div className="font-medium">{a.assumption}</div>
-                      <div className="text-muted-foreground">Test: {a.test}</div>
-                      <div className="text-xs text-muted-foreground">Metric: {a.metric}</div>
+                      <div className="text-muted-foreground">{t('templates.test', 'Test')}: {a.test}</div>
+                      <div className="text-xs text-muted-foreground">{t('templates.metric', 'Metric')}: {a.metric}</div>
                     </li>
                   ))}
                 </ul>
@@ -243,7 +243,7 @@ export function TemplateCoachPanel({
             {/* Red Flags */}
             {feedback.red_flags.length > 0 && (
               <Section
-                title="Red Flags"
+                title={t('templates.redFlags', 'Red Flags')}
                 icon={<AlertTriangle className="h-4 w-4 text-red-600" />}
                 expanded={expandedSections.has('redflags')}
                 onToggle={() => toggleSection('redflags')}
@@ -256,7 +256,7 @@ export function TemplateCoachPanel({
                         <Badge className={getSeverityColor(r.severity)}>{r.severity}</Badge>
                         <span className="font-medium">{r.risk}</span>
                       </div>
-                      <div className="text-muted-foreground mt-1">Mitigation: {r.mitigation}</div>
+                      <div className="text-muted-foreground mt-1">{t('templates.mitigation', 'Mitigation')}: {r.mitigation}</div>
                     </li>
                   ))}
                 </ul>
@@ -266,7 +266,7 @@ export function TemplateCoachPanel({
             {/* Recommended Actions */}
             {feedback.recommended_actions.length > 0 && (
               <Section
-                title="Recommended Actions"
+                title={t('templates.recommendedActions', 'Recommended Actions')}
                 icon={<ListChecks className="h-4 w-4 text-primary" />}
                 expanded={expandedSections.has('actions')}
                 onToggle={() => toggleSection('actions')}
@@ -298,7 +298,7 @@ export function TemplateCoachPanel({
                   ) : (
                     <ListChecks className="h-4 w-4 mr-1" />
                   )}
-                  Create {feedback.recommended_actions.length} Actions
+                  {t('templates.createNActions', 'Create {{count}} Actions', { count: feedback.recommended_actions.length })}
                 </Button>
               </Section>
             )}
@@ -306,7 +306,7 @@ export function TemplateCoachPanel({
             {/* Next Session Agenda */}
             {feedback.next_session_agenda.length > 0 && (
               <Section
-                title="Next Session Agenda"
+                title={t('templates.nextSessionAgenda', 'Next Session Agenda')}
                 icon={<Calendar className="h-4 w-4 text-purple-600" />}
                 expanded={expandedSections.has('agenda')}
                 onToggle={() => toggleSection('agenda')}
@@ -323,7 +323,7 @@ export function TemplateCoachPanel({
             {/* KPI Suggestions */}
             {feedback.kpi_suggestions.length > 0 && (
               <Section
-                title="KPI Suggestions"
+                title={t('templates.kpiSuggestions', 'KPI Suggestions')}
                 icon={<TrendingUp className="h-4 w-4 text-green-600" />}
                 expanded={expandedSections.has('kpis')}
                 onToggle={() => toggleSection('kpis')}
@@ -334,7 +334,7 @@ export function TemplateCoachPanel({
                     <li key={i} className="text-sm">
                       <div className="font-medium">{k.name}</div>
                       <div className="text-muted-foreground">{k.definition}</div>
-                      <div className="text-xs text-muted-foreground">Target: {k.target_hint}</div>
+                      <div className="text-xs text-muted-foreground">{t('templates.target', 'Target')}: {k.target_hint}</div>
                     </li>
                   ))}
                 </ul>
@@ -352,7 +352,7 @@ export function TemplateCoachPanel({
                   className="flex-1"
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
-                  Apply & Approve
+                  {t('templates.applyAndApprove', 'Apply & Approve')}
                 </Button>
                 <Button
                   size="sm"
@@ -361,7 +361,7 @@ export function TemplateCoachPanel({
                   className="flex-1"
                 >
                   <ThumbsDown className="h-4 w-4 mr-1" />
-                  Apply & Request Changes
+                  {t('templates.applyAndRequestChanges', 'Apply & Request Changes')}
                 </Button>
               </div>
             )}
@@ -376,7 +376,7 @@ export function TemplateCoachPanel({
                   className="gap-1"
                 >
                   <Copy className="h-3 w-3" />
-                  Copy to Notes
+                  {t('templates.copyToNotes', 'Copy to Notes')}
                 </Button>
               )}
               <Button
@@ -387,7 +387,7 @@ export function TemplateCoachPanel({
                 className="gap-1"
               >
                 <Sparkles className="h-3 w-3" />
-                Re-analyze
+                {t('templates.reanalyze', 'Re-analyze')}
               </Button>
             </div>
           </CardContent>

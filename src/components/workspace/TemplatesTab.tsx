@@ -356,6 +356,7 @@ function TemplateEditorDialog({
   isFounder,
   onClose,
 }: TemplateEditorDialogProps) {
+  const { t } = useTranslation();
   const { roles } = useAuth();
   const upsertInstance = useUpsertTemplateInstance(workspaceId);
   const completeInstance = useCompleteTemplateInstance(workspaceId);
@@ -460,7 +461,7 @@ function TemplateEditorDialog({
             <DialogTitle>{template.name}</DialogTitle>
           </DialogHeader>
           <div className="py-8 text-center text-muted-foreground">
-            This template has no form schema configured.
+            {t('templates.noSchemaConfigured', 'This template has no form schema configured.')}
           </div>
         </DialogContent>
       </Dialog>
@@ -472,13 +473,13 @@ function TemplateEditorDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{template.name}</span>
+            <span>{t(`templates.names.${template.name}`, template.name)}</span>
             {instance?.status === 'completed' && (
-              <Badge className="bg-green-100 text-green-700">Completed</Badge>
+              <Badge className="bg-green-100 text-green-700">{t('templates.completed', 'Completed')}</Badge>
             )}
           </DialogTitle>
           {template.description && (
-            <p className="text-sm text-muted-foreground">{template.description}</p>
+            <p className="text-sm text-muted-foreground">{t(`templates.descriptions.${template.name}`, template.description)}</p>
           )}
         </DialogHeader>
         
@@ -513,7 +514,7 @@ function TemplateEditorDialog({
           <Alert className="border-amber-200 bg-amber-50">
             <MessageSquare className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-sm">
-              <strong>Reviewer feedback:</strong> {instance.review_notes}
+              <strong>{t('templates.reviewerFeedback', 'Reviewer feedback')}:</strong> {instance.review_notes}
             </AlertDescription>
           </Alert>
         )}
@@ -535,20 +536,20 @@ function TemplateEditorDialog({
         {/* Review section for consultants/mentors */}
         {canReview && instance?.review_status === 'pending_review' && (
           <div className="border-t pt-4 space-y-3">
-            <Label>Review Notes (optional)</Label>
+            <Label>{t('templates.reviewNotesOptional', 'Review Notes (optional)')}</Label>
             <Textarea
               value={reviewNotes}
               onChange={(e) => setReviewNotes(e.target.value)}
-              placeholder="Add feedback for the founder..."
+              placeholder={t('templates.feedbackPlaceholder', 'Add feedback for the founder...')}
               rows={2}
             />
             <div className="flex gap-2">
               <Button onClick={() => handleReview('approved')} className="flex-1">
                 <CheckCircle2 className="h-4 w-4 mr-1" />
-                Approve
+                {t('templates.approve', 'Approve')}
               </Button>
               <Button variant="outline" onClick={() => handleReview('needs_changes')} className="flex-1">
-                Request Changes
+                {t('templates.requestChanges', 'Request Changes')}
               </Button>
             </div>
           </div>
@@ -557,7 +558,7 @@ function TemplateEditorDialog({
         {canWrite && (
           <div className="flex items-center justify-between pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
-              Close
+              {t('common.close', 'Close')}
             </Button>
             <div className="flex items-center gap-2">
               <Button 
@@ -566,7 +567,7 @@ function TemplateEditorDialog({
                 disabled={!hasChanges || upsertInstance.isPending}
               >
                 <Save className="h-4 w-4 mr-1" />
-                Save
+                {t('common.save', 'Save')}
               </Button>
               {isFounder && instance?.review_status !== 'pending_review' && instance?.review_status !== 'approved' && (
                 <Button 
@@ -575,7 +576,7 @@ function TemplateEditorDialog({
                   disabled={submitForReview.isPending}
                 >
                   <Send className="h-4 w-4 mr-1" />
-                  Submit for Review
+                  {t('templates.submitForReview')}
                 </Button>
               )}
               {!isFounder && instance?.status !== 'completed' && (
@@ -584,7 +585,7 @@ function TemplateEditorDialog({
                   disabled={completeInstance.isPending}
                 >
                   <Check className="h-4 w-4 mr-1" />
-                  Mark Complete
+                  {t('templates.markComplete', 'Mark Complete')}
                 </Button>
               )}
             </div>
