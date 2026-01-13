@@ -658,7 +658,7 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('sessions.titlePlaceholder', 'Weekly check-in')}
+              placeholder={t('sessions.titlePlaceholder', 'Monthly check-in')}
               required
             />
           </div>

@@ -37,7 +37,7 @@ interface TeamsIntegrationCardProps {
 }
 
 const EVENT_OPTIONS = [
-  { key: 'notify_checkin_submitted', icon: ClipboardList, label: 'Check-in submitted', description: 'When a startup submits their weekly check-in' },
+  { key: 'notify_checkin_submitted', icon: ClipboardList, label: 'Check-in submitted', description: 'When a startup submits their monthly check-in' },
   { key: 'notify_action_assigned', icon: Bell, label: 'Action assigned', description: 'When an action item is assigned to someone' },
   { key: 'notify_action_overdue', icon: AlertTriangle, label: 'Action overdue', description: 'When an action item becomes overdue' },
   { key: 'notify_session_created', icon: Calendar, label: 'Session created', description: 'When a new session/meeting is scheduled' },

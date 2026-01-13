@@ -198,9 +198,9 @@ export const VISUAL_CANVAS_TEMPLATES: {
       ],
     },
   },
-  // 6. Fundraising Readiness Board
+  // 6. Fundraise Readiness Board
   {
-    name: 'Fundraising Readiness Canvas',
+    name: 'Fundraise Readiness Canvas',
     description: 'Prepare for your fundraise with a comprehensive checklist of materials, metrics, and investor targets',
     category: 'Funding',
     stage: 'growth',
