@@ -70,8 +70,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Step 1: Generate weekly check-ins for this week
-    console.log("[run-checkin-reminders] Generating weekly check-ins...");
+    // Step 1: Generate monthly check-ins for this period
+    console.log("[run-checkin-reminders] Generating monthly check-ins...");
     const { data: generatedCount, error: genError } = await supabase.rpc("generate_weekly_checkins");
     
     if (genError) {
@@ -140,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
         const workspace = checkin.workspace as any;
         const definition = checkin.definition as any;
         const startupName = workspace?.startup?.name || "Your Startup";
-        const definitionName = definition?.name || "Weekly Check-in";
+        const definitionName = definition?.name || "Monthly Check-in";
 
         // Find founders in this workspace
         const founders = (workspace?.members || []).filter(
@@ -157,8 +157,8 @@ const handler = async (req: Request): Promise<Response> => {
           const { error: notifError } = await supabase.from("notifications").insert({
             user_id: founder.user_id,
             type: "checkin_reminder",
-            title: "Weekly Check-in Pending",
-            message: `Your weekly check-in for ${startupName} is due on ${checkin.due_date}. Please submit your update.`,
+            title: "Monthly Check-in Pending",
+            message: `Your monthly check-in for ${startupName} is due on ${checkin.due_date}. Please submit your update.`,
             link: `/workspace/${checkin.workspace_id}?tab=overview`,
             metadata: {
               checkin_instance_id: checkin.id,
@@ -181,15 +181,15 @@ const handler = async (req: Request): Promise<Response> => {
 
             try {
               const emailResult = await sendEmail(resendApiKey, {
-                from: "Startup Leiria <noreply@startupleiria.com>",
+                from: "FoundersBook <noreply@startupleiria.com>",
                 to: [founderEmail],
-                subject: `📋 Weekly Check-in: ${startupName}`,
+                subject: `📋 Monthly Check-in: ${startupName}`,
                 html: `
                   <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #333;">Hi ${founderName},</h2>
                     <p>Your <strong>${definitionName}</strong> for <strong>${startupName}</strong> is ready to be filled out.</p>
                     <p><strong>Due date:</strong> ${new Date(checkin.due_date).toLocaleDateString("pt-PT", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
-                    <p>This weekly check-in helps us track your progress and provide better support. It only takes a few minutes!</p>
+                    <p>This monthly check-in helps us track your progress and provide better support. It only takes a few minutes!</p>
                     <div style="margin: 24px 0;">
                       <a href="${supabaseUrl.replace(".supabase.co", ".lovableproject.com")}/workspace/${checkin.workspace_id}?tab=overview" 
                          style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
@@ -198,7 +198,7 @@ const handler = async (req: Request): Promise<Response> => {
                     </div>
                     <p style="color: #666; font-size: 14px;">If you have any questions, reach out to your assigned consultant.</p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-                    <p style="color: #999; font-size: 12px;">Startup Leiria - Accelerating Innovation</p>
+                    <p style="color: #999; font-size: 12px;">FoundersBook - Accelerating Innovation</p>
                   </div>
                 `,
               });
@@ -211,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
               await supabase.from("email_log").insert({
                 workspace_id: checkin.workspace_id,
                 email_type: "checkin_reminder",
-                subject: `📋 Weekly Check-in: ${startupName}`,
+                subject: `📋 Monthly Check-in: ${startupName}`,
                 recipients: [{ email: founderEmail, name: founderName }],
                 status: "sent",
                 sent_at: new Date().toISOString(),
@@ -228,7 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
               await supabase.from("email_log").insert({
                 workspace_id: checkin.workspace_id,
                 email_type: "checkin_reminder",
-                subject: `📋 Weekly Check-in: ${startupName}`,
+                subject: `📋 Monthly Check-in: ${startupName}`,
                 recipients: [{ email: founderEmail, name: founderName }],
                 status: "failed",
                 error_message: emailError.message,

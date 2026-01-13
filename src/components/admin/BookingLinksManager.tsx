@@ -1,0 +1,291 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { Link2, Copy, Plus, Trash2, Calendar, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface BookingLink {
+  id: string;
+  token_hash: string;
+  owner_consultant_id: string | null;
+  owner_email: string | null;
+  program_id: string | null;
+  active: boolean;
+  expires_at: string | null;
+  created_at: string;
+}
+
+export function BookingLinksManager() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<string>('');
+  const [expiresInDays, setExpiresInDays] = useState<string>('30');
+
+  // Fetch programs
+  const { data: programs } = useQuery({
+    queryKey: ['programs-list'],
+    queryFn: async () => {
+      const { data } = await supabase.from('programs').select('id, name').order('name');
+      return data || [];
+    },
+  });
+
+  // Fetch existing booking links
+  const { data: bookingLinks, isLoading } = useQuery({
+    queryKey: ['public-booking-links'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('public_booking_links')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as BookingLink[];
+    },
+  });
+
+  // Generate new booking link
+  const generateLink = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Generate a secure random token
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      const token = Array.from(tokenBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+
+      // Hash the token for storage
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(token));
+      const tokenHash = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+
+      // Get user email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', user.id)
+        .single();
+
+      // Calculate expiration
+      const expiresAt = expiresInDays 
+        ? new Date(Date.now() + parseInt(expiresInDays) * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+
+      // Insert the link
+      const { error } = await supabase
+        .from('public_booking_links')
+        .insert({
+          token_hash: tokenHash,
+          owner_consultant_id: user.id,
+          owner_email: profile?.email,
+          program_id: selectedProgram || null,
+          expires_at: expiresAt,
+          created_by: user.id,
+        });
+
+      if (error) throw error;
+
+      // Return the actual token (not the hash) for display
+      return token;
+    },
+    onSuccess: (token) => {
+      queryClient.invalidateQueries({ queryKey: ['public-booking-links'] });
+      
+      // Build the full URL
+      const baseUrl = window.location.origin;
+      const bookingUrl = `${baseUrl}/book/${token}`;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(bookingUrl);
+      
+      toast.success(
+        <div className="space-y-1">
+          <p>Booking link created and copied!</p>
+          <p className="text-xs font-mono break-all">{bookingUrl}</p>
+        </div>
+      );
+      
+      setIsDialogOpen(false);
+      setSelectedProgram('');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create link: ${error.message}`);
+    },
+  });
+
+  // Deactivate link
+  const deactivateLink = useMutation({
+    mutationFn: async (linkId: string) => {
+      const { error } = await supabase
+        .from('public_booking_links')
+        .update({ active: false })
+        .eq('id', linkId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['public-booking-links'] });
+      toast.success('Booking link deactivated');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to deactivate: ${error.message}`);
+    },
+  });
+
+  const getProgramName = (programId: string | null) => {
+    if (!programId) return 'Any program';
+    return programs?.find(p => p.id === programId)?.name || 'Unknown';
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              {t('admin.bookingLinks.title', 'Public Booking Links')}
+            </CardTitle>
+            <CardDescription>
+              {t('admin.bookingLinks.description', 'Generate shareable links for leads to book first contact meetings')}
+            </CardDescription>
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                {t('admin.bookingLinks.generate', 'Generate Link')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('admin.bookingLinks.generateNew', 'Generate New Booking Link')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label>{t('admin.bookingLinks.program', 'Program (optional)')}</Label>
+                  <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any program" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Any program</SelectItem>
+                      {programs?.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>{t('admin.bookingLinks.expires', 'Expires in')}</Label>
+                  <Select value={expiresInDays} onValueChange={setExpiresInDays}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7">7 days</SelectItem>
+                      <SelectItem value="30">30 days</SelectItem>
+                      <SelectItem value="90">90 days</SelectItem>
+                      <SelectItem value="">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button 
+                  onClick={() => generateLink.mutate()} 
+                  disabled={generateLink.isPending}
+                  className="w-full"
+                >
+                  {generateLink.isPending ? 'Generating...' : 'Generate & Copy Link'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        ) : !bookingLinks?.length ? (
+          <p className="text-muted-foreground text-sm">
+            {t('admin.bookingLinks.empty', 'No booking links created yet')}
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Program</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Expires</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookingLinks.map(link => (
+                <TableRow key={link.id}>
+                  <TableCell>{getProgramName(link.program_id)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 text-sm">
+                      <Calendar className="h-3 w-3 text-muted-foreground" />
+                      {format(new Date(link.created_at), 'MMM d, yyyy')}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {link.expires_at 
+                      ? format(new Date(link.expires_at), 'MMM d, yyyy')
+                      : 'Never'}
+                  </TableCell>
+                  <TableCell>
+                    {link.active ? (
+                      link.expires_at && new Date(link.expires_at) < new Date() ? (
+                        <Badge variant="outline" className="text-yellow-600">Expired</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-green-600">Active</Badge>
+                      )
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {link.active && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deactivateLink.mutate(link.id)}
+                          title="Deactivate"
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

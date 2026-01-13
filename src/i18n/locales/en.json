@@ -1469,6 +1469,7 @@
     "viewActions": "View Actions",
     "weeklyCheckinPending": "Monthly check-in pending",
     "monthlyCheckinPending": "Monthly check-in pending",
+    "weeklyWins": "Monthly Wins",
     "dueOn": "Due {{date}}",
     "completeCheckin": "Complete Check-in",
     "updateKpisForMonth": "Update KPIs for this month",
