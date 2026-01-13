@@ -232,8 +232,10 @@
     "myStartups": "As Minhas Startups",
     "activeMentorships": "Mentorias ativas",
     "upcomingMeetings": "Próximas Reuniões",
-    "pendingActionsCount": "ações pendentes",
-    "next": "Próximo"
+    "pendingActionsCount": "ações",
+    "next": "Próximo",
+    "nextSession": "Próxima Sessão",
+    "prepareSession": "Preparar"
   },
   "auth": {
     "signIn": "Entrar",
@@ -1377,6 +1379,13 @@
   "admin": {
     "title": "Painel de Admin",
     "subtitle": "Gerir programas, utilizadores e definições",
+    "groups": {
+      "operations": "Operações",
+      "people": "Pessoas",
+      "content": "Conteúdo",
+      "insights": "Insights",
+      "system": "Sistema"
+    },
     "approvals": "Aprovações",
     "compliance": "Conformidade",
     "programs": "Programas",
@@ -1385,10 +1394,10 @@
     "users": "Utilizadores",
     "kpis": "KPIs",
     "templates": "Templates",
-    "activityLog": "Registo de Atividade",
+    "activityLog": "Atividade",
     "analytics": "Analítica",
-    "healthModels": "Modelos de Saúde",
-    "externalMentors": "Mentores Externos",
+    "healthModels": "Saúde",
+    "externalMentors": "Mentores",
     "reports": "Relatórios",
     "noPendingApprovals": "Sem Candidaturas Pendentes",
     "allReviewed": "Todas as candidaturas foram revistas.",

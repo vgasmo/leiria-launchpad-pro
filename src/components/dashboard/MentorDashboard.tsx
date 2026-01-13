@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
-  MessageSquare, 
   Clock,
   FileText,
-  ArrowRight,
   Briefcase,
   Users
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { HealthBadge } from '@/components/ui/HealthBadge';
@@ -21,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { PendingTemplateReviews } from '@/components/dashboard/PendingTemplateReviews';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
+import { MentorNextSessionPrep } from '@/components/dashboard/MentorNextSessionPrep';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 
@@ -105,10 +104,13 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6">
+      {/* P0: Session Prep Card - shows when session is within 24h */}
+      <MentorNextSessionPrep workspaces={workspaces} />
+
       {/* Pending Reviews & Tasks */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <PendingTemplateReviews showEmpty />
-        <StaffTasksPanel />
+        <StaffTasksPanel compact />
       </div>
 
       {/* Calendar Widget */}
