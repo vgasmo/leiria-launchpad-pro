@@ -53,16 +53,17 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   escalation: <Bell className="h-4 w-4" />,
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  triage: 'Triage',
-  outreach: 'Outreach',
-  schedule_session: 'Schedule Session',
-  post_session_followup: 'Follow-up',
-  overdue_actions: 'Overdue Actions',
-  missing_kpis: 'Missing KPIs',
-  stage_gate_review: 'Stage Review',
-  escalation: 'Escalation',
-};
+// Note: Type labels are used dynamically with i18n keys workQueue.types.{key}
+const TYPE_KEYS = [
+  'triage',
+  'outreach',
+  'schedule_session',
+  'post_session_followup',
+  'overdue_actions',
+  'missing_kpis',
+  'stage_gate_review',
+  'escalation',
+];
 
 const PRIORITY_COLORS: Record<string, string> = {
   urgent: 'bg-destructive text-destructive-foreground',
@@ -174,12 +175,12 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                 </Select>
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
                   <SelectTrigger className="w-[130px] h-8">
-                    <SelectValue placeholder="All types" />
+                    <SelectValue placeholder={t('workQueue.allTypes')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem value="all">{t('workQueue.allTypes')}</SelectItem>
+                    {TYPE_KEYS.map((key) => (
+                      <SelectItem key={key} value={key}>{t(`workQueue.types.${key}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -206,17 +207,17 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
           <div className="flex gap-4 mt-3">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-primary" />
-              <span className="text-sm">{openCount} open</span>
+              <span className="text-sm">{openCount} {t('workQueue.open')}</span>
             </div>
             {overdueCount > 0 && (
               <div className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                <span className="text-sm font-medium">{overdueCount} overdue</span>
+                <span className="text-sm font-medium">{overdueCount} {t('workQueue.overdue')}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              <span className="text-sm">{dueThisWeekCount} due this week</span>
+              <span className="text-sm">{dueThisWeekCount} {t('workQueue.dueThisWeek')}</span>
             </div>
           </div>
         )}
@@ -263,7 +264,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                         )}
                         <div className="flex items-center gap-3 mt-1">
                           <Badge variant="outline" className="text-xs">
-                            {TYPE_LABELS[item.type] || item.type}
+                            {t(`workQueue.types.${item.type}`, item.type)}
                           </Badge>
                           {item.due_at && (
                             <span className={`text-xs ${
@@ -271,7 +272,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                               isDueToday ? 'text-amber-600 font-medium' : 
                               'text-muted-foreground'
                             }`}>
-                              {isOverdue ? 'Overdue: ' : isDueToday ? 'Today' : ''}
+                              {isOverdue ? `${t('workQueue.overdueLabel')}: ` : isDueToday ? t('common.today') : ''}
                               {!isDueToday && format(new Date(item.due_at), 'MMM d')}
                             </span>
                           )}

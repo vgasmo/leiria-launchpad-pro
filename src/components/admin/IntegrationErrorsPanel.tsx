@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { format, formatDistanceToNow } from 'date-fns';
 import { AlertCircle, CheckCircle, ExternalLink, RefreshCw, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +36,7 @@ interface IntegrationErrorsPanelProps {
 }
 
 export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }: IntegrationErrorsPanelProps) {
+  const { t } = useTranslation();
   const { data: errors, isLoading, refetch } = useUnresolvedIntegrationErrors();
   const resolveMutation = useResolveIntegrationError();
 
@@ -48,7 +50,7 @@ export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }:
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Integration Errors
+            {t('integrationErrors.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -70,7 +72,7 @@ export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }:
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <AlertCircle className={`h-4 w-4 ${errorCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
-            Integration Errors
+            {t('integrationErrors.title')}
             {errorCount > 0 && (
               <Badge variant="destructive" className="ml-2">{errorCount}</Badge>
             )}
@@ -84,7 +86,7 @@ export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }:
         {errorCount === 0 ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
             <CheckCircle className="h-4 w-4 text-green-500" />
-            All integrations running smoothly
+            {t('integrationErrors.allSmooth')}
           </div>
         ) : (
           <ScrollArea style={{ maxHeight }}>
@@ -130,7 +132,7 @@ export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }:
                         <X className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Mark as resolved</TooltipContent>
+                    <TooltipContent>{t('integrationErrors.markResolved')}</TooltipContent>
                   </Tooltip>
                 </div>
               ))}

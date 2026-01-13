@@ -189,7 +189,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Zap className="h-4 w-4 text-primary" />
-          Quick Actions
+          {t('quickActions.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -200,7 +200,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
             onClick={() => setShowQuickSession(true)}
           >
             <Calendar className="h-5 w-5 text-primary" />
-            <span className="text-xs">Schedule Session</span>
+            <span className="text-xs">{t('quickActions.scheduleSession')}</span>
           </Button>
           <Button 
             variant="outline" 
@@ -208,7 +208,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
             onClick={() => setShowQuickAction(true)}
           >
             <ClipboardList className="h-5 w-5 text-primary" />
-            <span className="text-xs">Add Action</span>
+            <span className="text-xs">{t('quickActions.addAction')}</span>
           </Button>
           <Button 
             variant="outline" 
@@ -216,7 +216,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
             onClick={() => navigate('/my-workspaces?filter=attention')}
           >
             <Bell className="h-5 w-5 text-amber-500" />
-            <span className="text-xs">View Alerts</span>
+            <span className="text-xs">{t('quickActions.viewAlerts')}</span>
           </Button>
           <Button 
             variant="outline" 
@@ -224,7 +224,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
             onClick={() => navigate('/consultor-tools')}
           >
             <CheckCircle2 className="h-5 w-5 text-green-500" />
-            <span className="text-xs">Consultor Tools</span>
+            <span className="text-xs">{t('consultorTools.title')}</span>
           </Button>
         </div>
       </CardContent>
