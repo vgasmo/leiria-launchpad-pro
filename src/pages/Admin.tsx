@@ -1,7 +1,19 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter } from 'lucide-react';
+import { 
+  Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
+  Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
+  ChevronDown
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -25,78 +37,125 @@ import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarnes
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 
+// Tab group definitions for cleaner navigation
+const TAB_GROUPS: Record<string, string[]> = {
+  operations: ['approvals', 'compliance', 'backoffice', 'announcements'],
+  people: ['users', 'mentors'],
+  content: ['kpis', 'templates', 'support-materials', 'surveys'],
+  insights: ['activity', 'analytics', 'health'],
+  system: ['integrations', 'flags', 'funnel'],
+};
+
 export default function Admin() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('approvals');
   
+  const getTabIcon = (tab: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      approvals: <Clock className="h-4 w-4" />,
+      compliance: <ShieldCheck className="h-4 w-4" />,
+      backoffice: <Building2 className="h-4 w-4" />,
+      announcements: <Bell className="h-4 w-4" />,
+      users: <Users className="h-4 w-4" />,
+      mentors: <Users2 className="h-4 w-4" />,
+      kpis: <BarChart3 className="h-4 w-4" />,
+      templates: <FileText className="h-4 w-4" />,
+      'support-materials': <BookOpen className="h-4 w-4" />,
+      surveys: <ClipboardList className="h-4 w-4" />,
+      activity: <Activity className="h-4 w-4" />,
+      analytics: <TrendingUp className="h-4 w-4" />,
+      health: <Heart className="h-4 w-4" />,
+      integrations: <Plug className="h-4 w-4" />,
+      flags: <Flag className="h-4 w-4" />,
+      funnel: <Filter className="h-4 w-4" />,
+    };
+    return icons[tab];
+  };
+
+  const getTabLabel = (tab: string) => {
+    const labels: Record<string, string> = {
+      approvals: t('admin.approvals'),
+      compliance: t('admin.compliance'),
+      backoffice: t('admin.backoffice.tab', 'Backoffice'),
+      announcements: t('admin.announcements.tab'),
+      users: t('admin.users'),
+      mentors: t('admin.externalMentors'),
+      kpis: t('admin.kpis'),
+      templates: t('admin.templates'),
+      'support-materials': t('admin.supportMaterials.title', 'Materials'),
+      surveys: t('admin.surveys.title', 'Surveys'),
+      activity: t('admin.activityLog'),
+      analytics: t('admin.analytics'),
+      health: t('admin.healthModels'),
+      integrations: t('admin.integrations', 'Integrations'),
+      flags: t('admin.featureFlags.tab', 'Flags'),
+      funnel: t('admin.funnel.tab', 'Funnel'),
+    };
+    return labels[tab];
+  };
+
+  const getGroupLabel = (group: string) => {
+    const labels: Record<string, string> = {
+      operations: t('admin.groups.operations', 'Operations'),
+      people: t('admin.groups.people', 'People'),
+      content: t('admin.groups.content', 'Content'),
+      insights: t('admin.groups.insights', 'Insights'),
+      system: t('admin.groups.system', 'System'),
+    };
+    return labels[group];
+  };
+
+  const isTabInGroup = (tab: string, group: keyof typeof TAB_GROUPS) => {
+    return TAB_GROUPS[group].includes(tab as any);
+  };
+
+  const getActiveGroup = () => {
+    for (const [group, tabs] of Object.entries(TAB_GROUPS)) {
+      if (tabs.includes(activeTab as any)) return group;
+    }
+    return 'operations';
+  };
+
   return (
     <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
-      <Tabs defaultValue="approvals" className="space-y-6">
-        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
-          <TabsTrigger value="approvals" className="gap-2">
-            <Clock className="h-4 w-4" aria-hidden="true" />
-            {t('admin.approvals')}
-          </TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-2">
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            {t('admin.compliance')}
-          </TabsTrigger>
-          <TabsTrigger value="backoffice" className="gap-2">
-            <Building2 className="h-4 w-4" aria-hidden="true" />
-            {t('admin.backoffice.tab', 'Backoffice')}
-          </TabsTrigger>
-          <TabsTrigger value="announcements" className="gap-2">
-            <Bell className="h-4 w-4" aria-hidden="true" />
-            {t('admin.announcements.tab')}
-          </TabsTrigger>
-          <TabsTrigger value="users" className="gap-2">
-            <Users className="h-4 w-4" aria-hidden="true" />
-            {t('admin.users')}
-          </TabsTrigger>
-          <TabsTrigger value="mentors" className="gap-2">
-            <Users2 className="h-4 w-4" aria-hidden="true" />
-            {t('admin.externalMentors')}
-          </TabsTrigger>
-          <TabsTrigger value="kpis" className="gap-2">
-            <BarChart3 className="h-4 w-4" aria-hidden="true" />
-            {t('admin.kpis')}
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="gap-2">
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            {t('admin.templates')}
-          </TabsTrigger>
-          <TabsTrigger value="support-materials" className="gap-2">
-            <BookOpen className="h-4 w-4" aria-hidden="true" />
-            {t('admin.supportMaterials.title', 'Support Materials')}
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="gap-2">
-            <Activity className="h-4 w-4" aria-hidden="true" />
-            {t('admin.activityLog')}
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="gap-2">
-            <TrendingUp className="h-4 w-4" aria-hidden="true" />
-            {t('admin.analytics')}
-          </TabsTrigger>
-          <TabsTrigger value="health" className="gap-2">
-            <Heart className="h-4 w-4" aria-hidden="true" />
-            {t('admin.healthModels')}
-          </TabsTrigger>
-          <TabsTrigger value="surveys" className="gap-2">
-            <ClipboardList className="h-4 w-4" aria-hidden="true" />
-            {t('admin.surveys.title', 'Surveys')}
-          </TabsTrigger>
-          <TabsTrigger value="integrations" className="gap-2">
-            <Plug className="h-4 w-4" aria-hidden="true" />
-            {t('admin.integrations', 'Integrations')}
-          </TabsTrigger>
-          <TabsTrigger value="flags" className="gap-2">
-            <Flag className="h-4 w-4" aria-hidden="true" />
-            {t('admin.featureFlags.tab', 'Feature Flags')}
-          </TabsTrigger>
-          <TabsTrigger value="funnel" className="gap-2">
-            <Filter className="h-4 w-4" aria-hidden="true" />
-            {t('admin.funnel.tab', 'Funnel')}
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
+        <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
+          {Object.entries(TAB_GROUPS).map(([group, tabs]) => (
+            <DropdownMenu key={group}>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant={getActiveGroup() === group ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  className="gap-1.5"
+                >
+                  {getGroupLabel(group)}
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {tabs.map((tab) => (
+                  <DropdownMenuItem 
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={activeTab === tab ? 'bg-accent' : ''}
+                  >
+                    <span className="flex items-center gap-2">
+                      {getTabIcon(tab)}
+                      {getTabLabel(tab)}
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ))}
+        </div>
+
+        {/* Active Tab Indicator */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{getTabIcon(activeTab)}</span>
+          <span className="font-medium text-foreground">{getTabLabel(activeTab)}</span>
+        </div>
 
         <TabsContent value="approvals">
           <PendingApprovalsManager />
@@ -176,7 +235,6 @@ export default function Admin() {
             <AdminFunnelManager />
           </div>
         </TabsContent>
-
       </Tabs>
     </AppLayout>
   );

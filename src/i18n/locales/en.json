@@ -286,8 +286,10 @@
     "myStartups": "My Startups",
     "activeMentorships": "Active mentorships",
     "upcomingMeetings": "Upcoming Meetings",
-    "pendingActionsCount": "pending actions",
-    "next": "Next"
+    "pendingActionsCount": "actions",
+    "next": "Next",
+    "nextSession": "Next Session",
+    "prepareSession": "Prepare"
   },
   "createStartup": {
     "title": "Create Your Startup",
@@ -1458,6 +1460,13 @@
   "admin": {
     "title": "Admin Panel",
     "subtitle": "Manage programs, users, and settings",
+    "groups": {
+      "operations": "Operations",
+      "people": "People",
+      "content": "Content",
+      "insights": "Insights",
+      "system": "System"
+    },
     "approvals": "Approvals",
     "compliance": "Compliance",
     "programs": "Programs",
@@ -1466,10 +1475,10 @@
     "users": "Users",
     "kpis": "KPIs",
     "templates": "Templates",
-    "activityLog": "Activity Log",
+    "activityLog": "Activity",
     "analytics": "Analytics",
-    "healthModels": "Health Models",
-    "externalMentors": "External Mentors",
+    "healthModels": "Health",
+    "externalMentors": "Mentors",
     "reports": "Reports",
     "noPendingApprovals": "No Pending Applications",
     "allReviewed": "All startup applications have been reviewed.",
