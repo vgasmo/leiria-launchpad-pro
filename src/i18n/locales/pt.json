@@ -508,6 +508,8 @@
     "title": "Templates",
     "noTemplates": "Nenhum template encontrado",
     "noTemplatesDesc": "Nenhum template disponível. Peça a um administrador para criar templates.",
+    "emptyStateTitle": "Ainda sem templates",
+    "emptyStateDesc": "Os templates ajudam a estruturar o seu raciocínio. O seu consultor irá adicionar templates relevantes para a sua fase.",
     "useTemplate": "Usar Template",
     "submitForReview": "Submeter para Revisão",
     "submittedForReview": "Template submetido para revisão",
