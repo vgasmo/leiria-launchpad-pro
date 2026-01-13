@@ -162,7 +162,9 @@
     "next": "Next",
     "details": "Details",
     "sending": "Sending...",
-    "actions": "Actions"
+    "actions": "Actions",
+    "updated": "Updated",
+    "saving": "Saving..."
   },
   "nav": {
     "myWorkspaces": "My Workspaces",
@@ -2357,5 +2359,52 @@
     "failed": "Failed to send request. Please try again.",
     "failedHint": "Check your connection and try again.",
     "goalRequired": "Please describe what you're trying to achieve."
+  },
+  "search": {
+    "searching": "Searching...",
+    "noResultsFor": "No results for \"{{query}}\"",
+    "viewAllResults": "View all results",
+    "types": {
+      "sessions": "Sessions",
+      "actions": "Actions",
+      "notes": "Notes",
+      "documents": "Documents",
+      "messages": "Messages",
+      "milestones": "Milestones"
+    }
+  },
+  "health": {
+    "setOverride": "Set override",
+    "manualOverride": "Manual override",
+    "numericScore": "Numeric score",
+    "whyThisScore": "Why this score?",
+    "howCalculated": "How is it calculated?",
+    "scoreExplanation": "Final score = weighted sum of components. Updated automatically.",
+    "setHealthOverride": "Set Health Score Override",
+    "newScore": "New score",
+    "selectScore": "Select score...",
+    "removeOverride": "Remove override (use calculated)",
+    "reasonLabel": "Reason (logged in activity log)",
+    "reasonPlaceholder": "Explain the reason for override...",
+    "components": {
+      "actions": "Actions",
+      "sessions": "Sessions",
+      "kpis": "KPIs",
+      "checkins": "Check-ins"
+    },
+    "levels": {
+      "thriving": "Thriving",
+      "healthy": "Healthy",
+      "stable": "Stable",
+      "atRisk": "At Risk",
+      "critical": "Critical"
+    }
+  },
+  "publicBooking": {
+    "title": "Book a Meeting",
+    "subtitle": "Schedule your first consultation with our team",
+    "newToProgram": "New to our program?",
+    "bookFirstMeeting": "Book Your First Meeting",
+    "bookFirstMeetingDesc": "Schedule a free consultation to learn how we can help your startup grow."
   }
 }
