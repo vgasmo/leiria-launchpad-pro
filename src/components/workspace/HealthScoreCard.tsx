@@ -174,7 +174,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
                         <Edit2 className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Definir override</TooltipContent>
+                    <TooltipContent>{t('health.setOverride')}</TooltipContent>
                   </Tooltip>
                 </>
               )}
@@ -192,7 +192,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
                 <span className="text-2xl font-bold">{config.label}</span>
                 {hasOverride && (
                   <Badge variant="outline" className="text-xs">
-                    Override manual
+                    {t('health.manualOverride')}
                   </Badge>
                 )}
               </div>
@@ -200,7 +200,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
               {numericScore > 0 && (
                 <div className="mt-2">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span>Score numérico</span>
+                    <span>{t('health.numericScore')}</span>
                     <span className="font-medium">{numericScore}/100</span>
                   </div>
                   <Progress value={numericScore} className="h-2" />
@@ -214,7 +214,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
             <div className="border-t pt-4">
               <div className="flex items-center gap-2 mb-3">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Porquê este score?</span>
+                <span className="text-sm font-medium">{t('health.whyThisScore')}</span>
               </div>
               <div className="space-y-2">
                 {explanation.slice(0, 4).map((factor: HealthExplanationFactor, index: number) => (
@@ -242,7 +242,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
             <CollapsibleTrigger className="flex items-center justify-between w-full border-t pt-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
-                <span>Como é calculado?</span>
+                <span>{t('health.howCalculated')}</span>
               </div>
               <ChevronDown className={`h-4 w-4 transition-transform ${showBreakdown ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
@@ -251,22 +251,22 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
                 <div className="p-2 rounded bg-muted">
                   <Activity className="h-4 w-4 mx-auto mb-1" />
-                  <div>Ações</div>
+                  <div>{t('health.components.actions')}</div>
                   <div className="font-bold">{weights.actions}%</div>
                 </div>
                 <div className="p-2 rounded bg-muted">
                   <Calendar className="h-4 w-4 mx-auto mb-1" />
-                  <div>Sessões</div>
+                  <div>{t('health.components.sessions')}</div>
                   <div className="font-bold">{weights.sessions}%</div>
                 </div>
                 <div className="p-2 rounded bg-muted">
                   <BarChart3 className="h-4 w-4 mx-auto mb-1" />
-                  <div>KPIs</div>
+                  <div>{t('health.components.kpis')}</div>
                   <div className="font-bold">{weights.kpis}%</div>
                 </div>
                 <div className="p-2 rounded bg-muted">
                   <ClipboardCheck className="h-4 w-4 mx-auto mb-1" />
-                  <div>Check-ins</div>
+                  <div>{t('health.components.checkins')}</div>
                   <div className="font-bold">{weights.checkins}%</div>
                 </div>
               </div>
@@ -278,10 +278,9 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
                     const score = components[key] || 0;
                     const weight = weights[key];
                     const weighted = (score * weight) / 100;
-                    const labels: Record<string, string> = { actions: 'Ações', sessions: 'Sessões', kpis: 'KPIs', checkins: 'Check-ins' };
                     return (
                       <div key={key} className="flex items-center gap-2 text-xs">
-                        <span className="w-16 text-muted-foreground">{labels[key]}</span>
+                        <span className="w-16 text-muted-foreground">{t(`health.components.${key}`)}</span>
                         <Progress value={score} className="flex-1 h-2" />
                         <span className="w-8 text-right">{score}</span>
                         <span className="text-muted-foreground">× {weight}% =</span>
@@ -293,7 +292,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
               )}
 
               <p className="text-xs text-muted-foreground">
-                Score final = soma ponderada dos componentes. Atualizado automaticamente.
+                {t('health.scoreExplanation')}
               </p>
             </CollapsibleContent>
           </Collapsible>
@@ -301,7 +300,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
           {/* Last updated */}
           {health?.health_score_updated_at && (
             <p className="text-xs text-muted-foreground text-right">
-              Atualizado: {new Date(health.health_score_updated_at).toLocaleDateString('pt-PT', {
+              {t('common.updated')}: {new Date(health.health_score_updated_at).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'short',
                 hour: '2-digit',
@@ -316,55 +315,55 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
       <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Definir Health Score Override</DialogTitle>
+            <DialogTitle>{t('health.setHealthOverride')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Novo score</Label>
+              <Label>{t('health.newScore')}</Label>
               <Select value={overrideValue} onValueChange={(v) => setOverrideValue(v as HealthScore | 'none')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecionar score..." />
+                  <SelectValue placeholder={t('health.selectScore')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">
                     <span className="flex items-center gap-2">
-                      ❌ Remover override (usar calculado)
+                      ❌ {t('health.removeOverride')}
                     </span>
                   </SelectItem>
                   <SelectItem value="thriving">
-                    <span className="flex items-center gap-2">🌟 Excelente</span>
+                    <span className="flex items-center gap-2">🌟 {t('health.levels.thriving')}</span>
                   </SelectItem>
                   <SelectItem value="healthy">
-                    <span className="flex items-center gap-2">✅ Saudável</span>
+                    <span className="flex items-center gap-2">✅ {t('health.levels.healthy')}</span>
                   </SelectItem>
                   <SelectItem value="stable">
-                    <span className="flex items-center gap-2">➡️ Estável</span>
+                    <span className="flex items-center gap-2">➡️ {t('health.levels.stable')}</span>
                   </SelectItem>
                   <SelectItem value="at_risk">
-                    <span className="flex items-center gap-2">⚠️ Em risco</span>
+                    <span className="flex items-center gap-2">⚠️ {t('health.levels.atRisk')}</span>
                   </SelectItem>
                   <SelectItem value="critical">
-                    <span className="flex items-center gap-2">🚨 Crítico</span>
+                    <span className="flex items-center gap-2">🚨 {t('health.levels.critical')}</span>
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Motivo (registado no activity log)</Label>
+              <Label>{t('health.reasonLabel')}</Label>
               <Textarea
                 value={overrideReason}
                 onChange={(e) => setOverrideReason(e.target.value)}
-                placeholder="Explicar porquê do override..."
+                placeholder={t('health.reasonPlaceholder')}
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowOverrideDialog(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleOverrideSave} disabled={setOverride.isPending}>
-              {setOverride.isPending ? 'A guardar...' : 'Guardar'}
+              {setOverride.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

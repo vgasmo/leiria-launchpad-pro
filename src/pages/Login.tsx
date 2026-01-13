@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users, Calendar } from 'lucide-react';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -158,12 +158,26 @@ export default function Login() {
           <h1 className="font-heading text-4xl font-bold text-background mb-4 tracking-tight">
             {t('login.platformTitle')}
           </h1>
-          <p className="text-lg text-background/70 mb-10 leading-relaxed">
+          <p className="text-lg text-background/70 mb-6 leading-relaxed">
             {t('login.platformSubtitle')}
           </p>
 
+          {/* Book a Meeting CTA */}
+          <div className="mb-10">
+            <Link
+              to="/book/demo"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-all duration-300 hover:shadow-lg hover:shadow-accent/25 hover:scale-105"
+            >
+              <Calendar className="h-5 w-5" />
+              {t('publicBooking.bookFirstMeeting')}
+            </Link>
+            <p className="text-sm text-background/50 mt-2">
+              {t('publicBooking.bookFirstMeetingDesc')}
+            </p>
+          </div>
+
           {/* Benefits Section - hidden on smaller screens within left panel */}
-          <div className={`mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { 
                 title: t('login.benefitMentorship'), 

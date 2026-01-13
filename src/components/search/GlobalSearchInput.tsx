@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, X, FileText, ListTodo, MessageSquare, File, Target, StickyNote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,25 +18,25 @@ const typeIcons: Record<string, React.ReactNode> = {
   milestone: <Target className="h-4 w-4" />,
 };
 
-const typeLabels: Record<string, string> = {
-  session: 'Sessões',
-  action: 'Ações',
-  note: 'Notas',
-  document: 'Documentos',
-  message: 'Mensagens',
-  milestone: 'Milestones',
-};
-
 export function GlobalSearchInput() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const debouncedQuery = query; // Simple debounce could be added
+  const debouncedQuery = query;
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const typeLabels: Record<string, string> = {
+    session: t('search.types.sessions'),
+    action: t('search.types.actions'),
+    note: t('search.types.notes'),
+    document: t('search.types.documents'),
+    message: t('search.types.messages'),
+    milestone: t('search.types.milestones'),
+  };
 
   const { data: results, isLoading } = useGlobalSearch({ query: debouncedQuery });
 
-  // Group results by type
   const groupedResults = results?.reduce((acc, result) => {
     if (!acc[result.type]) acc[result.type] = [];
     acc[result.type].push(result);
@@ -53,7 +54,6 @@ export function GlobalSearchInput() {
     setOpen(false);
   };
 
-  // Keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -73,7 +73,7 @@ export function GlobalSearchInput() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={inputRef}
-            placeholder="Pesquisar..."
+            placeholder={t('common.search') + '...'}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -95,10 +95,10 @@ export function GlobalSearchInput() {
       <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[400px] p-0" align="start">
         <ScrollArea className="max-h-[400px]">
           {isLoading ? (
-            <div className="p-4 text-center text-muted-foreground">A pesquisar...</div>
+            <div className="p-4 text-center text-muted-foreground">{t('search.searching')}</div>
           ) : Object.keys(groupedResults).length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              Sem resultados para "{query}"
+              {t('search.noResultsFor', { query })}
             </div>
           ) : (
             <div className="divide-y">
@@ -137,7 +137,7 @@ export function GlobalSearchInput() {
         {results && results.length > 0 && (
           <div className="border-t p-2">
             <Button variant="ghost" size="sm" className="w-full" onClick={handleViewAll}>
-              Ver todos os resultados
+              {t('search.viewAllResults')}
             </Button>
           </div>
         )}
