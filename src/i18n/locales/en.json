@@ -539,6 +539,8 @@
     "title": "Templates",
     "noTemplates": "No templates found",
     "noTemplatesDesc": "No templates available. Ask an admin to create templates.",
+    "emptyStateTitle": "No templates yet",
+    "emptyStateDesc": "Templates help structure your thinking. Your consultant will add templates relevant to your stage.",
     "useTemplate": "Use Template",
     "submitForReview": "Submit for Review",
     "submittedForReview": "Template submitted for review",
