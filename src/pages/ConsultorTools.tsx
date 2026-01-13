@@ -32,14 +32,14 @@ export default function ConsultorTools() {
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Value Proposition Wizard</CardTitle>
-                  <CardDescription>Create compelling VPs in 5-7 minutes</CardDescription>
+                  <CardTitle className="text-base">{t('consultorTools.vpWizard.title', 'Value Proposition Wizard')}</CardTitle>
+                  <CardDescription>{t('consultorTools.vpWizard.subtitle', 'Create compelling VPs in 5-7 minutes')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Guided wizard to build value propositions. Practice mode - save from workspace.
+                {t('consultorTools.vpWizard.description', 'Guided wizard to build value propositions. Practice mode - save from workspace.')}
               </p>
             </CardContent>
           </Card>
@@ -51,23 +51,23 @@ export default function ConsultorTools() {
                   <Shield className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Quality Gates</CardTitle>
-                  <CardDescription>Session & proposal quality checks</CardDescription>
+                  <CardTitle className="text-base">{t('consultorTools.qualityGates.title', 'Quality Gates')}</CardTitle>
+                  <CardDescription>{t('consultorTools.qualityGates.subtitle', 'Session & proposal quality checks')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Quality scoring automatically appears on sessions and proposals based on criteria like:
+                {t('consultorTools.qualityGates.description', 'Quality scoring automatically appears on sessions and proposals based on criteria like:')}
               </p>
               <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Clear title and agenda defined</li>
-                <li>Scheduled time and duration set</li>
-                <li>Expected outputs documented</li>
-                <li>Action items captured after session</li>
+                <li>{t('consultorTools.qualityGates.criteria.title', 'Clear title and agenda defined')}</li>
+                <li>{t('consultorTools.qualityGates.criteria.time', 'Scheduled time and duration set')}</li>
+                <li>{t('consultorTools.qualityGates.criteria.outputs', 'Expected outputs documented')}</li>
+                <li>{t('consultorTools.qualityGates.criteria.actions', 'Action items captured after session')}</li>
               </ul>
               <p className="text-xs text-muted-foreground italic">
-                Look for the "Quality Check" card on any session detail page.
+                {t('consultorTools.qualityGates.hint', 'Look for the "Quality Check" card on any session detail page.')}
               </p>
             </CardContent>
           </Card>
@@ -98,9 +98,9 @@ export default function ConsultorTools() {
         <Dialog open={showVPWizard} onOpenChange={setShowVPWizard}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Value Proposition Wizard</DialogTitle>
+              <DialogTitle>{t('consultorTools.vpWizard.title', 'Value Proposition Wizard')}</DialogTitle>
               <DialogDescription>
-                Practice mode - outputs can be copied. To save permanently, use the wizard from a specific workspace.
+                {t('consultorTools.vpWizard.practiceMode', 'Practice mode - outputs can be copied. To save permanently, use the wizard from a specific workspace.')}
               </DialogDescription>
             </DialogHeader>
             <ValuePropWizard 

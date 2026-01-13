@@ -102,7 +102,7 @@ export function ExerciseLibraryTab() {
             <SelectValue placeholder={t('consultorTools.filterByContext', 'Filter by context')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All contexts</SelectItem>
+            <SelectItem value="all">{t('consultorTools.allContexts', 'All contexts')}</SelectItem>
             {CONTEXT_TAGS.map((tag) => (
               <SelectItem key={tag} value={tag}>
                 {tag.replace('_', ' ')}
@@ -115,10 +115,10 @@ export function ExerciseLibraryTab() {
             <SelectValue placeholder={t('consultorTools.groupSize', 'Group size')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All sizes</SelectItem>
+            <SelectItem value="all">{t('consultorTools.allSizes', 'All sizes')}</SelectItem>
             <SelectItem value="1:1">1:1</SelectItem>
-            <SelectItem value="small_group">Small Group</SelectItem>
-            <SelectItem value="cohort">Cohort</SelectItem>
+            <SelectItem value="small_group">{t('consultorTools.smallGroup', 'Small Group')}</SelectItem>
+            <SelectItem value="cohort">{t('consultorTools.cohort', 'Cohort')}</SelectItem>
           </SelectContent>
         </Select>
         <Button onClick={() => setShowCreateDialog(true)}>
@@ -197,6 +197,7 @@ function ExerciseCard({
   onEdit: () => void;
   isAdmin: boolean;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -209,10 +210,10 @@ function ExerciseCard({
               {exercise.status === 'approved' ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Approved
+                  {t('common.approved', 'Approved')}
                 </Badge>
               ) : (
-                <Badge variant="outline">Draft</Badge>
+                <Badge variant="outline">{t('common.draft', 'Draft')}</Badge>
               )}
             </div>
             <CardDescription className="line-clamp-2">{exercise.purpose}</CardDescription>
@@ -227,7 +228,7 @@ function ExerciseCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={onEdit}>
                   <FileEdit className="h-4 w-4 mr-2" />
-                  Edit
+                  {t('common.edit', 'Edit')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -266,14 +267,14 @@ function ExerciseCard({
         <Collapsible open={expanded} onOpenChange={setExpanded}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="w-full justify-between">
-              {expanded ? 'Less details' : 'More details'}
+              {expanded ? t('common.lessDetails', 'Less details') : t('common.moreDetails', 'More details')}
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-3 space-y-3">
             {exercise.materials_needed.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">Materials needed:</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">{t('consultorTools.materialsNeeded', 'Materials needed')}:</p>
                 <ul className="text-sm list-disc list-inside">
                   {exercise.materials_needed.map((m, i) => (
                     <li key={i}>{m}</li>
@@ -283,7 +284,7 @@ function ExerciseCard({
             )}
             {exercise.success_criteria && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">Success criteria:</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">{t('consultorTools.successCriteria', 'Success criteria')}:</p>
                 <p className="text-sm">{exercise.success_criteria}</p>
               </div>
             )}
