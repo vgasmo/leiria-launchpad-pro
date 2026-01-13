@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair, TrendingUp, DollarSign, Rocket, BarChart3, Map } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -110,18 +110,20 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
   const findCanvasTemplate = (type: CanvasType) => 
     templates?.find(t => getCanvasType(t.name) === type);
   
-  const bmcTemplate = findCanvasTemplate('bmc');
-  const leanTemplate = findCanvasTemplate('lean');
-  const valuePropTemplate = findCanvasTemplate('value_prop');
-  const empathyTemplate = findCanvasTemplate('empathy');
-  const swotTemplate = findCanvasTemplate('swot');
-
   const canvasTemplates: { type: CanvasType; template: Template | undefined; label: string; icon: React.ReactNode }[] = [
-    { type: 'bmc', template: bmcTemplate, label: 'BMC', icon: <LayoutGrid className="h-4 w-4" /> },
-    { type: 'lean', template: leanTemplate, label: 'Lean', icon: <LayoutGrid className="h-4 w-4" /> },
-    { type: 'value_prop', template: valuePropTemplate, label: 'Value Prop', icon: <Target className="h-4 w-4" /> },
-    { type: 'empathy', template: empathyTemplate, label: 'Empathy', icon: <Users className="h-4 w-4" /> },
-    { type: 'swot', template: swotTemplate, label: 'SWOT', icon: <Crosshair className="h-4 w-4" /> },
+    { type: 'bmc', template: findCanvasTemplate('bmc'), label: 'BMC', icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'lean', template: findCanvasTemplate('lean'), label: 'Lean', icon: <LayoutGrid className="h-4 w-4" /> },
+    { type: 'value_prop', template: findCanvasTemplate('value_prop'), label: 'Value Prop', icon: <Target className="h-4 w-4" /> },
+    { type: 'empathy', template: findCanvasTemplate('empathy'), label: 'Empathy', icon: <Users className="h-4 w-4" /> },
+    { type: 'swot', template: findCanvasTemplate('swot'), label: 'SWOT', icon: <Crosshair className="h-4 w-4" /> },
+    { type: 'gtm', template: findCanvasTemplate('gtm'), label: 'GTM', icon: <Rocket className="h-4 w-4" /> },
+    { type: 'icp', template: findCanvasTemplate('icp'), label: 'ICP', icon: <Users className="h-4 w-4" /> },
+    { type: 'pricing', template: findCanvasTemplate('pricing'), label: 'Pricing', icon: <DollarSign className="h-4 w-4" /> },
+    { type: 'growth_loops', template: findCanvasTemplate('growth_loops'), label: 'Growth', icon: <TrendingUp className="h-4 w-4" /> },
+    { type: 'okrs', template: findCanvasTemplate('okrs'), label: 'OKRs', icon: <Target className="h-4 w-4" /> },
+    { type: 'fundraising', template: findCanvasTemplate('fundraising'), label: 'Fundraising', icon: <DollarSign className="h-4 w-4" /> },
+    { type: 'sales_pipeline', template: findCanvasTemplate('sales_pipeline'), label: 'Pipeline', icon: <BarChart3 className="h-4 w-4" /> },
+    { type: 'roadmap', template: findCanvasTemplate('roadmap'), label: 'Roadmap', icon: <Map className="h-4 w-4" /> },
   ];
 
   return (
@@ -245,9 +247,12 @@ interface CanvasTemplateWrapperProps {
 }
 
 function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type }: CanvasTemplateWrapperProps) {
+  const { t } = useTranslation();
   const upsertInstance = useUpsertTemplateInstance(workspaceId);
+  const submitForReview = useSubmitForReview(workspaceId);
   const [canvasData, setCanvasData] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (instance?.data_json) {
@@ -255,11 +260,19 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
     }
   }, [instance?.data_json]);
 
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
+
   const handleChange = (data: Record<string, string>) => {
     setCanvasData(data);
     setHasChanges(true);
-    // Auto-save after a short delay
-    const timeout = setTimeout(async () => {
+    
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    
+    saveTimeoutRef.current = setTimeout(async () => {
       try {
         await upsertInstance.mutateAsync({
           template_id: template.id,
@@ -267,12 +280,37 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
           existingId: instance?.id,
         });
         setHasChanges(false);
-        toast.success('Canvas saved');
+        toast.success(t('templates.canvasSaved'));
       } catch {
-        toast.error('Failed to save canvas');
+        toast.error(t('templates.canvasSaveFailed'));
       }
     }, 1000);
-    return () => clearTimeout(timeout);
+  };
+
+  const handleSubmitForReview = async () => {
+    if (!instance?.id) {
+      // Save first if not saved
+      try {
+        const result = await upsertInstance.mutateAsync({
+          template_id: template.id,
+          data_json: canvasData,
+          existingId: instance?.id,
+        });
+        if (result?.id) {
+          await submitForReview.mutateAsync(result.id);
+          toast.success(t('templates.submittedForReview'));
+        }
+      } catch {
+        toast.error(t('templates.submitFailed'));
+      }
+    } else {
+      try {
+        await submitForReview.mutateAsync(instance.id);
+        toast.success(t('templates.submittedForReview'));
+      } catch {
+        toast.error(t('templates.submitFailed'));
+      }
+    }
   };
 
   return (
@@ -280,7 +318,7 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
       {hasChanges && (
         <div className="text-sm text-muted-foreground flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-          Saving...
+          {t('common.saving')}
         </div>
       )}
       <CanvasTemplate
@@ -288,6 +326,8 @@ function CanvasTemplateWrapper({ template, instance, workspaceId, canWrite, type
         data={canvasData}
         onChange={handleChange}
         disabled={!canWrite}
+        reviewStatus={instance?.review_status as 'draft' | 'pending_review' | 'approved' | 'needs_changes' | undefined}
+        onSubmitForReview={canWrite ? handleSubmitForReview : undefined}
       />
     </div>
   );

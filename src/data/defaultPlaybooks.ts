@@ -2,7 +2,7 @@
 // Used to seed the database with initial playbooks when a program is created
 
 export interface PlaybookSeed {
-  stage: 'ideation' | 'validation' | 'mvp' | 'growth' | 'scale';
+  stage: 'ideation' | 'validation' | 'mvp' | 'traction' | 'growth' | 'scale';
   title: string;
   description: string;
   is_active: boolean;
@@ -112,6 +112,52 @@ export const DEFAULT_PLAYBOOKS: PlaybookSeed[] = [
       { item_type: 'action', title: 'Set up production hosting environment', description: 'Cloud provider, domains, SSL', relative_due_days: 20, priority: 'high', order_index: 4, metadata_json: { milestone_ref: 'ms_infra' } },
       { item_type: 'action', title: 'Implement authentication and authorization', description: 'User accounts and security basics', relative_due_days: 25, priority: 'high', order_index: 5, metadata_json: { milestone_ref: 'ms_infra' } },
       { item_type: 'action', title: 'Set up monitoring and error tracking', description: 'Know when things break', relative_due_days: 30, priority: 'medium', order_index: 6, metadata_json: { milestone_ref: 'ms_infra' } },
+    ],
+  },
+
+  // ============ TRACTION STAGE ============
+  {
+    stage: 'traction',
+    title: 'Product-Market Fit Validation',
+    description: 'Confirm and strengthen product-market fit with metrics and customer evidence.',
+    is_active: true,
+    items: [
+      { item_type: 'milestone', title: 'Achieve PMF Score > 40%', description: 'Run Sean Ellis test - 40%+ users would be "very disappointed" without product', relative_due_days: 30, priority: 'critical', order_index: 0, metadata_json: { ref: 'ms_pmf' } },
+      { item_type: 'action', title: 'Survey 100+ active users with PMF question', description: 'How disappointed would you be if you could no longer use [product]?', relative_due_days: 14, priority: 'high', order_index: 1, metadata_json: { milestone_ref: 'ms_pmf' } },
+      { item_type: 'action', title: 'Interview top 10 "very disappointed" users', description: 'Understand what makes them love the product', relative_due_days: 25, priority: 'high', order_index: 2, metadata_json: { milestone_ref: 'ms_pmf' } },
+      { item_type: 'milestone', title: 'Document Repeatable Value Delivery', description: 'Identify and document the core value loop', relative_due_days: 45, priority: 'high', order_index: 3, metadata_json: { ref: 'ms_value' } },
+      { item_type: 'action', title: 'Map the user journey from signup to "aha moment"', description: 'When do users first experience value?', relative_due_days: 35, priority: 'medium', order_index: 4, metadata_json: { milestone_ref: 'ms_value' } },
+      { item_type: 'action', title: 'Reduce time to value by 50%', description: 'Remove friction in onboarding', relative_due_days: 45, priority: 'high', order_index: 5, metadata_json: { milestone_ref: 'ms_value' } },
+    ],
+  },
+  {
+    stage: 'traction',
+    title: 'Early Revenue Engine',
+    description: 'Build repeatable revenue with early customers. Focus on learning what sells.',
+    is_active: true,
+    items: [
+      { item_type: 'milestone', title: 'Achieve First $10K MRR', description: 'Prove customers will pay and stay', relative_due_days: 60, priority: 'critical', order_index: 0, metadata_json: { ref: 'ms_revenue' } },
+      { item_type: 'action', title: 'Convert 10 paying customers', description: 'Focus on customers with strongest problem fit', relative_due_days: 30, priority: 'high', order_index: 1, metadata_json: { milestone_ref: 'ms_revenue' } },
+      { item_type: 'action', title: 'Document 3 case studies with early customers', description: 'Capture transformation stories and results', relative_due_days: 45, priority: 'medium', order_index: 2, metadata_json: { milestone_ref: 'ms_revenue' } },
+      { item_type: 'action', title: 'Implement basic churn tracking', description: 'Understand why customers leave', relative_due_days: 50, priority: 'high', order_index: 3, metadata_json: { milestone_ref: 'ms_revenue' } },
+      { item_type: 'milestone', title: 'Validate Pricing Model', description: 'Find the right price point and packaging', relative_due_days: 45, priority: 'high', order_index: 4, metadata_json: { ref: 'ms_pricing' } },
+      { item_type: 'action', title: 'Test 3 different price points with prospects', description: 'A/B test or conversational pricing discovery', relative_due_days: 30, priority: 'high', order_index: 5, metadata_json: { milestone_ref: 'ms_pricing' } },
+      { item_type: 'action', title: 'Define tier structure based on customer feedback', description: 'What features drive upgrade decisions?', relative_due_days: 40, priority: 'medium', order_index: 6, metadata_json: { milestone_ref: 'ms_pricing' } },
+    ],
+  },
+  {
+    stage: 'traction',
+    title: 'Retention & Engagement',
+    description: 'Build sticky product usage and reduce churn before scaling acquisition.',
+    is_active: true,
+    items: [
+      { item_type: 'milestone', title: 'Achieve 90%+ Monthly Retention', description: 'Keep customers engaged and active', relative_due_days: 60, priority: 'critical', order_index: 0, metadata_json: { ref: 'ms_retention' } },
+      { item_type: 'action', title: 'Implement weekly engagement tracking', description: 'Define and measure key engagement actions', relative_due_days: 14, priority: 'high', order_index: 1, metadata_json: { milestone_ref: 'ms_retention' } },
+      { item_type: 'action', title: 'Build automated onboarding sequence', description: 'Guide users to first value quickly', relative_due_days: 30, priority: 'high', order_index: 2, metadata_json: { milestone_ref: 'ms_retention' } },
+      { item_type: 'action', title: 'Create win-back campaign for churned users', description: 'Understand and address churn reasons', relative_due_days: 45, priority: 'medium', order_index: 3, metadata_json: { milestone_ref: 'ms_retention' } },
+      { item_type: 'milestone', title: 'Build Customer Success Foundation', description: 'Proactive customer success for top accounts', relative_due_days: 45, priority: 'high', order_index: 4, metadata_json: { ref: 'ms_cs' } },
+      { item_type: 'action', title: 'Define health score for customer accounts', description: 'Predict churn before it happens', relative_due_days: 30, priority: 'high', order_index: 5, metadata_json: { milestone_ref: 'ms_cs' } },
+      { item_type: 'action', title: 'Implement regular check-ins with top 10 customers', description: 'Monthly or quarterly success reviews', relative_due_days: 40, priority: 'medium', order_index: 6, metadata_json: { milestone_ref: 'ms_cs' } },
     ],
   },
 
