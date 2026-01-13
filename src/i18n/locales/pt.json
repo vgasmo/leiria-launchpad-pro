@@ -2338,5 +2338,98 @@
     "failed": "Falha ao enviar pedido. Por favor tente novamente.",
     "failedHint": "Verifique a sua ligação e tente novamente.",
     "goalRequired": "Por favor descreva o que está a tentar alcançar."
+  },
+  "publicBooking": {
+    "title": "Marcar Reunião",
+    "subtitle": "Agende a sua primeira consulta com a nossa equipa",
+    "newToProgram": "Novo no nosso programa?",
+    "bookFirstMeeting": "Marcar Primeira Reunião",
+    "bookFirstMeetingDesc": "Agende uma consulta gratuita para saber como podemos ajudar a sua startup a crescer.",
+    "selectTime": "Selecione um Horário",
+    "selectTimeDesc": "Escolha um horário conveniente para a sua primeira reunião",
+    "noSlotsAvailable": "Sem horários disponíveis no momento. Por favor tente novamente mais tarde.",
+    "yourDetails": "Os Seus Dados",
+    "fullName": "Nome Completo",
+    "organization": "Organização / Nome da Startup",
+    "organizationPlaceholder": "Nome da sua empresa ou projeto",
+    "whatToDiscuss": "O que gostaria de discutir?",
+    "discussPlaceholder": "Breve descrição do seu projeto ou o que gostaria de discutir...",
+    "confirmBooking": "Confirmar Marcação",
+    "booking": "A marcar...",
+    "bookingConfirmed": "Marcação Confirmada!",
+    "bookingConfirmedDesc": "A sua sessão de primeiro contacto foi agendada. Receberá um convite de calendário em breve.",
+    "invalidLink": "Link de Marcação Inválido",
+    "invalidLinkDesc": "Este link de marcação é inválido ou expirou. Por favor solicite um novo link.",
+    "change": "Alterar"
+  },
+  "search": {
+    "searching": "A pesquisar...",
+    "noResultsFor": "Sem resultados para \"{{query}}\"",
+    "viewAllResults": "Ver todos os resultados",
+    "types": {
+      "sessions": "Sessões",
+      "actions": "Ações",
+      "notes": "Notas",
+      "documents": "Documentos",
+      "messages": "Mensagens",
+      "milestones": "Marcos"
+    }
+  },
+  "health": {
+    "setOverride": "Definir override",
+    "manualOverride": "Override manual",
+    "numericScore": "Pontuação numérica",
+    "whyThisScore": "Porquê esta pontuação?",
+    "howCalculated": "Como é calculada?",
+    "scoreExplanation": "Pontuação final = soma ponderada dos componentes. Atualizada automaticamente.",
+    "setHealthOverride": "Definir Override de Health Score",
+    "newScore": "Nova pontuação",
+    "selectScore": "Selecionar pontuação...",
+    "removeOverride": "Remover override (usar calculada)",
+    "reasonLabel": "Motivo (registado no log de atividade)",
+    "reasonPlaceholder": "Explique o motivo do override...",
+    "components": {
+      "actions": "Ações",
+      "sessions": "Sessões",
+      "kpis": "KPIs",
+      "checkins": "Check-ins"
+    },
+    "levels": {
+      "thriving": "Excelente",
+      "healthy": "Saudável",
+      "stable": "Estável",
+      "atRisk": "Em Risco",
+      "critical": "Crítico"
+    }
+  },
+  "streakHero": {
+    "weeksStreak": "semana de streak",
+    "weeksStreak_plural": "semanas de streak",
+    "milestone": "Marco!",
+    "onFire": "Está em grande! Continue com o ritmo.",
+    "keepItUp": "Continue a voltar semanalmente para construir o seu streak."
+  },
+  "founderHome": {
+    "bookFirstContact": "Marcar Primeira Reunião",
+    "bookFirstContactDesc": "Conecte-se com um consultor para iniciar a sua jornada startup.",
+    "scheduleFirstMeeting": "Agendar Primeira Reunião",
+    "yourConsultant": "O Seu Consultor",
+    "noUpcomingSessions": "Sem sessões agendadas",
+    "bookNextSession": "Marque o seu próximo check-in com o consultor",
+    "bookSession": "Marcar Sessão",
+    "viewSessions": "Ver Sessões"
+  },
+  "oneThingToday": {
+    "focusToday": "Foco de Hoje",
+    "allCaughtUp": "Está tudo em dia!",
+    "keepMomentum": "Continue com o ritmo.",
+    "submitCheckin": "Submeta o seu check-in mensal",
+    "checkinWhy": "Os check-ins mantêm o seu consultor informado e ajudam a acompanhar o progresso.",
+    "updateKpis": "Atualize os seus KPIs deste mês",
+    "kpiWhy": "Métricas atualizadas ajudam a tomar melhores decisões e mostrar progresso aos investidores.",
+    "prepSession": "Prepare-se para a próxima sessão",
+    "sessionPrepWhy": "Estar preparado ajuda a tirar mais valor da sessão.",
+    "overdueWhy": "Esta ação está {{days}} dias atrasada. Completá-la desbloqueia o seu progresso.",
+    "actionWhy": "Completar ações aproxima-o dos seus marcos."
   }
 }
