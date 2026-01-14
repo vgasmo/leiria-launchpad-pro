@@ -22,6 +22,14 @@ const notificationTypeIcons: Record<string, string> = {
   mention: '💬',
   milestone_completed: '🎉',
   stage_change: '🚀',
+  // CRM notification types
+  task_due: '⏰',
+  task_overdue: '🔴',
+  next_action_due: '📌',
+  next_action_overdue: '❗',
+  overdue_escalated: '🚨',
+  recap_ready: '✨',
+  email_sync_done: '📧',
 };
 
 const notificationTypeColors: Record<string, string> = {
@@ -31,6 +39,14 @@ const notificationTypeColors: Record<string, string> = {
   mention: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
   milestone_completed: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
   stage_change: 'bg-primary/10 text-primary',
+  // CRM notification types
+  task_due: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  task_overdue: 'bg-destructive/10 text-destructive',
+  next_action_due: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  next_action_overdue: 'bg-destructive/10 text-destructive',
+  overdue_escalated: 'bg-destructive/10 text-destructive',
+  recap_ready: 'bg-primary/10 text-primary',
+  email_sync_done: 'bg-green-500/10 text-green-600 dark:text-green-400',
 };
 
 export function NotificationCenter() {

@@ -3159,7 +3159,8 @@
       "healthy": "Saudável",
       "at_risk": "Em Risco",
       "stale": "Parado"
-    }
+    },
+    "itemNotFound": "Lead não encontrado ou sem acesso"
   },
   "notifications": {
     "title": "Notificações",
