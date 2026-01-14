@@ -394,8 +394,8 @@ export default function CRM() {
                 </CardContent>
               </Card>
             ) : (
-              // Normal View - grouped columns (adaptive grid)
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+              // Normal View - grouped columns
+              <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <InboxGroup 
                   title={t('crm.overdue')} 
                   items={inbox?.overdue || []} 
@@ -488,11 +488,9 @@ function InboxGroup({
 }) {
   const { t } = useTranslation();
 
-  const hasItems = items.length > 0;
-
   return (
-    <Card className={cn(!hasItems && 'bg-muted/30')}>
-      <CardHeader className="pb-2 py-3">
+    <Card>
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Icon className={cn('h-4 w-4', iconColor)} />
           {title}
@@ -500,43 +498,47 @@ function InboxGroup({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {!hasItems ? (
-          <div className="px-3 pb-3 text-center text-xs text-muted-foreground">
-            {t('crm.noItems')}
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[280px]">
+        <ScrollArea className="h-[300px]">
+          {items.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              {t('crm.noItems')}
+            </div>
+          ) : (
             <div className="divide-y">
               {items.map(item => (
                 <div 
                   key={item.id} 
-                  className="p-2.5 hover:bg-muted/50 cursor-pointer flex items-center gap-2"
+                  className="p-3 hover:bg-muted/50 cursor-pointer flex items-center gap-3"
                   onClick={() => onOpenDrawer(item)}
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">
                       {item.organization_name || item.contact_name || 'Unnamed'}
                     </p>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Badge className={cn('h-4 text-[9px] px-1', STAGE_CONFIG[item.stage].color, 'text-white')}>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge className={cn('h-5 text-[10px]', STAGE_CONFIG[item.stage].color, 'text-white')}>
                         {STAGE_CONFIG[item.stage].label}
                       </Badge>
                       {item.next_action_at && (
                         <span className={cn(
-                          'text-[10px]',
                           new Date(item.next_action_at) < new Date() && 'text-destructive'
                         )}>
                           {formatRelativeTime(item.next_action_at)}
                         </span>
                       )}
                     </div>
+                    {item.next_action_description && (
+                      <p className="text-xs text-muted-foreground truncate mt-1">
+                        {item.next_action_description}
+                      </p>
+                    )}
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                 </div>
               ))}
             </div>
-          </ScrollArea>
-        )}
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );
