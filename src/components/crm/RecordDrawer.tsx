@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format, isThisWeek, isThisMonth, subDays } from 'date-fns';
+import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
 import {
   Sheet,
@@ -11,17 +11,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +26,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   ChevronDown,
   ChevronRight,
   Mail,
@@ -42,18 +42,23 @@ import {
   CheckSquare,
   Sparkles,
   RefreshCw,
-  Plus,
-  MoreVertical,
   ArrowDownRight,
   ArrowUpRight,
   AlertTriangle,
   Lightbulb,
   Target,
   Clock,
+  CircleCheck,
+  Circle,
+  Plus,
+  X,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
+import { useAddTask, useCompleteTask, useReopenTask, TaskPriority } from '@/hooks/useCrmTasks';
+import { useUpdateNextAction, useClearNextAction } from '@/hooks/useNextAction';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 
@@ -79,11 +84,14 @@ interface RecordDrawerProps {
 
 export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const language = i18n.language.startsWith('pt') ? 'pt' : 'en';
   const dateLocale = language === 'pt' ? pt : enUS;
   
   const [recapExpanded, setRecapExpanded] = useState(false);
   const [addActivityDialog, setAddActivityDialog] = useState<ActivityType | null>(null);
+  const [addTaskDialog, setAddTaskDialog] = useState(false);
+  const [nextActionDialog, setNextActionDialog] = useState(false);
   
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
@@ -101,15 +109,37 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const generateRecap = useGenerateRecap();
   const syncEmails = useSyncEmails();
   const addActivity = useAddActivity();
+  const addTask = useAddTask();
+  const completeTask = useCompleteTask();
+  const reopenTask = useReopenTask();
+  const updateNextAction = useUpdateNextAction();
+  const clearNextAction = useClearNextAction();
 
-  // Group activities by time period
+  // Separate tasks from other activities
+  const { tasks, otherActivities } = useMemo(() => {
+    if (!activities?.length) return { tasks: [], otherActivities: [] };
+    
+    const taskList = activities.filter(a => a.activity_type === 'task' && a.status !== 'done');
+    const others = activities.filter(a => a.activity_type !== 'task' || a.status === 'done');
+    
+    // Sort tasks by due_at (nulls last), then by created_at
+    taskList.sort((a, b) => {
+      if (!a.due_at && !b.due_at) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (!a.due_at) return 1;
+      if (!b.due_at) return -1;
+      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+    });
+    
+    return { tasks: taskList, otherActivities: others };
+  }, [activities]);
+
+  // Group other activities by time period
   const groupedActivities = useMemo(() => {
-    if (!activities?.length) return {};
+    if (!otherActivities?.length) return {};
     
     const groups: Record<string, ActivityEntry[]> = {};
-    const now = new Date();
     
-    activities.forEach(activity => {
+    otherActivities.forEach(activity => {
       const date = new Date(activity.occurred_at);
       let key: string;
       
@@ -126,7 +156,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
     });
     
     return groups;
-  }, [activities, t, dateLocale]);
+  }, [otherActivities, t, dateLocale]);
 
   const handleAddActivity = async (type: ActivityType, data: { subject: string; preview: string; shareWithFounder?: boolean }) => {
     if (!item) return;
@@ -142,9 +172,51 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
     setAddActivityDialog(null);
   };
 
+  const handleAddTask = async (data: {
+    subject: string;
+    preview?: string;
+    due_at?: string;
+    priority?: TaskPriority;
+    shareWithFounder?: boolean;
+  }) => {
+    if (!item) return;
+    
+    await addTask.mutateAsync({
+      funnel_item_id: item.id,
+      subject: data.subject,
+      preview: data.preview,
+      due_at: data.due_at,
+      priority: data.priority,
+      assigned_to: user?.id,
+      visibility: data.shareWithFounder ? 'shared' : 'staff',
+    });
+    
+    setAddTaskDialog(false);
+  };
+
+  const handleUpdateNextAction = async (data: { date: string; description: string }) => {
+    if (!item) return;
+    
+    await updateNextAction.mutateAsync({
+      funnelItemId: item.id,
+      next_action_at: data.date,
+      next_action_description: data.description,
+    });
+    
+    setNextActionDialog(false);
+  };
+
+  const handleClearNextAction = async () => {
+    if (!item) return;
+    await clearNextAction.mutateAsync(item.id);
+  };
+
   if (!item) return null;
 
   const stageConfig = STAGE_CONFIG[item.stage];
+  // Get next action from the item (need to cast as the type might not have these fields yet)
+  const nextActionAt = (item as any).next_action_at as string | null;
+  const nextActionDescription = (item as any).next_action_description as string | null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -281,6 +353,31 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               </Collapsible>
             )}
 
+            {/* Tasks Section */}
+            {tasks.length > 0 && (
+              <Card>
+                <CardHeader className="py-2 px-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4" />
+                    {t('crm.openTasks')}
+                    <Badge variant="secondary" className="ml-auto">{tasks.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {tasks.slice(0, 5).map(task => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        onComplete={() => completeTask.mutate(task.id)}
+                        onReopen={() => reopenTask.mutate(task.id)}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Quick Actions */}
             <div className="flex items-center gap-2 flex-wrap">
               <Button size="sm" variant="outline" className="h-8" onClick={() => setAddActivityDialog('note')}>
@@ -295,7 +392,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 <Calendar className="h-3 w-3 mr-1" />
                 {t('crm.logMeeting')}
               </Button>
-              <Button size="sm" variant="outline" className="h-8" onClick={() => setAddActivityDialog('task')}>
+              <Button size="sm" variant="outline" className="h-8" onClick={() => setAddTaskDialog(true)}>
                 <CheckSquare className="h-3 w-3 mr-1" />
                 {t('crm.addTask')}
               </Button>
@@ -321,7 +418,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                   <Skeleton className="h-16 w-full" />
                   <Skeleton className="h-16 w-full" />
                 </div>
-              ) : Object.keys(groupedActivities).length === 0 ? (
+              ) : Object.keys(groupedActivities).length === 0 && tasks.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">{t('crm.noActivityYet')}</p>
@@ -346,7 +443,64 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="overview" className="flex-1 p-4 space-y-4">
+          <TabsContent value="overview" className="flex-1 p-4 space-y-4 overflow-auto">
+            {/* Next Action Card */}
+            <Card className={cn(
+              nextActionAt && new Date(nextActionAt) < new Date() && 'border-destructive/50 bg-destructive/5'
+            )}>
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  {t('crm.nextAction')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 pt-0">
+                {nextActionAt ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className={cn(
+                        'h-4 w-4',
+                        new Date(nextActionAt) < new Date() ? 'text-destructive' : 'text-muted-foreground'
+                      )} />
+                      <span className={cn(
+                        'text-sm',
+                        new Date(nextActionAt) < new Date() && 'text-destructive font-medium'
+                      )}>
+                        {formatRelativeTime(nextActionAt)}
+                      </span>
+                    </div>
+                    {nextActionDescription && (
+                      <p className="text-sm text-muted-foreground">{nextActionDescription}</p>
+                    )}
+                    <div className="flex gap-2 pt-2">
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setNextActionDialog(true)}>
+                        {t('crm.updateNextAction')}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 text-xs text-muted-foreground"
+                        onClick={handleClearNextAction}
+                        disabled={clearNextAction.isPending}
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        {t('crm.clearNextAction')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{t('crm.noNextActionSet')}</p>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setNextActionDialog(true)}>
+                      <Plus className="h-3 w-3 mr-1" />
+                      {t('crm.setNextAction')}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Details */}
             <div className="grid gap-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t('crm.stage')}</span>
@@ -392,8 +546,91 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           isPending={addActivity.isPending}
           hasWorkspace={!!item.linked_workspace_id}
         />
+
+        {/* Add Task Dialog */}
+        <AddTaskDialog
+          open={addTaskDialog}
+          onOpenChange={setAddTaskDialog}
+          onSubmit={handleAddTask}
+          isPending={addTask.isPending}
+          hasWorkspace={!!item.linked_workspace_id}
+        />
+
+        {/* Next Action Dialog */}
+        <NextActionDialog
+          open={nextActionDialog}
+          onOpenChange={setNextActionDialog}
+          onSubmit={handleUpdateNextAction}
+          isPending={updateNextAction.isPending}
+          currentDate={nextActionAt}
+          currentDescription={nextActionDescription}
+        />
       </SheetContent>
     </Sheet>
+  );
+}
+
+function TaskRow({ 
+  task, 
+  onComplete, 
+  onReopen 
+}: { 
+  task: ActivityEntry; 
+  onComplete: () => void;
+  onReopen: () => void;
+}) {
+  const { t } = useTranslation();
+  const isCompleted = task.status === 'done';
+  const isOverdue = task.due_at && new Date(task.due_at) < new Date() && !isCompleted;
+  
+  return (
+    <div className="flex items-center gap-3 p-3 hover:bg-muted/50">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 shrink-0"
+        onClick={isCompleted ? onReopen : onComplete}
+      >
+        {isCompleted ? (
+          <CircleCheck className="h-4 w-4 text-green-500" />
+        ) : (
+          <Circle className="h-4 w-4 text-muted-foreground" />
+        )}
+      </Button>
+      <div className="min-w-0 flex-1">
+        <p className={cn(
+          'text-sm font-medium truncate',
+          isCompleted && 'line-through text-muted-foreground'
+        )}>
+          {task.subject}
+        </p>
+        {task.due_at && (
+          <p className={cn(
+            'text-xs',
+            isOverdue ? 'text-destructive' : 'text-muted-foreground'
+          )}>
+            {formatRelativeTime(task.due_at)}
+          </p>
+        )}
+      </div>
+      {task.priority && (
+        <Badge 
+          variant="outline" 
+          className={cn(
+            'text-xs shrink-0',
+            task.priority === 'high' && 'border-destructive text-destructive',
+            task.priority === 'medium' && 'border-amber-500 text-amber-500',
+          )}
+        >
+          {t(`crm.${task.priority}`)}
+        </Badge>
+      )}
+      {task.visibility === 'shared' && (
+        <Badge variant="secondary" className="text-[10px] shrink-0">
+          {t('crm.shareWithFounder').split(' ').slice(-1)[0]}
+        </Badge>
+      )}
+    </div>
   );
 }
 
@@ -517,6 +754,189 @@ function AddActivityDialog({
             </div>
           )}
           <Button onClick={handleSubmit} disabled={isPending || !subject.trim()} className="w-full">
+            {isPending ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddTaskDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  isPending,
+  hasWorkspace,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: {
+    subject: string;
+    preview?: string;
+    due_at?: string;
+    priority?: TaskPriority;
+    shareWithFounder?: boolean;
+  }) => void;
+  isPending: boolean;
+  hasWorkspace: boolean;
+}) {
+  const { t } = useTranslation();
+  const [subject, setSubject] = useState('');
+  const [preview, setPreview] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<TaskPriority | ''>('');
+  const [shareWithFounder, setShareWithFounder] = useState(false);
+
+  const handleSubmit = () => {
+    if (!subject.trim()) return;
+    onSubmit({
+      subject,
+      preview: preview || undefined,
+      due_at: dueDate ? new Date(dueDate).toISOString() : undefined,
+      priority: priority || undefined,
+      shareWithFounder,
+    });
+    setSubject('');
+    setPreview('');
+    setDueDate('');
+    setPriority('');
+    setShareWithFounder(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('crm.addTask')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>{t('crm.title')}</Label>
+            <Input
+              placeholder={t('crm.titlePlaceholder')}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('crm.details')}</Label>
+            <Textarea
+              placeholder={t('crm.detailsPlaceholder')}
+              value={preview}
+              onChange={(e) => setPreview(e.target.value)}
+              rows={2}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>{t('crm.dueDate')}</Label>
+              <Input
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('crm.priority')}</Label>
+              <Select value={priority} onValueChange={(v) => setPriority(v as TaskPriority | '')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="-" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{t('crm.low')}</SelectItem>
+                  <SelectItem value="medium">{t('crm.medium')}</SelectItem>
+                  <SelectItem value="high">{t('crm.high')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {hasWorkspace && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="share-task"
+                checked={shareWithFounder}
+                onCheckedChange={(checked) => setShareWithFounder(!!checked)}
+              />
+              <Label htmlFor="share-task" className="text-sm font-normal cursor-pointer">
+                {t('crm.shareWithFounder')}
+              </Label>
+            </div>
+          )}
+          <Button onClick={handleSubmit} disabled={isPending || !subject.trim()} className="w-full">
+            {isPending ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function NextActionDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  isPending,
+  currentDate,
+  currentDescription,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: { date: string; description: string }) => void;
+  isPending: boolean;
+  currentDate?: string | null;
+  currentDescription?: string | null;
+}) {
+  const { t } = useTranslation();
+  const [date, setDate] = useState('');
+  const [description, setDescription] = useState('');
+
+  // Initialize with current values when dialog opens
+  useState(() => {
+    if (currentDate) {
+      const d = new Date(currentDate);
+      setDate(d.toISOString().slice(0, 16));
+    }
+    if (currentDescription) {
+      setDescription(currentDescription);
+    }
+  });
+
+  const handleSubmit = () => {
+    if (!date) return;
+    onSubmit({
+      date: new Date(date).toISOString(),
+      description,
+    });
+    setDate('');
+    setDescription('');
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('crm.setNextAction')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>{t('crm.nextActionDate')}</Label>
+            <Input
+              type="datetime-local"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('crm.nextActionDescription')}</Label>
+            <Textarea
+              placeholder={t('crm.detailsPlaceholder')}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+            />
+          </div>
+          <Button onClick={handleSubmit} disabled={isPending || !date} className="w-full">
             {isPending ? t('common.saving') : t('common.save')}
           </Button>
         </div>

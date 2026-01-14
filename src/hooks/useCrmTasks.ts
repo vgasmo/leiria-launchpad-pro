@@ -2,10 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ActivityType, VisibilityType } from './useActivityTimeline';
+import type { VisibilityType, TaskStatus, TaskPriority } from './useActivityTimeline';
 
-export type TaskStatus = 'open' | 'done' | 'canceled';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type { TaskStatus, TaskPriority } from './useActivityTimeline';
 
 export interface TaskEntry {
   id: string;

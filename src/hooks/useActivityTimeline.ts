@@ -6,6 +6,9 @@ import type { Json } from '@/integrations/supabase/types';
 export type ActivityType = 'note' | 'email' | 'call' | 'task' | 'meeting' | 'system';
 export type VisibilityType = 'staff' | 'shared';
 
+export type TaskStatus = 'open' | 'done' | 'canceled';
+export type TaskPriority = 'low' | 'medium' | 'high';
+
 export interface ActivityEntry {
   id: string;
   workspace_id: string | null;
@@ -23,6 +26,12 @@ export interface ActivityEntry {
   external_id: string | null;
   metadata_json: Json;
   created_at: string;
+  // Task-specific fields
+  due_at: string | null;
+  completed_at: string | null;
+  status: TaskStatus | null;
+  assigned_to: string | null;
+  priority: TaskPriority | null;
 }
 
 export interface RelationshipRecap {
