@@ -1,100 +1,97 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface RecapRequest {
   funnel_item_id?: string;
   workspace_id?: string;
-  language?: "pt" | "en";
+  language?: 'pt' | 'en';
   max_items?: number;
 }
 
+interface RecapOutput {
+  summary: string;
+  key_points: string[];
+  open_loops: string[];
+  risks: string[];
+  next_best_actions: string[];
+}
+
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
-  
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return handleCorsOptions(req);
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+
+    if (!lovableApiKey) {
+      return corsJsonResponse({ error: 'LOVABLE_API_KEY is not configured' }, req, 500);
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const userClient = createClient(SUPABASE_URL, authHeader.replace("Bearer ", ""), {
+    // SECURITY: Validate authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return corsJsonResponse({ error: 'Authorization required' }, req, 401);
+    }
+
+    // SECURITY: Validate token and get user
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+    if (authError || !user) {
+      console.error('[generate-relationship-recap] Auth error:', authError);
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
     }
+
+    // Service client for privileged operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check feature flag
     const { data: flag } = await supabase
-      .from("feature_flags")
-      .select("enabled")
-      .eq("key", "crm_ai_recap")
-      .is("program_id", null)
+      .from('feature_flags')
+      .select('enabled')
+      .eq('key', 'crm_ai_recap')
+      .is('program_id', null)
       .single();
 
     if (!flag?.enabled) {
-      return new Response(JSON.stringify({ error: "Feature disabled" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: 'Feature disabled' }, req, 403);
     }
 
     const body: RecapRequest = await req.json();
-    const { funnel_item_id, workspace_id, language = "pt", max_items = 40 } = body;
+    const { funnel_item_id, workspace_id, language = 'pt', max_items = 40 } = body;
 
     if (!funnel_item_id && !workspace_id) {
-      return new Response(JSON.stringify({ error: "funnel_item_id or workspace_id required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: 'funnel_item_id or workspace_id required' }, req, 400);
     }
 
-    // Verify access
+    // Access check: workspace access for founders, staff for funnel
     if (workspace_id) {
-      const { data: access } = await userClient
-        .from("workspaces")
-        .select("id")
-        .eq("id", workspace_id)
-        .single();
+      const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
+        _user_id: user.id,
+        _workspace_id: workspace_id,
+      });
       
-      if (!access) {
-        return new Response(JSON.stringify({ error: "Workspace access denied" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (!hasAccess) {
+        return corsJsonResponse({ error: 'Workspace access denied' }, req, 403);
       }
     }
 
     // Staff check for funnel access
     if (funnel_item_id) {
       const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
 
-      const isStaff = roles?.some((r) => r.role === "admin" || r.role === "consultor");
+      const isStaff = roles?.some((r) => r.role === 'admin' || r.role === 'consultor');
       if (!isStaff) {
-        return new Response(JSON.stringify({ error: "Funnel access denied" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return corsJsonResponse({ error: 'Funnel access denied' }, req, 403);
       }
     }
 
@@ -103,15 +100,15 @@ Deno.serve(async (req) => {
 
     // Communication log entries
     const commQuery = supabase
-      .from("communication_log")
-      .select("*")
-      .order("occurred_at", { ascending: false })
+      .from('communication_log')
+      .select('*')
+      .order('occurred_at', { ascending: false })
       .limit(max_items);
 
     if (workspace_id) {
-      commQuery.eq("workspace_id", workspace_id);
+      commQuery.eq('workspace_id', workspace_id);
     } else if (funnel_item_id) {
-      commQuery.eq("funnel_item_id", funnel_item_id);
+      commQuery.eq('funnel_item_id', funnel_item_id);
     }
 
     const { data: commLogs } = await commQuery;
@@ -128,15 +125,15 @@ Deno.serve(async (req) => {
     // Session notes if workspace
     if (workspace_id) {
       const { data: sessions } = await supabase
-        .from("sessions")
-        .select("id, title, scheduled_at, notes, ai_summary")
-        .eq("workspace_id", workspace_id)
-        .order("scheduled_at", { ascending: false })
+        .from('sessions')
+        .select('id, title, scheduled_at, notes, ai_summary')
+        .eq('workspace_id', workspace_id)
+        .order('scheduled_at', { ascending: false })
         .limit(10);
 
       if (sessions) {
         activities.push(...sessions.map((s) => ({
-          type: "meeting",
+          type: 'meeting',
           date: s.scheduled_at,
           subject: s.title,
           preview: s.ai_summary || s.notes?.substring(0, 300),
@@ -149,46 +146,44 @@ Deno.serve(async (req) => {
     activities = activities.slice(0, max_items);
 
     if (activities.length === 0) {
-      return new Response(JSON.stringify({
-        summary: language === "pt" ? "Sem interações registadas." : "No interactions recorded.",
+      const emptyRecap = {
+        summary: language === 'pt' ? 'Sem interações registadas.' : 'No interactions recorded.',
         key_points: [],
         open_loops: [],
         risks: [],
         next_best_actions: [],
         items_analyzed: 0,
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      };
+      return corsJsonResponse(emptyRecap, req, 200);
     }
 
     // Get context for the lead/workspace
-    let contextName = "";
+    let contextName = '';
     if (funnel_item_id) {
       const { data: lead } = await supabase
-        .from("funnel_items")
-        .select("contact_name, organization_name, stage")
-        .eq("id", funnel_item_id)
+        .from('funnel_items')
+        .select('contact_name, organization_name, stage')
+        .eq('id', funnel_item_id)
         .single();
       if (lead) {
-        contextName = lead.organization_name || lead.contact_name || "Lead";
+        contextName = lead.organization_name || lead.contact_name || 'Lead';
       }
     } else if (workspace_id) {
       const { data: workspace } = await supabase
-        .from("workspaces")
-        .select("startups(name)")
-        .eq("id", workspace_id)
+        .from('workspaces')
+        .select('startups(name)')
+        .eq('id', workspace_id)
         .single();
       if (workspace?.startups) {
-        contextName = (workspace.startups as any).name || "Startup";
+        contextName = (workspace.startups as any).name || 'Startup';
       }
     }
 
-    const systemPrompt = language === "pt" 
+    const systemPrompt = language === 'pt' 
       ? `És um assistente de CRM para consultores de startups. Analisa o histórico de interações com "${contextName}" e gera um resumo estruturado. Responde SEMPRE em português de Portugal.`
       : `You are a CRM assistant for startup consultants. Analyze the interaction history with "${contextName}" and generate a structured summary. Always respond in English.`;
 
-    const userPrompt = language === "pt"
+    const userPrompt = language === 'pt'
       ? `Analisa estas ${activities.length} interações e gera:
 1. Um parágrafo resumo (máx 100 palavras)
 2. 3-5 pontos-chave da relação
@@ -197,9 +192,7 @@ Deno.serve(async (req) => {
 5. 2-3 próximas ações recomendadas
 
 Interações (mais recentes primeiro):
-${activities.map((a, i) => `${i + 1}. [${a.type}] ${a.date}: ${a.subject || ""} - ${a.preview || ""}`).join("\n")}
-
-Responde APENAS em JSON válido com as keys: summary, key_points (array), open_loops (array), risks (array), next_best_actions (array).`
+${activities.map((a, i) => `${i + 1}. [${a.type}] ${a.date}: ${a.subject || ''} - ${a.preview || ''}`).join('\n')}`
       : `Analyze these ${activities.length} interactions and generate:
 1. A summary paragraph (max 100 words)
 2. 3-5 key relationship points
@@ -208,88 +201,145 @@ Responde APENAS em JSON válido com as keys: summary, key_points (array), open_l
 5. 2-3 recommended next actions
 
 Interactions (most recent first):
-${activities.map((a, i) => `${i + 1}. [${a.type}] ${a.date}: ${a.subject || ""} - ${a.preview || ""}`).join("\n")}
+${activities.map((a, i) => `${i + 1}. [${a.type}] ${a.date}: ${a.subject || ''} - ${a.preview || ''}`).join('\n')}`;
 
-Respond ONLY with valid JSON with keys: summary, key_points (array), open_loops (array), risks (array), next_best_actions (array).`;
+    console.log('[generate-relationship-recap] Calling Lovable AI Gateway');
 
-    // Call AI
-    const aiResponse = await fetch("https://api.lovable.dev/ai/chat", {
-      method: "POST",
+    // Call Lovable AI Gateway with tool calling for structured output
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: 'google/gemini-2.5-flash',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
         ],
-        response_format: { type: "json_object" },
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'provide_relationship_recap',
+              description: 'Provide structured relationship recap for the lead/startup',
+              parameters: {
+                type: 'object',
+                properties: {
+                  summary: { type: 'string', description: 'Brief summary paragraph' },
+                  key_points: { type: 'array', items: { type: 'string' }, description: 'Key relationship points' },
+                  open_loops: { type: 'array', items: { type: 'string' }, description: 'Pending topics or promises' },
+                  risks: { type: 'array', items: { type: 'string' }, description: 'Identified risks' },
+                  next_best_actions: { type: 'array', items: { type: 'string' }, description: 'Recommended next actions' }
+                },
+                required: ['summary', 'key_points', 'open_loops', 'risks', 'next_best_actions'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'provide_relationship_recap' } }
       }),
     });
 
     if (!aiResponse.ok) {
+      if (aiResponse.status === 429) {
+        return corsJsonResponse({ error: 'Rate limit exceeded. Please try again later.' }, req, 429);
+      }
+      if (aiResponse.status === 402) {
+        return corsJsonResponse({ error: 'AI credits exhausted. Please add credits.' }, req, 402);
+      }
       const errorText = await aiResponse.text();
-      console.error("AI error:", errorText);
-      return new Response(JSON.stringify({ error: "AI generation failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error('[generate-relationship-recap] AI gateway error:', aiResponse.status, errorText);
+      return corsJsonResponse({ error: 'AI generation failed' }, req, 500);
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content;
-
-    let recap;
-    try {
-      recap = JSON.parse(content);
-    } catch {
-      recap = {
-        summary: content,
-        key_points: [],
-        open_loops: [],
-        risks: [],
-        next_best_actions: [],
-      };
+    
+    // Extract recap from tool call
+    let recap: RecapOutput;
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      try {
+        recap = JSON.parse(toolCall.function.arguments);
+      } catch (e) {
+        console.error('[generate-relationship-recap] Failed to parse tool call:', e);
+        recap = {
+          summary: language === 'pt' ? 'Não foi possível gerar resumo.' : 'Could not generate summary.',
+          key_points: [],
+          open_loops: [],
+          risks: [],
+          next_best_actions: [],
+        };
+      }
+    } else {
+      // Fallback: try to parse from content
+      const content = aiData.choices?.[0]?.message?.content || '';
+      try {
+        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || [null, content];
+        recap = JSON.parse(jsonMatch[1] || content);
+      } catch (e) {
+        console.error('[generate-relationship-recap] Failed to parse content:', e);
+        recap = {
+          summary: content || (language === 'pt' ? 'Resumo não disponível.' : 'Summary not available.'),
+          key_points: [],
+          open_loops: [],
+          risks: [],
+          next_best_actions: [],
+        };
+      }
     }
 
-    // Store recap
-    const { error: insertError } = await supabase
-      .from("relationship_recaps")
-      .upsert({
-        workspace_id: workspace_id || null,
-        funnel_item_id: funnel_item_id || null,
-        language,
-        summary: recap.summary || "",
-        key_points: recap.key_points || [],
-        open_loops: recap.open_loops || [],
-        risks: recap.risks || [],
-        next_best_actions: recap.next_best_actions || [],
-        items_analyzed: activities.length,
-        generated_at: new Date().toISOString(),
-        generated_by: user.id,
-      }, {
-        onConflict: workspace_id ? "workspace_id" : "funnel_item_id",
-      });
-
-    if (insertError) {
-      console.warn("Failed to store recap:", insertError);
+    // Store recap with proper conflict handling
+    // Using separate upserts for workspace vs funnel since constraints are different
+    if (workspace_id) {
+      await supabase
+        .from('relationship_recaps')
+        .upsert({
+          workspace_id,
+          funnel_item_id: null,
+          language,
+          summary: recap.summary || '',
+          key_points: recap.key_points || [],
+          open_loops: recap.open_loops || [],
+          risks: recap.risks || [],
+          next_best_actions: recap.next_best_actions || [],
+          items_analyzed: activities.length,
+          generated_at: new Date().toISOString(),
+          generated_by: user.id,
+        }, {
+          onConflict: 'workspace_id,language',
+        });
+    } else if (funnel_item_id) {
+      await supabase
+        .from('relationship_recaps')
+        .upsert({
+          workspace_id: null,
+          funnel_item_id,
+          language,
+          summary: recap.summary || '',
+          key_points: recap.key_points || [],
+          open_loops: recap.open_loops || [],
+          risks: recap.risks || [],
+          next_best_actions: recap.next_best_actions || [],
+          items_analyzed: activities.length,
+          generated_at: new Date().toISOString(),
+          generated_by: user.id,
+        }, {
+          onConflict: 'funnel_item_id,language',
+        });
     }
 
-    return new Response(JSON.stringify({
+    console.log('[generate-relationship-recap] Complete for:', funnel_item_id || workspace_id);
+
+    return corsJsonResponse({
       ...recap,
       items_analyzed: activities.length,
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    }, req, 200);
   } catch (err) {
-    console.error("generate-relationship-recap error:", err);
+    console.error('[generate-relationship-recap] Error:', err);
     const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return corsJsonResponse({ error: errorMessage }, req, 500);
   }
 });
