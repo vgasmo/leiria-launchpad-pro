@@ -521,10 +521,13 @@ export type Database = {
       communication_log: {
         Row: {
           activity_type: string
+          assigned_to: string | null
           body: string | null
           channel: string | null
+          completed_at: string | null
           created_at: string | null
           direction: string | null
+          due_at: string | null
           external_id: string | null
           external_source: string | null
           from_address: string | null
@@ -533,16 +536,21 @@ export type Database = {
           metadata_json: Json | null
           occurred_at: string
           preview: string | null
+          priority: string | null
+          status: string
           subject: string | null
           visibility: string
           workspace_id: string
         }
         Insert: {
           activity_type?: string
+          assigned_to?: string | null
           body?: string | null
           channel?: string | null
+          completed_at?: string | null
           created_at?: string | null
           direction?: string | null
+          due_at?: string | null
           external_id?: string | null
           external_source?: string | null
           from_address?: string | null
@@ -551,16 +559,21 @@ export type Database = {
           metadata_json?: Json | null
           occurred_at?: string
           preview?: string | null
+          priority?: string | null
+          status?: string
           subject?: string | null
           visibility?: string
           workspace_id: string
         }
         Update: {
           activity_type?: string
+          assigned_to?: string | null
           body?: string | null
           channel?: string | null
+          completed_at?: string | null
           created_at?: string | null
           direction?: string | null
+          due_at?: string | null
           external_id?: string | null
           external_source?: string | null
           from_address?: string | null
@@ -569,11 +582,34 @@ export type Database = {
           metadata_json?: Json | null
           occurred_at?: string
           preview?: string | null
+          priority?: string | null
+          status?: string
           subject?: string | null
           visibility?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "communication_log_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_log_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_log_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "communication_log_funnel_item_id_fkey"
             columns: ["funnel_item_id"]
