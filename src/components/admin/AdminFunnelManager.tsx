@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, User, Building2, Mail, Phone, Tag, ChevronRight, UserPlus, CheckCircle2, XCircle, FileText, Rocket, Settings } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Plus, Mail, Rocket, Settings } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { useFunnelItems, useCreateFunnelItem, useUpdateFunnelItem, useConvertToStartup, FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { IntakeRoutingManager } from './IntakeRoutingManager';
+import { RecordDrawer } from '@/components/crm/RecordDrawer';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
   new: { label: 'New', color: 'bg-slate-500' },
@@ -37,7 +40,8 @@ const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qua
 
 export function AdminFunnelManager() {
   const { t } = useTranslation();
-  const { data: items, isLoading } = useFunnelItems();
+  const { user } = useAuth();
+  const { data: items } = useFunnelItems();
   const { data: consultors } = useConsultors();
   const { data: programs } = usePrograms();
   const createItem = useCreateFunnelItem();
@@ -47,12 +51,24 @@ export function AdminFunnelManager() {
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<FunnelItem | null>(null);
   const [convertDialogItem, setConvertDialogItem] = useState<FunnelItem | null>(null);
+  const [showMineOnly, setShowMineOnly] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Filter items based on showMineOnly toggle
+  const filteredItems = showMineOnly && user 
+    ? items?.filter(i => i.owner_consultant_id === user.id) 
+    : items;
 
   // Group items by stage for kanban view
   const itemsByStage = ACTIVE_STAGES.reduce((acc, stage) => {
-    acc[stage] = items?.filter(i => i.stage === stage) || [];
+    acc[stage] = filteredItems?.filter(i => i.stage === stage) || [];
     return acc;
   }, {} as Record<FunnelStage, FunnelItem[]>);
+
+  const handleCardClick = (item: FunnelItem) => {
+    setSelectedItem(item);
+    setDrawerOpen(true);
+  };
 
   const handleStageChange = (item: FunnelItem, newStage: FunnelStage) => {
     updateItem.mutate({ id: item.id, stage: newStage });
@@ -69,7 +85,15 @@ export function AdminFunnelManager() {
           <h2 className="text-2xl font-bold">Funnel & Intake</h2>
           <p className="text-muted-foreground">Track leads from first contact to conversion</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-mine"
+              checked={showMineOnly}
+              onCheckedChange={setShowMineOnly}
+            />
+            <Label htmlFor="show-mine" className="text-sm cursor-pointer">My deals only</Label>
+          </div>
           <TabsList>
             <TabsTrigger value="funnel">Pipeline</TabsTrigger>
             <TabsTrigger value="routing" className="gap-1">
@@ -102,64 +126,71 @@ export function AdminFunnelManager() {
       </TabsContent>
 
       <TabsContent value="funnel">
-      {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {ACTIVE_STAGES.map(stage => {
-          const config = STAGE_CONFIG[stage];
-          const stageItems = itemsByStage[stage];
-          
-          return (
-            <div key={stage} className="flex-shrink-0 w-72">
-              <div className="flex items-center gap-2 mb-3">
-                <div className={cn('h-3 w-3 rounded-full', config.color)} />
-                <span className="font-medium text-sm">{config.label}</span>
-                <Badge variant="secondary" className="ml-auto text-xs">{stageItems.length}</Badge>
-              </div>
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-2 pr-2">
-                  {stageItems.map(item => (
-                    <FunnelCard
-                      key={item.id}
-                      item={item}
-                      consultors={consultors || []}
-                      onStageChange={handleStageChange}
-                      onAssign={handleAssign}
-                      onConvert={() => setConvertDialogItem(item)}
-                      onClick={() => setSelectedItem(item)}
-                    />
-                  ))}
-                  {stageItems.length === 0 && (
-                    <div className="p-4 text-center text-muted-foreground text-sm border border-dashed rounded-lg">
-                      No items
-                    </div>
-                  )}
+        {/* Kanban Board */}
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {ACTIVE_STAGES.map(stage => {
+            const config = STAGE_CONFIG[stage];
+            const stageItems = itemsByStage[stage];
+            
+            return (
+              <div key={stage} className="flex-shrink-0 w-72">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={cn('h-3 w-3 rounded-full', config.color)} />
+                  <span className="font-medium text-sm">{config.label}</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">{stageItems.length}</Badge>
                 </div>
-              </ScrollArea>
-            </div>
-          );
-        })}
-      </div>
+                <ScrollArea className="h-[600px]">
+                  <div className="space-y-2 pr-2">
+                    {stageItems.map(item => (
+                      <FunnelCard
+                        key={item.id}
+                        item={item}
+                        consultors={consultors || []}
+                        onStageChange={handleStageChange}
+                        onAssign={handleAssign}
+                        onConvert={() => setConvertDialogItem(item)}
+                        onClick={() => handleCardClick(item)}
+                      />
+                    ))}
+                    {stageItems.length === 0 && (
+                      <div className="p-4 text-center text-muted-foreground text-sm border border-dashed rounded-lg">
+                        No items
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Convert Dialog */}
-      {convertDialogItem && (
-        <Dialog open={!!convertDialogItem} onOpenChange={() => setConvertDialogItem(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Convert to Startup</DialogTitle>
-            </DialogHeader>
-            <ConvertForm
-              item={convertDialogItem}
-              programs={programs || []}
-              onSubmit={(programId, stage) => {
-                convertToStartup.mutate(
-                  { funnelItemId: convertDialogItem.id, programId, stage },
-                  { onSuccess: () => setConvertDialogItem(null) }
-                );
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+        {/* Convert Dialog */}
+        {convertDialogItem && (
+          <Dialog open={!!convertDialogItem} onOpenChange={() => setConvertDialogItem(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Convert to Startup</DialogTitle>
+              </DialogHeader>
+              <ConvertForm
+                item={convertDialogItem}
+                programs={programs || []}
+                onSubmit={(programId, stage) => {
+                  convertToStartup.mutate(
+                    { funnelItemId: convertDialogItem.id, programId, stage },
+                    { onSuccess: () => setConvertDialogItem(null) }
+                  );
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* CRM Record Drawer */}
+        <RecordDrawer
+          item={selectedItem}
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+        />
       </TabsContent>
     </Tabs>
   );
