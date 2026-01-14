@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -21,6 +21,8 @@ import {
   ListTodo,
   Search,
   Ghost,
+  Focus,
+  Zap,
 } from 'lucide-react';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
 import { usePrograms } from '@/hooks/useWorkspaces';
@@ -31,6 +33,7 @@ import { RecordDrawer } from '@/components/crm/RecordDrawer';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
@@ -60,6 +63,7 @@ export default function CRM() {
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [myItemsOnly, setMyItemsOnly] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
 
   const { data: programs } = usePrograms();
   const { data: consultors } = useConsultors();
@@ -68,12 +72,12 @@ export default function CRM() {
     stage: stageFilter !== 'all' ? stageFilter as FunnelStage : undefined,
     assigneeId: assigneeFilter !== 'all' ? assigneeFilter : undefined,
     search: searchQuery || undefined,
-    myItemsOnly,
+    myItemsOnly: focusMode ? true : myItemsOnly, // Focus mode implies my items
     currentUserId: user?.id,
   });
   const { data: tasksDue, isLoading: loadingTasks } = useCrmTasksDue({
     assigneeId: assigneeFilter !== 'all' ? assigneeFilter : undefined,
-    myItemsOnly,
+    myItemsOnly: focusMode ? true : myItemsOnly,
     currentUserId: user?.id,
   });
 
@@ -182,6 +186,32 @@ export default function CRM() {
     }
   }, [searchParams, setSearchParams, inbox, loadingInbox, handleOpenDrawer]);
 
+  // Compute Focus Mode items - only urgent items needing attention
+  const focusItems = useMemo(() => {
+    if (!focusMode || !inbox) return [];
+    
+    const allItems = [
+      ...(inbox.overdue || []),
+      ...(inbox.today || []),
+      ...(inbox.upcoming || []),
+      ...(inbox.noNextAction || []),
+      ...(inbox.stale || []),
+    ];
+    
+    // Filter to items that should show in focus mode
+    const filtered = allItems.filter(item => 
+      shouldShowInFocusMode({
+        next_action_at: item.next_action_at,
+        last_activity_at: item.last_activity_at,
+        hasOverdueTasks: false, // We'll enhance this later with actual task data
+        isMyItem: item.owner_consultant_id === user?.id,
+      })
+    );
+    
+    // Sort by urgency
+    return sortByFocusUrgency(filtered);
+  }, [focusMode, inbox, user?.id]);
+
   // Calculate total counts for tabs
   const inboxTotal = (inbox?.overdue.length || 0) + (inbox?.today.length || 0) + 
     (inbox?.upcoming.length || 0) + (inbox?.noNextAction.length || 0) + (inbox?.stale.length || 0);
@@ -246,15 +276,30 @@ export default function CRM() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <Switch
-              id="my-items"
-              checked={myItemsOnly}
-              onCheckedChange={setMyItemsOnly}
-            />
-            <Label htmlFor="my-items" className="text-sm cursor-pointer whitespace-nowrap">
-              {t('crm.myItemsOnly')}
-            </Label>
+          <div className="flex items-center gap-4 ml-auto">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="focus-mode"
+                checked={focusMode}
+                onCheckedChange={setFocusMode}
+              />
+              <Label htmlFor="focus-mode" className="text-sm cursor-pointer whitespace-nowrap flex items-center gap-1">
+                <Zap className={cn('h-3.5 w-3.5', focusMode && 'text-amber-500')} />
+                {t('crm.focusMode')}
+              </Label>
+            </div>
+            {!focusMode && (
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="my-items"
+                  checked={myItemsOnly}
+                  onCheckedChange={setMyItemsOnly}
+                />
+                <Label htmlFor="my-items" className="text-sm cursor-pointer whitespace-nowrap">
+                  {t('crm.myItemsOnly')}
+                </Label>
+              </div>
+            )}
           </div>
         </div>
 
@@ -275,7 +320,81 @@ export default function CRM() {
           <TabsContent value="inbox" className="space-y-4">
             {loadingInbox ? (
               <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
+            ) : focusMode ? (
+              // Focus Mode View - single list of urgent items
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    {t('crm.focusItems')}
+                    <Badge variant="secondary" className="ml-auto">{focusItems.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[500px]">
+                    {focusItems.length === 0 ? (
+                      <div className="p-8 text-center text-muted-foreground">
+                        <Focus className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                        <p className="font-medium">{t('crm.noFocusItems')}</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y">
+                        {focusItems.map(item => {
+                          const status = getRelationshipStatus({
+                            next_action_at: item.next_action_at,
+                            last_activity_at: item.last_activity_at,
+                          });
+                          const statusConfig = getRelationshipStatusConfig(status);
+                          
+                          return (
+                            <div 
+                              key={item.id} 
+                              className="p-3 hover:bg-muted/50 cursor-pointer flex items-center gap-3"
+                              onClick={() => handleOpenDrawer(item)}
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium truncate">
+                                    {item.organization_name || item.contact_name || 'Unnamed'}
+                                  </p>
+                                  <Badge className={cn('h-5 text-[10px]', statusConfig.bgColor, statusConfig.color)}>
+                                    {t(`crm.relationshipStatus.${status}`)}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                  <Badge className={cn('h-5 text-[10px]', STAGE_CONFIG[item.stage].color, 'text-white')}>
+                                    {STAGE_CONFIG[item.stage].label}
+                                  </Badge>
+                                  {item.next_action_at && (
+                                    <span className={cn(
+                                      new Date(item.next_action_at) < new Date() && 'text-destructive font-medium'
+                                    )}>
+                                      {formatRelativeTime(item.next_action_at)}
+                                    </span>
+                                  )}
+                                  {!item.next_action_at && item.last_activity_at && (
+                                    <span className="text-orange-500">
+                                      {t('crm.lastActivity')}: {formatRelativeTime(item.last_activity_at)}
+                                    </span>
+                                  )}
+                                </div>
+                                {item.next_action_description && (
+                                  <p className="text-xs text-muted-foreground truncate mt-1">
+                                    {item.next_action_description}
+                                  </p>
+                                )}
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
             ) : (
+              // Normal View - grouped columns
               <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <InboxGroup 
                   title={t('crm.overdue')} 

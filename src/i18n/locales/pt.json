@@ -3149,7 +3149,16 @@
     "saveChanges": "Guardar Alterações",
     "discardChanges": "Descartar Alterações",
     "clearNextActionAlso": "Também limpar próxima ação",
-    "shared": "Partilhado"
+    "shared": "Partilhado",
+    "focusMode": "Modo Foco",
+    "focusModeDesc": "Mostrar apenas itens urgentes",
+    "focusItems": "Itens Urgentes",
+    "noFocusItems": "Tudo em dia! Sem itens urgentes.",
+    "relationshipStatus": {
+      "healthy": "Saudável",
+      "at_risk": "Em Risco",
+      "stale": "Parado"
+    }
   },
   "notifications": {
     "title": "Notificações",
