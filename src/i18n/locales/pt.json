@@ -3133,6 +3133,26 @@
     "allPrograms": "Todos os Programas",
     "allStages": "Todas as Fases",
     "allAssignees": "Todos os Responsáveis",
-    "assignedTo": "Atribuído a"
+    "assignedTo": "Atribuído a",
+    "dashboardSubtitle": "Gerir leads, seguimentos e tarefas",
+    "searchPlaceholder": "Pesquisar leads...",
+    "myItemsOnly": "Apenas os meus",
+    "stale": "Parados",
+    "lastActivity": "Última atividade",
+    "open": "Abertas",
+    "done": "Concluídas",
+    "canceled": "Canceladas",
+    "cancelTask": "Cancelar Tarefa",
+    "taskCanceled": "Tarefa cancelada",
+    "taskCancelError": "Falha ao cancelar tarefa",
+    "edit": "Editar",
+    "saveChanges": "Guardar Alterações",
+    "discardChanges": "Descartar Alterações",
+    "clearNextActionAlso": "Também limpar próxima ação",
+    "shared": "Partilhado"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar tudo como lido"
   }
 }

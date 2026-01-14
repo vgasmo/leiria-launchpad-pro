@@ -47,6 +47,9 @@ export function TopBar() {
         <GlobalSearchInput />
       </div>
       
+      {/* Notifications Bell */}
+      <NotificationCenter />
+      
       {/* Language Selector - hidden on mobile */}
       <div className="hidden md:block">
         <LanguageSelector />

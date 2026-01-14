@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Mail, Rocket, Settings } from 'lucide-react';
+import { Plus, Mail, Rocket, Settings, Target, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useFunnelItems, useCreateFunnelItem, useUpdateFunnelItem, useConvertToStartup, FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { useUpdateNextAction } from '@/hooks/useNextAction';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
@@ -211,7 +213,32 @@ function FunnelCard({
   onConvert: () => void;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
+  const [nextActionPopover, setNextActionPopover] = useState(false);
+  const [nextActionDate, setNextActionDate] = useState('');
+  const [nextActionDesc, setNextActionDesc] = useState('');
+  const updateNextAction = useUpdateNextAction();
+  
   const canConvert = ['qualified', 'contracted'].includes(item.stage);
+  const nextActionAt = (item as any).next_action_at as string | null;
+  const nextActionDescription = (item as any).next_action_description as string | null;
+  const lastActivityAt = (item as any).last_activity_at as string | null;
+  const isOverdue = nextActionAt && new Date(nextActionAt) < new Date();
+
+  const handleSetNextAction = () => {
+    if (!nextActionDate) return;
+    updateNextAction.mutate({
+      funnelItemId: item.id,
+      next_action_at: new Date(nextActionDate).toISOString(),
+      next_action_description: nextActionDesc,
+    }, {
+      onSuccess: () => {
+        setNextActionPopover(false);
+        setNextActionDate('');
+        setNextActionDesc('');
+      }
+    });
+  };
   
   return (
     <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
@@ -228,8 +255,31 @@ function FunnelCard({
           {item.source && <Badge variant="outline" className="text-xs">{item.source}</Badge>}
         </div>
         
+        {/* Next Action Display */}
+        {nextActionAt && (
+          <div className={cn(
+            'flex items-center gap-1.5 text-xs rounded-md px-2 py-1',
+            isOverdue ? 'bg-destructive/10 text-destructive' : 'bg-muted'
+          )}>
+            <Target className="h-3 w-3 shrink-0" />
+            <span className="truncate flex-1">{nextActionDescription || t('crm.nextAction')}</span>
+            <span className={cn('shrink-0', isOverdue && 'font-medium')}>
+              {formatRelativeTime(nextActionAt)}
+            </span>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{formatRelativeTime(item.created_at)}</span>
+          <div className="flex items-center gap-2">
+            {lastActivityAt ? (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formatRelativeTime(lastActivityAt)}
+              </span>
+            ) : (
+              <span>{formatRelativeTime(item.created_at)}</span>
+            )}
+          </div>
           {item.owner && (
             <div className="flex items-center gap-1">
               <Avatar className="h-5 w-5">
@@ -251,6 +301,45 @@ function FunnelCard({
               <SelectItem value="rejected">Reject</SelectItem>
             </SelectContent>
           </Select>
+          
+          <Popover open={nextActionPopover} onOpenChange={setNextActionPopover}>
+            <PopoverTrigger asChild>
+              <Button size="sm" variant="outline" className="h-7 px-2">
+                <Target className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-3" align="end">
+              <div className="space-y-3">
+                <p className="text-sm font-medium">{t('crm.setNextAction')}</p>
+                <div className="space-y-2">
+                  <Label className="text-xs">{t('crm.nextActionDate')}</Label>
+                  <Input
+                    type="datetime-local"
+                    value={nextActionDate}
+                    onChange={(e) => setNextActionDate(e.target.value)}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">{t('crm.nextActionDescription')}</Label>
+                  <Input
+                    value={nextActionDesc}
+                    onChange={(e) => setNextActionDesc(e.target.value)}
+                    placeholder={t('crm.detailsPlaceholder')}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <Button 
+                  size="sm" 
+                  className="w-full h-7" 
+                  onClick={handleSetNextAction}
+                  disabled={!nextActionDate || updateNextAction.isPending}
+                >
+                  {t('common.save')}
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
           
           {canConvert && (
             <Button size="sm" variant="default" className="h-7 text-xs" onClick={onConvert}>

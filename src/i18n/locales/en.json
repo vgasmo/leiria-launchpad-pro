@@ -3169,6 +3169,26 @@
     "allPrograms": "All Programs",
     "allStages": "All Stages",
     "allAssignees": "All Assignees",
-    "assignedTo": "Assigned to"
+    "assignedTo": "Assigned to",
+    "dashboardSubtitle": "Manage leads, follow-ups, and tasks",
+    "searchPlaceholder": "Search leads...",
+    "myItemsOnly": "My items only",
+    "stale": "Stale",
+    "lastActivity": "Last activity",
+    "open": "Open",
+    "done": "Done",
+    "canceled": "Canceled",
+    "cancelTask": "Cancel Task",
+    "taskCanceled": "Task canceled",
+    "taskCancelError": "Failed to cancel task",
+    "edit": "Edit",
+    "saveChanges": "Save Changes",
+    "discardChanges": "Discard Changes",
+    "clearNextActionAlso": "Also clear next action",
+    "shared": "Shared"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read"
   }
 }

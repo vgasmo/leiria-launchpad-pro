@@ -52,15 +52,21 @@ import {
   Circle,
   Plus,
   X,
+  Ban,
+  Pencil,
+  Save,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
-import { useAddTask, useCompleteTask, useReopenTask, TaskPriority } from '@/hooks/useCrmTasks';
+import { useAddTask, useCompleteTask, useReopenTask, useCancelTask, useUpdateTask, TaskPriority } from '@/hooks/useCrmTasks';
 import { useUpdateNextAction, useClearNextAction } from '@/hooks/useNextAction';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
+
+type TaskStatusFilter = 'open' | 'done' | 'canceled';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
   new: { label: 'New', color: 'bg-slate-500' },
@@ -92,13 +98,14 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const [addActivityDialog, setAddActivityDialog] = useState<ActivityType | null>(null);
   const [addTaskDialog, setAddTaskDialog] = useState(false);
   const [nextActionDialog, setNextActionDialog] = useState(false);
+  const [taskStatusFilter, setTaskStatusFilter] = useState<TaskStatusFilter>('open');
   
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
   
   const { data: activities, isLoading: loadingActivities } = useActivityTimeline({
     funnelItemId: item?.id,
-    limit: 50,
+    limit: 100,
   });
   
   const { data: recap, isLoading: loadingRecap } = useRelationshipRecap({
@@ -106,32 +113,55 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
     language,
   });
   
+  const { data: consultors } = useConsultors();
+  
   const generateRecap = useGenerateRecap();
   const syncEmails = useSyncEmails();
   const addActivity = useAddActivity();
   const addTask = useAddTask();
   const completeTask = useCompleteTask();
   const reopenTask = useReopenTask();
+  const cancelTask = useCancelTask();
+  const updateTask = useUpdateTask();
   const updateNextAction = useUpdateNextAction();
   const clearNextAction = useClearNextAction();
 
-  // Separate tasks from other activities
-  const { tasks, otherActivities } = useMemo(() => {
-    if (!activities?.length) return { tasks: [], otherActivities: [] };
+  // Separate tasks from other activities and group by status
+  const { openTasks, doneTasks, canceledTasks, otherActivities } = useMemo(() => {
+    if (!activities?.length) return { openTasks: [], doneTasks: [], canceledTasks: [], otherActivities: [] };
     
-    const taskList = activities.filter(a => a.activity_type === 'task' && a.status !== 'done');
-    const others = activities.filter(a => a.activity_type !== 'task' || a.status === 'done');
+    const open = activities.filter(a => a.activity_type === 'task' && a.status === 'open');
+    const done = activities.filter(a => a.activity_type === 'task' && a.status === 'done');
+    const canceled = activities.filter(a => a.activity_type === 'task' && a.status === 'canceled');
+    const others = activities.filter(a => a.activity_type !== 'task');
     
     // Sort tasks by due_at (nulls last), then by created_at
-    taskList.sort((a, b) => {
-      if (!a.due_at && !b.due_at) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      if (!a.due_at) return 1;
-      if (!b.due_at) return -1;
-      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
-    });
+    const sortTasks = (tasks: ActivityEntry[]) => {
+      return [...tasks].sort((a, b) => {
+        if (!a.due_at && !b.due_at) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        if (!a.due_at) return 1;
+        if (!b.due_at) return -1;
+        return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+      });
+    };
     
-    return { tasks: taskList, otherActivities: others };
+    return { 
+      openTasks: sortTasks(open), 
+      doneTasks: sortTasks(done), 
+      canceledTasks: sortTasks(canceled), 
+      otherActivities: others 
+    };
   }, [activities]);
+  
+  // Get current filtered tasks
+  const filteredTasks = useMemo(() => {
+    switch (taskStatusFilter) {
+      case 'open': return openTasks;
+      case 'done': return doneTasks;
+      case 'canceled': return canceledTasks;
+      default: return openTasks;
+    }
+  }, [taskStatusFilter, openTasks, doneTasks, canceledTasks]);
 
   // Group other activities by time period
   const groupedActivities = useMemo(() => {
@@ -354,29 +384,71 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
             )}
 
             {/* Tasks Section */}
-            {tasks.length > 0 && (
-              <Card>
-                <CardHeader className="py-2 px-3">
+            <Card>
+              <CardHeader className="py-2 px-3">
+                <div className="flex items-center gap-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <CheckSquare className="h-4 w-4" />
-                    {t('crm.openTasks')}
-                    <Badge variant="secondary" className="ml-auto">{tasks.length}</Badge>
+                    {t('crm.tasks')}
                   </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
+                  <div className="flex gap-1 ml-auto">
+                    <Button
+                      variant={taskStatusFilter === 'open' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setTaskStatusFilter('open')}
+                    >
+                      {t('crm.open')} ({openTasks.length})
+                    </Button>
+                    <Button
+                      variant={taskStatusFilter === 'done' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setTaskStatusFilter('done')}
+                    >
+                      {t('crm.done')} ({doneTasks.length})
+                    </Button>
+                    <Button
+                      variant={taskStatusFilter === 'canceled' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setTaskStatusFilter('canceled')}
+                    >
+                      {t('crm.canceled')} ({canceledTasks.length})
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {filteredTasks.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    {t('crm.noTasksYet')}
+                  </div>
+                ) : (
                   <div className="divide-y">
-                    {tasks.slice(0, 5).map(task => (
+                    {filteredTasks.map(task => (
                       <TaskRow
                         key={task.id}
                         task={task}
-                        onComplete={() => completeTask.mutate({ taskId: task.id })}
+                        funnelItemId={item.id}
+                        consultors={consultors || []}
+                        onComplete={(clearNextAction) => completeTask.mutate({ 
+                          taskId: task.id, 
+                          clearNextAction, 
+                          funnelItemId: item.id 
+                        })}
                         onReopen={() => reopenTask.mutate(task.id)}
+                        onCancel={() => cancelTask.mutate(task.id)}
+                        onUpdate={(updates) => updateTask.mutate({ id: task.id, ...updates })}
+                        hasWorkspace={!!item.linked_workspace_id}
+                        nextActionAt={(item as any).next_action_at}
+                        nextActionDescription={(item as any).next_action_description}
                       />
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
+              </CardContent>
+            </Card>
 
             {/* Quick Actions */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -418,7 +490,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                   <Skeleton className="h-16 w-full" />
                   <Skeleton className="h-16 w-full" />
                 </div>
-              ) : Object.keys(groupedActivities).length === 0 && tasks.length === 0 ? (
+              ) : Object.keys(groupedActivities).length === 0 && openTasks.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">{t('crm.noActivityYet')}</p>
@@ -572,27 +644,181 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
 function TaskRow({ 
   task, 
+  funnelItemId,
+  consultors,
   onComplete, 
-  onReopen 
+  onReopen,
+  onCancel,
+  onUpdate,
+  hasWorkspace,
+  nextActionAt,
+  nextActionDescription,
 }: { 
   task: ActivityEntry; 
-  onComplete: () => void;
+  funnelItemId: string;
+  consultors: { id: string; full_name: string | null }[];
+  onComplete: (clearNextAction: boolean) => void;
   onReopen: () => void;
+  onCancel: () => void;
+  onUpdate: (updates: { subject?: string; due_at?: string | null; priority?: TaskPriority | null; assigned_to?: string | null }) => void;
+  hasWorkspace: boolean;
+  nextActionAt?: string | null;
+  nextActionDescription?: string | null;
 }) {
   const { t } = useTranslation();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editSubject, setEditSubject] = useState(task.subject || '');
+  const [editDueAt, setEditDueAt] = useState('');
+  const [editPriority, setEditPriority] = useState<TaskPriority | ''>(task.priority || '');
+  const [editAssignedTo, setEditAssignedTo] = useState(task.assigned_to || '');
+  const [showClearNextAction, setShowClearNextAction] = useState(false);
+  const [clearNextActionChecked, setClearNextActionChecked] = useState(true);
+  
+  const isOpen = task.status === 'open';
   const isCompleted = task.status === 'done';
-  const isOverdue = task.due_at && new Date(task.due_at) < new Date() && !isCompleted;
+  const isCanceled = task.status === 'canceled';
+  const isOverdue = task.due_at && new Date(task.due_at) < new Date() && isOpen;
+  
+  // Check if this task matches the next action
+  const matchesNextAction = nextActionAt && task.due_at && 
+    Math.abs(new Date(nextActionAt).getTime() - new Date(task.due_at).getTime()) < 60000;
+
+  useEffect(() => {
+    if (isEditing && task.due_at) {
+      const d = new Date(task.due_at);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      setEditDueAt(`${year}-${month}-${day}T${hours}:${minutes}`);
+    }
+  }, [isEditing, task.due_at]);
+
+  const handleSave = () => {
+    onUpdate({
+      subject: editSubject,
+      due_at: editDueAt ? new Date(editDueAt).toISOString() : null,
+      priority: editPriority || null,
+      assigned_to: editAssignedTo || null,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCompleteClick = () => {
+    if (matchesNextAction) {
+      setShowClearNextAction(true);
+    } else {
+      onComplete(false);
+    }
+  };
+
+  const handleConfirmComplete = () => {
+    onComplete(clearNextActionChecked);
+    setShowClearNextAction(false);
+  };
+  
+  if (isEditing) {
+    return (
+      <div className="p-3 space-y-3 bg-muted/30">
+        <div className="space-y-2">
+          <Label className="text-xs">{t('crm.title')}</Label>
+          <Input
+            value={editSubject}
+            onChange={(e) => setEditSubject(e.target.value)}
+            className="h-8 text-sm"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Label className="text-xs">{t('crm.dueDate')}</Label>
+            <Input
+              type="datetime-local"
+              value={editDueAt}
+              onChange={(e) => setEditDueAt(e.target.value)}
+              className="h-8 text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">{t('crm.priority')}</Label>
+            <Select value={editPriority} onValueChange={(v) => setEditPriority(v as TaskPriority | '')}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="-" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">{t('crm.low')}</SelectItem>
+                <SelectItem value="medium">{t('crm.medium')}</SelectItem>
+                <SelectItem value="high">{t('crm.high')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {consultors.length > 0 && (
+          <div className="space-y-1">
+            <Label className="text-xs">{t('crm.assignedTo')}</Label>
+            <Select value={editAssignedTo} onValueChange={setEditAssignedTo}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="-" />
+              </SelectTrigger>
+              <SelectContent>
+                {consultors.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.full_name || 'Unnamed'}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Button size="sm" className="h-7 text-xs" onClick={handleSave}>
+            <Save className="h-3 w-3 mr-1" />
+            {t('common.save')}
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setIsEditing(false)}>
+            {t('common.cancel')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (showClearNextAction) {
+    return (
+      <div className="p-3 space-y-3 bg-muted/30">
+        <p className="text-sm">{t('crm.taskCompleted')}</p>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id={`clear-next-${task.id}`}
+            checked={clearNextActionChecked}
+            onCheckedChange={(checked) => setClearNextActionChecked(!!checked)}
+          />
+          <Label htmlFor={`clear-next-${task.id}`} className="text-sm font-normal cursor-pointer">
+            {t('crm.clearNextActionAlso')}
+          </Label>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" className="h-7 text-xs" onClick={handleConfirmComplete}>
+            {t('common.confirm')}
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowClearNextAction(false)}>
+            {t('common.cancel')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   return (
-    <div className="flex items-center gap-3 p-3 hover:bg-muted/50">
+    <div className="flex items-center gap-3 p-3 hover:bg-muted/50 group">
       <Button
         variant="ghost"
         size="sm"
         className="h-6 w-6 p-0 shrink-0"
-        onClick={isCompleted ? onReopen : onComplete}
+        onClick={isCompleted ? onReopen : isCanceled ? onReopen : handleCompleteClick}
       >
         {isCompleted ? (
           <CircleCheck className="h-4 w-4 text-green-500" />
+        ) : isCanceled ? (
+          <Ban className="h-4 w-4 text-muted-foreground" />
         ) : (
           <Circle className="h-4 w-4 text-muted-foreground" />
         )}
@@ -600,7 +826,7 @@ function TaskRow({
       <div className="min-w-0 flex-1">
         <p className={cn(
           'text-sm font-medium truncate',
-          isCompleted && 'line-through text-muted-foreground'
+          (isCompleted || isCanceled) && 'line-through text-muted-foreground'
         )}>
           {task.subject}
         </p>
@@ -627,8 +853,30 @@ function TaskRow({
       )}
       {task.visibility === 'shared' && (
         <Badge variant="secondary" className="text-[10px] shrink-0">
-          {t('crm.shareWithFounder').split(' ').slice(-1)[0]}
+          {t('crm.shared')}
         </Badge>
+      )}
+      {isOpen && (
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => setIsEditing(true)}
+            title={t('common.edit')}
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+            onClick={onCancel}
+            title={t('crm.cancelTask')}
+          >
+            <Ban className="h-3 w-3" />
+          </Button>
+        </div>
       )}
     </div>
   );
