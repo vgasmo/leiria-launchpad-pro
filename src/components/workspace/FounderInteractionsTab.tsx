@@ -4,7 +4,6 @@ import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -17,11 +16,8 @@ import {
   Calendar,
   CheckSquare,
   Sparkles,
-  RefreshCw,
   MessageCircle,
   Target,
-  Clock,
-  AlertTriangle,
   Lightbulb,
   ArrowDownRight,
   ArrowUpRight,
@@ -29,7 +25,6 @@ import {
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, ActivityEntry, ActivityType } from '@/hooks/useActivityTimeline';
 import { useSessions } from '@/hooks/useSessions';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 
 interface FounderInteractionsTabProps {

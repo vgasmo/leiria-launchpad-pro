@@ -49,6 +49,7 @@ import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadi
 import { OwnershipCard } from '@/components/workspace/OwnershipCard';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
+import { InteractionsCard } from '@/components/workspace/InteractionsCard';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
@@ -421,6 +422,14 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
+        
+        {/* Interactions Card for Founders */}
+        {isFounder && (
+          <InteractionsCard 
+            workspaceId={workspace.id} 
+            onViewAll={() => setSearchParams({ tab: 'communications' })}
+          />
+        )}
         
         {/* Playbook Progress Widget for Founders */}
         {isFounder && (
