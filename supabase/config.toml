@@ -193,3 +193,6 @@ verify_jwt = false
 
 [functions.generate-relationship-recap]
 verify_jwt = false
+
+[functions.generate-crm-notifications]
+verify_jwt = false
