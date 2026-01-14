@@ -3072,6 +3072,22 @@
       "meeting": "Reunião",
       "task": "Tarefa",
       "system": "Sistema"
-    }
+    },
+    "founder": {
+      "email": "Troca de emails",
+      "note": "Nota da equipa",
+      "call": "Chamada telefónica",
+      "meeting": "Reunião",
+      "task": "Ação pendente",
+      "update": "Atualização"
+    },
+    "sinceLast": "Desde a última vez",
+    "suggestedNextSteps": "Próximos Passos Sugeridos",
+    "noRecapYet": "Ainda sem resumo disponível",
+    "upcomingSession": "Próxima Sessão",
+    "viewSession": "Ver Sessão",
+    "noInteractionsYet": "Ainda sem interações",
+    "noInteractionsHint": "Comunicações e notas de reunião aparecerão aqui.",
+    "interactions": "Interações"
   }
 }

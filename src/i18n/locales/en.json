@@ -3108,6 +3108,22 @@
       "meeting": "Meeting",
       "task": "Task",
       "system": "System"
-    }
+    },
+    "founder": {
+      "email": "Email exchange",
+      "note": "Team note",
+      "call": "Phone call",
+      "meeting": "Meeting",
+      "task": "Action item",
+      "update": "Update"
+    },
+    "sinceLast": "Since last time",
+    "suggestedNextSteps": "Suggested Next Steps",
+    "noRecapYet": "No summary available yet",
+    "upcomingSession": "Upcoming Session",
+    "viewSession": "View Session",
+    "noInteractionsYet": "No interactions yet",
+    "noInteractionsHint": "Communications and meeting notes will appear here.",
+    "interactions": "Interactions"
   }
 }
