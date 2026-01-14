@@ -26,10 +26,10 @@ export interface ActivityEntry {
   external_id: string | null;
   metadata_json: Json;
   created_at: string;
-  // Task-specific fields
+  // Task-specific fields (status defaults to 'open' in DB, but may be null for non-tasks)
   due_at: string | null;
   completed_at: string | null;
-  status: TaskStatus | null;
+  status: TaskStatus;
   assigned_to: string | null;
   priority: TaskPriority | null;
 }
@@ -87,7 +87,11 @@ export function useActivityTimeline(filters: TimelineFilters) {
       const { data, error } = await query;
       if (error) throw error;
       
-      return (data || []) as ActivityEntry[];
+      // Ensure status has a default for tasks (DB default is 'open')
+      return (data || []).map(row => ({
+        ...row,
+        status: row.status || 'open',
+      })) as ActivityEntry[];
     },
     enabled: !!(workspaceId || funnelItemId),
   });
