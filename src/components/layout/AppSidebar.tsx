@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Lightbulb,
   HelpCircle,
+  Contact,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +52,10 @@ export function AppSidebar() {
 
   const navigation = [
     { name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 },
+  ];
+
+  const staffNavigation = [
+    { name: t('nav.crm'), href: '/crm', icon: Contact },
   ];
 
   const adminNavigation = [
@@ -182,10 +187,45 @@ export function AppSidebar() {
             </>
           )}
 
-          {/* Consultor Tools */}
+          {/* CRM & Consultor Tools - visible to staff */}
           {showConsultorTools && (
             <>
               <div className="my-4 h-px bg-sidebar-border" />
+              {staffNavigation.map((item) => {
+                const isActive = location.pathname === item.href || 
+                  (item.href !== '/' && location.pathname.startsWith(item.href));
+                
+                const NavItem = (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                      collapsed && "justify-center px-2"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {!collapsed && (
+                      <span className="animate-fade-in">{item.name}</span>
+                    )}
+                  </Link>
+                );
+
+                if (collapsed) {
+                  return (
+                    <Tooltip key={item.name} delayDuration={0}>
+                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
+                      <TooltipContent side="right" className="font-medium">
+                        {item.name}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+                return NavItem;
+              })}
               {(() => {
                 const isActive = location.pathname === '/consultor-tools';
                 const NavItem = (
