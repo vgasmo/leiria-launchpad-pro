@@ -27,6 +27,16 @@ Deno.serve(async (req) => {
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    // Parse request body for optional dry_run parameter
+    let dry_run = false;
+    try {
+      const body = await req.json();
+      dry_run = body?.dry_run === true;
+    } catch {
+      // No body or invalid JSON, default to normal mode
+    }
+
     const now = new Date();
     const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const cutoff24hAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -43,7 +53,7 @@ Deno.serve(async (req) => {
 
     if (staffUserIds.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, created: 0, message: 'No staff users found' }),
+        JSON.stringify({ success: true, created: 0, dry_run, message: 'No staff users found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -172,9 +182,15 @@ Deno.serve(async (req) => {
       existingKeys.add(key);
     }
 
-    // Insert notifications
+    // Count would-be escalations for reporting
+    const escalationCount = notificationsToCreate.filter(n => n.type === 'overdue_escalated').length;
+
+    // Insert notifications (skip in dry_run mode)
     let createdCount = 0;
-    if (notificationsToCreate.length > 0) {
+    if (dry_run) {
+      // Dry run - just count what would be created
+      createdCount = 0;
+    } else if (notificationsToCreate.length > 0) {
       const { data: inserted, error } = await supabase
         .from('notifications')
         .insert(notificationsToCreate.map(n => ({ ...n, read: false })))
@@ -190,7 +206,10 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
+        dry_run,
         created: createdCount,
+        would_create: notificationsToCreate.length,
+        would_escalate: escalationCount,
         checked: {
           tasks: tasks?.length || 0,
           funnelItems: funnelItems?.length || 0,
