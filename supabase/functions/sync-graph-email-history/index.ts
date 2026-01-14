@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -20,8 +20,10 @@ interface SyncResult {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -306,7 +308,8 @@ Deno.serve(async (req) => {
           }
         }
       } catch (err) {
-        result.errors.push(`${folder} error: ${err.message}`);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        result.errors.push(`${folder} error: ${errorMessage}`);
       }
     }
 
@@ -318,7 +321,8 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("sync-graph-email-history error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
