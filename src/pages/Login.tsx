@@ -229,7 +229,7 @@ export default function Login() {
       </div>
 
       {/* Right side - auth forms */}
-      <div className="flex flex-1 items-center justify-center p-8 bg-background">
+      <div className="flex flex-1 items-start lg:items-center justify-center p-8 pt-16 lg:pt-8 bg-background overflow-y-auto">
         <div className={`w-full max-w-md transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
