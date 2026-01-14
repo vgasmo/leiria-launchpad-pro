@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
@@ -891,16 +891,24 @@ function NextActionDialog({
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
 
-  // Initialize with current values when dialog opens
-  useState(() => {
-    if (currentDate) {
-      const d = new Date(currentDate);
-      setDate(d.toISOString().slice(0, 16));
+  // Prefill fields when dialog opens with current values
+  useEffect(() => {
+    if (open) {
+      if (currentDate) {
+        // Convert ISO to local datetime-local format: YYYY-MM-DDTHH:mm
+        const d = new Date(currentDate);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        setDate(`${year}-${month}-${day}T${hours}:${minutes}`);
+      } else {
+        setDate('');
+      }
+      setDescription(currentDescription || '');
     }
-    if (currentDescription) {
-      setDescription(currentDescription);
-    }
-  });
+  }, [open, currentDate, currentDescription]);
 
   const handleSubmit = () => {
     if (!date) return;
@@ -908,8 +916,6 @@ function NextActionDialog({
       date: new Date(date).toISOString(),
       description,
     });
-    setDate('');
-    setDescription('');
   };
 
   return (

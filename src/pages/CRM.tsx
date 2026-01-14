@@ -20,7 +20,7 @@ import {
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
-import { useCompleteTask, useReopenTask } from '@/hooks/useCrmTasks';
+import { useCompleteTask } from '@/hooks/useCrmTasks';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';

@@ -85,13 +85,13 @@ export function useAddTask() {
 
       return data;
     },
-    onSuccess: (_, params) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-timeline'] });
       queryClient.invalidateQueries({ queryKey: ['crm-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
       toast.success(t('crm.taskAdded'));
     },
-    onError: (e: Error) => toast.error(t('crm.taskError')),
+    onError: () => toast.error(t('crm.taskError')),
   });
 }
 
@@ -119,7 +119,7 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: ['crm-tasks'] });
       toast.success(t('crm.taskCompleted'));
     },
-    onError: (e: Error) => toast.error(t('crm.taskCompleteError')),
+    onError: () => toast.error(t('crm.taskCompleteError')),
   });
 }
 
@@ -147,7 +147,7 @@ export function useReopenTask() {
       queryClient.invalidateQueries({ queryKey: ['crm-tasks'] });
       toast.success(t('crm.taskReopened'));
     },
-    onError: (e: Error) => toast.error(t('crm.taskReopenError')),
+    onError: () => toast.error(t('crm.taskReopenError')),
   });
 }
 
@@ -181,6 +181,6 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ['crm-tasks'] });
       toast.success(t('crm.taskUpdated'));
     },
-    onError: (e: Error) => toast.error(t('crm.taskUpdateError')),
+    onError: () => toast.error(t('crm.taskUpdateError')),
   });
 }
