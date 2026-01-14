@@ -369,7 +369,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                       <TaskRow
                         key={task.id}
                         task={task}
-                        onComplete={() => completeTask.mutate(task.id)}
+                        onComplete={() => completeTask.mutate({ taskId: task.id })}
                         onReopen={() => reopenTask.mutate(task.id)}
                       />
                     ))}

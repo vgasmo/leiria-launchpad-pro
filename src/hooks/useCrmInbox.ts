@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfDay, endOfDay, addDays } from 'date-fns';
+import { startOfDay, endOfDay, addDays, subDays } from 'date-fns';
 import type { FunnelStage } from './useFunnel';
 
 export interface CrmInboxItem {
@@ -25,12 +25,16 @@ export interface CrmInboxGroups {
   today: CrmInboxItem[];
   upcoming: CrmInboxItem[];
   noNextAction: CrmInboxItem[];
+  stale: CrmInboxItem[];
 }
 
 interface UseCrmInboxFilters {
   programId?: string;
   stage?: FunnelStage;
   assigneeId?: string;
+  search?: string;
+  myItemsOnly?: boolean;
+  currentUserId?: string;
 }
 
 export function useCrmInbox(filters?: UseCrmInboxFilters) {
@@ -51,6 +55,13 @@ export function useCrmInbox(filters?: UseCrmInboxFilters) {
       }
       if (filters?.assigneeId) {
         query = query.eq('owner_consultant_id', filters.assigneeId);
+      }
+      if (filters?.myItemsOnly && filters?.currentUserId) {
+        query = query.eq('owner_consultant_id', filters.currentUserId);
+      }
+      if (filters?.search) {
+        const searchTerm = `%${filters.search}%`;
+        query = query.or(`organization_name.ilike.${searchTerm},contact_name.ilike.${searchTerm},contact_email.ilike.${searchTerm}`);
       }
 
       const { data: items, error } = await query;
@@ -82,6 +93,7 @@ export function useCrmInbox(filters?: UseCrmInboxFilters) {
       const todayStart = startOfDay(now);
       const todayEnd = endOfDay(now);
       const weekEnd = endOfDay(addDays(now, 7));
+      const staleThreshold = subDays(now, 14);
 
       const enrichedItems: CrmInboxItem[] = (items || []).map(item => ({
         ...item,
@@ -95,11 +107,21 @@ export function useCrmInbox(filters?: UseCrmInboxFilters) {
         today: [],
         upcoming: [],
         noNextAction: [],
+        stale: [],
       };
 
       enrichedItems.forEach(item => {
+        // Check for stale items (no activity in 14 days)
+        const lastActivity = item.last_activity_at ? new Date(item.last_activity_at) : null;
+        const isStale = !lastActivity || lastActivity < staleThreshold;
+
         if (!item.next_action_at) {
-          groups.noNextAction.push(item);
+          // Put stale items in stale group, others in noNextAction
+          if (isStale && !item.next_action_at) {
+            groups.stale.push(item);
+          } else {
+            groups.noNextAction.push(item);
+          }
         } else {
           const actionDate = new Date(item.next_action_at);
           if (actionDate < todayStart) {
@@ -109,10 +131,16 @@ export function useCrmInbox(filters?: UseCrmInboxFilters) {
           } else if (actionDate <= weekEnd) {
             groups.upcoming.push(item);
           } else {
-            // Future beyond 7 days - still show in upcoming for now
             groups.upcoming.push(item);
           }
         }
+      });
+
+      // Sort stale by last_activity_at ascending (oldest first)
+      groups.stale.sort((a, b) => {
+        const aDate = a.last_activity_at ? new Date(a.last_activity_at).getTime() : 0;
+        const bDate = b.last_activity_at ? new Date(b.last_activity_at).getTime() : 0;
+        return aDate - bDate;
       });
 
       return groups;
@@ -134,6 +162,9 @@ export function useCrmTasksDue(filters?: UseCrmInboxFilters) {
 
       if (filters?.assigneeId) {
         query = query.eq('assigned_to', filters.assigneeId);
+      }
+      if (filters?.myItemsOnly && filters?.currentUserId) {
+        query = query.eq('assigned_to', filters.currentUserId);
       }
 
       const { data, error } = await query;

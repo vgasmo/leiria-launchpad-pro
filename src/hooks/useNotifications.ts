@@ -3,16 +3,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 import { Json } from '@/integrations/supabase/types';
 
+export type NotificationType = 
+  | 'task_due' 
+  | 'task_overdue' 
+  | 'next_action_due' 
+  | 'next_action_overdue' 
+  | 'recap_ready' 
+  | 'email_sync_done'
+  | 'system';
+
 export interface Notification {
   id: string;
   user_id: string;
-  type: string;
+  type: NotificationType | string;
   title: string;
   message: string | null;
   link: string | null;
   read: boolean;
   created_at: string;
   metadata: Json | null;
+  entity_type: string | null;
+  entity_id: string | null;
 }
 
 export function useNotifications() {
@@ -29,7 +40,7 @@ export function useNotifications() {
           schema: 'public',
           table: 'notifications',
         },
-        (payload) => {
+        () => {
           queryClient.invalidateQueries({ queryKey: ['notifications'] });
         }
       )
@@ -54,9 +65,14 @@ export function useNotifications() {
         .limit(50);
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Notification[];
     },
   });
+}
+
+export function useUnreadNotificationCount() {
+  const { data: notifications } = useNotifications();
+  return notifications?.filter(n => !n.read).length ?? 0;
 }
 
 export function useMarkNotificationRead() {
