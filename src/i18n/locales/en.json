@@ -174,7 +174,8 @@
     "settings": "Settings",
     "admin": "Admin",
     "adminPanel": "Admin Panel",
-    "helpGlossary": "Help & Glossary"
+    "helpGlossary": "Help & Glossary",
+    "crm": "CRM"
   },
   "dashboard": {
     "portfolio": "Portfolio Overview",
