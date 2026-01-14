@@ -520,36 +520,67 @@ export type Database = {
       }
       communication_log: {
         Row: {
+          activity_type: string
           body: string | null
           channel: string | null
           created_at: string | null
+          direction: string | null
+          external_id: string | null
+          external_source: string | null
           from_address: string | null
+          funnel_item_id: string | null
           id: string
           metadata_json: Json | null
+          occurred_at: string
+          preview: string | null
           subject: string | null
+          visibility: string
           workspace_id: string
         }
         Insert: {
+          activity_type?: string
           body?: string | null
           channel?: string | null
           created_at?: string | null
+          direction?: string | null
+          external_id?: string | null
+          external_source?: string | null
           from_address?: string | null
+          funnel_item_id?: string | null
           id?: string
           metadata_json?: Json | null
+          occurred_at?: string
+          preview?: string | null
           subject?: string | null
+          visibility?: string
           workspace_id: string
         }
         Update: {
+          activity_type?: string
           body?: string | null
           channel?: string | null
           created_at?: string | null
+          direction?: string | null
+          external_id?: string | null
+          external_source?: string | null
           from_address?: string | null
+          funnel_item_id?: string | null
           id?: string
           metadata_json?: Json | null
+          occurred_at?: string
+          preview?: string | null
           subject?: string | null
+          visibility?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "communication_log_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "communication_log_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1378,9 +1409,12 @@ export type Database = {
           created_at: string
           first_contact_at: string | null
           id: string
+          last_activity_at: string | null
           linked_contract_id: string | null
           linked_startup_id: string | null
           linked_workspace_id: string | null
+          next_action_at: string | null
+          next_action_description: string | null
           notes: string | null
           organization_name: string | null
           owner_consultant_id: string | null
@@ -1400,9 +1434,12 @@ export type Database = {
           created_at?: string
           first_contact_at?: string | null
           id?: string
+          last_activity_at?: string | null
           linked_contract_id?: string | null
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
+          next_action_at?: string | null
+          next_action_description?: string | null
           notes?: string | null
           organization_name?: string | null
           owner_consultant_id?: string | null
@@ -1422,9 +1459,12 @@ export type Database = {
           created_at?: string
           first_contact_at?: string | null
           id?: string
+          last_activity_at?: string | null
           linked_contract_id?: string | null
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
+          next_action_at?: string | null
+          next_action_description?: string | null
           notes?: string | null
           organization_name?: string | null
           owner_consultant_id?: string | null
@@ -2901,6 +2941,72 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      relationship_recaps: {
+        Row: {
+          created_at: string
+          funnel_item_id: string | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          items_analyzed: number
+          key_points: Json
+          language: string
+          next_best_actions: Json
+          open_loops: Json
+          risks: Json
+          summary: string
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          funnel_item_id?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          items_analyzed?: number
+          key_points?: Json
+          language?: string
+          next_best_actions?: Json
+          open_loops?: Json
+          risks?: Json
+          summary: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          funnel_item_id?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          items_analyzed?: number
+          key_points?: Json
+          language?: string
+          next_best_actions?: Json
+          open_loops?: Json
+          risks?: Json
+          summary?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationship_recaps_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relationship_recaps_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
