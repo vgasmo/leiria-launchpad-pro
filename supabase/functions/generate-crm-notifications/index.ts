@@ -101,12 +101,26 @@ Deno.serve(async (req) => {
       existingKeys.add(key);
     }
 
-    // 2. Next action notifications
+    // 2. Next action notifications with escalation
     const { data: funnelItems } = await supabase
       .from('funnel_items')
       .select('id, organization_name, contact_name, next_action_at, next_action_description, owner_consultant_id')
       .not('next_action_at', 'is', null)
       .not('stage', 'in', '("rejected","archived")');
+
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weekCutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Get escalation notifications from last 7 days to avoid weekly spam
+    const { data: recentEscalations } = await supabase
+      .from('notifications')
+      .select('user_id, entity_id')
+      .eq('type', 'overdue_escalated')
+      .gte('created_at', weekCutoff.toISOString());
+
+    const escalationKeys = new Set(
+      recentEscalations?.map(n => `${n.user_id}:${n.entity_id}`) || []
+    );
 
     for (const item of funnelItems || []) {
       if (!item.next_action_at) continue;
@@ -119,7 +133,16 @@ Deno.serve(async (req) => {
 
       let type: string | null = null;
       if (dueDate < now) {
-        type = 'next_action_overdue';
+        // Check if severely overdue (7+ days) for escalation
+        if (dueDate < sevenDaysAgo) {
+          const escalationKey = `${userId}:${item.id}`;
+          if (!escalationKeys.has(escalationKey)) {
+            type = 'overdue_escalated';
+            escalationKeys.add(escalationKey);
+          }
+        } else {
+          type = 'next_action_overdue';
+        }
       } else if (dueDate <= in24h) {
         type = 'next_action_due';
       }
@@ -130,11 +153,16 @@ Deno.serve(async (req) => {
       if (existingKeys.has(key)) continue;
 
       const name = item.organization_name || item.contact_name || 'Lead';
+      const title = type === 'overdue_escalated' 
+        ? '⚠️ Severely Overdue Follow-up'
+        : type === 'next_action_overdue' 
+          ? 'Follow-up Overdue' 
+          : 'Follow-up Due Soon';
 
       notificationsToCreate.push({
         user_id: userId,
         type,
-        title: type === 'next_action_overdue' ? 'Follow-up Overdue' : 'Follow-up Due Soon',
+        title,
         message: `${name}: ${item.next_action_description || 'Next action required'}`,
         link: `/crm?open=${item.id}`,
         entity_type: 'funnel_item',

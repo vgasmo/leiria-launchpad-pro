@@ -55,6 +55,7 @@ import {
   Ban,
   Pencil,
   Save,
+  Activity,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
@@ -65,6 +66,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
+import { getRelationshipStatus, getRelationshipStatusConfig } from '@/lib/crmUtils';
 
 type TaskStatusFilter = 'open' | 'done' | 'canceled';
 
@@ -247,6 +249,14 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   // Get next action from the item (need to cast as the type might not have these fields yet)
   const nextActionAt = (item as any).next_action_at as string | null;
   const nextActionDescription = (item as any).next_action_description as string | null;
+  const lastActivityAt = (item as any).last_activity_at as string | null;
+  
+  // Compute relationship status
+  const relationshipStatus = getRelationshipStatus({
+    next_action_at: nextActionAt,
+    last_activity_at: lastActivityAt,
+  });
+  const statusConfig = getRelationshipStatusConfig(relationshipStatus);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -254,9 +264,15 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
         <SheetHeader className="p-4 pb-2 border-b">
           <div className="flex items-start justify-between">
             <div className="min-w-0">
-              <SheetTitle className="text-lg truncate">
-                {item.organization_name || item.contact_name || t('crm.unnamedLead')}
-              </SheetTitle>
+              <div className="flex items-center gap-2">
+                <SheetTitle className="text-lg truncate">
+                  {item.organization_name || item.contact_name || t('crm.unnamedLead')}
+                </SheetTitle>
+                <Badge className={cn('h-5 text-[10px] shrink-0', statusConfig.bgColor, statusConfig.color)}>
+                  <Activity className="h-3 w-3 mr-1" />
+                  {t(`crm.relationshipStatus.${relationshipStatus}`)}
+                </Badge>
+              </div>
               {item.contact_email && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                   <Mail className="h-3 w-3" />

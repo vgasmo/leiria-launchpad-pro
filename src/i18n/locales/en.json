@@ -3185,7 +3185,16 @@
     "saveChanges": "Save Changes",
     "discardChanges": "Discard Changes",
     "clearNextActionAlso": "Also clear next action",
-    "shared": "Shared"
+    "shared": "Shared",
+    "focusMode": "Focus Mode",
+    "focusModeDesc": "Show only urgent items needing attention",
+    "focusItems": "Focus Items",
+    "noFocusItems": "All caught up! No urgent items.",
+    "relationshipStatus": {
+      "healthy": "Healthy",
+      "at_risk": "At Risk",
+      "stale": "Stale"
+    }
   },
   "notifications": {
     "title": "Notifications",
