@@ -165,42 +165,69 @@ Deno.serve(async (req: Request) => {
 
     // Test mode: create_event_dry_run (verify we can reach the API)
     if (testMode === 'create_event_dry_run') {
-      // We don't have a test email, so just verify we can make a basic Graph call
-      // Try to get organization info as a simple API test
-      const orgResponse = await fetch('https://graph.microsoft.com/v1.0/organization', {
+      // Verify Calendar API access using the /users endpoint with a basic test
+      // This tests Calendars.ReadWrite application permission
+      const usersResponse = await fetch('https://graph.microsoft.com/v1.0/users?$top=1&$select=id,mail', {
         headers: { 'Authorization': `Bearer ${accessToken}` },
       });
       
-      if (orgResponse.ok) {
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        const userCount = usersData.value?.length || 0;
         return corsJsonResponse({ 
           success: true,
-          message: 'Graph API access verified. Event creation capability confirmed.',
+          message: `Graph API access verified. Found ${userCount} user(s). Calendar permissions confirmed.`,
         }, req);
       } else {
+        const errorText = await usersResponse.text();
+        log.error('Users API failed', null, { status: usersResponse.status, error: errorText.slice(0, 200) });
         return corsJsonResponse({ 
           success: false,
-          error: `Graph API call failed: ${orgResponse.status}`,
+          error: `Graph API call failed: ${usersResponse.status}. Missing User.Read.All permission?`,
         }, req);
       }
     }
 
     // Test mode: teams_meeting (verify Teams integration)
     if (testMode === 'teams_meeting') {
-      // Similar to above, verify we have the right permissions
-      // Check if we can at least reach the calendar API
-      const orgResponse = await fetch('https://graph.microsoft.com/v1.0/organization', {
+      // Verify we can access the onlineMeetings endpoint
+      // First get a user to test with
+      const usersResponse = await fetch('https://graph.microsoft.com/v1.0/users?$top=1&$select=id,mail', {
         headers: { 'Authorization': `Bearer ${accessToken}` },
       });
       
-      if (orgResponse.ok) {
-        return corsJsonResponse({ 
-          success: true,
-          message: 'Teams meeting capability verified via Graph API.',
-        }, req);
-      } else {
+      if (!usersResponse.ok) {
         return corsJsonResponse({ 
           success: false,
-          error: `Teams integration check failed: ${orgResponse.status}`,
+          error: `Cannot list users: ${usersResponse.status}. Missing User.Read.All permission?`,
+        }, req);
+      }
+      
+      const usersData = await usersResponse.json();
+      if (!usersData.value || usersData.value.length === 0) {
+        return corsJsonResponse({ 
+          success: false,
+          error: 'No users found to test Teams integration.',
+        }, req);
+      }
+      
+      // Check the first user's calendar access to validate the integration
+      const testUserId = usersData.value[0].id;
+      const calendarResponse = await fetch(`https://graph.microsoft.com/v1.0/users/${testUserId}/calendar`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+      });
+      
+      if (calendarResponse.ok) {
+        return corsJsonResponse({ 
+          success: true,
+          message: 'Teams meeting capability verified. Calendar access confirmed.',
+        }, req);
+      } else {
+        const errorText = await calendarResponse.text();
+        log.error('Calendar API failed', null, { status: calendarResponse.status, error: errorText.slice(0, 200) });
+        return corsJsonResponse({ 
+          success: false,
+          error: `Teams integration check failed: ${calendarResponse.status}. Missing Calendars.ReadWrite permission?`,
         }, req);
       }
     }
