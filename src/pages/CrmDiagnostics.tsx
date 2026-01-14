@@ -34,7 +34,8 @@ interface TestResult {
 
 export default function CrmDiagnostics() {
   const { t } = useTranslation();
-  const { isStaff } = useAuth();
+  const { isAdmin, isConsultor } = useAuth();
+  const isStaff = isAdmin || isConsultor;
   const [funnelItemId, setFunnelItemId] = useState('');
   const [logsExpanded, setLogsExpanded] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
