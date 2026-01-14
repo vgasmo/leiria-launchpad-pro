@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
 import { usePrograms } from '@/hooks/useWorkspaces';
+import { toast } from 'sonner';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { useCompleteTask } from '@/hooks/useCrmTasks';
 import { useAuth } from '@/contexts/AuthContext';
@@ -146,6 +147,7 @@ export default function CRM() {
           
           if (error || !data) {
             console.error('Failed to load funnel item:', error);
+            toast.error(t('crm.itemNotFound'));
             searchParams.delete('open');
             setSearchParams(searchParams, { replace: true });
             return;
@@ -178,6 +180,7 @@ export default function CRM() {
           setSearchParams(searchParams, { replace: true });
         } catch (err) {
           console.error('Error fetching funnel item:', err);
+          toast.error(t('crm.itemNotFound'));
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
         }

@@ -3195,7 +3195,8 @@
       "healthy": "Healthy",
       "at_risk": "At Risk",
       "stale": "Stale"
-    }
+    },
+    "itemNotFound": "Lead not found or you don't have access"
   },
   "notifications": {
     "title": "Notifications",

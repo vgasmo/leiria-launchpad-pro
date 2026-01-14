@@ -7,6 +7,7 @@ interface SyncRequest {
   consultant_user_id?: string; // Optional - will resolve via intake routing if not provided
   lookback_days?: number;
   max_messages?: number;
+  dry_run?: boolean; // If true, only count potential emails, don't insert
 }
 
 interface SyncResult {
@@ -14,6 +15,8 @@ interface SyncResult {
   skipped: number;
   errors: string[];
   mailbox: string;
+  dry_run?: boolean;
+  would_insert?: number;
 }
 
 Deno.serve(async (req) => {
@@ -70,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     const body: SyncRequest = await req.json();
-    const { funnel_item_id, workspace_id, lookback_days = 90, max_messages = 200 } = body;
+    const { funnel_item_id, workspace_id, lookback_days = 90, max_messages = 200, dry_run = false } = body;
     let { consultant_user_id } = body;
 
     if (!funnel_item_id && !workspace_id) {
@@ -305,6 +308,12 @@ Deno.serve(async (req) => {
           // Sanitize preview (max 500 chars)
           const preview = (msg.bodyPreview || '').trim().substring(0, 500);
 
+          // Dry run mode: count but don't insert
+          if (dry_run) {
+            result.inserted++;
+            continue;
+          }
+
           // Upsert into communication_log
           const { error } = await supabase
             .from('communication_log')
@@ -346,13 +355,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update last_activity_at on funnel_items if applicable
-    if (funnel_item_id && maxOccurredAt) {
+    // Update last_activity_at on funnel_items if applicable (skip in dry_run)
+    if (!dry_run && funnel_item_id && maxOccurredAt) {
       await supabase
         .from('funnel_items')
         .update({ last_activity_at: maxOccurredAt })
         .eq('id', funnel_item_id)
         .lt('last_activity_at', maxOccurredAt);
+    }
+
+    // Add dry_run info to result
+    if (dry_run) {
+      result.dry_run = true;
+      result.would_insert = result.inserted;
+      result.inserted = 0;
     }
 
     console.log(`[sync-graph-email-history] Completed: ${JSON.stringify(result)}`);
