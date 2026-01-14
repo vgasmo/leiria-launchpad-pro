@@ -223,11 +223,11 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
         )}
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pt-0">
         {displayItems.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>{t('workQueue.noItems')}</p>
+          <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
+            <CheckCircle2 className="h-5 w-5 opacity-50" />
+            <p className="text-sm">{t('workQueue.noItems')}</p>
           </div>
         ) : (
           <div className="space-y-2">

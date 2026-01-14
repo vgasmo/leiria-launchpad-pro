@@ -145,15 +145,31 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
 
   if (compact) {
     return (
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => setShowQuickSession(true)}>
-          <Calendar className="h-4 w-4 mr-1" />
-          Session
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => setShowQuickAction(true)}>
-          <ClipboardList className="h-4 w-4 mr-1" />
-          Action
-        </Button>
+      <Card className="p-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+            <Zap className="h-3.5 w-3.5 text-primary" />
+            {t('quickActions.title')}:
+          </span>
+          <div className="flex gap-1.5 flex-wrap">
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setShowQuickSession(true)}>
+              <Calendar className="h-3.5 w-3.5 mr-1" />
+              {t('quickActions.scheduleSession')}
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setShowQuickAction(true)}>
+              <ClipboardList className="h-3.5 w-3.5 mr-1" />
+              {t('quickActions.addAction')}
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => navigate('/my-workspaces?filter=attention')}>
+              <Bell className="h-3.5 w-3.5 mr-1 text-amber-500" />
+              {t('quickActions.viewAlerts')}
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => navigate('/consultor-tools')}>
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-green-500" />
+              {t('consultorTools.title')}
+            </Button>
+          </div>
+        </div>
         <QuickSessionDialog
           open={showQuickSession}
           onOpenChange={setShowQuickSession}
@@ -180,7 +196,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
           isLoading={isLoading}
           onSubmit={handleCreateQuickAction}
         />
-      </div>
+      </Card>
     );
   }
 
