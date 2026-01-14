@@ -27,6 +27,7 @@ import ValuePropWizardPage from "./pages/ValuePropWizardPage";
 import IntegrationsSetup from "./pages/IntegrationsSetup";
 import HelpGlossary from "./pages/HelpGlossary";
 import PendingApproval from "./pages/PendingApproval";
+import CRM from "./pages/CRM";
 import PublicBooking from "./pages/PublicBooking";
 
 const queryClient = new QueryClient({
@@ -94,6 +95,7 @@ function AppRoutes() {
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/integrations-setup" element={<ProtectedRoute><IntegrationsSetup /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
+      <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />
       <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
