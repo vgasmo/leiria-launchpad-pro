@@ -3189,6 +3189,8 @@
   },
   "notifications": {
     "title": "Notifications",
-    "markAllRead": "Mark all read"
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "settings": "Notification Settings"
   }
 }

@@ -3153,6 +3153,8 @@
   },
   "notifications": {
     "title": "Notificações",
-    "markAllRead": "Marcar tudo como lido"
+    "markAllRead": "Marcar tudo como lido",
+    "noNotifications": "Sem notificações",
+    "settings": "Definições de Notificações"
   }
 }

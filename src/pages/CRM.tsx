@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -30,6 +30,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
@@ -78,7 +79,7 @@ export default function CRM() {
 
   const completeTask = useCompleteTask();
 
-  const handleOpenDrawer = (item: CrmInboxItem) => {
+  const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
     const funnelItem: FunnelItem = {
       id: item.id,
       stage: item.stage,
@@ -105,7 +106,81 @@ export default function CRM() {
     };
     setSelectedItem(funnelItem);
     setDrawerOpen(true);
-  };
+  }, []);
+
+  // Deep-link support: ?open=<funnel_item_id>
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (!openId) return;
+    if (loadingInbox) return; // Wait for data to load
+
+    // Try to find item in loaded inbox groups
+    const allItems = [
+      ...(inbox?.overdue || []),
+      ...(inbox?.today || []),
+      ...(inbox?.upcoming || []),
+      ...(inbox?.noNextAction || []),
+      ...(inbox?.stale || []),
+    ];
+    
+    const foundItem = allItems.find(item => item.id === openId);
+    
+    if (foundItem) {
+      handleOpenDrawer(foundItem);
+      // Clear the param to prevent re-open
+      searchParams.delete('open');
+      setSearchParams(searchParams, { replace: true });
+    } else {
+      // Item not in loaded data - fetch directly
+      const fetchAndOpen = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('funnel_items')
+            .select('*, owner:profiles!funnel_items_owner_consultant_id_fkey(id, full_name), program:programs(id, name)')
+            .eq('id', openId)
+            .single();
+          
+          if (error || !data) {
+            console.error('Failed to load funnel item:', error);
+            searchParams.delete('open');
+            setSearchParams(searchParams, { replace: true });
+            return;
+          }
+          
+          // Handle owner which might be returned as array from FK join
+          const ownerData = Array.isArray(data.owner) ? data.owner[0] : data.owner;
+          const programData = Array.isArray(data.program) ? data.program[0] : data.program;
+          
+          // Create minimal CrmInboxItem
+          const crmItem: CrmInboxItem = {
+            id: data.id,
+            stage: data.stage as FunnelStage,
+            contact_name: data.contact_name,
+            contact_email: data.contact_email,
+            organization_name: data.organization_name,
+            owner_consultant_id: data.owner_consultant_id,
+            linked_workspace_id: data.linked_workspace_id,
+            program_id: data.program_id,
+            next_action_at: data.next_action_at,
+            next_action_description: data.next_action_description,
+            last_activity_at: data.last_activity_at,
+            created_at: data.created_at,
+            owner: ownerData || null,
+            program: programData || null,
+          };
+          
+          handleOpenDrawer(crmItem);
+          searchParams.delete('open');
+          setSearchParams(searchParams, { replace: true });
+        } catch (err) {
+          console.error('Error fetching funnel item:', err);
+          searchParams.delete('open');
+          setSearchParams(searchParams, { replace: true });
+        }
+      };
+      fetchAndOpen();
+    }
+  }, [searchParams, setSearchParams, inbox, loadingInbox, handleOpenDrawer]);
 
   // Calculate total counts for tabs
   const inboxTotal = (inbox?.overdue.length || 0) + (inbox?.today.length || 0) + 
