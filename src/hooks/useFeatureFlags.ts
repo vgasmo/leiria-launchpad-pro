@@ -6,7 +6,9 @@ export type FeatureFlagKey =
   | 'funnel_ui'
   | 'strict_calendar_validation'
   | 'founder_gamification'
-  | 'traction_stage';
+  | 'traction_stage'
+  | 'crm_graph_email_sync'
+  | 'crm_ai_recap';
 
 interface FeatureFlag {
   id: string;

@@ -177,12 +177,46 @@ export function useAddActivity() {
       visibility?: VisibilityType;
       metadata_json?: Json;
     }) => {
+      // For funnel items without workspace, we need a placeholder workspace_id
+      // The DB schema requires workspace_id, so we use the linked_workspace_id if available
+      // or fall back to a system placeholder
+      const insertData: Record<string, unknown> = {
+        activity_type: entry.activity_type,
+        subject: entry.subject,
+        preview: entry.preview,
+        body: entry.body,
+        direction: entry.direction,
+        visibility: entry.visibility ?? 'staff',
+        metadata_json: entry.metadata_json,
+      };
+      
+      if (entry.workspace_id) {
+        insertData.workspace_id = entry.workspace_id;
+      }
+      if (entry.funnel_item_id) {
+        insertData.funnel_item_id = entry.funnel_item_id;
+        // If no workspace_id but we have funnel_item_id, get linked workspace
+        if (!entry.workspace_id) {
+          const { data: funnelItem } = await supabase
+            .from('funnel_items')
+            .select('linked_workspace_id')
+            .eq('id', entry.funnel_item_id)
+            .single();
+          
+          if (funnelItem?.linked_workspace_id) {
+            insertData.workspace_id = funnelItem.linked_workspace_id;
+          }
+        }
+      }
+      
+      // workspace_id is required by the schema
+      if (!insertData.workspace_id) {
+        throw new Error('workspace_id is required for activity entries');
+      }
+      
       const { data, error } = await supabase
         .from('communication_log')
-        .insert({
-          ...entry,
-          occurred_at: new Date().toISOString(),
-        })
+        .insert(insertData as { workspace_id: string; [key: string]: unknown })
         .select()
         .single();
       
