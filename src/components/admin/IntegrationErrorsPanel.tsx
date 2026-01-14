@@ -68,23 +68,23 @@ export function IntegrationErrorsPanel({ compact = false, maxHeight = '300px' }:
 
   return (
     <Card className={errorCount > 0 ? 'border-destructive/30' : ''}>
-      <CardHeader className="pb-3">
+      <CardHeader className="py-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
             <AlertCircle className={`h-4 w-4 ${errorCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
             {t('integrationErrors.title')}
             {errorCount > 0 && (
-              <Badge variant="destructive" className="ml-2">{errorCount}</Badge>
+              <Badge variant="destructive" className="ml-2 text-xs">{errorCount}</Badge>
             )}
           </CardTitle>
-          <Button variant="ghost" size="icon" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => refetch()}>
+            <RefreshCw className="h-3.5 w-3.5" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 pb-3">
         {errorCount === 0 ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
             {t('integrationErrors.allSmooth')}
           </div>

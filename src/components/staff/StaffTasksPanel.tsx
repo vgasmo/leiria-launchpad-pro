@@ -68,23 +68,25 @@ export function StaffTasksPanel({ compact = false }: StaffTasksPanelProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="py-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-primary" />
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-primary" />
             {t('staffTasks.title')}
           </CardTitle>
           {pendingTasks.length > 0 && (
-            <Badge variant="secondary">{pendingTasks.length} {t('staffTasks.pending')}</Badge>
+            <Badge variant="secondary" className="text-xs">{pendingTasks.length}</Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {pendingTasks.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>{t('staffTasks.noPendingTasks')}</p>
-            <p className="text-xs mt-1">{t('staffTasks.tasksInWorkspaces')}</p>
+          <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground">
+            <CheckCircle2 className="h-5 w-5 opacity-50" />
+            <div>
+              <p className="text-sm">{t('staffTasks.noPendingTasks')}</p>
+              <p className="text-xs">{t('staffTasks.tasksInWorkspaces')}</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">

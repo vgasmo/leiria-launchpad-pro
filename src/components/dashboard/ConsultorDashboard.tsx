@@ -238,38 +238,39 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* Primary Action Area: Work Queue + Urgent Items */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      {/* Quick Actions Bar - Inline */}
+      <CockpitQuickActions workspaces={workspaces} compact />
+
+      {/* Primary Action Area: Work Queue + Side Panels */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4">
           <WorkQueuePanel compact />
           
           {/* Today's Meetings - Only show if there are any */}
           {todaysMeetings.length > 0 && (
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="py-3">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-primary" />
-                  <CardTitle className="text-base">{t('dashboard.todaysMeetings')}</CardTitle>
-                  <Badge variant="secondary" className="ml-auto">{todaysMeetings.length}</Badge>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.todaysMeetings')}</CardTitle>
+                  <Badge variant="secondary" className="ml-auto text-xs">{todaysMeetings.length}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {todaysMeetings.slice(0, 4).map(workspace => (
+              <CardContent className="pt-0 pb-3">
+                <div className="space-y-1">
+                  {todaysMeetings.slice(0, 3).map(workspace => (
                     <div
                       key={workspace.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => navigate(`/workspace/${workspace.id}`)}
                     >
-                      <Avatar className="h-8 w-8 rounded-md">
+                      <Avatar className="h-6 w-6 rounded">
                         <AvatarImage src={workspace.startup?.logo_url || undefined} />
-                        <AvatarFallback className="rounded-md bg-primary/10 text-primary text-xs font-semibold">
+                        <AvatarFallback className="rounded bg-primary/10 text-primary text-[10px] font-semibold">
                           {workspace.startup?.name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{workspace.startup?.name}</p>
-                      </div>
+                      <span className="font-medium text-sm truncate flex-1">{workspace.startup?.name}</span>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(workspace.nextMeetingDate!), 'h:mm a')}
                       </span>
@@ -281,9 +282,8 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           )}
         </div>
 
-        {/* Right Sidebar: Quick Actions + Quick Glance */}
-        <div className="space-y-4">
-          <CockpitQuickActions workspaces={workspaces} />
+        {/* Right Sidebar: Compact Panels */}
+        <div className="space-y-3">
           <StaffTasksPanel compact />
           <IntegrationErrorsPanel compact />
         </div>
