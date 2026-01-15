@@ -157,10 +157,10 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.building')}</Label>
+                  <Label>{t('backoffice.building')}</Label>
                   <Select name="building_id" defaultValue={selectedContract?.building_id || undefined}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
+                      <SelectValue placeholder={t('backoffice.selectBuilding')} />
                     </SelectTrigger>
                     <SelectContent>
                       {buildings?.filter(b => b.is_active).map(b => (

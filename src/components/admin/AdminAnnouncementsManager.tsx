@@ -14,36 +14,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle, Users, Send } from 'lucide-react';
+import { Plus, Mail, Package, AlertTriangle, Bell, Trash2, CheckCircle, Users, Send, MapPin, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { useBuildings } from '@/hooks/useBackoffice';
 
 type AnnouncementCategory = 'mail' | 'package' | 'general' | 'urgent';
 
 interface FormState {
   workspace_ids: string[];
+  building_id: string | null;
   category: AnnouncementCategory;
   title: string;
   message: string;
   sendToAll: boolean;
   sendEmail: boolean;
+  sendTeams: boolean;
 }
 
 const EMPTY_FORM: FormState = {
   workspace_ids: [],
+  building_id: null,
   category: 'general',
   title: '',
   message: '',
   sendToAll: false,
-  sendEmail: true, // Default to sending emails
+  sendEmail: true,
+  sendTeams: false,
 };
 
-const CATEGORY_CONFIG: Record<AnnouncementCategory, { icon: typeof Mail; label: string; color: string }> = {
-  mail: { icon: Mail, label: 'Correio', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  package: { icon: Package, label: 'Encomenda', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
-  general: { icon: Bell, label: 'Geral', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200' },
-  urgent: { icon: AlertTriangle, label: 'Urgente', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+const CATEGORY_CONFIG: Record<AnnouncementCategory, { icon: typeof Mail; labelKey: string; color: string }> = {
+  mail: { icon: Mail, labelKey: 'admin.announcements.categoryMail', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+  package: { icon: Package, labelKey: 'admin.announcements.categoryPackage', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
+  general: { icon: Bell, labelKey: 'admin.announcements.categoryGeneral', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200' },
+  urgent: { icon: AlertTriangle, labelKey: 'admin.announcements.categoryUrgent', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
 };
 
 export function AdminAnnouncementsManager() {
@@ -52,6 +57,9 @@ export function AdminAnnouncementsManager() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<FormState>(EMPTY_FORM);
+  const [buildingFilter, setBuildingFilter] = useState<string>('all');
+
+  const { data: buildings } = useBuildings();
 
   const { data: workspaces } = useQuery({
     queryKey: ['admin-workspaces-list'],
@@ -66,16 +74,23 @@ export function AdminAnnouncementsManager() {
   });
 
   const { data: announcements, isLoading } = useQuery({
-    queryKey: ['admin-announcements'],
+    queryKey: ['admin-announcements', buildingFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('admin_announcements')
         .select(`
           *,
-          workspace:workspaces(id, startup:startups(name))
+          workspace:workspaces(id, startup:startups(name)),
+          building:buildings(id, name, code)
         `)
         .order('created_at', { ascending: false })
         .limit(50);
+      
+      if (buildingFilter !== 'all') {
+        query = query.eq('building_id', buildingFilter);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -91,10 +106,13 @@ export function AdminAnnouncementsManager() {
       
       const inserts = targetIds.map(workspace_id => ({
         workspace_id,
+        building_id: data.building_id || null,
         category: data.category,
         title: data.title,
         message: data.message || null,
         created_by: user?.id,
+        send_email: data.sendEmail,
+        send_teams: data.sendTeams,
       }));
       
       // Insert announcements
@@ -235,6 +253,26 @@ export function AdminAnnouncementsManager() {
               </div>
 
               <div>
+                <Label>{t('admin.announcements.building')}</Label>
+                <Select value={formData.building_id || ''} onValueChange={(v) => setFormData({ ...formData, building_id: v || null })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('admin.announcements.allBuildings')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('admin.announcements.allBuildings')}</SelectItem>
+                    {buildings?.filter(b => b.is_active).map(b => (
+                      <SelectItem key={b.id} value={b.id}>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3" />
+                          {b.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label>{t('admin.announcements.category')} *</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v as AnnouncementCategory })}>
                   <SelectTrigger>
@@ -247,7 +285,7 @@ export function AdminAnnouncementsManager() {
                         <SelectItem key={key} value={key}>
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4" />
-                            {config.label}
+                            {t(config.labelKey)}
                           </div>
                         </SelectItem>
                       );
@@ -276,16 +314,29 @@ export function AdminAnnouncementsManager() {
                 />
               </div>
 
-              <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
-                <Checkbox
-                  id="sendEmail"
-                  checked={formData.sendEmail}
-                  onCheckedChange={(checked) => setFormData({ ...formData, sendEmail: !!checked })}
-                />
-                <Label htmlFor="sendEmail" className="flex items-center gap-2 cursor-pointer text-sm">
-                  <Send className="h-4 w-4" />
-                  {t('admin.announcements.sendEmailNotification')}
-                </Label>
+              <div className="space-y-2 p-3 bg-muted/50 rounded-md">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="sendEmail"
+                    checked={formData.sendEmail}
+                    onCheckedChange={(checked) => setFormData({ ...formData, sendEmail: !!checked })}
+                  />
+                  <Label htmlFor="sendEmail" className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Send className="h-4 w-4" />
+                    {t('admin.announcements.sendEmailNotification')}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="sendTeams"
+                    checked={formData.sendTeams}
+                    onCheckedChange={(checked) => setFormData({ ...formData, sendTeams: !!checked })}
+                  />
+                  <Label htmlFor="sendTeams" className="flex items-center gap-2 cursor-pointer text-sm">
+                    <MessageSquare className="h-4 w-4" />
+                    {t('admin.announcements.sendTeamsNotification')}
+                  </Label>
+                </div>
               </div>
 
               <Button type="submit" className="w-full" disabled={createMutation.isPending}>
@@ -296,6 +347,26 @@ export function AdminAnnouncementsManager() {
         </Dialog>
       </CardHeader>
       <CardContent>
+        {/* Building filter */}
+        <div className="mb-4">
+          <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder={t('admin.announcements.allBuildings')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('admin.announcements.allBuildings')}</SelectItem>
+              {buildings?.filter(b => b.is_active).map(b => (
+                <SelectItem key={b.id} value={b.id}>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-3 w-3" />
+                    {b.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {isLoading ? (
           <p className="text-muted-foreground">{t('common.loading')}</p>
         ) : announcements?.length === 0 ? (
@@ -321,7 +392,7 @@ export function AdminAnnouncementsManager() {
                     <TableCell>
                       <Badge className={config?.color || ''}>
                         <Icon className="h-3 w-3 mr-1" />
-                        {config?.label || ann.category}
+                        {config ? t(config.labelKey) : ann.category}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">
