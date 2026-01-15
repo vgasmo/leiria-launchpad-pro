@@ -343,31 +343,31 @@ export function AdminBackoffice() {
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="overview" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('backoffice.overview')}
+            {t('admin.backoffice.overview')}
           </TabsTrigger>
           <TabsTrigger value="contracts" className="gap-1.5">
             <FileText className="h-4 w-4" />
-            {t('backoffice.contracts')}
+            {t('admin.backoffice.contracts')}
           </TabsTrigger>
           <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
-            {t('backoffice.spaces')}
+            {t('admin.backoffice.spaces')}
           </TabsTrigger>
           <TabsTrigger value="rooms" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('backoffice.roomMapping')}
+            {t('admin.backoffice.roomMapping')}
           </TabsTrigger>
           <TabsTrigger value="waiting-list" className="gap-1.5">
             <Clock className="h-4 w-4" />
-            {t('backoffice.waitingList')}
+            {t('admin.backoffice.waitingList')}
           </TabsTrigger>
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
-            {t('backoffice.incubationTypes')}
+            {t('admin.backoffice.incubationTypes')}
           </TabsTrigger>
           <TabsTrigger value="buildings" className="gap-1.5">
             <MapPin className="h-4 w-4" />
-            {t('backoffice.buildings')}
+            {t('admin.backoffice.buildings')}
           </TabsTrigger>
         </TabsList>
 
@@ -378,7 +378,7 @@ export function AdminBackoffice() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            {t('backoffice.ecosystemOverview')}
+            {t('admin.backoffice.ecosystemOverview')}
           </CardTitle>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />

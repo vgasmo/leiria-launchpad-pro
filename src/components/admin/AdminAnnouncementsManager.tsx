@@ -254,12 +254,12 @@ export function AdminAnnouncementsManager() {
 
               <div>
                 <Label>{t('admin.announcements.building')}</Label>
-                <Select value={formData.building_id || ''} onValueChange={(v) => setFormData({ ...formData, building_id: v || null })}>
+                <Select value={formData.building_id || 'all'} onValueChange={(v) => setFormData({ ...formData, building_id: v === 'all' ? null : v })}>
                   <SelectTrigger>
                     <SelectValue placeholder={t('admin.announcements.allBuildings')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('admin.announcements.allBuildings')}</SelectItem>
+                    <SelectItem value="all">{t('admin.announcements.allBuildings')}</SelectItem>
                     {buildings?.filter(b => b.is_active).map(b => (
                       <SelectItem key={b.id} value={b.id}>
                         <div className="flex items-center gap-2">
