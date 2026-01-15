@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,73 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   maintenance: { label: 'Maintenance', color: 'bg-yellow-500' },
   reserved: { label: 'Reserved', color: 'bg-purple-500' },
 };
+
+// FloorMapCard component to handle async URL loading
+function FloorMapCard({ map, onDelete }: { map: FloorMap & { space?: { name: string } }; onDelete: () => void }) {
+  const [signedUrl, setSignedUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUrl = async () => {
+      const { data, error } = await supabase.storage.from('floor-maps').createSignedUrl(map.file_path, 3600);
+      if (!error && data?.signedUrl) {
+        setSignedUrl(data.signedUrl);
+      }
+      setLoading(false);
+    };
+    loadUrl();
+  }, [map.file_path]);
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-base">{map.name}</CardTitle>
+            <CardDescription>
+              {map.space?.name} {map.floor && `• Floor ${map.floor}`}
+            </CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
+            onClick={onDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+            <span className="text-muted-foreground text-sm">Loading...</span>
+          </div>
+        ) : signedUrl ? (
+          <a
+            href={signedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block aspect-video bg-muted rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+          >
+            <img
+              src={signedUrl}
+              alt={map.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          </a>
+        ) : (
+          <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+            <span className="text-muted-foreground text-sm">Unable to load</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export function RoomMappingTab() {
   const { t } = useTranslation();
@@ -155,11 +222,6 @@ export function RoomMappingTab() {
     } finally {
       setUploading(false);
     }
-  };
-
-  const getFloorMapUrl = (filePath: string) => {
-    const { data } = supabase.storage.from('floor-maps').getPublicUrl(filePath);
-    return data.publicUrl;
   };
 
   // Group rooms by floor
@@ -522,43 +584,11 @@ export function RoomMappingTab() {
         <TabsContent value="maps">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {floorMaps?.map(map => (
-              <Card key={map.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-base">{map.name}</CardTitle>
-                      <CardDescription>
-                        {map.space?.name} {map.floor && `• Floor ${map.floor}`}
-                      </CardDescription>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive"
-                      onClick={() => deleteFloorMap.mutate({ id: map.id, filePath: map.file_path })}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <a
-                    href={getFloorMapUrl(map.file_path)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block aspect-video bg-muted rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                  >
-                    <img
-                      src={getFloorMapUrl(map.file_path)}
-                      alt={map.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                      }}
-                    />
-                  </a>
-                </CardContent>
-              </Card>
+              <FloorMapCard 
+                key={map.id} 
+                map={map} 
+                onDelete={() => deleteFloorMap.mutate({ id: map.id, filePath: map.file_path })}
+              />
             ))}
 
             {(!floorMaps || floorMaps.length === 0) && (

@@ -13,15 +13,25 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, Download, Building2, Calendar, User, X, Plus, 
-  ChevronDown, Ban, CheckCircle, ExternalLink, Trash2, AlertTriangle, Star
+  ChevronDown, Ban, CheckCircle, ExternalLink, Trash2, AlertTriangle, Star,
+  FileText, Receipt, MapPin, Package, Clock
 } from 'lucide-react';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import type { StartupStage, WorkspacePriority } from '@/types/database';
+
+// Backoffice sub-tab components
+import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
+import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
+import { BackofficeSpacesTab } from '@/components/backoffice/BackofficeSpacesTab';
+import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
+import { RoomMappingTab } from '@/components/backoffice/RoomMappingTab';
+import { SpaceWaitingListTab } from '@/components/backoffice/SpaceWaitingListTab';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
@@ -49,6 +59,7 @@ export function AdminBackoffice() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [activeSubTab, setActiveSubTab] = useState('overview');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -326,12 +337,48 @@ export function AdminBackoffice() {
   };
 
   return (
+    <div className="space-y-6">
+      {/* Sub-tabs for different backoffice sections */}
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+          <TabsTrigger value="overview" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {t('admin.backoffice.overview', 'Overview')}
+          </TabsTrigger>
+          <TabsTrigger value="contracts" className="gap-1.5">
+            <FileText className="h-4 w-4" />
+            {t('admin.backoffice.contracts', 'Contracts')}
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1.5">
+            <Receipt className="h-4 w-4" />
+            {t('admin.backoffice.invoices', 'Invoices')}
+          </TabsTrigger>
+          <TabsTrigger value="spaces" className="gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {t('admin.backoffice.spaces', 'Spaces')}
+          </TabsTrigger>
+          <TabsTrigger value="rooms" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {t('admin.backoffice.roomMapping', 'Room Mapping')}
+          </TabsTrigger>
+          <TabsTrigger value="waiting-list" className="gap-1.5">
+            <Clock className="h-4 w-4" />
+            {t('admin.backoffice.waitingList', 'Waiting List')}
+          </TabsTrigger>
+          <TabsTrigger value="incubation" className="gap-1.5">
+            <Package className="h-4 w-4" />
+            {t('admin.backoffice.incubationTypes', 'Incubation Types')}
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab - Original Backoffice Content */}
+        <TabsContent value="overview">
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            {t('admin.backoffice.title', 'Backoffice')}
+            {t('admin.backoffice.ecosystemOverview', 'Ecosystem Overview')}
           </CardTitle>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
@@ -702,5 +749,38 @@ export function AdminBackoffice() {
         </Dialog>
       </CardContent>
     </Card>
+        </TabsContent>
+
+        {/* Contracts Tab */}
+        <TabsContent value="contracts">
+          <BackofficeContractsTab />
+        </TabsContent>
+
+        {/* Invoices Tab */}
+        <TabsContent value="invoices">
+          <BackofficeInvoicesTab />
+        </TabsContent>
+
+        {/* Spaces Tab */}
+        <TabsContent value="spaces">
+          <BackofficeSpacesTab />
+        </TabsContent>
+
+        {/* Room Mapping Tab */}
+        <TabsContent value="rooms">
+          <RoomMappingTab />
+        </TabsContent>
+
+        {/* Waiting List Tab */}
+        <TabsContent value="waiting-list">
+          <SpaceWaitingListTab />
+        </TabsContent>
+
+        {/* Incubation Types Tab */}
+        <TabsContent value="incubation">
+          <BackofficeIncubationTypesTab />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
