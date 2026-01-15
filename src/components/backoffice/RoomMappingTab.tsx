@@ -191,15 +191,23 @@ export function RoomMappingTab() {
   };
 
   const handleUploadFloorMap = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const inputEl = e.currentTarget;
+    const file = inputEl.files?.[0];
     if (!file || !user) return;
 
     if (!mapBuildingId) {
       toast.error(t('backoffice.selectBuildingFirst', 'Please select a building first'));
-      // reset file input so user can re-select after choosing a building
-      e.currentTarget.value = '';
+      inputEl.value = '';
       return;
     }
+
+    const getErrorMessage = (err: unknown) => {
+      if (!err) return '';
+      if (typeof err === 'string') return err;
+      if (typeof err === 'object' && 'message' in err && typeof (err as any).message === 'string') return (err as any).message;
+      if (typeof err === 'object' && 'error_description' in err && typeof (err as any).error_description === 'string') return (err as any).error_description;
+      return '';
+    };
 
     setUploading(true);
     try {
@@ -238,13 +246,20 @@ export function RoomMappingTab() {
         uploaded_by: user.id,
       });
 
-      setMapDialogOpen(false);
+      // Reset before closing to avoid interacting with an unmounted input
+      inputEl.value = '';
       setMapBuildingId('');
       setMapName('');
       setMapFloor('');
-      e.currentTarget.value = '';
+      setMapDialogOpen(false);
     } catch (error) {
-      toast.error(t('backoffice.uploadMapFailed', 'Failed to upload floor map'));
+      console.error('Upload floor map failed', error);
+      const details = getErrorMessage(error);
+      toast.error(
+        details
+          ? `${t('backoffice.uploadMapFailed', 'Failed to upload floor map')}: ${details}`
+          : t('backoffice.uploadMapFailed', 'Failed to upload floor map')
+      );
     } finally {
       setUploading(false);
     }
@@ -336,7 +351,7 @@ export function RoomMappingTab() {
                     type="file"
                     accept="image/*,.pdf"
                     onChange={handleUploadFloorMap}
-                    disabled={uploading}
+                    disabled={uploading || !mapBuildingId}
                   />
                   {!mapBuildingId && (
                     <p className="text-xs text-muted-foreground">
