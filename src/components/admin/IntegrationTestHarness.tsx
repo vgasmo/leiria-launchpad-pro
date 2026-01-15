@@ -129,38 +129,36 @@ export function IntegrationTestHarness() {
         }
 
         case 'get_schedule': {
-          // Find a workspace that has an active consultant assigned
-          const { data: workspacesWithConsultant } = await supabase
-            .from('workspace_users')
-            .select('workspace_id')
-            .eq('role', 'consultor')
-            .eq('active', true)
+          // Find an active workspace that has a consultant assigned
+          // Use a join to get both conditions in one query
+          const { data: workspacesWithConsultant, error: wsError } = await supabase
+            .from('workspaces')
+            .select(`
+              id,
+              workspace_users!inner(user_id, role, active)
+            `)
+            .eq('status', 'active')
+            .eq('workspace_users.role', 'consultor')
+            .eq('workspace_users.active', true)
             .limit(1);
 
+          if (wsError) {
+            result = { name: testKey, status: 'fail', error: `Query error: ${wsError.message}` };
+            break;
+          }
+
           if (!workspacesWithConsultant?.length) {
-            result = { name: testKey, status: 'skip', error: 'No workspace with a consultant assigned' };
+            result = { name: testKey, status: 'skip', error: 'No active workspace with consultant assigned' };
             break;
           }
 
-          // Verify the workspace is active
-          const { data: workspace } = await supabase
-            .from('workspaces')
-            .select('id')
-            .eq('id', workspacesWithConsultant[0].workspace_id)
-            .eq('status', 'active')
-            .maybeSingle();
-
-          if (!workspace) {
-            result = { name: testKey, status: 'skip', error: 'No active workspace with consultant' };
-            break;
-          }
-
+          const workspaceId = workspacesWithConsultant[0].id;
           const tomorrow = new Date();
           tomorrow.setDate(tomorrow.getDate() + 1);
           const dateStr = format(tomorrow, 'yyyy-MM-dd');
 
           const { data, error } = await invokeWithAuth('check-consultant-availability', {
-            body: { workspaceId: workspace.id, date: dateStr },
+            body: { workspaceId, date: dateStr },
           });
 
           if (error) throw error;
@@ -173,7 +171,7 @@ export function IntegrationTestHarness() {
             error: skipReasons.includes(data?.reason)
               ? 'Graph API not configured for calendar'
               : (data?.error || data?.warning || data?.reason),
-            details: { slots_found: data?.slots?.length ?? 0, reason: data?.reason },
+            details: { slots_found: data?.slots?.length ?? 0, reason: data?.reason, workspaceId },
           };
           break;
         }
