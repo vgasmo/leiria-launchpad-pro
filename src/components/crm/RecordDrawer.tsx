@@ -534,7 +534,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           <TabsContent value="overview" className="flex-1 p-4 space-y-4 overflow-auto">
             {/* Next Action Card */}
             <Card className={cn(
-              nextActionAt && new Date(nextActionAt) < new Date() && 'border-destructive/50 bg-destructive/5'
+              nextActionAt && new Date(nextActionAt) < new Date() && 'border-amber-300/50 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10'
             )}>
               <CardHeader className="py-3 px-4">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -548,11 +548,11 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                     <div className="flex items-center gap-2">
                       <Clock className={cn(
                         'h-4 w-4',
-                        new Date(nextActionAt) < new Date() ? 'text-destructive' : 'text-muted-foreground'
+                        new Date(nextActionAt) < new Date() ? 'text-amber-500' : 'text-muted-foreground'
                       )} />
                       <span className={cn(
                         'text-sm',
-                        new Date(nextActionAt) < new Date() && 'text-destructive font-medium'
+                        new Date(nextActionAt) < new Date() && 'text-amber-600 dark:text-amber-400 font-medium'
                       )}>
                         {formatRelativeTime(nextActionAt)}
                       </span>
@@ -849,7 +849,7 @@ function TaskRow({
         {task.due_at && (
           <p className={cn(
             'text-xs',
-            isOverdue ? 'text-destructive' : 'text-muted-foreground'
+            isOverdue ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
           )}>
             {formatRelativeTime(task.due_at)}
           </p>
@@ -860,8 +860,8 @@ function TaskRow({
           variant="outline" 
           className={cn(
             'text-xs shrink-0',
-            task.priority === 'high' && 'border-destructive text-destructive',
-            task.priority === 'medium' && 'border-amber-500 text-amber-500',
+            task.priority === 'high' && 'border-amber-500 text-amber-600',
+            task.priority === 'medium' && 'border-amber-400/60 text-amber-500',
           )}
         >
           {t(`crm.${task.priority}`)}

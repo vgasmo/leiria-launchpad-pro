@@ -7,6 +7,7 @@
 - No duplicate components detected
 - CRM routes properly configured: `/crm`, `/admin/crm-diagnostics`
 - RLS policies maintain staff vs founder visibility correctly
+- Unused imports cleaned up
 
 ### ✅ CRM v1.2 Hardening (Completed)
 - [x] CRM Diagnostics page at `/admin/crm-diagnostics`
@@ -17,6 +18,7 @@
 - [x] Record drawer timeline load test
 - [x] CRM metrics calculation
 - [x] i18n keys for EN and PT (diagnostics namespace)
+- [x] Deep-link robustness: `/crm?open=<id>` fetches if not in inbox
 
 ### ✅ CRM v1.3 Founder Engagement (Completed)
 - [x] OneThingToday card with soft urgency tones
@@ -29,6 +31,15 @@
 - [x] NextBestAction with soft amber borders (not red)
 - [x] HealthAlertsCard with softer critical styling
 - [x] CRM inbox overdue items use amber instead of red
+- [x] RecordDrawer overdue indicators softened to amber
+- [x] Task lifecycle: Open/Done/Canceled tabs with inline edit
+- [x] "Clear next action also?" confirmation when completing matching tasks
+
+### ✅ UI Aesthetics Pass (Completed)
+- [x] Removed destructive/red backgrounds from urgency indicators
+- [x] Consistent amber tones for overdue/at-risk items
+- [x] Softer badges (amber-100 bg, amber-600 text)
+- [x] Dark mode compatible color choices
 
 ### ⚠️ Risk Areas (Monitor)
 - Graph API requires consultant email to match Azure AD tenant
