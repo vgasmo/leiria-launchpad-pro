@@ -220,10 +220,10 @@ export function EnhancedNextSteps({ workspaceId, programId, stage, canWrite }: E
               key={step.id}
               className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                 step.variant === 'destructive'
-                  ? 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10'
+                  ? 'border-amber-400/40 bg-amber-50/30 dark:border-amber-700/40 dark:bg-amber-900/10 hover:bg-amber-50/50 dark:hover:bg-amber-900/20'
                   : step.variant === 'warning'
-                  ? 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20'
-                  : 'border-border bg-muted/30 hover:bg-muted/50'
+                  ? 'border-border bg-muted/30 hover:bg-muted/50'
+                  : 'border-border/50 bg-muted/20 hover:bg-muted/40'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -233,9 +233,9 @@ export function EnhancedNextSteps({ workspaceId, programId, stage, canWrite }: E
                 <div
                   className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                     step.variant === 'destructive'
-                      ? 'bg-destructive/10 text-destructive'
+                      ? 'bg-amber-100/50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                       : step.variant === 'warning'
-                      ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400'
+                      ? 'bg-primary/10 text-primary'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >

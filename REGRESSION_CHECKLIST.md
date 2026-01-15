@@ -20,10 +20,12 @@
 
 ### ✅ CRM v1.3 Founder Engagement (Completed)
 - [x] OneThingToday card with soft urgency tones
-- [x] YourWeekCard limited to 2 priorities
+- [x] YourWeekCard limited to 2 priorities with soft amber styling
 - [x] FounderDashboard with progressive disclosure
 - [x] InteractionsCard for shared visibility items
 - [x] Focus Mode for consultants in CRM dashboard
+- [x] EnhancedNextSteps with neutral/soft urgency colors
+- [x] AlertsPanel with reduced red intensity
 
 ### ⚠️ Risk Areas (Monitor)
 - Graph API requires consultant email to match Azure AD tenant

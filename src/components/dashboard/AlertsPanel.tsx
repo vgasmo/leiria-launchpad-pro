@@ -49,7 +49,7 @@ export function AlertsPanel() {
   }
 
   return (
-    <Card className={criticalCount > 0 ? 'border-red-200 dark:border-red-800' : ''}>
+    <Card className={criticalCount > 0 ? 'border-amber-200/50 dark:border-amber-800/50' : ''}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -107,10 +107,10 @@ export function AlertsPanel() {
                   key={alert.id}
                   className={`p-3 rounded-lg border ${
                     alert.severity === 'critical' 
-                      ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800'
+                      ? 'bg-muted/50 border-amber-300/50 dark:border-amber-700/50'
                       : alert.severity === 'warning'
-                      ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'
-                      : 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
+                      ? 'bg-muted/30 border-border'
+                      : 'bg-muted/20 border-border/50'
                   }`}
                 >
                   <div className="flex items-start gap-3">
