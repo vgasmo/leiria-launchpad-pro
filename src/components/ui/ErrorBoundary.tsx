@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCcw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { logError } from '@/lib/logError';
 
 interface Props {
   children: ReactNode;
@@ -74,15 +75,16 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error with error ID for debugging (safe - server-side logs only)
-    console.error(`[${this.state.errorId}] Uncaught error:`, {
-      message: error.message,
-      name: error.name,
-      componentStack: errorInfo.componentStack,
+    // Log error with structured context using our logging utility
+    const loggedError = logError(error, {
+      component: 'ErrorBoundary',
+      metadata: {
+        componentStack: errorInfo.componentStack,
+      },
     });
     
-    // TODO: In production, send to error monitoring service
-    // Example: sendToMonitoring({ errorId: this.state.errorId, error, errorInfo });
+    // Update state with the logged error ID
+    this.setState({ errorId: loggedError.errorId });
   }
 
   private handleReload = () => {
