@@ -27,7 +27,6 @@ import type { StartupStage, WorkspacePriority } from '@/types/database';
 
 // Backoffice sub-tab components
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
-import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
 import { BackofficeSpacesTab } from '@/components/backoffice/BackofficeSpacesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
 import { BackofficeBuildingsTab } from '@/components/backoffice/BackofficeBuildingsTab';
@@ -344,35 +343,31 @@ export function AdminBackoffice() {
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="overview" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.overview', 'Overview')}
+            {t('backoffice.overview')}
           </TabsTrigger>
           <TabsTrigger value="contracts" className="gap-1.5">
             <FileText className="h-4 w-4" />
-            {t('admin.backoffice.contracts', 'Contracts')}
-          </TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-1.5">
-            <Receipt className="h-4 w-4" />
-            {t('admin.backoffice.invoices', 'Invoices')}
+            {t('backoffice.contracts')}
           </TabsTrigger>
           <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.spaces', 'Spaces')}
+            {t('backoffice.spaces')}
           </TabsTrigger>
           <TabsTrigger value="rooms" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.roomMapping', 'Room Mapping')}
+            {t('backoffice.roomMapping')}
           </TabsTrigger>
           <TabsTrigger value="waiting-list" className="gap-1.5">
             <Clock className="h-4 w-4" />
-            {t('admin.backoffice.waitingList', 'Waiting List')}
+            {t('backoffice.waitingList')}
           </TabsTrigger>
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
-            {t('admin.backoffice.incubationTypes', 'Incubation Types')}
+            {t('backoffice.incubationTypes')}
           </TabsTrigger>
           <TabsTrigger value="buildings" className="gap-1.5">
             <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.buildings', 'Buildings')}
+            {t('backoffice.buildings')}
           </TabsTrigger>
         </TabsList>
 
@@ -383,11 +378,11 @@ export function AdminBackoffice() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            {t('admin.backoffice.ecosystemOverview', 'Ecosystem Overview')}
+            {t('backoffice.ecosystemOverview')}
           </CardTitle>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
-            {t('common.export', 'Export')}
+            {t('common.export')}
           </Button>
         </div>
       </CardHeader>
@@ -397,7 +392,7 @@ export function AdminBackoffice() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t('admin.backoffice.searchPlaceholder', 'Search by name, NIF, email...')}
+              placeholder={t('backoffice.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -406,10 +401,10 @@ export function AdminBackoffice() {
           
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={t('admin.backoffice.stage', 'Stage')} />
+              <SelectValue placeholder={t('backoffice.stage')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('admin.backoffice.allStages', 'All Stages')}</SelectItem>
+              <SelectItem value="all">{t('backoffice.allStages')}</SelectItem>
               {STAGES.map(s => (
                 <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
               ))}
@@ -418,10 +413,10 @@ export function AdminBackoffice() {
 
           <Select value={programFilter} onValueChange={setProgramFilter}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('admin.backoffice.program', 'Program')} />
+              <SelectValue placeholder={t('backoffice.program')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('admin.backoffice.allPrograms', 'All Programs')}</SelectItem>
+              <SelectItem value="all">{t('backoffice.allPrograms')}</SelectItem>
               {programs?.map(p => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
               ))}
@@ -430,10 +425,10 @@ export function AdminBackoffice() {
 
           <Select value={consultantFilter} onValueChange={setConsultantFilter}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('admin.backoffice.consultant', 'Consultant')} />
+              <SelectValue placeholder={t('backoffice.consultant')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('admin.backoffice.allConsultants', 'All Consultants')}</SelectItem>
+              <SelectItem value="all">{t('backoffice.allConsultants')}</SelectItem>
               {consultants?.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.full_name || c.email}</SelectItem>
               ))}
@@ -442,31 +437,31 @@ export function AdminBackoffice() {
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder={t('admin.backoffice.status', 'Status')} />
+              <SelectValue placeholder={t('backoffice.status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('admin.backoffice.allStatuses', 'All')}</SelectItem>
-              <SelectItem value="active">{t('admin.backoffice.active', 'Active')}</SelectItem>
-              <SelectItem value="blocked">{t('admin.backoffice.blocked', 'Blocked')}</SelectItem>
-              <SelectItem value="archived">{t('admin.backoffice.archived', 'Archived')}</SelectItem>
+              <SelectItem value="all">{t('backoffice.allStatuses')}</SelectItem>
+              <SelectItem value="active">{t('backoffice.active')}</SelectItem>
+              <SelectItem value="blocked">{t('backoffice.blocked')}</SelectItem>
+              <SelectItem value="archived">{t('backoffice.archived')}</SelectItem>
             </SelectContent>
           </Select>
 
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               <X className="h-4 w-4 mr-1" />
-              {t('common.clear', 'Clear')}
+              {t('common.clear')}
             </Button>
           )}
         </div>
 
         {/* Stats */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>{filteredData.length} {t('admin.backoffice.startups', 'startups')}</span>
+          <span>{filteredData.length} {t('backoffice.startups')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.status === 'active').length} {t('admin.backoffice.active', 'active')}</span>
+          <span>{filteredData.filter(d => d.status === 'active').length} {t('backoffice.active')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.health_score !== null && d.health_score < 50).length} {t('admin.backoffice.needAttention', 'need attention')}</span>
+          <span>{filteredData.filter(d => d.health_score !== null && d.health_score < 50).length} {t('backoffice.needAttention')}</span>
         </div>
 
         {/* Table */}
@@ -481,22 +476,22 @@ export function AdminBackoffice() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('admin.backoffice.startup', 'Startup')}</TableHead>
-                  <TableHead>{t('admin.backoffice.program', 'Program')}</TableHead>
-                  <TableHead>{t('admin.backoffice.stage', 'Stage')}</TableHead>
-                  <TableHead>{t('admin.backoffice.priority', 'Priority')}</TableHead>
-                  <TableHead>{t('admin.backoffice.health', 'Health')}</TableHead>
-                  <TableHead>{t('admin.backoffice.consultant', 'Consultant')}</TableHead>
-                  <TableHead>{t('admin.backoffice.nextSession', 'Next Session')}</TableHead>
-                  <TableHead>{t('admin.backoffice.status', 'Status')}</TableHead>
-                  <TableHead>{t('admin.backoffice.actions', 'Actions')}</TableHead>
+                  <TableHead>{t('backoffice.startup')}</TableHead>
+                  <TableHead>{t('backoffice.program')}</TableHead>
+                  <TableHead>{t('backoffice.stage')}</TableHead>
+                  <TableHead>{t('backoffice.priority')}</TableHead>
+                  <TableHead>{t('backoffice.health')}</TableHead>
+                  <TableHead>{t('backoffice.consultant')}</TableHead>
+                  <TableHead>{t('backoffice.nextSession')}</TableHead>
+                  <TableHead>{t('backoffice.status')}</TableHead>
+                  <TableHead>{t('backoffice.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      {t('admin.backoffice.noStartups', 'No startups found')}
+                      {t('backoffice.noStartups')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -521,7 +516,7 @@ export function AdminBackoffice() {
                         <Popover>
                           <PopoverTrigger asChild>
                             <button className="flex items-center gap-1 hover:bg-muted rounded px-1 -ml-1 text-sm">
-                              {item.program_name || <span className="text-muted-foreground">{t('admin.backoffice.noProgram', 'No program')}</span>}
+                              {item.program_name || <span className="text-muted-foreground">{t('backoffice.noProgram')}</span>}
                               <ChevronDown className="h-3 w-3 text-muted-foreground" />
                             </button>
                           </PopoverTrigger>
@@ -530,7 +525,7 @@ export function AdminBackoffice() {
                               onClick={() => changeProgramMutation.mutate({ workspaceId: item.workspace_id, programId: null })}
                               className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded text-muted-foreground"
                             >
-                              {t('common.none', 'None')}
+                              {t('common.none')}
                             </button>
                             {programs?.map(p => (
                               <button
@@ -618,19 +613,19 @@ export function AdminBackoffice() {
                           <PopoverTrigger asChild>
                             <button className="flex items-center gap-1 hover:bg-muted rounded px-1 -ml-1 text-sm">
                               {item.assigned_consultant_name ? (
-                                <>
+                              <>
                                   <User className="h-3 w-3 text-muted-foreground" />
                                   {item.assigned_consultant_name}
                                 </>
                               ) : (
-                                <span className="text-muted-foreground">{t('admin.backoffice.unassigned', 'Unassigned')}</span>
+                                <span className="text-muted-foreground">{t('backoffice.unassigned')}</span>
                               )}
                               <ChevronDown className="h-3 w-3 text-muted-foreground" />
                             </button>
                           </PopoverTrigger>
                           <PopoverContent className="w-64 p-2">
                             <Input
-                              placeholder={t('admin.backoffice.searchConsultant', 'Search consultant...')}
+                              placeholder={t('backoffice.searchConsultant')}
                               value={consultorSearch}
                               onChange={(e) => setConsultorSearch(e.target.value)}
                               className="mb-2"
@@ -658,7 +653,7 @@ export function AdminBackoffice() {
                                 onClick={() => removeConsultorMutation.mutate(item.workspace_id)}
                               >
                                 <Trash2 className="h-3 w-3 mr-1" />
-                                {t('admin.backoffice.removeConsultant', 'Remove consultant')}
+                                {t('backoffice.removeConsultant')}
                               </Button>
                             )}
                           </PopoverContent>
@@ -693,7 +688,7 @@ export function AdminBackoffice() {
                             onClick={() => unblockMutation.mutate(item.workspace_id)}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            {t('admin.backoffice.unblock', 'Unblock')}
+                            {t('backoffice.unblock')}
                           </Button>
                         ) : (
                           <Button
@@ -705,7 +700,7 @@ export function AdminBackoffice() {
                             }}
                           >
                             <Ban className="h-4 w-4 mr-1" />
-                            {t('admin.backoffice.block', 'Block')}
+                            {t('backoffice.block')}
                           </Button>
                         )}
                       </TableCell>
@@ -723,31 +718,31 @@ export function AdminBackoffice() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
-                {t('admin.backoffice.blockWorkspace', 'Block Workspace')}
+                {t('backoffice.blockWorkspace')}
               </DialogTitle>
               <DialogDescription>
-                {t('admin.backoffice.blockDescription', 'This will prevent access to {{name}}. Are you sure?', { name: workspaceToBlock?.name })}
+                {t('backoffice.blockDescription', { name: workspaceToBlock?.name })}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>{t('admin.backoffice.reason', 'Reason (optional)')}</Label>
+                <Label>{t('backoffice.reason')}</Label>
                 <Input
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
-                  placeholder={t('admin.backoffice.reasonPlaceholder', 'Enter reason for blocking...')}
+                  placeholder={t('backoffice.reasonPlaceholder')}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setBlockDialogOpen(false)}>
-                {t('common.cancel', 'Cancel')}
+                {t('common.cancel')}
               </Button>
               <Button 
                 variant="destructive" 
                 onClick={() => workspaceToBlock && blockMutation.mutate({ workspaceId: workspaceToBlock.id, reason: blockReason })}
               >
-                {t('admin.backoffice.confirmBlock', 'Block Workspace')}
+                {t('backoffice.confirmBlock')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -759,11 +754,6 @@ export function AdminBackoffice() {
         {/* Contracts Tab */}
         <TabsContent value="contracts">
           <BackofficeContractsTab />
-        </TabsContent>
-
-        {/* Invoices Tab */}
-        <TabsContent value="invoices">
-          <BackofficeInvoicesTab />
         </TabsContent>
 
         {/* Spaces Tab */}

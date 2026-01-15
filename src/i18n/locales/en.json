@@ -1889,7 +1889,13 @@
       "reference": "Reference",
       "referencePlaceholder": "Payment reference or transaction ID",
       "confirmPayment": "Confirm Payment",
-      "allStatuses": "All Statuses"
+      "allStatuses": "All Statuses",
+      "waitingListDesc": "Manage requests for office space from leads and startups",
+      "addToWaitlist": "Add to Waitlist",
+      "addWaitlistRequest": "Add Waiting List Request",
+      "requestFor": "Request For",
+      "preferredCapacity": "Preferred Capacity",
+      "preferredBuilding": "Preferred Building"
     },
     "backofficeExtended": {
       "officeSpaces": "Office Spaces",
