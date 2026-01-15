@@ -8,9 +8,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Package, Clock, Users, Building2, Percent } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Package, Clock, Users, Building2, Percent, Globe, Ruler } from 'lucide-react';
 import { useIncubationTypes, useCreateIncubationType, useUpdateIncubationType, type IncubationType } from '@/hooks/useBackoffice';
 import { cn } from '@/lib/utils';
+
+const CONTRACT_TYPES = [
+  { value: 'domiciliation', labelKey: 'backoffice.contractTypes.domiciliation' },
+  { value: 'virtual_incubation', labelKey: 'backoffice.contractTypes.virtualIncubation' },
+  { value: 'office_standard', labelKey: 'backoffice.contractTypes.officeStandard' },
+  { value: 'office_sqm', labelKey: 'backoffice.contractTypes.officeSqm' },
+  { value: 'office_social', labelKey: 'backoffice.contractTypes.officeSocial' },
+  { value: 'desk', labelKey: 'backoffice.contractTypes.desk' },
+  { value: 'hot_desk', labelKey: 'backoffice.contractTypes.hotDesk' },
+];
 
 export function BackofficeIncubationTypesTab() {
   const { t } = useTranslation();
@@ -32,6 +43,10 @@ export function BackofficeIncubationTypesTab() {
       includes_meeting_room_hours: parseInt(formData.get('includes_meeting_room_hours') as string) || 0,
       equity_percentage: parseFloat(formData.get('equity_percentage') as string) || null,
       is_active: formData.get('is_active') === 'on',
+      contract_type: formData.get('contract_type') as string || null,
+      price_per_sqm: parseFloat(formData.get('price_per_sqm') as string) || null,
+      requires_space: formData.get('requires_space') === 'on',
+      is_virtual: formData.get('is_virtual') === 'on',
     };
 
     if (selectedType) {
@@ -41,6 +56,11 @@ export function BackofficeIncubationTypesTab() {
     }
     setDialogOpen(false);
     setSelectedType(null);
+  };
+
+  const getContractTypeLabel = (contractType: string | null) => {
+    const type = CONTRACT_TYPES.find(ct => ct.value === contractType);
+    return type ? t(type.labelKey) : contractType;
   };
 
   return (
@@ -59,7 +79,7 @@ export function BackofficeIncubationTypesTab() {
               {t('backoffice.addType')}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedType ? t('backoffice.editType') : t('backoffice.addType')}
@@ -90,6 +110,22 @@ export function BackofficeIncubationTypesTab() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label>{t('backoffice.contractType')}</Label>
+                <Select name="contract_type" defaultValue={selectedType?.contract_type || ''}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('backoffice.selectContractType')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONTRACT_TYPES.map(ct => (
+                      <SelectItem key={ct.value} value={ct.value}>
+                        {t(ct.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t('backoffice.baseMonthlyFee')}</Label>
@@ -98,6 +134,17 @@ export function BackofficeIncubationTypesTab() {
                     step="0.01"
                     name="base_monthly_fee"
                     defaultValue={selectedType?.base_monthly_fee || 0}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('backoffice.pricePerSqm')}</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name="price_per_sqm"
+                    placeholder="€/m²"
+                    defaultValue={selectedType?.price_per_sqm || ''}
                   />
                 </div>
 
@@ -141,13 +188,29 @@ export function BackofficeIncubationTypesTab() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <Switch
                     name="includes_office_space"
                     defaultChecked={selectedType?.includes_office_space ?? false}
                   />
                   <Label>{t('backoffice.includesOfficeSpace')}</Label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    name="requires_space"
+                    defaultChecked={selectedType?.requires_space ?? false}
+                  />
+                  <Label>{t('backoffice.requiresSpace')}</Label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    name="is_virtual"
+                    defaultChecked={selectedType?.is_virtual ?? false}
+                  />
+                  <Label>{t('backoffice.isVirtual')}</Label>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -192,9 +255,17 @@ export function BackofficeIncubationTypesTab() {
                       </CardDescription>
                     )}
                   </div>
-                  <Badge variant={type.is_active ? 'default' : 'secondary'}>
-                    {type.is_active ? t('backoffice.active') : t('backoffice.inactive')}
-                  </Badge>
+                  <div className="flex flex-col gap-1 items-end">
+                    <Badge variant={type.is_active ? 'default' : 'secondary'}>
+                      {type.is_active ? t('backoffice.active') : t('backoffice.inactive')}
+                    </Badge>
+                    {type.is_virtual && (
+                      <Badge variant="outline" className="text-xs">
+                        <Globe className="h-3 w-3 mr-1" />
+                        Virtual
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -202,6 +273,12 @@ export function BackofficeIncubationTypesTab() {
                   <span className="text-2xl font-bold">€{type.base_monthly_fee}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
+
+                {type.contract_type && (
+                  <Badge variant="outline" className="text-xs">
+                    {getContractTypeLabel(type.contract_type)}
+                  </Badge>
+                )}
 
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {type.duration_months && (
@@ -226,6 +303,12 @@ export function BackofficeIncubationTypesTab() {
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Percent className="h-3 w-3" />
                       {type.equity_percentage}% equity
+                    </div>
+                  )}
+                  {type.price_per_sqm && type.price_per_sqm > 0 && (
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Ruler className="h-3 w-3" />
+                      €{type.price_per_sqm}/m²
                     </div>
                   )}
                 </div>

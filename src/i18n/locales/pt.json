@@ -572,6 +572,8 @@
       "Product Roadmap Canvas": "Canvas de Roadmap de Produto",
       "Go-To-Market Canvas": "Canvas Go-to-Market"
     },
+    "locationContract": "Localização e Contrato",
+    "noContractAssigned": "Ainda sem contrato atribuído",
     "descriptions": {
       "Unit Economics": "Métricas financeiras chave por cliente",
       "Fundraising Readiness": "Avalie a sua preparação para levantar capital",
@@ -1756,8 +1758,27 @@
       "noTypes": "Nenhum tipo de incubação definido",
       "incubationTypesDesc": "Definir pacotes de serviço e preços",
       "contractType": "Tipo de Contrato",
+      "selectContractType": "Selecionar tipo de contrato",
+      "selectIncubationType": "Selecionar tipo de incubação",
       "isVirtual": "Virtual (sem espaço físico)",
       "requiresSpace": "Requer Alocação de Espaço",
+      "contractTypes": {
+        "domiciliation": "Domiciliação",
+        "virtualIncubation": "Incubação Virtual",
+        "officeStandard": "Escritório (Standard)",
+        "officeSqm": "Escritório (por m²)",
+        "officeSocial": "Escritório (Incubadora Social)",
+        "desk": "Secretária",
+        "hotDesk": "Hot Desk"
+      },
+      "contractStatus": {
+        "draft": "Rascunho",
+        "pending_signature": "Aguarda Assinatura",
+        "active": "Ativo",
+        "suspended": "Suspenso",
+        "terminated": "Terminado",
+        "expired": "Expirado"
+      },
       "addBuilding": "Adicionar Edifício",
       "editBuilding": "Editar Edifício",
       "buildingName": "Nome do Edifício",

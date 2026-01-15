@@ -573,6 +573,8 @@
       "Operations": "Operations",
       "Other": "Other"
     },
+    "locationContract": "Location & Contract",
+    "noContractAssigned": "No contract assigned yet",
     "names": {
       "Unit Economics": "Unit Economics",
       "Fundraising Readiness": "Fundraising Readiness",
@@ -1837,8 +1839,27 @@
       "noTypes": "No incubation types defined",
       "incubationTypesDesc": "Define service packages and pricing",
       "contractType": "Contract Type",
+      "selectContractType": "Select contract type",
+      "selectIncubationType": "Select incubation type",
       "isVirtual": "Virtual (no physical space)",
       "requiresSpace": "Requires Space Allocation",
+      "contractTypes": {
+        "domiciliation": "Domiciliation",
+        "virtualIncubation": "Virtual Incubation",
+        "officeStandard": "Office Space (Standard)",
+        "officeSqm": "Office Space (per m²)",
+        "officeSocial": "Office Space (Social Incubator)",
+        "desk": "Desk",
+        "hotDesk": "Hot Desk"
+      },
+      "contractStatus": {
+        "draft": "Draft",
+        "pending_signature": "Pending Signature",
+        "active": "Active",
+        "suspended": "Suspended",
+        "terminated": "Terminated",
+        "expired": "Expired"
+      },
       "addBuilding": "Add Building",
       "editBuilding": "Edit Building",
       "buildingName": "Building Name",
