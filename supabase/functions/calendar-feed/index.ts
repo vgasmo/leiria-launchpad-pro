@@ -3,7 +3,7 @@
  * Returns an ICS feed for sessions (authenticated or token-based)
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getCorsHeaders, handleCorsOptions } from '../_shared/cors.ts';
 import { createLogger, generateRequestId, ErrorCode } from '../_shared/security.ts';
 

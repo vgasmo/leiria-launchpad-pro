@@ -63,22 +63,22 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
       )}>
         {/* Top bar with user info - always visible */}
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-14 lg:h-16 items-center justify-between px-4 lg:px-8">
+          <div className="flex h-14 lg:h-16 items-center justify-between gap-4 px-4 lg:px-8">
             <div className={cn(
-              "transition-all duration-500 min-w-0 flex-1",
+              "transition-all duration-500 min-w-0 overflow-hidden",
               mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
             )}>
               {title && (
-                <h1 className="font-heading text-lg lg:text-xl font-semibold text-foreground truncate">
+                <h1 className="font-heading text-lg lg:text-xl font-semibold text-foreground truncate" title={title}>
                   {title}
                 </h1>
               )}
               {subtitle && (
-                <p className="text-xs lg:text-sm text-muted-foreground truncate">{subtitle}</p>
+                <p className="text-xs lg:text-sm text-muted-foreground truncate" title={subtitle}>{subtitle}</p>
               )}
             </div>
             <div className={cn(
-              "flex items-center gap-2 lg:gap-4 transition-all duration-500 delay-100 flex-shrink-0",
+              "flex items-center gap-2 lg:gap-4 transition-all duration-500 delay-100 flex-shrink-0 ml-auto",
               mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
             )}>
               {actions}
