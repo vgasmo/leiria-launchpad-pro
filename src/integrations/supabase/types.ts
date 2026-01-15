@@ -207,42 +207,64 @@ export type Database = {
       }
       admin_announcements: {
         Row: {
+          building_id: string | null
           category: string
           created_at: string
           created_by: string
+          email_sent_at: string | null
           expires_at: string | null
           id: string
           is_read: boolean
           message: string | null
           read_at: string | null
+          send_email: boolean | null
+          send_teams: boolean | null
+          teams_sent_at: string | null
           title: string
           workspace_id: string
         }
         Insert: {
+          building_id?: string | null
           category: string
           created_at?: string
           created_by: string
+          email_sent_at?: string | null
           expires_at?: string | null
           id?: string
           is_read?: boolean
           message?: string | null
           read_at?: string | null
+          send_email?: boolean | null
+          send_teams?: boolean | null
+          teams_sent_at?: string | null
           title: string
           workspace_id: string
         }
         Update: {
+          building_id?: string | null
           category?: string
           created_at?: string
           created_by?: string
+          email_sent_at?: string | null
           expires_at?: string | null
           id?: string
           is_read?: boolean
           message?: string | null
           read_at?: string | null
+          send_email?: boolean | null
+          send_teams?: boolean | null
+          teams_sent_at?: string | null
           title?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "admin_announcements_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "admin_announcements_workspace_id_fkey"
             columns: ["workspace_id"]
