@@ -3196,7 +3196,10 @@
     "consultantRequest": "Pedido do seu consultor",
     "quickActions": "Ações Rápidas",
     "openDrawer": "Abrir Detalhes",
-    "setAction": "Definir Ação"
+    "setAction": "Definir Ação",
+    "pipeline": "Pipeline",
+    "totalLeads": "Total Leads",
+    "unnamed": "Sem Nome"
   },
   "notifications": {
     "title": "Notificações",

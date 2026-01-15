@@ -23,7 +23,9 @@ import {
   Ghost,
   Focus,
   Zap,
+  LayoutGrid,
 } from 'lucide-react';
+import { PipelineView } from '@/components/crm/PipelineView';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
@@ -306,8 +308,12 @@ export default function CRM() {
           </div>
         </div>
 
-        <Tabs defaultValue="inbox" className="space-y-4">
+        <Tabs defaultValue="pipeline" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="pipeline" className="gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              {t('crm.pipeline')}
+            </TabsTrigger>
             <TabsTrigger value="inbox" className="gap-2">
               <Inbox className="h-4 w-4" />
               {t('crm.followUpInbox')}
@@ -319,6 +325,17 @@ export default function CRM() {
               {tasksTotal > 0 && <Badge variant="secondary" className="ml-1">{tasksTotal}</Badge>}
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="pipeline" className="space-y-4">
+            <PipelineView
+              programFilter={programFilter}
+              assigneeFilter={assigneeFilter}
+              searchQuery={searchQuery}
+              myItemsOnly={focusMode ? true : myItemsOnly}
+              currentUserId={user?.id}
+              onOpenDrawer={handleOpenDrawer}
+            />
+          </TabsContent>
 
           <TabsContent value="inbox" className="space-y-4">
             {loadingInbox ? (
