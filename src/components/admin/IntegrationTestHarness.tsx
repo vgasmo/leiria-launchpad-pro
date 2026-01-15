@@ -129,15 +129,29 @@ export function IntegrationTestHarness() {
         }
 
         case 'get_schedule': {
-          // Use check-consultant-availability with a test workspace
-          const { data: workspaces } = await supabase
-            .from('workspaces')
-            .select('id')
-            .eq('status', 'active')
+          // Find a workspace that has an active consultant assigned
+          const { data: workspacesWithConsultant } = await supabase
+            .from('workspace_users')
+            .select('workspace_id')
+            .eq('role', 'consultor')
+            .eq('active', true)
             .limit(1);
 
-          if (!workspaces?.length) {
-            result = { name: testKey, status: 'skip', error: 'No active workspace for testing' };
+          if (!workspacesWithConsultant?.length) {
+            result = { name: testKey, status: 'skip', error: 'No workspace with a consultant assigned' };
+            break;
+          }
+
+          // Verify the workspace is active
+          const { data: workspace } = await supabase
+            .from('workspaces')
+            .select('id')
+            .eq('id', workspacesWithConsultant[0].workspace_id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+          if (!workspace) {
+            result = { name: testKey, status: 'skip', error: 'No active workspace with consultant' };
             break;
           }
 
@@ -146,14 +160,19 @@ export function IntegrationTestHarness() {
           const dateStr = format(tomorrow, 'yyyy-MM-dd');
 
           const { data, error } = await invokeWithAuth('check-consultant-availability', {
-            body: { workspaceId: workspaces[0].id, date: dateStr },
+            body: { workspaceId: workspace.id, date: dateStr },
           });
 
           if (error) throw error;
+          
+          // Treat 'no_graph_integration' or 'not_configured' as skip (needs config)
+          const skipReasons = ['not_configured', 'no_graph_integration'];
           result = {
             name: testKey,
-            status: data?.success ? 'pass' : data?.reason === 'not_configured' ? 'skip' : 'fail',
-            error: data?.reason === 'not_configured' ? 'Graph API not configured' : data?.error,
+            status: data?.success ? 'pass' : skipReasons.includes(data?.reason) ? 'skip' : 'fail',
+            error: skipReasons.includes(data?.reason)
+              ? 'Graph API not configured for calendar'
+              : (data?.error || data?.warning || data?.reason),
             details: { slots_found: data?.slots?.length ?? 0, reason: data?.reason },
           };
           break;
