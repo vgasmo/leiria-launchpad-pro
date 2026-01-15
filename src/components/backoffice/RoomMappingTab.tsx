@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Plus, MapPin, Users, Building2, Monitor,
-  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck
+  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye
 } from 'lucide-react';
+import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
 import {
   useRoomsWithAllocations,
   useCreateRoom,
@@ -53,7 +54,15 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 // FloorMapCard component to handle async URL loading
-function FloorMapCard({ map, onDelete }: { map: FloorMap & { space?: { name: string } }; onDelete: () => void }) {
+function FloorMapCard({ 
+  map, 
+  onDelete,
+  onViewInteractive 
+}: { 
+  map: FloorMap & { space?: { name: string } }; 
+  onDelete: () => void;
+  onViewInteractive: () => void;
+}) {
   const { t } = useTranslation();
   const [signedUrl, setSignedUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -81,14 +90,25 @@ function FloorMapCard({ map, onDelete }: { map: FloorMap & { space?: { name: str
               {map.space?.name} {map.floor && `• Floor ${map.floor}`}
             </CardDescription>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onViewInteractive}
+              title={t('backoffice.viewInteractive', 'View interactive map')}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -146,6 +166,8 @@ export function RoomMappingTab() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [roomToAllocate, setRoomToAllocate] = useState<Room | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedFloorMap, setSelectedFloorMap] = useState<FloorMap | null>(null);
 
   const [mapBuildingId, setMapBuildingId] = useState<string>('');
   const [mapName, setMapName] = useState<string>('');
@@ -661,6 +683,10 @@ export function RoomMappingTab() {
                 key={map.id} 
                 map={map} 
                 onDelete={() => deleteFloorMap.mutate({ id: map.id, filePath: map.file_path })}
+                onViewInteractive={() => {
+                  setSelectedFloorMap(map);
+                  setViewerOpen(true);
+                }}
               />
             ))}
 
@@ -787,6 +813,18 @@ export function RoomMappingTab() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Interactive Floor Map Viewer */}
+      <InteractiveFloorMapViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        floorMap={selectedFloorMap}
+        rooms={rooms || []}
+        onRoomClick={(room) => {
+          setSelectedRoom(room);
+          setRoomDialogOpen(true);
+        }}
+      />
     </div>
   );
 }

@@ -1,0 +1,365 @@
+import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { type Room, type FloorMap, useUpdateRoom } from '@/hooks/useBackoffice';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+
+
+interface InteractiveFloorMapViewerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  floorMap: FloorMap | null;
+  rooms: Room[];
+  onRoomClick?: (room: Room) => void;
+}
+
+export function InteractiveFloorMapViewer({
+  open,
+  onOpenChange,
+  floorMap,
+  rooms,
+  onRoomClick,
+}: InteractiveFloorMapViewerProps) {
+  const { t } = useTranslation();
+  const [signedUrl, setSignedUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedRoomForPin, setSelectedRoomForPin] = useState<string>('');
+  const [placingPin, setPlacingPin] = useState(false);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const updateRoom = useUpdateRoom();
+
+  // Get rooms that have pins on this floor map
+  const roomsWithPins = rooms.filter(r => r.floor_map_id === floorMap?.id && r.pin_x != null && r.pin_y != null);
+  
+  // Get rooms that could be placed on this map (same floor/building, no pin yet or on this map)
+  const availableRoomsForPinning = rooms.filter(r => 
+    !r.floor_map_id || r.floor_map_id === floorMap?.id
+  );
+
+  useEffect(() => {
+    if (!floorMap?.file_path) {
+      setLoading(false);
+      return;
+    }
+
+    const loadUrl = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.storage.from('floor-maps').createSignedUrl(floorMap.file_path, 3600);
+      if (!error && data?.signedUrl) {
+        setSignedUrl(data.signedUrl);
+      }
+      setLoading(false);
+    };
+    loadUrl();
+  }, [floorMap?.file_path]);
+
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!editMode || !placingPin || !selectedRoomForPin || !imageRef.current) return;
+
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Save pin position
+    updateRoom.mutate(
+      { id: selectedRoomForPin, pin_x: x, pin_y: y, floor_map_id: floorMap?.id },
+      {
+        onSuccess: () => {
+          toast.success(t('backoffice.pinPlaced', 'Pin placed successfully'));
+          setPlacingPin(false);
+          setSelectedRoomForPin('');
+        },
+      }
+    );
+  };
+
+  const handleRemovePin = (roomId: string) => {
+    updateRoom.mutate(
+      { id: roomId, pin_x: null, pin_y: null, floor_map_id: null },
+      {
+        onSuccess: () => {
+          toast.success(t('backoffice.pinRemoved', 'Pin removed'));
+        },
+      }
+    );
+  };
+
+  const isPdf = floorMap?.file_path.toLowerCase().endsWith('.pdf');
+
+  if (!floorMap) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              {floorMap.name}
+              {floorMap.floor && <Badge variant="secondary">Floor {floorMap.floor}</Badge>}
+            </DialogTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={editMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setEditMode(!editMode);
+                  setPlacingPin(false);
+                  setSelectedRoomForPin('');
+                }}
+              >
+                {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit2 className="h-4 w-4 mr-2" />}
+                {editMode ? t('backoffice.viewMode', 'View Mode') : t('backoffice.editMode', 'Edit Mode')}
+              </Button>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 flex gap-4 min-h-0">
+          {/* Main map area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {loading ? (
+              <div className="flex-1 bg-muted rounded-lg flex items-center justify-center">
+                <span className="text-muted-foreground">{t('common.loading')}</span>
+              </div>
+            ) : isPdf ? (
+              <div className="flex-1 bg-muted rounded-lg flex flex-col items-center justify-center gap-4">
+                <MapPin className="h-12 w-12 text-muted-foreground" />
+                <p className="text-muted-foreground text-center max-w-xs">
+                  {t('backoffice.pdfNotSupported', 'PDF floor plans cannot be used for interactive mapping. Please upload a PNG or JPG image.')}
+                </p>
+                <Button variant="outline" onClick={() => window.open(signedUrl, '_blank')}>
+                  {t('backoffice.openPdf', 'Open PDF')}
+                </Button>
+              </div>
+            ) : (
+              <div
+                ref={imageRef}
+                className={cn(
+                  'relative flex-1 bg-muted rounded-lg overflow-hidden',
+                  editMode && placingPin && 'cursor-crosshair'
+                )}
+                onClick={handleMapClick}
+              >
+                <img
+                  src={signedUrl}
+                  alt={floorMap.name}
+                  className="w-full h-full object-contain"
+                  draggable={false}
+                />
+
+                {/* Render pins */}
+                <TooltipProvider>
+                  {roomsWithPins.map(room => {
+                    const allocation = room.current_allocation;
+                    const occupantName = allocation?.workspace?.startup?.name ||
+                      allocation?.funnel_item?.organization_name ||
+                      allocation?.funnel_item?.contact_name;
+                    const isOccupied = !!allocation;
+
+                    return (
+                      <Tooltip key={room.id}>
+                        <TooltipTrigger asChild>
+                          <button
+                            className={cn(
+                              'absolute transform -translate-x-1/2 -translate-y-full',
+                              'transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary',
+                              editMode && 'cursor-move'
+                            )}
+                            style={{ left: `${room.pin_x}%`, top: `${room.pin_y}%` }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!editMode && onRoomClick) {
+                                onRoomClick(room);
+                              }
+                            }}
+                          >
+                            <div className={cn(
+                              'flex flex-col items-center',
+                            )}>
+                              <MapPin
+                                className={cn(
+                                  'h-8 w-8 drop-shadow-lg',
+                                  isOccupied ? 'text-primary fill-primary/20' : 'text-green-500 fill-green-500/20'
+                                )}
+                              />
+                              <span className={cn(
+                                'text-xs font-medium px-1.5 py-0.5 rounded bg-background/90 shadow-sm -mt-1',
+                                isOccupied ? 'text-primary' : 'text-green-600'
+                              )}>
+                                {room.name}
+                              </span>
+                            </div>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="space-y-1">
+                            <div className="font-medium">{room.name}</div>
+                            {room.room_number && <div className="text-xs text-muted-foreground">#{room.room_number}</div>}
+                            <div className="flex items-center gap-1 text-xs">
+                              <Users className="h-3 w-3" />
+                              {room.capacity || '?'} people
+                            </div>
+                            {occupantName ? (
+                              <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded mt-1">
+                                {occupantName}
+                                {allocation?.start_date && (
+                                  <span className="block text-muted-foreground">
+                                    Since {format(new Date(allocation.start_date), 'MMM yyyy')}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-green-600 font-medium mt-1">
+                                {t('backoffice.vacant', 'Vacant')}
+                              </div>
+                            )}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </TooltipProvider>
+
+                {/* Placing pin indicator */}
+                {editMode && placingPin && (
+                  <div className="absolute inset-0 bg-primary/5 pointer-events-none flex items-center justify-center">
+                    <div className="bg-background/95 rounded-lg px-4 py-2 shadow-lg">
+                      <span className="text-sm">{t('backoffice.clickToPlacePin', 'Click on the map to place the pin')}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar for edit mode */}
+          {editMode && !isPdf && (
+            <div className="w-72 flex flex-col border-l pl-4 min-h-0">
+              <h3 className="font-medium mb-3">{t('backoffice.placeRoomPins', 'Place Room Pins')}</h3>
+              
+              <div className="space-y-3 mb-4">
+                <Select
+                  value={selectedRoomForPin}
+                  onValueChange={(val) => {
+                    setSelectedRoomForPin(val);
+                    setPlacingPin(false);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('backoffice.selectRoom', 'Select a room...')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRoomsForPinning.map(room => (
+                      <SelectItem key={room.id} value={room.id}>
+                        <span className="flex items-center gap-2">
+                          {room.name}
+                          {room.pin_x != null && <Check className="h-3 w-3 text-green-500" />}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {selectedRoomForPin && (
+                  <Button
+                    className="w-full"
+                    onClick={() => setPlacingPin(true)}
+                    disabled={placingPin}
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    {placingPin ? t('backoffice.clickOnMap', 'Click on map...') : t('backoffice.placePin', 'Place Pin')}
+                  </Button>
+                )}
+
+                {placingPin && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setPlacingPin(false);
+                      setSelectedRoomForPin('');
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {t('common.cancel')}
+                  </Button>
+                )}
+              </div>
+
+              {/* List of placed pins */}
+              <div className="flex-1 min-h-0">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  {t('backoffice.placedPins', 'Placed Pins')} ({roomsWithPins.length})
+                </h4>
+                <ScrollArea className="h-full">
+                  <div className="space-y-2 pr-2">
+                    {roomsWithPins.map(room => {
+                      const allocation = room.current_allocation;
+                      const occupantName = allocation?.workspace?.startup?.name ||
+                        allocation?.funnel_item?.organization_name ||
+                        allocation?.funnel_item?.contact_name;
+
+                      return (
+                        <div
+                          key={room.id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-sm truncate">{room.name}</div>
+                            {occupantName && (
+                              <div className="text-xs text-primary truncate">{occupantName}</div>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() => handleRemovePin(room.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+
+                    {roomsWithPins.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-4">
+                        {t('backoffice.noPinsYet', 'No pins placed yet')}
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-6 pt-2 border-t text-sm">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-primary fill-primary/20" />
+            <span>{t('backoffice.occupied', 'Occupied')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-green-500 fill-green-500/20" />
+            <span>{t('backoffice.vacant', 'Vacant')}</span>
+          </div>
+          <div className="ml-auto text-muted-foreground text-xs">
+            {roomsWithPins.length} {t('backoffice.roomsPlaced', 'rooms placed')}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

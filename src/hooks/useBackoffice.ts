@@ -624,6 +624,10 @@ export interface Room {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Pin coordinates for floor map placement (0-100 percentage)
+  pin_x: number | null;
+  pin_y: number | null;
+  floor_map_id: string | null;
   // Joined
   space?: OfficeSpace;
   current_allocation?: RoomAllocation | null;

@@ -3681,9 +3681,12 @@ export type Database = {
           capacity: number | null
           created_at: string
           floor: string | null
+          floor_map_id: string | null
           id: string
           name: string
           notes: string | null
+          pin_x: number | null
+          pin_y: number | null
           room_number: string | null
           room_type: string
           space_id: string
@@ -3696,9 +3699,12 @@ export type Database = {
           capacity?: number | null
           created_at?: string
           floor?: string | null
+          floor_map_id?: string | null
           id?: string
           name: string
           notes?: string | null
+          pin_x?: number | null
+          pin_y?: number | null
           room_number?: string | null
           room_type?: string
           space_id: string
@@ -3711,9 +3717,12 @@ export type Database = {
           capacity?: number | null
           created_at?: string
           floor?: string | null
+          floor_map_id?: string | null
           id?: string
           name?: string
           notes?: string | null
+          pin_x?: number | null
+          pin_y?: number | null
           room_number?: string | null
           room_type?: string
           space_id?: string
@@ -3726,6 +3735,13 @@ export type Database = {
             columns: ["building_id"]
             isOneToOne: false
             referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rooms_floor_map_id_fkey"
+            columns: ["floor_map_id"]
+            isOneToOne: false
+            referencedRelation: "floor_maps"
             referencedColumns: ["id"]
           },
           {
