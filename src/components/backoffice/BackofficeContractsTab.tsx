@@ -9,10 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, FileText, Search, Calendar, Percent } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, FileText, Search, Clock, AlertTriangle, Cake } from 'lucide-react';
 import { useContracts, useIncubationTypes, useBuildings, useCreateContract, useUpdateContract, type StartupContract, type IncubationType } from '@/hooks/useBackoffice';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
-import { format } from 'date-fns';
+import { format, differenceInMonths, addYears, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,6 +25,46 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   terminated: { label: 'Terminated', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
   expired: { label: 'Expired', className: 'bg-muted text-muted-foreground' },
 };
+
+// Helper to calculate incubation tenure
+function getIncubationTenure(startDate: string) {
+  const start = new Date(startDate);
+  const now = new Date();
+  const months = differenceInMonths(now, start);
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  return { months, years, remainingMonths };
+}
+
+// Helper to check for anniversary alerts
+function getAnniversaryAlert(startDate: string) {
+  const start = new Date(startDate);
+  const now = new Date();
+  const { years, months } = getIncubationTenure(startDate);
+  
+  // Check if approaching or past 3 years
+  if (months >= 33) {
+    const isOver3 = months >= 36;
+    return {
+      type: 'year3' as const,
+      severity: 'critical' as const,
+      message: isOver3 ? '3+ years - review required' : 'Approaching 3-year mark',
+    };
+  }
+  
+  // Check for upcoming anniversary (within 30 days)
+  const nextAnniversary = addYears(start, years + 1);
+  const daysUntil = differenceInDays(nextAnniversary, now);
+  if (daysUntil > 0 && daysUntil <= 30) {
+    return {
+      type: 'anniversary' as const,
+      severity: years >= 2 ? 'warning' as const : 'info' as const,
+      message: `Year ${years + 1} anniversary in ${daysUntil} days`,
+    };
+  }
+  
+  return null;
+}
 
 export function BackofficeContractsTab() {
   const { t } = useTranslation();
@@ -295,10 +336,9 @@ export function BackofficeContractsTab() {
                   <TableHead>{t('backoffice.contractNumber')}</TableHead>
                   <TableHead>{t('backoffice.type')}</TableHead>
                   <TableHead>{t('backoffice.building')}</TableHead>
+                  <TableHead>{t('backoffice.timeIncubated', 'Time Incubated')}</TableHead>
                   <TableHead>{t('backoffice.status')}</TableHead>
-                  <TableHead>{t('backoffice.startDate')}</TableHead>
                   <TableHead>{t('backoffice.monthlyFee')}</TableHead>
-                  <TableHead>{t('backoffice.discount')}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -308,10 +348,18 @@ export function BackofficeContractsTab() {
                   const startup = (contract.workspace as any)?.startup;
                   const incubationType = contract.incubation_type as IncubationType | null;
                   const building = contract.building as { name: string; city?: string } | null;
-                  const effectiveFee = contract.monthly_fee * (1 - (contract.discount_percentage || 0) / 100);
+                  
+                  // Calculate tenure and alerts
+                  const tenure = getIncubationTenure(contract.start_date);
+                  const alert = contract.status === 'active' ? getAnniversaryAlert(contract.start_date) : null;
 
                   return (
-                    <TableRow key={contract.id}>
+                    <TableRow 
+                      key={contract.id}
+                      className={cn(
+                        alert?.severity === 'critical' && 'bg-red-50/50 dark:bg-red-950/10'
+                      )}
+                    >
                       <TableCell className="font-medium">
                         {startup?.name || 'Unnamed'}
                       </TableCell>
@@ -330,24 +378,69 @@ export function BackofficeContractsTab() {
                         ) : '-'}
                       </TableCell>
                       <TableCell>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2">
+                                <div className={cn(
+                                  'flex items-center gap-1 text-sm',
+                                  tenure.years >= 3 && 'text-red-600 font-medium',
+                                  tenure.years === 2 && 'text-yellow-600'
+                                )}>
+                                  <Clock className="h-3 w-3" />
+                                  {tenure.years > 0 ? (
+                                    <span>{tenure.years}y {tenure.remainingMonths}m</span>
+                                  ) : (
+                                    <span>{tenure.months}m</span>
+                                  )}
+                                </div>
+                                {alert && (
+                                  <div className={cn(
+                                    alert.severity === 'critical' && 'text-red-600',
+                                    alert.severity === 'warning' && 'text-yellow-600',
+                                    alert.severity === 'info' && 'text-blue-600',
+                                  )}>
+                                    {alert.type === 'year3' ? (
+                                      <AlertTriangle className="h-4 w-4" />
+                                    ) : (
+                                      <Cake className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="text-xs">
+                                <div>{t('backoffice.startedOn', 'Started')}: {format(new Date(contract.start_date), 'dd MMM yyyy')}</div>
+                                <div>{t('backoffice.totalMonths', 'Total')}: {tenure.months} {t('backoffice.dashboard.months', 'months')}</div>
+                                {alert && (
+                                  <div className={cn(
+                                    'mt-1 font-medium',
+                                    alert.severity === 'critical' && 'text-red-400',
+                                    alert.severity === 'warning' && 'text-yellow-400',
+                                  )}>
+                                    {alert.message}
+                                  </div>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell>
                         <Badge className={cn('text-xs', statusConfig?.className)}>
                           {statusConfig?.label}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          {format(new Date(contract.start_date), 'dd MMM yyyy')}
+                        <div className="text-sm">
+                          €{contract.monthly_fee.toFixed(2)}
+                          {contract.discount_percentage > 0 && (
+                            <span className="text-green-600 text-xs ml-1">
+                              (-{contract.discount_percentage}%)
+                            </span>
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell>€{contract.monthly_fee.toFixed(2)}</TableCell>
-                      <TableCell>
-                        {contract.discount_percentage > 0 && (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <Percent className="h-3 w-3" />
-                            {contract.discount_percentage}%
-                          </div>
-                        )}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -366,7 +459,7 @@ export function BackofficeContractsTab() {
                 })}
                 {filteredContracts?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       {t('backoffice.noContracts')}
                     </TableCell>
                   </TableRow>

@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import type { StartupStage, WorkspacePriority } from '@/types/database';
 
 // Backoffice sub-tab components
+import { BackofficeDashboard } from '@/components/backoffice/BackofficeDashboard';
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
 import { BackofficeSpacesTab } from '@/components/backoffice/BackofficeSpacesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
@@ -59,7 +60,7 @@ export function AdminBackoffice() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeSubTab, setActiveSubTab] = useState('overview');
+  const [activeSubTab, setActiveSubTab] = useState('dashboard');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -341,6 +342,10 @@ export function AdminBackoffice() {
       {/* Sub-tabs for different backoffice sections */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+          <TabsTrigger value="dashboard" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {t('admin.backoffice.dashboard', 'Dashboard')}
+          </TabsTrigger>
           <TabsTrigger value="overview" className="gap-1.5">
             <Building2 className="h-4 w-4" />
             {t('admin.backoffice.overview')}
@@ -370,6 +375,11 @@ export function AdminBackoffice() {
             {t('admin.backoffice.buildings')}
           </TabsTrigger>
         </TabsList>
+
+        {/* Dashboard Tab - KPIs, Alerts, Anniversaries */}
+        <TabsContent value="dashboard">
+          <BackofficeDashboard />
+        </TabsContent>
 
         {/* Overview Tab - Original Backoffice Content */}
         <TabsContent value="overview">
