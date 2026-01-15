@@ -54,8 +54,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 
 // FloorMapCard component to handle async URL loading
 function FloorMapCard({ map, onDelete }: { map: FloorMap & { space?: { name: string } }; onDelete: () => void }) {
+  const { t } = useTranslation();
   const [signedUrl, setSignedUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
+
+  const isPdf = map.file_path.toLowerCase().endsWith('.pdf');
 
   useEffect(() => {
     const loadUrl = async () => {
@@ -94,21 +97,35 @@ function FloorMapCard({ map, onDelete }: { map: FloorMap & { space?: { name: str
             <span className="text-muted-foreground text-sm">Loading...</span>
           </div>
         ) : signedUrl ? (
-          <a
-            href={signedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block aspect-video bg-muted rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-          >
-            <img
-              src={signedUrl}
-              alt={map.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              }}
-            />
-          </a>
+          isPdf ? (
+            <a
+              href={signedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block aspect-video bg-muted rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors"
+            >
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Image className="h-10 w-10" />
+                <span className="text-sm font-medium">{t('backoffice.openPdf', 'Open PDF')}</span>
+              </div>
+            </a>
+          ) : (
+            <a
+              href={signedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block aspect-video bg-muted rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+            >
+              <img
+                src={signedUrl}
+                alt={map.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
+            </a>
+          )
         ) : (
           <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
             <span className="text-muted-foreground text-sm">Unable to load</span>
