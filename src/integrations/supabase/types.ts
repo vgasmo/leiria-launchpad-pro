@@ -3584,6 +3584,7 @@ export type Database = {
           revoked_at: string | null
           scope: string
           token: string
+          token_hash: string | null
           views_count: number | null
           workspace_id: string
         }
@@ -3596,6 +3597,7 @@ export type Database = {
           revoked_at?: string | null
           scope?: string
           token?: string
+          token_hash?: string | null
           views_count?: number | null
           workspace_id: string
         }
@@ -3608,6 +3610,7 @@ export type Database = {
           revoked_at?: string | null
           scope?: string
           token?: string
+          token_hash?: string | null
           views_count?: number | null
           workspace_id?: string
         }
@@ -5894,6 +5897,7 @@ export type Database = {
         Args: { _startup_id: string }
         Returns: boolean
       }
+      sha256_token: { Args: { token: string }; Returns: string }
       shares_workspace_with: {
         Args: { _target_user_id: string }
         Returns: boolean

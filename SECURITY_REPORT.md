@@ -104,7 +104,13 @@ founder → Own workspace access only
 | Rate limiting on AI functions | ai_rate_limits table + check_ai_rate_limit function | ✅ Active |
 | Mentor NDA bypass | mentor_nda_acceptances + has_accepted_nda check | ✅ Active |
 
-### 5.2 Recommendations for Future
+### 5.2 Recent Security Fixes (2026-01-15)
+
+| Issue | Fix Applied | Status |
+|-------|-------------|--------|
+| Share link tokens stored in plaintext | Added token_hash column with SHA-256 hashing, migrated existing tokens, updated get-shared-workspace edge function with rate limiting | ✅ Fixed |
+
+### 5.3 Recommendations for Future
 
 1. **Move Graph API secrets to Supabase Vault** instead of global_integration_settings
 2. **Add IP-based rate limiting** for public endpoints (booking)
