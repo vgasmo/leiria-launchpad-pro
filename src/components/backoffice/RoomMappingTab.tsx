@@ -10,15 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Plus, MapPin, Users, Building2, Monitor, Armchair, 
+import {
+  Plus, MapPin, Users, Building2, Monitor,
   DoorOpen, Wrench, Image, Upload, Trash2, UserCheck
 } from 'lucide-react';
-import { 
+import {
   useRoomsWithAllocations,
   useCreateRoom,
   useUpdateRoom,
-  useDeleteRoom,
   useCreateRoomAllocation,
   useEndRoomAllocation,
   useFloorMaps,
@@ -129,6 +128,10 @@ export function RoomMappingTab() {
   const [roomToAllocate, setRoomToAllocate] = useState<Room | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const [mapSpaceId, setMapSpaceId] = useState<string>('');
+  const [mapName, setMapName] = useState<string>('');
+  const [mapFloor, setMapFloor] = useState<string>('');
+
   const { data: spaces } = useOfficeSpaces();
   const { data: rooms, isLoading } = useRoomsWithAllocations(selectedSpace === 'all' ? undefined : selectedSpace);
   const { data: floorMaps } = useFloorMaps(selectedSpace === 'all' ? undefined : selectedSpace);
@@ -137,7 +140,6 @@ export function RoomMappingTab() {
 
   const createRoom = useCreateRoom();
   const updateRoom = useUpdateRoom();
-  const deleteRoom = useDeleteRoom();
   const createAllocation = useCreateRoomAllocation();
   const endAllocation = useEndRoomAllocation();
   const createFloorMap = useCreateFloorMap();
@@ -188,19 +190,17 @@ export function RoomMappingTab() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    const spaceId = (document.getElementById('map-space-id') as HTMLSelectElement)?.value;
-    const floor = (document.getElementById('map-floor') as HTMLInputElement)?.value;
-    const mapName = (document.getElementById('map-name') as HTMLInputElement)?.value;
-
-    if (!spaceId) {
-      toast.error('Please select a building first');
+    if (!mapSpaceId) {
+      toast.error(t('backoffice.selectBuildingFirst', 'Please select a building first'));
+      // reset file input so user can re-select after choosing a building
+      e.currentTarget.value = '';
       return;
     }
 
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `${spaceId}/${Date.now()}.${fileExt}`;
+      const filePath = `${mapSpaceId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('floor-maps')
@@ -209,16 +209,20 @@ export function RoomMappingTab() {
       if (uploadError) throw uploadError;
 
       await createFloorMap.mutateAsync({
-        space_id: spaceId,
-        name: mapName || file.name,
-        floor: floor || null,
+        space_id: mapSpaceId,
+        name: (mapName || file.name).trim(),
+        floor: (mapFloor || '').trim() || null,
         file_path: filePath,
         uploaded_by: user.id,
       });
 
       setMapDialogOpen(false);
+      setMapSpaceId('');
+      setMapName('');
+      setMapFloor('');
+      e.currentTarget.value = '';
     } catch (error) {
-      toast.error('Failed to upload floor map');
+      toast.error(t('backoffice.uploadMapFailed', 'Failed to upload floor map'));
     } finally {
       setUploading(false);
     }
@@ -273,9 +277,9 @@ export function RoomMappingTab() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>{t('backoffice.building', 'Building')}</Label>
-                  <Select name="space_id">
-                    <SelectTrigger id="map-space-id">
-                      <SelectValue placeholder="Select building..." />
+                  <Select value={mapSpaceId} onValueChange={setMapSpaceId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('backoffice.selectBuilding', 'Select building...')} />
                     </SelectTrigger>
                     <SelectContent>
                       {spaces?.map(space => (
@@ -287,11 +291,19 @@ export function RoomMappingTab() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('backoffice.mapName', 'Map Name')}</Label>
-                    <Input id="map-name" placeholder="Ground Floor Layout" />
+                    <Input
+                      value={mapName}
+                      onChange={(e) => setMapName(e.target.value)}
+                      placeholder={t('backoffice.mapNamePlaceholder', 'Ground Floor Layout')}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>{t('backoffice.floor', 'Floor')}</Label>
-                    <Input id="map-floor" placeholder="Ground, 1, 2..." />
+                    <Input
+                      value={mapFloor}
+                      onChange={(e) => setMapFloor(e.target.value)}
+                      placeholder={t('backoffice.floorPlaceholder', 'Ground, 1, 2...')}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -302,6 +314,11 @@ export function RoomMappingTab() {
                     onChange={handleUploadFloorMap}
                     disabled={uploading}
                   />
+                  {!mapSpaceId && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('backoffice.selectBuildingFirst', 'Please select a building first')}
+                    </p>
+                  )}
                 </div>
               </div>
             </DialogContent>
