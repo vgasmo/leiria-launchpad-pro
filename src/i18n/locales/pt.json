@@ -3160,12 +3160,55 @@
       "at_risk": "Em Risco",
       "stale": "Parado"
     },
-    "itemNotFound": "Lead não encontrado ou sem acesso"
+    "itemNotFound": "Lead não encontrado ou sem acesso",
+    "diagnostics": {
+      "title": "Diagnósticos CRM",
+      "subtitle": "Validar funcionalidades CRM sem afetar dados de produção",
+      "runAll": "Executar Todos",
+      "config": "Configuração de Teste",
+      "configDesc": "Forneça um funnel_item_id para testes direcionados",
+      "funnelId": "ID do Item do Funil (opcional)",
+      "openCrm": "Abrir CRM",
+      "infrastructure": "Infraestrutura",
+      "schemaCheck": "Verificação de Schema",
+      "schemaCheckDesc": "Verificar se as tabelas CRM têm as colunas necessárias",
+      "permissionsCheck": "Verificação de Permissões",
+      "permissionsCheckDesc": "Verificar acesso da equipa aos dados CRM",
+      "notificationsSection": "Notificações",
+      "notificationsDryRun": "Notificações (Dry Run)",
+      "notificationsDryRunDesc": "Contar notificações sem as criar",
+      "notificationsLive": "Notificações (Live)",
+      "notificationsLiveDesc": "Gerar notificações reais (irá modificar dados)",
+      "dataTests": "Testes de Dados",
+      "graphSync": "Sincronização Email Graph (Dry Run)",
+      "graphSyncDesc": "Testar sincronização de emails sem inserir dados",
+      "drawerLoad": "Carregamento do Drawer",
+      "drawerLoadDesc": "Testar carregamento da timeline para um item do funil",
+      "bulkCheck": "Verificação de Ações em Massa",
+      "bulkCheckDesc": "Verificar capacidades de operações em massa",
+      "metricsCheck": "Métricas CRM",
+      "metricsCheckDesc": "Calcular métricas e contagens atuais do CRM",
+      "logs": "Logs de Teste",
+      "clearLogs": "Limpar Logs",
+      "run": "Executar",
+      "testResults": "Resultados dos Testes"
+    },
+    "consultantRequest": "Pedido do seu consultor",
+    "quickActions": "Ações Rápidas",
+    "openDrawer": "Abrir Detalhes",
+    "setAction": "Definir Ação"
   },
   "notifications": {
     "title": "Notificações",
     "markAllRead": "Marcar tudo como lido",
     "noNotifications": "Sem notificações",
-    "settings": "Definições de Notificações"
+    "settings": "Definições de Notificações",
+    "taskDue": "Tarefa a Vencer",
+    "taskOverdue": "Tarefa Em Atraso",
+    "nextActionDue": "Ação a Vencer",
+    "nextActionOverdue": "Ação Em Atraso",
+    "recapReady": "Resumo Pronto",
+    "emailSyncDone": "Emails Sincronizados",
+    "overdueEscalated": "Urgente: Escalonamento de Atraso"
   }
 }

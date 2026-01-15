@@ -3196,12 +3196,55 @@
       "at_risk": "At Risk",
       "stale": "Stale"
     },
-    "itemNotFound": "Lead not found or you don't have access"
+    "itemNotFound": "Lead not found or you don't have access",
+    "diagnostics": {
+      "title": "CRM Diagnostics",
+      "subtitle": "Validate CRM features without affecting production data",
+      "runAll": "Run All Tests",
+      "config": "Test Configuration",
+      "configDesc": "Provide a funnel_item_id for targeted tests",
+      "funnelId": "Funnel Item ID (optional)",
+      "openCrm": "Open CRM",
+      "infrastructure": "Infrastructure",
+      "schemaCheck": "Schema Check",
+      "schemaCheckDesc": "Verify CRM tables have required columns",
+      "permissionsCheck": "Permissions Check",
+      "permissionsCheckDesc": "Verify staff access to CRM data",
+      "notificationsSection": "Notifications",
+      "notificationsDryRun": "Notifications (Dry Run)",
+      "notificationsDryRunDesc": "Count notifications without creating them",
+      "notificationsLive": "Notifications (Live)",
+      "notificationsLiveDesc": "Generate real notifications (will modify data)",
+      "dataTests": "Data Tests",
+      "graphSync": "Graph Email Sync (Dry Run)",
+      "graphSyncDesc": "Test email sync without inserting data",
+      "drawerLoad": "Record Drawer Load",
+      "drawerLoadDesc": "Test loading timeline for a funnel item",
+      "bulkCheck": "Bulk Actions Check",
+      "bulkCheckDesc": "Verify bulk operation capabilities",
+      "metricsCheck": "CRM Metrics",
+      "metricsCheckDesc": "Calculate current CRM metrics and counts",
+      "logs": "Test Logs",
+      "clearLogs": "Clear Logs",
+      "run": "Run",
+      "testResults": "Test Results"
+    },
+    "consultantRequest": "Request from your consultant",
+    "quickActions": "Quick Actions",
+    "openDrawer": "Open Details",
+    "setAction": "Set Action"
   },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all read",
     "noNotifications": "No notifications",
-    "settings": "Notification Settings"
+    "settings": "Notification Settings",
+    "taskDue": "Task Due Soon",
+    "taskOverdue": "Task Overdue",
+    "nextActionDue": "Action Due Soon",
+    "nextActionOverdue": "Action Overdue",
+    "recapReady": "Recap Ready",
+    "emailSyncDone": "Emails Synced",
+    "overdueEscalated": "Urgent: Overdue Escalation"
   }
 }

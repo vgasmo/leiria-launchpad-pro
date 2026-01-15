@@ -10,6 +10,7 @@ export type NotificationType =
   | 'next_action_overdue' 
   | 'recap_ready' 
   | 'email_sync_done'
+  | 'overdue_escalated'
   | 'system';
 
 export interface Notification {

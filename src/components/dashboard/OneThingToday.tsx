@@ -43,7 +43,7 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
   const recommendation = useMemo<RecommendedAction | null>(() => {
     const candidates: RecommendedAction[] = [];
 
-    // Check for overdue actions (highest priority)
+    // Check for overdue actions (highest priority but softer tone)
     const overdueActions = actions?.filter(
       a => a.status !== 'completed' && a.due_date && isPast(new Date(a.due_date))
     ) || [];
@@ -51,14 +51,16 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
     if (overdueActions.length > 0) {
       const oldest = overdueActions[0];
       const daysOverdue = differenceInDays(new Date(), new Date(oldest.due_date!));
+      // Only show as destructive if severely overdue (7+ days), else use warning
+      const variant = daysOverdue >= 7 ? 'destructive' : 'warning';
       candidates.push({
         type: 'overdue_action',
         title: oldest.title,
-        why: t('oneThingToday.overdueWhy', `This action is ${daysOverdue} days overdue. Completing it unblocks your progress.`, { days: daysOverdue }),
+        why: t('oneThingToday.overdueWhy', { days: daysOverdue }),
         link: `/workspace/${workspace.id}?tab=actions`,
         priority: 100 + daysOverdue,
-        icon: AlertCircle,
-        variant: 'destructive',
+        icon: daysOverdue >= 7 ? AlertCircle : Target,
+        variant,
       });
     }
 
@@ -150,16 +152,17 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
   }
 
   const Icon = recommendation.icon;
+  // Softer color scheme - use amber/warning instead of heavy red
   const bgClass = recommendation.variant === 'destructive' 
-    ? 'from-destructive/5 to-red-500/5 border-destructive/20'
+    ? 'from-red-500/5 to-orange-500/5 border-red-400/30'
     : recommendation.variant === 'warning'
-    ? 'from-amber-500/5 to-orange-500/5 border-amber-500/20'
+    ? 'from-amber-500/5 to-yellow-500/5 border-amber-400/30'
     : 'from-primary/5 to-accent/5 border-primary/20';
   
   const iconBgClass = recommendation.variant === 'destructive'
-    ? 'bg-destructive/10 text-destructive'
+    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
     : recommendation.variant === 'warning'
-    ? 'bg-amber-500/10 text-amber-600'
+    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
     : 'bg-primary/10 text-primary';
 
   return (

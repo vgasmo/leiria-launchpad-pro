@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, Check, CheckCheck, Trash2, Clock, AlertTriangle, Mail, Calendar } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Clock, AlertTriangle, Mail, Siren, Sparkles, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -9,7 +9,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   useNotifications,
   useUnreadNotificationCount,
@@ -21,14 +20,28 @@ import {
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 
+// CRM notification type icons - more specific mappings
 const NOTIFICATION_ICONS: Record<string, typeof Bell> = {
   task_due: Clock,
   task_overdue: AlertTriangle,
-  next_action_due: Clock,
+  next_action_due: Pin,
   next_action_overdue: AlertTriangle,
-  recap_ready: Mail,
+  recap_ready: Sparkles,
   email_sync_done: Mail,
+  overdue_escalated: Siren,
   system: Bell,
+};
+
+// Type-specific colors for better visual hierarchy
+const NOTIFICATION_COLORS: Record<string, string> = {
+  task_due: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  task_overdue: 'bg-destructive/10 text-destructive',
+  next_action_due: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  next_action_overdue: 'bg-destructive/10 text-destructive',
+  recap_ready: 'bg-primary/10 text-primary',
+  email_sync_done: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  overdue_escalated: 'bg-destructive/10 text-destructive',
+  system: 'bg-muted text-muted-foreground',
 };
 
 export function NotificationBell() {
@@ -96,25 +109,22 @@ export function NotificationBell() {
             <div className="divide-y">
               {notifications.map((notification) => {
                 const Icon = NOTIFICATION_ICONS[notification.type] || Bell;
-                const isOverdue = notification.type.includes('overdue');
+                const colorClass = NOTIFICATION_COLORS[notification.type] || 'bg-muted text-muted-foreground';
                 
                 return (
                   <div
                     key={notification.id}
                     className={cn(
-                      'p-3 hover:bg-muted/50 cursor-pointer transition-colors flex gap-3',
+                      'p-3 hover:bg-muted/50 cursor-pointer transition-colors flex gap-3 group',
                       !notification.read && 'bg-primary/5'
                     )}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className={cn(
                       'shrink-0 mt-0.5 h-8 w-8 rounded-full flex items-center justify-center',
-                      isOverdue ? 'bg-destructive/10' : 'bg-muted'
+                      colorClass
                     )}>
-                      <Icon className={cn(
-                        'h-4 w-4',
-                        isOverdue ? 'text-destructive' : 'text-muted-foreground'
-                      )} />
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
