@@ -69,7 +69,7 @@ export function LocationContractCard({ workspaceId }: LocationContractCardProps)
             {t('workspace.locationContract')}
           </CardTitle>
           <Badge className={statusColors[contract.status] || ''}>
-            {t(`backoffice.contractStatus.${contract.status}`)}
+            {t(`admin.backoffice.contractStatus.${contract.status}`)}
           </Badge>
         </div>
       </CardHeader>
@@ -96,7 +96,7 @@ export function LocationContractCard({ workspaceId }: LocationContractCardProps)
               <p className="font-medium">{contract.incubation_type.name}</p>
               {contract.incubation_type.contract_type && (
                 <Badge variant="outline" className="text-xs mt-1">
-                  {t(`backoffice.contractTypes.${contract.incubation_type.contract_type}`)}
+                  {t(`admin.backoffice.contractTypes.${contract.incubation_type.contract_type}`)}
                 </Badge>
               )}
             </div>

@@ -294,6 +294,7 @@ export function BackofficeContractsTab() {
                   <TableHead>{t('backoffice.startup')}</TableHead>
                   <TableHead>{t('backoffice.contractNumber')}</TableHead>
                   <TableHead>{t('backoffice.type')}</TableHead>
+                  <TableHead>{t('backoffice.building')}</TableHead>
                   <TableHead>{t('backoffice.status')}</TableHead>
                   <TableHead>{t('backoffice.startDate')}</TableHead>
                   <TableHead>{t('backoffice.monthlyFee')}</TableHead>
@@ -306,6 +307,7 @@ export function BackofficeContractsTab() {
                   const statusConfig = STATUS_CONFIG[contract.status];
                   const startup = (contract.workspace as any)?.startup;
                   const incubationType = contract.incubation_type as IncubationType | null;
+                  const building = contract.building as { name: string; city?: string } | null;
                   const effectiveFee = contract.monthly_fee * (1 - (contract.discount_percentage || 0) / 100);
 
                   return (
@@ -318,6 +320,14 @@ export function BackofficeContractsTab() {
                       </TableCell>
                       <TableCell>
                         {incubationType?.name || '-'}
+                      </TableCell>
+                      <TableCell>
+                        {building ? (
+                          <span className="text-sm">
+                            {building.name}
+                            {building.city && <span className="text-muted-foreground text-xs block">{building.city}</span>}
+                          </span>
+                        ) : '-'}
                       </TableCell>
                       <TableCell>
                         <Badge className={cn('text-xs', statusConfig?.className)}>
@@ -356,7 +366,7 @@ export function BackofficeContractsTab() {
                 })}
                 {filteredContracts?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       {t('backoffice.noContracts')}
                     </TableCell>
                   </TableRow>
