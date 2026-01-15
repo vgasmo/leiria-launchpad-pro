@@ -130,19 +130,19 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
                 key={item.id}
                 className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 ${
                   item.urgency === 'high'
-                    ? 'border-destructive/30 bg-destructive/5'
+                    ? 'border-amber-300/40 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10'
                     : item.urgency === 'medium'
-                    ? 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10'
-                    : 'border-border bg-muted/30'
+                    ? 'border-border bg-muted/30'
+                    : 'border-border/50 bg-muted/20'
                 }`}
                 onClick={() => navigate(`/workspace/${workspace.id}?tab=${item.tab}`)}
               >
                 <div className="flex items-center gap-2.5">
                   <div className={`h-7 w-7 rounded-full flex items-center justify-center ${
                     item.urgency === 'high'
-                      ? 'bg-destructive/10 text-destructive'
+                      ? 'bg-amber-100/50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                       : item.urgency === 'medium'
-                      ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400'
+                      ? 'bg-primary/10 text-primary'
                       : 'bg-muted text-muted-foreground'
                   }`}>
                     {item.icon}
