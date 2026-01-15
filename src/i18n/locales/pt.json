@@ -140,9 +140,12 @@
     "next": "Seguinte",
     "details": "Detalhes",
     "sending": "A enviar...",
-    "actions": "Ações"
+    "actions": "Ações",
+    "new": "Novo",
+    "perMonth": "/mês"
   },
   "nav": {
+    "home": "Início",
     "myWorkspaces": "Os Meus Workspaces",
     "workspaces": "Workspaces",
     "mentors": "Mentores",
@@ -2458,7 +2461,8 @@
     "activeMentorships_plural": "{{count}} mentorias ativas",
     "viewAll": "Ver Todas",
     "dashboard": "Dashboard",
-    "createStartup": "Criar Startup"
+    "createStartup": "Criar Startup",
+    "loadError": "Falha ao carregar workspaces. Por favor tente novamente."
   },
   "topBar": {
     "roles": "Funções",

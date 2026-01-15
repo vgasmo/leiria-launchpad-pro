@@ -293,7 +293,7 @@ export default function MyWorkspaces() {
             <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.createStartup')}</span>
-              <span className="sm:hidden">New</span>
+              <span className="sm:hidden">{t('common.new')}</span>
             </Button>
           )}
         </div>
@@ -377,7 +377,7 @@ export default function MyWorkspaces() {
             <Card className="border-destructive/50 bg-destructive/5">
               <CardContent className="flex items-center gap-3 p-6">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
-                <p className="text-destructive">Failed to load workspaces. Please try again.</p>
+                <p className="text-destructive">{t('myWorkspaces.loadError')}</p>
               </CardContent>
             </Card>
           ) : filteredWorkspaces.length === 0 ? (
