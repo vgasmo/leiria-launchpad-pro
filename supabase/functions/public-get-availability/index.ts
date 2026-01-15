@@ -165,10 +165,30 @@ serve(async (req) => {
   }
 
   try {
-    const { token, action } = await req.json();
+    // Parse request body safely
+    let body: { token?: unknown; action?: unknown };
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (!token) {
-      return new Response(JSON.stringify({ error: "Token required" }), {
+    const { token, action } = body;
+
+    // Validate token
+    if (!token || typeof token !== 'string' || token.length > 500) {
+      return new Response(JSON.stringify({ error: "Invalid or missing token" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate action
+    if (action !== undefined && action !== 'validate' && action !== 'get_slots') {
+      return new Response(JSON.stringify({ error: "Invalid action" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -393,9 +413,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error("Error:", message);
-    return new Response(JSON.stringify({ error: message }), {
+    // Log full error server-side for debugging
+    console.error("Error:", error instanceof Error ? error.message : 'Unknown error');
+    // Return safe error message to client - never leak internal details
+    return new Response(JSON.stringify({ 
+      error: "Unable to retrieve availability. Please try again or contact us directly." 
+    }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

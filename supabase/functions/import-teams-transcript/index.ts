@@ -36,11 +36,13 @@ async function getGraphCredentials(
   // Check for env var secret first (production secure approach)
   const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
   
+  // Support both 'graph_api' and 'microsoft_graph' for backward compatibility
   const { data: globalSettings } = await supabaseAdmin
     .from('global_integration_settings')
     .select('settings_json, is_enabled')
-    .eq('integration_type', 'graph_api')
+    .in('integration_type', ['graph_api', 'microsoft_graph'])
     .eq('is_enabled', true)
+    .limit(1)
     .maybeSingle();
   
   if (!globalSettings?.settings_json) {

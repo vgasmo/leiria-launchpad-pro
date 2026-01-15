@@ -1,6 +1,8 @@
 /**
  * Public Book First Contact - Creates funnel item and calendar event
  * Supports real Graph API calendar integration with Teams meeting
+ * 
+ * HARDENED: Input validation, rate limiting, safe error messages
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -10,6 +12,16 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation constants
+const MAX_NAME_LENGTH = 200;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PHONE_LENGTH = 50;
+const MAX_ORG_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 2000;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_REGEX = /^\d{2}:\d{2}$/;
 
 interface BookingRequest {
   token: string;
@@ -23,6 +35,97 @@ interface BookingRequest {
     phone?: string;
     organization?: string;
     message?: string;
+  };
+}
+
+// Validate and sanitize booking request
+function validateBookingRequest(body: unknown): { valid: true; data: BookingRequest } | { valid: false; error: string } {
+  if (!body || typeof body !== 'object') {
+    return { valid: false, error: 'Invalid request body' };
+  }
+
+  const req = body as Record<string, unknown>;
+
+  // Token validation
+  if (!req.token || typeof req.token !== 'string' || req.token.length > 500) {
+    return { valid: false, error: 'Invalid token' };
+  }
+
+  // Slot validation
+  if (!req.slot || typeof req.slot !== 'object') {
+    return { valid: false, error: 'Invalid slot' };
+  }
+  const slot = req.slot as Record<string, unknown>;
+  
+  if (!slot.date || typeof slot.date !== 'string' || !DATE_REGEX.test(slot.date)) {
+    return { valid: false, error: 'Invalid date format (expected YYYY-MM-DD)' };
+  }
+  if (!slot.time || typeof slot.time !== 'string' || !TIME_REGEX.test(slot.time)) {
+    return { valid: false, error: 'Invalid time format (expected HH:MM)' };
+  }
+
+  // Contact validation
+  if (!req.contact || typeof req.contact !== 'object') {
+    return { valid: false, error: 'Invalid contact information' };
+  }
+  const contact = req.contact as Record<string, unknown>;
+
+  if (!contact.name || typeof contact.name !== 'string' || contact.name.trim().length === 0) {
+    return { valid: false, error: 'Name is required' };
+  }
+  if (contact.name.length > MAX_NAME_LENGTH) {
+    return { valid: false, error: `Name must be ${MAX_NAME_LENGTH} characters or less` };
+  }
+
+  if (!contact.email || typeof contact.email !== 'string') {
+    return { valid: false, error: 'Email is required' };
+  }
+  const email = contact.email.trim().toLowerCase();
+  if (!EMAIL_REGEX.test(email) || email.length > MAX_EMAIL_LENGTH) {
+    return { valid: false, error: 'Invalid email address' };
+  }
+
+  // Optional fields validation
+  let phone: string | undefined;
+  if (contact.phone !== undefined && contact.phone !== null) {
+    if (typeof contact.phone !== 'string' || contact.phone.length > MAX_PHONE_LENGTH) {
+      return { valid: false, error: 'Invalid phone number' };
+    }
+    phone = contact.phone.trim() || undefined;
+  }
+
+  let organization: string | undefined;
+  if (contact.organization !== undefined && contact.organization !== null) {
+    if (typeof contact.organization !== 'string' || contact.organization.length > MAX_ORG_LENGTH) {
+      return { valid: false, error: 'Invalid organization name' };
+    }
+    organization = contact.organization.trim() || undefined;
+  }
+
+  let message: string | undefined;
+  if (contact.message !== undefined && contact.message !== null) {
+    if (typeof contact.message !== 'string' || contact.message.length > MAX_MESSAGE_LENGTH) {
+      return { valid: false, error: `Message must be ${MAX_MESSAGE_LENGTH} characters or less` };
+    }
+    message = contact.message.trim() || undefined;
+  }
+
+  return {
+    valid: true,
+    data: {
+      token: req.token as string,
+      slot: {
+        date: slot.date as string,
+        time: slot.time as string,
+      },
+      contact: {
+        name: (contact.name as string).trim(),
+        email,
+        phone,
+        organization,
+        message,
+      },
+    },
   };
 }
 
@@ -168,17 +271,32 @@ serve(async (req) => {
   }
 
   try {
-    const { token, slot, contact } = await req.json() as BookingRequest;
-
-    if (!token || !slot || !contact?.name || !contact?.email) {
+    // Parse and validate request body
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: "Missing required fields" 
+        error: "Invalid JSON body" 
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const validation = validateBookingRequest(rawBody);
+    if (!validation.valid) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: validation.error 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { token, slot, contact } = validation.data;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
