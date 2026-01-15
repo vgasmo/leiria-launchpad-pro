@@ -94,51 +94,40 @@ async function getGraphAccessToken(credentials: {
   return data.access_token;
 }
 
-// Get free/busy schedule from Graph API
+// Get free/busy schedule from Graph API using application permissions
 async function getFreeBusySchedule(
   accessToken: string,
   userEmail: string,
   startTime: string,
-  endTime: string
+  endTime: string,
+  log: ReturnType<typeof createLogger>
 ): Promise<GraphFreeBusyResponse> {
-  const url = 'https://graph.microsoft.com/v1.0/me/calendar/getSchedule';
+  // With application permissions (client credentials), use /users/{id}/calendar/getSchedule
+  // The /me endpoint only works with delegated permissions
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userEmail)}/calendar/getSchedule`;
   
+  const requestBody = {
+    schedules: [userEmail],
+    startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
+    endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
+    availabilityViewInterval: 30, // 30-minute slots
+  };
+
+  log.info('Calling Graph getSchedule', { url, email: userEmail });
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      schedules: [userEmail],
-      startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
-      endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
-      availabilityViewInterval: 30, // 30-minute slots
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
-    // Try user-specific endpoint
-    const userUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userEmail)}/calendar/getSchedule`;
-    const userResponse = await fetch(userUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        schedules: [userEmail],
-        startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
-        endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
-        availabilityViewInterval: 30,
-      }),
-    });
-    
-    if (!userResponse.ok) {
-      throw new Error(`Failed to get schedule: ${userResponse.status}`);
-    }
-    
-    return await userResponse.json();
+    const errorText = await response.text();
+    log.error('Graph getSchedule failed', null, { status: response.status, error: errorText.slice(0, 300) });
+    throw new Error(`Failed to get schedule: ${response.status} - ${errorText.slice(0, 100)}`);
   }
 
   return await response.json();
@@ -329,7 +318,7 @@ Deno.serve(async (req: Request) => {
       const startTime = `${date}T09:00:00`;
       const endTime = `${date}T18:00:00`;
 
-      const schedule = await getFreeBusySchedule(accessToken, consultantEmail, startTime, endTime);
+      const schedule = await getFreeBusySchedule(accessToken, consultantEmail, startTime, endTime, log);
 
       if (!schedule.value || schedule.value.length === 0) {
         // If Graph didn't return any schedule, treat as unverifiable (don't guess).
