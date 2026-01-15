@@ -3232,7 +3232,10 @@
     "consultantRequest": "Request from your consultant",
     "quickActions": "Quick Actions",
     "openDrawer": "Open Details",
-    "setAction": "Set Action"
+    "setAction": "Set Action",
+    "pipeline": "Pipeline",
+    "totalLeads": "Total Leads",
+    "unnamed": "Unnamed"
   },
   "notifications": {
     "title": "Notifications",
