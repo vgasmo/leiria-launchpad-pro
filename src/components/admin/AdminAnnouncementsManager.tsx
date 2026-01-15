@@ -262,10 +262,7 @@ export function AdminAnnouncementsManager() {
                     <SelectItem value="all">{t('admin.announcements.allBuildings')}</SelectItem>
                     {buildings?.filter(b => b.is_active).map(b => (
                       <SelectItem key={b.id} value={b.id}>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-3 w-3" />
-                          {b.name}
-                        </div>
+                        {b.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
