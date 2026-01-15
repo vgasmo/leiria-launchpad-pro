@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { HealthScore } from '@/types/database';
+import { useTranslation } from 'react-i18next';
 
 interface HealthBadgeProps {
   score: HealthScore | null | undefined;
@@ -7,15 +8,25 @@ interface HealthBadgeProps {
   className?: string;
 }
 
-const healthConfig: Record<HealthScore, { label: string; className: string }> = {
-  critical: { label: 'Critical', className: 'bg-health-critical/10 text-health-critical border-health-critical/30' },
-  at_risk: { label: 'At Risk', className: 'bg-health-at-risk/10 text-health-at-risk border-health-at-risk/30' },
-  stable: { label: 'Stable', className: 'bg-health-stable/10 text-health-stable border-health-stable/30' },
-  healthy: { label: 'Healthy', className: 'bg-health-healthy/10 text-health-healthy border-health-healthy/30' },
-  thriving: { label: 'Thriving', className: 'bg-health-thriving/10 text-health-thriving border-health-thriving/30' },
+const healthClassNames: Record<HealthScore, string> = {
+  critical: 'bg-health-critical/10 text-health-critical border-health-critical/30',
+  at_risk: 'bg-health-at-risk/10 text-health-at-risk border-health-at-risk/30',
+  stable: 'bg-health-stable/10 text-health-stable border-health-stable/30',
+  healthy: 'bg-health-healthy/10 text-health-healthy border-health-healthy/30',
+  thriving: 'bg-health-thriving/10 text-health-thriving border-health-thriving/30',
+};
+
+const healthLabelKeys: Record<HealthScore, string> = {
+  critical: 'health.levels.critical',
+  at_risk: 'health.levels.atRisk',
+  stable: 'health.levels.stable',
+  healthy: 'health.levels.healthy',
+  thriving: 'health.levels.thriving',
 };
 
 export function HealthBadge({ score, size = 'md', className }: HealthBadgeProps) {
+  const { t } = useTranslation();
+  
   const sizeClasses = {
     sm: 'text-xs px-2 py-0.5',
     md: 'text-xs px-2.5 py-1',
@@ -30,18 +41,19 @@ export function HealthBadge({ score, size = 'md', className }: HealthBadgeProps)
         "bg-muted text-muted-foreground border-border",
         className
       )}>
-        Not Set
+        {t('health.levels.unknown')}
       </span>
     );
   }
 
-  const config = healthConfig[score];
+  const labelKey = healthLabelKeys[score];
+  const colorClass = healthClassNames[score];
   
   return (
     <span className={cn(
       "inline-flex items-center rounded-full border font-medium",
       sizeClasses[size],
-      config.className,
+      colorClass,
       className
     )}>
       <span className={cn(
@@ -53,7 +65,7 @@ export function HealthBadge({ score, size = 'md', className }: HealthBadgeProps)
         score === 'healthy' && 'bg-health-healthy',
         score === 'thriving' && 'bg-health-thriving',
       )} />
-      {config.label}
+      {t(labelKey)}
     </span>
   );
 }

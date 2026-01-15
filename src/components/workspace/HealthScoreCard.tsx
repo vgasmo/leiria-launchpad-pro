@@ -187,16 +187,16 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
             <div className={`text-4xl font-bold p-4 rounded-xl ${config.color}`}>
               {config.icon}
             </div>
-            <div className="flex-1">
+          <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold">{config.label}</span>
+                <span className="text-2xl font-bold">{t(config.labelKey)}</span>
                 {hasOverride && (
                   <Badge variant="outline" className="text-xs">
                     {t('health.manualOverride')}
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">{config.description}</p>
+              <p className="text-sm text-muted-foreground">{t(config.descriptionKey)}</p>
               {numericScore > 0 && (
                 <div className="mt-2">
                   <div className="flex items-center justify-between text-xs mb-1">

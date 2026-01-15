@@ -3173,8 +3173,21 @@
       "healthy": "Saudável",
       "stable": "Estável",
       "atRisk": "Em Risco",
-      "critical": "Crítico"
+      "critical": "Crítico",
+      "unknown": "Desconhecido"
+    },
+    "descriptions": {
+      "thriving": "A startup está a exceder expectativas",
+      "healthy": "Bom progresso geral",
+      "stable": "Progresso moderado",
+      "atRisk": "Precisa de atenção",
+      "critical": "Ação urgente necessária",
+      "unknown": "Score não calculado"
     }
+  },
+  "workspace": {
+    "locationContract": "Localização e Contrato",
+    "noContractAssigned": "Ainda sem contrato atribuído"
   },
   "streakHero": {
     "weeksStreak": "semana de streak",

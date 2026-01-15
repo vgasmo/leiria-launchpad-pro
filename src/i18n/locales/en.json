@@ -3163,8 +3163,21 @@
       "healthy": "Healthy",
       "stable": "Stable",
       "atRisk": "At Risk",
-      "critical": "Critical"
+      "critical": "Critical",
+      "unknown": "Unknown"
+    },
+    "descriptions": {
+      "thriving": "Startup is exceeding expectations",
+      "healthy": "Good overall progress",
+      "stable": "Moderate progress",
+      "atRisk": "Needs attention",
+      "critical": "Urgent action required",
+      "unknown": "Score not calculated"
     }
+  },
+  "workspace": {
+    "locationContract": "Location & Contract",
+    "noContractAssigned": "No contract assigned yet"
   },
   "publicBooking": {
     "title": "Book a Meeting",

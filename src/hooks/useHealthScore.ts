@@ -123,16 +123,16 @@ export function useRecomputeHealthScores() {
   });
 }
 
-// Get health score config
+// Get health score config - returns translation keys for label/description
 export function getHealthScoreConfig(score: string | null) {
-  const configs: Record<string, { color: string; icon: string; label: string; description: string }> = {
-    thriving: { color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', icon: '🌟', label: 'Excelente', description: 'A startup está a exceder expectativas' },
-    healthy: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: '✅', label: 'Saudável', description: 'Bom progresso geral' },
-    stable: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: '➡️', label: 'Estável', description: 'Progresso moderado' },
-    at_risk: { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: '⚠️', label: 'Em risco', description: 'Precisa de atenção' },
-    critical: { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: '🚨', label: 'Crítico', description: 'Ação urgente necessária' },
+  const configs: Record<string, { color: string; icon: string; labelKey: string; descriptionKey: string }> = {
+    thriving: { color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', icon: '🌟', labelKey: 'health.levels.thriving', descriptionKey: 'health.descriptions.thriving' },
+    healthy: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: '✅', labelKey: 'health.levels.healthy', descriptionKey: 'health.descriptions.healthy' },
+    stable: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: '➡️', labelKey: 'health.levels.stable', descriptionKey: 'health.descriptions.stable' },
+    at_risk: { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: '⚠️', labelKey: 'health.levels.atRisk', descriptionKey: 'health.descriptions.atRisk' },
+    critical: { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: '🚨', labelKey: 'health.levels.critical', descriptionKey: 'health.descriptions.critical' },
   };
-  return configs[score || ''] || { color: 'bg-muted text-muted-foreground', icon: '❓', label: 'Desconhecido', description: 'Score não calculado' };
+  return configs[score || ''] || { color: 'bg-muted text-muted-foreground', icon: '❓', labelKey: 'health.levels.unknown', descriptionKey: 'health.descriptions.unknown' };
 }
 
 // Legacy functions below for backwards compatibility
