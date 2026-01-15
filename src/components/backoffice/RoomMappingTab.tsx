@@ -94,7 +94,7 @@ function FloorMapCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 text-primary hover:text-primary/80"
               onClick={onViewInteractive}
               title={t('backoffice.viewInteractive', 'View interactive map')}
             >
