@@ -24,6 +24,8 @@ import {
   useCreateFloorMap,
   useDeleteFloorMap,
   useOfficeSpaces,
+  useBuildings,
+  useCreateOfficeSpace,
   type Room,
   type FloorMap
 } from '@/hooks/useBackoffice';
@@ -128,10 +130,11 @@ export function RoomMappingTab() {
   const [roomToAllocate, setRoomToAllocate] = useState<Room | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const [mapSpaceId, setMapSpaceId] = useState<string>('');
+  const [mapBuildingId, setMapBuildingId] = useState<string>('');
   const [mapName, setMapName] = useState<string>('');
   const [mapFloor, setMapFloor] = useState<string>('');
 
+  const { data: buildings } = useBuildings();
   const { data: spaces } = useOfficeSpaces();
   const { data: rooms, isLoading } = useRoomsWithAllocations(selectedSpace === 'all' ? undefined : selectedSpace);
   const { data: floorMaps } = useFloorMaps(selectedSpace === 'all' ? undefined : selectedSpace);
@@ -144,6 +147,7 @@ export function RoomMappingTab() {
   const endAllocation = useEndRoomAllocation();
   const createFloorMap = useCreateFloorMap();
   const deleteFloorMap = useDeleteFloorMap();
+  const createOfficeSpace = useCreateOfficeSpace();
 
   const handleSaveRoom = async (formData: FormData) => {
     const payload = {
@@ -190,7 +194,7 @@ export function RoomMappingTab() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (!mapSpaceId) {
+    if (!mapBuildingId) {
       toast.error(t('backoffice.selectBuildingFirst', 'Please select a building first'));
       // reset file input so user can re-select after choosing a building
       e.currentTarget.value = '';
@@ -199,8 +203,26 @@ export function RoomMappingTab() {
 
     setUploading(true);
     try {
+      // Floor maps are tied to office_spaces (space_id). If the admin hasn't created
+      // any spaces yet, we create a lightweight “building space” record so maps can be stored.
+      let spaceId = spaces?.find((s: any) => s.building_id === mapBuildingId)?.id as string | undefined;
+
+      if (!spaceId) {
+        const buildingName = buildings?.find((b) => b.id === mapBuildingId)?.name || 'Building';
+        const created = await createOfficeSpace.mutateAsync({
+          name: buildingName,
+          type: 'private_office',
+          building_id: mapBuildingId,
+        });
+        spaceId = (created as any)?.id;
+      }
+
+      if (!spaceId) {
+        throw new Error('Unable to resolve office space for building');
+      }
+
       const fileExt = file.name.split('.').pop();
-      const filePath = `${mapSpaceId}/${Date.now()}.${fileExt}`;
+      const filePath = `${spaceId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('floor-maps')
@@ -209,7 +231,7 @@ export function RoomMappingTab() {
       if (uploadError) throw uploadError;
 
       await createFloorMap.mutateAsync({
-        space_id: mapSpaceId,
+        space_id: spaceId,
         name: (mapName || file.name).trim(),
         floor: (mapFloor || '').trim() || null,
         file_path: filePath,
@@ -217,7 +239,7 @@ export function RoomMappingTab() {
       });
 
       setMapDialogOpen(false);
-      setMapSpaceId('');
+      setMapBuildingId('');
       setMapName('');
       setMapFloor('');
       e.currentTarget.value = '';
@@ -277,13 +299,15 @@ export function RoomMappingTab() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>{t('backoffice.building', 'Building')}</Label>
-                  <Select value={mapSpaceId} onValueChange={setMapSpaceId}>
+                  <Select value={mapBuildingId} onValueChange={setMapBuildingId}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('backoffice.selectBuilding', 'Select building...')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {spaces?.map(space => (
-                        <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
+                      {buildings?.map((building) => (
+                        <SelectItem key={building.id} value={building.id}>
+                          {building.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -314,7 +338,7 @@ export function RoomMappingTab() {
                     onChange={handleUploadFloorMap}
                     disabled={uploading}
                   />
-                  {!mapSpaceId && (
+                  {!mapBuildingId && (
                     <p className="text-xs text-muted-foreground">
                       {t('backoffice.selectBuildingFirst', 'Please select a building first')}
                     </p>
