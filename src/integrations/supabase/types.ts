@@ -1370,6 +1370,47 @@ export type Database = {
           },
         ]
       }
+      floor_maps: {
+        Row: {
+          created_at: string
+          file_path: string
+          floor: string | null
+          id: string
+          name: string
+          space_id: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          floor?: string | null
+          id?: string
+          name: string
+          space_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          floor?: string | null
+          id?: string
+          name?: string
+          space_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floor_maps_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "office_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_rounds: {
         Row: {
           announced_at: string | null
@@ -3482,6 +3523,123 @@ export type Database = {
           },
         ]
       }
+      room_allocations: {
+        Row: {
+          allocation_type: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          funnel_item_id: string | null
+          id: string
+          notes: string | null
+          room_id: string
+          start_date: string
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          allocation_type?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          room_id: string
+          start_date: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          allocation_type?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          room_id?: string
+          start_date?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_allocations_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_allocations_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_allocations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          amenities: string[] | null
+          capacity: number | null
+          created_at: string
+          floor: string | null
+          id: string
+          name: string
+          notes: string | null
+          room_number: string | null
+          room_type: string
+          space_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          floor?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          room_number?: string | null
+          room_type?: string
+          space_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          floor?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          room_number?: string | null
+          room_type?: string
+          space_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "office_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_filters: {
         Row: {
           created_at: string
@@ -3946,6 +4104,92 @@ export type Database = {
           },
           {
             foreignKeyName: "space_allocations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      space_waiting_list: {
+        Row: {
+          created_at: string
+          fulfilled_at: string | null
+          fulfilled_by: string | null
+          funnel_item_id: string | null
+          id: string
+          notes: string | null
+          offered_room_id: string | null
+          preferred_capacity: number | null
+          preferred_space_id: string | null
+          priority: number
+          request_type: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          offered_room_id?: string | null
+          preferred_capacity?: number | null
+          preferred_space_id?: string | null
+          priority?: number
+          request_type?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          funnel_item_id?: string | null
+          id?: string
+          notes?: string | null
+          offered_room_id?: string | null
+          preferred_capacity?: number | null
+          preferred_space_id?: string | null
+          priority?: number
+          request_type?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_waiting_list_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_waiting_list_offered_room_id_fkey"
+            columns: ["offered_room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_waiting_list_preferred_space_id_fkey"
+            columns: ["preferred_space_id"]
+            isOneToOne: false
+            referencedRelation: "office_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_waiting_list_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"

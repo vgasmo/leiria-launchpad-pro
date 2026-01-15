@@ -1,0 +1,514 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Plus, Clock, CheckCircle, XCircle, Building2, Users, 
+  ArrowRight, AlertCircle, ListOrdered
+} from 'lucide-react';
+import { 
+  useSpaceWaitingList,
+  useCreateWaitingListRequest,
+  useUpdateWaitingListRequest,
+  useFulfillWaitingListRequest,
+  useOfficeSpaces,
+  useRoomsWithAllocations,
+  type SpaceWaitingListItem
+} from '@/hooks/useBackoffice';
+import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useFunnelItems } from '@/hooks/useFunnel';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { format, formatDistanceToNow } from 'date-fns';
+
+const REQUEST_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
+  office: { label: 'Private Office', color: 'bg-blue-500' },
+  desk: { label: 'Dedicated Desk', color: 'bg-green-500' },
+  hotdesk: { label: 'Hot Desk', color: 'bg-yellow-500' },
+  virtual: { label: 'Virtual Incubation', color: 'bg-purple-500' },
+  meeting_room: { label: 'Meeting Room', color: 'bg-orange-500' },
+};
+
+const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; color: string }> = {
+  waiting: { label: 'Waiting', icon: Clock, color: 'text-yellow-600' },
+  offered: { label: 'Offered', icon: ArrowRight, color: 'text-blue-600' },
+  accepted: { label: 'Accepted', icon: CheckCircle, color: 'text-green-600' },
+  declined: { label: 'Declined', icon: XCircle, color: 'text-red-600' },
+  fulfilled: { label: 'Fulfilled', icon: CheckCircle, color: 'text-green-600' },
+  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-muted-foreground' },
+};
+
+export function SpaceWaitingListTab() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<string>('waiting');
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [fulfillDialogOpen, setFulfillDialogOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<SpaceWaitingListItem | null>(null);
+  const [priority, setPriority] = useState([50]);
+
+  const { data: waitingList, isLoading } = useSpaceWaitingList({ status: statusFilter === 'all' ? undefined : statusFilter });
+  const { data: spaces } = useOfficeSpaces();
+  const { data: rooms } = useRoomsWithAllocations();
+  const { data: workspaces } = useWorkspaces();
+  const { data: funnelItems } = useFunnelItems();
+
+  const createRequest = useCreateWaitingListRequest();
+  const updateRequest = useUpdateWaitingListRequest();
+  const fulfillRequest = useFulfillWaitingListRequest();
+
+  const availableRooms = rooms?.filter(r => !r.current_allocation && r.status === 'available') || [];
+
+  const handleAddRequest = async (formData: FormData) => {
+    if (!user) return;
+
+    const workspaceId = formData.get('workspace_id') as string;
+    const funnelItemId = formData.get('funnel_item_id') as string;
+
+    await createRequest.mutateAsync({
+      workspace_id: workspaceId || null,
+      funnel_item_id: funnelItemId || null,
+      request_type: formData.get('request_type') as string,
+      preferred_space_id: formData.get('preferred_space_id') as string || null,
+      preferred_capacity: parseInt(formData.get('preferred_capacity') as string) || null,
+      priority: priority[0],
+      notes: formData.get('notes') as string || null,
+      requested_by: user.id,
+    });
+    setAddDialogOpen(false);
+    setPriority([50]);
+  };
+
+  const handleFulfill = async (formData: FormData) => {
+    if (!selectedRequest || !user) return;
+
+    await fulfillRequest.mutateAsync({
+      requestId: selectedRequest.id,
+      roomId: formData.get('room_id') as string,
+      startDate: formData.get('start_date') as string,
+      userId: user.id,
+    });
+    setFulfillDialogOpen(false);
+    setSelectedRequest(null);
+  };
+
+  const getEntityName = (item: SpaceWaitingListItem) => {
+    return item.workspace?.startup?.name || 
+      item.funnel_item?.organization_name || 
+      item.funnel_item?.contact_name || 
+      'Unknown';
+  };
+
+  const waitingCount = waitingList?.filter(r => r.status === 'waiting').length || 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <ListOrdered className="h-5 w-5" />
+            {t('backoffice.waitingList', 'Space Waiting List')}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t('backoffice.waitingListDesc', 'Manage requests for office space from leads and startups')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                {t('backoffice.addToWaitlist', 'Add to Waitlist')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{t('backoffice.addWaitlistRequest', 'Add Waiting List Request')}</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddRequest(new FormData(e.currentTarget));
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label>{t('backoffice.requestFor', 'Request For')}</Label>
+                  <Tabs defaultValue="startup" className="w-full">
+                    <TabsList className="w-full">
+                      <TabsTrigger value="startup" className="flex-1">Startup</TabsTrigger>
+                      <TabsTrigger value="lead" className="flex-1">Lead/Prospect</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="startup" className="mt-2">
+                      <Select name="workspace_id">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select startup..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {workspaces?.map(w => (
+                            <SelectItem key={w.id} value={w.id}>
+                              {w.startup?.name || 'Unnamed'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TabsContent>
+                    <TabsContent value="lead" className="mt-2">
+                      <Select name="funnel_item_id">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select lead..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <ScrollArea className="h-[200px]">
+                            {funnelItems?.map(item => (
+                              <SelectItem key={item.id} value={item.id}>
+                                {item.organization_name || item.contact_name || 'Unnamed'}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t('backoffice.requestType', 'Request Type')}</Label>
+                    <Select name="request_type" defaultValue="office">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(REQUEST_TYPE_CONFIG).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('backoffice.preferredCapacity', 'Preferred Capacity')}</Label>
+                    <Input type="number" name="preferred_capacity" placeholder="Number of people" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('backoffice.preferredBuilding', 'Preferred Building')}</Label>
+                  <Select name="preferred_space_id">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any building..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {spaces?.map(space => (
+                        <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('backoffice.priority', 'Priority')}: {priority[0]}</Label>
+                  <Slider
+                    value={priority}
+                    onValueChange={setPriority}
+                    min={1}
+                    max={100}
+                    step={1}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Low</span>
+                    <span>High</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('backoffice.notes', 'Notes')}</Label>
+                  <Textarea name="notes" placeholder="Any special requirements..." />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button type="submit">
+                    {t('backoffice.addToList', 'Add to List')}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className={cn(waitingCount > 0 && 'border-yellow-500/50')}>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-yellow-600" />
+              <div>
+                <div className="text-2xl font-bold">{waitingCount}</div>
+                <p className="text-sm text-muted-foreground">Waiting</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-green-600" />
+              <div>
+                <div className="text-2xl font-bold">{availableRooms.length}</div>
+                <p className="text-sm text-muted-foreground">Available Rooms</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div>
+                <div className="text-2xl font-bold">
+                  {waitingList?.filter(r => r.status === 'fulfilled').length || 0}
+                </div>
+                <p className="text-sm text-muted-foreground">Fulfilled</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <div>
+                <div className="text-2xl font-bold">
+                  {waitingList?.filter(r => r.priority >= 80 && r.status === 'waiting').length || 0}
+                </div>
+                <p className="text-sm text-muted-foreground">High Priority</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Waiting List Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {statusFilter === 'all' ? 'All Requests' : STATUS_CONFIG[statusFilter]?.label + ' Requests'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
+          ) : waitingList && waitingList.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Preference</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Requested</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {waitingList.map(item => {
+                  const statusConfig = STATUS_CONFIG[item.status];
+                  const StatusIcon = statusConfig?.icon || Clock;
+                  const typeConfig = REQUEST_TYPE_CONFIG[item.request_type];
+
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="font-medium">{getEntityName(item)}</div>
+                        {item.preferred_capacity && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {item.preferred_capacity} people
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={cn('text-white', typeConfig?.color)}
+                        >
+                          {typeConfig?.label || item.request_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {item.preferred_space?.name || 'Any'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className={cn(
+                              'h-2 w-16 rounded-full bg-muted overflow-hidden'
+                            )}
+                          >
+                            <div 
+                              className={cn(
+                                'h-full rounded-full',
+                                item.priority >= 80 ? 'bg-red-500' :
+                                item.priority >= 50 ? 'bg-yellow-500' : 'bg-green-500'
+                              )}
+                              style={{ width: `${item.priority}%` }}
+                            />
+                          </div>
+                          <span className="text-sm">{item.priority}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {formatDistanceToNow(new Date(item.requested_at), { addSuffix: true })}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={cn('flex items-center gap-1', statusConfig?.color)}>
+                          <StatusIcon className="h-4 w-4" />
+                          <span className="text-sm">{statusConfig?.label}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {item.status === 'waiting' && (
+                          <div className="flex items-center gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequest(item);
+                                setFulfillDialogOpen(true);
+                              }}
+                              disabled={availableRooms.length === 0}
+                            >
+                              Fulfill
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateRequest.mutate({ id: item.id, status: 'cancelled' })}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        )}
+                        {item.status === 'fulfilled' && item.offered_room && (
+                          <span className="text-sm text-muted-foreground">
+                            → {(item.offered_room as any)?.name}
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12">
+              <ListOrdered className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-medium">{t('backoffice.noWaitingRequests', 'No Requests')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {statusFilter === 'waiting' 
+                  ? t('backoffice.noWaitingDesc', 'No one is currently waiting for space')
+                  : t('backoffice.noRequestsInStatus', 'No requests with this status')}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Fulfill Dialog */}
+      <Dialog open={fulfillDialogOpen} onOpenChange={setFulfillDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('backoffice.fulfillRequest', 'Fulfill Request')}</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleFulfill(new FormData(e.currentTarget));
+            }}
+            className="space-y-4"
+          >
+            <div className="p-3 bg-muted rounded-lg space-y-1">
+              <div>
+                <span className="text-sm text-muted-foreground">Organization:</span>
+                <span className="font-medium ml-2">{selectedRequest && getEntityName(selectedRequest)}</span>
+              </div>
+              <div>
+                <span className="text-sm text-muted-foreground">Request:</span>
+                <span className="ml-2">
+                  {selectedRequest && REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.label}
+                  {selectedRequest?.preferred_capacity && ` for ${selectedRequest.preferred_capacity} people`}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('backoffice.assignRoom', 'Assign Room')}</Label>
+              <Select name="room_id" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select available room..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRooms.map(room => (
+                    <SelectItem key={room.id} value={room.id}>
+                      {room.name} ({room.space?.name}) - {room.capacity || '?'} people
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('backoffice.startDate', 'Start Date')}</Label>
+              <Input
+                type="date"
+                name="start_date"
+                defaultValue={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setFulfillDialogOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit">
+                {t('backoffice.confirmFulfill', 'Confirm & Assign')}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
