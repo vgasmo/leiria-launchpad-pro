@@ -293,6 +293,48 @@ export type Database = {
           },
         ]
       }
+      buildings: {
+        Row: {
+          address: string | null
+          city: string | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          total_area_sqm: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          total_area_sqm?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          total_area_sqm?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cap_table_entries: {
         Row: {
           cliff_months: number | null
@@ -1696,6 +1738,7 @@ export type Database = {
         Row: {
           base_currency: string | null
           base_monthly_fee: number | null
+          contract_type: string | null
           created_at: string
           description: string | null
           duration_months: number | null
@@ -1705,13 +1748,17 @@ export type Database = {
           includes_mentoring_hours: number | null
           includes_office_space: boolean | null
           is_active: boolean | null
+          is_virtual: boolean | null
           name: string
+          price_per_sqm: number | null
+          requires_space: boolean | null
           sort_order: number | null
           updated_at: string
         }
         Insert: {
           base_currency?: string | null
           base_monthly_fee?: number | null
+          contract_type?: string | null
           created_at?: string
           description?: string | null
           duration_months?: number | null
@@ -1721,13 +1768,17 @@ export type Database = {
           includes_mentoring_hours?: number | null
           includes_office_space?: boolean | null
           is_active?: boolean | null
+          is_virtual?: boolean | null
           name: string
+          price_per_sqm?: number | null
+          requires_space?: boolean | null
           sort_order?: number | null
           updated_at?: string
         }
         Update: {
           base_currency?: string | null
           base_monthly_fee?: number | null
+          contract_type?: string | null
           created_at?: string
           description?: string | null
           duration_months?: number | null
@@ -1737,7 +1788,10 @@ export type Database = {
           includes_mentoring_hours?: number | null
           includes_office_space?: boolean | null
           is_active?: boolean | null
+          is_virtual?: boolean | null
           name?: string
+          price_per_sqm?: number | null
+          requires_space?: boolean | null
           sort_order?: number | null
           updated_at?: string
         }
@@ -2600,6 +2654,7 @@ export type Database = {
       office_spaces: {
         Row: {
           amenities: Json | null
+          building_id: string | null
           capacity: number | null
           created_at: string
           floor: string | null
@@ -2613,6 +2668,7 @@ export type Database = {
         }
         Insert: {
           amenities?: Json | null
+          building_id?: string | null
           capacity?: number | null
           created_at?: string
           floor?: string | null
@@ -2626,6 +2682,7 @@ export type Database = {
         }
         Update: {
           amenities?: Json | null
+          building_id?: string | null
           capacity?: number | null
           created_at?: string
           floor?: string | null
@@ -2637,7 +2694,15 @@ export type Database = {
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "office_spaces_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       outlook_calendar_settings: {
         Row: {
@@ -3590,6 +3655,7 @@ export type Database = {
       rooms: {
         Row: {
           amenities: string[] | null
+          building_id: string | null
           capacity: number | null
           created_at: string
           floor: string | null
@@ -3604,6 +3670,7 @@ export type Database = {
         }
         Insert: {
           amenities?: string[] | null
+          building_id?: string | null
           capacity?: number | null
           created_at?: string
           floor?: string | null
@@ -3618,6 +3685,7 @@ export type Database = {
         }
         Update: {
           amenities?: string[] | null
+          building_id?: string | null
           capacity?: number | null
           created_at?: string
           floor?: string | null
@@ -3631,6 +3699,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rooms_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rooms_space_id_fkey"
             columns: ["space_id"]
@@ -4060,6 +4135,7 @@ export type Database = {
       space_allocations: {
         Row: {
           allocated_by: string | null
+          building_id: string | null
           created_at: string
           end_date: string | null
           id: string
@@ -4072,6 +4148,7 @@ export type Database = {
         }
         Insert: {
           allocated_by?: string | null
+          building_id?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
@@ -4084,6 +4161,7 @@ export type Database = {
         }
         Update: {
           allocated_by?: string | null
+          building_id?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
@@ -4095,6 +4173,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "space_allocations_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "space_allocations_office_space_id_fkey"
             columns: ["office_space_id"]
@@ -4599,6 +4684,7 @@ export type Database = {
       startup_contracts: {
         Row: {
           billing_day: number | null
+          building_id: string | null
           contract_number: string | null
           created_at: string
           created_by: string | null
@@ -4609,12 +4695,14 @@ export type Database = {
           document_url: string | null
           end_date: string | null
           equity_percentage: number | null
+          funnel_item_id: string | null
           id: string
           incubation_type_id: string | null
           monthly_fee: number
           notes: string | null
           payment_terms_days: number | null
           signed_at: string | null
+          square_meters: number | null
           start_date: string
           status: string
           terminated_at: string | null
@@ -4624,6 +4712,7 @@ export type Database = {
         }
         Insert: {
           billing_day?: number | null
+          building_id?: string | null
           contract_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -4634,12 +4723,14 @@ export type Database = {
           document_url?: string | null
           end_date?: string | null
           equity_percentage?: number | null
+          funnel_item_id?: string | null
           id?: string
           incubation_type_id?: string | null
           monthly_fee?: number
           notes?: string | null
           payment_terms_days?: number | null
           signed_at?: string | null
+          square_meters?: number | null
           start_date: string
           status?: string
           terminated_at?: string | null
@@ -4649,6 +4740,7 @@ export type Database = {
         }
         Update: {
           billing_day?: number | null
+          building_id?: string | null
           contract_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -4659,12 +4751,14 @@ export type Database = {
           document_url?: string | null
           end_date?: string | null
           equity_percentage?: number | null
+          funnel_item_id?: string | null
           id?: string
           incubation_type_id?: string | null
           monthly_fee?: number
           notes?: string | null
           payment_terms_days?: number | null
           signed_at?: string | null
+          square_meters?: number | null
           start_date?: string
           status?: string
           terminated_at?: string | null
@@ -4673,6 +4767,20 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "startup_contracts_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "startup_contracts_incubation_type_id_fkey"
             columns: ["incubation_type_id"]
