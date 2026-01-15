@@ -670,6 +670,41 @@ export type Database = {
           },
         ]
       }
+      contract_reminders: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          reminder_type: string
+          scheduled_date: string
+          sent_at: string | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          reminder_type: string
+          scheduled_date: string
+          sent_at?: string | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          reminder_type?: string
+          scheduled_date?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_reminders_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           contract_type: string | null
@@ -1616,6 +1651,57 @@ export type Database = {
         }
         Relationships: []
       }
+      incubation_types: {
+        Row: {
+          base_currency: string | null
+          base_monthly_fee: number | null
+          created_at: string
+          description: string | null
+          duration_months: number | null
+          equity_percentage: number | null
+          id: string
+          includes_meeting_room_hours: number | null
+          includes_mentoring_hours: number | null
+          includes_office_space: boolean | null
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          base_currency?: string | null
+          base_monthly_fee?: number | null
+          created_at?: string
+          description?: string | null
+          duration_months?: number | null
+          equity_percentage?: number | null
+          id?: string
+          includes_meeting_room_hours?: number | null
+          includes_mentoring_hours?: number | null
+          includes_office_space?: boolean | null
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          base_currency?: string | null
+          base_monthly_fee?: number | null
+          created_at?: string
+          description?: string | null
+          duration_months?: number | null
+          equity_percentage?: number | null
+          id?: string
+          includes_meeting_room_hours?: number | null
+          includes_mentoring_hours?: number | null
+          includes_office_space?: boolean | null
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       intake_routing: {
         Row: {
           active: boolean
@@ -1843,6 +1929,96 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          issue_date: string
+          line_items: Json | null
+          notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          reminder_sent_at: string | null
+          sent_at: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          tax_rate: number | null
+          total: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          issue_date: string
+          line_items?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          reminder_sent_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal: number
+          tax_amount: number
+          tax_rate?: number | null
+          total: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          line_items?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          reminder_sent_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number | null
+          total?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -2380,6 +2556,48 @@ export type Database = {
         }
         Relationships: []
       }
+      office_spaces: {
+        Row: {
+          amenities: Json | null
+          capacity: number | null
+          created_at: string
+          floor: string | null
+          id: string
+          is_available: boolean | null
+          monthly_cost: number | null
+          name: string
+          notes: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: Json | null
+          capacity?: number | null
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_available?: boolean | null
+          monthly_cost?: number | null
+          name: string
+          notes?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: Json | null
+          capacity?: number | null
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_available?: boolean | null
+          monthly_cost?: number | null
+          name?: string
+          notes?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outlook_calendar_settings: {
         Row: {
           calendar_user_email: string | null
@@ -2431,6 +2649,63 @@ export type Database = {
             foreignKeyName: "outlook_calendar_settings_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          id: string
+          invoice_id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          recorded_by: string | null
+          reference: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          payment_date: string
+          payment_method?: string | null
+          recorded_by?: string | null
+          reference?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          recorded_by?: string | null
+          reference?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3624,6 +3899,60 @@ export type Database = {
           },
         ]
       }
+      space_allocations: {
+        Row: {
+          allocated_by: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          monthly_cost_override: number | null
+          notes: string | null
+          office_space_id: string
+          start_date: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          allocated_by?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          monthly_cost_override?: number | null
+          notes?: string | null
+          office_space_id: string
+          start_date: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          allocated_by?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          monthly_cost_override?: number | null
+          notes?: string | null
+          office_space_id?: string
+          start_date?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_allocations_office_space_id_fkey"
+            columns: ["office_space_id"]
+            isOneToOne: false
+            referencedRelation: "office_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_allocations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_tasks: {
         Row: {
           assignee_id: string
@@ -4019,6 +4348,99 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_contracts: {
+        Row: {
+          billing_day: number | null
+          contract_number: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          discount_applied_by: string | null
+          discount_percentage: number | null
+          discount_reason: string | null
+          document_url: string | null
+          end_date: string | null
+          equity_percentage: number | null
+          id: string
+          incubation_type_id: string | null
+          monthly_fee: number
+          notes: string | null
+          payment_terms_days: number | null
+          signed_at: string | null
+          start_date: string
+          status: string
+          terminated_at: string | null
+          termination_reason: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          billing_day?: number | null
+          contract_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          discount_applied_by?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          id?: string
+          incubation_type_id?: string | null
+          monthly_fee?: number
+          notes?: string | null
+          payment_terms_days?: number | null
+          signed_at?: string | null
+          start_date: string
+          status?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          billing_day?: number | null
+          contract_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          discount_applied_by?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          id?: string
+          incubation_type_id?: string | null
+          monthly_fee?: number
+          notes?: string | null
+          payment_terms_days?: number | null
+          signed_at?: string | null
+          start_date?: string
+          status?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_contracts_incubation_type_id_fkey"
+            columns: ["incubation_type_id"]
+            isOneToOne: false
+            referencedRelation: "incubation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -5755,6 +6177,7 @@ export type Database = {
         Args: { _reason?: string; _workspace_id: string }
         Returns: undefined
       }
+      can_access_backoffice: { Args: never; Returns: boolean }
       can_edit_workspace: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -5880,6 +6303,7 @@ export type Database = {
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }
       is_admin_only: { Args: never; Returns: boolean }
+      is_backoffice: { Args: never; Returns: boolean }
       is_connected_mentor: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -5916,6 +6340,7 @@ export type Database = {
         | "mentor_externo"
         | "founder"
         | "team_member"
+        | "backoffice"
       compliance_status: "on_track" | "needs_update" | "overdue"
       health_score: "critical" | "at_risk" | "stable" | "healthy" | "thriving"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
@@ -6055,6 +6480,7 @@ export const Constants = {
         "mentor_externo",
         "founder",
         "team_member",
+        "backoffice",
       ],
       compliance_status: ["on_track", "needs_update", "overdue"],
       health_score: ["critical", "at_risk", "stable", "healthy", "thriving"],
