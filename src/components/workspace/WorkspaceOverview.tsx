@@ -50,6 +50,7 @@ import { OwnershipCard } from '@/components/workspace/OwnershipCard';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
 import { InteractionsCard } from '@/components/workspace/InteractionsCard';
+import { LocationContractCard } from '@/components/workspace/LocationContractCard';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/integrations/supabase/client';
@@ -419,6 +420,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         {isFounder && (
           <ResponsibleConsultantCard workspaceId={workspace.id} />
         )}
+        
+        {/* Location & Contract Card */}
+        <LocationContractCard workspaceId={workspace.id} />
         
         {/* Workspace Alerts Section */}
         <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />

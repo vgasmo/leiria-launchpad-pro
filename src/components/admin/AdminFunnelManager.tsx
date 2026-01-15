@@ -18,6 +18,7 @@ import { useFunnelItems, useCreateFunnelItem, useUpdateFunnelItem, useConvertToS
 import { useUpdateNextAction } from '@/hooks/useNextAction';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
+import { useIncubationTypes, useBuildings } from '@/hooks/useBackoffice';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
@@ -176,9 +177,9 @@ export function AdminFunnelManager() {
               <ConvertForm
                 item={convertDialogItem}
                 programs={programs || []}
-                onSubmit={(programId, stage) => {
+                onSubmit={(data) => {
                   convertToStartup.mutate(
-                    { funnelItemId: convertDialogItem.id, programId, stage },
+                    { funnelItemId: convertDialogItem.id, ...data },
                     { onSuccess: () => setConvertDialogItem(null) }
                   );
                 }}
@@ -420,27 +421,54 @@ function ConvertForm({
 }: { 
   item: FunnelItem;
   programs: { id: string; name: string }[];
-  onSubmit: (programId: string, stage: string) => void;
+  onSubmit: (data: { 
+    programId: string; 
+    stage: string; 
+    incubationTypeId?: string;
+    buildingId?: string;
+    squareMeters?: number;
+    monthlyFee?: number;
+  }) => void;
 }) {
+  const { t } = useTranslation();
   const [programId, setProgramId] = useState(item.program_id || '');
   const [stage, setStage] = useState('ideation');
+  const [incubationTypeId, setIncubationTypeId] = useState('');
+  const [buildingId, setBuildingId] = useState('');
+  const [squareMeters, setSquareMeters] = useState('');
+  const [monthlyFee, setMonthlyFee] = useState('');
+  
+  // Fetch incubation types and buildings
+  const { data: incubationTypes } = useIncubationTypes();
+  const { data: buildings } = useBuildings();
+  
+  const selectedIncubationType = incubationTypes?.find(t => t.id === incubationTypeId);
+  const requiresSpace = selectedIncubationType?.requires_space;
+  const pricePerSqm = selectedIncubationType?.price_per_sqm;
+  
+  // Calculate monthly fee when sqm or type changes
+  const calculatedFee = pricePerSqm && squareMeters 
+    ? (parseFloat(squareMeters) * pricePerSqm).toFixed(2)
+    : selectedIncubationType?.base_monthly_fee?.toString() || '';
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Convert <strong>{item.organization_name || item.contact_name}</strong> to a startup
+        {t('admin.funnel.convertTo')} <strong>{item.organization_name || item.contact_name}</strong>
       </p>
+      
       <div className="space-y-2">
-        <Label>Program</Label>
+        <Label>{t('admin.funnel.program')}</Label>
         <Select value={programId} onValueChange={setProgramId}>
-          <SelectTrigger><SelectValue placeholder="Select program" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('admin.funnel.selectProgram')} /></SelectTrigger>
           <SelectContent>
             {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
+      
       <div className="space-y-2">
-        <Label>Starting Stage</Label>
+        <Label>{t('admin.funnel.startingStage')}</Label>
         <Select value={stage} onValueChange={setStage}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -450,8 +478,77 @@ function ConvertForm({
           </SelectContent>
         </Select>
       </div>
-      <Button onClick={() => onSubmit(programId, stage)} disabled={!programId} className="w-full">
-        <Rocket className="h-4 w-4 mr-2" />Create Startup & Workspace
+      
+      <div className="border-t pt-4 mt-4">
+        <Label className="text-base font-medium">{t('admin.funnel.contractDetails')}</Label>
+      </div>
+      
+      <div className="space-y-2">
+        <Label>{t('backoffice.incubationType')}</Label>
+        <Select value={incubationTypeId} onValueChange={setIncubationTypeId}>
+          <SelectTrigger><SelectValue placeholder={t('backoffice.selectIncubationType')} /></SelectTrigger>
+          <SelectContent>
+            {incubationTypes?.filter(t => t.is_active).map(t => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name} - €{t.base_monthly_fee}/mo
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <Label>{t('backoffice.building')}</Label>
+        <Select value={buildingId} onValueChange={setBuildingId}>
+          <SelectTrigger><SelectValue placeholder={t('backoffice.selectBuilding')} /></SelectTrigger>
+          <SelectContent>
+            {buildings?.filter(b => b.is_active).map(b => (
+              <SelectItem key={b.id} value={b.id}>
+                {b.name} ({b.city})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {requiresSpace && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>{t('backoffice.squareMeters')}</Label>
+            <Input 
+              type="number" 
+              step="0.01"
+              value={squareMeters}
+              onChange={(e) => setSquareMeters(e.target.value)}
+              placeholder="m²"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('backoffice.monthlyFee')}</Label>
+            <Input 
+              type="number" 
+              step="0.01"
+              value={monthlyFee || calculatedFee}
+              onChange={(e) => setMonthlyFee(e.target.value)}
+              placeholder="€"
+            />
+          </div>
+        </div>
+      )}
+      
+      <Button 
+        onClick={() => onSubmit({ 
+          programId, 
+          stage, 
+          incubationTypeId: incubationTypeId || undefined,
+          buildingId: buildingId || undefined,
+          squareMeters: squareMeters ? parseFloat(squareMeters) : undefined,
+          monthlyFee: monthlyFee ? parseFloat(monthlyFee) : (calculatedFee ? parseFloat(calculatedFee) : undefined),
+        })} 
+        disabled={!programId} 
+        className="w-full"
+      >
+        <Rocket className="h-4 w-4 mr-2" />{t('admin.funnel.createStartupWorkspace')}
       </Button>
     </div>
   );

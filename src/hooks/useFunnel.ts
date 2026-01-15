@@ -149,7 +149,23 @@ export function useConvertToStartup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ funnelItemId, programId, stage }: { funnelItemId: string; programId: string; stage: string }) => {
+    mutationFn: async ({ 
+      funnelItemId, 
+      programId, 
+      stage,
+      incubationTypeId,
+      buildingId,
+      squareMeters,
+      monthlyFee,
+    }: { 
+      funnelItemId: string; 
+      programId: string; 
+      stage: string;
+      incubationTypeId?: string;
+      buildingId?: string;
+      squareMeters?: number;
+      monthlyFee?: number;
+    }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -187,6 +203,31 @@ export function useConvertToStartup() {
         .single();
       if (workspaceError) throw workspaceError;
 
+      // Create contract if incubation type is specified
+      let contract = null;
+      if (incubationTypeId) {
+        const { data: contractData, error: contractError } = await supabase
+          .from('startup_contracts')
+          .insert({
+            workspace_id: workspace.id,
+            incubation_type_id: incubationTypeId,
+            building_id: buildingId || null,
+            square_meters: squareMeters || null,
+            monthly_fee: monthlyFee || 0,
+            start_date: new Date().toISOString().split('T')[0],
+            status: 'draft',
+            funnel_item_id: funnelItemId,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+        if (contractError) {
+          console.error('Contract creation error:', contractError);
+        } else {
+          contract = contractData;
+        }
+      }
+
       // Update funnel item
       await supabase
         .from('funnel_items')
@@ -195,6 +236,7 @@ export function useConvertToStartup() {
           type: 'startup_active',
           linked_startup_id: startup.id,
           linked_workspace_id: workspace.id,
+          linked_contract_id: contract?.id || null,
           converted_at: new Date().toISOString(),
         })
         .eq('id', funnelItemId);
@@ -204,14 +246,15 @@ export function useConvertToStartup() {
         funnel_item_id: funnelItemId,
         event_type: 'converted_to_startup',
         performed_by: user.id,
-        metadata: { startup_id: startup.id, workspace_id: workspace.id },
+        metadata: { startup_id: startup.id, workspace_id: workspace.id, contract_id: contract?.id },
       });
 
-      return { startup, workspace };
+      return { startup, workspace, contract };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
       toast.success('Converted to startup');
     },
     onError: (e: Error) => toast.error(e.message),
