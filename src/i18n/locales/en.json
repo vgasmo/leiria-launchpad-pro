@@ -164,9 +164,12 @@
     "sending": "Sending...",
     "actions": "Actions",
     "updated": "Updated",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "new": "New",
+    "perMonth": "/mo"
   },
   "nav": {
+    "home": "Home",
     "myWorkspaces": "My Workspaces",
     "workspaces": "Workspaces",
     "mentors": "Mentors",
@@ -2471,7 +2474,8 @@
     "activeMentorships_plural": "{{count}} active mentorships",
     "viewAll": "View All",
     "dashboard": "Dashboard",
-    "createStartup": "Create Startup"
+    "createStartup": "Create Startup",
+    "loadError": "Failed to load workspaces. Please try again."
   },
   "topBar": {
     "roles": "Roles",
