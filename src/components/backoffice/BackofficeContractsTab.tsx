@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, FileText, Search, Calendar, Percent } from 'lucide-react';
-import { useContracts, useIncubationTypes, useCreateContract, useUpdateContract, type StartupContract, type IncubationType } from '@/hooks/useBackoffice';
+import { useContracts, useIncubationTypes, useBuildings, useCreateContract, useUpdateContract, type StartupContract, type IncubationType } from '@/hooks/useBackoffice';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -37,6 +37,7 @@ export function BackofficeContractsTab() {
     statusFilter !== 'all' ? { status: statusFilter } : undefined
   );
   const { data: incubationTypes } = useIncubationTypes();
+  const { data: buildings } = useBuildings();
   const { data: workspaces } = useWorkspaces();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
@@ -53,11 +54,13 @@ export function BackofficeContractsTab() {
     const payload: Record<string, unknown> = {
       workspace_id: formData.get('workspace_id') as string,
       incubation_type_id: formData.get('incubation_type_id') as string || null,
+      building_id: formData.get('building_id') as string || null,
       contract_number: formData.get('contract_number') as string || null,
       status: formData.get('status') as string,
       start_date: formData.get('start_date') as string,
       end_date: formData.get('end_date') as string || null,
       monthly_fee: parseFloat(formData.get('monthly_fee') as string) || 0,
+      square_meters: parseFloat(formData.get('square_meters') as string) || null,
       discount_percentage: parseFloat(formData.get('discount_percentage') as string) || 0,
       discount_reason: formData.get('discount_reason') as string || null,
       discount_applied_by: user?.id,
@@ -147,6 +150,22 @@ export function BackofficeContractsTab() {
                       {incubationTypes?.map(t => (
                         <SelectItem key={t.id} value={t.id}>
                           {t.name} (€{t.base_monthly_fee}/mo)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('admin.backoffice.building')}</Label>
+                  <Select name="building_id" defaultValue={selectedContract?.building_id || undefined}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {buildings?.filter(b => b.is_active).map(b => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

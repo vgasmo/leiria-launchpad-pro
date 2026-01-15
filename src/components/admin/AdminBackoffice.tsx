@@ -30,6 +30,7 @@ import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContra
 import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
 import { BackofficeSpacesTab } from '@/components/backoffice/BackofficeSpacesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
+import { BackofficeBuildingsTab } from '@/components/backoffice/BackofficeBuildingsTab';
 import { RoomMappingTab } from '@/components/backoffice/RoomMappingTab';
 import { SpaceWaitingListTab } from '@/components/backoffice/SpaceWaitingListTab';
 
@@ -368,6 +369,10 @@ export function AdminBackoffice() {
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
             {t('admin.backoffice.incubationTypes', 'Incubation Types')}
+          </TabsTrigger>
+          <TabsTrigger value="buildings" className="gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {t('admin.backoffice.buildings', 'Buildings')}
           </TabsTrigger>
         </TabsList>
 
@@ -779,6 +784,11 @@ export function AdminBackoffice() {
         {/* Incubation Types Tab */}
         <TabsContent value="incubation">
           <BackofficeIncubationTypesTab />
+        </TabsContent>
+
+        {/* Buildings Tab */}
+        <TabsContent value="buildings">
+          <BackofficeBuildingsTab />
         </TabsContent>
       </Tabs>
     </div>

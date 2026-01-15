@@ -6,6 +6,19 @@ import { toast } from 'sonner';
 // TYPES
 // ============================================
 
+export interface Building {
+  id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  city: string;
+  total_area_sqm: number | null;
+  description: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface IncubationType {
   id: string;
   name: string;
@@ -19,6 +32,10 @@ export interface IncubationType {
   equity_percentage: number | null;
   is_active: boolean;
   sort_order: number;
+  contract_type: string | null;
+  price_per_sqm: number | null;
+  requires_space: boolean;
+  is_virtual: boolean;
   created_at: string;
 }
 
@@ -41,10 +58,14 @@ export interface StartupContract {
   payment_terms_days: number;
   notes: string | null;
   document_url: string | null;
+  square_meters: number | null;
+  building_id: string | null;
+  funnel_item_id: string | null;
   created_at: string;
   // Joined data
   workspace?: { id: string; startup?: { name: string } | null };
   incubation_type?: IncubationType | null;
+  building?: Building | null;
 }
 
 export interface Invoice {
@@ -169,6 +190,65 @@ export function useUpdateIncubationType() {
 }
 
 // ============================================
+// BUILDINGS
+// ============================================
+
+export function useBuildings() {
+  return useQuery({
+    queryKey: ['buildings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('buildings')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data as Building[];
+    },
+  });
+}
+
+export function useCreateBuilding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data, error } = await supabase
+        .from('buildings')
+        .insert(payload as any)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['buildings'] });
+      toast.success('Building created');
+    },
+    onError: () => toast.error('Failed to create building'),
+  });
+}
+
+export function useUpdateBuilding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('buildings')
+        .update(payload as any)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['buildings'] });
+      toast.success('Building updated');
+    },
+    onError: () => toast.error('Failed to update building'),
+  });
+}
+
+// ============================================
 // CONTRACTS
 // ============================================
 
@@ -181,7 +261,8 @@ export function useContracts(filters?: { status?: string; workspaceId?: string }
         .select(`
           *,
           workspace:workspaces(id, startup:startups(name)),
-          incubation_type:incubation_types(*)
+          incubation_type:incubation_types(*),
+          building:buildings(*)
         `)
         .order('created_at', { ascending: false });
 
