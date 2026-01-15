@@ -370,7 +370,7 @@ export default function CRM() {
                                   </Badge>
                                   {item.next_action_at && (
                                     <span className={cn(
-                                      new Date(item.next_action_at) < new Date() && 'text-destructive font-medium'
+                                      new Date(item.next_action_at) < new Date() && 'text-amber-600 dark:text-amber-400 font-medium'
                                     )}>
                                       {formatRelativeTime(item.next_action_at)}
                                     </span>
@@ -403,7 +403,7 @@ export default function CRM() {
                   title={t('crm.overdue')} 
                   items={inbox?.overdue || []} 
                   icon={AlertTriangle}
-                  iconColor="text-destructive"
+                  iconColor="text-amber-500"
                   onOpenDrawer={handleOpenDrawer}
                 />
                 <InboxGroup 

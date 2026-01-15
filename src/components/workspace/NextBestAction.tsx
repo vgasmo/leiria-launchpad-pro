@@ -7,13 +7,11 @@ import {
   CheckCircle2, 
   ClipboardList, 
   Calendar, 
-  Shield,
   AlertTriangle,
   ChevronRight,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceNextSession } from '@/hooks/useWorkspaceData';
 import { usePendingCheckin } from '@/hooks/useCheckins';
 import { format, isThisMonth } from 'date-fns';
@@ -172,20 +170,20 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         {nextActions.map((item) => (
           <div 
             key={item.id}
-            className={`flex items-center justify-between p-3 rounded-lg border ${
+            className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
               item.variant === 'destructive' 
-                ? 'border-destructive/30 bg-destructive/5' 
+                ? 'border-amber-300/40 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10' 
                 : item.variant === 'warning'
-                ? 'border-amber-300/50 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10'
+                ? 'border-amber-200/50 bg-amber-50/30 dark:border-amber-800/30 dark:bg-amber-950/10'
                 : 'border-border bg-muted/30'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                 item.variant === 'destructive' 
-                  ? 'bg-destructive/10 text-destructive' 
+                  ? 'bg-amber-100/80 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' 
                   : item.variant === 'warning'
-                  ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400'
+                  ? 'bg-amber-50 text-amber-500 dark:bg-amber-900/30 dark:text-amber-400'
                   : 'bg-muted text-muted-foreground'
               }`}>
                 {item.icon}
