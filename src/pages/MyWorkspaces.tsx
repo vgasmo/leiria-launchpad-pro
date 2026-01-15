@@ -241,45 +241,56 @@ export default function MyWorkspaces() {
       title={getPageTitle()}
       subtitle={getPageSubtitle()}
       actions={
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-2">
+          {/* Founder: Open workspace button when they have exactly 1 */}
           {isFounder && !showDetailedView && (workspaces || []).length === 1 && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate(`/workspace/${(workspaces || [])[0].id}`)}
-              className="gap-1 text-xs sm:text-sm"
-              aria-label="Abrir workspace"
-              title="Abrir workspace"
+              className="gap-2"
+              aria-label={t('founder.openWorkspace', 'Abrir')}
             >
               <ArrowRight className="h-4 w-4" />
               <span className="hidden sm:inline">{t('founder.openWorkspace', 'Abrir')}</span>
             </Button>
           )}
+          {/* Consultor: toggle assigned/all startups */}
           {isConsultor && !isAdmin && (
             <Button 
               variant={showAssignedOnly ? "default" : "outline"} 
               size="sm" 
               onClick={() => setShowAssignedOnly(!showAssignedOnly)}
-              className="text-xs sm:text-sm gap-1"
+              className="gap-2"
             >
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">{showAssignedOnly ? t('myWorkspaces.myPortfolio') : t('myWorkspaces.allStartups')}</span>
             </Button>
           )}
+          {/* View All button for staff dashboards */}
           {(showConsultorDashboard || showMentorDashboard) && (
-            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="text-xs sm:text-sm">
-              <FileText className="h-4 w-4 sm:mr-2" />
+            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="gap-2">
+              <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.viewAll')}</span>
             </Button>
           )}
+          {/* Founder: View All button when they have workspaces */}
+          {showFounderDashboard && (workspaces || []).length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('myWorkspaces.viewAll')}</span>
+            </Button>
+          )}
+          {/* Back to dashboard button when in detailed view */}
           {showDetailedView && (
-            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)} className="text-xs sm:text-sm">
-              <TrendingUp className="h-4 w-4 sm:mr-2" />
+            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)} className="gap-2">
+              <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
           )}
+          {/* Create startup button for founders with no workspaces */}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (workspaces || []).length === 0 && (
-            <Button onClick={() => setShowCreateStartup(true)} className="gap-1 sm:gap-2 text-xs sm:text-sm" data-tour="create-workspace">
+            <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.createStartup')}</span>
               <span className="sm:hidden">New</span>

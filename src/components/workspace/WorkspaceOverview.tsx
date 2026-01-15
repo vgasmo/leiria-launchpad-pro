@@ -201,8 +201,8 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         startupName={workspace.startup?.name || 'Workspace'}
       />
       
-      {/* Onboarding CTA for empty workspaces */}
-      {isWorkspaceEmpty && canWrite && (
+      {/* Onboarding CTA for empty workspaces - FOUNDERS ONLY */}
+      {isWorkspaceEmpty && canWrite && isFounder && (
         <Card className="border-dashed border-primary/50 bg-primary/5">
           <CardContent className="py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
