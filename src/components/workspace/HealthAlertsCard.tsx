@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Bell, BellOff, Check, Clock, X } from 'lucide-react';
+import { AlertTriangle, Bell, BellOff, Check, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -66,14 +65,14 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
     if (alert.status === 'snoozed') return <BellOff className="h-4 w-4 text-muted-foreground" />;
     if (alert.status === 'acknowledged') return <Check className="h-4 w-4 text-green-600" />;
     if (alert.status === 'resolved') return <Check className="h-4 w-4 text-muted-foreground" />;
-    if (alert.severity === 'critical') return <AlertTriangle className="h-4 w-4 text-destructive" />;
-    return <Bell className="h-4 w-4 text-amber-500" />;
+    if (alert.severity === 'critical') return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+    return <Bell className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getAlertStyles = (alert: HealthAlert) => {
-    if (alert.status !== 'active') return 'bg-muted/50 opacity-60';
-    if (alert.severity === 'critical') return 'bg-red-50 border-red-200';
-    return 'bg-amber-50 border-amber-200';
+    if (alert.status !== 'active') return 'bg-muted/30 opacity-60';
+    if (alert.severity === 'critical') return 'bg-amber-50/50 border-amber-200/60 dark:bg-amber-950/20 dark:border-amber-800/40';
+    return 'bg-muted/30 border-border/60';
   };
 
   return (
@@ -85,7 +84,7 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
             {t('alerts.healthAlerts', 'Health Alerts')}
           </CardTitle>
           {activeAlerts.length > 0 && (
-            <Badge variant="destructive" className="text-xs">
+            <Badge variant="secondary" className="text-xs bg-amber-100/60 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
               {activeAlerts.length} {t('alerts.active', 'active')}
             </Badge>
           )}

@@ -26,6 +26,9 @@
 - [x] Focus Mode for consultants in CRM dashboard
 - [x] EnhancedNextSteps with neutral/soft urgency colors
 - [x] AlertsPanel with reduced red intensity
+- [x] NextBestAction with soft amber borders (not red)
+- [x] HealthAlertsCard with softer critical styling
+- [x] CRM inbox overdue items use amber instead of red
 
 ### ⚠️ Risk Areas (Monitor)
 - Graph API requires consultant email to match Azure AD tenant
