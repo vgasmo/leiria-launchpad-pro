@@ -30,6 +30,7 @@ import PendingApproval from "./pages/PendingApproval";
 import CRM from "./pages/CRM";
 import CrmDiagnostics from "./pages/CrmDiagnostics";
 import PublicBooking from "./pages/PublicBooking";
+import AdminDataImport from "./pages/AdminDataImport";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,7 @@ function AppRoutes() {
       <Route path="/admin/crm-diagnostics" element={<ProtectedRoute><CrmDiagnostics /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />
+      <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
       <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
