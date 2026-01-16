@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,389 +11,827 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { 
-  Upload, FileSpreadsheet, Users, Building2, Briefcase, 
-  PlayCircle, CheckCircle2, AlertTriangle, Download, Trash2,
-  RefreshCw, Shield, ArrowRight, Info, X
+  Upload, FileSpreadsheet, PlayCircle, CheckCircle2, AlertTriangle, 
+  Download, Trash2, RefreshCw, Shield, ArrowRight, ArrowLeft, Info, 
+  Search, ExternalLink, Building2, Mail, Phone, Hash
 } from 'lucide-react';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
-import { useMasterDatasetImport, FileParseResult } from '@/hooks/useMasterDatasetImport';
-import { datasetToCSV } from '@/lib/masterDataset';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
-const FILE_TYPES = [
-  { type: 'excel_clients', label: 'Excel Clients', icon: FileSpreadsheet, color: 'text-green-600' },
-  { type: 'hubspot_contacts', label: 'HubSpot Contacts', icon: Users, color: 'text-orange-600' },
-  { type: 'hubspot_companies', label: 'HubSpot Companies', icon: Building2, color: 'text-orange-600' },
-  { type: 'hubspot_deals', label: 'HubSpot Deals', icon: Briefcase, color: 'text-orange-600' },
-] as const;
+// ====================
+// TYPES
+// ====================
+
+interface ParsedRow {
+  rowIndex: number;
+  raw: Record<string, unknown>;
+  // Normalized fields
+  organization_name: string;
+  contact_name: string;
+  contact_email: string;
+  contact_phone: string;
+  vat_number: string;
+  building: string;
+  service: string;
+  department: string;
+  deal_id: string;
+  contact_id: string;
+  company_id: string;
+  // Validation
+  isValid: boolean;
+  validationErrors: string[];
+  // Dedup
+  isDuplicate: boolean;
+  duplicateOf?: string;
+  matchReason?: string;
+}
+
+interface ImportConfig {
+  program_id: string;
+  default_stage: string;
+  owner_consultant_id: string;
+  upsert_mode: boolean;
+  create_workspaces: boolean;
+  allow_stage_update: boolean;
+}
+
+interface DryRunResult {
+  would_insert: number;
+  would_update: number;
+  skipped_invalid: number;
+  skipped_duplicate: number;
+  details: Array<{
+    rowIndex: number;
+    name: string;
+    action: 'insert' | 'update' | 'skip_invalid' | 'skip_duplicate';
+    reason?: string;
+  }>;
+}
+
+interface ImportResult {
+  inserted: number;
+  updated: number;
+  errors: Array<{ rowIndex: number; name: string; error: string }>;
+}
+
+// ====================
+// NORMALIZATION UTILS
+// ====================
+
+function normalizeVat(vat: string): string {
+  if (!vat) return '';
+  return vat.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+}
+
+function normalizeEmail(email: string): string {
+  if (!email) return '';
+  return email.toLowerCase().trim();
+}
+
+function normalizeOrgName(name: string): string {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/,?\s*(lda|ltda|s\.?a\.?|unipessoal|limitada|sociedade|empresa|inc|llc|ltd|gmbh|srl|sl|sarl)\.?$/gi, '')
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getStringValue(row: Record<string, unknown>, keys: string[]): string {
+  for (const key of keys) {
+    // Check exact key
+    if (row[key] !== undefined && row[key] !== null && row[key] !== '') {
+      return String(row[key]).trim();
+    }
+    // Check case-insensitive
+    const lowerKey = key.toLowerCase();
+    for (const rowKey of Object.keys(row)) {
+      if (rowKey.toLowerCase() === lowerKey && row[rowKey] !== undefined && row[rowKey] !== null && row[rowKey] !== '') {
+        return String(row[rowKey]).trim();
+      }
+    }
+  }
+  return '';
+}
+
+// ====================
+// MAIN COMPONENT
+// ====================
 
 export default function AdminDataImport() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isAdmin, isConsultor } = useAuth();
   const { data: programs } = usePrograms();
   const { data: consultors } = useConsultors();
-  
-  const {
-    parsedFiles,
-    masterDataset,
-    dryRunResult,
-    addParsedFile,
-    removeParsedFile,
-    clearParsedFiles,
-    buildDataset,
-    dryRun,
-    isDryRunning,
-    performImport,
-    isImporting,
-  } = useMasterDatasetImport();
 
-  const [config, setConfig] = useState({
+  // State
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [fileName, setFileName] = useState<string>('');
+  const [rawRows, setRawRows] = useState<Record<string, unknown>[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dryRunResult, setDryRunResult] = useState<DryRunResult | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const [config, setConfig] = useState<ImportConfig>({
     program_id: '',
     default_stage: 'new',
     owner_consultant_id: '',
-    upsert_mode: false,
+    upsert_mode: true,
+    create_workspaces: false,
+    allow_stage_update: false,
   });
 
-  const [activeTab, setActiveTab] = useState('upload');
   const [safetyChecks, setSafetyChecks] = useState({
     understood_dry_run: false,
     backup_exists: false,
     program_confirmed: false,
   });
 
-  const handleFileUpload = useCallback(async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    fileType: FileParseResult['type']
-  ) => {
+  // ====================
+  // FILE PARSING
+  // ====================
+
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setIsProcessing(true);
     try {
       let rows: Record<string, unknown>[] = [];
-      
+
       if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        // Parse Excel files using xlsx library
         const arrayBuffer = await file.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-      } else {
-        // Parse CSV files
+      } else if (file.name.endsWith('.csv')) {
         const text = await file.text();
         rows = parseCSV(text);
+      } else {
+        toast.error(t('dataImport.unsupportedFormat', 'Unsupported file format. Please use XLSX or CSV.'));
+        return;
       }
 
-      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-      
-      addParsedFile({
-        fileName: file.name,
-        rowCount: rows.length,
-        columns,
-        rows,
-        type: fileType,
-      });
+      if (rows.length === 0) {
+        toast.error(t('dataImport.emptyFile', 'The file is empty or could not be parsed.'));
+        return;
+      }
+
+      const cols = Object.keys(rows[0]);
+      setFileName(file.name);
+      setRawRows(rows);
+      setColumns(cols);
+
+      // Parse and validate rows
+      const parsed = parseAndValidateRows(rows);
+      setParsedRows(parsed);
+
+      toast.success(t('dataImport.fileParsed', 'File parsed successfully: {{count}} rows', { count: rows.length }));
+      setStep(2);
     } catch (error) {
       console.error('Error parsing file:', error);
-      alert(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
+      toast.error(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
+    } finally {
+      setIsProcessing(false);
+      event.target.value = '';
     }
-    
-    event.target.value = '';
-  }, [addParsedFile, t]);
+  }, [t]);
 
-  const handleBuildDataset = useCallback(() => {
-    const dataset = buildDataset();
-    if (dataset) {
-      setActiveTab('preview');
+  const parseAndValidateRows = (rows: Record<string, unknown>[]): ParsedRow[] => {
+    const parsed: ParsedRow[] = [];
+    const seenVats = new Map<string, number>();
+    const seenEmails = new Map<string, number>();
+    const seenNames = new Map<string, number>();
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const validationErrors: string[] = [];
+
+      // Extract fields with multiple possible column names
+      const organization_name = getStringValue(row, [
+        'Nome', 'Nome da empresa', 'organization_name', 'Company', 'Empresa',
+        'Nome do negócio', 'Deal Name', 'Negócio', 'Nome Empresa', 'company_name'
+      ]);
+      const contact_name = getStringValue(row, [
+        'Contacto', 'Contact', 'contact_name', 'Nome do contacto', 'Contact Name',
+        'Nome Contacto', 'Pessoa', 'Person'
+      ]);
+      const contact_email = getStringValue(row, [
+        'Email', 'E-mail', 'email', 'contact_email', 'Email Final', 'email_final',
+        'Email do contacto', 'Contact Email', 'E-Mail', 'email_address'
+      ]);
+      const contact_phone = getStringValue(row, [
+        'Telefone', 'Phone', 'phone', 'contact_phone', 'Telemóvel', 'Tel', 'Mobile',
+        'Número de telefone', 'Phone Number'
+      ]);
+      const vat_number = getStringValue(row, [
+        'NIF', 'VAT', 'nif', 'vat_number', 'NIPC', 'Número fiscal', 'Tax ID',
+        'Contribuinte', 'NIF/NIPC', 'VAT Number'
+      ]);
+      const building = getStringValue(row, [
+        'Edifício', 'Edificio', 'Building', 'building', 'Local', 'Location'
+      ]);
+      const service = getStringValue(row, [
+        'Serviço', 'Servico', 'Service', 'service', 'Tipo de serviço'
+      ]);
+      const department = getStringValue(row, [
+        'Departamento', 'Department', 'department', 'Area', 'Área'
+      ]);
+      const deal_id = getStringValue(row, [
+        'Deal ID', 'deal_id', 'ID do negócio', 'HubSpot Deal ID', 'Record ID'
+      ]);
+      const contact_id = getStringValue(row, [
+        'Contact ID', 'contact_id', 'ID do contacto', 'HubSpot Contact ID'
+      ]);
+      const company_id = getStringValue(row, [
+        'Company ID', 'company_id', 'ID da empresa', 'HubSpot Company ID'
+      ]);
+
+      // Validation
+      if (!organization_name && !contact_email) {
+        validationErrors.push(t('dataImport.noNameOrEmail', 'Missing organization name and email'));
+      }
+
+      // Deduplication within file
+      let isDuplicate = false;
+      let duplicateOf: string | undefined;
+      let matchReason: string | undefined;
+
+      const normalizedVat = normalizeVat(vat_number);
+      const normalizedEmail = normalizeEmail(contact_email);
+      const normalizedName = normalizeOrgName(organization_name);
+
+      // Check VAT first (strongest match)
+      if (normalizedVat && seenVats.has(normalizedVat)) {
+        isDuplicate = true;
+        duplicateOf = `Row ${seenVats.get(normalizedVat)! + 1}`;
+        matchReason = `NIF: ${vat_number}`;
+      }
+      // Then email
+      else if (normalizedEmail && seenEmails.has(normalizedEmail)) {
+        isDuplicate = true;
+        duplicateOf = `Row ${seenEmails.get(normalizedEmail)! + 1}`;
+        matchReason = `Email: ${contact_email}`;
+      }
+      // Then normalized name
+      else if (normalizedName && seenNames.has(normalizedName)) {
+        isDuplicate = true;
+        duplicateOf = `Row ${seenNames.get(normalizedName)! + 1}`;
+        matchReason = `Name: ${organization_name}`;
+      }
+
+      // Track for dedup
+      if (normalizedVat) seenVats.set(normalizedVat, i);
+      if (normalizedEmail) seenEmails.set(normalizedEmail, i);
+      if (normalizedName) seenNames.set(normalizedName, i);
+
+      parsed.push({
+        rowIndex: i,
+        raw: row,
+        organization_name,
+        contact_name,
+        contact_email,
+        contact_phone,
+        vat_number,
+        building,
+        service,
+        department,
+        deal_id,
+        contact_id,
+        company_id,
+        isValid: validationErrors.length === 0,
+        validationErrors,
+        isDuplicate,
+        duplicateOf,
+        matchReason,
+      });
     }
-  }, [buildDataset]);
 
-  const handleDryRun = useCallback(() => {
+    return parsed;
+  };
+
+  // ====================
+  // DRY RUN
+  // ====================
+
+  const handleDryRun = useCallback(async () => {
     if (!config.program_id) {
-      alert(t('dataImport.selectProgram', 'Please select a program'));
+      toast.error(t('dataImport.selectProgram', 'Please select a program'));
       return;
     }
-    dryRun({ ...config, dry_run: true });
-  }, [config, dryRun, t]);
 
-  const handleImport = useCallback(() => {
+    setIsProcessing(true);
+    try {
+      const validRows = parsedRows.filter(r => r.isValid && !r.isDuplicate);
+      
+      // Get existing funnel items for dedup against database
+      const emails = validRows.filter(r => r.contact_email).map(r => normalizeEmail(r.contact_email));
+      const vats = validRows.filter(r => r.vat_number).map(r => normalizeVat(r.vat_number));
+
+      const { data: existingByEmail } = emails.length > 0 
+        ? await supabase
+            .from('funnel_items')
+            .select('id, contact_email, organization_name')
+            .in('contact_email', emails)
+        : { data: [] };
+
+      // Build lookup maps
+      const existingEmailMap = new Map<string, string>();
+      (existingByEmail || []).forEach(item => {
+        if (item.contact_email) {
+          existingEmailMap.set(normalizeEmail(item.contact_email), item.id);
+        }
+      });
+
+      // Calculate what would happen
+      const details: DryRunResult['details'] = [];
+      let would_insert = 0;
+      let would_update = 0;
+
+      for (const row of validRows) {
+        const normalizedEmail = normalizeEmail(row.contact_email);
+        const existingId = existingEmailMap.get(normalizedEmail);
+
+        if (existingId && config.upsert_mode) {
+          would_update++;
+          details.push({
+            rowIndex: row.rowIndex,
+            name: row.organization_name || row.contact_email,
+            action: 'update',
+            reason: t('dataImport.emailExists', 'Email already exists in CRM'),
+          });
+        } else if (existingId && !config.upsert_mode) {
+          details.push({
+            rowIndex: row.rowIndex,
+            name: row.organization_name || row.contact_email,
+            action: 'skip_duplicate',
+            reason: t('dataImport.skipExisting', 'Skipped (exists, upsert disabled)'),
+          });
+        } else {
+          would_insert++;
+          details.push({
+            rowIndex: row.rowIndex,
+            name: row.organization_name || row.contact_email,
+            action: 'insert',
+          });
+        }
+      }
+
+      // Add invalid rows to details
+      for (const row of parsedRows.filter(r => !r.isValid)) {
+        details.push({
+          rowIndex: row.rowIndex,
+          name: row.organization_name || row.contact_email || `Row ${row.rowIndex + 1}`,
+          action: 'skip_invalid',
+          reason: row.validationErrors.join(', '),
+        });
+      }
+
+      // Add file duplicates to details
+      for (const row of parsedRows.filter(r => r.isDuplicate)) {
+        details.push({
+          rowIndex: row.rowIndex,
+          name: row.organization_name || row.contact_email || `Row ${row.rowIndex + 1}`,
+          action: 'skip_duplicate',
+          reason: `${t('dataImport.duplicateOf', 'Duplicate of')} ${row.duplicateOf} (${row.matchReason})`,
+        });
+      }
+
+      // Sort by row index
+      details.sort((a, b) => a.rowIndex - b.rowIndex);
+
+      setDryRunResult({
+        would_insert,
+        would_update,
+        skipped_invalid: parsedRows.filter(r => !r.isValid).length,
+        skipped_duplicate: parsedRows.filter(r => r.isDuplicate).length + 
+          (config.upsert_mode ? 0 : validRows.filter(r => existingEmailMap.has(normalizeEmail(r.contact_email))).length),
+        details: details.slice(0, 100), // Limit preview
+      });
+
+      toast.success(t('dataImport.dryRunComplete', 'Dry run complete'));
+      setStep(3);
+    } catch (error) {
+      console.error('Dry run error:', error);
+      toast.error(t('dataImport.dryRunError', 'Error during dry run'));
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [parsedRows, config, t]);
+
+  // ====================
+  // IMPORT
+  // ====================
+
+  const handleImport = useCallback(async () => {
     if (!config.program_id) {
-      alert(t('dataImport.selectProgram', 'Please select a program'));
+      toast.error(t('dataImport.selectProgram', 'Please select a program'));
       return;
     }
+
     if (!Object.values(safetyChecks).every(Boolean)) {
-      alert(t('dataImport.confirmSafetyChecks', 'Please confirm all safety checks'));
+      toast.error(t('dataImport.confirmSafetyChecks', 'Please confirm all safety checks'));
       return;
     }
-    performImport({ ...config, dry_run: false });
-  }, [config, safetyChecks, performImport, t]);
 
-  const handleDownload = useCallback((type: 'organizations' | 'people' | 'deals' | 'all') => {
-    if (!masterDataset) return;
-    
-    let content: string;
-    let filename: string;
-    
-    if (type === 'all') {
-      content = JSON.stringify(masterDataset, null, 2);
-      filename = 'master_dataset.json';
-    } else if (type === 'organizations') {
-      content = datasetToCSV(masterDataset.organizations);
-      filename = 'master_organizations.csv';
-    } else if (type === 'people') {
-      content = datasetToCSV(masterDataset.people);
-      filename = 'master_people.csv';
-    } else {
-      content = datasetToCSV(masterDataset.deals);
-      filename = 'master_deals.csv';
+    setIsProcessing(true);
+    const errors: ImportResult['errors'] = [];
+    let inserted = 0;
+    let updated = 0;
+
+    try {
+      const validRows = parsedRows.filter(r => r.isValid && !r.isDuplicate);
+
+      // Get existing for upsert matching
+      const emails = validRows.filter(r => r.contact_email).map(r => normalizeEmail(r.contact_email));
+      const { data: existingByEmail } = emails.length > 0
+        ? await supabase
+            .from('funnel_items')
+            .select('id, contact_email')
+            .in('contact_email', emails)
+        : { data: [] };
+
+      const existingEmailMap = new Map<string, string>();
+      (existingByEmail || []).forEach(item => {
+        if (item.contact_email) {
+          existingEmailMap.set(normalizeEmail(item.contact_email), item.id);
+        }
+      });
+
+      // Process each row
+      for (const row of validRows) {
+        try {
+          const normalizedEmail = normalizeEmail(row.contact_email);
+          const existingId = existingEmailMap.get(normalizedEmail);
+
+          // Build notes with metadata
+          const noteParts: string[] = [];
+          if (row.vat_number) noteParts.push(`NIF: ${row.vat_number}`);
+          if (row.building) noteParts.push(`Edifício: ${row.building}`);
+          if (row.service) noteParts.push(`Serviço: ${row.service}`);
+          if (row.department) noteParts.push(`Departamento: ${row.department}`);
+          if (row.deal_id) noteParts.push(`HubSpot Deal ID: ${row.deal_id}`);
+          if (row.contact_id) noteParts.push(`HubSpot Contact ID: ${row.contact_id}`);
+          if (row.company_id) noteParts.push(`HubSpot Company ID: ${row.company_id}`);
+          noteParts.push(`Imported: ${new Date().toISOString().split('T')[0]}`);
+
+          const funnelData = {
+            organization_name: row.organization_name || null,
+            contact_name: row.contact_name || null,
+            contact_email: row.contact_email || null,
+            contact_phone: row.contact_phone || null,
+            source: 'hubspot_import',
+            stage: config.default_stage,
+            program_id: config.program_id,
+            owner_consultant_id: config.owner_consultant_id || null,
+            tags: ['hubspot_import'],
+            notes: noteParts.join('\n'),
+            type: 'lead' as const,
+          };
+
+          if (existingId && config.upsert_mode) {
+            // Update - but don't overwrite sensitive fields or empty values
+            const updateData: Record<string, unknown> = {};
+            
+            // Only update non-empty values
+            if (row.organization_name) updateData.organization_name = row.organization_name;
+            if (row.contact_name) updateData.contact_name = row.contact_name;
+            if (row.contact_phone) updateData.contact_phone = row.contact_phone;
+            
+            // Always append to notes, don't overwrite
+            const { data: existing } = await supabase
+              .from('funnel_items')
+              .select('notes, tags')
+              .eq('id', existingId)
+              .single();
+
+            const existingNotes = existing?.notes || '';
+            const newNotes = existingNotes 
+              ? `${existingNotes}\n\n--- Update ${new Date().toISOString().split('T')[0]} ---\n${noteParts.join('\n')}`
+              : noteParts.join('\n');
+            updateData.notes = newNotes;
+
+            // Merge tags
+            const existingTags = (existing?.tags || []) as string[];
+            updateData.tags = [...new Set([...existingTags, 'hubspot_import'])];
+
+            // Update stage only if allowed
+            if (config.allow_stage_update) {
+              updateData.stage = config.default_stage;
+            }
+
+            // Set owner only if not already set
+            if (config.owner_consultant_id) {
+              // We'd need to check if owner is null, but for simplicity just skip overwriting
+            }
+
+            const { error } = await supabase
+              .from('funnel_items')
+              .update(updateData)
+              .eq('id', existingId);
+
+            if (error) throw error;
+            updated++;
+          } else if (!existingId) {
+            const { error } = await supabase
+              .from('funnel_items')
+              .insert(funnelData);
+
+            if (error) throw error;
+            inserted++;
+          }
+        } catch (e: any) {
+          errors.push({
+            rowIndex: row.rowIndex,
+            name: row.organization_name || row.contact_email || `Row ${row.rowIndex + 1}`,
+            error: e.message || 'Unknown error',
+          });
+        }
+      }
+
+      setImportResult({ inserted, updated, errors });
+      toast.success(t('dataImport.importComplete', 'Import complete: {{inserted}} inserted, {{updated}} updated', { inserted, updated }));
+      setStep(4);
+    } catch (error) {
+      console.error('Import error:', error);
+      toast.error(t('dataImport.importError', 'Error during import'));
+    } finally {
+      setIsProcessing(false);
     }
+  }, [parsedRows, config, safetyChecks, t]);
 
-    const blob = new Blob([content], { type: type === 'all' ? 'application/json' : 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [masterDataset]);
+  // ====================
+  // COMPUTED VALUES
+  // ====================
+
+  const stats = useMemo(() => {
+    const total = parsedRows.length;
+    const valid = parsedRows.filter(r => r.isValid).length;
+    const invalid = parsedRows.filter(r => !r.isValid).length;
+    const duplicates = parsedRows.filter(r => r.isDuplicate).length;
+    const withEmail = parsedRows.filter(r => r.contact_email).length;
+    const withVat = parsedRows.filter(r => r.vat_number).length;
+    return { total, valid, invalid, duplicates, withEmail, withVat };
+  }, [parsedRows]);
+
+  const filteredRows = useMemo(() => {
+    if (!searchTerm) return parsedRows.slice(0, 25);
+    const term = searchTerm.toLowerCase();
+    return parsedRows.filter(r => 
+      r.organization_name.toLowerCase().includes(term) ||
+      r.contact_email.toLowerCase().includes(term) ||
+      r.vat_number.toLowerCase().includes(term) ||
+      r.contact_name.toLowerCase().includes(term)
+    ).slice(0, 25);
+  }, [parsedRows, searchTerm]);
 
   const allSafetyChecked = Object.values(safetyChecks).every(Boolean);
-  const canImport = dryRunResult && !dryRunResult.dry_run === false && allSafetyChecked;
+
+  // Access check
+  if (!isAdmin && !isConsultor) {
+    return (
+      <AppLayout title={t('common.accessDenied', 'Access Denied')}>
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>{t('common.accessDenied', 'Access Denied')}</AlertTitle>
+          <AlertDescription>
+            {t('dataImport.adminOnly', 'Only administrators and consultants can access this page.')}
+          </AlertDescription>
+        </Alert>
+      </AppLayout>
+    );
+  }
+
+  // ====================
+  // RENDER
+  // ====================
 
   return (
     <AppLayout 
-      title={t('dataImport.title', 'Data Import')} 
-      subtitle={t('dataImport.subtitle', 'Import organizations and contacts from external sources')}
+      title={t('dataImport.title', 'HubSpot Data Import')} 
+      subtitle={t('dataImport.subtitle', 'Import organizations from HubSpot export files')}
     >
-      <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="upload" className="gap-2">
-              <Upload className="h-4 w-4" />
-              {t('dataImport.upload', 'Upload')}
-            </TabsTrigger>
-            <TabsTrigger value="preview" className="gap-2" disabled={!masterDataset}>
-              <FileSpreadsheet className="h-4 w-4" />
-              {t('dataImport.preview', 'Preview')}
-            </TabsTrigger>
-            <TabsTrigger value="configure" className="gap-2" disabled={!masterDataset}>
-              <RefreshCw className="h-4 w-4" />
-              {t('dataImport.configure', 'Configure')}
-            </TabsTrigger>
-            <TabsTrigger value="import" className="gap-2" disabled={!dryRunResult}>
-              <CheckCircle2 className="h-4 w-4" />
-              {t('dataImport.import', 'Import')}
-            </TabsTrigger>
-          </TabsList>
+      <div className="space-y-6 max-w-5xl mx-auto">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center gap-2">
+          {[1, 2, 3, 4].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <div className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors',
+                step >= s 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-muted text-muted-foreground'
+              )}>
+                {step > s ? <CheckCircle2 className="h-4 w-4" /> : s}
+              </div>
+              <span className={cn(
+                'text-sm hidden sm:inline',
+                step >= s ? 'text-foreground' : 'text-muted-foreground'
+              )}>
+                {s === 1 && t('dataImport.step1', 'Upload')}
+                {s === 2 && t('dataImport.step2', 'Preview')}
+                {s === 3 && t('dataImport.step3', 'Configure')}
+                {s === 4 && t('dataImport.step4', 'Results')}
+              </span>
+              {s < 4 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+            </div>
+          ))}
+        </div>
 
-          {/* UPLOAD TAB */}
-          <TabsContent value="upload" className="space-y-6">
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>{t('dataImport.supportedFormats', 'Supported Formats')}</AlertTitle>
-              <AlertDescription>
-                {t('dataImport.supportedFormatsDesc', 'Upload CSV or XLSX files. Each file type maps to a specific data category.')}
-              </AlertDescription>
-            </Alert>
+        {/* STEP 1: UPLOAD */}
+        {step === 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                {t('dataImport.uploadFile', 'Upload File')}
+              </CardTitle>
+              <CardDescription>
+                {t('dataImport.uploadDesc', 'Upload your HubSpot export file (XLSX or CSV format)')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>{t('dataImport.expectedFormat', 'Expected Format')}</AlertTitle>
+                <AlertDescription>
+                  <p className="mb-2">{t('dataImport.expectedFormatDesc', 'The file should contain columns like:')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Nome/Company', 'Email', 'NIF', 'Telefone', 'Edifício', 'Serviço'].map(col => (
+                      <Badge key={col} variant="secondary">{col}</Badge>
+                    ))}
+                  </div>
+                </AlertDescription>
+              </Alert>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {FILE_TYPES.map(({ type, label, icon: Icon, color }) => {
-                const parsedFile = parsedFiles.find(f => f.type === type);
-                
-                return (
-                  <Card key={type} className={cn(
-                    'relative overflow-hidden transition-all',
-                    parsedFile && 'ring-2 ring-primary'
-                  )}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Icon className={cn('h-5 w-5', color)} />
-                          <CardTitle className="text-base">{label}</CardTitle>
-                        </div>
-                        {parsedFile && (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => removeParsedFile(type)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {parsedFile ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">{parsedFile.fileName}</span>
-                            <Badge variant="secondary">{parsedFile.rowCount} rows</Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {parsedFile.columns.slice(0, 5).map(col => (
-                              <Badge key={col} variant="outline" className="text-xs">
-                                {col}
-                              </Badge>
-                            ))}
-                            {parsedFile.columns.length > 5 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{parsedFile.columns.length - 5}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept=".csv,.xlsx,.xls"
-                            onChange={(e) => handleFileUpload(e, type)}
-                            className="cursor-pointer"
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <Input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileUpload}
+                  className="max-w-xs mx-auto cursor-pointer"
+                  disabled={isProcessing}
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t('dataImport.supportedFormats', 'XLSX, XLS, or CSV files')}
+                </p>
+              </div>
+
+              {isProcessing && (
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  {t('dataImport.parsing', 'Parsing file...')}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* STEP 2: PREVIEW */}
+        {step === 2 && (
+          <div className="space-y-6">
+            {/* Stats */}
+            <div className="grid gap-4 md:grid-cols-4">
+              <StatCard icon={FileSpreadsheet} label={t('dataImport.totalRows', 'Total Rows')} value={stats.total} />
+              <StatCard icon={CheckCircle2} label={t('dataImport.validRows', 'Valid Rows')} value={stats.valid} color="green" />
+              <StatCard icon={AlertTriangle} label={t('dataImport.invalidRows', 'Invalid Rows')} value={stats.invalid} color="red" />
+              <StatCard icon={Building2} label={t('dataImport.duplicates', 'Duplicates')} value={stats.duplicates} color="yellow" />
             </div>
 
-            {parsedFiles.length > 0 && (
-              <div className="flex items-center justify-between pt-4">
-                <Button variant="outline" onClick={clearParsedFiles}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t('common.clearAll', 'Clear All')}
-                </Button>
-                <Button onClick={handleBuildDataset}>
-                  {t('dataImport.buildDataset', 'Build Master Dataset')}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* PREVIEW TAB */}
-          <TabsContent value="preview" className="space-y-6">
-            {masterDataset && (
-              <>
-                {/* Stats Cards */}
-                <div className="grid gap-4 md:grid-cols-4">
-                  <StatsCard
-                    icon={Building2}
-                    label={t('dataImport.organizations', 'Organizations')}
-                    value={masterDataset.metadata.stats.total_orgs}
-                    duplicates={masterDataset.organizations.filter(o => o._is_duplicate).length}
-                  />
-                  <StatsCard
-                    icon={Users}
-                    label={t('dataImport.people', 'People')}
-                    value={masterDataset.metadata.stats.total_people}
-                    duplicates={masterDataset.people.filter(p => p._is_duplicate).length}
-                  />
-                  <StatsCard
-                    icon={Briefcase}
-                    label={t('dataImport.deals', 'Deals')}
-                    value={masterDataset.metadata.stats.total_deals}
-                  />
-                  <StatsCard
-                    icon={AlertTriangle}
-                    label={t('dataImport.duplicatesFound', 'Duplicates Found')}
-                    value={masterDataset.metadata.stats.duplicates_found}
-                    variant="warning"
+            {/* File Info */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{fileName}</CardTitle>
+                  <div className="flex gap-2">
+                    <Badge variant="outline">
+                      <Mail className="h-3 w-3 mr-1" />
+                      {stats.withEmail} {t('dataImport.withEmail', 'with email')}
+                    </Badge>
+                    <Badge variant="outline">
+                      <Hash className="h-3 w-3 mr-1" />
+                      {stats.withVat} {t('dataImport.withNIF', 'with NIF')}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mb-4">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t('dataImport.searchRows', 'Search by name, email, or NIF...')}
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="max-w-sm"
                   />
                 </div>
-
-                {/* Download Options */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('dataImport.downloadDataset', 'Download Dataset')}</CardTitle>
-                    <CardDescription>
-                      {t('dataImport.downloadDesc', 'Download the normalized master dataset for review or backup')}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleDownload('organizations')}>
-                      <Download className="h-4 w-4 mr-2" />
-                      master_organizations.csv
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownload('people')}>
-                      <Download className="h-4 w-4 mr-2" />
-                      master_people.csv
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownload('deals')}>
-                      <Download className="h-4 w-4 mr-2" />
-                      master_deals.csv
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => handleDownload('all')}>
-                      <Download className="h-4 w-4 mr-2" />
-                      master_dataset.json
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Preview Tables */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('dataImport.previewOrgs', 'Organizations Preview')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {masterDataset.organizations.slice(0, 20).map((org, idx) => (
-                          <div 
-                            key={org.external_id} 
-                            className={cn(
-                              'flex items-center justify-between p-3 rounded-lg border',
-                              org._is_duplicate && 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
-                            )}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium truncate">{org.name}</span>
-                                {org._is_duplicate && (
-                                  <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800">
-                                    {t('dataImport.duplicate', 'Duplicate')}
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                <span>{org.email_main || '—'}</span>
-                                {org.vat_number && <Badge variant="secondary" className="text-xs">{org.vat_number}</Badge>}
-                              </div>
+                
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-2">
+                    {filteredRows.map((row) => (
+                      <div 
+                        key={row.rowIndex}
+                        className={cn(
+                          'p-3 rounded-lg border',
+                          !row.isValid && 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800',
+                          row.isDuplicate && row.isValid && 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-muted-foreground">#{row.rowIndex + 1}</span>
+                              <span className="font-medium truncate">
+                                {row.organization_name || <span className="italic text-muted-foreground">—</span>}
+                              </span>
+                              {!row.isValid && (
+                                <Badge variant="destructive" className="text-xs">
+                                  {t('dataImport.invalid', 'Invalid')}
+                                </Badge>
+                              )}
+                              {row.isDuplicate && (
+                                <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800">
+                                  {t('dataImport.duplicate', 'Duplicate')}
+                                </Badge>
+                              )}
                             </div>
-                            <Badge variant="outline">{org.external_source}</Badge>
+                            <div className="text-sm text-muted-foreground flex items-center gap-3 flex-wrap mt-1">
+                              {row.contact_email && (
+                                <span className="flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
+                                  {row.contact_email}
+                                </span>
+                              )}
+                              {row.vat_number && (
+                                <span className="flex items-center gap-1">
+                                  <Hash className="h-3 w-3" />
+                                  {row.vat_number}
+                                </span>
+                              )}
+                              {row.contact_phone && (
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {row.contact_phone}
+                                </span>
+                              )}
+                            </div>
+                            {row.building && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                <Building2 className="h-3 w-3 inline mr-1" />
+                                {row.building}
+                                {row.service && ` · ${row.service}`}
+                              </div>
+                            )}
+                            {!row.isValid && row.validationErrors.length > 0 && (
+                              <div className="text-xs text-red-600 mt-1">
+                                {row.validationErrors.join(', ')}
+                              </div>
+                            )}
+                            {row.isDuplicate && row.matchReason && (
+                              <div className="text-xs text-yellow-700 mt-1">
+                                {t('dataImport.duplicateOf', 'Duplicate of')} {row.duplicateOf} ({row.matchReason})
+                              </div>
+                            )}
                           </div>
-                        ))}
+                        </div>
                       </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                    ))}
+                    {filteredRows.length < parsedRows.length && (
+                      <div className="text-center text-sm text-muted-foreground py-4">
+                        {t('dataImport.showingFirst', 'Showing first {{count}} of {{total}} rows', { 
+                          count: filteredRows.length, 
+                          total: parsedRows.length 
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
 
-                <div className="flex justify-end">
-                  <Button onClick={() => setActiveTab('configure')}>
-                    {t('common.continue', 'Continue')}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </>
-            )}
-          </TabsContent>
-
-          {/* CONFIGURE TAB */}
-          <TabsContent value="configure" className="space-y-6">
+            {/* Import Config */}
             <Card>
               <CardHeader>
                 <CardTitle>{t('dataImport.importConfig', 'Import Configuration')}</CardTitle>
-                <CardDescription>
-                  {t('dataImport.importConfigDesc', 'Configure how data should be imported into the CRM')}
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label>{t('dataImport.program', 'Program')} *</Label>
@@ -446,118 +885,124 @@ export default function AdminDataImport() {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>{t('dataImport.importMode', 'Import Mode')}</Label>
-                    <div className="flex items-center gap-4 pt-2">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={config.upsert_mode}
-                          onCheckedChange={v => setConfig({...config, upsert_mode: v})}
-                        />
-                        <span className="text-sm">
-                          {config.upsert_mode 
-                            ? t('dataImport.upsertMode', 'Update existing records')
-                            : t('dataImport.insertOnly', 'Insert new only')
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex justify-end">
-                  <Button onClick={handleDryRun} disabled={isDryRunning || !config.program_id}>
-                    {isDryRunning ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        {t('dataImport.running', 'Running...')}
-                      </>
-                    ) : (
-                      <>
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        {t('dataImport.dryRun', 'Dry Run')}
-                      </>
-                    )}
-                  </Button>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                      <Label>{t('dataImport.upsertMode', 'Update Existing Records')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataImport.upsertModeDesc', 'Update records that match by email')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.upsert_mode}
+                      onCheckedChange={v => setConfig({...config, upsert_mode: v})}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                      <Label>{t('dataImport.allowStageUpdate', 'Allow Stage Update')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataImport.allowStageUpdateDesc', 'Update stage on existing records')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.allow_stage_update}
+                      onCheckedChange={v => setConfig({...config, allow_stage_update: v})}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <Button variant="outline" onClick={() => { setStep(1); setParsedRows([]); setFileName(''); }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('dataImport.startOver', 'Start Over')}
+              </Button>
+              <Button onClick={handleDryRun} disabled={isProcessing || !config.program_id}>
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    {t('dataImport.running', 'Running...')}
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                    {t('dataImport.dryRun', 'Run Dry Run')}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: DRY RUN RESULTS + IMPORT */}
+        {step === 3 && dryRunResult && (
+          <div className="space-y-6">
             {/* Dry Run Results */}
-            {dryRunResult && (
-              <Card className="border-primary">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                    <CardTitle>{t('dataImport.dryRunResults', 'Dry Run Results')}</CardTitle>
+            <Card className="border-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  {t('dataImport.dryRunResults', 'Dry Run Results')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{dryRunResult.would_insert}</div>
+                    <div className="text-sm text-muted-foreground">{t('dataImport.toInsert', 'To Insert')}</div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-4">
-                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{dryRunResult.summary.would_insert}</div>
-                      <div className="text-sm text-muted-foreground">{t('dataImport.toInsert', 'To Insert')}</div>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{dryRunResult.summary.would_update}</div>
-                      <div className="text-sm text-muted-foreground">{t('dataImport.toUpdate', 'To Update')}</div>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-600">{dryRunResult.summary.duplicates}</div>
-                      <div className="text-sm text-muted-foreground">{t('dataImport.duplicates', 'Duplicates')}</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="text-2xl font-bold">{dryRunResult.summary.skipped}</div>
-                      <div className="text-sm text-muted-foreground">{t('dataImport.skipped', 'Skipped')}</div>
-                    </div>
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{dryRunResult.would_update}</div>
+                    <div className="text-sm text-muted-foreground">{t('dataImport.toUpdate', 'To Update')}</div>
                   </div>
-
-                  {dryRunResult.details.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">{t('dataImport.sampleActions', 'Sample Actions')}</h4>
-                      <ScrollArea className="h-[200px]">
-                        <div className="space-y-1">
-                          {dryRunResult.details.map((detail, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm p-2 rounded bg-muted/50">
-                              <Badge variant={
-                                detail.action === 'insert' ? 'default' :
-                                detail.action === 'update' ? 'secondary' :
-                                'outline'
-                              } className="text-xs">
-                                {detail.action}
-                              </Badge>
-                              <span className="truncate flex-1">{detail.name}</span>
-                              {detail.reason && (
-                                <span className="text-xs text-muted-foreground">{detail.reason}</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end">
-                    <Button onClick={() => setActiveTab('import')}>
-                      {t('common.continue', 'Continue')}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
+                  <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">{dryRunResult.skipped_invalid}</div>
+                    <div className="text-sm text-muted-foreground">{t('dataImport.skippedInvalid', 'Invalid')}</div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+                  <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">{dryRunResult.skipped_duplicate}</div>
+                    <div className="text-sm text-muted-foreground">{t('dataImport.skippedDuplicate', 'Duplicates')}</div>
+                  </div>
+                </div>
 
-          {/* IMPORT TAB */}
-          <TabsContent value="import" className="space-y-6">
+                <ScrollArea className="h-[200px] border rounded-lg">
+                  <div className="p-2 space-y-1">
+                    {dryRunResult.details.map((detail, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm p-2 rounded bg-muted/50">
+                        <Badge variant={
+                          detail.action === 'insert' ? 'default' :
+                          detail.action === 'update' ? 'secondary' :
+                          detail.action === 'skip_invalid' ? 'destructive' :
+                          'outline'
+                        } className="text-xs w-20 justify-center">
+                          {detail.action.replace('skip_', '')}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">#{detail.rowIndex + 1}</span>
+                        <span className="truncate flex-1">{detail.name}</span>
+                        {detail.reason && (
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">{detail.reason}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Safety Checks */}
             <Alert variant="destructive">
               <Shield className="h-4 w-4" />
               <AlertTitle>{t('dataImport.safetyTitle', 'Safety Checklist')}</AlertTitle>
               <AlertDescription>
-                {t('dataImport.safetyDesc', 'Please confirm the following before proceeding with the import:')}
+                {t('dataImport.safetyDesc', 'Please confirm the following before proceeding:')}
               </AlertDescription>
             </Alert>
 
@@ -570,10 +1015,10 @@ export default function AdminDataImport() {
                   />
                   <div>
                     <Label className="cursor-pointer">
-                      {t('dataImport.check1', 'I have reviewed the dry run results and understand what will be imported')}
+                      {t('dataImport.check1', 'I have reviewed the dry run results')}
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      {dryRunResult?.summary.would_insert} {t('dataImport.recordsWillBeInserted', 'records will be inserted')}, {dryRunResult?.summary.would_update} {t('dataImport.willBeUpdated', 'will be updated')}
+                      {dryRunResult.would_insert} {t('dataImport.willBeInserted', 'will be inserted')}, {dryRunResult.would_update} {t('dataImport.willBeUpdated', 'will be updated')}
                     </p>
                   </div>
                 </div>
@@ -585,10 +1030,10 @@ export default function AdminDataImport() {
                   />
                   <div>
                     <Label className="cursor-pointer">
-                      {t('dataImport.check2', 'I have downloaded the master dataset as a backup')}
+                      {t('dataImport.check2', 'I understand this action cannot be undone')}
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      {t('dataImport.check2Desc', 'This allows you to review what was imported if needed')}
+                      {t('dataImport.check2Desc', 'Records will be created or updated in the CRM')}
                     </p>
                   </div>
                 </div>
@@ -600,7 +1045,7 @@ export default function AdminDataImport() {
                   />
                   <div>
                     <Label className="cursor-pointer">
-                      {t('dataImport.check3', 'I confirm the program and stage configuration is correct')}
+                      {t('dataImport.check3', 'I confirm the configuration is correct')}
                     </Label>
                     <p className="text-sm text-muted-foreground">
                       {t('common.program', 'Program')}: {programs?.find(p => p.id === config.program_id)?.name || '—'} | {t('common.stage', 'Stage')}: {config.default_stage}
@@ -610,70 +1055,159 @@ export default function AdminDataImport() {
               </CardContent>
             </Card>
 
+            {/* Actions */}
             <div className="flex items-center justify-between">
-              <Button variant="outline" onClick={() => setActiveTab('configure')}>
+              <Button variant="outline" onClick={() => setStep(2)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 {t('common.back', 'Back')}
               </Button>
               <Button
                 onClick={handleImport}
-                disabled={!allSafetyChecked || isImporting}
-                className="gap-2"
+                disabled={!allSafetyChecked || isProcessing}
               >
-                {isImporting ? (
+                {isProcessing ? (
                   <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     {t('dataImport.importing', 'Importing...')}
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
                     {t('dataImport.startImport', 'Start Import')}
                   </>
                 )}
               </Button>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
+
+        {/* STEP 4: RESULTS */}
+        {step === 4 && importResult && (
+          <div className="space-y-6">
+            <Alert className="border-green-300 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800 dark:text-green-200">
+                {t('dataImport.importComplete', 'Import Complete!')}
+              </AlertTitle>
+              <AlertDescription className="text-green-700 dark:text-green-300">
+                {t('dataImport.importSummary', '{{inserted}} records inserted, {{updated}} updated', {
+                  inserted: importResult.inserted,
+                  updated: importResult.updated,
+                })}
+                {importResult.errors.length > 0 && ` (${importResult.errors.length} errors)`}
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10">
+                <CardContent className="pt-6 text-center">
+                  <div className="text-3xl font-bold text-green-600">{importResult.inserted}</div>
+                  <div className="text-sm text-muted-foreground">{t('dataImport.recordsInserted', 'Records Inserted')}</div>
+                </CardContent>
+              </Card>
+              <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10">
+                <CardContent className="pt-6 text-center">
+                  <div className="text-3xl font-bold text-blue-600">{importResult.updated}</div>
+                  <div className="text-sm text-muted-foreground">{t('dataImport.recordsUpdated', 'Records Updated')}</div>
+                </CardContent>
+              </Card>
+              <Card className={cn(
+                importResult.errors.length > 0 
+                  ? 'border-red-200 bg-red-50/50 dark:bg-red-900/10' 
+                  : 'border-gray-200'
+              )}>
+                <CardContent className="pt-6 text-center">
+                  <div className={cn(
+                    'text-3xl font-bold',
+                    importResult.errors.length > 0 ? 'text-red-600' : 'text-muted-foreground'
+                  )}>
+                    {importResult.errors.length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{t('dataImport.errors', 'Errors')}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {importResult.errors.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base text-red-600">
+                    <AlertTriangle className="h-4 w-4 inline mr-2" />
+                    {t('dataImport.errorDetails', 'Error Details')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {importResult.errors.map((err, idx) => (
+                        <div key={idx} className="text-sm p-2 rounded bg-red-50 dark:bg-red-900/20 border border-red-200">
+                          <span className="font-medium">Row #{err.rowIndex + 1}: {err.name}</span>
+                          <p className="text-red-600 text-xs">{err.error}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <Button variant="outline" onClick={() => { 
+                setStep(1); 
+                setParsedRows([]); 
+                setFileName(''); 
+                setDryRunResult(null);
+                setImportResult(null);
+                setSafetyChecks({ understood_dry_run: false, backup_exists: false, program_confirmed: false });
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t('dataImport.importAnother', 'Import Another File')}
+              </Button>
+              <Button onClick={() => navigate('/crm')}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                {t('dataImport.openCRM', 'Open CRM')}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
 }
 
-// Helper component for stats cards
-function StatsCard({ 
+// ====================
+// HELPER COMPONENTS
+// ====================
+
+function StatCard({ 
   icon: Icon, 
   label, 
   value, 
-  duplicates,
-  variant = 'default',
+  color = 'default'
 }: { 
   icon: React.ElementType; 
   label: string; 
   value: number;
-  duplicates?: number;
-  variant?: 'default' | 'warning';
+  color?: 'default' | 'green' | 'red' | 'yellow';
 }) {
+  const colorClasses = {
+    default: 'bg-muted text-muted-foreground',
+    green: 'bg-green-100 text-green-600 dark:bg-green-900/30',
+    red: 'bg-red-100 text-red-600 dark:bg-red-900/30',
+    yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30',
+  };
+
   return (
-    <Card className={cn(
-      variant === 'warning' && 'border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20'
-    )}>
+    <Card>
       <CardContent className="pt-6">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'p-2 rounded-lg',
-            variant === 'warning' ? 'bg-yellow-100 dark:bg-yellow-800' : 'bg-muted'
-          )}>
-            <Icon className={cn(
-              'h-5 w-5',
-              variant === 'warning' ? 'text-yellow-600' : 'text-muted-foreground'
-            )} />
+          <div className={cn('p-2 rounded-lg', colorClasses[color])}>
+            <Icon className="h-5 w-5" />
           </div>
           <div>
             <div className="text-2xl font-bold">{value}</div>
             <div className="text-sm text-muted-foreground">{label}</div>
-            {duplicates !== undefined && duplicates > 0 && (
-              <div className="text-xs text-yellow-600">{duplicates} duplicates</div>
-            )}
           </div>
         </div>
       </CardContent>
@@ -681,7 +1215,10 @@ function StatsCard({
   );
 }
 
-// Simple CSV parser
+// ====================
+// CSV PARSER
+// ====================
+
 function parseCSV(text: string): Record<string, unknown>[] {
   const lines = text.split('\n').filter(line => line.trim());
   if (lines.length < 2) return [];
