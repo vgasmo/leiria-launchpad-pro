@@ -41,10 +41,18 @@ interface ParsedRow {
   vat_number: string;
   building: string;
   service: string;
+  sector: string;
+  deal_type: string; // Tipo de negócio (Virtual, Fisico, Ideias)
+  deal_stage: string; // Etapa do negócio (Tier A/B/C, Onboarding)
+  owner_name: string; // Proprietário do negócio
+  associated_company: string;
   department: string;
   deal_id: string;
   contact_id: string;
   company_id: string;
+  // Resolved
+  resolved_owner_id: string | null;
+  resolved_stage: string | null;
   // Validation
   isValid: boolean;
   validationErrors: string[];
@@ -58,6 +66,8 @@ interface ImportConfig {
   program_id: string;
   default_stage: string;
   owner_consultant_id: string;
+  use_file_owner: boolean; // Use owner from file if available
+  use_file_stage: boolean; // Use stage from file if available
   upsert_mode: boolean;
   create_workspaces: boolean;
   allow_stage_update: boolean;
@@ -151,6 +161,8 @@ export default function AdminDataImport() {
     program_id: '',
     default_stage: 'new',
     owner_consultant_id: '',
+    use_file_owner: true, // Default: use owner from file
+    use_file_stage: true, // Default: use stage from file
     upsert_mode: true,
     create_workspaces: false,
     allow_stage_update: false,
@@ -163,57 +175,52 @@ export default function AdminDataImport() {
   });
 
   // ====================
-  // FILE PARSING
+  // CONSULTANT LOOKUP & MAPPING
   // ====================
 
-  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessing(true);
-    try {
-      let rows: Record<string, unknown>[] = [];
-
-      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-      } else if (file.name.endsWith('.csv')) {
-        const text = await file.text();
-        rows = parseCSV(text);
-      } else {
-        toast.error(t('dataImport.unsupportedFormat', 'Unsupported file format. Please use XLSX or CSV.'));
-        return;
+  // Build consultant lookup map
+  const consultorLookup = useMemo(() => {
+    const map = new Map<string, string>();
+    consultors?.forEach(c => {
+      if (c.full_name) {
+        map.set(c.full_name.toLowerCase().trim(), c.id);
+        const firstName = c.full_name.split(' ')[0].toLowerCase().trim();
+        if (firstName && !map.has(firstName)) {
+          map.set(firstName, c.id);
+        }
       }
+    });
+    return map;
+  }, [consultors]);
 
-      if (rows.length === 0) {
-        toast.error(t('dataImport.emptyFile', 'The file is empty or could not be parsed.'));
-        return;
-      }
+  const mapHubSpotStage = (hubspotStage: string): string | null => {
+    if (!hubspotStage) return null;
+    const stage = hubspotStage.toLowerCase().trim();
+    if (stage.includes('tier a')) return 'qualified';
+    if (stage.includes('tier b')) return 'qualified';
+    if (stage.includes('tier c')) return 'qualified';
+    if (stage.includes('onboarding')) return 'met';
+    if (stage.includes('qualified')) return 'qualified';
+    if (stage.includes('first contact') || stage.includes('primeiro contacto')) return 'first_contact_booked';
+    if (stage.includes('new') || stage.includes('novo')) return 'new';
+    if (stage.includes('lost') || stage.includes('perdido')) return 'lost';
+    if (stage.includes('contracted') || stage.includes('contratado')) return 'contracted';
+    return null;
+  };
 
-      const cols = Object.keys(rows[0]);
-      setFileName(file.name);
-      setRawRows(rows);
-      setColumns(cols);
-
-      // Parse and validate rows
-      const parsed = parseAndValidateRows(rows);
-      setParsedRows(parsed);
-
-      toast.success(t('dataImport.fileParsed', 'File parsed successfully: {{count}} rows', { count: rows.length }));
-      setStep(2);
-    } catch (error) {
-      console.error('Error parsing file:', error);
-      toast.error(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
-    } finally {
-      setIsProcessing(false);
-      event.target.value = '';
+  const resolveOwner = useCallback((ownerName: string): string | null => {
+    if (!ownerName) return null;
+    const normalized = ownerName.toLowerCase().trim();
+    if (consultorLookup.has(normalized)) return consultorLookup.get(normalized) || null;
+    const firstName = normalized.split(' ')[0];
+    if (consultorLookup.has(firstName)) return consultorLookup.get(firstName) || null;
+    for (const [name, id] of consultorLookup.entries()) {
+      if (name.includes(normalized) || normalized.includes(name)) return id;
     }
-  }, [t]);
+    return null;
+  }, [consultorLookup]);
 
-  const parseAndValidateRows = (rows: Record<string, unknown>[]): ParsedRow[] => {
+  const parseAndValidateRows = useCallback((rows: Record<string, unknown>[]): ParsedRow[] => {
     const parsed: ParsedRow[] = [];
     const seenVats = new Map<string, number>();
     const seenEmails = new Map<string, number>();
@@ -226,29 +233,60 @@ export default function AdminDataImport() {
       // Extract fields with multiple possible column names
       const organization_name = getStringValue(row, [
         'Nome', 'Nome da empresa', 'organization_name', 'Company', 'Empresa',
-        'Nome do negócio', 'Deal Name', 'Negócio', 'Nome Empresa', 'company_name'
+        'Nome do negócio', 'Deal Name', 'Negócio', 'Nome Empresa', 'company_name',
+        'Associated Company'
       ]);
-      const contact_name = getStringValue(row, [
+      
+      // Parse Associated Contact: "Name (email)" format
+      const associatedContact = getStringValue(row, ['Associated Contact']);
+      let contact_name = getStringValue(row, [
         'Contacto', 'Contact', 'contact_name', 'Nome do contacto', 'Contact Name',
         'Nome Contacto', 'Pessoa', 'Person'
       ]);
-      const contact_email = getStringValue(row, [
+      let contact_email = getStringValue(row, [
         'Email', 'E-mail', 'email', 'contact_email', 'Email Final', 'email_final',
         'Email do contacto', 'Contact Email', 'E-Mail', 'email_address'
       ]);
+      
+      // Parse "Name (email)" format from Associated Contact
+      if (associatedContact) {
+        const match = associatedContact.match(/^(.+?)\s*\(([^)]+)\)/);
+        if (match) {
+          if (!contact_name) contact_name = match[1].trim();
+          if (!contact_email) contact_email = match[2].trim();
+        } else if (!contact_name) {
+          contact_name = associatedContact;
+        }
+      }
+      
       const contact_phone = getStringValue(row, [
         'Telefone', 'Phone', 'phone', 'contact_phone', 'Telemóvel', 'Tel', 'Mobile',
         'Número de telefone', 'Phone Number'
       ]);
       const vat_number = getStringValue(row, [
         'NIF', 'VAT', 'nif', 'vat_number', 'NIPC', 'Número fiscal', 'Tax ID',
-        'Contribuinte', 'NIF/NIPC', 'VAT Number'
+        'Contribuinte', 'NIF/NIPC', 'VAT Number', 'Número de contribuinte'
       ]);
       const building = getStringValue(row, [
         'Edifício', 'Edificio', 'Building', 'building', 'Local', 'Location'
       ]);
       const service = getStringValue(row, [
         'Serviço', 'Servico', 'Service', 'service', 'Tipo de serviço'
+      ]);
+      const sector = getStringValue(row, [
+        'Setor de atuação', 'Setor', 'Sector', 'Industry', 'Indústria'
+      ]);
+      const deal_type = getStringValue(row, [
+        'Tipo de negócio', 'Deal Type', 'Business Type', 'Tipo'
+      ]);
+      const deal_stage = getStringValue(row, [
+        'Etapa do negócio', 'Deal Stage', 'Stage', 'Etapa', 'Pipeline Stage'
+      ]);
+      const owner_name = getStringValue(row, [
+        'Proprietário do negócio', 'Deal Owner', 'Owner', 'Proprietário', 'Assigned To'
+      ]);
+      const associated_company = getStringValue(row, [
+        'Associated Company', 'Company', 'Empresa Associada'
       ]);
       const department = getStringValue(row, [
         'Departamento', 'Department', 'department', 'Area', 'Área'
@@ -262,6 +300,12 @@ export default function AdminDataImport() {
       const company_id = getStringValue(row, [
         'Company ID', 'company_id', 'ID da empresa', 'HubSpot Company ID'
       ]);
+
+      // Resolve owner from name
+      const resolved_owner_id = resolveOwner(owner_name);
+      
+      // Resolve stage from HubSpot stage
+      const resolved_stage = mapHubSpotStage(deal_stage);
 
       // Validation
       if (!organization_name && !contact_email) {
@@ -311,10 +355,17 @@ export default function AdminDataImport() {
         vat_number,
         building,
         service,
+        sector,
+        deal_type,
+        deal_stage,
+        owner_name,
+        associated_company,
         department,
         deal_id,
         contact_id,
         company_id,
+        resolved_owner_id,
+        resolved_stage,
         isValid: validationErrors.length === 0,
         validationErrors,
         isDuplicate,
@@ -324,7 +375,7 @@ export default function AdminDataImport() {
     }
 
     return parsed;
-  };
+  }, [consultorLookup, t]);
 
   // ====================
   // DRY RUN
@@ -485,11 +536,40 @@ export default function AdminDataImport() {
           if (row.vat_number) noteParts.push(`NIF: ${row.vat_number}`);
           if (row.building) noteParts.push(`Edifício: ${row.building}`);
           if (row.service) noteParts.push(`Serviço: ${row.service}`);
+          if (row.sector) noteParts.push(`Setor: ${row.sector}`);
+          if (row.deal_type) noteParts.push(`Tipo: ${row.deal_type}`);
+          if (row.deal_stage) noteParts.push(`Etapa HubSpot: ${row.deal_stage}`);
+          if (row.owner_name) noteParts.push(`Owner HubSpot: ${row.owner_name}`);
+          if (row.associated_company) noteParts.push(`Empresa: ${row.associated_company}`);
           if (row.department) noteParts.push(`Departamento: ${row.department}`);
           if (row.deal_id) noteParts.push(`HubSpot Deal ID: ${row.deal_id}`);
           if (row.contact_id) noteParts.push(`HubSpot Contact ID: ${row.contact_id}`);
           if (row.company_id) noteParts.push(`HubSpot Company ID: ${row.company_id}`);
           noteParts.push(`Imported: ${new Date().toISOString().split('T')[0]}`);
+
+          // Determine owner: use file owner if enabled and resolved, else fallback to config
+          const finalOwnerId = (config.use_file_owner && row.resolved_owner_id) 
+            ? row.resolved_owner_id 
+            : (config.owner_consultant_id || null);
+          
+          // Determine stage: use file stage if enabled and resolved, else fallback to config
+          const finalStage = (config.use_file_stage && row.resolved_stage) 
+            ? row.resolved_stage 
+            : config.default_stage;
+
+          // Build tags from sector
+          const tags: string[] = ['hubspot_import'];
+          if (row.sector) {
+            // Split sector by ; and add each as tag
+            row.sector.split(';').forEach(s => {
+              const tag = s.trim().toLowerCase().replace(/\s+/g, '_');
+              if (tag && !tags.includes(tag)) tags.push(tag);
+            });
+          }
+          if (row.deal_type) {
+            const typeTag = row.deal_type.toLowerCase().replace(/\s+/g, '_');
+            if (!tags.includes(typeTag)) tags.push(typeTag);
+          }
 
           const funnelData = {
             organization_name: row.organization_name || null,
@@ -497,10 +577,10 @@ export default function AdminDataImport() {
             contact_email: row.contact_email || null,
             contact_phone: row.contact_phone || null,
             source: 'hubspot_import',
-            stage: config.default_stage,
+            stage: finalStage,
             program_id: config.program_id,
-            owner_consultant_id: config.owner_consultant_id || null,
-            tags: ['hubspot_import'],
+            owner_consultant_id: finalOwnerId,
+            tags,
             notes: noteParts.join('\n'),
             type: 'lead' as const,
           };
@@ -587,7 +667,9 @@ export default function AdminDataImport() {
     const duplicates = parsedRows.filter(r => r.isDuplicate).length;
     const withEmail = parsedRows.filter(r => r.contact_email).length;
     const withVat = parsedRows.filter(r => r.vat_number).length;
-    return { total, valid, invalid, duplicates, withEmail, withVat };
+    const withOwner = parsedRows.filter(r => r.resolved_owner_id).length;
+    const withStage = parsedRows.filter(r => r.resolved_stage).length;
+    return { total, valid, invalid, duplicates, withEmail, withVat, withOwner, withStage };
   }, [parsedRows]);
 
   const filteredRows = useMemo(() => {
@@ -792,11 +874,27 @@ export default function AdminDataImport() {
                                 </span>
                               )}
                             </div>
-                            {row.building && (
-                              <div className="text-xs text-muted-foreground mt-1">
-                                <Building2 className="h-3 w-3 inline mr-1" />
-                                {row.building}
-                                {row.service && ` · ${row.service}`}
+                            {(row.building || row.owner_name || row.deal_stage) && (
+                              <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">
+                                {row.building && (
+                                  <span>
+                                    <Building2 className="h-3 w-3 inline mr-1" />
+                                    {row.building}
+                                    {row.service && ` · ${row.service}`}
+                                  </span>
+                                )}
+                                {row.owner_name && (
+                                  <span className={row.resolved_owner_id ? 'text-green-600' : 'text-amber-600'}>
+                                    👤 {row.owner_name}
+                                    {row.resolved_owner_id ? ' ✓' : ' (não mapeado)'}
+                                  </span>
+                                )}
+                                {row.deal_stage && (
+                                  <span className={row.resolved_stage ? 'text-green-600' : 'text-amber-600'}>
+                                    📊 {row.deal_stage}
+                                    {row.resolved_stage ? ` → ${row.resolved_stage}` : ' (não mapeado)'}
+                                  </span>
+                                )}
                               </div>
                             )}
                             {!row.isValid && row.validationErrors.length > 0 && (
@@ -888,6 +986,40 @@ export default function AdminDataImport() {
                 </div>
 
                 <Separator />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <div>
+                      <Label className="text-primary">{t('dataImport.useFileOwner', 'Usar Owner do Ficheiro')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataImport.useFileOwnerDesc', 'Mapear "Proprietário do negócio" para consultor')}
+                      </p>
+                      <p className="text-xs text-green-600 font-medium mt-1">
+                        {stats.withOwner} de {stats.total} linhas com owner mapeado
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.use_file_owner}
+                      onCheckedChange={v => setConfig({...config, use_file_owner: v})}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <div>
+                      <Label className="text-primary">{t('dataImport.useFileStage', 'Usar Etapa do Ficheiro')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataImport.useFileStageDesc', 'Mapear "Etapa do negócio" (Tier A/B/C) para stage')}
+                      </p>
+                      <p className="text-xs text-green-600 font-medium mt-1">
+                        {stats.withStage} de {stats.total} linhas com stage mapeado
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.use_file_stage}
+                      onCheckedChange={v => setConfig({...config, use_file_stage: v})}
+                    />
+                  </div>
+                </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
