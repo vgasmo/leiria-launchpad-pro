@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => ({
           /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/,
         ],
         // Increase the size limit to 3 MB to handle large bundles
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         // Skip waiting for faster updates - ensures new deploys are used immediately
         skipWaiting: true,
         clientsClaim: true,
