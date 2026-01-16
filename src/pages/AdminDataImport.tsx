@@ -432,15 +432,15 @@ export default function AdminDataImport() {
                   <div className="space-y-2">
                     <Label>{t('dataImport.assignTo', 'Assign to Consultant')}</Label>
                     <Select 
-                      value={config.owner_consultant_id} 
-                      onValueChange={v => setConfig({...config, owner_consultant_id: v})}
+                      value={config.owner_consultant_id || 'none'} 
+                      onValueChange={v => setConfig({...config, owner_consultant_id: v === 'none' ? '' : v})}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t('dataImport.noAssignment', 'No default assignment')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('dataImport.noAssignment', 'No default assignment')}</SelectItem>
-                        {consultors?.map(c => (
+                        <SelectItem value="none">{t('dataImport.noAssignment', 'No default assignment')}</SelectItem>
+                        {consultors?.filter(c => c.id).map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
                         ))}
                       </SelectContent>
