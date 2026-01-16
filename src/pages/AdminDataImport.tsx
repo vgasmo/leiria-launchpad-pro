@@ -378,6 +378,56 @@ export default function AdminDataImport() {
   }, [consultorLookup, t]);
 
   // ====================
+  // FILE PARSING
+  // ====================
+
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    try {
+      let rows: Record<string, unknown>[] = [];
+
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      } else if (file.name.endsWith('.csv')) {
+        const text = await file.text();
+        rows = parseCSV(text);
+      } else {
+        toast.error(t('dataImport.unsupportedFormat', 'Unsupported file format. Please use XLSX or CSV.'));
+        return;
+      }
+
+      if (rows.length === 0) {
+        toast.error(t('dataImport.emptyFile', 'The file is empty or could not be parsed.'));
+        return;
+      }
+
+      const cols = Object.keys(rows[0]);
+      setFileName(file.name);
+      setRawRows(rows);
+      setColumns(cols);
+
+      const parsed = parseAndValidateRows(rows);
+      setParsedRows(parsed);
+
+      toast.success(t('dataImport.fileParsed', 'File parsed successfully: {{count}} rows', { count: rows.length }));
+      setStep(2);
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      toast.error(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
+    } finally {
+      setIsProcessing(false);
+      event.target.value = '';
+    }
+  }, [t, parseAndValidateRows]);
+
+  // ====================
   // DRY RUN
   // ====================
 
