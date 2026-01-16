@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
   Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
-  ChevronDown, Stethoscope
+  ChevronDown, Stethoscope, Database
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -44,7 +44,7 @@ const TAB_GROUPS: Record<string, string[]> = {
   people: ['users', 'mentors'],
   content: ['kpis', 'templates', 'support-materials', 'surveys'],
   insights: ['activity', 'analytics', 'health'],
-  system: ['integrations', 'crm-diagnostics', 'flags', 'funnel'],
+  system: ['integrations', 'crm-diagnostics', 'data-import', 'flags', 'funnel'],
 };
 
 export default function Admin() {
@@ -69,6 +69,7 @@ export default function Admin() {
       health: <Heart className="h-4 w-4" />,
       integrations: <Plug className="h-4 w-4" />,
       'crm-diagnostics': <Stethoscope className="h-4 w-4" />,
+      'data-import': <Database className="h-4 w-4" />,
       flags: <Flag className="h-4 w-4" />,
       funnel: <Filter className="h-4 w-4" />,
     };
@@ -92,6 +93,7 @@ export default function Admin() {
       health: t('admin.healthModels'),
       integrations: t('admin.integrations', 'Integrations'),
       'crm-diagnostics': t('admin.crmDiagnostics', 'CRM Diagnostics'),
+      'data-import': t('admin.dataImport.tab', 'Data Import'),
       flags: t('admin.featureFlags.tab', 'Flags'),
       funnel: t('admin.funnel.tab', 'Funnel'),
     };
@@ -144,6 +146,8 @@ export default function Admin() {
                     onClick={() => {
                       if (tab === 'crm-diagnostics') {
                         navigate('/admin/crm-diagnostics');
+                      } else if (tab === 'data-import') {
+                        navigate('/admin/data-import');
                       } else {
                         setActiveTab(tab);
                       }
