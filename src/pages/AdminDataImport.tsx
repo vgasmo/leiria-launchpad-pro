@@ -196,11 +196,12 @@ export default function AdminDataImport() {
   const mapHubSpotStage = (hubspotStage: string): string | null => {
     if (!hubspotStage) return null;
     const stage = hubspotStage.toLowerCase().trim();
-    if (stage.includes('tier a')) return 'qualified';
-    if (stage.includes('tier b')) return 'qualified';
-    if (stage.includes('tier c')) return 'qualified';
+    // Map all qualified/tier leads to contracted
+    if (stage.includes('tier a')) return 'contracted';
+    if (stage.includes('tier b')) return 'contracted';
+    if (stage.includes('tier c')) return 'contracted';
+    if (stage.includes('qualified')) return 'contracted';
     if (stage.includes('onboarding')) return 'met';
-    if (stage.includes('qualified')) return 'qualified';
     if (stage.includes('first contact') || stage.includes('primeiro contacto')) return 'first_contact_booked';
     if (stage.includes('new') || stage.includes('novo')) return 'new';
     if (stage.includes('lost') || stage.includes('perdido')) return 'lost';
