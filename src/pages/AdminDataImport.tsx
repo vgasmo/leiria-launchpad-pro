@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import * as XLSX from 'xlsx';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,39 +71,36 @@ export default function AdminDataImport() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    
-    reader.onload = async (e) => {
-      try {
-        const text = e.target?.result as string;
-        let rows: Record<string, unknown>[] = [];
-        
-        if (file.name.endsWith('.csv')) {
-          rows = parseCSV(text);
-        } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-          // For Excel files, we'd need a library. For now, prompt user to convert to CSV
-          alert(t('dataImport.convertToCSV', 'Please convert Excel files to CSV before uploading.'));
-          return;
-        } else {
-          rows = parseCSV(text);
-        }
-
-        const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-        
-        addParsedFile({
-          fileName: file.name,
-          rowCount: rows.length,
-          columns,
-          rows,
-          type: fileType,
-        });
-      } catch (error) {
-        console.error('Error parsing file:', error);
-        alert(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
+    try {
+      let rows: Record<string, unknown>[] = [];
+      
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // Parse Excel files using xlsx library
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      } else {
+        // Parse CSV files
+        const text = await file.text();
+        rows = parseCSV(text);
       }
-    };
 
-    reader.readAsText(file);
+      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      
+      addParsedFile({
+        fileName: file.name,
+        rowCount: rows.length,
+        columns,
+        rows,
+        type: fileType,
+      });
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      alert(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
+    }
+    
     event.target.value = '';
   }, [addParsedFile, t]);
 
