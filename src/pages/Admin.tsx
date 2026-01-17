@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
   Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
-  ChevronDown, Stethoscope, Database
+  ChevronDown, Stethoscope, Database, Tag
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -37,12 +37,13 @@ import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsMa
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
+import { AdminTagCategoriesManager } from '@/components/admin/AdminTagCategoriesManager';
 
 // Tab group definitions for cleaner navigation
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'compliance', 'backoffice', 'announcements'],
   people: ['users', 'mentors'],
-  content: ['kpis', 'templates', 'support-materials', 'surveys'],
+  content: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   insights: ['activity', 'analytics', 'health'],
   system: ['integrations', 'crm-diagnostics', 'data-import', 'flags', 'funnel'],
 };
