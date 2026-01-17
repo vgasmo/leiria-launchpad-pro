@@ -1353,7 +1353,9 @@
     "noActionsYet": "No actions yet",
     "noMilestonesYet": "No milestones yet",
     "addFirstAction": "Add first action",
-    "addFirstMilestone": "Add first milestone"
+    "addFirstMilestone": "Add first milestone",
+    "locationContract": "Location & Contract",
+    "noContractAssigned": "No contract assigned yet"
   },
   "invite": {
     "verifying": "Verifying Invitation",
@@ -3253,10 +3255,6 @@
       "critical": "Urgent action required",
       "unknown": "Score not calculated"
     }
-  },
-  "workspace": {
-    "locationContract": "Location & Contract",
-    "noContractAssigned": "No contract assigned yet"
   },
   "publicBooking": {
     "title": "Book a Meeting",

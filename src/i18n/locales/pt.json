@@ -1292,7 +1292,9 @@
     "noActionsYet": "Sem ações ainda",
     "noMilestonesYet": "Sem marcos ainda",
     "addFirstAction": "Adicionar primeira ação",
-    "addFirstMilestone": "Adicionar primeiro marco"
+    "addFirstMilestone": "Adicionar primeiro marco",
+    "locationContract": "Localização e Contrato",
+    "noContractAssigned": "Ainda sem contrato atribuído"
   },
   "invite": {
     "verifying": "A Verificar Convite",
@@ -3248,10 +3250,6 @@
       "critical": "Ação urgente necessária",
       "unknown": "Score não calculado"
     }
-  },
-  "workspace": {
-    "locationContract": "Localização e Contrato",
-    "noContractAssigned": "Ainda sem contrato atribuído"
   },
   "streakHero": {
     "weeksStreak": "semana de streak",
