@@ -123,7 +123,7 @@ export function MentorRecommendationWidget({
       .filter(m => m.matchScore > 0)
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 5); // Top 5 recommendations
-  }, [mentors, requestedTags, availabilityData, sessionCounts]);
+  }, [mentors, requestedTags, availabilityData]);
 
   const getInitials = (name: string | null, email: string) => {
     if (name) {
