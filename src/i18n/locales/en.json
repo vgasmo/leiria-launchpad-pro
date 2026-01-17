@@ -3726,6 +3726,44 @@
     "acceptFailed": "Failed to accept the invitation. Please try again.",
     "wrongEmail": "This invitation was sent to {{email}}. Please log in with that account.",
     "goToWorkspace": "Go to Workspace",
-    "redirecting": "Redirecting to your workspace..."
+    "redirecting": "Redirecting to your workspace...",
+    "sentTo": "Invitation sent to"
+  },
+  "nif": {
+    "label": "NIF (Tax ID)",
+    "placeholder": "123456789",
+    "helpText": "Portuguese tax identification number (9 digits)",
+    "valid": "Valid NIF",
+    "invalid": "Invalid NIF - please check the number"
+  },
+  "onboardingWizard": {
+    "companyDetails": "Company Details",
+    "companyDetailsDesc": "Let's make sure your company information is complete.",
+    "startupName": "Startup Name",
+    "website": "Website",
+    "mainContact": "Main Contact",
+    "nifRequired": "Your NIF is required for official correspondence and future financial data matching."
+  },
+  "dataQuality": {
+    "title": "Data Quality Dashboard",
+    "description": "Monitor and improve your ecosystem data quality.",
+    "missingNif": "Startups Missing NIF",
+    "missingNifDesc": "Tax ID required for financial matching",
+    "workspacesWithoutFounders": "Workspaces Without Founders",
+    "workspacesWithoutFoundersDesc": "Imported workspaces need founder access",
+    "missingContact": "Missing Contact Info",
+    "missingContactDesc": "Startups without email or phone",
+    "bulkInviteFounders": "Bulk Invite Founders",
+    "invitingFounders": "Sending invitations...",
+    "invitesSent": "Invitations sent successfully!",
+    "invitesFailed": "Failed to send some invitations",
+    "noStartupsToInvite": "No startups available to invite"
+  },
+  "progressReport": {
+    "noProgress": "—",
+    "noActionsYet": "No actions yet",
+    "noMilestonesYet": "No milestones yet",
+    "addFirstAction": "Add first action",
+    "addFirstMilestone": "Add first milestone"
   }
 }

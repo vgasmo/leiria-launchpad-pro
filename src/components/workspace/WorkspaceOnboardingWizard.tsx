@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Loader2,
   BookOpen,
+  Building2,
 } from 'lucide-react';
 import { WizardStepTransition } from '@/components/ui/WizardStepTransition';
 import { WizardIllustration } from '@/components/ui/WizardIllustration';
@@ -32,15 +33,23 @@ import { useApplyStageDefaults } from '@/hooks/useKpis';
 import { useCreateMilestone } from '@/hooks/useMilestones';
 import { useCreateActionItemFull } from '@/hooks/useActionItems';
 import { useCreateSession } from '@/hooks/useSessions';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { CompanyDetailsStep } from './CompanyDetailsStep';
 import type { StartupStage } from '@/types/database';
 
 interface WorkspaceOnboardingWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workspaceId: string;
+  startupId?: string;
   stage: StartupStage;
   startupName: string;
+  website?: string;
+  mainContactName?: string;
+  mainContactEmail?: string;
+  nif?: string;
+  isFounderOnboarding?: boolean;
 }
 
 // Default milestones by stage with suggested actions
@@ -269,19 +278,36 @@ const STAGE_MILESTONES: Record<StartupStage, {
   ],
 };
 
-type WizardStep = 'welcome' | 'kpis' | 'milestones' | 'meeting' | 'complete';
+type WizardStep = 'welcome' | 'company' | 'kpis' | 'milestones' | 'meeting' | 'complete';
 
 export function WorkspaceOnboardingWizard({
   open,
   onOpenChange,
   workspaceId,
+  startupId,
   stage,
-  startupName,
+  startupName: initialStartupName,
+  website: initialWebsite = '',
+  mainContactName: initialContactName = '',
+  mainContactEmail: initialContactEmail = '',
+  nif: initialNif = '',
+  isFounderOnboarding = false,
 }: WorkspaceOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('welcome');
   const [prevStep, setPrevStep] = useState<WizardStep>('welcome');
   const [isProcessing, setIsProcessing] = useState(false);
   const confettiTriggered = useRef(false);
+  
+  // Company details state
+  const [companyDetails, setCompanyDetails] = useState({
+    startupName: initialStartupName,
+    website: initialWebsite,
+    mainContactName: initialContactName,
+    mainContactEmail: initialContactEmail,
+    nif: initialNif,
+  });
+  const [isNifValid, setIsNifValid] = useState(false);
+  const [companySaved, setCompanySaved] = useState(false);
   
   // Step results tracking
   const [kpisApplied, setKpisApplied] = useState(false);
@@ -294,7 +320,7 @@ export function WorkspaceOnboardingWizard({
   );
   
   // Meeting form
-  const [meetingTitle, setMeetingTitle] = useState(`Kickoff Meeting - ${startupName}`);
+  const [meetingTitle, setMeetingTitle] = useState(`Kickoff Meeting - ${initialStartupName}`);
   const [meetingDate, setMeetingDate] = useState(format(addDays(new Date(), 3), 'yyyy-MM-dd'));
   const [meetingTime, setMeetingTime] = useState('10:00');
   const [meetingDuration, setMeetingDuration] = useState('60');
@@ -304,17 +330,26 @@ export function WorkspaceOnboardingWizard({
     if (open) {
       setCurrentStep('welcome');
       setPrevStep('welcome');
+      setCompanyDetails({
+        startupName: initialStartupName,
+        website: initialWebsite,
+        mainContactName: initialContactName,
+        mainContactEmail: initialContactEmail,
+        nif: initialNif,
+      });
+      setIsNifValid(false);
+      setCompanySaved(false);
       setKpisApplied(false);
       setMilestonesCreated(false);
       setMeetingScheduled(false);
       setSelectedMilestones(new Set(STAGE_MILESTONES[stage]?.map((_, i) => i) || []));
-      setMeetingTitle(`Kickoff Meeting - ${startupName}`);
+      setMeetingTitle(`Kickoff Meeting - ${initialStartupName}`);
       setMeetingDate(format(addDays(new Date(), 3), 'yyyy-MM-dd'));
       setMeetingTime('10:00');
       setMeetingDuration('60');
       confettiTriggered.current = false;
     }
-  }, [open, stage, startupName]);
+  }, [open, stage, initialStartupName, initialWebsite, initialContactName, initialContactEmail, initialNif]);
 
   // Trigger confetti on completion
   useEffect(() => {
@@ -324,13 +359,23 @@ export function WorkspaceOnboardingWizard({
     }
   }, [currentStep]);
 
-  const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = [
-    { key: 'welcome', label: 'Welcome', icon: Sparkles },
-    { key: 'kpis', label: 'KPIs', icon: TrendingUp },
-    { key: 'milestones', label: 'Milestones', icon: Target },
-    { key: 'meeting', label: 'Meeting', icon: Calendar },
-    { key: 'complete', label: 'Done', icon: Check },
-  ];
+  // Build steps dynamically based on whether this is founder onboarding
+  const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = isFounderOnboarding
+    ? [
+        { key: 'welcome', label: 'Welcome', icon: Sparkles },
+        { key: 'company', label: 'Company', icon: Building2 },
+        { key: 'kpis', label: 'KPIs', icon: TrendingUp },
+        { key: 'milestones', label: 'Milestones', icon: Target },
+        { key: 'meeting', label: 'Meeting', icon: Calendar },
+        { key: 'complete', label: 'Done', icon: Check },
+      ]
+    : [
+        { key: 'welcome', label: 'Welcome', icon: Sparkles },
+        { key: 'kpis', label: 'KPIs', icon: TrendingUp },
+        { key: 'milestones', label: 'Milestones', icon: Target },
+        { key: 'meeting', label: 'Meeting', icon: Calendar },
+        { key: 'complete', label: 'Done', icon: Check },
+      ];
 
   // Helper for step transitions
   const goToStep = (step: WizardStep) => {
@@ -433,6 +478,39 @@ export function WorkspaceOnboardingWizard({
     }
   };
 
+  // Handle saving company details
+  const handleSaveCompanyDetails = async () => {
+    if (!startupId) {
+      goToStep('kpis');
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('startups')
+        .update({
+          name: companyDetails.startupName,
+          website: companyDetails.website || null,
+          main_contact_name: companyDetails.mainContactName || null,
+          main_contact_email: companyDetails.mainContactEmail || null,
+          nif: companyDetails.nif || null,
+        })
+        .eq('id', startupId);
+      
+      if (error) throw error;
+      
+      setCompanySaved(true);
+      toast.success('Company details saved');
+      goToStep('kpis');
+    } catch (err) {
+      console.error('Failed to save company details:', err);
+      toast.error('Failed to save company details');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleClose = () => {
     onOpenChange(false);
     // State will be reset by useEffect when dialog reopens
@@ -490,10 +568,11 @@ export function WorkspaceOnboardingWizard({
               <div className="text-center py-6 space-y-4">
                 <WizardIllustration type="welcome" size="lg" className="mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Welcome to {startupName}!</h3>
+                  <h3 className="text-lg font-semibold mb-2">Welcome to {companyDetails.startupName}!</h3>
                   <p className="text-muted-foreground text-sm">
-                    This wizard will help you set up your workspace with stage-appropriate KPIs,
-                    initial milestones, and schedule your first meeting.
+                    {isFounderOnboarding 
+                      ? 'This wizard will help you complete your company profile, set up KPIs, milestones, and schedule your first meeting.'
+                      : 'This wizard will help you set up your workspace with stage-appropriate KPIs, initial milestones, and schedule your first meeting.'}
                   </p>
                 </div>
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-left">
@@ -509,6 +588,18 @@ export function WorkspaceOnboardingWizard({
                   </div>
                 </div>
               </div>
+            )}
+
+            {currentStep === 'company' && (
+              <CompanyDetailsStep
+                startupName={companyDetails.startupName}
+                website={companyDetails.website}
+                mainContactName={companyDetails.mainContactName}
+                mainContactEmail={companyDetails.mainContactEmail}
+                nif={companyDetails.nif}
+                onUpdate={(updates) => setCompanyDetails(prev => ({ ...prev, ...updates }))}
+                onNifValid={setIsNifValid}
+              />
             )}
 
             {currentStep === 'kpis' && (
@@ -698,10 +789,30 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'welcome' && (
-            <Button type="button" onClick={() => goToStep('kpis')} className="w-full sm:w-auto">
+            <Button 
+              type="button" 
+              onClick={() => goToStep(isFounderOnboarding ? 'company' : 'kpis')} 
+              className="w-full sm:w-auto"
+            >
               Get Started
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
+          )}
+
+          {currentStep === 'company' && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button type="button" variant="outline" onClick={() => goToStep('kpis')} disabled={isProcessing}>
+                Skip
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleSaveCompanyDetails} 
+                disabled={isProcessing || companySaved}
+              >
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {companySaved ? 'Saved' : 'Save & Continue'}
+              </Button>
+            </div>
           )}
           
           {currentStep === 'kpis' && (

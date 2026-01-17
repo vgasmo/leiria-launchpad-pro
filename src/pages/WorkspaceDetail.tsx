@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Clock, BookOpen, Shield, FolderLock } from 'lucide-react';
@@ -24,6 +25,7 @@ import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
 import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
+import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -34,10 +36,24 @@ export default function WorkspaceDetail() {
   const { t } = useTranslation();
   const { data: workspace, isLoading, error } = useWorkspace(id);
   const { isAdmin, isConsultor, isMentor, isFounder } = useAuth();
+  
+  // Handle onboarding wizard auto-open for invited founders
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
+  const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
 
   // Determine if user can write to this workspace
   // Admins, consultors, mentors, AND founders can write
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
+  
+  // Auto-open onboarding wizard when redirected from invite acceptance
+  useEffect(() => {
+    if (shouldShowOnboarding && workspace && isFounder) {
+      setShowOnboardingWizard(true);
+      // Remove the query param after reading it
+      searchParams.delete('onboarding');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [shouldShowOnboarding, workspace, isFounder, searchParams, setSearchParams]);
 
   if (isLoading) {
     return (
@@ -277,6 +293,23 @@ export default function WorkspaceDetail() {
         </TabsContent>
         </div>
       </Tabs>
+      
+      {/* Founder Onboarding Wizard - auto-opens after invite acceptance */}
+      {startup && (
+        <WorkspaceOnboardingWizard
+          open={showOnboardingWizard}
+          onOpenChange={setShowOnboardingWizard}
+          workspaceId={workspace.id}
+          startupId={startup.id}
+          stage={workspace.stage}
+          startupName={startup.name}
+          website={startup.website || ''}
+          mainContactName={startup.main_contact_name || ''}
+          mainContactEmail={startup.main_contact_email || ''}
+          nif={startup.nif || ''}
+          isFounderOnboarding={isFounder}
+        />
+      )}
     </AppLayout>
   );
 }
