@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Pencil, Trash2, FileText, Code, Upload, FileSpreadsheet, Copy, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const FINANCIAL_MODEL_TEMPLATE_PATH = 'templates/Template_Avaliacao_Startup_Ecos
 const FINANCIAL_MODEL_BUCKET = 'public-assets';
 
 export function AdminTemplatesManager() {
+  const { t } = useTranslation();
   const { isAdmin, isConsultor } = useAuth();
   const canUploadAssets = isAdmin || isConsultor;
   
@@ -272,7 +274,7 @@ export function AdminTemplatesManager() {
                   ) : (
                     <Upload className="h-4 w-4 mr-1" />
                   )}
-                  {isUploadingAsset ? 'Uploading...' : 'Upload Template'}
+                  {isUploadingAsset ? t('common.uploading', 'Uploading...') : t('admin.templates.uploadTemplate', 'Upload Template')}
                 </Button>
                 <Button
                   size="sm"
@@ -280,7 +282,7 @@ export function AdminTemplatesManager() {
                   onClick={handleCopyAssetUrl}
                 >
                   <Copy className="h-4 w-4 mr-1" />
-                  Copy URL
+                  {t('common.copyUrl', 'Copy URL')}
                 </Button>
               </div>
             </div>

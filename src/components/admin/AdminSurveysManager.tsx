@@ -116,7 +116,7 @@ export function AdminSurveysManager() {
           {loadingCampaigns ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                Loading...
+                {t('common.loading', 'Loading...')}
               </CardContent>
             </Card>
           ) : campaigns.length === 0 ? (

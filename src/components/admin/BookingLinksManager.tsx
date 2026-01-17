@@ -224,7 +224,7 @@ export function BookingLinksManager() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-muted-foreground text-sm">Loading...</p>
+          <p className="text-muted-foreground text-sm">{t('common.loading', 'Loading...')}</p>
         ) : !bookingLinks?.length ? (
           <p className="text-muted-foreground text-sm">
             {t('admin.bookingLinks.empty', 'No booking links created yet')}

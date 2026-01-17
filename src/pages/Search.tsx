@@ -142,20 +142,20 @@ export default function SearchPage() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Save Search</DialogTitle>
+                <DialogTitle>{t('search.saveSearch', 'Save Search')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Search Name</Label>
+                  <Label>{t('search.searchName', 'Search Name')}</Label>
                   <Input
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
-                    placeholder="My search..."
+                    placeholder={t('search.searchNamePlaceholder', 'My search...')}
                   />
                 </div>
                 <Button onClick={handleSaveSearch} disabled={saveSearch.isPending}>
                   {saveSearch.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Save
+                  {t('common.save', 'Save')}
                 </Button>
               </div>
             </DialogContent>

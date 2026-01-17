@@ -114,7 +114,7 @@ function FloorMapCard({
       <CardContent>
         {loading ? (
           <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">Loading...</span>
+            <span className="text-muted-foreground text-sm">{t('common.loading', 'Loading...')}</span>
           </div>
         ) : signedUrl ? (
           isPdf ? (
