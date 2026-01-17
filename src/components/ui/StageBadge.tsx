@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { StartupStage } from '@/types/database';
 
@@ -7,12 +8,12 @@ export interface StageBadgeProps {
   className?: string;
 }
 
-const stageConfig: Record<StartupStage, { label: string; className: string }> = {
-  ideation: { label: 'Ideation', className: 'bg-stage-ideation/10 text-stage-ideation border-stage-ideation/30' },
-  validation: { label: 'Validation', className: 'bg-stage-validation/10 text-stage-validation border-stage-validation/30' },
-  mvp: { label: 'MVP', className: 'bg-stage-mvp/10 text-stage-mvp border-stage-mvp/30' },
-  growth: { label: 'Growth', className: 'bg-stage-growth/10 text-stage-growth border-stage-growth/30' },
-  scale: { label: 'Scale', className: 'bg-stage-scale/10 text-stage-scale border-stage-scale/30' },
+const stageConfig: Record<StartupStage, { labelKey: string; className: string }> = {
+  ideation: { labelKey: 'stages.ideation', className: 'bg-stage-ideation/10 text-stage-ideation border-stage-ideation/30' },
+  validation: { labelKey: 'stages.validation', className: 'bg-stage-validation/10 text-stage-validation border-stage-validation/30' },
+  mvp: { labelKey: 'stages.mvp', className: 'bg-stage-mvp/10 text-stage-mvp border-stage-mvp/30' },
+  growth: { labelKey: 'stages.growth', className: 'bg-stage-growth/10 text-stage-growth border-stage-growth/30' },
+  scale: { labelKey: 'stages.scale', className: 'bg-stage-scale/10 text-stage-scale border-stage-scale/30' },
 };
 
 const sizeStyles = {
@@ -22,6 +23,7 @@ const sizeStyles = {
 };
 
 export function StageBadge({ stage, size = 'md', className }: StageBadgeProps) {
+  const { t } = useTranslation();
   const config = stageConfig[stage];
   
   return (
@@ -31,7 +33,7 @@ export function StageBadge({ stage, size = 'md', className }: StageBadgeProps) {
       config.className,
       className
     )}>
-      {config.label}
+      {t(config.labelKey, { defaultValue: stage })}
     </span>
   );
 }

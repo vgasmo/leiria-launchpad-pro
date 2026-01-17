@@ -3683,5 +3683,49 @@
     "2to3Years": "2-3 years",
     "startupsOver3Years": "startups over 3 years",
     "reviewRecommended": "Review recommended for price adjustment or graduation"
+  },
+  "workspace": {
+    "overview": "Overview",
+    "sessions": "Sessions",
+    "actions": "Actions",
+    "milestones": "Milestones",
+    "kpis": "KPIs",
+    "templates": "Templates",
+    "calendar": "Calendar",
+    "documents": "Documents",
+    "team": "Team",
+    "funding": "Funding",
+    "notesAndTasks": "Notes",
+    "time": "Time",
+    "settings": "Settings",
+    "scheduleSession": "Schedule Session",
+    "notAccessible": "Workspace Not Accessible",
+    "noPermission": "You don't have permission to access this workspace."
+  },
+  "stages": {
+    "ideation": "Ideation",
+    "validation": "Validation",
+    "mvp": "MVP",
+    "growth": "Growth",
+    "scale": "Scale"
+  },
+  "invite": {
+    "verifying": "Verifying Invitation",
+    "verifyingDesc": "Please wait while we verify your invitation...",
+    "loginRequired": "Login Required",
+    "loginRequiredDesc": "Please log in to accept this invitation.",
+    "loginToAccept": "You need to be logged in to accept this workspace invitation.",
+    "noAccountYet": "Don't have an account?",
+    "processing": "Processing",
+    "processingDesc": "Adding you to the workspace...",
+    "accepted": "Welcome!",
+    "acceptedDesc": "You've been added to the workspace successfully.",
+    "acceptedSuccess": "You've joined the workspace!",
+    "error": "Invitation Error",
+    "invalidToken": "This invitation link is invalid or has expired.",
+    "acceptFailed": "Failed to accept the invitation. Please try again.",
+    "wrongEmail": "This invitation was sent to {{email}}. Please log in with that account.",
+    "goToWorkspace": "Go to Workspace",
+    "redirecting": "Redirecting to your workspace..."
   }
 }
