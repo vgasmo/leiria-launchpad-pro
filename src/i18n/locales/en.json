@@ -166,7 +166,8 @@
     "updated": "Updated",
     "saving": "Saving...",
     "new": "New",
-    "perMonth": "/mo"
+    "perMonth": "/mo",
+    "important": "Important"
   },
   "nav": {
     "home": "Home",
@@ -1242,6 +1243,58 @@
     "weekly": "Weekly",
     "dayOfWeek": "Day of Week",
     "startupSettings": "Startup Settings"
+  },
+  "startupSettings": {
+    "title": "Startup Profile",
+    "editDescription": "Edit your startup's public information",
+    "uploadLogo": "Upload Logo",
+    "logoHint": "PNG, JPG up to 2MB",
+    "logoUploaded": "Logo uploaded successfully",
+    "uploadFailed": "Upload failed",
+    "startupName": "Startup Name",
+    "website": "Website",
+    "nif": "Tax ID (NIF)",
+    "mainContact": "Main Contact",
+    "mainContactEmail": "Main Contact Email",
+    "mainContactPhone": "Main Contact Phone",
+    "description": "Description",
+    "saved": "Startup profile saved",
+    "saveFailed": "Failed to save profile"
+  },
+  "nif": {
+    "label": "NIF",
+    "placeholder": "123456789",
+    "invalid": "Invalid NIF",
+    "valid": "Valid NIF",
+    "helpText": "Portuguese Tax Identification Number (9 digits)"
+  },
+  "onboardingWizard": {
+    "companyDetails": "Company Details",
+    "companyDetailsDesc": "Basic information about your startup",
+    "startupName": "Startup Name",
+    "website": "Website",
+    "mainContact": "Main Contact",
+    "nifRequired": "NIF is important for matching with future financial data"
+  },
+  "workspace": {
+    "overview": "Overview",
+    "sessions": "Sessions",
+    "actions": "Actions",
+    "milestones": "Milestones",
+    "kpis": "KPIs",
+    "playbooks": "Playbooks",
+    "templates": "Templates",
+    "calendar": "Calendar",
+    "documents": "Documents",
+    "team": "Team",
+    "funding": "Funding",
+    "notesAndTasks": "Notes & Tasks",
+    "time": "Time",
+    "governance": "Governance",
+    "settings": "Settings",
+    "notAccessible": "Workspace Not Accessible",
+    "noPermission": "You don't have permission to access this workspace.",
+    "scheduleSession": "Schedule Session"
   },
   "stages": {
     "ideation": "Ideation",

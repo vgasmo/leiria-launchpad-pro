@@ -76,7 +76,7 @@ export function WorkspaceTabGroups({
         { id: 'kpis', label: t('workspace.kpis'), icon: <TrendingUp className="h-4 w-4" /> },
         { id: 'milestones', label: t('workspace.milestones'), icon: <Target className="h-4 w-4" /> },
         { id: 'actions', label: t('workspace.actions'), icon: <ClipboardCheck className="h-4 w-4" /> },
-        { id: 'playbooks', label: 'Playbooks', icon: <BookOpen className="h-4 w-4" /> },
+        { id: 'playbooks', label: t('workspace.playbooks'), icon: <BookOpen className="h-4 w-4" /> },
       ],
     },
     {
@@ -122,7 +122,7 @@ export function WorkspaceTabGroups({
           icon: <Clock className="h-4 w-4" />,
           showForRoles: ['admin', 'consultor'],
         },
-        { id: 'governance', label: 'Governance', icon: <Shield className="h-4 w-4" /> },
+        { id: 'governance', label: t('workspace.governance'), icon: <Shield className="h-4 w-4" /> },
         { id: 'settings', label: t('workspace.settings'), icon: <Settings className="h-4 w-4" /> },
       ],
     },
