@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -10,12 +10,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, FileText, Search, Clock, AlertTriangle, Cake } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, FileText, Search, Clock, AlertTriangle, Cake, Zap, Building2 } from 'lucide-react';
 import { useContracts, useIncubationTypes, useBuildings, useCreateContract, useUpdateContract, type StartupContract, type IncubationType } from '@/hooks/useBackoffice';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { format, differenceInMonths, addYears, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
@@ -73,6 +75,12 @@ export function BackofficeContractsTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<StartupContract | null>(null);
+  
+  // Bulk contract creation state
+  const [selectedWorkspaces, setSelectedWorkspaces] = useState<Set<string>>(new Set());
+  const [bulkIncubationType, setBulkIncubationType] = useState<string>('');
+  const [bulkBuilding, setBulkBuilding] = useState<string>('');
+  const [isBulkCreating, setIsBulkCreating] = useState(false);
 
   const { data: contracts, isLoading } = useContracts(
     statusFilter !== 'all' ? { status: statusFilter } : undefined
@@ -82,6 +90,72 @@ export function BackofficeContractsTab() {
   const { data: workspaces } = useWorkspaces();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
+
+  // Workspaces without contracts
+  const workspacesWithoutContracts = useMemo(() => {
+    if (!workspaces || !contracts) return [];
+    const contractedWorkspaceIds = new Set(contracts.map(c => c.workspace_id));
+    return workspaces.filter(w => !contractedWorkspaceIds.has(w.id));
+  }, [workspaces, contracts]);
+
+  const toggleWorkspaceSelection = (workspaceId: string) => {
+    setSelectedWorkspaces(prev => {
+      const next = new Set(prev);
+      if (next.has(workspaceId)) {
+        next.delete(workspaceId);
+      } else {
+        next.add(workspaceId);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedWorkspaces.size === workspacesWithoutContracts.length) {
+      setSelectedWorkspaces(new Set());
+    } else {
+      setSelectedWorkspaces(new Set(workspacesWithoutContracts.map(w => w.id)));
+    }
+  };
+
+  const handleBulkCreateContracts = async () => {
+    if (selectedWorkspaces.size === 0) {
+      toast.error(t('backoffice.selectWorkspacesFirst', 'Select workspaces first'));
+      return;
+    }
+    
+    const selectedType = incubationTypes?.find(it => it.id === bulkIncubationType);
+    
+    setIsBulkCreating(true);
+    let created = 0;
+    let errors = 0;
+    
+    for (const workspaceId of selectedWorkspaces) {
+      try {
+        await createContract.mutateAsync({
+          workspace_id: workspaceId,
+          incubation_type_id: bulkIncubationType || null,
+          building_id: bulkBuilding || null,
+          status: 'active',
+          start_date: new Date().toISOString().split('T')[0],
+          monthly_fee: selectedType?.base_monthly_fee || 0,
+        });
+        created++;
+      } catch (err) {
+        errors++;
+        console.error('Failed to create contract:', err);
+      }
+    }
+    
+    setIsBulkCreating(false);
+    setSelectedWorkspaces(new Set());
+    
+    if (errors > 0) {
+      toast.warning(t('backoffice.bulkCreatePartial', `Created ${created} contracts, ${errors} failed`));
+    } else {
+      toast.success(t('backoffice.bulkCreateSuccess', `Created ${created} contracts`));
+    }
+  };
 
   const filteredContracts = contracts?.filter(c => {
     if (!searchQuery) return true;
@@ -315,6 +389,117 @@ export function BackofficeContractsTab() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Workspaces Without Contracts - Bulk Create */}
+      {workspacesWithoutContracts.length > 0 && (
+        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+              <Zap className="h-5 w-5" />
+              {t('backoffice.workspacesWithoutContracts', 'Workspaces Without Contracts')}
+              <Badge variant="secondary" className="ml-2 bg-amber-200 dark:bg-amber-800">
+                {workspacesWithoutContracts.length}
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              {t('backoffice.bulkCreateDescription', 'Select workspaces and create contracts in bulk')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Bulk Options */}
+            <div className="flex flex-wrap gap-3 items-end bg-background/80 p-3 rounded-lg border">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t('backoffice.incubationType')}</Label>
+                <Select value={bulkIncubationType} onValueChange={setBulkIncubationType}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder={t('backoffice.selectType')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {incubationTypes?.map(it => (
+                      <SelectItem key={it.id} value={it.id}>
+                        {it.name} (€{it.base_monthly_fee}/mo)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t('backoffice.building')}</Label>
+                <Select value={bulkBuilding} onValueChange={setBulkBuilding}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder={t('backoffice.selectBuilding')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
+                    {buildings?.filter(b => b.is_active).map(b => (
+                      <SelectItem key={b.id} value={b.id}>
+                        <span className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {b.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button
+                onClick={handleBulkCreateContracts}
+                disabled={selectedWorkspaces.size === 0 || isBulkCreating}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                {isBulkCreating 
+                  ? t('common.processing', 'Processing...') 
+                  : t('backoffice.createContractsCount', `Create ${selectedWorkspaces.size} Contracts`)}
+              </Button>
+            </div>
+            
+            {/* Workspaces Selection Table */}
+            <div className="max-h-64 overflow-auto border rounded-lg bg-background">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={selectedWorkspaces.size === workspacesWithoutContracts.length && workspacesWithoutContracts.length > 0}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>{t('backoffice.startup')}</TableHead>
+                    <TableHead>{t('backoffice.stage', 'Stage')}</TableHead>
+                    <TableHead>{t('backoffice.createdAt', 'Created')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {workspacesWithoutContracts.map(workspace => (
+                    <TableRow key={workspace.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedWorkspaces.has(workspace.id)}
+                          onCheckedChange={() => toggleWorkspaceSelection(workspace.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {workspace.startup?.name || t('common.unnamed', 'Unnamed')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {workspace.stage || '-'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {workspace.created_at ? format(new Date(workspace.created_at), 'dd MMM yyyy') : '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Contracts Table */}
       <Card>

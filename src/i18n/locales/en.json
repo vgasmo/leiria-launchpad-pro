@@ -1957,7 +1957,17 @@
       "addWaitlistRequest": "Add Waiting List Request",
       "requestFor": "Request For",
       "preferredCapacity": "Preferred Capacity",
-      "preferredBuilding": "Preferred Building"
+      "preferredBuilding": "Preferred Building",
+      "workspacesWithoutContracts": "Workspaces Without Contracts",
+      "bulkCreateDescription": "Select workspaces and create contracts in bulk",
+      "selectWorkspacesFirst": "Select workspaces first",
+      "bulkCreatePartial": "Created {{created}} contracts, {{errors}} failed",
+      "bulkCreateSuccess": "Created {{count}} contracts successfully",
+      "createContractsCount": "Create {{count}} Contracts",
+      "startedOn": "Started",
+      "totalMonths": "Total",
+      "createdAt": "Created",
+      "timeIncubated": "Time Incubated"
     },
     "backofficeExtended": {
       "officeSpaces": "Office Spaces",
