@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle, Upload, FileText, Loader2, AlertTriangle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle, Upload, FileText, Loader2, AlertTriangle, Mail, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { startupSchema } from '@/lib/validations';
 
@@ -51,6 +52,7 @@ export function AdminStartupsManager() {
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+  const [sendingInviteFor, setSendingInviteFor] = useState<string | null>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
   const { data: startups, isLoading } = useQuery({
@@ -277,6 +279,38 @@ export function AdminStartupsManager() {
   };
 
   const uniqueStages = [...new Set(startups?.flatMap(s => s.workspaces?.map(w => w.stage) || []).filter(Boolean))];
+
+  const handleSendInvite = async (startup: any) => {
+    if (!startup.main_contact_email) {
+      toast.error(t('admin.startupsManager.noEmailForInvite'));
+      return;
+    }
+    
+    const workspace = startup.workspaces?.[0];
+    if (!workspace?.id) {
+      toast.error(t('admin.startupsManager.noWorkspaceForInvite'));
+      return;
+    }
+
+    setSendingInviteFor(startup.id);
+    try {
+      const { error } = await supabase.functions.invoke('send-workspace-invite', {
+        body: {
+          workspaceId: workspace.id,
+          email: startup.main_contact_email,
+          role: 'founder',
+        },
+      });
+
+      if (error) throw error;
+      toast.success(t('invite.sentTo') + ' ' + startup.main_contact_email);
+    } catch (err: any) {
+      console.error('Failed to send invite:', err);
+      toast.error(t('invite.error'));
+    } finally {
+      setSendingInviteFor(null);
+    }
+  };
 
   return (
     <Card>
@@ -554,10 +588,37 @@ export function AdminStartupsManager() {
                       ) : '-'}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(startup)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(startup.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                      </div>
+                      <TooltipProvider>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(startup)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          {startup.main_contact_email && workspace?.id && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => handleSendInvite(startup)}
+                                  disabled={sendingInviteFor === startup.id}
+                                >
+                                  {sendingInviteFor === startup.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Mail className="h-4 w-4 text-primary" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t('admin.startupsManager.inviteFounder')}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(startup.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 );

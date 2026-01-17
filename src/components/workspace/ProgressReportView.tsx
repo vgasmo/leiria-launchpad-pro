@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { FileText, Download, Share2, Printer, TrendingUp, Target, CheckCircle2, Calendar, Loader2, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ interface ProgressReportViewProps {
 }
 
 export function ProgressReportView({ workspaceId, workspace }: ProgressReportViewProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const { data: actions } = useWorkspaceActions(workspaceId);
@@ -46,13 +48,13 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
 
   const handlePrint = () => {
     window.print();
-    toast.success('Print dialog opened');
+    toast.success(t('common.success'));
   };
 
   const handleShare = async () => {
     const shareUrl = window.location.href.replace(/\?.*/, '') + '?tab=overview';
     await navigator.clipboard.writeText(shareUrl);
-    toast.success('Link copied to clipboard');
+    toast.success(t('common.linkCopied'));
   };
 
   const handleExportPdf = async () => {
@@ -76,13 +78,19 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
         };
       }
 
-      toast.success('Report generated! Use browser print to save as PDF');
+      toast.success(t('common.success'));
     } catch (error) {
       console.error('Failed to generate report:', error);
-      toast.error('Failed to generate report');
+      toast.error(t('common.error'));
     } finally {
       setIsGeneratingPdf(false);
     }
+  };
+
+  // Format progress display - show "—" when empty
+  const formatProgress = (completed: number, total: number) => {
+    if (total === 0) return '—';
+    return `${completed}/${total}`;
   };
 
   return (
@@ -90,14 +98,14 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <FileText className="h-4 w-4 mr-2" />
-          Progress Report
+          {t('progressReport.title')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto print:max-w-none print:max-h-none print:overflow-visible">
         <DialogHeader className="print:hidden">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Progress Report
+            {t('progressReport.title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -113,15 +121,15 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             ) : (
               <Download className="h-4 w-4 mr-2" />
             )}
-            Export PDF
+            {t('progressReport.exportPdf')}
           </Button>
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
-            Print
+            {t('progressReport.print')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleShare}>
             <Share2 className="h-4 w-4 mr-2" />
-            Copy Link
+            {t('progressReport.copyLink')}
           </Button>
         </div>
 
@@ -132,7 +140,7 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             <h1 className="text-2xl font-bold">{workspace.startup?.name}</h1>
             <p className="text-muted-foreground">{workspace.program?.name}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Report generated on {format(new Date(), 'MMMM d, yyyy')}
+              {t('progressReport.generatedBy')} • {format(new Date(), 'PPP')}
             </p>
           </div>
 
@@ -140,26 +148,26 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-4 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Stage</p>
+                <p className="text-xs text-muted-foreground mb-1">{t('progressReport.stage')}</p>
                 <StageBadge stage={workspace.stage} />
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Health</p>
+                <p className="text-xs text-muted-foreground mb-1">{t('progressReport.health')}</p>
                 <HealthBadge score={effectiveHealth as HealthScore | null} />
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Milestones</p>
-                <p className="text-lg font-semibold">{milestoneCounts.completed}/{milestoneCounts.total}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t('progressReport.milestones')}</p>
+                <p className="text-lg font-semibold">{formatProgress(milestoneCounts.completed, milestoneCounts.total)}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Actions</p>
-                <p className="text-lg font-semibold">{actionCounts.completed}/{actionCounts.total}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t('progressReport.actions')}</p>
+                <p className="text-lg font-semibold">{formatProgress(actionCounts.completed, actionCounts.total)}</p>
               </CardContent>
             </Card>
           </div>
@@ -169,7 +177,7 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="h-4 w-4" />
-                Key Metrics
+                {t('progressReport.keyMetrics')}
               </CardTitle>
               {kpiData?.currentMonth && (
                 <CardDescription>
@@ -179,7 +187,7 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             </CardHeader>
             <CardContent>
               {kpiData?.current.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No KPIs recorded this period</p>
+                <p className="text-muted-foreground text-sm">{t('progressReport.noKpis')}</p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {kpiData?.current.slice(0, 6).map((kpi: any) => (
@@ -208,12 +216,12 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Target className="h-4 w-4" />
-                Milestones Progress
+                {t('progressReport.milestonesProgress')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {milestones?.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No milestones defined</p>
+                <p className="text-muted-foreground text-sm">{t('progressReport.noMilestones')}</p>
               ) : (
                 <div className="space-y-2">
                   {milestones?.slice(0, 8).map((milestone: any) => (
@@ -244,12 +252,12 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Calendar className="h-4 w-4" />
-                Recent Sessions
+                {t('progressReport.recentSessions')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {sessions?.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No sessions recorded</p>
+                <p className="text-muted-foreground text-sm">{t('progressReport.noSessions')}</p>
               ) : (
                 <div className="space-y-3">
                   {sessions?.slice(0, 5).map((session: any) => (
@@ -274,7 +282,7 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
 
           {/* Footer */}
           <div className="text-center text-xs text-muted-foreground pt-4 border-t">
-            <p>Generated by Startup Leiria • {format(new Date(), 'PPP')}</p>
+            <p>{t('progressReport.generatedBy')} • {format(new Date(), 'PPP')}</p>
           </div>
         </div>
       </DialogContent>
