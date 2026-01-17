@@ -98,6 +98,7 @@ function AppRoutes() {
       <Route path="/integrations-setup" element={<ProtectedRoute><IntegrationsSetup /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
       <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+      <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
       <Route path="/admin/crm-diagnostics" element={<ProtectedRoute><CrmDiagnostics /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />
