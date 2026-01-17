@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
@@ -53,6 +53,8 @@ interface ParsedRow {
   // Resolved
   resolved_owner_id: string | null;
   resolved_stage: string | null;
+  resolved_building_id: string | null;
+  resolved_incubation_type_id: string | null;
   // Validation
   isValid: boolean;
   validationErrors: string[];
@@ -70,6 +72,7 @@ interface ImportConfig {
   use_file_stage: boolean; // Use stage from file if available
   upsert_mode: boolean;
   create_workspaces: boolean;
+  create_draft_contracts: boolean; // Create draft contracts from building/service data
   allow_stage_update: boolean;
 }
 
@@ -145,6 +148,22 @@ export default function AdminDataImport() {
   const { isAdmin, isConsultor } = useAuth();
   const { data: programs } = usePrograms();
   const { data: consultors } = useConsultors();
+  
+  // Load buildings and incubation types for contract creation
+  const [buildings, setBuildings] = useState<Array<{ id: string; name: string; code: string }>>([]);
+  const [incubationTypes, setIncubationTypes] = useState<Array<{ id: string; name: string; contract_type: string; base_monthly_fee: number }>>([]);
+  
+  useEffect(() => {
+    const loadLookupData = async () => {
+      const [buildingsRes, typesRes] = await Promise.all([
+        supabase.from('buildings').select('id, name, code').order('name'),
+        supabase.from('incubation_types').select('id, name, contract_type, base_monthly_fee').eq('is_active', true).order('sort_order'),
+      ]);
+      if (buildingsRes.data) setBuildings(buildingsRes.data);
+      if (typesRes.data) setIncubationTypes(typesRes.data);
+    };
+    loadLookupData();
+  }, []);
 
   // State
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -165,6 +184,7 @@ export default function AdminDataImport() {
     use_file_stage: true, // Default: use stage from file
     upsert_mode: true,
     create_workspaces: false,
+    create_draft_contracts: true, // Default: create draft contracts
     allow_stage_update: false,
   });
 
@@ -208,6 +228,61 @@ export default function AdminDataImport() {
     if (stage.includes('contracted') || stage.includes('contratado')) return 'contracted';
     return null;
   };
+
+  // Build building lookup map (name/code -> id)
+  const buildingLookup = useMemo(() => {
+    const map = new Map<string, string>();
+    buildings.forEach(b => {
+      map.set(b.name.toLowerCase().trim(), b.id);
+      map.set(b.code.toLowerCase().trim(), b.id);
+      // Also add variants
+      if (b.name.includes(' - ')) {
+        const shortName = b.name.split(' - ')[0].toLowerCase().trim();
+        if (!map.has(shortName)) map.set(shortName, b.id);
+      }
+    });
+    // Add common aliases
+    map.set('comum', buildings.find(b => b.name.toLowerCase().includes('leiria') || b.code === 'LEIRIA')?.id || '');
+    map.set('inc. social', buildings.find(b => b.code === 'SOCIAL')?.id || '');
+    return map;
+  }, [buildings]);
+
+  // Build incubation type lookup map (name/contract_type -> object)
+  const incubationTypeLookup = useMemo(() => {
+    const map = new Map<string, { id: string; base_monthly_fee: number }>();
+    incubationTypes.forEach(t => {
+      map.set(t.name.toLowerCase().trim(), { id: t.id, base_monthly_fee: t.base_monthly_fee });
+      map.set(t.contract_type.toLowerCase().trim(), { id: t.id, base_monthly_fee: t.base_monthly_fee });
+    });
+    // Add common aliases from file
+    map.set('incubação virtual', map.get('incubação virtual') || { id: '', base_monthly_fee: 0 });
+    map.set('incubação física', map.get('desk') || map.get('escritório standard') || { id: '', base_monthly_fee: 0 });
+    map.set('domiciliação', map.get('domiciliação') || { id: '', base_monthly_fee: 0 });
+    map.set('incubação de ideias', map.get('incubação virtual') || { id: '', base_monthly_fee: 0 });
+    return map;
+  }, [incubationTypes]);
+
+  const resolveBuilding = useCallback((buildingName: string): string | null => {
+    if (!buildingName) return null;
+    const normalized = buildingName.toLowerCase().trim();
+    if (buildingLookup.has(normalized)) return buildingLookup.get(normalized) || null;
+    // Try partial match
+    for (const [name, id] of buildingLookup.entries()) {
+      if (name.includes(normalized) || normalized.includes(name)) return id;
+    }
+    return null;
+  }, [buildingLookup]);
+
+  const resolveIncubationType = useCallback((serviceName: string): { id: string; base_monthly_fee: number } | null => {
+    if (!serviceName) return null;
+    const normalized = serviceName.toLowerCase().trim();
+    if (incubationTypeLookup.has(normalized)) return incubationTypeLookup.get(normalized) || null;
+    // Try partial match
+    for (const [name, data] of incubationTypeLookup.entries()) {
+      if (name.includes(normalized) || normalized.includes(name)) return data;
+    }
+    return null;
+  }, [incubationTypeLookup]);
 
   const resolveOwner = useCallback((ownerName: string): string | null => {
     if (!ownerName) return null;
@@ -307,6 +382,11 @@ export default function AdminDataImport() {
       
       // Resolve stage from HubSpot stage
       const resolved_stage = mapHubSpotStage(deal_stage);
+      
+      // Resolve building and incubation type for contract creation
+      const resolved_building_id = resolveBuilding(building);
+      const resolvedIncubationType = resolveIncubationType(service);
+      const resolved_incubation_type_id = resolvedIncubationType?.id || null;
 
       // Validation
       if (!organization_name && !contact_email) {
@@ -367,6 +447,8 @@ export default function AdminDataImport() {
         company_id,
         resolved_owner_id,
         resolved_stage,
+        resolved_building_id,
+        resolved_incubation_type_id,
         isValid: validationErrors.length === 0,
         validationErrors,
         isDuplicate,
@@ -376,7 +458,7 @@ export default function AdminDataImport() {
     }
 
     return parsed;
-  }, [consultorLookup, t]);
+  }, [consultorLookup, resolveBuilding, resolveIncubationType, t]);
 
   // ====================
   // FILE PARSING
@@ -720,7 +802,9 @@ export default function AdminDataImport() {
     const withVat = parsedRows.filter(r => r.vat_number).length;
     const withOwner = parsedRows.filter(r => r.resolved_owner_id).length;
     const withStage = parsedRows.filter(r => r.resolved_stage).length;
-    return { total, valid, invalid, duplicates, withEmail, withVat, withOwner, withStage };
+    const withBuilding = parsedRows.filter(r => r.resolved_building_id).length;
+    const withService = parsedRows.filter(r => r.resolved_incubation_type_id).length;
+    return { total, valid, invalid, duplicates, withEmail, withVat, withOwner, withStage, withBuilding, withService };
   }, [parsedRows]);
 
   const filteredRows = useMemo(() => {
