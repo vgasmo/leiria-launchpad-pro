@@ -38,10 +38,11 @@ import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarnes
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { AdminTagCategoriesManager } from '@/components/admin/AdminTagCategoriesManager';
+import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 
 // Tab group definitions for cleaner navigation
 const TAB_GROUPS: Record<string, string[]> = {
-  operations: ['approvals', 'compliance', 'backoffice', 'announcements'],
+  operations: ['approvals', 'compliance', 'backoffice', 'announcements', 'data-quality'],
   people: ['users', 'mentors'],
   content: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   insights: ['activity', 'analytics', 'health'],
@@ -59,12 +60,14 @@ export default function Admin() {
       compliance: <ShieldCheck className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
       announcements: <Bell className="h-4 w-4" />,
+      'data-quality': <Database className="h-4 w-4" />,
       users: <Users className="h-4 w-4" />,
       mentors: <Users2 className="h-4 w-4" />,
       kpis: <BarChart3 className="h-4 w-4" />,
       templates: <FileText className="h-4 w-4" />,
       'support-materials': <BookOpen className="h-4 w-4" />,
       surveys: <ClipboardList className="h-4 w-4" />,
+      tags: <Tag className="h-4 w-4" />,
       activity: <Activity className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
@@ -83,12 +86,14 @@ export default function Admin() {
       compliance: t('admin.compliance'),
       backoffice: t('admin.backoffice.tab', 'Backoffice'),
       announcements: t('admin.announcements.tab'),
+      'data-quality': t('dataQuality.title', 'Data Quality'),
       users: t('admin.users'),
       mentors: t('admin.externalMentors'),
       kpis: t('admin.kpis'),
       templates: t('admin.templates'),
       'support-materials': t('admin.supportMaterials.title', 'Materials'),
       surveys: t('admin.surveys.title', 'Surveys'),
+      tags: t('admin.tags.title', 'Tags'),
       activity: t('admin.activityLog'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
@@ -186,6 +191,10 @@ export default function Admin() {
 
         <TabsContent value="announcements">
           <AdminAnnouncementsManager />
+        </TabsContent>
+
+        <TabsContent value="data-quality">
+          <DataQualityDashboard />
         </TabsContent>
 
         <TabsContent value="users">

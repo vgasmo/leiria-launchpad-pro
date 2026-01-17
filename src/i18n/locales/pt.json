@@ -3647,5 +3647,87 @@
     "2to3Years": "2-3 anos",
     "startupsOver3Years": "startups com mais de 3 anos",
     "reviewRecommended": "Revisão recomendada para ajuste de preço ou graduação"
+  },
+  "workspace": {
+    "overview": "Visão Geral",
+    "sessions": "Sessões",
+    "actions": "Ações",
+    "milestones": "Marcos",
+    "kpis": "KPIs",
+    "documents": "Documentos",
+    "team": "Equipa",
+    "settings": "Definições",
+    "scheduleSession": "Agendar Sessão",
+    "noActionsYet": "Sem ações ainda",
+    "noMilestonesYet": "Sem marcos ainda",
+    "addFirstAction": "Adicionar primeira ação",
+    "addFirstMilestone": "Adicionar primeiro marco"
+  },
+  "stages": {
+    "ideation": "Ideação",
+    "validation": "Validação",
+    "mvp": "MVP",
+    "growth": "Crescimento",
+    "scale": "Escala"
+  },
+  "invite": {
+    "title": "Aceitar Convite",
+    "accepting": "A aceitar convite...",
+    "success": "Convite aceite com sucesso!",
+    "redirecting": "A redirecionar para o workspace...",
+    "expired": "Este convite expirou",
+    "invalid": "Link de convite inválido",
+    "alreadyUsed": "Este convite já foi utilizado",
+    "loginRequired": "Inicie sessão para aceitar o convite",
+    "signupRequired": "Crie uma conta para aceitar o convite",
+    "processing": "A processar convite...",
+    "error": "Erro ao aceitar convite",
+    "welcome": "Bem-vindo à sua nova startup!",
+    "sentTo": "Convite enviado para",
+    "sending": "A enviar convite..."
+  },
+  "dataQuality": {
+    "title": "Qualidade dos Dados",
+    "description": "Visão geral da qualidade e completude dos dados",
+    "missingNif": "Startups sem NIF",
+    "missingFounders": "Workspaces sem founders",
+    "missingContact": "Startups sem contacto",
+    "totalIssues": "Total de problemas",
+    "inviteFounders": "Convidar Founders",
+    "bulkInvite": "Convite em Massa",
+    "noIssues": "Sem problemas de dados!",
+    "allDataComplete": "Todos os registos estão completos"
+  },
+  "progressReport": {
+    "title": "Relatório de Progresso",
+    "stage": "Fase",
+    "health": "Saúde",
+    "milestones": "Marcos",
+    "actions": "Ações",
+    "keyMetrics": "Métricas Principais",
+    "noKpis": "Sem KPIs registados neste período",
+    "milestonesProgress": "Progresso dos Marcos",
+    "noMilestones": "Sem marcos definidos",
+    "recentSessions": "Sessões Recentes",
+    "noSessions": "Sem sessões registadas",
+    "exportPdf": "Exportar PDF",
+    "print": "Imprimir",
+    "copyLink": "Copiar Link",
+    "generatedBy": "Gerado por Startup Leiria"
+  },
+  "nif": {
+    "label": "NIF",
+    "placeholder": "123456789",
+    "invalid": "NIF inválido",
+    "valid": "NIF válido",
+    "helpText": "Número de Identificação Fiscal português (9 dígitos)"
+  },
+  "onboardingWizard": {
+    "companyDetails": "Dados da Empresa",
+    "companyDetailsDesc": "Informação básica sobre a sua startup",
+    "startupName": "Nome da Startup",
+    "website": "Website",
+    "mainContact": "Contacto Principal",
+    "nifRequired": "O NIF é importante para correspondência com dados financeiros futuros"
   }
 }
