@@ -1,0 +1,307 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+interface WorkspaceInviteRequest {
+  workspaceId: string;
+  startupId?: string;
+  email: string;
+  role: string;
+  includeBookingLink?: boolean;
+  bookingToken?: string;
+}
+
+// Generate a secure random token
+function generateToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// Hash the token for storage
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// HTML escape function
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+}
+
+// Input validation
+function validateInput(payload: WorkspaceInviteRequest): { valid: boolean; error?: string } {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  
+  if (!payload.workspaceId || !uuidRegex.test(payload.workspaceId)) {
+    return { valid: false, error: "Invalid workspace ID" };
+  }
+  
+  if (payload.startupId && !uuidRegex.test(payload.startupId)) {
+    return { valid: false, error: "Invalid startup ID" };
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!payload.email || !emailRegex.test(payload.email) || payload.email.length > 255) {
+    return { valid: false, error: "Invalid email address" };
+  }
+  
+  if (!payload.role || !['founder', 'team_member'].includes(payload.role)) {
+    return { valid: false, error: "Invalid role" };
+  }
+  
+  return { valid: true };
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    // Validate auth
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      console.error("No authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) {
+      console.error("Auth failed:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const payload: WorkspaceInviteRequest = await req.json();
+    
+    // Validate input
+    const validation = validateInput(payload);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Check if user is admin or consultor
+    const { data: userRoles, error: rolesError } = await supabaseService
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    
+    if (rolesError) {
+      console.error("Failed to fetch user roles:", rolesError);
+      return new Response(
+        JSON.stringify({ error: "Failed to verify permissions" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const roles = userRoles?.map(r => r.role) || [];
+    if (!roles.includes('admin') && !roles.includes('consultor')) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Only staff can send invitations" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Get workspace and startup info
+    const { data: workspace, error: wsError } = await supabaseService
+      .from('workspaces')
+      .select(`
+        id,
+        startup:startups(id, name, main_contact_email, main_contact_name)
+      `)
+      .eq('id', payload.workspaceId)
+      .single();
+    
+    if (wsError || !workspace) {
+      console.error("Workspace not found:", wsError);
+      return new Response(
+        JSON.stringify({ error: "Workspace not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const startup = workspace.startup as unknown as { id: string; name: string; main_contact_email: string | null; main_contact_name: string | null } | null;
+    const startupName = startup?.name || 'Your Startup';
+    
+    // Check if invitation already exists
+    const { data: existingInvite } = await supabaseService
+      .from('workspace_invitations')
+      .select('id, accepted_at')
+      .eq('workspace_id', payload.workspaceId)
+      .eq('email', payload.email.toLowerCase())
+      .maybeSingle();
+    
+    // Generate token
+    const rawToken = generateToken();
+    const tokenHash = await hashToken(rawToken);
+    
+    if (existingInvite) {
+      if (existingInvite.accepted_at) {
+        return new Response(
+          JSON.stringify({ error: "This email has already accepted an invitation" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Update existing invitation with new token
+      const { error: updateError } = await supabaseService
+        .from('workspace_invitations')
+        .update({
+          token_hash: tokenHash,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          created_by: user.id,
+        })
+        .eq('id', existingInvite.id);
+      
+      if (updateError) {
+        console.error("Failed to update invitation:", updateError);
+        return new Response(
+          JSON.stringify({ error: "Failed to update invitation" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      // Create new invitation
+      const { error: insertError } = await supabaseService
+        .from('workspace_invitations')
+        .insert({
+          workspace_id: payload.workspaceId,
+          startup_id: payload.startupId || startup?.id || null,
+          email: payload.email.toLowerCase(),
+          role: payload.role,
+          token_hash: tokenHash,
+          created_by: user.id,
+        });
+      
+      if (insertError) {
+        console.error("Failed to create invitation:", insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to create invitation" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+    
+    // Build invite URL
+    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://leiria-launchpad-pro.lovable.app";
+    const inviteUrl = `${baseUrl}/accept-invite?token=${rawToken}`;
+    
+    // Build booking URL if requested
+    let bookingSection = '';
+    if (payload.includeBookingLink && payload.bookingToken) {
+      const bookingUrl = `${baseUrl}/book/${payload.bookingToken}`;
+      bookingSection = `
+        <div style="margin-top: 24px; padding: 16px; background: #f0f9ff; border-radius: 8px;">
+          <p style="color: #0369a1; margin: 0 0 8px 0; font-weight: 500;">📅 Book Your First Session</p>
+          <p style="color: #666; margin: 0 0 12px 0; font-size: 14px;">Schedule your first meeting with your consultant to get started.</p>
+          <a href="${escapeHtml(bookingUrl)}" style="display: inline-block; background: #0ea5e9; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">Book a Session</a>
+        </div>
+      `;
+    }
+    
+    // Get sender profile
+    const { data: senderProfile } = await supabaseService
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single();
+    
+    const senderName = senderProfile?.full_name || 'Startup Leiria Team';
+    
+    // Send email
+    const safeStartupName = escapeHtml(startupName);
+    const safeSenderName = escapeHtml(senderName);
+    
+    const emailResult = await resend.emails.send({
+      from: "Startup Leiria <noreply@startupleiria.com>",
+      to: [payload.email],
+      subject: `You're invited to join ${safeStartupName} on Startup Leiria`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 8px;">🚀 Welcome to ${safeStartupName}!</h1>
+          <p style="color: #666; margin-bottom: 24px;">You've been invited by ${safeSenderName} to join the ${safeStartupName} workspace on Startup Leiria.</p>
+          
+          <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+            <p style="color: #666; margin: 0 0 16px 0;">
+              As a founder, you'll have access to:
+            </p>
+            <ul style="color: #666; margin: 0 0 16px 0; padding-left: 20px;">
+              <li>Your startup's workspace dashboard</li>
+              <li>KPI tracking and milestones</li>
+              <li>Session scheduling with consultants</li>
+              <li>Documents and resources</li>
+            </ul>
+            
+            <a href="${escapeHtml(inviteUrl)}" style="display: inline-block; background: #7c3aed; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Accept Invitation</a>
+          </div>
+          
+          ${bookingSection}
+          
+          <p style="color: #999; font-size: 12px; margin-top: 24px;">
+            This invitation expires in 7 days. If you didn't expect this email, you can safely ignore it.
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+          <p style="color: #999; font-size: 12px;">
+            Startup Leiria - Empowering entrepreneurs
+          </p>
+        </div>
+      `,
+    });
+    
+    console.log(`Invitation sent to ${payload.email} for workspace ${payload.workspaceId}`, emailResult);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: `Invitation sent to ${payload.email}`,
+        invitationId: existingInvite?.id || 'new'
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+    
+  } catch (err) {
+    console.error("Error in send-workspace-invite:", err);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

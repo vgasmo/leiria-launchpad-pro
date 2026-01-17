@@ -195,7 +195,7 @@ export function JourneyHeader({
                     <Progress value={actionsProgress} className="h-2" />
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {actionsCompleted}/{actionsTotal}
+                    {actionsTotal > 0 ? `${actionsCompleted}/${actionsTotal}` : '—'}
                   </span>
                 </div>
               </TooltipTrigger>
@@ -212,7 +212,7 @@ export function JourneyHeader({
                     <Progress value={milestonesProgress} className="h-2" />
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {milestonesCompleted}/{milestonesTotal}
+                    {milestonesTotal > 0 ? `${milestonesCompleted}/${milestonesTotal}` : '—'}
                   </span>
                 </div>
               </TooltipTrigger>

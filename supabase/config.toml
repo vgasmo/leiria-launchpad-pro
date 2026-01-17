@@ -199,3 +199,9 @@ verify_jwt = false
 
 [functions.bulk-create-workspaces]
 verify_jwt = false
+
+[functions.send-workspace-invite]
+verify_jwt = false
+
+[functions.accept-workspace-invite]
+verify_jwt = false

@@ -32,6 +32,7 @@ import CrmDiagnostics from "./pages/CrmDiagnostics";
 import PublicBooking from "./pages/PublicBooking";
 import AdminDataImport from "./pages/AdminDataImport";
 import Ecosystem from "./pages/Ecosystem";
+import AcceptInvite from "./pages/AcceptInvite";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,7 @@ function AppRoutes() {
       <Route path="/share/:token" element={<SharedWorkspace />} />
       <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
       <Route path="/book/:token" element={<PublicBooking />} />
+      <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
       <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
