@@ -167,7 +167,20 @@
     "saving": "Saving...",
     "new": "New",
     "perMonth": "/mo",
-    "important": "Important"
+    "important": "Important",
+    "uploading": "Uploading...",
+    "copyUrl": "Copy URL",
+    "goBack": "Go back",
+    "export": "Export",
+    "view": "View",
+    "clear": "Clear",
+    "unknown": "Unknown",
+    "approved": "Approved",
+    "draft": "Draft",
+    "moreDetails": "More details",
+    "lessDetails": "Less details",
+    "copy": "Copy",
+    "accessDenied": "Access Denied"
   },
   "nav": {
     "home": "Home",
@@ -3795,5 +3808,15 @@
     "noMilestonesYet": "No milestones yet",
     "addFirstAction": "Add first action",
     "addFirstMilestone": "Add first milestone"
+  },
+  "search": {
+    "saveSearch": "Save Search",
+    "searchName": "Search Name",
+    "searchNamePlaceholder": "My search..."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "backHome": "Go back home",
+    "description": "The page you're looking for doesn't exist or has been moved."
   }
 }

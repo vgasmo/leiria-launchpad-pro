@@ -193,11 +193,11 @@ export function AdminTeamsTestPanel() {
                 <SelectItem value="global">
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Global Settings (no workspace)
+                    {t('admin.teams.globalSettings', 'Global Settings (no workspace)')}
                   </div>
                 </SelectItem>
                 {loadingWorkspaces ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                  <SelectItem value="loading" disabled>{t('common.loading', 'Loading...')}</SelectItem>
                 ) : (
                   workspaces?.map((ws) => (
                     <SelectItem key={ws.id} value={ws.id}>

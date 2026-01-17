@@ -143,7 +143,11 @@
     "actions": "Ações",
     "new": "Novo",
     "perMonth": "/mês",
-    "important": "Importante"
+    "important": "Importante",
+    "uploading": "A carregar...",
+    "copyUrl": "Copiar URL",
+    "goBack": "Voltar",
+    "accessDenied": "Acesso Negado"
   },
   "nav": {
     "home": "Início",
@@ -3774,5 +3778,15 @@
     "website": "Website",
     "mainContact": "Contacto Principal",
     "nifRequired": "O NIF é importante para correspondência com dados financeiros futuros"
+  },
+  "search": {
+    "saveSearch": "Guardar Pesquisa",
+    "searchName": "Nome da Pesquisa",
+    "searchNamePlaceholder": "A minha pesquisa..."
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "backHome": "Voltar ao início",
+    "description": "A página que procura não existe ou foi movida."
   }
 }
