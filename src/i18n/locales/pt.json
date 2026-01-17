@@ -1861,7 +1861,17 @@
       "addWaitlistRequest": "Adicionar Pedido à Lista de Espera",
       "requestFor": "Pedido Para",
       "preferredCapacity": "Capacidade Preferida",
-      "preferredBuilding": "Edifício Preferido"
+      "preferredBuilding": "Edifício Preferido",
+      "workspacesWithoutContracts": "Workspaces Sem Contrato",
+      "bulkCreateDescription": "Selecione workspaces e crie contratos em massa",
+      "selectWorkspacesFirst": "Selecione workspaces primeiro",
+      "bulkCreatePartial": "Criados {{created}} contratos, {{errors}} falharam",
+      "bulkCreateSuccess": "Criados {{count}} contratos com sucesso",
+      "createContractsCount": "Criar {{count}} Contratos",
+      "startedOn": "Início",
+      "totalMonths": "Total",
+      "createdAt": "Criado",
+      "timeIncubated": "Tempo de Incubação"
     },
     "backofficeExtended": {
       "officeSpaces": "Espaços de Escritório",
