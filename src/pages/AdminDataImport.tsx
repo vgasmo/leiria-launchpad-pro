@@ -762,12 +762,112 @@ export default function AdminDataImport() {
             if (error) throw error;
             updated++;
           } else if (!existingId) {
-            const { error } = await supabase
+            // Insert new funnel item
+            const { data: insertedItem, error } = await supabase
               .from('funnel_items')
-              .insert(funnelData);
+              .insert(funnelData)
+              .select('id')
+              .single();
 
             if (error) throw error;
             inserted++;
+
+            // Create draft contract if enabled and stage is contracted with building/service
+            if (config.create_draft_contracts && 
+                finalStage === 'contracted' && 
+                row.organization_name &&
+                (row.resolved_building_id || row.resolved_incubation_type_id)) {
+              
+              let workspaceId: string | null = null;
+              
+              // First check if a startup with this name or NIF already exists
+              let startupId: string | null = null;
+              
+              if (row.vat_number) {
+                const { data: existingByNif } = await supabase
+                  .from('startups')
+                  .select('id')
+                  .eq('nif', row.vat_number)
+                  .maybeSingle();
+                if (existingByNif) startupId = existingByNif.id;
+              }
+              
+              if (!startupId) {
+                const { data: existingByName } = await supabase
+                  .from('startups')
+                  .select('id')
+                  .eq('name', row.organization_name)
+                  .maybeSingle();
+                if (existingByName) startupId = existingByName.id;
+              }
+              
+              // Create startup if not found
+              if (!startupId) {
+                const { data: newStartup } = await supabase
+                  .from('startups')
+                  .insert({
+                    name: row.organization_name,
+                    nif: row.vat_number || null,
+                    main_contact_email: row.contact_email || null,
+                    main_contact_name: row.contact_name || null,
+                    main_contact_phone: row.contact_phone || null,
+                  })
+                  .select('id')
+                  .single();
+                if (newStartup) startupId = newStartup.id;
+              }
+              
+              // Now find or create workspace for this startup + program
+              if (startupId) {
+                const { data: existingWs } = await supabase
+                  .from('workspaces')
+                  .select('id')
+                  .eq('startup_id', startupId)
+                  .eq('program_id', config.program_id)
+                  .maybeSingle();
+                
+                if (existingWs) {
+                  workspaceId = existingWs.id;
+                } else {
+                  const { data: newWs } = await supabase
+                    .from('workspaces')
+                    .insert({
+                      startup_id: startupId,
+                      program_id: config.program_id,
+                      assigned_consultor_id: finalOwnerId || null,
+                    })
+                    .select('id')
+                    .single();
+                  if (newWs) workspaceId = newWs.id;
+                }
+              }
+
+              // Link funnel item to workspace
+              if (workspaceId) {
+                await supabase
+                  .from('funnel_items')
+                  .update({ linked_workspace_id: workspaceId })
+                  .eq('id', insertedItem.id);
+              }
+
+              // Now create the draft contract
+              if (workspaceId) {
+                const incubationType = incubationTypes.find(it => it.id === row.resolved_incubation_type_id);
+                
+                await supabase
+                  .from('startup_contracts')
+                  .insert({
+                    workspace_id: workspaceId,
+                    building_id: row.resolved_building_id || null,
+                    incubation_type_id: row.resolved_incubation_type_id || null,
+                    funnel_item_id: insertedItem.id,
+                    status: 'draft',
+                    start_date: new Date().toISOString().split('T')[0],
+                    monthly_fee: incubationType?.base_monthly_fee || 0,
+                    notes: `Imported from HubSpot: ${row.building || ''} / ${row.service || ''}`,
+                  });
+              }
+            }
           }
         } catch (e: any) {
           errors.push({
@@ -787,7 +887,7 @@ export default function AdminDataImport() {
     } finally {
       setIsProcessing(false);
     }
-  }, [parsedRows, config, safetyChecks, t]);
+  }, [parsedRows, config, safetyChecks, incubationTypes, t]);
 
   // ====================
   // COMPUTED VALUES
@@ -1183,6 +1283,25 @@ export default function AdminDataImport() {
                     />
                   </div>
                 </div>
+
+                {/* Draft Contracts Toggle */}
+                {(stats.withBuilding > 0 || stats.withService > 0) && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div>
+                      <Label className="text-green-700 dark:text-green-400">{t('dataImport.createDraftContracts', 'Criar Contratos Rascunho')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataImport.createDraftContractsDesc', 'Criar contratos draft para leads que virem "contracted" com edifício/serviço')}
+                      </p>
+                      <p className="text-xs text-green-600 font-medium mt-1">
+                        {stats.withBuilding} com edifício, {stats.withService} com serviço mapeado
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.create_draft_contracts}
+                      onCheckedChange={v => setConfig({...config, create_draft_contracts: v})}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
