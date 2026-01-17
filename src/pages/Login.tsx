@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users, Calendar } from 'lucide-react';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
@@ -28,8 +28,14 @@ export default function Login() {
     fullName: z.string().trim().min(2, { message: t('login.nameMinLength') }).max(100),
   });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isLoading, signIn, signUp } = useAuth();
-  const [activeTab, setActiveTab] = useState('login');
+  
+  // Handle returnTo param for invite flow
+  const returnTo = searchParams.get('returnTo');
+  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login';
+  
+  const [activeTab, setActiveTab] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -51,9 +57,14 @@ export default function Login() {
 
   useEffect(() => {
     if (user && !isLoading) {
-      navigate('/my-workspaces');
+      // If there's a returnTo param, redirect there instead of default
+      if (returnTo) {
+        navigate(decodeURIComponent(returnTo));
+      } else {
+        navigate('/my-workspaces');
+      }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, returnTo]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +118,12 @@ export default function Login() {
         setError(error.message);
       }
     } else {
-      navigate('/my-workspaces');
+      // If there's a returnTo param, redirect there instead of default
+      if (returnTo) {
+        navigate(decodeURIComponent(returnTo));
+      } else {
+        navigate('/my-workspaces');
+      }
     }
   };
 

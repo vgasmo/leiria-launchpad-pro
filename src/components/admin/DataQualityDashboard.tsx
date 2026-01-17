@@ -122,7 +122,7 @@ export function DataQualityDashboard() {
     ) || [];
 
     if (toInvite.length === 0) {
-      toast.error('No valid invites selected');
+      toast.error(t('dataQuality.noStartupsToInvite', 'No valid invites selected'));
       return;
     }
 
@@ -158,10 +158,10 @@ export function DataQualityDashboard() {
     queryClient.invalidateQueries({ queryKey: ['data-quality-issues'] });
 
     if (successCount > 0) {
-      toast.success(`${successCount} convites enviados com sucesso`);
+      toast.success(t('dataQuality.invitesSent', '{{count}} invites sent successfully').replace('{{count}}', String(successCount)));
     }
     if (errorCount > 0) {
-      toast.error(`${errorCount} convites falharam`);
+      toast.error(t('dataQuality.invitesFailed', '{{count}} invites failed').replace('{{count}}', String(errorCount)));
     }
   };
 
@@ -262,13 +262,13 @@ export function DataQualityDashboard() {
               {t('dataQuality.bulkInvite')}
             </CardTitle>
             <CardDescription>
-              Envie convites em massa para founders em falta
+              {t('dataQuality.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={selectAllFounderIssues}>
-                Selecionar todos com email
+                {t('dataQuality.selectAllWithEmail', 'Select all with email')}
               </Button>
               <Button
                 onClick={handleBulkInvite}
@@ -279,7 +279,7 @@ export function DataQualityDashboard() {
                 ) : (
                   <Send className="h-4 w-4 mr-2" />
                 )}
-                Enviar {selectedFounderInvites} convites
+                {t('dataQuality.sendInvites', 'Send {{count}} invites').replace('{{count}}', String(selectedFounderInvites))}
               </Button>
             </div>
           </CardContent>
@@ -308,10 +308,10 @@ export function DataQualityDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12"></TableHead>
-                  <TableHead>Startup</TableHead>
-                  <TableHead>Problema</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="w-24">Ação</TableHead>
+                  <TableHead>{t('dataQuality.startup', 'Startup')}</TableHead>
+                  <TableHead>{t('dataQuality.issue', 'Issue')}</TableHead>
+                  <TableHead>{t('dataQuality.email', 'Email')}</TableHead>
+                  <TableHead className="w-24">{t('dataQuality.action', 'Action')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -350,10 +350,10 @@ export function DataQualityDashboard() {
                                 },
                               });
                               if (error) throw error;
-                              toast.success('Convite enviado');
+                              toast.success(t('dataQuality.inviteSent', 'Invite sent'));
                               queryClient.invalidateQueries({ queryKey: ['data-quality-issues'] });
                             } catch {
-                              toast.error('Falha ao enviar convite');
+                              toast.error(t('dataQuality.inviteFailed', 'Failed to send invite'));
                             }
                           }}
                         >

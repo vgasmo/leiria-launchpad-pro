@@ -157,7 +157,7 @@ export default function WorkspaceDetail() {
             <TabsTrigger value="kpis" className="text-xs sm:text-sm">{t('workspace.kpis')}</TabsTrigger>
             <TabsTrigger value="playbooks" className="gap-1 text-xs sm:text-sm">
               <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">Playbooks</span>
+              <span className="hidden sm:inline">{t('workspace.playbooks')}</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="text-xs sm:text-sm">{t('workspace.templates')}</TabsTrigger>
             <TabsTrigger value="calendar" className="text-xs sm:text-sm">{t('workspace.calendar')}</TabsTrigger>
@@ -192,7 +192,7 @@ export default function WorkspaceDetail() {
             )}
             <TabsTrigger value="governance" className="gap-1 text-xs sm:text-sm">
               <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">Governance</span>
+              <span className="hidden sm:inline">{t('workspace.governance')}</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-1 text-xs sm:text-sm">
               <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5" />

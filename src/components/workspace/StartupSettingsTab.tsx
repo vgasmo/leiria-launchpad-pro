@@ -132,9 +132,9 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      toast.success(t('settings.profileUpdated', 'Startup profile updated'));
+      toast.success(t('startupSettings.profileUpdated', 'Startup profile updated'));
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,11 +143,11 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
 
     // Validate file type and size
     if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+      toast.error(t('startupSettings.uploadImageOnly', 'Please upload an image file'));
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image must be less than 2MB');
+      toast.error(t('startupSettings.imageSizeLimit', 'Image must be less than 2MB'));
       return;
     }
 
@@ -178,9 +178,9 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
 
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      toast.success('Logo uploaded successfully');
+      toast.success(t('startupSettings.logoUploaded', 'Logo uploaded successfully'));
     } catch (error: any) {
-      toast.error(`Upload failed: ${error.message}`);
+      toast.error(`${t('startupSettings.uploadFailed', 'Upload failed')}: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -189,7 +189,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('startupSettings.nameRequired', 'Name is required'));
       return;
     }
     updateMutation.mutate(formData);
@@ -201,7 +201,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Startup Profile
+            {t('startupSettings.title', 'Startup Profile')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -236,9 +236,9 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          Startup Profile
+          {t('startupSettings.title', 'Startup Profile')}
         </CardTitle>
-        <CardDescription>Edit your startup's public information</CardDescription>
+        <CardDescription>{t('startupSettings.editDescription', 'Edit your startup\'s public information')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -269,15 +269,15 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
                 ) : (
                   <Upload className="h-4 w-4 mr-2" />
                 )}
-                {isUploading ? 'Uploading...' : 'Upload Logo'}
+                {isUploading ? t('common.loading') : t('startupSettings.uploadLogo', 'Upload Logo')}
               </Button>
-              <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 2MB</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('startupSettings.logoHint', 'PNG, JPG up to 2MB')}</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Startup Name *</Label>
+              <Label htmlFor="name">{t('startupSettings.startupName', 'Startup Name')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -286,7 +286,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
+              <Label htmlFor="website">{t('startupSettings.website', 'Website')}</Label>
               <div className="relative">
                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -302,7 +302,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="nif">NIF (Tax ID)</Label>
+              <Label htmlFor="nif">{t('nif.label', 'NIF (Tax ID)')}</Label>
               <Input
                 id="nif"
                 value={formData.nif}
@@ -398,11 +398,11 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           <div className="rounded-lg border bg-muted/30 p-4 space-y-4">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-medium">Main contact</p>
+              <p className="text-sm font-medium">{t('startupSettings.mainContact', 'Main contact')}</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="main_contact_name">Contact name</Label>
+                <Label htmlFor="main_contact_name">{t('startupSettings.contactName', 'Contact name')}</Label>
                 <Input
                   id="main_contact_name"
                   value={formData.main_contact_name}
@@ -411,7 +411,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="main_contact_email">Contact email</Label>
+                <Label htmlFor="main_contact_email">{t('startupSettings.contactEmail', 'Contact email')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -425,7 +425,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="main_contact_phone">Contact phone</Label>
+                <Label htmlFor="main_contact_phone">{t('startupSettings.contactPhone', 'Contact phone')}</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -442,7 +442,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">{t('startupSettings.phone', 'Phone')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -455,7 +455,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="founded_date">Founded Date</Label>
+              <Label htmlFor="founded_date">{t('startupSettings.foundedDate', 'Founded Date')}</Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -470,7 +470,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">{t('startupSettings.address', 'Address')}</Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
@@ -485,13 +485,13 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('common.description', 'Description')}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              placeholder="Describe your startup, mission, and what you're building..."
+              placeholder={t('startupSettings.descriptionPlaceholder', 'Describe your startup, mission, and what you\'re building...')}
             />
           </div>
 
@@ -500,7 +500,7 @@ export function StartupSettingsTab({ workspaceId, startupId, startup, canEdit }:
               {updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : null}
-              Save Changes
+              {t('common.save', 'Save Changes')}
             </Button>
           </div>
         </form>

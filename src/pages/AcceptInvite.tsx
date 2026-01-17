@@ -95,8 +95,15 @@ export default function AcceptInvite() {
   };
   
   const handleLogin = () => {
-    // Redirect to login with return URL
-    navigate(`/auth?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    // Redirect to login with return URL - use /login not /auth
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    navigate(`/login?returnTo=${returnUrl}`);
+  };
+
+  const handleSignup = () => {
+    // Redirect to signup with return URL
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    navigate(`/login?mode=signup&returnTo=${returnUrl}`);
   };
   
   const handleGoToWorkspace = () => {
@@ -146,9 +153,12 @@ export default function AcceptInvite() {
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 {t('invite.noAccountYet')}{' '}
-                <a href="/auth?mode=signup" className="text-primary hover:underline">
+                <button 
+                  onClick={handleSignup}
+                  className="text-primary hover:underline"
+                >
                   {t('auth.signUp')}
-                </a>
+                </button>
               </p>
             </div>
           )}
