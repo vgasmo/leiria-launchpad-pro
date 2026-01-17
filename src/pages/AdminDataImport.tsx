@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
+import { parseExcelToJson } from '@/lib/excelParser';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -474,10 +474,7 @@ export default function AdminDataImport() {
 
       if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
         const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        rows = await parseExcelToJson(arrayBuffer);
       } else if (file.name.endsWith('.csv')) {
         const text = await file.text();
         rows = parseCSV(text);
