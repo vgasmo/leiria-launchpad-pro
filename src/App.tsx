@@ -31,6 +31,7 @@ import CRM from "./pages/CRM";
 import CrmDiagnostics from "./pages/CrmDiagnostics";
 import PublicBooking from "./pages/PublicBooking";
 import AdminDataImport from "./pages/AdminDataImport";
+import Ecosystem from "./pages/Ecosystem";
 
 const queryClient = new QueryClient({
   defaultOptions: {

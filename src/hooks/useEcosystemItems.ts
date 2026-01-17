@@ -70,7 +70,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         wsQuery = wsQuery.eq('program_id', filters.programId);
       }
       if (filters.stage && filters.stage !== 'all') {
-        wsQuery = wsQuery.eq('stage', filters.stage);
+        wsQuery = wsQuery.eq('stage', filters.stage as any);
       }
       if (filters.healthScore && filters.healthScore !== 'all') {
         wsQuery = wsQuery.or(`health_score.eq.${filters.healthScore},health_score_override.eq.${filters.healthScore}`);

@@ -23,7 +23,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={<Building2 className="h-12 w-12" />}
+        icon={Building2}
         title={t('ecosystem.noItems', 'No items found')}
         description={t('ecosystem.noItemsDesc', 'Try adjusting your filters or search criteria')}
       />
