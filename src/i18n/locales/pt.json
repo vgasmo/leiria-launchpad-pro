@@ -1258,14 +1258,20 @@
     "time": "Tempo",
     "settings": "Definições",
     "reports": "Relatórios",
+    "playbooks": "Playbooks",
     "governance": "Governança",
+    "scheduleSession": "Agendar Sessão",
     "notAccessible": "Workspace Não Acessível",
     "noPermission": "Este workspace não existe ou não tem permissão para o visualizar. Se acredita que deveria ter acesso, contacte um administrador.",
     "responsibleConsultant": "Consultor Responsável",
     "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve.",
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor",
-    "noTeamAssigned": "Equipa ainda não atribuída"
+    "noTeamAssigned": "Equipa ainda não atribuída",
+    "noActionsYet": "Sem ações ainda",
+    "noMilestonesYet": "Sem marcos ainda",
+    "addFirstAction": "Adicionar primeira ação",
+    "addFirstMilestone": "Adicionar primeiro marco"
   },
   "investorUpdates": {
     "title": "Atualizações para Investidores",
@@ -3648,44 +3654,6 @@
     "startupsOver3Years": "startups com mais de 3 anos",
     "reviewRecommended": "Revisão recomendada para ajuste de preço ou graduação"
   },
-  "workspace": {
-    "overview": "Visão Geral",
-    "sessions": "Sessões",
-    "actions": "Ações",
-    "milestones": "Marcos",
-    "kpis": "KPIs",
-    "documents": "Documentos",
-    "team": "Equipa",
-    "settings": "Definições",
-    "scheduleSession": "Agendar Sessão",
-    "noActionsYet": "Sem ações ainda",
-    "noMilestonesYet": "Sem marcos ainda",
-    "addFirstAction": "Adicionar primeira ação",
-    "addFirstMilestone": "Adicionar primeiro marco"
-  },
-  "stages": {
-    "ideation": "Ideação",
-    "validation": "Validação",
-    "mvp": "MVP",
-    "growth": "Crescimento",
-    "scale": "Escala"
-  },
-  "invite": {
-    "title": "Aceitar Convite",
-    "accepting": "A aceitar convite...",
-    "success": "Convite aceite com sucesso!",
-    "redirecting": "A redirecionar para o workspace...",
-    "expired": "Este convite expirou",
-    "invalid": "Link de convite inválido",
-    "alreadyUsed": "Este convite já foi utilizado",
-    "loginRequired": "Inicie sessão para aceitar o convite",
-    "signupRequired": "Crie uma conta para aceitar o convite",
-    "processing": "A processar convite...",
-    "error": "Erro ao aceitar convite",
-    "welcome": "Bem-vindo à sua nova startup!",
-    "sentTo": "Convite enviado para",
-    "sending": "A enviar convite..."
-  },
   "dataQuality": {
     "title": "Qualidade dos Dados",
     "description": "Visão geral da qualidade e completude dos dados",
@@ -3696,7 +3664,15 @@
     "inviteFounders": "Convidar Founders",
     "bulkInvite": "Convite em Massa",
     "noIssues": "Sem problemas de dados!",
-    "allDataComplete": "Todos os registos estão completos"
+    "allDataComplete": "Todos os registos estão completos",
+    "startup": "Startup",
+    "issue": "Problema",
+    "email": "Email",
+    "action": "Ação",
+    "selectAllWithEmail": "Selecionar todos com email",
+    "sendInvites": "Enviar convites",
+    "inviteSent": "Convite enviado",
+    "inviteFailed": "Falha ao enviar convite"
   },
   "progressReport": {
     "title": "Relatório de Progresso",
@@ -3713,7 +3689,12 @@
     "exportPdf": "Exportar PDF",
     "print": "Imprimir",
     "copyLink": "Copiar Link",
-    "generatedBy": "Gerado por Startup Leiria"
+    "generatedBy": "Gerado por Startup Leiria",
+    "noProgress": "—",
+    "noActionsYet": "Sem ações ainda",
+    "noMilestonesYet": "Sem marcos ainda",
+    "addFirstAction": "Adicionar primeira ação",
+    "addFirstMilestone": "Adicionar primeiro marco"
   },
   "nif": {
     "label": "NIF",
