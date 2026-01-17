@@ -139,7 +139,7 @@ export function CompanyDetailsStep({
           <Label htmlFor="nif" className="flex items-center gap-2">
             {t('nif.label')}
             <Badge variant="secondary" className="text-xs font-normal">
-              Importante
+              {t('common.important', 'Important')}
             </Badge>
           </Label>
           <div className="relative">

@@ -142,7 +142,8 @@
     "sending": "A enviar...",
     "actions": "Ações",
     "new": "Novo",
-    "perMonth": "/mês"
+    "perMonth": "/mês",
+    "important": "Importante"
   },
   "nav": {
     "home": "Início",
@@ -1219,6 +1220,43 @@
     "weekly": "Semanal",
     "dayOfWeek": "Dia da Semana",
     "startupSettings": "Definições da Startup"
+  },
+  "startupSettings": {
+    "title": "Perfil da Startup",
+    "editDescription": "Edite a informação pública da sua startup",
+    "uploadLogo": "Carregar Logo",
+    "logoHint": "PNG, JPG até 2MB",
+    "logoUploaded": "Logo carregado com sucesso",
+    "uploadFailed": "Falha no carregamento",
+    "startupName": "Nome da Startup",
+    "website": "Website",
+    "nif": "NIF",
+    "mainContact": "Contacto Principal",
+    "mainContactEmail": "Email do Contacto Principal",
+    "mainContactPhone": "Telefone do Contacto Principal",
+    "description": "Descrição",
+    "saved": "Perfil da startup guardado",
+    "saveFailed": "Falha ao guardar perfil"
+  },
+  "workspace": {
+    "overview": "Visão Geral",
+    "sessions": "Sessões",
+    "actions": "Ações",
+    "milestones": "Marcos",
+    "kpis": "KPIs",
+    "playbooks": "Playbooks",
+    "templates": "Templates",
+    "calendar": "Calendário",
+    "documents": "Documentos",
+    "team": "Equipa",
+    "funding": "Financiamento",
+    "notesAndTasks": "Notas e Tarefas",
+    "time": "Tempo",
+    "governance": "Governação",
+    "settings": "Definições",
+    "notAccessible": "Workspace Inacessível",
+    "noPermission": "Não tem permissão para aceder a este workspace.",
+    "scheduleSession": "Agendar Sessão"
   },
   "stages": {
     "ideation": "Ideação",
