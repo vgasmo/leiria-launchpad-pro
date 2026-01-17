@@ -54,6 +54,12 @@ export function AdminStartupsManager() {
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [sendingInviteFor, setSendingInviteFor] = useState<string | null>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  
+  // Bulk selection state
+  const [selectedStartups, setSelectedStartups] = useState<Set<string>>(new Set());
+  const [isBulkStageOpen, setIsBulkStageOpen] = useState(false);
+  const [bulkStage, setBulkStage] = useState<string>('');
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   const { data: startups, isLoading } = useQuery({
     queryKey: ['admin-startups'],
@@ -311,6 +317,55 @@ export function AdminStartupsManager() {
       setSendingInviteFor(null);
     }
   };
+
+  // Bulk stage update handler
+  const handleBulkStageUpdate = async () => {
+    if (!bulkStage || selectedStartups.size === 0) return;
+    
+    setIsBulkProcessing(true);
+    try {
+      const workspaceIds = filteredStartups
+        ?.filter(s => selectedStartups.has(s.id) && s.workspaces?.[0]?.id)
+        .map(s => s.workspaces![0].id) || [];
+      
+      for (const workspaceId of workspaceIds) {
+        await supabase
+          .from('workspaces')
+          .update({ stage: bulkStage as 'ideation' | 'validation' | 'mvp' | 'growth' | 'scale' })
+          .eq('id', workspaceId);
+      }
+      
+      toast.success(`Updated ${workspaceIds.length} workspaces to ${bulkStage} stage`);
+      setSelectedStartups(new Set());
+      setBulkStage('');
+      setIsBulkStageOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
+    } catch (err: any) {
+      toast.error('Failed to update stages');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const toggleStartupSelection = (id: string) => {
+    const newSet = new Set(selectedStartups);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedStartups(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedStartups.size === filteredStartups?.length) {
+      setSelectedStartups(new Set());
+    } else {
+      setSelectedStartups(new Set(filteredStartups?.map(s => s.id) || []));
+    }
+  };
+
+  const stages = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 
   return (
     <Card>
