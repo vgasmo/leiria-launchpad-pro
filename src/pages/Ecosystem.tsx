@@ -45,14 +45,14 @@ export default function Ecosystem() {
       <div className="container mx-auto py-6 space-y-6">
         <PageHeader
           title={t('ecosystem.title', 'Ecosystem Command Center')}
-          description={t('ecosystem.description', 'Unified view of all workspaces and leads')}
+          subtitle={t('ecosystem.description', 'Unified view of all workspaces and leads')}
           icon={<Globe2 className="h-6 w-6" />}
         />
 
         <EcosystemFilters filters={filters} onChange={setFilters} />
 
         {isLoading ? (
-          <ContentSkeleton rows={10} />
+          <ContentSkeleton type="list" count={10} />
         ) : (
           <EcosystemTable 
             items={items || []} 
