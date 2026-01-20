@@ -56,3 +56,69 @@ export function triggerSuccessConfetti() {
     colors: ['#22c55e', '#10b981', '#34d399', '#6ee7b7'],
   });
 }
+
+/**
+ * Mini celebration for action completions - subtle but satisfying
+ */
+export function triggerMiniCelebration() {
+  confetti({
+    particleCount: 30,
+    spread: 50,
+    origin: { y: 0.8, x: 0.5 },
+    zIndex: 9999,
+    colors: ['#c8e600', '#84cc16', '#22c55e'],
+    startVelocity: 20,
+    gravity: 1.2,
+    scalar: 0.8,
+  });
+}
+
+/**
+ * KPI update celebration - brand colors with upward trajectory
+ */
+export function triggerKpiCelebration() {
+  const colors = ['#c8e600', '#84cc16', '#22c55e', '#10b981'];
+  
+  // Upward burst suggesting growth
+  confetti({
+    particleCount: 60,
+    spread: 55,
+    origin: { y: 0.9, x: 0.5 },
+    angle: 90,
+    startVelocity: 45,
+    zIndex: 9999,
+    colors,
+  });
+}
+
+/**
+ * Milestone completion - big celebration
+ */
+export function triggerMilestoneCelebration() {
+  const duration = 1500;
+  const animationEnd = Date.now() + duration;
+  const colors = ['#c8e600', '#cc2936', '#22c55e', '#f59e0b', '#3b82f6'];
+
+  (function frame() {
+    confetti({
+      particleCount: 5,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.6 },
+      colors,
+      zIndex: 9999,
+    });
+    confetti({
+      particleCount: 5,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.6 },
+      colors,
+      zIndex: 9999,
+    });
+
+    if (Date.now() < animationEnd) {
+      requestAnimationFrame(frame);
+    }
+  })();
+}
