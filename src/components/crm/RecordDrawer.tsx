@@ -67,6 +67,7 @@ import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { getRelationshipStatus, getRelationshipStatusConfig } from '@/lib/crmUtils';
+import { LeadScoreCard } from '@/components/crm/LeadScoreCard';
 
 type TaskStatusFilter = 'open' | 'done' | 'canceled';
 
@@ -587,6 +588,23 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 )}
               </CardContent>
             </Card>
+
+            {/* Lead Score */}
+            <LeadScoreCard 
+              item={{
+                id: item.id,
+                stage: item.stage,
+                contact_name: item.contact_name,
+                contact_email: item.contact_email,
+                contact_phone: item.contact_phone,
+                organization_name: item.organization_name,
+                next_action_at: nextActionAt,
+                last_activity_at: lastActivityAt,
+                created_at: item.created_at,
+                source: item.source,
+                notes: item.notes,
+              }}
+            />
 
             {/* Details */}
             <div className="grid gap-3">

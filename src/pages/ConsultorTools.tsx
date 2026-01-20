@@ -1,26 +1,26 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Lightbulb, Sparkles, Shield } from 'lucide-react';
+import { FileText, Lightbulb, Sparkles, Shield, MessageSquare, Wrench, BarChart3 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExerciseLibraryTab } from '@/components/consultor/ExerciseLibraryTab';
 import { SupportMaterialsTab } from '@/components/consultor/SupportMaterialsTab';
+import { SessionFrameworksTab } from '@/components/consultor/SessionFrameworksTab';
+import { CoachingToolkitTab } from '@/components/consultor/CoachingToolkitTab';
+import { PlaybookAnalyticsTab } from '@/components/consultor/PlaybookAnalyticsTab';
 import { ValuePropWizard } from '@/components/consultor/ValuePropWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useNavigate } from 'react-router-dom';
 
 export default function ConsultorTools() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('exercises');
+  const [activeTab, setActiveTab] = useState('frameworks');
   const [showVPWizard, setShowVPWizard] = useState(false);
 
   return (
     <AppLayout
       title={t('consultorTools.title', 'Consultor Tools')}
-      subtitle={t('consultorTools.subtitle', 'Exercise library, support materials, and productivity tools')}
+      subtitle={t('consultorTools.subtitle', 'Session frameworks, coaching toolkit, and playbook analytics')}
     >
       <div className="space-y-6">
         {/* Quick Actions */}
@@ -66,15 +66,20 @@ export default function ConsultorTools() {
                 <li>{t('consultorTools.qualityGates.criteria.outputs', 'Expected outputs documented')}</li>
                 <li>{t('consultorTools.qualityGates.criteria.actions', 'Action items captured after session')}</li>
               </ul>
-              <p className="text-xs text-muted-foreground italic">
-                {t('consultorTools.qualityGates.hint', 'Look for the "Quality Check" card on any session detail page.')}
-              </p>
             </CardContent>
           </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="frameworks" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              {t('consultorTools.sessionFrameworks', 'Session Frameworks')}
+            </TabsTrigger>
+            <TabsTrigger value="coaching" className="gap-2">
+              <Wrench className="h-4 w-4" />
+              {t('consultorTools.coachingToolkit', 'Coaching Toolkit')}
+            </TabsTrigger>
             <TabsTrigger value="exercises" className="gap-2">
               <Lightbulb className="h-4 w-4" />
               {t('consultorTools.exercises', 'Exercises')}
@@ -83,7 +88,19 @@ export default function ConsultorTools() {
               <FileText className="h-4 w-4" />
               {t('consultorTools.materials', 'Support Materials')}
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              {t('consultorTools.playbookAnalytics', 'Playbook Analytics')}
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="frameworks" className="mt-6">
+            <SessionFrameworksTab />
+          </TabsContent>
+
+          <TabsContent value="coaching" className="mt-6">
+            <CoachingToolkitTab />
+          </TabsContent>
 
           <TabsContent value="exercises" className="mt-6">
             <ExerciseLibraryTab />
@@ -91,6 +108,10 @@ export default function ConsultorTools() {
 
           <TabsContent value="materials" className="mt-6">
             <SupportMaterialsTab />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <PlaybookAnalyticsTab />
           </TabsContent>
         </Tabs>
 

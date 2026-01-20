@@ -24,6 +24,7 @@ import {
   Focus,
   Zap,
   LayoutGrid,
+  TrendingUp,
 } from 'lucide-react';
 import { PipelineView } from '@/components/crm/PipelineView';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
@@ -37,6 +38,7 @@ import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
+import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
@@ -309,7 +311,7 @@ export default function CRM() {
         </div>
 
         <Tabs defaultValue="pipeline" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="pipeline" className="gap-2">
               <LayoutGrid className="h-4 w-4" />
               {t('crm.pipeline')}
@@ -323,6 +325,10 @@ export default function CRM() {
               <ListTodo className="h-4 w-4" />
               {t('crm.tasksDue')}
               {tasksTotal > 0 && <Badge variant="secondary" className="ml-1">{tasksTotal}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              {t('crm.analytics', 'Analytics')}
             </TabsTrigger>
           </TabsList>
 
@@ -480,6 +486,10 @@ export default function CRM() {
                 />
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <CrmAnalyticsDashboard />
           </TabsContent>
         </Tabs>
 
