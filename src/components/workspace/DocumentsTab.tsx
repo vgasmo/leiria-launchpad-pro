@@ -11,6 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { 
   Upload, 
   Link as LinkIcon, 
@@ -76,6 +78,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   const addLinkMutation = useAddExternalLink();
   const deleteMutation = useDeleteDocument();
   const getDocumentUrl = useGetDocumentUrl();
+  const { confirm, dialogProps } = useConfirmDialog();
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
@@ -156,9 +159,16 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
     setPendingExternalUrl(null);
   };
 
-  const handleDelete = async (doc: Document) => {
-    if (!confirm(`Delete "${doc.name}"?`)) return;
-    await deleteMutation.mutateAsync({ document: doc, workspaceId });
+  const handleDelete = (doc: Document) => {
+    confirm({
+      title: t('documents.deleteTitle', 'Eliminar documento?'),
+      description: t('documents.deleteConfirm', 'Tem a certeza que quer eliminar "{{name}}"? Esta ação não pode ser desfeita.', { name: doc.name }),
+      confirmLabel: t('common.delete'),
+      onConfirm: async () => {
+        await deleteMutation.mutateAsync({ document: doc, workspaceId });
+        toast.success(t('documents.documentDeleted', 'Documento eliminado'));
+      },
+    });
   };
 
   if (isLoading) {
@@ -187,6 +197,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   });
 
   return (
+    <>
     <div className="space-y-6">
       {/* External Link Confirmation Dialog */}
       <AlertDialog open={externalLinkConfirmOpen} onOpenChange={setExternalLinkConfirmOpen}>
@@ -441,5 +452,8 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
           })
       )}
     </div>
+    
+    <ConfirmDialog {...dialogProps} />
+    </>
   );
 }
