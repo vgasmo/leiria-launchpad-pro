@@ -84,38 +84,38 @@ export default function Admin() {
 
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
-      approvals: t('admin.approvals'),
-      compliance: t('admin.compliance'),
-      lifecycle: t('admin.lifecycle', 'Contract Lifecycle'),
+      approvals: t('admin.approvals', 'Aprovações'),
+      compliance: t('admin.compliance', 'Conformidade'),
+      lifecycle: t('admin.lifecycle', 'Ciclo de Contratos'),
       backoffice: t('admin.backoffice.tab', 'Backoffice'),
-      announcements: t('admin.announcements.tab'),
-      'data-quality': t('dataQuality.title', 'Data Quality'),
-      users: t('admin.users'),
-      mentors: t('admin.externalMentors'),
-      kpis: t('admin.kpis'),
-      templates: t('admin.templates'),
-      'support-materials': t('admin.supportMaterials.title', 'Materials'),
-      surveys: t('admin.surveys.title', 'Surveys'),
+      announcements: t('admin.announcements.tab', 'Anúncios'),
+      'data-quality': t('dataQuality.title', 'Qualidade de Dados'),
+      users: t('admin.users', 'Utilizadores'),
+      mentors: t('admin.externalMentors', 'Mentores Externos'),
+      kpis: t('admin.kpis', 'KPIs'),
+      templates: t('admin.templates', 'Templates'),
+      'support-materials': t('admin.supportMaterials.title', 'Materiais'),
+      surveys: t('admin.surveys.title', 'Inquéritos'),
       tags: t('admin.tags.title', 'Tags'),
-      activity: t('admin.activityLog'),
-      analytics: t('admin.analytics'),
-      health: t('admin.healthModels'),
-      integrations: t('admin.integrations', 'Integrations'),
-      'crm-diagnostics': t('admin.crmDiagnostics', 'CRM Diagnostics'),
-      'data-import': t('admin.dataImport.tab', 'Data Import'),
+      activity: t('admin.activityLog', 'Registo de Atividade'),
+      analytics: t('admin.analytics', 'Analytics'),
+      health: t('admin.healthModels', 'Modelos de Saúde'),
+      integrations: t('admin.integrations', 'Integrações'),
+      'crm-diagnostics': t('admin.crmDiagnostics', 'Diagnóstico CRM'),
+      'data-import': t('admin.dataImport.tab', 'Importação'),
       flags: t('admin.featureFlags.tab', 'Flags'),
-      funnel: t('admin.funnel.tab', 'Funnel'),
+      funnel: t('admin.funnel.tab', 'Funil'),
     };
     return labels[tab];
   };
 
   const getGroupLabel = (group: string) => {
     const labels: Record<string, string> = {
-      operations: t('admin.groups.operations', 'Operations'),
-      people: t('admin.groups.people', 'People'),
-      content: t('admin.groups.content', 'Content'),
+      operations: t('admin.groups.operations', 'Operações'),
+      people: t('admin.groups.people', 'Pessoas'),
+      content: t('admin.groups.content', 'Conteúdo'),
       insights: t('admin.groups.insights', 'Insights'),
-      system: t('admin.groups.system', 'System'),
+      system: t('admin.groups.system', 'Sistema'),
     };
     return labels[group];
   };

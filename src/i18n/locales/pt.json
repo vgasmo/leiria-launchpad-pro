@@ -3917,5 +3917,114 @@
     "meeting": "Reunião",
     "email": "Email",
     "task": "Tarefa"
+  },
+  "focusMode": {
+    "activate": "Modo Foco",
+    "active": "Modo Foco Ativo",
+    "deactivate": "Desativar Modo Foco",
+    "allClear": "Tudo em dia!",
+    "noPriorityItems": "Não há itens urgentes que precisem da sua atenção. Excelente trabalho!"
+  },
+  "emptyState": {
+    "noMatchingWorkspaces": "Sem resultados correspondentes",
+    "adjustFilters": "Tente ajustar os seus filtros ou termos de pesquisa para encontrar o que procura.",
+    "clearFilters": "Limpar Todos os Filtros",
+    "welcomeFounder": "Inicie a Sua Jornada Startup",
+    "welcomeToWorkspace": "Bem-vindo aos Workspaces",
+    "founderNoStartups": "Registe a sua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.",
+    "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador ou junte-se a um programa.",
+    "founderValue": "Obtenha orientação de mentores e acompanhe os seus KPIs num só lugar.",
+    "createFirstStartup": "Criar a Sua Startup",
+    "explorePrograms": "Explorar Programas",
+    "noData": "Sem dados disponíveis",
+    "noResults": "Sem resultados",
+    "tryDifferentFilters": "Tente filtros diferentes ou adicione novos itens."
+  },
+  "loading": {
+    "default": "A carregar...",
+    "preparingData": "A preparar dados...",
+    "savingChanges": "A guardar alterações...",
+    "processing": "A processar...",
+    "almostThere": "Quase lá..."
+  },
+  "accessibility": {
+    "skipToContent": "Saltar para o conteúdo",
+    "menuToggle": "Alternar menu",
+    "closeDialog": "Fechar diálogo",
+    "expandSection": "Expandir secção",
+    "collapseSection": "Recolher secção",
+    "required": "Obrigatório",
+    "optional": "Opcional",
+    "loading": "A carregar",
+    "sortAscending": "Ordenar ascendente",
+    "sortDescending": "Ordenar descendente"
+  },
+  "feedback": {
+    "saved": "Guardado",
+    "created": "Criado",
+    "updated": "Atualizado",
+    "deleted": "Eliminado",
+    "completed": "Concluído!",
+    "achieved": "Conquistado!",
+    "actionRequired": "Ação Necessária",
+    "success": "Sucesso!",
+    "error": "Ocorreu um erro",
+    "tryAgain": "Por favor, tente novamente."
+  },
+  "admin": {
+    "title": "Painel de Administração",
+    "subtitle": "Gestão do ecossistema Startup Leiria",
+    "approvals": "Aprovações",
+    "compliance": "Conformidade",
+    "lifecycle": "Ciclo de Contratos",
+    "users": "Utilizadores",
+    "externalMentors": "Mentores Externos",
+    "kpis": "KPIs",
+    "templates": "Templates",
+    "activityLog": "Registo de Atividade",
+    "analytics": "Analytics",
+    "healthModels": "Modelos de Saúde",
+    "integrations": "Integrações",
+    "crmDiagnostics": "Diagnóstico CRM",
+    "dataImport": {
+      "tab": "Importação de Dados"
+    },
+    "featureFlags": {
+      "tab": "Flags"
+    },
+    "funnel": {
+      "tab": "Funil"
+    },
+    "backoffice": {
+      "tab": "Backoffice"
+    },
+    "announcements": {
+      "tab": "Anúncios"
+    },
+    "supportMaterials": {
+      "title": "Materiais"
+    },
+    "surveys": {
+      "title": "Inquéritos"
+    },
+    "tags": {
+      "title": "Tags"
+    },
+    "groups": {
+      "operations": "Operações",
+      "people": "Pessoas",
+      "content": "Conteúdo",
+      "insights": "Insights",
+      "system": "Sistema"
+    }
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "email": "Por favor, insira um email válido",
+    "minLength": "Deve ter pelo menos {{min}} caracteres",
+    "maxLength": "Não pode exceder {{max}} caracteres",
+    "number": "Por favor, insira um número válido",
+    "url": "Por favor, insira um URL válido",
+    "date": "Por favor, insira uma data válida"
   }
 }
