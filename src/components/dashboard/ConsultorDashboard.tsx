@@ -302,7 +302,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-sm">{item.workspace.startup?.name}</span>
-                          {health && <HealthBadge health={health} size="sm" />}
+                          {health && <HealthBadge score={health} size="sm" />}
                         </div>
                         <p className="text-xs text-muted-foreground">{item.reason}</p>
                       </div>
