@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
   Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
-  ChevronDown, Stethoscope, Database, Tag
+  ChevronDown, Stethoscope, Database, Tag, GitBranch
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -39,10 +39,11 @@ import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { AdminTagCategoriesManager } from '@/components/admin/AdminTagCategoriesManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
+import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 
 // Tab group definitions for cleaner navigation
 const TAB_GROUPS: Record<string, string[]> = {
-  operations: ['approvals', 'compliance', 'backoffice', 'announcements', 'data-quality'],
+  operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
   people: ['users', 'mentors'],
   content: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   insights: ['activity', 'analytics', 'health'],
@@ -58,6 +59,7 @@ export default function Admin() {
     const icons: Record<string, React.ReactNode> = {
       approvals: <Clock className="h-4 w-4" />,
       compliance: <ShieldCheck className="h-4 w-4" />,
+      lifecycle: <GitBranch className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
       announcements: <Bell className="h-4 w-4" />,
       'data-quality': <Database className="h-4 w-4" />,
@@ -84,6 +86,7 @@ export default function Admin() {
     const labels: Record<string, string> = {
       approvals: t('admin.approvals'),
       compliance: t('admin.compliance'),
+      lifecycle: t('admin.lifecycle', 'Contract Lifecycle'),
       backoffice: t('admin.backoffice.tab', 'Backoffice'),
       announcements: t('admin.announcements.tab'),
       'data-quality': t('dataQuality.title', 'Data Quality'),
@@ -183,6 +186,10 @@ export default function Admin() {
 
         <TabsContent value="compliance">
           <ComplianceDashboard />
+        </TabsContent>
+
+        <TabsContent value="lifecycle">
+          <ContractLifecycleHub />
         </TabsContent>
 
         <TabsContent value="backoffice">
