@@ -139,6 +139,8 @@ export function useUpdateFunnelItem() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
       toast.success('Updated');
     },
     onError: (e: Error) => toast.error(e.message),
