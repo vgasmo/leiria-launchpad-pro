@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, addDays } from 'date-fns';
-import { Calendar, Clock, Video, MapPin } from 'lucide-react';
+import { pt, enUS } from 'date-fns/locale';
+import { Calendar, Clock, Video, MapPin, CalendarPlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUpcomingSessions } from '@/hooks/useUpcomingSessions';
@@ -15,7 +18,10 @@ interface CalendarWidgetProps {
 
 export function CalendarWidget({ className }: CalendarWidgetProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { data: sessions, isLoading } = useUpcomingSessions();
+
+  const dateLocale = i18n.language === 'pt' ? pt : enUS;
 
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
@@ -53,7 +59,7 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
-            Upcoming Sessions
+            {t('calendar.upcomingSessions', 'Próximas Sessões')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -72,7 +78,7 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Calendar className="h-4 w-4 text-primary" />
-          Upcoming Sessions
+          {t('calendar.upcomingSessions', 'Próximas Sessões')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,7 +99,7 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
                 )}
               >
                 <span className="text-[10px] text-muted-foreground uppercase">
-                  {format(day, 'EEE')}
+                  {format(day, 'EEE', { locale: dateLocale })}
                 </span>
                 <span className={cn(
                   "text-sm font-medium",
@@ -129,7 +135,7 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
                       "text-xs font-medium",
                       isToday(day) ? "text-primary" : "text-muted-foreground"
                     )}>
-                      {isToday(day) ? 'Today' : format(day, 'EEEE, MMM d')}
+                      {isToday(day) ? t('common.today', 'Hoje') : format(day, 'EEEE, d MMM', { locale: dateLocale })}
                     </span>
                     <Badge variant="secondary" className="text-[10px] h-4">
                       {daySessions.length}
@@ -140,18 +146,18 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
                       <div
                         key={session.id}
                         onClick={() => handleSessionClick(session)}
-                        className="p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                        className="p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors group"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{session.title}</p>
+                            <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{session.title}</p>
                             <p className="text-xs text-muted-foreground truncate">
                               {session.startup_name}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                             <Clock className="h-3 w-3" />
-                            {format(new Date(session.scheduled_at), 'h:mm a')}
+                            {format(new Date(session.scheduled_at), 'HH:mm')}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -185,10 +191,16 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
                 <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-4">
                   <Calendar className="h-8 w-8 text-primary/60" />
                 </div>
-                <h4 className="font-medium text-foreground mb-1">No sessions scheduled</h4>
-                <p className="text-sm text-muted-foreground max-w-[200px]">
-                  Book a session with your mentor to get guidance and feedback.
+                <h4 className="font-medium text-foreground mb-1">
+                  {t('calendar.noSessions', 'Sem sessões agendadas')}
+                </h4>
+                <p className="text-sm text-muted-foreground max-w-[220px] mb-4">
+                  {t('calendar.noSessionsDesc', 'Agende uma sessão com o seu mentor para obter orientação.')}
                 </p>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/mentors')}>
+                  <CalendarPlus className="h-4 w-4" />
+                  {t('calendar.bookSession', 'Agendar Sessão')}
+                </Button>
               </div>
             )}
           </div>
