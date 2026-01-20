@@ -1,8 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCcw, Home } from 'lucide-react';
+import { AlertTriangle, RefreshCcw, Home, Copy, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { logError } from '@/lib/logError';
+import { logError, getBreadcrumbs } from '@/lib/logError';
 
 interface Props {
   children: ReactNode;
@@ -13,6 +13,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorId: string | null;
+  copied: boolean;
 }
 
 /**
@@ -41,11 +42,11 @@ function getSafeErrorMessage(error: Error | null, isDev: boolean): string | null
   
   // If it matches a safe pattern, show a sanitized version
   if (safePatterns.some(p => p.test(message))) {
-    if (/network/i.test(message)) return 'Network error. Please check your connection.';
-    if (/timeout/i.test(message)) return 'Request timed out. Please try again.';
-    if (/not found/i.test(message)) return 'The requested resource was not found.';
-    if (/unauthorized/i.test(message)) return 'You are not authorized to perform this action.';
-    if (/forbidden/i.test(message)) return 'Access denied.';
+    if (/network/i.test(message)) return 'Erro de rede. Verifique a sua ligação.';
+    if (/timeout/i.test(message)) return 'Tempo limite excedido. Tente novamente.';
+    if (/not found/i.test(message)) return 'O recurso solicitado não foi encontrado.';
+    if (/unauthorized/i.test(message)) return 'Não tem autorização para esta ação.';
+    if (/forbidden/i.test(message)) return 'Acesso negado.';
   }
   
   // For all other errors, return null (show generic message only)
@@ -64,9 +65,10 @@ export class ErrorBoundary extends Component<Props, State> {
     hasError: false,
     error: null,
     errorId: null,
+    copied: false,
   };
 
-  public static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): Partial<State> {
     return { 
       hasError: true, 
       error,
@@ -78,8 +80,10 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log error with structured context using our logging utility
     const loggedError = logError(error, {
       component: 'ErrorBoundary',
+      severity: 'critical',
       metadata: {
         componentStack: errorInfo.componentStack,
+        breadcrumbs: getBreadcrumbs(),
       },
     });
     
@@ -95,6 +99,19 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.href = '/my-workspaces';
   };
 
+  private handleCopyErrorId = async () => {
+    if (this.state.errorId) {
+      try {
+        await navigator.clipboard.writeText(this.state.errorId);
+        this.setState({ copied: true });
+        setTimeout(() => this.setState({ copied: false }), 2000);
+      } catch (e) {
+        // Fallback for older browsers
+        console.log('Error ID:', this.state.errorId);
+      }
+    }
+  };
+
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -105,46 +122,65 @@ export class ErrorBoundary extends Component<Props, State> {
       const safeMessage = getSafeErrorMessage(this.state.error, isDev);
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4">
-          <Card className="max-w-md w-full">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 p-4">
+          <Card className="max-w-md w-full shadow-xl border-destructive/20">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center animate-pulse">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
               </div>
-              <CardTitle className="text-xl">Something went wrong</CardTitle>
+              <CardTitle className="text-xl font-heading">
+                Ocorreu um erro
+              </CardTitle>
             </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-muted-foreground mb-4">
-                An unexpected error occurred. Please try refreshing the page or return to the dashboard.
+            <CardContent className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                Pedimos desculpa pelo incómodo. Por favor, tente atualizar a página ou voltar ao início.
               </p>
               
               {/* Error ID for support reference (always safe to show) */}
               {this.state.errorId && (
-                <p className="text-xs text-muted-foreground mb-4">
-                  Error ID: <code className="bg-muted px-1 rounded">{this.state.errorId}</code>
-                </p>
+                <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
+                  <span className="text-xs text-muted-foreground">
+                    Código de erro:
+                  </span>
+                  <code className="bg-background px-2 py-1 rounded text-xs font-mono">
+                    {this.state.errorId}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={this.handleCopyErrorId}
+                  >
+                    {this.state.copied ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               )}
               
               {/* Only show error details in development or for safe messages */}
               {safeMessage && (
-                <details className="text-left bg-muted/50 rounded-lg p-3 text-xs">
-                  <summary className="cursor-pointer font-medium text-muted-foreground">
-                    {isDev ? 'Error details (dev only)' : 'More info'}
+                <details className="text-left bg-muted/30 rounded-lg p-3 text-xs border">
+                  <summary className="cursor-pointer font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    {isDev ? 'Detalhes do erro (dev)' : 'Mais informações'}
                   </summary>
-                  <pre className="mt-2 whitespace-pre-wrap break-words text-destructive">
+                  <pre className="mt-2 whitespace-pre-wrap break-words text-destructive/80 font-mono text-[10px]">
                     {safeMessage}
                   </pre>
                 </details>
               )}
             </CardContent>
-            <CardFooter className="flex gap-2 justify-center">
-              <Button variant="outline" onClick={this.handleGoHome}>
-                <Home className="h-4 w-4 mr-2" />
-                Go Home
+            <CardFooter className="flex gap-3 justify-center pt-2">
+              <Button variant="outline" onClick={this.handleGoHome} className="gap-2">
+                <Home className="h-4 w-4" />
+                Início
               </Button>
-              <Button onClick={this.handleReload}>
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                Reload Page
+              <Button onClick={this.handleReload} className="gap-2">
+                <RefreshCcw className="h-4 w-4" />
+                Atualizar
               </Button>
             </CardFooter>
           </Card>
