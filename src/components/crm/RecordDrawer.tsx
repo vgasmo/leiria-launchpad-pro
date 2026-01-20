@@ -57,7 +57,7 @@ import {
   Save,
   Activity,
 } from 'lucide-react';
-import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
 import { useAddTask, useCompleteTask, useReopenTask, useCancelTask, useUpdateTask, TaskPriority } from '@/hooks/useCrmTasks';
 import { useUpdateNextAction, useClearNextAction } from '@/hooks/useNextAction';
@@ -68,6 +68,20 @@ import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { getRelationshipStatus, getRelationshipStatusConfig } from '@/lib/crmUtils';
 import { LeadScoreCard } from '@/components/crm/LeadScoreCard';
+
+const STAGE_OPTIONS: FunnelStage[] = [
+  'new',
+  'first_contact_booked',
+  'met',
+  'qualified',
+  'proposal_sent',
+  'negotiating',
+  'contracted',
+  'incubating',
+  'accelerating',
+  'rejected',
+  'archived',
+];
 
 type TaskStatusFilter = 'open' | 'done' | 'canceled';
 
@@ -128,6 +142,15 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const updateTask = useUpdateTask();
   const updateNextAction = useUpdateNextAction();
   const clearNextAction = useClearNextAction();
+  const updateFunnelItem = useUpdateFunnelItem();
+
+  const handleStageChange = async (newStage: FunnelStage) => {
+    if (!item) return;
+    await updateFunnelItem.mutateAsync({
+      id: item.id,
+      stage: newStage,
+    });
+  };
 
   // Separate tasks from other activities and group by status
   const { openTasks, doneTasks, canceledTasks, otherActivities } = useMemo(() => {
@@ -281,9 +304,22 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 </p>
               )}
             </div>
-            <Badge className={cn('shrink-0', stageConfig.color, 'text-white')}>
-              {stageConfig.label}
-            </Badge>
+            <Select
+              value={item.stage}
+              onValueChange={(value) => handleStageChange(value as FunnelStage)}
+              disabled={updateFunnelItem.isPending}
+            >
+              <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageConfig.color, 'text-white border-0 hover:opacity-90')}>
+                <SelectValue>{stageConfig.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {STAGE_OPTIONS.map((stage) => (
+                  <SelectItem key={stage} value={stage}>
+                    {STAGE_CONFIG[stage].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </SheetHeader>
 
