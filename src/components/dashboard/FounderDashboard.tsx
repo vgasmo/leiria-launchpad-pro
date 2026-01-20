@@ -23,6 +23,7 @@ import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
+import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
@@ -61,12 +62,18 @@ export function FounderDashboard({
   // Get the primary workspace (founders typically have 1)
   const workspace = workspaces[0];
   
+  // P0 FIX: Compute hasMentor from real workspace_users data (not hardcoded)
+  const { data: workspaceMembers } = useWorkspaceMembers(workspace?.id);
+  const hasMentor = useMemo(() => {
+    if (!workspaceMembers) return false;
+    return workspaceMembers.some(m => m.role === 'mentor_externo');
+  }, [workspaceMembers]);
+  
   // Calculate checklist progress
   const hasProfile = Boolean(profile?.full_name);
   const hasStartup = Boolean(workspace);
   const hasKpis = Boolean(workspace?.hasCurrentMonthKpi);
   const hasDocuments = Boolean(workspace?.lastSession);
-  const hasMentor = false;
 
   if (isLoading) {
     return (
