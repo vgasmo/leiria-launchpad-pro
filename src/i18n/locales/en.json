@@ -3868,5 +3868,70 @@
     "title": "Page not found",
     "backHome": "Go back home",
     "description": "The page you're looking for doesn't exist or has been moved."
+  },
+  "consultor": {
+    "hero": {
+      "title": "Risk & Priorities Today",
+      "subtitle": "Startups that need your immediate attention",
+      "viewAll": "View All",
+      "allClear": "All under control!",
+      "noPriorities": "No startups in critical or at-risk state.",
+      "openWorkspace": "Open"
+    },
+    "risk": {
+      "criticalHealth": "Critical health",
+      "atRisk": "At risk",
+      "overdueActions": "{{count}} overdue action",
+      "overdueActions_plural": "{{count}} overdue actions",
+      "noRecentSession": "No session in 30+ days",
+      "missingKpis": "Missing KPIs"
+    },
+    "agenda": {
+      "title": "Agenda (7 days)",
+      "empty": "No scheduled sessions",
+      "schedule": "Schedule session",
+      "prep": "Prep"
+    },
+    "actions": {
+      "title": "Critical Actions",
+      "allClear": "No overdue actions",
+      "overdueCount": "{{count}} overdue action",
+      "overdueCount_plural": "{{count}} overdue actions",
+      "resolve": "Resolve"
+    },
+    "pipeline": {
+      "title": "Pipeline (CRM)",
+      "open": "Open CRM",
+      "empty": "No pipeline data",
+      "totalLeads": "Active leads",
+      "contracted": "Contracted",
+      "newLeads": "New leads",
+      "needsAction": "{{count}} lead needs action",
+      "needsAction_plural": "{{count}} leads need action"
+    },
+    "dataQuality": {
+      "title": "Data Quality Alerts"
+    },
+    "alerts": {
+      "missingKpis": "{{count}} startup missing KPIs this month",
+      "missingKpis_plural": "{{count}} startups missing KPIs this month",
+      "noRecentSessions": "{{count}} startup without session in 30+ days",
+      "noRecentSessions_plural": "{{count}} startups without session in 30+ days"
+    },
+    "weeklyImpact": {
+      "title": "Weekly Summary",
+      "sessionsCompleted": "Sessions completed",
+      "actionsCreated": "Actions created",
+      "leadsConverted": "Leads converted"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Cannot exceed {{max}} characters",
+    "number": "Please enter a valid number",
+    "url": "Please enter a valid URL",
+    "date": "Please enter a valid date"
   }
 }

@@ -242,10 +242,10 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-foreground">
-              {t('consultor.hero.title', 'Risco e Prioridades de Hoje')}
+              {t('consultor.hero.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {t('consultor.hero.subtitle', 'Startups que precisam da sua atenção imediata')}
+              {t('consultor.hero.subtitle')}
             </p>
           </div>
           <Button 
@@ -253,7 +253,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             size="sm"
             onClick={() => navigate('/my-workspaces?filter=attention')}
           >
-            {t('consultor.hero.viewAll', 'Ver Todas')}
+            {t('consultor.hero.viewAll')}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
@@ -266,7 +266,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               </div>
               <div>
                 <p className="font-medium text-foreground">
-                  {t('consultor.hero.allClear', 'Tudo sob controlo!')}
+                  {t('consultor.hero.allClear')}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t('consultor.hero.noPriorities', 'Nenhuma startup em estado crítico ou de risco.')}
