@@ -284,7 +284,10 @@
     "submitApplication": "Submeter Candidatura",
     "successMessage": "Startup criada! A sua candidatura está pendente de aprovação.",
     "mustBeLoggedIn": "Tem de ter sessão iniciada para criar uma startup",
-    "failedToCreate": "Falha ao criar startup"
+    "failedToCreate": "Falha ao criar startup. Por favor, tente novamente.",
+    "duplicateName": "Já existe uma startup com este nome.",
+    "permissionError": "Não tem permissão para criar uma startup. Por favor, contacte o suporte.",
+    "serverError": "Erro no servidor. Por favor, tente novamente dentro de momentos."
   },
   "sessions": {
     "title": "Sessões",

@@ -181,9 +181,14 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
             })}
             
             {sessions?.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Calendar className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">No upcoming sessions</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-4">
+                  <Calendar className="h-8 w-8 text-primary/60" />
+                </div>
+                <h4 className="font-medium text-foreground mb-1">No sessions scheduled</h4>
+                <p className="text-sm text-muted-foreground max-w-[200px]">
+                  Book a session with your mentor to get guidance and feedback.
+                </p>
               </div>
             )}
           </div>

@@ -112,8 +112,16 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       
     } catch (err: any) {
       console.error('Error creating startup:', err);
-      const details = [err?.code, err?.message, err?.details, err?.hint].filter(Boolean).join(' — ');
-      setError(details || t('createStartup.failedToCreate'));
+      // User-friendly error messages instead of raw database errors
+      if (err?.code === '23505') {
+        setError(t('createStartup.duplicateName', 'A startup with this name already exists.'));
+      } else if (err?.message?.includes('permission') || err?.message?.includes('RLS')) {
+        setError(t('createStartup.permissionError', 'You do not have permission to create a startup. Please contact support.'));
+      } else if (err?.code === 'PGRST') {
+        setError(t('createStartup.serverError', 'Server error. Please try again in a few moments.'));
+      } else {
+        setError(t('createStartup.failedToCreate'));
+      }
     } finally {
       setIsSubmitting(false);
     }
