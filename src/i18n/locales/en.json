@@ -192,7 +192,54 @@
     "admin": "Admin",
     "adminPanel": "Admin Panel",
     "helpGlossary": "Help & Glossary",
-    "crm": "CRM"
+    "crm": "CRM",
+    "consultorTools": "Consultant Tools",
+    "portfolio": "Portfolio",
+    "startups": "Startups",
+    "sessions": "Sessions",
+    "actionsFollowups": "Actions & Follow-ups",
+    "programs": "Programs",
+    "reports": "Reports",
+    "dataQuality": "Data Quality",
+    "opsCompliance": "Operations & Compliance",
+    "usersPermissions": "Users & Permissions",
+    "systemConfig": "System Configuration",
+    "founder": {
+      "home": "Home",
+      "myStartup": "My Startup",
+      "goalsKpis": "Goals & KPIs",
+      "sessionsMentoring": "Sessions & Mentoring",
+      "actionsPlan": "Actions & Plan",
+      "documents": "Documents",
+      "networkResources": "Network & Resources",
+      "support": "Support"
+    },
+    "consultor": {
+      "portfolio": "Portfolio",
+      "startups": "Startups",
+      "sessions": "Sessions",
+      "actionsFollowups": "Actions & Follow-ups",
+      "crmPipeline": "CRM & Pipeline",
+      "programs": "Programs",
+      "reports": "Reports",
+      "dataQuality": "Data Quality"
+    },
+    "mentor": {
+      "home": "Home",
+      "upcomingSessions": "Upcoming Sessions",
+      "assignedStartups": "Assigned Startups",
+      "notesActions": "Notes & Actions",
+      "resources": "Resources",
+      "profile": "Profile"
+    },
+    "admin": {
+      "operations": "Operations",
+      "crm": "CRM",
+      "programsCohorts": "Programs & Cohorts",
+      "reports": "Reports",
+      "usersPermissions": "Users & Permissions",
+      "systemConfig": "System Configuration"
+    }
   },
   "dashboard": {
     "portfolio": "Portfolio Overview",

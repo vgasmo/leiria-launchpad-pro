@@ -10,9 +10,26 @@ import {
   AlertCircle,
   Users,
   MessageCircle,
-  Lightbulb,
   HelpCircle,
+  Target,
+  Calendar,
+  CheckSquare,
+  FileText,
+  Network,
+  Headphones,
+  BarChart3,
+  Briefcase,
+  ClipboardList,
   Contact,
+  GraduationCap,
+  Database,
+  Home,
+  UserCircle,
+  NotebookPen,
+  BookOpen,
+  Shield,
+  Cog,
+  LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,18 +47,23 @@ import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 import { SidebarContactInfo } from './SidebarContactInfo';
 
+interface NavItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  exact?: boolean;
+}
+
 export function AppSidebar() {
   const location = useLocation();
   const { t } = useTranslation();
   const { profile, isAdmin, isMentor, isConsultor, roles, signOut } = useAuth();
   const isFounder = roles.includes('founder');
-  const showConsultorTools = isAdmin || isConsultor || roles.includes('consultor');
+  const isStaff = isAdmin || isConsultor;
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
   
   // Get founder's workspace for contact info
-  // - If the founder is inside a specific workspace route, use that workspace id
-  // - Otherwise, fall back to the first workspace (e.g. on /my-workspaces)
   const { data: workspaces = [] } = useWorkspaces();
   const workspaceIdFromRoute = location.pathname.startsWith('/workspace/')
     ? location.pathname.split('/')[2]
@@ -50,17 +72,82 @@ export function AppSidebar() {
     ? (workspaceIdFromRoute || (workspaces.length === 1 ? workspaces[0].id : null))
     : null;
 
-  const navigation = [
-    { name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 },
+  // Get first workspace ID for founder navigation
+  const firstWorkspaceId = workspaces.length > 0 ? workspaces[0].id : null;
+
+  // ============================================
+  // ROLE-SPECIFIC NAVIGATION ITEMS
+  // ============================================
+
+  // FOUNDER OS Navigation
+  const founderNavigation: NavItem[] = [
+    { name: t('nav.founder.home', 'Início'), href: '/my-workspaces', icon: Home, exact: true },
+    ...(firstWorkspaceId ? [
+      { name: t('nav.founder.myStartup', 'A Minha Startup'), href: `/workspace/${firstWorkspaceId}`, icon: Building2 },
+      { name: t('nav.founder.goalsKpis', 'Objetivos & KPIs'), href: `/workspace/${firstWorkspaceId}/kpis`, icon: Target },
+      { name: t('nav.founder.sessionsMentoring', 'Sessões & Mentoria'), href: `/workspace/${firstWorkspaceId}/sessions`, icon: Calendar },
+      { name: t('nav.founder.actionsPlan', 'Ações & Plano'), href: `/workspace/${firstWorkspaceId}/actions`, icon: CheckSquare },
+      { name: t('nav.founder.documents', 'Documentos'), href: `/workspace/${firstWorkspaceId}/documents`, icon: FileText },
+    ] : []),
+    { name: t('nav.founder.networkResources', 'Rede & Recursos'), href: '/mentors', icon: Network },
+    { name: t('nav.founder.support', 'Suporte'), href: '/help', icon: Headphones },
   ];
 
-  const staffNavigation = [
-    { name: t('nav.crm'), href: '/crm', icon: Contact },
+  // CONSULTOR OS Navigation (Portfolio OS)
+  const consultorNavigation: NavItem[] = [
+    { name: t('nav.consultor.portfolio', 'Portefólio'), href: '/my-workspaces', icon: Briefcase, exact: true },
+    { name: t('nav.consultor.startups', 'Startups'), href: '/my-workspaces', icon: Building2 },
+    { name: t('nav.consultor.sessions', 'Sessões'), href: '/consultor-tools', icon: Calendar },
+    { name: t('nav.consultor.actionsFollowups', 'Ações & Follow-ups'), href: '/consultor-tools?tab=actions', icon: CheckSquare },
+    { name: t('nav.consultor.crmPipeline', 'CRM & Pipeline'), href: '/crm', icon: Contact },
+    { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=kpis', icon: GraduationCap },
+    { name: t('nav.consultor.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
+    { name: t('nav.consultor.dataQuality', 'Qualidade de Dados'), href: '/admin?tab=data-quality', icon: Database },
   ];
 
-  const adminNavigation = [
-    { name: t('nav.adminPanel'), href: '/admin', icon: Settings },
+  // MENTOR COMPANION Navigation
+  const mentorNavigation: NavItem[] = [
+    { name: t('nav.mentor.home', 'Início'), href: '/my-workspaces', icon: Home, exact: true },
+    { name: t('nav.mentor.upcomingSessions', 'Próximas Sessões'), href: '/my-workspaces', icon: Calendar },
+    { name: t('nav.mentor.assignedStartups', 'Startups Atribuídas'), href: '/my-workspaces', icon: Building2 },
+    { name: t('nav.mentor.notesActions', 'Notas & Ações'), href: '/my-workspaces', icon: NotebookPen },
+    { name: t('nav.mentor.resources', 'Recursos'), href: '/mentors', icon: BookOpen },
+    { name: t('nav.mentor.profile', 'Perfil'), href: '/profile', icon: UserCircle },
   ];
+
+  // ADMIN Navigation (simplified)
+  const adminNavigation: NavItem[] = [
+    { name: t('nav.admin.operations', 'Operações'), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('nav.admin.crm', 'CRM'), href: '/crm', icon: Contact },
+    { name: t('nav.admin.programsCohorts', 'Programas & Cohorts'), href: '/admin?tab=kpis', icon: GraduationCap },
+    { name: t('nav.admin.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
+    { name: t('nav.admin.usersPermissions', 'Utilizadores & Permissões'), href: '/admin?tab=users', icon: Shield },
+    { name: t('nav.admin.systemConfig', 'Configuração do Sistema'), href: '/admin?tab=integrations', icon: Cog },
+  ];
+
+  // Determine which navigation to show based on role priority
+  const getActiveNavigation = (): NavItem[] => {
+    // Admin sees admin nav
+    if (isAdmin) {
+      return adminNavigation;
+    }
+    // Consultor sees portfolio OS
+    if (isConsultor) {
+      return consultorNavigation;
+    }
+    // External mentor sees mentor companion
+    if (isMentor && !isFounder && !isStaff) {
+      return mentorNavigation;
+    }
+    // Founder sees founder OS
+    if (isFounder) {
+      return founderNavigation;
+    }
+    // Default fallback
+    return [{ name: t('nav.myWorkspaces'), href: '/my-workspaces', icon: Building2 }];
+  };
+
+  const activeNavigation = getActiveNavigation();
 
   // Real notification count from database
   const { data: attentionStats, isLoading: attentionLoading } = useAttentionCount();
@@ -72,6 +159,53 @@ export function AppSidebar() {
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'U';
+
+  const isActiveRoute = (item: NavItem): boolean => {
+    if (item.exact) {
+      return location.pathname === item.href;
+    }
+    // Handle query params in href
+    if (item.href.includes('?')) {
+      const [path, query] = item.href.split('?');
+      return location.pathname === path && location.search.includes(query);
+    }
+    return location.pathname.startsWith(item.href);
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const isActive = isActiveRoute(item);
+    
+    const NavLink = (
+      <Link
+        key={item.name}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          isActive
+            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+          collapsed && "justify-center px-2"
+        )}
+      >
+        <item.icon className="h-5 w-5 shrink-0" />
+        {!collapsed && (
+          <span className="animate-fade-in truncate">{item.name}</span>
+        )}
+      </Link>
+    );
+
+    if (collapsed) {
+      return (
+        <Tooltip key={item.name} delayDuration={0}>
+          <TooltipTrigger asChild>{NavLink}</TooltipTrigger>
+          <TooltipContent side="right" className="font-medium">
+            {item.name}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+    return NavLink;
+  };
 
   return (
     <aside 
@@ -110,193 +244,18 @@ export function AppSidebar() {
           )}
         </Button>
 
-        {/* Navigation */}
+        {/* Main Navigation */}
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto scrollbar-thin" data-tour="workspaces">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href || 
-              (item.href !== '/' && location.pathname.startsWith(item.href));
-            
-            const NavItem = (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                  collapsed && "justify-center px-2"
-                )}
-              >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && (
-                  <span className="animate-fade-in">{item.name}</span>
-                )}
-              </Link>
-            );
+          {activeNavigation.map(renderNavItem)}
 
-            if (collapsed) {
-              return (
-                <Tooltip key={item.name} delayDuration={0}>
-                  <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
-                    {item.name}
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
-            return NavItem;
-          })}
-
-          {/* Find Mentors - visible to founders and mentors */}
-          {(isFounder || isMentor) && (
+          {/* Admin link for staff who aren't admins */}
+          {isConsultor && !isAdmin && (
             <>
               <div className="my-4 h-px bg-sidebar-border" />
-              {(() => {
-                const isActive = location.pathname === '/mentors';
-                const NavItem = (
-                  <Link
-                    to="/mentors"
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      collapsed && "justify-center px-2"
-                    )}
-                  >
-                    <Users className="h-5 w-5 shrink-0" />
-                    {!collapsed && (
-                      <span className="animate-fade-in">{t('nav.findMentors')}</span>
-                    )}
-                  </Link>
-                );
-
-                if (collapsed) {
-                  return (
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
-                      <TooltipContent side="right" className="font-medium">
-                        {t('nav.findMentors')}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-                return NavItem;
-              })()}
-            </>
-          )}
-
-          {/* CRM & Consultor Tools - visible to staff */}
-          {showConsultorTools && (
-            <>
-              <div className="my-4 h-px bg-sidebar-border" />
-              {staffNavigation.map((item) => {
-                const isActive = location.pathname === item.href || 
-                  (item.href !== '/' && location.pathname.startsWith(item.href));
-                
-                const NavItem = (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      collapsed && "justify-center px-2"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5 shrink-0" />
-                    {!collapsed && (
-                      <span className="animate-fade-in">{item.name}</span>
-                    )}
-                  </Link>
-                );
-
-                if (collapsed) {
-                  return (
-                    <Tooltip key={item.name} delayDuration={0}>
-                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
-                      <TooltipContent side="right" className="font-medium">
-                        {item.name}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-                return NavItem;
-              })}
-              {(() => {
-                const isActive = location.pathname === '/consultor-tools';
-                const NavItem = (
-                  <Link
-                    to="/consultor-tools"
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      collapsed && "justify-center px-2"
-                    )}
-                  >
-                    <Lightbulb className="h-5 w-5 shrink-0" />
-                    {!collapsed && (
-                      <span className="animate-fade-in">{t('nav.consultorTools', 'Consultor Tools')}</span>
-                    )}
-                  </Link>
-                );
-
-                if (collapsed) {
-                  return (
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
-                      <TooltipContent side="right" className="font-medium">
-                        {t('nav.consultorTools', 'Consultor Tools')}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-                return NavItem;
-              })()}
-            </>
-          )}
-
-          {isAdmin && (
-            <>
-              <div className="my-4 h-px bg-sidebar-border" />
-              {adminNavigation.map((item) => {
-                const isActive = location.pathname.startsWith(item.href);
-                
-                const NavItem = (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      collapsed && "justify-center px-2"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5 shrink-0" />
-                    {!collapsed && (
-                      <span className="animate-fade-in">{item.name}</span>
-                    )}
-                  </Link>
-                );
-
-                if (collapsed) {
-                  return (
-                    <Tooltip key={item.name} delayDuration={0}>
-                      <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
-                      <TooltipContent side="right" className="font-medium">
-                        {item.name}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-                return NavItem;
+              {renderNavItem({
+                name: t('nav.adminPanel'),
+                href: '/admin',
+                icon: Settings,
               })}
             </>
           )}
@@ -357,43 +316,6 @@ export function AppSidebar() {
         {/* Contact Info - Consultant/Mentor for founders */}
         {isFounder && founderWorkspaceId && (
           <SidebarContactInfo workspaceId={founderWorkspaceId} collapsed={collapsed} />
-        )}
-
-        {/* Help/Glossary - visible to founders */}
-        {isFounder && (
-          <div className={cn("mx-3 mb-2", collapsed ? "text-center" : "")}>
-            {collapsed ? (
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/help"
-                    className={cn(
-                      "flex items-center justify-center h-10 w-10 rounded-lg transition-colors",
-                      location.pathname === '/help' 
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground" 
-                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                    )}
-                  >
-                    <HelpCircle className="h-5 w-5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{t('nav.helpGlossary', 'Ajuda e Glossário')}</TooltipContent>
-              </Tooltip>
-            ) : (
-              <Link
-                to="/help"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 w-full",
-                  location.pathname === '/help' 
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" 
-                    : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                )}
-              >
-                <HelpCircle className="h-5 w-5" />
-                {t('nav.helpGlossary', 'Ajuda e Glossário')}
-              </Link>
-            )}
-          </div>
         )}
 
         {/* Messaging button */}

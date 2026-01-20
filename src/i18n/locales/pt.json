@@ -170,7 +170,43 @@
     "dataQuality": "Qualidade de Dados",
     "opsCompliance": "Operações & Conformidade",
     "usersPermissions": "Utilizadores & Permissões",
-    "systemConfig": "Configuração do Sistema"
+    "systemConfig": "Configuração do Sistema",
+    "founder": {
+      "home": "Início",
+      "myStartup": "A Minha Startup",
+      "goalsKpis": "Objetivos & KPIs",
+      "sessionsMentoring": "Sessões & Mentoria",
+      "actionsPlan": "Ações & Plano",
+      "documents": "Documentos",
+      "networkResources": "Rede & Recursos",
+      "support": "Suporte"
+    },
+    "consultor": {
+      "portfolio": "Portefólio",
+      "startups": "Startups",
+      "sessions": "Sessões",
+      "actionsFollowups": "Ações & Follow-ups",
+      "crmPipeline": "CRM & Pipeline",
+      "programs": "Programas",
+      "reports": "Relatórios",
+      "dataQuality": "Qualidade de Dados"
+    },
+    "mentor": {
+      "home": "Início",
+      "upcomingSessions": "Próximas Sessões",
+      "assignedStartups": "Startups Atribuídas",
+      "notesActions": "Notas & Ações",
+      "resources": "Recursos",
+      "profile": "Perfil"
+    },
+    "admin": {
+      "operations": "Operações",
+      "crm": "CRM",
+      "programsCohorts": "Programas & Cohorts",
+      "reports": "Relatórios",
+      "usersPermissions": "Utilizadores & Permissões",
+      "systemConfig": "Configuração do Sistema"
+    }
   },
   "dashboard": {
     "portfolio": "Visão do Portfólio",
