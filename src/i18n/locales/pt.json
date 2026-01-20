@@ -4018,6 +4018,51 @@
       "system": "Sistema"
     }
   },
+  "consultor": {
+    "hero": {
+      "title": "Risco e Prioridades de Hoje",
+      "subtitle": "Startups que precisam da sua atenção imediata",
+      "viewAll": "Ver Todas",
+      "allClear": "Tudo sob controlo!",
+      "noPriorities": "Nenhuma startup em estado crítico ou de risco.",
+      "openWorkspace": "Abrir"
+    },
+    "risk": {
+      "criticalHealth": "Saúde crítica",
+      "atRisk": "Em risco",
+      "overdueActions": "{{count}} ação atrasada",
+      "noRecentSession": "Sem sessão há 30+ dias",
+      "missingKpis": "KPIs em falta"
+    },
+    "agenda": {
+      "title": "Agenda (7 dias)",
+      "empty": "Sem sessões agendadas",
+      "schedule": "Agendar sessão",
+      "prep": "Prep"
+    },
+    "actions": {
+      "title": "Ações Críticas",
+      "allClear": "Sem ações atrasadas",
+      "overdueCount": "{{count}} ação atrasada",
+      "resolve": "Resolver"
+    },
+    "pipeline": {
+      "title": "Pipeline (CRM)",
+      "open": "Abrir CRM",
+      "empty": "Sem dados de pipeline",
+      "totalLeads": "Leads ativos",
+      "contracted": "Contratados",
+      "newLeads": "Novos leads",
+      "needsAction": "{{count}} leads precisam de ação"
+    },
+    "dataQuality": {
+      "title": "Alertas de Qualidade de Dados"
+    },
+    "alerts": {
+      "missingKpis": "{{count}} startups sem KPIs este mês",
+      "noRecentSessions": "{{count}} startups sem sessão há 30+ dias"
+    }
+  },
   "validation": {
     "required": "Este campo é obrigatório",
     "email": "Por favor, insira um email válido",
