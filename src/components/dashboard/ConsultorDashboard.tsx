@@ -565,9 +565,41 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* SECTION 4: Work Queue */}
-      <section>
+      {/* SECTION 4: Weekly Impact Summary */}
+      <section className="grid gap-4 lg:grid-cols-2">
         <WorkQueuePanel compact />
+        
+        {/* Weekly Impact Card */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              {t('consultor.weeklyImpact.title', 'Resumo Semanal')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold">{upcomingSessions.length}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('consultor.weeklyImpact.sessionsCompleted', 'Sessões realizadas')}
+                </p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('consultor.weeklyImpact.actionsCreated', 'Ações criadas')}
+                </p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-health-healthy/10">
+                <p className="text-2xl font-bold text-health-healthy">{pipelineSnapshot?.contracted || 0}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('consultor.weeklyImpact.leadsConverted', 'Leads convertidos')}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* SECTION 5: Data Quality Alerts */}
