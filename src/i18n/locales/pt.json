@@ -3506,7 +3506,11 @@
     "setAction": "Definir Ação",
     "pipeline": "Pipeline",
     "totalLeads": "Total Leads",
-    "unnamed": "Sem Nome"
+    "unnamed": "Sem Nome",
+    "dragDropHint": "Arraste os cartões para mudar de fase",
+    "stageMoved": "Movido para {{stage}}",
+    "stageMoveFailed": "Falha ao mover de fase",
+    "analytics": "Análise"
   },
   "notifications": {
     "title": "Notificações",
