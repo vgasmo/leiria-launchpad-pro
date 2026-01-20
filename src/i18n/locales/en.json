@@ -1351,7 +1351,26 @@
     "at_risk": "At Risk",
     "stable": "Stable",
     "healthy": "Healthy",
-    "thriving": "Thriving"
+    "thriving": "Thriving",
+    "unknown": "Unknown",
+    "levels": {
+      "critical": "Critical",
+      "at_risk": "At Risk",
+      "atRisk": "At Risk",
+      "stable": "Stable",
+      "healthy": "Healthy",
+      "thriving": "Thriving",
+      "unknown": "Unknown"
+    },
+    "descriptions": {
+      "critical": "Urgent action required",
+      "at_risk": "Needs attention",
+      "atRisk": "Needs attention",
+      "stable": "Moderate progress",
+      "healthy": "Good overall progress",
+      "thriving": "Exceeding expectations",
+      "unknown": "Score not calculated"
+    }
   },
   "roles": {
     "admin": "Admin",
@@ -3300,19 +3319,21 @@
       "checkins": "Check-ins"
     },
     "levels": {
-      "thriving": "Thriving",
-      "healthy": "Healthy",
-      "stable": "Stable",
-      "atRisk": "At Risk",
       "critical": "Critical",
+      "at_risk": "At Risk",
+      "atRisk": "At Risk",
+      "stable": "Stable",
+      "healthy": "Healthy",
+      "thriving": "Thriving",
       "unknown": "Unknown"
     },
     "descriptions": {
-      "thriving": "Startup is exceeding expectations",
-      "healthy": "Good overall progress",
-      "stable": "Moderate progress",
-      "atRisk": "Needs attention",
       "critical": "Urgent action required",
+      "at_risk": "Needs attention",
+      "atRisk": "Needs attention",
+      "stable": "Moderate progress",
+      "healthy": "Good overall progress",
+      "thriving": "Exceeding expectations",
       "unknown": "Score not calculated"
     }
   },
