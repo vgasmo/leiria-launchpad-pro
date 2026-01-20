@@ -164,13 +164,15 @@ export function AppSidebar() {
     .slice(0, 2) || 'U';
 
   const isActiveRoute = (item: NavItem): boolean => {
-    if (item.exact) {
-      return location.pathname === item.href;
-    }
     // Handle query params in href
     if (item.href.includes('?')) {
       const [path, query] = item.href.split('?');
       return location.pathname === path && location.search.includes(query);
+    }
+
+    if (item.exact) {
+      // Exact match should not light up when query params are present (e.g., /admin?tab=...)
+      return location.pathname === item.href && location.search === '';
     }
     return location.pathname.startsWith(item.href);
   };

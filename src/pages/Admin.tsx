@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
   Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
   ChevronDown, Stethoscope, Database, Tag, GitBranch
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
-import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 import { AdminBackoffice } from '@/components/admin/AdminBackoffice';
@@ -37,7 +36,6 @@ import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsMa
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
-import { AdminTagCategoriesManager } from '@/components/admin/AdminTagCategoriesManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 
@@ -55,7 +53,42 @@ const TAB_GROUPS: Record<string, string[]> = {
 export default function Admin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('approvals');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const validTabs = useMemo(() => {
+    const tabs = new Set<string>();
+    for (const groupTabs of Object.values(TAB_GROUPS)) {
+      groupTabs.forEach((tab) => tabs.add(tab));
+    }
+    return tabs;
+  }, []);
+
+  const [activeTab, setActiveTab] = useState(() => {
+    const fromUrl = searchParams.get('tab');
+    return fromUrl && validTabs.has(fromUrl) ? fromUrl : 'approvals';
+  });
+
+  // Keep internal tab state in sync with URL (?tab=...)
+  useEffect(() => {
+    const fromUrl = searchParams.get('tab');
+    if (fromUrl && validTabs.has(fromUrl) && fromUrl !== activeTab) {
+      setActiveTab(fromUrl);
+      return;
+    }
+
+    // If URL has no tab, ensure we don't show stale deep-linked state after navigation.
+    if (!fromUrl && activeTab !== 'approvals') {
+      setActiveTab('approvals');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, validTabs]);
+
+  const setActiveTabAndUrl = (tab: string) => {
+    setActiveTab(tab);
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
   
   const getTabIcon = (tab: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -123,10 +156,6 @@ export default function Admin() {
     return labels[group];
   };
 
-  const isTabInGroup = (tab: string, group: keyof typeof TAB_GROUPS) => {
-    return TAB_GROUPS[group].includes(tab as any);
-  };
-
   const getActiveGroup = () => {
     for (const [group, tabs] of Object.entries(TAB_GROUPS)) {
       if (tabs.includes(activeTab as any)) return group;
@@ -136,7 +165,7 @@ export default function Admin() {
 
   return (
     <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
         {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
           {Object.entries(TAB_GROUPS).map(([group, tabs]) => (
@@ -161,7 +190,7 @@ export default function Admin() {
                       } else if (tab === 'data-import') {
                         navigate('/admin/data-import');
                       } else {
-                        setActiveTab(tab);
+                         setActiveTabAndUrl(tab);
                       }
                     }}
                     className={activeTab === tab ? 'bg-accent' : ''}
