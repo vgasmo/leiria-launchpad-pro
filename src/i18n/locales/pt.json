@@ -159,7 +159,18 @@
     "admin": "Admin",
     "adminPanel": "Painel de Admin",
     "helpGlossary": "Ajuda e Glossário",
-    "crm": "CRM"
+    "crm": "CRM",
+    "consultorTools": "Ferramentas do Consultor",
+    "portfolio": "Portefólio",
+    "startups": "Startups",
+    "sessions": "Sessões",
+    "actionsFollowups": "Ações & Follow-ups",
+    "programs": "Programas",
+    "reports": "Relatórios",
+    "dataQuality": "Qualidade de Dados",
+    "opsCompliance": "Operações & Conformidade",
+    "usersPermissions": "Utilizadores & Permissões",
+    "systemConfig": "Configuração do Sistema"
   },
   "dashboard": {
     "portfolio": "Visão do Portfólio",
@@ -241,10 +252,21 @@
     "myStartups": "As Minhas Startups",
     "activeMentorships": "Mentorias ativas",
     "upcomingMeetings": "Próximas Reuniões",
-    "pendingActionsCount": "ações",
+    "pendingActionsCount": "ações pendentes",
     "next": "Próximo",
     "nextSession": "Próxima Sessão",
-    "prepareSession": "Preparar"
+    "prepareSession": "Preparar",
+    "welcomeTitle": "Bem-vindo ao Painel de Mentor",
+    "updateAvailability": "Atualizar Disponibilidade",
+    "manageConnections": "Gerir Conexões",
+    "startupsHealthy": "Startups Saudáveis",
+    "pendingActions": "Ações Pendentes",
+    "lastSession": "Última sessão",
+    "scheduleSession": "Agendar",
+    "yourImpact": "O Teu Impacto",
+    "startupsSupported": "Startups apoiadas",
+    "sessionsHeld": "Sessões realizadas",
+    "healthyStartups": "Startups saudáveis"
   },
   "auth": {
     "signIn": "Entrar",
@@ -4015,7 +4037,10 @@
       "people": "Pessoas",
       "content": "Conteúdo",
       "insights": "Insights",
-      "system": "Sistema"
+      "system": "Sistema",
+      "programs": "Programas & Cohorts",
+      "reports": "Relatórios",
+      "users": "Utilizadores"
     }
   },
   "consultor": {
@@ -4031,6 +4056,7 @@
       "criticalHealth": "Saúde crítica",
       "atRisk": "Em risco",
       "overdueActions": "{{count}} ação atrasada",
+      "overdueActions_plural": "{{count}} ações atrasadas",
       "noRecentSession": "Sem sessão há 30+ dias",
       "missingKpis": "KPIs em falta"
     },
@@ -4044,6 +4070,7 @@
       "title": "Ações Críticas",
       "allClear": "Sem ações atrasadas",
       "overdueCount": "{{count}} ação atrasada",
+      "overdueCount_plural": "{{count}} ações atrasadas",
       "resolve": "Resolver"
     },
     "pipeline": {
@@ -4053,14 +4080,23 @@
       "totalLeads": "Leads ativos",
       "contracted": "Contratados",
       "newLeads": "Novos leads",
-      "needsAction": "{{count}} leads precisam de ação"
+      "needsAction": "{{count}} lead precisa de ação",
+      "needsAction_plural": "{{count}} leads precisam de ação"
     },
     "dataQuality": {
       "title": "Alertas de Qualidade de Dados"
     },
     "alerts": {
-      "missingKpis": "{{count}} startups sem KPIs este mês",
-      "noRecentSessions": "{{count}} startups sem sessão há 30+ dias"
+      "missingKpis": "{{count}} startup sem KPIs este mês",
+      "missingKpis_plural": "{{count}} startups sem KPIs este mês",
+      "noRecentSessions": "{{count}} startup sem sessão há 30+ dias",
+      "noRecentSessions_plural": "{{count}} startups sem sessão há 30+ dias"
+    },
+    "weeklyImpact": {
+      "title": "Resumo Semanal",
+      "sessionsCompleted": "Sessões realizadas",
+      "actionsCreated": "Ações criadas",
+      "leadsConverted": "Leads convertidos"
     }
   },
   "validation": {

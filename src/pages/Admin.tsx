@@ -41,13 +41,15 @@ import { AdminTagCategoriesManager } from '@/components/admin/AdminTagCategories
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 
-// Tab group definitions for cleaner navigation
+// Tab group definitions - SIMPLIFIED P1 IA
+// Groups: Operações | CRM | Programas & Cohorts | Relatórios | Utilizadores & Permissões | Sistema
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
-  people: ['users', 'mentors'],
-  content: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
-  insights: ['activity', 'analytics', 'health'],
-  system: ['integrations', 'crm-diagnostics', 'data-import', 'flags', 'funnel'],
+  crm: ['funnel'],
+  programs: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
+  reports: ['activity', 'analytics', 'health'],
+  users: ['users', 'mentors'],
+  system: ['integrations', 'crm-diagnostics', 'data-import', 'flags'],
 };
 
 export default function Admin() {
@@ -112,9 +114,10 @@ export default function Admin() {
   const getGroupLabel = (group: string) => {
     const labels: Record<string, string> = {
       operations: t('admin.groups.operations', 'Operações'),
-      people: t('admin.groups.people', 'Pessoas'),
-      content: t('admin.groups.content', 'Conteúdo'),
-      insights: t('admin.groups.insights', 'Insights'),
+      crm: t('nav.crm', 'CRM'),
+      programs: t('admin.groups.programs', 'Programas & Cohorts'),
+      reports: t('admin.groups.reports', 'Relatórios'),
+      users: t('admin.groups.users', 'Utilizadores'),
       system: t('admin.groups.system', 'Sistema'),
     };
     return labels[group];
