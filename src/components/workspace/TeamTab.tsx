@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { toast } from 'sonner';
 import { Users, Plus, Pencil, Trash2, Crown, Linkedin, Mail, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +28,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
   const createMember = useCreateTeamMember();
   const updateMember = useUpdateTeamMember();
   const deleteMember = useDeleteTeamMember();
+  const { confirm, dialogProps } = useConfirmDialog();
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
@@ -90,14 +93,20 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('team.removeMemberConfirm'))) return;
-    try {
-      await deleteMember.mutateAsync(id);
-      toast.success(t('team.memberRemoved'));
-    } catch (error: any) {
-      toast.error(error.message || t('team.failedToRemove'));
-    }
+  const handleDelete = (id: string, memberName: string) => {
+    confirm({
+      title: t('team.removeMemberTitle', 'Remover membro?'),
+      description: t('team.removeMemberConfirm', { name: memberName }),
+      confirmLabel: t('common.delete'),
+      onConfirm: async () => {
+        try {
+          await deleteMember.mutateAsync(id);
+          toast.success(t('team.memberRemoved'));
+        } catch (error: any) {
+          toast.error(error.message || t('team.failedToRemove'));
+        }
+      },
+    });
   };
 
   const getInitials = (name: string) => 
@@ -195,7 +204,7 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(member)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(member.id)} className="text-destructive">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(member.id, member.full_name)} className="text-destructive">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -281,6 +290,8 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <ConfirmDialog {...dialogProps} />
     </>
   );
 }
