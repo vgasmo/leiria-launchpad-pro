@@ -269,7 +269,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                   {t('consultor.hero.allClear')}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {t('consultor.hero.noPriorities', 'Nenhuma startup em estado crítico ou de risco.')}
+                  {t('consultor.hero.noPriorities')}
                 </p>
               </div>
             </CardContent>
@@ -305,7 +305,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" className="shrink-0">
-                      {t('consultor.hero.openWorkspace', 'Abrir')}
+                      {t('consultor.hero.openWorkspace')}
                       <ExternalLink className="h-3 w-3 ml-1" />
                     </Button>
                   </CardContent>
@@ -406,7 +406,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                {t('consultor.agenda.title', 'Agenda (7 dias)')}
+                {t('consultor.agenda.title')}
               </CardTitle>
               <Badge variant="secondary" className="text-xs">{upcomingSessions.length}</Badge>
             </div>
@@ -416,7 +416,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               <div className="text-center py-6">
                 <Calendar className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {t('consultor.agenda.empty', 'Sem sessões agendadas')}
+                  {t('consultor.agenda.empty')}
                 </p>
                 <Button 
                   variant="link" 
@@ -424,7 +424,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                   className="mt-2"
                   onClick={() => navigate('/my-workspaces')}
                 >
-                  {t('consultor.agenda.schedule', 'Agendar sessão')}
+                  {t('consultor.agenda.schedule')}
                 </Button>
               </div>
             ) : (
@@ -448,7 +448,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                       </p>
                     </div>
                     <Button variant="ghost" size="sm" className="text-xs h-7">
-                      {t('consultor.agenda.prep', 'Prep')}
+                      {t('consultor.agenda.prep')}
                     </Button>
                   </div>
                 ))}
@@ -463,7 +463,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-health-at-risk" />
-                {t('consultor.actions.title', 'Ações Críticas')}
+                {t('consultor.actions.title')}
               </CardTitle>
               <Badge variant="destructive" className="text-xs">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</Badge>
             </div>
@@ -473,7 +473,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               <div className="text-center py-6">
                 <CheckCircle2 className="h-8 w-8 text-health-healthy/30 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {t('consultor.actions.allClear', 'Sem ações atrasadas')}
+                  {t('consultor.actions.allClear')}
                 </p>
               </div>
             ) : (
@@ -493,11 +493,11 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{w.startup?.name}</p>
                       <p className="text-xs text-destructive">
-                        {t('consultor.actions.overdueCount', '{{count}} ação atrasada', { count: w.overdueActionsCount })}
+                        {t('consultor.actions.overdueCount', { count: w.overdueActionsCount })}
                       </p>
                     </div>
                     <Button variant="ghost" size="sm" className="text-xs h-7">
-                      {t('consultor.actions.resolve', 'Resolver')}
+                      {t('consultor.actions.resolve')}
                     </Button>
                   </div>
                 ))}
@@ -512,7 +512,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
-                {t('consultor.pipeline.title', 'Pipeline (CRM)')}
+                {t('consultor.pipeline.title')}
               </CardTitle>
               <Button 
                 variant="ghost" 
@@ -520,7 +520,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                 className="h-7 text-xs"
                 onClick={() => navigate('/crm')}
               >
-                {t('consultor.pipeline.open', 'Abrir CRM')}
+                {t('consultor.pipeline.open')}
               </Button>
             </div>
           </CardHeader>
@@ -529,7 +529,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               <div className="text-center py-6">
                 <BarChart3 className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {t('consultor.pipeline.empty', 'Sem dados de pipeline')}
+                  {t('consultor.pipeline.empty')}
                 </p>
               </div>
             ) : (
@@ -537,22 +537,22 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-lg bg-muted/50">
                     <p className="text-2xl font-bold">{pipelineSnapshot.total}</p>
-                    <p className="text-xs text-muted-foreground">{t('consultor.pipeline.totalLeads', 'Leads ativos')}</p>
+                    <p className="text-xs text-muted-foreground">{t('consultor.pipeline.totalLeads')}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-health-healthy/10">
                     <p className="text-2xl font-bold text-health-healthy">{pipelineSnapshot.contracted}</p>
-                    <p className="text-xs text-muted-foreground">{t('consultor.pipeline.contracted', 'Contratados')}</p>
+                    <p className="text-xs text-muted-foreground">{t('consultor.pipeline.contracted')}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('consultor.pipeline.newLeads', 'Novos leads')}</span>
+                  <span className="text-muted-foreground">{t('consultor.pipeline.newLeads')}</span>
                   <Badge variant="secondary">{pipelineSnapshot.newLeads}</Badge>
                 </div>
                 {pipelineSnapshot.needsAction > 0 && (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-health-at-risk/10 border border-health-at-risk/30">
                     <AlertCircle className="h-4 w-4 text-health-at-risk" />
                     <span className="text-xs text-health-at-risk">
-                      {t('consultor.pipeline.needsAction', '{{count}} leads precisam de ação', { count: pipelineSnapshot.needsAction })}
+                      {t('consultor.pipeline.needsAction', { count: pipelineSnapshot.needsAction })}
                     </span>
                   </div>
                 )}
@@ -571,7 +571,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />
-              {t('consultor.weeklyImpact.title', 'Resumo Semanal')}
+              {t('consultor.weeklyImpact.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -579,19 +579,19 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               <div className="text-center p-3 rounded-lg bg-muted/50">
                 <p className="text-2xl font-bold">{upcomingSessions.length}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.sessionsCompleted', 'Sessões realizadas')}
+                  {t('consultor.weeklyImpact.sessionsCompleted')}
                 </p>
               </div>
               <div className="text-center p-3 rounded-lg bg-muted/50">
                 <p className="text-2xl font-bold">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.actionsCreated', 'Ações criadas')}
+                  {t('consultor.weeklyImpact.actionsCreated')}
                 </p>
               </div>
               <div className="text-center p-3 rounded-lg bg-health-healthy/10">
                 <p className="text-2xl font-bold text-health-healthy">{pipelineSnapshot?.contracted || 0}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.leadsConverted', 'Leads convertidos')}
+                  {t('consultor.weeklyImpact.leadsConverted')}
                 </p>
               </div>
             </div>
@@ -606,7 +606,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Target className="h-4 w-4 text-health-at-risk" />
-                {t('consultor.dataQuality.title', 'Alertas de Qualidade de Dados')}
+                {t('consultor.dataQuality.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">

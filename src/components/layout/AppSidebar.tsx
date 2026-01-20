@@ -124,12 +124,17 @@ export function AppSidebar() {
   ];
 
   // Determine which navigation to show based on role priority
+  // Admin who is also consultor should see admin nav with consultor tools
   const getActiveNavigation = (): NavItem[] => {
-    // Admin sees admin nav
-    if (isAdmin) {
+    // Pure admin (no consultor role) sees admin nav
+    if (isAdmin && !isConsultor) {
       return adminNavigation;
     }
-    // Consultor sees portfolio OS
+    // Admin who is also consultor - show admin nav (they can access consultor tools via admin)
+    if (isAdmin && isConsultor) {
+      return adminNavigation;
+    }
+    // Consultor (not admin) sees portfolio OS
     if (isConsultor) {
       return consultorNavigation;
     }

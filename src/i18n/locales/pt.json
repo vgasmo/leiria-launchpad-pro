@@ -1318,7 +1318,26 @@
     "at_risk": "Em Risco",
     "stable": "Estável",
     "healthy": "Saudável",
-    "thriving": "Próspero"
+    "thriving": "Próspero",
+    "unknown": "Desconhecido",
+    "levels": {
+      "critical": "Crítico",
+      "at_risk": "Em Risco",
+      "atRisk": "Em Risco",
+      "stable": "Estável",
+      "healthy": "Saudável",
+      "thriving": "Próspero",
+      "unknown": "Desconhecido"
+    },
+    "descriptions": {
+      "critical": "Ação urgente necessária",
+      "at_risk": "Precisa de atenção",
+      "atRisk": "Precisa de atenção",
+      "stable": "Progresso moderado",
+      "healthy": "Bom progresso geral",
+      "thriving": "A exceder expectativas",
+      "unknown": "Score não calculado"
+    }
   },
   "roles": {
     "admin": "Admin",
@@ -3300,19 +3319,21 @@
       "checkins": "Check-ins"
     },
     "levels": {
-      "thriving": "Excelente",
-      "healthy": "Saudável",
-      "stable": "Estável",
-      "atRisk": "Em Risco",
       "critical": "Crítico",
+      "at_risk": "Em Risco",
+      "atRisk": "Em Risco",
+      "stable": "Estável",
+      "healthy": "Saudável",
+      "thriving": "Excelente",
       "unknown": "Desconhecido"
     },
     "descriptions": {
-      "thriving": "A startup está a exceder expectativas",
-      "healthy": "Bom progresso geral",
-      "stable": "Progresso moderado",
-      "atRisk": "Precisa de atenção",
       "critical": "Ação urgente necessária",
+      "at_risk": "Precisa de atenção",
+      "atRisk": "Precisa de atenção",
+      "stable": "Progresso moderado",
+      "healthy": "Bom progresso geral",
+      "thriving": "A exceder expectativas",
       "unknown": "Score não calculado"
     }
   },
