@@ -6,12 +6,10 @@ import {
   Calendar, 
   TrendingUp, 
   Users, 
-  Clock,
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
   ExternalLink,
-  RefreshCw,
   BarChart3,
   Target,
   MessageSquare,
@@ -154,7 +152,6 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
   // Upcoming sessions (7 days)
   const upcomingSessions = useMemo(() => {
     if (!workspaces) return [];
-    const now = new Date();
     return workspaces
       .filter(w => w.nextMeetingDate && isThisWeek(new Date(w.nextMeetingDate)))
       .sort((a, b) => 
@@ -280,7 +277,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         ) : (
           <div className="space-y-2">
             {riskItems.map((item) => {
-              const health = item.workspace.health_score_override || item.workspace.health_score;
+              const health = (item.workspace.health_score_override || item.workspace.health_score) as HealthScore | null;
               return (
                 <Card 
                   key={item.workspace.id}

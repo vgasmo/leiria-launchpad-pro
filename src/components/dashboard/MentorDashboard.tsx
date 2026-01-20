@@ -195,7 +195,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
           </div>
 
           <div className="grid gap-3">
-            {sortedWorkspaces.map((workspace, index) => {
+            {sortedWorkspaces.map((workspace) => {
               const health = workspace.health_score_override || workspace.health_score;
               const hasUpcomingMeeting = workspace.nextMeetingDate && isToday(new Date(workspace.nextMeetingDate));
               
