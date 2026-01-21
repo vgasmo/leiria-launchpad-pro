@@ -20,15 +20,30 @@ export interface GraphTokenResult {
 let tokenCache: { token: string; expiresAt: Date } | null = null;
 
 /**
- * Get Graph credentials from environment or database
- * Prioritizes MS_GRAPH_CLIENT_SECRET env var over database
+ * Get Graph credentials from environment variables and database
+ * SECURITY: Client secret MUST come from environment variable only
+ * Database only stores tenant_id and client_id (non-sensitive identifiers)
  */
 export async function getGraphCredentials(
   supabaseAdmin: SupabaseClient
 ): Promise<GraphCredentials | null> {
-  const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
+  // SECURITY: Secret MUST come from environment variable, never from database
+  const clientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
+  if (!clientSecret) {
+    console.warn('[GraphAuth] MS_GRAPH_CLIENT_SECRET not configured in environment');
+    return null;
+  }
   
-  // Support both 'graph_api' and 'microsoft_graph' integration types for backward compatibility
+  // Get tenant_id and client_id from environment or database
+  const envTenantId = Deno.env.get('MS_GRAPH_TENANT_ID');
+  const envClientId = Deno.env.get('MS_GRAPH_CLIENT_ID');
+  
+  // If all credentials are in env vars, use those (preferred)
+  if (envTenantId && envClientId) {
+    return { tenantId: envTenantId, clientId: envClientId, clientSecret };
+  }
+  
+  // Fallback: Get non-sensitive IDs from database
   const { data: globalSettings } = await supabaseAdmin
     .from('global_integration_settings')
     .select('settings_json, is_enabled')
@@ -42,14 +57,15 @@ export async function getGraphCredentials(
   const globalJson = globalSettings.settings_json as {
     tenant_id?: string;
     client_id?: string;
-    client_secret?: string;
   };
   
-  const tenantId = globalJson.tenant_id;
-  const clientId = globalJson.client_id;
-  const clientSecret = envClientSecret || globalJson.client_secret;
+  const tenantId = envTenantId || globalJson.tenant_id;
+  const clientId = envClientId || globalJson.client_id;
   
-  if (!tenantId || !clientId || !clientSecret) return null;
+  if (!tenantId || !clientId) {
+    console.warn('[GraphAuth] Missing tenant_id or client_id configuration');
+    return null;
+  }
   
   return { tenantId, clientId, clientSecret };
 }
