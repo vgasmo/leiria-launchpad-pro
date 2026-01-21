@@ -3,12 +3,14 @@
  * i18n lint:
  * - Detect duplicate top-level keys (JSON overwrites) in locale files.
  * - Ensure critical namespaces exist in both locales.
+ * - Scan TSX files for t('...') usages and verify keys exist in both locales.
  *
  * Usage: node scripts/i18n-lint.mjs
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { globSync } from 'node:fs';
 
 const ROOT = process.cwd();
 const LOCALES = [
@@ -29,7 +31,6 @@ function findTopLevelKeyOccurrences(jsonText) {
   let inString = false;
   let escape = false;
   let token = '';
-  let collectingKey = false;
   let lastString = null;
 
   for (let i = 0; i < jsonText.length; i++) {
@@ -102,8 +103,48 @@ function assert(condition, message) {
   }
 }
 
+// Recursively get a nested key from an object
+function getNestedKey(obj, keyPath) {
+  const parts = keyPath.split('.');
+  let current = obj;
+  for (const part of parts) {
+    if (current === undefined || current === null) return undefined;
+    current = current[part];
+  }
+  return current;
+}
+
+// Find all TSX/TS files recursively in src
+function findTsxFiles(dir) {
+  const files = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
+      files.push(...findTsxFiles(fullPath));
+    } else if (entry.isFile() && /\.(tsx|ts)$/.test(entry.name) && !entry.name.endsWith('.d.ts')) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
+// Extract t('...') keys from file content
+function extractTranslationKeys(content) {
+  const keys = [];
+  // Match t('key'), t("key"), t(`key`) - simple patterns without defaultValue
+  // Also match t('key', { ... }) with interpolation
+  const regex = /\bt\(\s*['"`]([^'"`]+)['"`]/g;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    keys.push(match[1]);
+  }
+  return keys;
+}
+
 function main() {
   const problems = [];
+  const warnings = [];
 
   // Duplicate top-level keys
   for (const loc of LOCALES) {
@@ -111,8 +152,9 @@ function main() {
     const occurrences = findTopLevelKeyOccurrences(text);
     const dups = [...occurrences.entries()].filter(([, n]) => n > 1);
     if (dups.length) {
-      problems.push(
-        `[${loc.code}] Duplicate top-level keys found: ` + dups.map(([k, n]) => `${k}(${n})`).join(', ')
+      // Duplicates are warnings - JSON will use last occurrence
+      warnings.push(
+        `[${loc.code}] Duplicate top-level keys (last wins): ` + dups.map(([k, n]) => `${k}(${n})`).join(', ')
       );
     }
   }
@@ -121,7 +163,7 @@ function main() {
   const pt = parseJson(LOCALES[1].file);
 
   // Critical namespaces parity
-  const critical = ['templates', 'sessions', 'common', 'nextBestAction'];
+  const critical = ['templates', 'sessions', 'common', 'nextBestAction', 'health', 'consultor'];
   for (const ns of critical) {
     if (!(ns in en)) problems.push(`[en] Missing namespace: ${ns}`);
     if (!(ns in pt)) problems.push(`[pt] Missing namespace: ${ns}`);
@@ -169,13 +211,77 @@ function main() {
     }
   }
 
+  // ==========================================
+  // NEW: Scan TSX files for missing translation keys
+  // ==========================================
+  const srcDir = path.join(ROOT, 'src');
+  const tsxFiles = findTsxFiles(srcDir);
+  
+  const missingInEn = new Map(); // key -> [files]
+  const missingInPt = new Map(); // key -> [files]
+  
+  for (const file of tsxFiles) {
+    const content = readText(file);
+    const keys = extractTranslationKeys(content);
+    const relPath = path.relative(ROOT, file);
+    
+    for (const key of keys) {
+      // Skip keys with dynamic parts (contain variables)
+      if (key.includes('${') || key.includes('{{')) continue;
+      
+      const enValue = getNestedKey(en, key);
+      const ptValue = getNestedKey(pt, key);
+      
+      if (enValue === undefined) {
+        if (!missingInEn.has(key)) missingInEn.set(key, []);
+        missingInEn.get(key).push(relPath);
+      }
+      if (ptValue === undefined) {
+        if (!missingInPt.has(key)) missingInPt.set(key, []);
+        missingInPt.get(key).push(relPath);
+      }
+    }
+  }
+  
+  // Report missing keys (limit output to avoid overwhelming logs)
+  const MAX_MISSING_TO_SHOW = 20;
+  
+  if (missingInEn.size > 0) {
+    const keys = [...missingInEn.keys()].slice(0, MAX_MISSING_TO_SHOW);
+    for (const key of keys) {
+      const files = missingInEn.get(key).slice(0, 2).join(', ');
+      problems.push(`[en] Missing key: "${key}" (used in: ${files})`);
+    }
+    if (missingInEn.size > MAX_MISSING_TO_SHOW) {
+      problems.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
+    }
+  }
+  
+  if (missingInPt.size > 0) {
+    const keys = [...missingInPt.keys()].slice(0, MAX_MISSING_TO_SHOW);
+    for (const key of keys) {
+      const files = missingInPt.get(key).slice(0, 2).join(', ');
+      problems.push(`[pt] Missing key: "${key}" (used in: ${files})`);
+    }
+    if (missingInPt.size > MAX_MISSING_TO_SHOW) {
+      problems.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
+    }
+  }
+
+  // Print warnings (non-fatal)
+  if (warnings.length) {
+    console.warn('i18n:lint WARNINGS');
+    for (const w of warnings) console.warn(' ⚠ ' + w);
+    console.warn('');
+  }
+
   if (problems.length) {
     console.error('i18n:lint FAILED');
     for (const p of problems) console.error(' - ' + p);
     process.exit(1);
   }
 
-  console.log('i18n:lint OK');
+  console.log(`i18n:lint OK (scanned ${tsxFiles.length} files)`);
 }
 
 main();

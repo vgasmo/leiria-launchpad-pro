@@ -18,7 +18,7 @@ const healthClassNames: Record<HealthScore, string> = {
 
 const healthLabelKeys: Record<HealthScore, string> = {
   critical: 'health.levels.critical',
-  at_risk: 'health.levels.atRisk',
+  at_risk: 'health.levels.at_risk',
   stable: 'health.levels.stable',
   healthy: 'health.levels.healthy',
   thriving: 'health.levels.thriving',
