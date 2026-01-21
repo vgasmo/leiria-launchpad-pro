@@ -15,6 +15,9 @@ i18n
     },
     lng: savedLanguage,
     fallbackLng: 'en',
+    // Enable legacy plural compatibility for keys like `_plural`
+    // @ts-expect-error - i18next v25+ expects 'v4' but we need 'v3' for legacy plural support
+    compatibilityJSON: 'v3',
     interpolation: {
       escapeValue: false,
     },
