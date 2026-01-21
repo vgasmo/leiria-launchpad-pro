@@ -98,7 +98,8 @@ export function AppSidebar() {
     { name: t('nav.consultor.sessions', 'Sessões'), href: '/consultor-tools', icon: Calendar },
     { name: t('nav.consultor.actionsFollowups', 'Ações & Follow-ups'), href: '/consultor-tools?tab=actions', icon: CheckSquare },
     { name: t('nav.consultor.crmPipeline', 'CRM & Pipeline'), href: '/crm', icon: Contact },
-    { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=kpis', icon: GraduationCap },
+    // Default to the Programs wizard / setup view instead of KPIs
+    { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.consultor.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.consultor.dataQuality', 'Qualidade de Dados'), href: '/admin?tab=data-quality', icon: Database },
   ];
@@ -117,7 +118,8 @@ export function AppSidebar() {
   const adminNavigation: NavItem[] = [
     { name: t('nav.admin.operations', 'Operações'), href: '/admin', icon: ClipboardList, exact: true },
     { name: t('nav.admin.crm', 'CRM'), href: '/crm', icon: Contact },
-    { name: t('nav.admin.programsCohorts', 'Programas & Cohorts'), href: '/admin?tab=kpis', icon: GraduationCap },
+    // Default to the Programs wizard / setup view instead of KPIs
+    { name: t('nav.admin.programsCohorts', 'Programas & Cohorts'), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.admin.usersPermissions', 'Utilizadores & Permissões'), href: '/admin?tab=users', icon: Shield },
     { name: t('nav.admin.systemConfig', 'Configuração do Sistema'), href: '/admin?tab=integrations', icon: Cog },
