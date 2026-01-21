@@ -38,13 +38,14 @@ import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
+import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 
 // Tab group definitions - SIMPLIFIED P1 IA
 // Groups: Operações | CRM | Programas & Cohorts | Relatórios | Utilizadores & Permissões | Sistema
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
   crm: ['funnel'],
-  programs: ['kpis', 'templates', 'support-materials', 'surveys', 'tags'],
+  programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   reports: ['activity', 'analytics', 'health'],
   users: ['users', 'mentors'],
   system: ['integrations', 'crm-diagnostics', 'data-import', 'flags'],
@@ -100,6 +101,7 @@ export default function Admin() {
       'data-quality': <Database className="h-4 w-4" />,
       users: <Users className="h-4 w-4" />,
       mentors: <Users2 className="h-4 w-4" />,
+      'programs-setup': <Building2 className="h-4 w-4" />,
       kpis: <BarChart3 className="h-4 w-4" />,
       templates: <FileText className="h-4 w-4" />,
       'support-materials': <BookOpen className="h-4 w-4" />,
@@ -119,41 +121,42 @@ export default function Admin() {
 
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
-      approvals: t('admin.approvals', 'Aprovações'),
-      compliance: t('admin.compliance', 'Conformidade'),
-      lifecycle: t('admin.lifecycle', 'Ciclo de Contratos'),
-      backoffice: t('admin.backoffice.tab', 'Backoffice'),
-      announcements: t('admin.announcements.tab', 'Anúncios'),
-      'data-quality': t('dataQuality.title', 'Qualidade de Dados'),
-      users: t('admin.users', 'Utilizadores'),
-      mentors: t('admin.externalMentors', 'Mentores Externos'),
-      kpis: t('admin.kpis', 'KPIs'),
-      templates: t('admin.templates', 'Templates'),
-      'support-materials': t('admin.supportMaterials.title', 'Materiais'),
-      surveys: t('admin.surveys.title', 'Inquéritos'),
-      tags: t('admin.tags.title', 'Tags'),
-      activity: t('admin.activityLog', 'Registo de Atividade'),
-      analytics: t('admin.analytics', 'Analytics'),
-      health: t('admin.healthModels', 'Modelos de Saúde'),
-      integrations: t('admin.integrations', 'Integrações'),
-      'crm-diagnostics': t('admin.crmDiagnostics', 'Diagnóstico CRM'),
-      'data-import': t('admin.dataImport.tab', 'Importação'),
-      flags: t('admin.featureFlags.tab', 'Flags'),
-      funnel: t('admin.funnel.tab', 'Funil'),
+      approvals: t('admin.approvals'),
+      compliance: t('admin.compliance'),
+      lifecycle: t('admin.lifecycle'),
+      backoffice: t('admin.backoffice.tab'),
+      announcements: t('admin.announcements.tab'),
+      'data-quality': t('dataQuality.title'),
+      users: t('admin.users'),
+      mentors: t('admin.externalMentors'),
+      'programs-setup': t('admin.programsSetup'),
+      kpis: t('admin.kpis'),
+      templates: t('admin.templates'),
+      'support-materials': t('admin.supportMaterials.title'),
+      surveys: t('admin.surveys.title'),
+      tags: t('admin.tags.title'),
+      activity: t('admin.activityLog'),
+      analytics: t('admin.analytics'),
+      health: t('admin.healthModels'),
+      integrations: t('admin.integrations'),
+      'crm-diagnostics': t('admin.crmDiagnostics'),
+      'data-import': t('admin.dataImport.tab'),
+      flags: t('admin.featureFlags.tab'),
+      funnel: t('admin.funnel.tab'),
     };
-    return labels[tab];
+    return labels[tab] || tab;
   };
 
   const getGroupLabel = (group: string) => {
     const labels: Record<string, string> = {
-      operations: t('admin.groups.operations', 'Operações'),
-      crm: t('nav.crm', 'CRM'),
-      programs: t('admin.groups.programs', 'Programas & Cohorts'),
-      reports: t('admin.groups.reports', 'Relatórios'),
-      users: t('admin.groups.users', 'Utilizadores'),
-      system: t('admin.groups.system', 'Sistema'),
+      operations: t('admin.groups.operations'),
+      crm: t('nav.crm'),
+      programs: t('admin.groups.programs'),
+      reports: t('admin.groups.reports'),
+      users: t('admin.groups.users'),
+      system: t('admin.groups.system'),
     };
-    return labels[group];
+    return labels[group] || group;
   };
 
   const getActiveGroup = () => {
@@ -242,6 +245,10 @@ export default function Admin() {
 
         <TabsContent value="mentors">
           <AdminExternalMentorsManager />
+        </TabsContent>
+
+        <TabsContent value="programs-setup">
+          <AdminProgramsManager />
         </TabsContent>
 
         <TabsContent value="kpis">
