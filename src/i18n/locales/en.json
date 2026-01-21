@@ -180,7 +180,13 @@
     "moreDetails": "More details",
     "lessDetails": "Less details",
     "copy": "Copy",
-    "accessDenied": "Access Denied"
+    "accessDenied": "Access Denied",
+    "go": "Go"
+  },
+  "filters": {
+    "overdueActions": "Overdue Actions",
+    "meetingsToday": "Meetings Today",
+    "missingKpi": "Missing KPIs"
   },
   "nav": {
     "home": "Home",
