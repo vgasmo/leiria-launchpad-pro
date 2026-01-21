@@ -34,7 +34,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log('User authenticated:', user.id);
+    // Verify user has admin or consultor role - SECURITY: This is critical
+    // because the function uses SERVICE_ROLE_KEY which bypasses RLS
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    if (rolesError) {
+      console.error('Error checking user roles:', rolesError);
+      return new Response(JSON.stringify({ error: 'Failed to verify permissions' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const isStaff = roles?.some(r => r.role === 'admin' || r.role === 'consultor');
+    if (!isStaff) {
+      console.warn('Non-staff user attempted bulk workspace creation:', user.id);
+      return new Response(JSON.stringify({ error: 'Forbidden - Staff access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Staff user authenticated:', user.id);
 
     // Parse body for optional filters
     const body = await req.json().catch(() => ({}));
