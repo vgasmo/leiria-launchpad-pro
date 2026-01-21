@@ -14,7 +14,8 @@ interface SetIntegrationRequest {
   settings: {
     tenant_id?: string;
     client_id?: string;
-    client_secret?: string;
+    // SECURITY: client_secret is NO LONGER accepted via API
+    // It must be configured as MS_GRAPH_CLIENT_SECRET environment variable
     [key: string]: unknown;
   };
   is_enabled?: boolean;
@@ -82,22 +83,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If no secret provided, preserve existing one
-    let finalSettings = { ...body.settings };
+    // SECURITY: Never store client_secret in database
+    // Remove any client_secret from settings before storing
+    const { client_secret: _removed, ...sanitizedSettings } = body.settings;
+    const finalSettings = { ...sanitizedSettings };
     
-    if (!body.settings.client_secret) {
-      const { data: existing } = await supabase
-        .from('global_integration_settings')
-        .select('settings_json')
-        .eq('integration_type', body.integration_type)
-        .maybeSingle();
-
-      if (existing?.settings_json && typeof existing.settings_json === 'object') {
-        const existingJson = existing.settings_json as Record<string, unknown>;
-        if (existingJson.client_secret) {
-          finalSettings.client_secret = existingJson.client_secret as string;
-        }
-      }
+    if (_removed) {
+      log.warn('Rejected attempt to store client_secret in database - use MS_GRAPH_CLIENT_SECRET env var');
     }
 
     // Upsert settings using service role
