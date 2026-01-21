@@ -48,25 +48,27 @@ export function validateEnv(): Env {
       throw new Error(message);
     }
 
-    // In production, log error and show friendly screen
-    console.error('[ENV] Configuration error - some features may not work correctly');
+    // In production, log minimal info and show generic user-friendly screen
+    // Note: Avoid exposing internal state or configuration details
+    console.error('[App] Service initialization failed');
     
-    // Show a friendly error screen if critical vars are missing
+    // Show a generic error screen - no internal details exposed
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
       const root = document.getElementById('root');
       if (root) {
-        root.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;padding:20px;text-align:center;">
-            <h1 style="color:#c82333;margin-bottom:16px;">Configuration Error</h1>
-            <p style="color:#666;max-width:400px;">
-              The application is not configured correctly. 
-              Please contact support or check deployment settings.
-            </p>
-            <p style="color:#999;font-size:12px;margin-top:24px;">
-              Error Code: ENV_MISSING
-            </p>
-          </div>
-        `;
+        // Use textContent to avoid any XSS risk from innerHTML
+        root.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;padding:20px;text-align:center;';
+        
+        const heading = document.createElement('h1');
+        heading.textContent = 'Service Temporarily Unavailable';
+        heading.style.cssText = 'color:#6b7280;margin-bottom:16px;';
+        
+        const message = document.createElement('p');
+        message.textContent = 'We are experiencing technical difficulties. Please try again later or contact support if the problem persists.';
+        message.style.cssText = 'color:#9ca3af;max-width:400px;';
+        
+        root.appendChild(heading);
+        root.appendChild(message);
       }
     }
     
