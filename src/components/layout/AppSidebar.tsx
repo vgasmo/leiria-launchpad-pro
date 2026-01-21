@@ -77,15 +77,15 @@ export function AppSidebar() {
   // ROLE-SPECIFIC NAVIGATION ITEMS
   // ============================================
 
-  // FOUNDER OS Navigation
+  // FOUNDER OS Navigation - uses ?tab= query params to match WorkspaceDetail routing
   const founderNavigation: NavItem[] = [
     { name: t('nav.founder.home', 'Início'), href: '/my-workspaces', icon: Home, exact: true },
     ...(firstWorkspaceId ? [
-      { name: t('nav.founder.myStartup', 'A Minha Startup'), href: `/workspace/${firstWorkspaceId}`, icon: Building2 },
-      { name: t('nav.founder.goalsKpis', 'Objetivos & KPIs'), href: `/workspace/${firstWorkspaceId}/kpis`, icon: Target },
-      { name: t('nav.founder.sessionsMentoring', 'Sessões & Mentoria'), href: `/workspace/${firstWorkspaceId}/sessions`, icon: Calendar },
-      { name: t('nav.founder.actionsPlan', 'Ações & Plano'), href: `/workspace/${firstWorkspaceId}/actions`, icon: CheckSquare },
-      { name: t('nav.founder.documents', 'Documentos'), href: `/workspace/${firstWorkspaceId}/documents`, icon: FileText },
+      { name: t('nav.founder.myStartup', 'A Minha Startup'), href: `/workspace/${firstWorkspaceId}`, icon: Building2, exact: true },
+      { name: t('nav.founder.goalsKpis', 'Objetivos & KPIs'), href: `/workspace/${firstWorkspaceId}?tab=kpis`, icon: Target },
+      { name: t('nav.founder.sessionsMentoring', 'Sessões & Mentoria'), href: `/workspace/${firstWorkspaceId}?tab=sessions`, icon: Calendar },
+      { name: t('nav.founder.actionsPlan', 'Ações & Plano'), href: `/workspace/${firstWorkspaceId}?tab=actions`, icon: CheckSquare },
+      { name: t('nav.founder.documents', 'Documentos'), href: `/workspace/${firstWorkspaceId}?tab=documents`, icon: FileText },
     ] : []),
     { name: t('nav.founder.networkResources', 'Rede & Recursos'), href: '/mentors', icon: Network },
     { name: t('nav.founder.support', 'Suporte'), href: '/help', icon: Headphones },
