@@ -160,18 +160,18 @@ export function FounderDashboard({
               <Rocket className="h-10 w-10 text-primary-foreground" />
             </div>
             <h3 className="font-heading text-2xl md:text-3xl font-bold mb-3">
-              {t('founder.startYourJourney', 'Inicie a Sua Jornada Startup')}
+              {t('founder.startYourJourney')}
             </h3>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto text-base">
-              {t('founder.startYourJourneyDesc', 'Registe a sua startup para aceder a mentoria, acompanhar o progresso e preparar a próxima ronda de financiamento.')}
+              {t('founder.startYourJourneyDesc')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button size="lg" onClick={onCreateStartup} className="gap-2 shadow-lg">
                 <Plus className="h-5 w-5" />
-                {t('founder.createYourStartup', 'Criar a Sua Startup')}
+                {t('founder.createYourStartup')}
               </Button>
               <Button variant="outline" size="lg" onClick={() => navigate('/help')}>
-                {t('founder.learnMore', 'Saber Mais')}
+                {t('founder.learnMore')}
               </Button>
             </div>
           </CardContent>

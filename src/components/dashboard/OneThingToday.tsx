@@ -68,8 +68,8 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
     if (pendingCheckin) {
       candidates.push({
         type: 'checkin',
-        title: t('oneThingToday.submitCheckin', 'Submit your monthly check-in'),
-        why: t('oneThingToday.checkinWhy', 'Check-ins keep your consultant informed and help track your progress.'),
+        title: t('oneThingToday.submitCheckin'),
+        why: t('oneThingToday.checkinWhy'),
         link: `/workspace/${workspace.id}?tab=overview`,
         priority: 80,
         icon: Calendar,
@@ -81,8 +81,8 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
     if (!workspace.hasCurrentMonthKpi) {
       candidates.push({
         type: 'kpi_update',
-        title: t('oneThingToday.updateKpis', 'Update your KPIs for this month'),
-        why: t('oneThingToday.kpiWhy', 'Up-to-date metrics help you make better decisions and show progress to investors.'),
+        title: t('oneThingToday.updateKpis'),
+        why: t('oneThingToday.kpiWhy'),
         link: `/workspace/${workspace.id}?tab=kpis`,
         priority: 60,
         icon: TrendingUp,
@@ -96,8 +96,8 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       if (daysUntil <= 2 && daysUntil >= 0) {
         candidates.push({
           type: 'session_prep',
-          title: t('oneThingToday.prepSession', 'Prepare for your upcoming session'),
-          why: t('oneThingToday.sessionPrepWhy', 'Being prepared helps you get more value from your session.'),
+          title: t('oneThingToday.prepSession'),
+          why: t('oneThingToday.sessionPrepWhy'),
           link: `/workspace/${workspace.id}?tab=sessions`,
           priority: 50,
           icon: FileText,
@@ -116,7 +116,7 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       candidates.push({
         type: 'milestone',
         title: next.title,
-        why: t('oneThingToday.actionWhy', 'Completing actions moves you closer to your milestones.'),
+        why: t('oneThingToday.actionWhy'),
         link: `/workspace/${workspace.id}?tab=actions`,
         priority: 30,
         icon: CheckCircle2,
@@ -139,10 +139,10 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
             </div>
             <div className="flex-1">
               <p className="font-medium text-green-700 dark:text-green-400">
-                {t('oneThingToday.allCaughtUp', "You're all caught up!")}
+                {t('oneThingToday.allCaughtUp')}
               </p>
               <p className="text-sm text-muted-foreground">
-                {t('oneThingToday.keepMomentum', 'Keep the momentum going.')}
+                {t('oneThingToday.keepMomentum')}
               </p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="outline" className="text-xs flex items-center gap-1">
                 <Lightbulb className="h-3 w-3" />
-                {t('oneThingToday.focusToday', 'Focus Today')}
+                {t('oneThingToday.focusToday')}
               </Badge>
             </div>
             <p className="font-medium truncate">{recommendation.title}</p>
@@ -190,7 +190,7 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
             onClick={() => navigate(recommendation.link)}
             className="flex-shrink-0"
           >
-            {t('common.actions', 'Go')}
+            {t('common.go')}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>

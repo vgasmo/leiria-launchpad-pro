@@ -147,7 +147,13 @@
     "uploading": "A carregar...",
     "copyUrl": "Copiar URL",
     "goBack": "Voltar",
-    "accessDenied": "Acesso Negado"
+    "accessDenied": "Acesso Negado",
+    "go": "Ir"
+  },
+  "filters": {
+    "overdueActions": "Ações Atrasadas",
+    "meetingsToday": "Reuniões Hoje",
+    "missingKpi": "KPIs em Falta"
   },
   "nav": {
     "home": "Início",

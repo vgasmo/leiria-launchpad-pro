@@ -340,7 +340,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
                     <span className="flex items-center gap-2">➡️ {t('health.levels.stable')}</span>
                   </SelectItem>
                   <SelectItem value="at_risk">
-                    <span className="flex items-center gap-2">⚠️ {t('health.levels.atRisk')}</span>
+                    <span className="flex items-center gap-2">⚠️ {t('health.levels.at_risk')}</span>
                   </SelectItem>
                   <SelectItem value="critical">
                     <span className="flex items-center gap-2">🚨 {t('health.levels.critical')}</span>

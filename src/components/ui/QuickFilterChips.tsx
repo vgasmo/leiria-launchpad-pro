@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { X, AlertCircle, Calendar, TrendingDown, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export interface QuickFilter {
   id: string;
@@ -74,10 +75,12 @@ export function useWorkspaceQuickFilters(stats: {
   meetingsToday: number;
   missingKpi: number;
 }) {
+  const { t } = useTranslation();
+  
   return [
     {
       id: 'critical',
-      label: 'Critical',
+      label: t('health.levels.critical'),
       icon: <AlertCircle className="h-3.5 w-3.5" />,
       count: stats.critical,
       variant: 'destructive' as const,
@@ -85,7 +88,7 @@ export function useWorkspaceQuickFilters(stats: {
     },
     {
       id: 'at_risk',
-      label: 'At Risk',
+      label: t('health.levels.at_risk'),
       icon: <TrendingDown className="h-3.5 w-3.5" />,
       count: stats.atRisk,
       variant: 'warning' as const,
@@ -93,7 +96,7 @@ export function useWorkspaceQuickFilters(stats: {
     },
     {
       id: 'overdue',
-      label: 'Overdue Actions',
+      label: t('filters.overdueActions'),
       icon: <Clock className="h-3.5 w-3.5" />,
       count: stats.overdue,
       variant: 'destructive' as const,
@@ -101,7 +104,7 @@ export function useWorkspaceQuickFilters(stats: {
     },
     {
       id: 'meetings_today',
-      label: 'Meetings Today',
+      label: t('filters.meetingsToday'),
       icon: <Calendar className="h-3.5 w-3.5" />,
       count: stats.meetingsToday,
       variant: 'default' as const,
