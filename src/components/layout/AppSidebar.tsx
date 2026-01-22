@@ -27,6 +27,7 @@ import {
   BookOpen,
   Shield,
   Cog,
+  BookOpenCheck,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -88,6 +89,7 @@ export function AppSidebar() {
       { name: t('nav.founder.documents', 'Documentos'), href: `/workspace/${firstWorkspaceId}?tab=documents`, icon: FileText },
     ] : []),
     { name: t('nav.founder.networkResources', 'Rede & Recursos'), href: '/mentors', icon: Network },
+    { name: t('nav.founder.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
     { name: t('nav.founder.support', 'Suporte'), href: '/help', icon: Headphones },
   ];
 
@@ -102,6 +104,7 @@ export function AppSidebar() {
     { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.consultor.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.consultor.dataQuality', 'Qualidade de Dados'), href: '/admin?tab=data-quality', icon: Database },
+    { name: t('nav.consultor.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
   ];
 
   // MENTOR COMPANION Navigation
@@ -111,6 +114,7 @@ export function AppSidebar() {
     { name: t('nav.mentor.assignedStartups', 'Startups Atribuídas'), href: '/my-workspaces', icon: Building2 },
     { name: t('nav.mentor.notesActions', 'Notas & Ações'), href: '/my-workspaces', icon: NotebookPen },
     { name: t('nav.mentor.resources', 'Recursos'), href: '/mentors', icon: BookOpen },
+    { name: t('nav.mentor.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
     { name: t('nav.mentor.profile', 'Perfil'), href: '/profile', icon: UserCircle },
   ];
 
@@ -123,6 +127,7 @@ export function AppSidebar() {
     { name: t('nav.admin.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.admin.usersPermissions', 'Utilizadores & Permissões'), href: '/admin?tab=users', icon: Shield },
     { name: t('nav.admin.systemConfig', 'Configuração do Sistema'), href: '/admin?tab=integrations', icon: Cog },
+    { name: t('nav.admin.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
   ];
 
   // Determine which navigation to show based on role priority
