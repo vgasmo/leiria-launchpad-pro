@@ -169,7 +169,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    {t(`health.${health}`)}: {stats.healthDistribution[health as keyof typeof stats.healthDistribution]}
+                    {t(`health.levels.${health}`)}: {stats.healthDistribution[health as keyof typeof stats.healthDistribution]}
                   </TooltipContent>
                 </Tooltip>
               );

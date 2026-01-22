@@ -87,9 +87,7 @@ export function RoleSpecificPrepCard({ sessionId, workspaceId }: RoleSpecificPre
                 </div>
                 <div className="flex-1">
                   <Badge variant={healthData.health_score === 'healthy' || healthData.health_score === 'thriving' ? 'default' : 'destructive'}>
-                    {healthData.health_score === 'healthy' || healthData.health_score === 'thriving' ? 'Healthy' : 
-                     healthData.health_score === 'at_risk' ? 'At Risk' : 
-                     healthData.health_score === 'critical' ? 'Critical' : 'Stable'}
+                    {t(`health.levels.${healthData.health_score || 'unknown'}`)}
                   </Badge>
                 </div>
               </div>

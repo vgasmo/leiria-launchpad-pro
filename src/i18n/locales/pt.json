@@ -4177,5 +4177,24 @@
     "number": "Por favor, insira um número válido",
     "url": "Por favor, insira um URL válido",
     "date": "Por favor, insira uma data válida"
+  },
+  "ecosystem": {
+    "title": "Centro de Comando do Ecossistema",
+    "description": "Visão unificada de todos os workspaces e leads",
+    "searchPlaceholder": "Pesquisar por nome...",
+    "allPrograms": "Todos os Programas",
+    "allStages": "Todas as Fases",
+    "allHealth": "Toda a Saúde",
+    "noItems": "Nenhum item encontrado",
+    "noItemsDesc": "Tente ajustar os seus filtros ou critérios de pesquisa",
+    "name": "Nome",
+    "type": "Tipo",
+    "owner": "Responsável",
+    "lastActivity": "Última Atividade",
+    "allCategories": "Todas as Categorias",
+    "tagCategory": "Categoria de Tag",
+    "allTags": "Todas as Tags",
+    "tag": "Tag",
+    "needsAttention": "Apenas Precisa de Atenção"
   }
 }

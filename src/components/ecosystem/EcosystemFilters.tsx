@@ -26,27 +26,11 @@ interface Props {
   onChange: (filters: EcosystemFiltersState) => void;
 }
 
-const STAGES = [
-  { value: 'all', label: 'All Stages' },
-  { value: 'ideation', label: 'Ideation' },
-  { value: 'validation', label: 'Validation' },
-  { value: 'early_traction', label: 'Early Traction' },
-  { value: 'scaling', label: 'Scaling' },
-  { value: 'growth', label: 'Growth' },
-  { value: 'new', label: 'New Lead' },
-  { value: 'first_contact_booked', label: 'First Contact Booked' },
-  { value: 'met', label: 'Met' },
-  { value: 'contracted', label: 'Contracted' },
-];
+// Stage values are now translated in the component using t()
+const STAGE_VALUES = ['all', 'ideation', 'validation', 'early_traction', 'scaling', 'growth', 'new', 'first_contact_booked', 'met', 'contracted'] as const;
 
-const HEALTH_SCORES = [
-  { value: 'all', label: 'All Health' },
-  { value: 'critical', label: 'Critical' },
-  { value: 'at_risk', label: 'At Risk' },
-  { value: 'stable', label: 'Stable' },
-  { value: 'healthy', label: 'Healthy' },
-  { value: 'thriving', label: 'Thriving' },
-];
+// Health scores are now translated in the component using t()
+const HEALTH_SCORE_VALUES = ['all', 'critical', 'at_risk', 'stable', 'healthy', 'thriving'] as const;
 
 export function EcosystemFilters({ filters, onChange }: Props) {
   const { t } = useTranslation();
@@ -105,8 +89,10 @@ export function EcosystemFilters({ filters, onChange }: Props) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {STAGES.map(s => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              {STAGE_VALUES.map(s => (
+                <SelectItem key={s} value={s}>
+                  {s === 'all' ? t('ecosystem.allStages') : t(`stages.${s}`)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -122,8 +108,10 @@ export function EcosystemFilters({ filters, onChange }: Props) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {HEALTH_SCORES.map(h => (
-                <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>
+              {HEALTH_SCORE_VALUES.map(h => (
+                <SelectItem key={h} value={h}>
+                  {h === 'all' ? t('ecosystem.allHealth') : t(`health.levels.${h}`)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

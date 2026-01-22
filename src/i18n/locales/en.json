@@ -3967,5 +3967,24 @@
     "number": "Please enter a valid number",
     "url": "Please enter a valid URL",
     "date": "Please enter a valid date"
+  },
+  "ecosystem": {
+    "title": "Ecosystem Command Center",
+    "description": "Unified view of all workspaces and leads",
+    "searchPlaceholder": "Search by name...",
+    "allPrograms": "All Programs",
+    "allStages": "All Stages",
+    "allHealth": "All Health",
+    "noItems": "No items found",
+    "noItemsDesc": "Try adjusting your filters or search criteria",
+    "name": "Name",
+    "type": "Type",
+    "owner": "Owner",
+    "lastActivity": "Last Activity",
+    "allCategories": "All Categories",
+    "tagCategory": "Tag Category",
+    "allTags": "All Tags",
+    "tag": "Tag",
+    "needsAttention": "Needs Attention Only"
   }
 }
