@@ -60,14 +60,14 @@
 
     /* Sidebar - dark professional with high contrast */
     --sidebar-background: 60 8% 10%;
-    --sidebar-foreground: 0 0% 95%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 68 65% 50%;
     --sidebar-primary-foreground: 60 5% 10%;
     --sidebar-accent: 60 8% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 60 8% 22%;
     --sidebar-ring: 68 60% 48%;
-    --sidebar-muted: 0 0% 75%;
+    --sidebar-muted: 0 0% 88%;
 
     /* Health score colors - professional tones */
     --health-critical: 0 65% 48%;
