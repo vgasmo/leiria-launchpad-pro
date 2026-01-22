@@ -236,12 +236,12 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
   if (!stats) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       {/* SECTION 1: HERO - "Risco e Prioridades de Hoje" */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="text-2xl font-semibold leading-tight text-foreground">
               {t('consultor.hero.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -249,20 +249,21 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
             </p>
           </div>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm"
             onClick={() => navigate('/my-workspaces?filter=attention')}
+            className="text-muted-foreground hover:text-foreground"
           >
-            {t('consultor.hero.viewAll')}
+            {t('common.viewAll')}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
 
         {riskItems.length === 0 ? (
-          <Card className="border-success/30 bg-success/5">
+          <Card className="border-health-healthy/30 bg-health-healthy/5 rounded-2xl">
             <CardContent className="flex items-center gap-3 py-5">
-              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+              <div className="h-10 w-10 rounded-full bg-health-healthy/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-health-healthy" />
               </div>
               <div>
                 <p className="font-medium text-foreground text-sm">
@@ -281,18 +282,18 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               return (
                 <Card 
                   key={item.workspace.id}
-                  className={`cursor-pointer transition-all hover:shadow-sm border-l-2 ${
-                    item.priority === 'critical' ? 'border-l-destructive' :
-                    item.priority === 'high' ? 'border-l-warning' :
-                    'border-l-info'
+                  className={`cursor-pointer transition-all hover:shadow-sm rounded-2xl border-border/60 border-l-2 ${
+                    item.priority === 'critical' ? 'border-l-health-critical' :
+                    item.priority === 'high' ? 'border-l-health-at-risk' :
+                    'border-l-health-stable'
                   }`}
                   onClick={() => navigate(`/workspace/${item.workspace.id}`)}
                 >
-                  <CardContent className="flex items-center justify-between py-3 px-4">
+                  <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 rounded">
+                      <Avatar className="h-10 w-10 rounded-lg">
                         <AvatarImage src={item.workspace.startup?.logo_url || undefined} />
-                        <AvatarFallback className="rounded bg-primary/10 text-primary text-xs font-semibold">
+                        <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
                           {item.workspace.startup?.name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -304,8 +305,8 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                         <p className="text-xs text-muted-foreground">{item.reason}</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0">
-                      {t('consultor.hero.openWorkspace')}
+                    <Button variant="ghost" size="sm" className="shrink-0 text-xs">
+                      {t('common.view')}
                       <ExternalLink className="h-3 w-3 ml-1" />
                     </Button>
                   </CardContent>
@@ -316,99 +317,102 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         )}
       </section>
 
-      {/* SECTION 2: Stats Bar (Compact) */}
-      <section className="grid gap-2 grid-cols-2 lg:grid-cols-5">
-        <Card className="p-3">
+      {/* SECTION 2: Stats Bar (Compact) - Max 4 visible on mobile */}
+      <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('dashboard.totalStartups')}</p>
-              <p className="text-xl font-bold">{stats.total}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.totalStartups')}</p>
+              <p className="text-3xl font-semibold">{stats.total}</p>
             </div>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-5 w-5 text-muted-foreground/50" />
           </div>
         </Card>
 
         <Card 
-          className={`p-3 cursor-pointer transition-all hover:shadow-md ${
-            stats.needsAttention > 0 ? 'border-amber-300 dark:border-amber-700' : ''
+          className={`p-4 rounded-2xl border-border/60 cursor-pointer transition-all hover:shadow-sm ${
+            stats.needsAttention > 0 ? 'border-health-at-risk/30' : ''
           }`}
           onClick={() => navigate('/my-workspaces?filter=attention')}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('dashboard.needsAttention')}</p>
-              <p className={`text-xl font-bold ${stats.needsAttention > 0 ? 'text-amber-600' : ''}`}>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.needsAttention')}</p>
+              <p className={`text-3xl font-semibold ${stats.needsAttention > 0 ? 'text-health-at-risk' : ''}`}>
                 {stats.needsAttention}
               </p>
             </div>
-            <AlertCircle className={`h-4 w-4 ${stats.needsAttention > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+            <AlertCircle className={`h-5 w-5 ${stats.needsAttention > 0 ? 'text-health-at-risk/60' : 'text-muted-foreground/50'}`} />
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('dashboard.meetingsThisWeek')}</p>
-              <p className="text-xl font-bold">{stats.upcomingMeetingsCount}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.meetingsThisWeek')}</p>
+              <p className="text-3xl font-semibold">{stats.upcomingMeetingsCount}</p>
             </div>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-5 w-5 text-muted-foreground/50" />
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('dashboard.overdueActions')}</p>
-              <p className={`text-xl font-bold ${stats.overdueActionsCount > 0 ? 'text-destructive' : ''}`}>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.overdueActions')}</p>
+              <p className={`text-3xl font-semibold ${stats.overdueActionsCount > 0 ? 'text-health-critical' : ''}`}>
                 {stats.overdueActionsCount}
               </p>
             </div>
-            <AlertTriangle className={`h-4 w-4 ${stats.overdueActionsCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
-          </div>
-        </Card>
-
-        <Card className="p-3 col-span-2 lg:col-span-1">
-          <p className="text-xs text-muted-foreground mb-1.5">{t('dashboard.healthDistribution')}</p>
-          <div className="flex gap-1 h-3">
-            {Object.entries(stats.healthCounts).map(([health, count]) => {
-              if (count === 0) return null;
-              const colors: Record<string, string> = {
-                critical: 'bg-health-critical',
-                at_risk: 'bg-health-at-risk',
-                stable: 'bg-health-stable',
-                healthy: 'bg-health-healthy',
-                thriving: 'bg-health-thriving',
-              };
-              const width = (count / stats.total) * 100;
-              return (
-                <Tooltip key={health}>
-                  <TooltipTrigger asChild>
-                    <div 
-                      className={`${colors[health]} rounded cursor-pointer transition-all hover:opacity-80`}
-                      style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <span>{t(`health.levels.${health}`)}: {count}</span>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
+            <AlertTriangle className={`h-5 w-5 ${stats.overdueActionsCount > 0 ? 'text-health-critical/60' : 'text-muted-foreground/50'}`} />
           </div>
         </Card>
       </section>
 
-      {/* SECTION 3: Main Grid - Agenda + Actions + Pipeline */}
+      {/* Health Distribution - separate subtle row */}
+      <Card className="p-4 rounded-2xl border-border/60">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.healthDistribution')}</p>
+        </div>
+        <div className="flex gap-1 h-2.5 rounded-full overflow-hidden bg-muted/50">
+          {Object.entries(stats.healthCounts).map(([health, count]) => {
+            if (count === 0) return null;
+            const colors: Record<string, string> = {
+              critical: 'bg-health-critical',
+              at_risk: 'bg-health-at-risk',
+              stable: 'bg-health-stable',
+              healthy: 'bg-health-healthy',
+              thriving: 'bg-health-thriving',
+            };
+            const width = (count / stats.total) * 100;
+            return (
+              <Tooltip key={health}>
+                <TooltipTrigger asChild>
+                  <div 
+                    className={`${colors[health]} cursor-pointer transition-opacity hover:opacity-80`}
+                    style={{ width: `${width}%`, minWidth: count > 0 ? '8px' : 0 }}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{t(`health.levels.${health}`)}: {count}</span>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* SECTION 3: Main Grid - Agenda + Actions + Pipeline (Max 3 visible) */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Agenda (7 dias) */}
-        <Card>
+        <Card className="rounded-2xl border-border/60">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 {t('consultor.agenda.title')}
               </CardTitle>
-              <Badge variant="secondary" className="text-xs">{upcomingSessions.length}</Badge>
+              <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full">{upcomingSessions.length}</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -458,14 +462,14 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
 
         {/* Ações Críticas */}
-        <Card>
+        <Card className="rounded-2xl border-border/60">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-health-at-risk" />
                 {t('consultor.actions.title')}
               </CardTitle>
-              <Badge variant="destructive" className="text-xs">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</Badge>
+              <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full border-health-critical/30 text-health-critical bg-health-critical/10">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -481,7 +485,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                 {criticalActions.map(w => (
                   <div
                     key={w.id}
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors border-l-2 border-l-destructive"
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors border-l-2 border-l-health-critical"
                     onClick={() => navigate(`/workspace/${w.id}?tab=actions`)}
                   >
                     <Avatar className="h-7 w-7 rounded">
@@ -492,7 +496,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{w.startup?.name}</p>
-                      <p className="text-xs text-destructive">
+                      <p className="text-xs text-health-critical">
                         {t('consultor.actions.overdueCount', { count: w.overdueActionsCount })}
                       </p>
                     </div>
@@ -507,7 +511,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
 
         {/* Pipeline Snapshot */}
-        <Card>
+        <Card className="rounded-2xl border-border/60">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">

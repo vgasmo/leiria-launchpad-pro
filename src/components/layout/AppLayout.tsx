@@ -88,7 +88,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
           </div>
         </header>
         <div className={cn(
-          "p-4 lg:p-8 transition-all duration-500 delay-200",
+          "px-4 py-6 lg:px-6 lg:py-6 transition-all duration-500 delay-200 mx-auto max-w-7xl",
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}>
           {children}

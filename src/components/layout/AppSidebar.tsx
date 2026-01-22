@@ -187,19 +187,20 @@ export function AppSidebar() {
   const renderNavItem = (item: NavItem) => {
     const isActive = isActiveRoute(item);
     
+    // Premium nav styling: subtle bg + slim left accent bar when active
     const NavLink = (
       <Link
         key={item.name}
         to={item.href}
         className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 relative",
           isActive
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-            : "text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent/60 text-sidebar-foreground before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-r before:bg-sidebar-primary"
+            : "text-sidebar-muted hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
           collapsed && "justify-center px-2"
         )}
       >
-        <item.icon className={cn("h-4.5 w-4.5 shrink-0", isActive && "text-sidebar-primary")} />
+        <item.icon className={cn("h-[18px] w-[18px] shrink-0", isActive && "text-sidebar-primary")} />
         {!collapsed && (
           <span className="truncate">{item.name}</span>
         )}
