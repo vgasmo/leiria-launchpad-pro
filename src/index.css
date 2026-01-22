@@ -58,16 +58,16 @@
 
     --radius: 0.5rem;
 
-    /* Sidebar - dark professional */
+    /* Sidebar - dark professional with good contrast */
     --sidebar-background: 60 8% 10%;
-    --sidebar-foreground: 60 5% 90%;
+    --sidebar-foreground: 60 5% 85%;
     --sidebar-primary: 68 65% 50%;
     --sidebar-primary-foreground: 60 5% 10%;
-    --sidebar-accent: 60 8% 16%;
-    --sidebar-accent-foreground: 60 5% 95%;
-    --sidebar-border: 60 8% 20%;
+    --sidebar-accent: 60 8% 18%;
+    --sidebar-accent-foreground: 60 5% 98%;
+    --sidebar-border: 60 8% 22%;
     --sidebar-ring: 68 60% 48%;
-    --sidebar-muted: 60 5% 55%;
+    --sidebar-muted: 60 5% 65%;
 
     /* Health score colors - professional tones */
     --health-critical: 0 65% 48%;
