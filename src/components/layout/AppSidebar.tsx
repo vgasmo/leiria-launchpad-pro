@@ -192,16 +192,16 @@ export function AppSidebar() {
         key={item.name}
         to={item.href}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
           isActive
-            ? "bg-sidebar-accent/60 text-sidebar-foreground border-l-2 border-l-sidebar-primary shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            : "text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
           collapsed && "justify-center px-2"
         )}
       >
-        <item.icon className="h-5 w-5 shrink-0" />
+        <item.icon className={cn("h-4.5 w-4.5 shrink-0", isActive && "text-sidebar-primary")} />
         {!collapsed && (
-          <span className="animate-fade-in truncate">{item.name}</span>
+          <span className="truncate">{item.name}</span>
         )}
       </Link>
     );
@@ -276,7 +276,7 @@ export function AppSidebar() {
           )}
         </nav>
 
-        {/* Notifications */}
+        {/* Notifications - muted amber instead of red */}
         {attentionLoading ? (
           <div className={cn("mx-3 mb-3", collapsed ? "p-2" : "p-3")}>
             <Skeleton className="h-10 w-full" />
@@ -285,7 +285,7 @@ export function AppSidebar() {
           <Link
             to="/my-workspaces?filter=attention"
             className={cn(
-              "mx-3 mb-3 rounded-lg bg-destructive/10 border border-destructive/20 transition-all duration-300 block hover:bg-destructive/20 cursor-pointer",
+              "mx-3 mb-3 rounded-md bg-warning/10 border border-warning/20 transition-all duration-200 block hover:bg-warning/15 cursor-pointer",
               collapsed ? "p-2" : "p-3"
             )}
             data-tour="notifications"
@@ -295,8 +295,8 @@ export function AppSidebar() {
                 <TooltipTrigger asChild>
                   <div className="flex justify-center">
                     <div className="relative">
-                      <AlertCircle className="h-5 w-5 text-destructive" />
-                      <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+                      <AlertCircle className="h-4.5 w-4.5 text-warning" />
+                      <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-warning text-[9px] font-semibold text-warning-foreground flex items-center justify-center">
                         {notificationCount > 9 ? '9+' : notificationCount}
                       </span>
                     </div>
@@ -307,14 +307,14 @@ export function AppSidebar() {
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <div className="flex items-center gap-3 animate-fade-in">
-                <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <AlertCircle className="h-4 w-4 text-warning shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-destructive">
+                  <p className="text-xs font-medium text-warning">
                     {t('dashboard.itemsNeedAttention', { count: notificationCount })}
                   </p>
                   {attentionStats && (
-                    <p className="text-[10px] text-destructive/70 truncate">
+                    <p className="text-[10px] text-muted-foreground truncate">
                       {[
                         attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} ${t('health.levels.critical')}`,
                         attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} ${t('health.levels.at_risk')}`,

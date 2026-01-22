@@ -97,33 +97,33 @@ export function FounderDashboard({
   if (pendingWorkspaces.length > 0 && workspaces.length === 0) {
     return (
       <div className="space-y-6">
-        <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-amber-600" />
+        <Card className="border-warning/30 bg-warning/5">
+          <CardContent className="p-5">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                <Clock className="h-5 w-5 text-warning" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                <h3 className="text-base font-semibold text-foreground mb-1">
                   {t('founder.applicationUnderReview')}
                 </h3>
-                <p className="text-amber-700 dark:text-amber-300 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {t('founder.applicationBeingReviewed')}
                 </p>
                 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pendingWorkspaces.map(pw => (
-                    <div key={pw.id} className="flex items-center gap-3 p-3 bg-white/50 dark:bg-background/50 rounded-lg">
-                      <Rocket className="h-5 w-5 text-amber-600" />
+                    <div key={pw.id} className="flex items-center gap-3 p-2.5 bg-muted/50 rounded-md">
+                      <Rocket className="h-4 w-4 text-warning" />
                       <div className="flex-1">
-                        <span className="font-medium">{pw.startup?.name}</span>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Badge variant="outline">{pw.program?.name}</Badge>
+                        <span className="font-medium text-sm">{pw.startup?.name}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{pw.program?.name}</Badge>
                           <span>•</span>
                           <StageBadge stage={pw.stage} size="sm" />
                         </div>
                       </div>
-                      <Badge variant="secondary">{t('founder.pending')}</Badge>
+                      <Badge variant="secondary" className="text-xs">{t('founder.pending')}</Badge>
                     </div>
                   ))}
                 </div>
@@ -153,24 +153,24 @@ export function FounderDashboard({
         />
         
         {/* Motivational empty state */}
-        <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <CardContent className="relative p-8 md:p-12 text-center">
-            <div className="h-20 w-20 mx-auto rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
-              <Rocket className="h-10 w-10 text-primary-foreground" />
+        <Card className="relative overflow-hidden border-0 shadow-card">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
+          <CardContent className="relative p-6 md:p-10 text-center">
+            <div className="h-16 w-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+              <Rocket className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="font-heading text-2xl md:text-3xl font-bold mb-3">
+            <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
               {t('founder.startYourJourney')}
             </h3>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto text-base">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
               {t('founder.startYourJourneyDesc')}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button size="lg" onClick={onCreateStartup} className="gap-2 shadow-lg">
-                <Plus className="h-5 w-5" />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+              <Button size="default" onClick={onCreateStartup} className="gap-2">
+                <Plus className="h-4 w-4" />
                 {t('founder.createYourStartup')}
               </Button>
-              <Button variant="outline" size="lg" onClick={() => navigate('/help')}>
+              <Button variant="ghost" size="default" onClick={() => navigate('/help')}>
                 {t('founder.learnMore')}
               </Button>
             </div>
@@ -209,32 +209,33 @@ export function FounderDashboard({
       {/* One Thing Today - Single focus action */}
       <OneThingToday workspace={workspace} />
 
-      {/* Startup Header Card - Compact */}
-      <Card className="overflow-hidden animate-fade-in">
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-14 w-14 rounded-xl border-2 border-background shadow-lg">
+      {/* Startup Header Card - Compact and clean */}
+      <Card className="overflow-hidden shadow-card border-0">
+        <div className="bg-muted/30 p-3.5">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-11 w-11 rounded-lg border border-border/50">
               <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
-              <AvatarFallback className="rounded-xl bg-primary text-primary-foreground text-lg font-bold">
+              <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
                 {workspace.startup?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-lg font-bold truncate">{workspace.startup?.name}</h1>
-                <HealthBadge score={health as HealthScore | null} />
+              <div className="flex items-center gap-2 mb-0.5">
+                <h1 className="text-base font-semibold truncate">{workspace.startup?.name}</h1>
+                <HealthBadge score={health as HealthScore | null} size="sm" />
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
+              <div className="flex items-center gap-1.5">
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                   {workspace.program?.name}
                 </Badge>
                 <StageBadge stage={workspace.stage} size="sm" />
               </div>
             </div>
             <Button 
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => navigate(`/workspace/${workspace.id}`)}
+              className="text-xs"
             >
               {t('founder.openWorkspace')}
             </Button>

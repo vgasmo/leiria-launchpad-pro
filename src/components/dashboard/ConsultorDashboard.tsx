@@ -259,16 +259,16 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </div>
 
         {riskItems.length === 0 ? (
-          <Card className="border-health-healthy/30 bg-health-healthy/5">
-            <CardContent className="flex items-center gap-4 py-6">
-              <div className="h-12 w-12 rounded-full bg-health-healthy/10 flex items-center justify-center">
-                <CheckCircle2 className="h-6 w-6 text-health-healthy" />
+          <Card className="border-success/30 bg-success/5">
+            <CardContent className="flex items-center gap-3 py-5">
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="font-medium text-foreground">
+                <p className="font-medium text-foreground text-sm">
                   {t('consultor.hero.allClear')}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('consultor.hero.noPriorities')}
                 </p>
               </div>
@@ -281,10 +281,10 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               return (
                 <Card 
                   key={item.workspace.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    item.priority === 'critical' ? 'border-l-4 border-l-destructive' :
-                    item.priority === 'high' ? 'border-l-4 border-l-amber-500' :
-                    'border-l-4 border-l-blue-400'
+                  className={`cursor-pointer transition-all hover:shadow-sm border-l-2 ${
+                    item.priority === 'critical' ? 'border-l-destructive' :
+                    item.priority === 'high' ? 'border-l-warning' :
+                    'border-l-info'
                   }`}
                   onClick={() => navigate(`/workspace/${item.workspace.id}`)}
                 >

@@ -185,6 +185,7 @@
       "actionsPlan": "Ações & Plano",
       "documents": "Documentos",
       "networkResources": "Rede & Recursos",
+      "quickGuide": "Guia Rápido",
       "support": "Suporte"
     },
     "consultor": {
@@ -195,7 +196,8 @@
       "crmPipeline": "CRM & Pipeline",
       "programs": "Programas",
       "reports": "Relatórios",
-      "dataQuality": "Qualidade de Dados"
+      "dataQuality": "Qualidade de Dados",
+      "quickGuide": "Guia Rápido"
     },
     "mentor": {
       "home": "Início",
@@ -203,6 +205,7 @@
       "assignedStartups": "Startups Atribuídas",
       "notesActions": "Notas & Ações",
       "resources": "Recursos",
+      "quickGuide": "Guia Rápido",
       "profile": "Perfil"
     },
     "admin": {
@@ -211,7 +214,8 @@
       "programsCohorts": "Programas & Cohorts",
       "reports": "Relatórios",
       "usersPermissions": "Utilizadores & Permissões",
-      "systemConfig": "Configuração do Sistema"
+      "systemConfig": "Configuração do Sistema",
+      "quickGuide": "Guia Rápido"
     }
   },
   "dashboard": {
@@ -4196,5 +4200,17 @@
     "allTags": "Todas as Tags",
     "tag": "Tag",
     "needsAttention": "Apenas Precisa de Atenção"
+  },
+  "guide": {
+    "title": "Guia Rápido",
+    "subtitle": "Tudo o que precisas de saber para começar",
+    "welcome": "Bem-vindo ao FoundersBook",
+    "intro": "Esta plataforma adapta-se ao teu perfil. Explora o guia abaixo para entenderes como tirar o máximo partido.",
+    "quickStart": "Para Começar",
+    "navigation": "Navegação",
+    "navigationDesc": "O que encontras em cada secção",
+    "proTips": "Dicas Pro",
+    "helpLink": "Precisas de mais ajuda? Consulta o",
+    "glossary": "Glossário de Conceitos"
   }
 }
