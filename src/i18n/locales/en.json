@@ -218,6 +218,7 @@
       "actionsPlan": "Actions & Plan",
       "documents": "Documents",
       "networkResources": "Network & Resources",
+      "quickGuide": "Quick Guide",
       "support": "Support"
     },
     "consultor": {
@@ -228,7 +229,8 @@
       "crmPipeline": "CRM & Pipeline",
       "programs": "Programs",
       "reports": "Reports",
-      "dataQuality": "Data Quality"
+      "dataQuality": "Data Quality",
+      "quickGuide": "Quick Guide"
     },
     "mentor": {
       "home": "Home",
@@ -236,6 +238,7 @@
       "assignedStartups": "Assigned Startups",
       "notesActions": "Notes & Actions",
       "resources": "Resources",
+      "quickGuide": "Quick Guide",
       "profile": "Profile"
     },
     "admin": {
@@ -244,7 +247,8 @@
       "programsCohorts": "Programs & Cohorts",
       "reports": "Reports",
       "usersPermissions": "Users & Permissions",
-      "systemConfig": "System Configuration"
+      "systemConfig": "System Configuration",
+      "quickGuide": "Quick Guide"
     }
   },
   "dashboard": {
@@ -3986,5 +3990,17 @@
     "allTags": "All Tags",
     "tag": "Tag",
     "needsAttention": "Needs Attention Only"
+  },
+  "guide": {
+    "title": "Quick Guide",
+    "subtitle": "Everything you need to know to get started",
+    "welcome": "Welcome to FoundersBook",
+    "intro": "This platform adapts to your profile. Explore the guide below to understand how to get the most out of it.",
+    "quickStart": "Getting Started",
+    "navigation": "Navigation",
+    "navigationDesc": "What you'll find in each section",
+    "proTips": "Pro Tips",
+    "helpLink": "Need more help? Check out the",
+    "glossary": "Concept Glossary"
   }
 }

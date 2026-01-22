@@ -45,36 +45,36 @@ export function QuickActionsFab({
   };
 
   return (
-    <div className={cn("fixed bottom-6 right-6 z-50 md:hidden", className)}>
+    <div className={cn("fixed bottom-5 right-5 z-50 md:hidden", className)}>
       {/* Action buttons */}
       <div className={cn(
-        "flex flex-col-reverse gap-2 mb-2 transition-all duration-200",
-        isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        "flex flex-col-reverse gap-1.5 mb-2 transition-all duration-150",
+        isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
       )}>
         {actions.map((action) => (
           <Button
             key={action.id}
             variant="secondary"
             size="sm"
-            className="shadow-lg flex items-center gap-2 justify-start pl-3 pr-4"
+            className="shadow-md flex items-center gap-2 justify-start pl-2.5 pr-3 h-8 text-xs"
             onClick={() => handleActionClick(action)}
           >
             {action.icon}
-            <span className="text-sm">{action.label}</span>
+            <span>{action.label}</span>
           </Button>
         ))}
       </div>
 
-      {/* Main FAB button */}
+      {/* Main FAB button - smaller, less dominant */}
       <Button
-        size="lg"
+        size="icon"
         className={cn(
-          "h-14 w-14 rounded-full shadow-xl transition-transform",
+          "h-11 w-11 rounded-full shadow-lg transition-transform",
           isOpen && "rotate-45"
         )}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-5 w-5" />
       </Button>
     </div>
   );
