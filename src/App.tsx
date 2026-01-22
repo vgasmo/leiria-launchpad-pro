@@ -26,6 +26,7 @@ import ConsultorTools from "./pages/ConsultorTools";
 import ValuePropWizardPage from "./pages/ValuePropWizardPage";
 import IntegrationsSetup from "./pages/IntegrationsSetup";
 import HelpGlossary from "./pages/HelpGlossary";
+import QuickGuide from "./pages/QuickGuide";
 import PendingApproval from "./pages/PendingApproval";
 import CRM from "./pages/CRM";
 import CrmDiagnostics from "./pages/CrmDiagnostics";
@@ -103,6 +104,7 @@ function AppRoutes() {
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/integrations-setup" element={<ProtectedRoute><IntegrationsSetup /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
+      <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
       <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
       <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
       <Route path="/admin/crm-diagnostics" element={<ProtectedRoute><CrmDiagnostics /></ProtectedRoute>} />
