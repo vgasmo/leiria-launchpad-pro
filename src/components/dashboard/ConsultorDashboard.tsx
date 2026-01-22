@@ -389,7 +389,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <span>{t(`health.${health}`)}: {count}</span>
+                    <span>{t(`health.levels.${health}`)}: {count}</span>
                   </TooltipContent>
                 </Tooltip>
               );

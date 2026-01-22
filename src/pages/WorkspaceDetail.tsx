@@ -147,58 +147,67 @@ export default function WorkspaceDetail() {
       />
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-        {/* Scrollable tabs container for mobile */}
-        <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-          <TabsList className="bg-muted/50 inline-flex h-auto gap-1 p-1 min-w-max">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm">{t('workspace.overview')}</TabsTrigger>
-            <TabsTrigger value="sessions" className="text-xs sm:text-sm">{t('workspace.sessions')}</TabsTrigger>
-            <TabsTrigger value="actions" className="text-xs sm:text-sm">{t('workspace.actions')}</TabsTrigger>
-            <TabsTrigger value="milestones" className="text-xs sm:text-sm">{t('workspace.milestones')}</TabsTrigger>
-            <TabsTrigger value="kpis" className="text-xs sm:text-sm">{t('workspace.kpis')}</TabsTrigger>
-            <TabsTrigger value="playbooks" className="gap-1 text-xs sm:text-sm">
-              <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">{t('workspace.playbooks')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="templates" className="text-xs sm:text-sm">{t('workspace.templates')}</TabsTrigger>
-            <TabsTrigger value="calendar" className="text-xs sm:text-sm">{t('workspace.calendar')}</TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs sm:text-sm">{t('workspace.documents')}</TabsTrigger>
-            {isFounder && startup && (
-              <TabsTrigger value="team" className="gap-1 text-xs sm:text-sm">
-                <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">{t('workspace.team')}</span>
+        {/* Responsive scrollable tabs with fade indicators */}
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background to-transparent pointer-events-none z-10 lg:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 lg:hidden" />
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-muted -mx-4 px-4 lg:mx-0 lg:px-0">
+            <TabsList className="bg-muted/30 inline-flex h-auto gap-0.5 p-1 min-w-max">
+              {/* Core tabs - always visible */}
+              <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.overview')}</TabsTrigger>
+              <TabsTrigger value="sessions" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.sessions')}</TabsTrigger>
+              <TabsTrigger value="actions" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.actions')}</TabsTrigger>
+              <TabsTrigger value="milestones" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.milestones')}</TabsTrigger>
+              <TabsTrigger value="kpis" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.kpis')}</TabsTrigger>
+              <TabsTrigger value="calendar" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.calendar')}</TabsTrigger>
+              <TabsTrigger value="documents" className="text-xs sm:text-sm px-2 sm:px-3">{t('workspace.documents')}</TabsTrigger>
+              {/* Secondary tabs - icon-only on mobile */}
+              <TabsTrigger value="playbooks" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                <BookOpen className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">{t('workspace.playbooks')}</span>
               </TabsTrigger>
-            )}
-            <TabsTrigger value="dataroom" className="gap-1 text-xs sm:text-sm">
-              <FolderLock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">{t('dataroom.title')}</span>
-            </TabsTrigger>
-            {isFounder && (
-              <TabsTrigger value="funding" className="gap-1 text-xs sm:text-sm">
-                <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">{t('workspace.funding')}</span>
+              <TabsTrigger value="templates" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                <span className="md:hidden">📄</span>
+                <span className="hidden md:inline">{t('workspace.templates')}</span>
               </TabsTrigger>
-            )}
-            {(isAdmin || isConsultor || isMentor) && (
-              <TabsTrigger value="notes" className="gap-1 text-xs sm:text-sm">
-                <StickyNote className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">{t('workspace.notesAndTasks')}</span>
+              {isFounder && startup && (
+                <TabsTrigger value="team" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t('workspace.team')}</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="dataroom" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                <FolderLock className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">{t('dataroom.title')}</span>
               </TabsTrigger>
-            )}
-            {(isAdmin || isConsultor) && (
-              <TabsTrigger value="time" className="gap-1 text-xs sm:text-sm">
-                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">{t('workspace.time')}</span>
+              {isFounder && (
+                <TabsTrigger value="funding" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                  <DollarSign className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t('workspace.funding')}</span>
+                </TabsTrigger>
+              )}
+              {(isAdmin || isConsultor || isMentor) && (
+                <TabsTrigger value="notes" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                  <StickyNote className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t('workspace.notesAndTasks')}</span>
+                </TabsTrigger>
+              )}
+              {(isAdmin || isConsultor) && (
+                <TabsTrigger value="time" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t('workspace.time')}</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="governance" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                <Shield className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">{t('workspace.governance')}</span>
               </TabsTrigger>
-            )}
-            <TabsTrigger value="governance" className="gap-1 text-xs sm:text-sm">
-              <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">{t('workspace.governance')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-1 text-xs sm:text-sm">
-              <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden sm:inline">{t('workspace.settings')}</span>
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger value="settings" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                <Settings className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">{t('workspace.settings')}</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
 
         <div className="animate-fade-in">

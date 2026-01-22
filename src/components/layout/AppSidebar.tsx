@@ -194,8 +194,8 @@ export function AppSidebar() {
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
           isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent/60 text-sidebar-foreground border-l-2 border-l-sidebar-primary shadow-sm"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
           collapsed && "justify-center px-2"
         )}
       >
@@ -316,9 +316,9 @@ export function AppSidebar() {
                   {attentionStats && (
                     <p className="text-[10px] text-destructive/70 truncate">
                       {[
-                        attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} ${t('health.critical').toLowerCase()}`,
-                        attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} ${t('health.at_risk').toLowerCase()}`,
-                        attentionStats.overdueCount > 0 && `${attentionStats.overdueCount} ${t('actions.overdue').toLowerCase()}`,
+                        attentionStats.criticalCount > 0 && `${attentionStats.criticalCount} ${t('health.levels.critical')}`,
+                        attentionStats.atRiskCount > 0 && `${attentionStats.atRiskCount} ${t('health.levels.at_risk')}`,
+                        attentionStats.overdueCount > 0 && `${attentionStats.overdueCount} ${t('actions.overdue')}`,
                       ].filter(Boolean).join(', ')}
                     </p>
                   )}
