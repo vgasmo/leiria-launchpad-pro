@@ -222,11 +222,14 @@ export function AppSidebar() {
       )}
     >
       <div className="flex h-full flex-col">
-        {/* Logo */}
-        <div className={cn(
-          "flex h-16 items-center border-b border-sidebar-border transition-all duration-300",
-          collapsed ? "justify-center px-2" : "justify-center px-4"
-        )}>
+        {/* Logo - clickable to navigate home */}
+        <Link 
+          to="/"
+          className={cn(
+            "flex h-16 items-center border-b border-sidebar-border transition-all duration-300 hover:opacity-80",
+            collapsed ? "justify-center px-2" : "justify-center px-4"
+          )}
+        >
           <img 
             src={startupLeiriaLogo} 
             alt="FoundersBook" 
@@ -235,7 +238,7 @@ export function AppSidebar() {
               collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
             )}
           />
-        </div>
+        </Link>
 
         {/* Collapse toggle */}
         <Button
