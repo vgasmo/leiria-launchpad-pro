@@ -226,7 +226,7 @@ export function AppSidebar() {
         <Link 
           to="/"
           className={cn(
-            "flex h-16 items-center border-b border-sidebar-border transition-all duration-300 hover:opacity-80",
+            "flex h-16 items-center border-b border-sidebar-border transition-all duration-300 hover:opacity-80 cursor-pointer bg-transparent",
             collapsed ? "justify-center px-2" : "justify-center px-4"
           )}
         >
@@ -234,7 +234,7 @@ export function AppSidebar() {
             src={startupLeiriaLogo} 
             alt="FoundersBook" 
             className={cn(
-              "transition-all duration-300",
+              "transition-all duration-300 pointer-events-none",
               collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
             )}
           />
