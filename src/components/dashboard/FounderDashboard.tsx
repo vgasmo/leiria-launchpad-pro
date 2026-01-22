@@ -188,7 +188,7 @@ export function FounderDashboard({
   const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=sessions`);
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 max-w-5xl">
       {/* Welcome Panel with Checklist (dismissible) - only show if not complete */}
       <FounderWelcomePanel
         hasStartup={hasStartup}
@@ -200,42 +200,42 @@ export function FounderDashboard({
         workspaceId={workspace.id}
       />
 
-      {/* P1: PRIMARY BOOKING CTA - ABOVE THE FOLD */}
-      <FounderBookingCTA workspaceId={workspace.id} />
+      {/* HERO BLOCK: Focus Today */}
+      <section className="space-y-4">
+        {/* One Thing Today - Single focus action */}
+        <OneThingToday workspace={workspace} />
 
-      {/* Streak Hero - Show momentum */}
-      <StreakHero streakWeeks={streakWeeks} />
+        {/* PRIMARY BOOKING CTA */}
+        <FounderBookingCTA workspaceId={workspace.id} />
+      </section>
 
-      {/* One Thing Today - Single focus action */}
-      <OneThingToday workspace={workspace} />
-
-      {/* Startup Header Card - Compact and clean */}
-      <Card className="overflow-hidden shadow-card border-0">
-        <div className="bg-muted/30 p-3.5">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-11 w-11 rounded-lg border border-border/50">
+      {/* MAIN BLOCK 1: Startup Card */}
+      <Card className="overflow-hidden border-border/60 rounded-2xl shadow-sm">
+        <div className="bg-muted/40 p-4 sm:p-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-12 w-12 rounded-xl border border-border/50">
               <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
-              <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
+              <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold">
                 {workspace.startup?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h1 className="text-base font-semibold truncate">{workspace.startup?.name}</h1>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-lg font-semibold truncate">{workspace.startup?.name}</h1>
                 <HealthBadge score={health as HealthScore | null} size="sm" />
               </div>
-              <div className="flex items-center gap-1.5">
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full border border-border/50">
                   {workspace.program?.name}
                 </Badge>
                 <StageBadge stage={workspace.stage} size="sm" />
               </div>
             </div>
             <Button 
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => navigate(`/workspace/${workspace.id}`)}
-              className="text-xs"
+              className="text-xs shrink-0"
             >
               {t('founder.openWorkspace')}
             </Button>
@@ -243,17 +243,17 @@ export function FounderDashboard({
         </div>
       </Card>
 
-      {/* Two-column layout for progress and calendar */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        {/* Stage Progress + Investor Readiness */}
+      {/* MAIN BLOCKS 2 & 3: Progress + Calendar (max 3 visible) */}
+      <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
           <StageProgressCard workspace={workspace} />
           <InvestorReadinessWidget workspaceId={workspace.id} compact />
         </div>
-        
-        {/* Upcoming Sessions Calendar */}
         <CalendarWidget />
       </div>
+
+      {/* Streak (secondary - calm) */}
+      <StreakHero streakWeeks={streakWeeks} />
 
       {/* Checklist Recovery Footer */}
       {canRestore && (

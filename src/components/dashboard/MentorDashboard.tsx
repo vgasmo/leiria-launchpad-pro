@@ -130,54 +130,54 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl">
       {/* P0 HERO: Next Session Prep - Only shows when session is within 24h */}
       <MentorNextSessionPrep workspaces={workspaces} />
 
-      {/* Quick Stats - Mentor-focused */}
+      {/* Quick Stats - Mentor-focused, calmer design */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-        <Card className="p-4">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('mentor.myStartups', 'Minhas Startups')}</p>
-              <p className="text-2xl font-bold">{workspaces.length}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.myStartups')}</p>
+              <p className="text-3xl font-semibold">{workspaces.length}</p>
             </div>
-            <Briefcase className="h-5 w-5 text-primary/60" />
+            <Briefcase className="h-5 w-5 text-muted-foreground/50" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('mentor.upcomingMeetings', 'Próximas Sessões')}</p>
-              <p className="text-2xl font-bold">{upcomingMeetings.length}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.upcomingMeetings')}</p>
+              <p className="text-3xl font-semibold">{upcomingMeetings.length}</p>
             </div>
-            <Calendar className="h-5 w-5 text-primary/60" />
+            <Calendar className="h-5 w-5 text-muted-foreground/50" />
           </div>
           {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length > 0 && (
             <p className="text-xs text-primary mt-1">
-              {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length} {t('common.today', 'hoje')}
+              {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length} {t('common.today')}
             </p>
           )}
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('mentor.startupsHealthy', 'Startups Saudáveis')}</p>
-              <p className="text-2xl font-bold text-success">{impactStats.healthyCount}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.startupsHealthy')}</p>
+              <p className="text-3xl font-semibold text-health-healthy">{impactStats.healthyCount}</p>
             </div>
-            <TrendingUp className="h-5 w-5 text-success/60" />
+            <TrendingUp className="h-5 w-5 text-health-healthy/50" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 rounded-2xl border-border/60">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{t('mentor.pendingActions', 'Ações Pendentes')}</p>
-              <p className="text-2xl font-bold">{impactStats.actionsCreated}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.pendingActions')}</p>
+              <p className="text-3xl font-semibold">{impactStats.actionsCreated}</p>
             </div>
-            <CheckCircle2 className="h-5 w-5 text-muted-foreground/60" />
+            <CheckCircle2 className="h-5 w-5 text-muted-foreground/50" />
           </div>
         </Card>
       </div>
@@ -187,9 +187,9 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         {/* Startup Cards - Main focus */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('mentor.myStartups', 'Minhas Startups')}</h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/mentors')} className="gap-1 text-xs">
-              {t('mentor.manageConnections', 'Gerir Conexões')}
+            <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/mentors')} className="gap-1 text-xs text-muted-foreground hover:text-foreground">
+              {t('mentor.manageConnections')}
               <ArrowRight className="h-3 w-3" />
             </Button>
           </div>
@@ -202,8 +202,8 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
               return (
                 <Card 
                   key={workspace.id}
-                  className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/30 ${
-                    hasUpcomingMeeting ? 'border-primary/40 bg-primary/5' : ''
+                  className={`cursor-pointer transition-all hover:shadow-sm rounded-2xl border-border/60 ${
+                    hasUpcomingMeeting ? 'border-primary/30 bg-primary/5' : ''
                   }`}
                   onClick={() => navigate(`/workspace/${workspace.id}`)}
                 >
