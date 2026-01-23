@@ -224,7 +224,16 @@ export function BookingLinksManager() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-muted-foreground text-sm">{t('common.loading', 'Loading...')}</p>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex items-center gap-4 p-3 border rounded-lg animate-pulse">
+                <div className="h-4 w-24 bg-muted rounded" />
+                <div className="h-4 w-20 bg-muted rounded" />
+                <div className="h-4 w-16 bg-muted rounded" />
+                <div className="h-6 w-14 bg-muted rounded-full ml-auto" />
+              </div>
+            ))}
+          </div>
         ) : !bookingLinks?.length ? (
           <p className="text-muted-foreground text-sm">
             {t('admin.bookingLinks.empty', 'No booking links created yet')}

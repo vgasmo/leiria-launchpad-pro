@@ -83,16 +83,16 @@ export function useSyncSessionToOutlook() {
     },
     onSuccess: (data) => {
       if (data.success) {
-        toast.success('Session synced to Outlook calendar');
+        toast.success('Sessão sincronizada com o calendário Outlook');
       } else if (data.reason === 'not_configured') {
-        toast.info('Outlook sync not configured for this workspace');
+        toast.info('Sincronização Outlook não configurada para este workspace');
       } else {
-        toast.warning(data.message || 'Sync completed with warnings');
+        toast.warning(data.message || 'Sincronização concluída com avisos');
       }
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     },
     onError: (error: Error) => {
-      toast.error(`Outlook sync failed: ${error.message}`);
+      toast.error(`Erro na sincronização Outlook: ${error.message}`);
     },
   });
 }

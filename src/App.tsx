@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -47,6 +48,7 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { t } = useTranslation();
   const { user, isLoading, isAuthReady, isAdmin, isAccountApproved, isAccountPending, isAccountSuspended } = useAuth();
 
   // Wait for both auth check AND profile/roles to be fully loaded
@@ -55,7 +57,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
-          <span className="animate-pulse text-muted-foreground text-sm">A carregar...</span>
+          <span className="animate-pulse text-muted-foreground text-sm">{t('common.loading')}</span>
         </div>
       </div>
     );

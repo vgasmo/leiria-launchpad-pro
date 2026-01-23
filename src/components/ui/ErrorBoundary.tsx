@@ -105,9 +105,8 @@ export class ErrorBoundary extends Component<Props, State> {
         await navigator.clipboard.writeText(this.state.errorId);
         this.setState({ copied: true });
         setTimeout(() => this.setState({ copied: false }), 2000);
-      } catch (e) {
-        // Fallback for older browsers
-        console.log('Error ID:', this.state.errorId);
+      } catch {
+        // Fallback for older browsers - no-op, clipboard API unavailable
       }
     }
   };
