@@ -271,11 +271,11 @@ export default function SearchPage() {
           </div>
         ) : !debouncedQuery ? (
           <div className="text-center py-12 text-muted-foreground">
-            Start typing to search across sessions, actions, notes, documents, and messages.
+            {t('search.startTyping', 'Comece a digitar para pesquisar sessões, ações, notas, documentos e mensagens.')}
           </div>
         ) : Object.keys(groupedResults).length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            No results found for "{debouncedQuery}"
+            {t('search.noResultsFor', 'Nenhum resultado encontrado para "{{query}}"', { query: debouncedQuery })}
           </div>
         ) : (
           <div className="space-y-6">
