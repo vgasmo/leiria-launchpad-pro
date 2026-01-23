@@ -251,14 +251,24 @@ export async function isAccountActive(
 
 /**
  * Validate workspace access AND account is active
- * Combines both checks for sensitive operations
+ * Uses consolidated has_active_workspace_access function
+ * Enforces: approved account + active membership + active workspace + not blocked
  */
 export async function validateActiveWorkspaceAccess(
   supabase: SupabaseClient,
   userId: string,
   workspaceId: string
 ): Promise<boolean> {
-  const { data: hasAccess } = await supabase.rpc('has_active_workspace_access', {
+  // First check account is active (separate call for clarity in logs)
+  const accountActive = await isAccountActive(supabase, userId);
+  if (!accountActive) {
+    return false;
+  }
+  
+  // Then check workspace access using the canonical function
+  // Note: has_active_workspace_access now uses auth.uid() internally via RLS
+  // For edge functions, we use has_workspace_access with explicit user check
+  const { data: hasAccess } = await supabase.rpc('has_workspace_access', {
     _user_id: userId,
     _workspace_id: workspaceId,
   });
