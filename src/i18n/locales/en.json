@@ -4017,5 +4017,13 @@
     "proTips": "Pro Tips",
     "helpLink": "Need more help? Check out the",
     "glossary": "Concept Glossary"
+  },
+  "status": {
+    "pending": "Pending",
+    "notStarted": "Not Started",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "delayed": "Delayed"
   }
 }

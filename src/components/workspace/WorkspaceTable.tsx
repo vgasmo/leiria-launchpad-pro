@@ -102,6 +102,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                     <AvatarImage
                       src={workspace.startup?.logo_url || undefined}
                       className="object-cover"
+                      alt={workspace.startup?.name || 'Startup logo'}
                     />
                     <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-semibold">
                       {workspace.startup?.name?.slice(0, 2).toUpperCase() || '?'}

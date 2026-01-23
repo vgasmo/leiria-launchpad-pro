@@ -4227,5 +4227,13 @@
     "proTips": "Dicas Pro",
     "helpLink": "Precisas de mais ajuda? Consulta o",
     "glossary": "Glossário de Conceitos"
+  },
+  "status": {
+    "pending": "Pendente",
+    "notStarted": "Não Iniciado",
+    "inProgress": "Em Progresso",
+    "completed": "Concluído",
+    "cancelled": "Cancelado",
+    "delayed": "Atrasado"
   }
 }
