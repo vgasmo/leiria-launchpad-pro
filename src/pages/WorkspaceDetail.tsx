@@ -156,13 +156,15 @@ export default function WorkspaceDetail() {
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
         {/* Tabs with "More" dropdown for secondary items */}
         <TabsList className="bg-muted/30 h-auto gap-0.5 p-1 flex flex-wrap">
-          {/* Core tabs - always visible (max 6) */}
+          {/* Core tabs - always visible (extended to include Playbooks & Templates) */}
           <TabsTrigger value="overview" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.overview')}</TabsTrigger>
           <TabsTrigger value="sessions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.sessions')}</TabsTrigger>
           <TabsTrigger value="actions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.actions')}</TabsTrigger>
           <TabsTrigger value="milestones" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.milestones')}</TabsTrigger>
           <TabsTrigger value="kpis" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.kpis')}</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.documents')}</TabsTrigger>
+          <TabsTrigger value="playbooks" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.playbooks')}</TabsTrigger>
+          <TabsTrigger value="templates" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.templates')}</TabsTrigger>
           
           {/* "More" dropdown for secondary tabs */}
           <DropdownMenu>
@@ -172,7 +174,7 @@ export default function WorkspaceDetail() {
                 size="sm" 
                 className={cn(
                   "h-8 gap-1 text-xs sm:text-sm px-2.5 rounded-md",
-                  ['calendar', 'playbooks', 'templates', 'team', 'dataroom', 'funding', 'notes', 'time', 'governance', 'settings'].includes(currentTab) 
+                  ['calendar', 'team', 'dataroom', 'funding', 'notes', 'time', 'governance', 'settings'].includes(currentTab) 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
                 )}
@@ -185,13 +187,6 @@ export default function WorkspaceDetail() {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => handleTabChange('calendar')} className={currentTab === 'calendar' ? 'bg-accent' : ''}>
                 {t('workspace.calendar')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleTabChange('playbooks')} className={currentTab === 'playbooks' ? 'bg-accent' : ''}>
-                <BookOpen className="h-4 w-4 mr-2" />
-                {t('workspace.playbooks')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleTabChange('templates')} className={currentTab === 'templates' ? 'bg-accent' : ''}>
-                {t('workspace.templates')}
               </DropdownMenuItem>
               {isFounder && startup && (
                 <DropdownMenuItem onClick={() => handleTabChange('team')} className={currentTab === 'team' ? 'bg-accent' : ''}>
