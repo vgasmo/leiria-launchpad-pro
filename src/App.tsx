@@ -28,6 +28,7 @@ import IntegrationsSetup from "./pages/IntegrationsSetup";
 import HelpGlossary from "./pages/HelpGlossary";
 import QuickGuide from "./pages/QuickGuide";
 import PendingApproval from "./pages/PendingApproval";
+import SuspendedAccount from "./pages/SuspendedAccount";
 import CRM from "./pages/CRM";
 import CrmDiagnostics from "./pages/CrmDiagnostics";
 import PublicBooking from "./pages/PublicBooking";
@@ -46,7 +47,7 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
-  const { user, isLoading, isAuthReady, isAdmin, isAccountApproved, isAccountPending } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isAccountApproved, isAccountPending, isAccountSuspended } = useAuth();
 
   // Wait for both auth check AND profile/roles to be fully loaded
   if (isLoading || !isAuthReady) {
@@ -62,6 +63,11 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check if account is suspended (block all access, including admins)
+  if (isAccountSuspended) {
+    return <Navigate to="/suspended" replace />;
   }
 
   // Check if account is pending approval (non-staff users)
@@ -89,6 +95,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/pending-approval" element={<PendingApproval />} />
+      <Route path="/suspended" element={<SuspendedAccount />} />
       <Route path="/share/:token" element={<SharedWorkspace />} />
       <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
       <Route path="/book/:token" element={<PublicBooking />} />

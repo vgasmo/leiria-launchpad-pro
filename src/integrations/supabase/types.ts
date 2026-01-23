@@ -2977,6 +2977,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"] | null
           avatar_url: string | null
           bio: string | null
           calendar_feed_token: string | null
@@ -2990,6 +2991,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
           avatar_url?: string | null
           bio?: string | null
           calendar_feed_token?: string | null
@@ -3003,6 +3005,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"] | null
           avatar_url?: string | null
           bio?: string | null
           calendar_feed_token?: string | null
@@ -6668,6 +6671,7 @@ export type Database = {
       }
     }
     Functions: {
+      approve_user_account: { Args: { p_user_id: string }; Returns: undefined }
       block_workspace: {
         Args: { _reason?: string; _workspace_id: string }
         Returns: undefined
@@ -6829,6 +6833,7 @@ export type Database = {
       validate_portuguese_nif: { Args: { nif: string }; Returns: boolean }
     }
     Enums: {
+      account_status: "pending" | "approved" | "suspended"
       action_status: "pending" | "in_progress" | "completed" | "cancelled"
       app_role:
         | "admin"
@@ -6969,6 +6974,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["pending", "approved", "suspended"],
       action_status: ["pending", "in_progress", "completed", "cancelled"],
       app_role: [
         "admin",
