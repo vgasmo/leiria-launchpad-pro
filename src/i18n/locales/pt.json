@@ -2952,36 +2952,6 @@
     "message": "Não tem permissão para ver este conteúdo. Por favor contacte um administrador se acredita que isto é um erro.",
     "backToWorkspaces": "Voltar aos Workspaces"
   },
-  "emptyStates": {
-    "milestones": {
-      "title": "Transforme caos em progresso",
-      "description": "Milestones ajudam a dividir a jornada em objetivos alcançáveis. Comece com os objetivos das próximas 2 semanas."
-    },
-    "sessions": {
-      "title": "Sessões geram momentum",
-      "description": "Agende a primeira sessão de mentoria para acelerar decisões e obter insights valiosos."
-    },
-    "documents": {
-      "title": "O seu deck fecha negócios",
-      "description": "Investidores não leem documentos longos. Carregue o pitch deck e mantenha documentos importantes organizados."
-    },
-    "actions": {
-      "title": "Ações geram resultados",
-      "description": "Crie milestones primeiro, depois divida-os em tarefas específicas e acionáveis com responsáveis claros."
-    },
-    "kpis": {
-      "title": "Meça o que importa",
-      "description": "KPIs ajudam a medir progresso e contar a história de crescimento para investidores. Comece com 3-5 métricas chave."
-    },
-    "dataroom": {
-      "title": "O seu kit de investidor",
-      "description": "Organize pitch deck, financeiros e updates num só lugar seguro para partilhar com investidores."
-    },
-    "mentors": {
-      "title": "Obtenha orientação especializada",
-      "description": "Peça um mentor para ajudar a navegar desafios e acelerar o crescimento."
-    }
-  },
   "yourWeek": {
     "title": "A Sua Semana",
     "streak": "{{count}} semana consecutiva",
@@ -3442,7 +3412,35 @@
     "noTasks": "Tudo em dia!",
     "noTasksDesc": "Sem tarefas pendentes. Bom trabalho!",
     "noNotifications": "Sem novas notificações",
-    "noNotificationsDesc": "Está tudo em dia."
+    "noNotificationsDesc": "Está tudo em dia.",
+    "milestones": {
+      "title": "Transforme caos em progresso",
+      "description": "Milestones ajudam a dividir a jornada em objetivos alcançáveis. Comece com os objetivos das próximas 2 semanas."
+    },
+    "sessions": {
+      "title": "Sessões geram momentum",
+      "description": "Agende a primeira sessão de mentoria para acelerar decisões e obter insights valiosos."
+    },
+    "documents": {
+      "title": "O seu deck fecha negócios",
+      "description": "Investidores não leem documentos longos. Carregue o pitch deck e mantenha documentos importantes organizados."
+    },
+    "actions": {
+      "title": "Ações geram resultados",
+      "description": "Crie milestones primeiro, depois divida-os em tarefas específicas e acionáveis com responsáveis claros."
+    },
+    "kpis": {
+      "title": "Meça o que importa",
+      "description": "KPIs ajudam a medir progresso e contar a história de crescimento para investidores. Comece com 3-5 métricas chave."
+    },
+    "dataroom": {
+      "title": "O seu kit de investidor",
+      "description": "Organize pitch deck, financeiros e updates num só lugar seguro para partilhar com investidores."
+    },
+    "mentors": {
+      "title": "Obtenha orientação especializada",
+      "description": "Peça um mentor para ajudar a navegar desafios e acelerar o crescimento."
+    }
   },
   "crm": {
     "activity": "Atividade",
