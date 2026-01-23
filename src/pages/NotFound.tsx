@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import startupLeiriaLogo from "@/assets/startup-leiria-logo.png";
+import startupLeiriaLogo from "@/assets/startup-leiria.svg";
 
 const NotFound = () => {
   const location = useLocation();

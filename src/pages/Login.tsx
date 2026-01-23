@@ -14,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
-import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 
 export default function Login() {
   const { t } = useTranslation();
