@@ -98,6 +98,9 @@ export function JourneyHeader({
   const actionsProgress = actionsTotal > 0 ? Math.round((actionsCompleted / actionsTotal) * 100) : 0;
   const milestonesProgress = milestonesTotal > 0 ? Math.round((milestonesCompleted / milestonesTotal) * 100) : 0;
 
+  // Role-based emphasis: Stage + Journey primary for founders, Health secondary
+  // This component is viewed by all roles but founders see it most prominently
+
   return (
     <Card className="bg-gradient-to-r from-primary/5 via-background to-background border-primary/20">
       <CardContent className="py-4">

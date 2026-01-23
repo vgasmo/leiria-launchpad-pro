@@ -408,24 +408,52 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </CardContent>
         </Card>
 
-        {/* Health Score Card */}
-        <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={canWrite} />
+        {/* UX EMPHASIS by Role:
+            - Staff (Consultant/Admin): See Health, Ownership, Contracts FIRST - operational focus
+            - Founders: See Responsible Consultant, Playbook Progress, Investor Readiness FIRST - journey focus
+        */}
         
-        {/* P1.1: Ownership & SLA Card - visible to staff */}
+        {/* Health Score Card - Staff sees it prominently, Founders have it in JourneyHeader already */}
+        {(isConsultor || isAdmin) && (
+          <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={canWrite} />
+        )}
+        
+        {/* P1.1: Ownership & SLA Card - visible to staff - PRIMARY for consultants */}
         {(isConsultor || isAdmin) && (
           <OwnershipCard workspaceId={workspace.id} />
         )}
         
-        {/* Responsible Consultant Card - visible to founders */}
+        {/* Location & Contract Card - Staff sees early, Founders see later */}
+        {(isConsultor || isAdmin) && (
+          <LocationContractCard workspaceId={workspace.id} />
+        )}
+        
+        {/* Workspace Alerts Section - Staff sees early */}
+        {(isConsultor || isAdmin) && (
+          <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
+        )}
+        
+        {/* === FOUNDER-FOCUSED CONTENT BELOW === */}
+        
+        {/* Responsible Consultant Card - PRIMARY for founders - their key contact */}
         {isFounder && (
           <ResponsibleConsultantCard workspaceId={workspace.id} />
         )}
         
-        {/* Location & Contract Card */}
-        <LocationContractCard workspaceId={workspace.id} />
+        {/* Playbook Progress Widget for Founders - Journey focus */}
+        {isFounder && (
+          <PlaybookProgressWidget workspaceId={workspace.id} />
+        )}
         
-        {/* Workspace Alerts Section */}
-        <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
+        {/* Investor Readiness Checklist for Founders - Results focus */}
+        {isFounder && (
+          <InvestorReadinessChecklist workspaceId={workspace.id} canWrite={canWrite} />
+        )}
+        
+        {/* Health Score Card - Secondary for Founders (they see it in JourneyHeader) */}
+        {isFounder && (
+          <HealthScoreCard workspaceId={workspace.id} programId={workspace.program_id} canManage={false} />
+        )}
         
         {/* Interactions Card for Founders */}
         {isFounder && (
@@ -435,17 +463,17 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           />
         )}
         
-        {/* Playbook Progress Widget for Founders */}
+        {/* Location & Contract for Founders - secondary */}
         {isFounder && (
-          <PlaybookProgressWidget workspaceId={workspace.id} />
+          <LocationContractCard workspaceId={workspace.id} />
         )}
         
-        {/* Investor Readiness Checklist for Founders */}
+        {/* Workspace Alerts for Founders - secondary */}
         {isFounder && (
-          <InvestorReadinessChecklist workspaceId={workspace.id} canWrite={canWrite} />
+          <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
         )}
         
-        {/* Progress Timeline */}
+        {/* Progress Timeline - All roles */}
         <ProgressTimeline workspaceId={workspace.id} />
       </div>
 
