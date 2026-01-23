@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,7 @@ const TEST_DEFINITIONS = [
 ];
 
 export function IntegrationTestHarness() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
@@ -268,11 +270,11 @@ export function IntegrationTestHarness() {
     queryClient.invalidateQueries({ queryKey: ['integration-test-last-run'] });
 
     if (overallStatus === 'pass') {
-      toast.success('All integration tests passed!');
+      toast.success(t('admin.integrationTests.allPassed', 'Todos os testes de integração passaram!'));
     } else if (overallStatus === 'fail') {
-      toast.error('Some integration tests failed');
+      toast.error(t('admin.integrationTests.someFailed', 'Alguns testes de integração falharam'));
     } else {
-      toast.info('Integration tests completed with warnings');
+      toast.info(t('admin.integrationTests.completedWithWarnings', 'Testes de integração concluídos com avisos'));
     }
   };
 

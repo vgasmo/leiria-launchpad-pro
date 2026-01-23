@@ -115,8 +115,17 @@ export function AdminSurveysManager() {
         <TabsContent value="campaigns" className="space-y-4">
           {loadingCampaigns ? (
             <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                {t('common.loading', 'Loading...')}
+              <CardContent className="py-8 space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="flex items-center gap-4 p-4 border rounded-lg animate-pulse">
+                    <div className="h-10 w-10 bg-muted rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-48 bg-muted rounded" />
+                      <div className="h-3 w-32 bg-muted rounded" />
+                    </div>
+                    <div className="h-6 w-16 bg-muted rounded-full" />
+                  </div>
+                ))}
               </CardContent>
             </Card>
           ) : campaigns.length === 0 ? (

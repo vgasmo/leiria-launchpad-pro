@@ -225,19 +225,19 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     size="sm"
                     onClick={handleFetchFromTeams}
                     disabled={isFetchingTeams}
-                    title={!session.teams_meeting_url ? 'Transcrição só disponível após reunião Teams com transcrição ativa terminar' : 'Importar transcrição do Teams'}
+                    title={!session.teams_meeting_url ? t('sessions.ai.teamsNotReady') : t('sessions.ai.importTeams')}
                   >
                     {isFetchingTeams ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Video className="h-4 w-4 mr-2" />
                     )}
-                    Fetch from Teams
+                    {t('sessions.ai.fetchTeams')}
                   </Button>
                 </div>
                 {!session.teams_meeting_url && (
                   <p className="text-xs text-muted-foreground">
-                    💡 A transcrição do Teams só aparece se a transcrição tiver sido ativada durante a reunião e a reunião já tiver terminado.
+                    💡 {t('sessions.ai.teamsTranscriptHint')}
                   </p>
                 )}
               </div>
