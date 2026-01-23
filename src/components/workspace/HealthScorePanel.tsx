@@ -59,12 +59,13 @@ export function HealthScorePanel({
     setShowNotesEditor(false);
   };
 
+  // Softer status colors - using muted tones to reduce visual noise
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case 'green': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case 'yellow': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'red': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-muted text-muted-foreground';
+      case 'green': return 'bg-health-healthy/10 text-health-healthy border-health-healthy/20';
+      case 'yellow': return 'bg-health-at-risk/10 text-health-at-risk border-health-at-risk/20';
+      case 'red': return 'bg-health-critical/10 text-health-critical border-health-critical/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -92,8 +93,8 @@ export function HealthScorePanel({
         <div className="flex items-center gap-3">
           <HealthBadge score={healthScore} size="lg" />
           {healthStatus && (
-            <Badge className={`${getStatusColor(healthStatus)} border-0`}>
-              {healthStatus.toUpperCase()}
+            <Badge variant="outline" className={`${getStatusColor(healthStatus)} text-xs font-medium`}>
+              {healthStatus === 'green' ? 'Saudável' : healthStatus === 'yellow' ? 'Atenção' : healthStatus === 'red' ? 'Crítico' : healthStatus}
             </Badge>
           )}
         </div>

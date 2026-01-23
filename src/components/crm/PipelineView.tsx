@@ -23,18 +23,19 @@ import { toast } from 'sonner';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 import type { FunnelStage } from '@/hooks/useFunnel';
 
-const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string; bgColor: string }> = {
-  new: { label: 'New', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-800' },
-  first_contact_booked: { label: 'Meeting Booked', color: 'text-blue-700 dark:text-blue-300', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
-  met: { label: 'Met', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
-  qualified: { label: 'Qualified', color: 'text-purple-700 dark:text-purple-300', bgColor: 'bg-purple-50 dark:bg-purple-900/30' },
-  proposal_sent: { label: 'Proposal Sent', color: 'text-amber-700 dark:text-amber-300', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
-  negotiating: { label: 'Negotiating', color: 'text-orange-700 dark:text-orange-300', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-  contracted: { label: 'Contracted', color: 'text-green-700 dark:text-green-300', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-  incubating: { label: 'Incubating', color: 'text-emerald-700 dark:text-emerald-300', bgColor: 'bg-emerald-50 dark:bg-emerald-900/30' },
-  accelerating: { label: 'Accelerating', color: 'text-primary', bgColor: 'bg-primary/10' },
-  rejected: { label: 'Rejected', color: 'text-destructive', bgColor: 'bg-destructive/10' },
-  archived: { label: 'Archived', color: 'text-muted-foreground', bgColor: 'bg-muted' },
+// Stage config with i18n keys - labels resolved via t() at render time
+const STAGE_CONFIG: Record<FunnelStage, { labelKey: string; color: string; bgColor: string }> = {
+  new: { labelKey: 'pipeline.stages.new', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-800' },
+  first_contact_booked: { labelKey: 'pipeline.stages.first_contact_booked', color: 'text-blue-700 dark:text-blue-300', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
+  met: { labelKey: 'pipeline.stages.met', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
+  qualified: { labelKey: 'pipeline.stages.qualified', color: 'text-purple-700 dark:text-purple-300', bgColor: 'bg-purple-50 dark:bg-purple-900/30' },
+  proposal_sent: { labelKey: 'pipeline.stages.proposal_sent', color: 'text-amber-700 dark:text-amber-300', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
+  negotiating: { labelKey: 'pipeline.stages.negotiating', color: 'text-orange-700 dark:text-orange-300', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
+  contracted: { labelKey: 'pipeline.stages.contracted', color: 'text-green-700 dark:text-green-300', bgColor: 'bg-green-50 dark:bg-green-900/30' },
+  incubating: { labelKey: 'pipeline.stages.incubating', color: 'text-emerald-700 dark:text-emerald-300', bgColor: 'bg-emerald-50 dark:bg-emerald-900/30' },
+  accelerating: { labelKey: 'pipeline.stages.accelerating', color: 'text-primary', bgColor: 'bg-primary/10' },
+  rejected: { labelKey: 'pipeline.stages.rejected', color: 'text-destructive', bgColor: 'bg-destructive/10' },
+  archived: { labelKey: 'pipeline.stages.archived', color: 'text-muted-foreground', bgColor: 'bg-muted' },
 };
 
 interface PipelineViewProps {
@@ -114,14 +115,30 @@ export function PipelineView({
         id: itemId,
         stage: newStage,
       });
-      toast.success(t('crm.stageMoved', { stage: STAGE_CONFIG[newStage].label }));
+      toast.success(t('crm.stageMoved', { stage: t(STAGE_CONFIG[newStage].labelKey) }));
     } catch (error) {
       toast.error(t('crm.stageMoveFailed'));
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+          <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-4 min-w-max">
+            {[1, 2, 3, 4, 5, 6, 7].map(i => (
+              <div key={i} className="w-72 flex-shrink-0">
+                <div className="h-[500px] bg-muted/30 rounded-xl animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const totalItems = PIPELINE_STAGES.reduce((sum, stage) => sum + (pipeline?.[stage]?.length || 0), 0);
@@ -168,7 +185,7 @@ export function PipelineView({
 interface PipelineColumnProps {
   stage: FunnelStage;
   items: CrmInboxItem[];
-  config: { label: string; color: string; bgColor: string };
+  config: { labelKey: string; color: string; bgColor: string };
   onOpenDrawer: (item: CrmInboxItem) => void;
 }
 
@@ -190,7 +207,7 @@ function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnPr
       >
         <CardHeader className="py-3 px-4">
           <CardTitle className={cn('text-sm font-semibold flex items-center justify-between', config.color)}>
-            <span>{config.label}</span>
+            <span>{t(config.labelKey)}</span>
             <Badge 
               variant="secondary" 
               className={cn('text-xs font-medium', config.color, 'bg-background/80')}
@@ -202,8 +219,11 @@ function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnPr
         <CardContent className="p-2 pt-0">
           <ScrollArea className="h-[calc(100vh-320px)] min-h-[400px]">
             {items.length === 0 ? (
-              <div className="p-4 text-center text-xs text-muted-foreground">
-                {t('crm.noItems')}
+              <div className="p-6 text-center">
+                <div className="h-8 w-8 mx-auto mb-2 rounded-full bg-muted/50 flex items-center justify-center">
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </div>
+                <p className="text-xs text-muted-foreground">{t('crm.emptyColumn', 'Arraste leads para aqui')}</p>
               </div>
             ) : (
               <div className="space-y-2">
