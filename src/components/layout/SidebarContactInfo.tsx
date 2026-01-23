@@ -132,7 +132,7 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-sidebar-muted hover:text-sidebar-foreground"
+                  className="h-7 w-7 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                   asChild
                 >
                   <a href={`mailto:${profile.email}`}>
