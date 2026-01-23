@@ -209,7 +209,8 @@ export function FounderDashboard({
         <FounderBookingCTA workspaceId={workspace.id} />
       </section>
 
-      {/* MAIN BLOCK 1: Startup Card */}
+      {/* MAIN BLOCK 1: Startup Card - Journey-first, Health secondary */}
+      {/* UX EMPHASIS: Founders see their journey/phase prominently, health is informational not alarming */}
       <Card className="overflow-hidden border-border/60 rounded-2xl shadow-sm">
         <div className="bg-muted/40 p-4 sm:p-6">
           <div className="flex items-center gap-4">
@@ -222,13 +223,15 @@ export function FounderDashboard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-lg font-semibold truncate">{workspace.startup?.name}</h1>
-                <HealthBadge score={health as HealthScore | null} size="sm" />
               </div>
+              {/* UX: Stage badge is PRIMARY for founders - their journey position */}
               <div className="flex items-center gap-2">
+                <StageBadge stage={workspace.stage} size="sm" />
                 <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full border border-border/50">
                   {workspace.program?.name}
                 </Badge>
-                <StageBadge stage={workspace.stage} size="sm" />
+                {/* Health badge is shown but secondary - not the focus */}
+                <HealthBadge score={health as HealthScore | null} size="sm" />
               </div>
             </div>
             <Button 
