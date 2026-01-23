@@ -61,17 +61,19 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
     );
   }
 
+  // Calmer alert icons - use amber instead of harsh red for critical
   const getAlertIcon = (alert: HealthAlert) => {
     if (alert.status === 'snoozed') return <BellOff className="h-4 w-4 text-muted-foreground" />;
-    if (alert.status === 'acknowledged') return <Check className="h-4 w-4 text-green-600" />;
+    if (alert.status === 'acknowledged') return <Check className="h-4 w-4 text-health-healthy" />;
     if (alert.status === 'resolved') return <Check className="h-4 w-4 text-muted-foreground" />;
-    if (alert.severity === 'critical') return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+    if (alert.severity === 'critical') return <AlertTriangle className="h-4 w-4 text-health-at-risk" />;
     return <Bell className="h-4 w-4 text-muted-foreground" />;
   };
 
+  // Softer alert styling - reduce visual intensity
   const getAlertStyles = (alert: HealthAlert) => {
     if (alert.status !== 'active') return 'bg-muted/30 opacity-60';
-    if (alert.severity === 'critical') return 'bg-amber-50/50 border-amber-200/60 dark:bg-amber-950/20 dark:border-amber-800/40';
+    if (alert.severity === 'critical') return 'bg-health-at-risk/5 border-health-at-risk/20';
     return 'bg-muted/30 border-border/60';
   };
 
@@ -84,7 +86,7 @@ export function HealthAlertsCard({ workspaceId, canManage = false, className }: 
             {t('alerts.healthAlerts', 'Health Alerts')}
           </CardTitle>
           {activeAlerts.length > 0 && (
-            <Badge variant="secondary" className="text-xs bg-amber-100/60 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <Badge variant="secondary" className="text-xs bg-health-at-risk/10 text-health-at-risk">
               {activeAlerts.length} {t('alerts.active', 'active')}
             </Badge>
           )}

@@ -31,6 +31,21 @@
       "financialModelDesc": "Análise financeira"
     }
   },
+  "pipeline": {
+    "stages": {
+      "new": "Novo",
+      "first_contact_booked": "Reunião Agendada",
+      "met": "Reunido",
+      "qualified": "Qualificado",
+      "proposal_sent": "Proposta Enviada",
+      "negotiating": "Em Negociação",
+      "contracted": "Contratado",
+      "incubating": "Em Incubação",
+      "accelerating": "Em Aceleração",
+      "rejected": "Rejeitado",
+      "archived": "Arquivado"
+    }
+  },
   "dataroom": {
     "title": "Dataroom",
     "description": "Documentos e relatórios para investidores",

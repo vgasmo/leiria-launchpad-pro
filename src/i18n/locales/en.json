@@ -63,6 +63,21 @@
     "contactSupport": "Need help? Contact support",
     "logout": "Sign Out"
   },
+  "pipeline": {
+    "stages": {
+      "new": "New",
+      "first_contact_booked": "Meeting Booked",
+      "met": "Met",
+      "qualified": "Qualified",
+      "proposal_sent": "Proposal Sent",
+      "negotiating": "Negotiating",
+      "contracted": "Contracted",
+      "incubating": "Incubating",
+      "accelerating": "Accelerating",
+      "rejected": "Rejected",
+      "archived": "Archived"
+    }
+  },
   "dataroom": {
     "title": "Dataroom",
     "description": "Documents and reports for investors",
