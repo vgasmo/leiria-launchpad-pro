@@ -93,20 +93,15 @@ export default function MentorNda() {
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting NDA acceptance...');
       const { data, error } = await supabase.functions.invoke('accept-mentor-nda', {
         body: {}  // Explicit empty body for POST
       });
       
-      console.log('NDA response:', { data, error });
-      
       if (error) {
-        console.error('Function invoke error:', error);
         throw new Error(error.message || 'Failed to invoke function');
       }
       
       if (data?.error) {
-        console.error('Function returned error:', data.error);
         throw new Error(data.error);
       }
       

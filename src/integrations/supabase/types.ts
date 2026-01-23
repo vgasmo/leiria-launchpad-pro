@@ -6782,7 +6782,12 @@ export type Database = {
         Args: { _nda_version?: string; _user_id: string }
         Returns: boolean
       }
-      has_active_workspace_access: { Args: { ws_id: string }; Returns: boolean }
+      has_active_workspace_access:
+        | {
+            Args: { _user_id: string; _workspace_id: string }
+            Returns: boolean
+          }
+        | { Args: { ws_id: string }; Returns: boolean }
       has_any_role: { Args: { _user_id: string }; Returns: boolean }
       has_program_access: { Args: { _program_id: string }; Returns: boolean }
       has_role: {
@@ -6798,6 +6803,7 @@ export type Database = {
             Returns: boolean
           }
         | { Args: { _workspace_id: string }; Returns: boolean }
+      is_account_active: { Args: { _user_id: string }; Returns: boolean }
       is_admin:
         | { Args: never; Returns: boolean }
         | { Args: { _user_id: string }; Returns: boolean }

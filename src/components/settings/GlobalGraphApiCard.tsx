@@ -100,16 +100,11 @@ export function GlobalGraphApiCard() {
 
     setIsTesting(true);
     try {
-      console.log('[GlobalGraphApiCard] Testing Graph API with email:', testEmail);
-
       const { data, error } = await invokeWithAuth('test-graph-api', {
         body: { test_email: testEmail },
       });
 
-      console.log('[GlobalGraphApiCard] Test response:', { data, error });
-
       if (error) {
-        console.error('[GlobalGraphApiCard] Edge function error:', error);
         throw error;
       }
 

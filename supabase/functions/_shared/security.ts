@@ -235,6 +235,38 @@ export async function validateWorkspaceAccess(
 }
 
 /**
+ * Check if user account is active (not pending/suspended)
+ * Use this for functions that should reject blocked users
+ */
+export async function isAccountActive(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data: isActive } = await supabase.rpc('is_account_active', {
+    _user_id: userId,
+  });
+
+  return isActive === true;
+}
+
+/**
+ * Validate workspace access AND account is active
+ * Combines both checks for sensitive operations
+ */
+export async function validateActiveWorkspaceAccess(
+  supabase: SupabaseClient,
+  userId: string,
+  workspaceId: string
+): Promise<boolean> {
+  const { data: hasAccess } = await supabase.rpc('has_active_workspace_access', {
+    _user_id: userId,
+    _workspace_id: workspaceId,
+  });
+
+  return hasAccess === true;
+}
+
+/**
  * Check AI rate limit for a user
  * Returns true if within limit, false if exceeded
  */
