@@ -705,8 +705,8 @@ function KpiCard({
                   border: '1px solid hsl(var(--border))',
                   borderRadius: 6,
                 }}
-                formatter={(value: number) => [
-                  value !== null ? `${value.toLocaleString()}${def.unit ? ` ${def.unit}` : ''}` : 'No data',
+                formatter={(value: number, name: string) => [
+                  value !== null ? `${value.toLocaleString()}${def.unit ? ` ${def.unit}` : ''}` : t('common.noData', 'Sem dados'),
                   def.name
                 ]}
               />

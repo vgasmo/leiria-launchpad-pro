@@ -6,6 +6,7 @@ import { Download, CheckCircle, Clock, AlertCircle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -64,7 +65,17 @@ export function SurveyResponsesViewer({ campaignId }: SurveyResponsesViewerProps
 
   if (isLoading) {
     return (
-      <div className="text-center py-8 text-muted-foreground">Loading...</div>
+      <div className="space-y-4">
+        <div className="flex justify-between">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -184,7 +195,9 @@ function InstanceDetailDialog({
         </DialogHeader>
 
         {isLoading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading...</div>
+          <div className="space-y-4 py-4">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+          </div>
         ) : (
           <div className="space-y-6">
             {sections.map((section) => (

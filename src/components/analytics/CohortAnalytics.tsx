@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCohortAnalytics } from '@/hooks/useCohortAnalytics';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,7 @@ const HEALTH_COLORS: Record<string, string> = {
 const STAGE_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
 export function CohortAnalytics() {
+  const { t } = useTranslation();
   const [selectedProgram, setSelectedProgram] = useState<string>('all');
   const { data: programs } = usePrograms();
   const { data: stats, isLoading } = useCohortAnalytics(selectedProgram === 'all' ? undefined : selectedProgram);
@@ -93,13 +95,13 @@ export function CohortAnalytics() {
     <div className="space-y-6">
       {/* Program Selector */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Cohort Analytics</h2>
+        <h2 className="text-xl font-semibold">{t('analytics.cohortAnalytics', 'Análise de Coorte')}</h2>
         <Select value={selectedProgram} onValueChange={setSelectedProgram}>
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select program" />
+            <SelectValue placeholder={t('analytics.selectProgram', 'Selecionar programa')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
+            <SelectItem value="all">{t('analytics.allPrograms', 'Todos os Programas')}</SelectItem>
             {programs?.map(p => (
               <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
             ))}
@@ -113,12 +115,12 @@ export function CohortAnalytics() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Total Startups
+              {t('analytics.totalStartups', 'Total de Startups')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{normalizedStats?.totalStartups || 0}</div>
-            <p className="text-xs text-muted-foreground">across {stats?.length || 0} programs</p>
+            <p className="text-xs text-muted-foreground">{t('analytics.acrossPrograms', 'em {{count}} programas', { count: stats?.length || 0 })}</p>
           </CardContent>
         </Card>
 
@@ -126,12 +128,12 @@ export function CohortAnalytics() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Avg Overdue Actions
+              {t('analytics.avgOverdueActions', 'Ações Atrasadas (média)')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{normalizedStats?.avgOverdueActions.toFixed(1) || 0}</div>
-            <p className="text-xs text-muted-foreground">per startup</p>
+            <p className="text-xs text-muted-foreground">{t('analytics.perStartup', 'por startup')}</p>
           </CardContent>
         </Card>
 
@@ -139,12 +141,12 @@ export function CohortAnalytics() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Avg Pending Actions
+              {t('analytics.avgPendingActions', 'Ações Pendentes (média)')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{normalizedStats?.avgPendingActions.toFixed(1) || 0}</div>
-            <p className="text-xs text-muted-foreground">per startup</p>
+            <p className="text-xs text-muted-foreground">{t('analytics.perStartup', 'por startup')}</p>
           </CardContent>
         </Card>
 
@@ -152,7 +154,7 @@ export function CohortAnalytics() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              KPI Completion
+              {t('analytics.kpiCompletion', 'Conclusão de KPIs')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -180,7 +182,7 @@ export function CohortAnalytics() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Health Distribution
+              {t('analytics.healthDistribution', 'Distribuição de Saúde')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -206,7 +208,7 @@ export function CohortAnalytics() {
               </ResponsiveContainer>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
+                {t('common.noData', 'Sem dados')}
               </div>
             )}
           </CardContent>
@@ -215,7 +217,7 @@ export function CohortAnalytics() {
         {/* Stage Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Stage Distribution</CardTitle>
+            <CardTitle className="text-lg">{t('analytics.stageDistribution', 'Distribuição por Fase')}</CardTitle>
           </CardHeader>
           <CardContent>
             {stageChartData.length > 0 ? (
@@ -234,7 +236,7 @@ export function CohortAnalytics() {
               </ResponsiveContainer>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
+                {t('common.noData', 'Sem dados')}
               </div>
             )}
           </CardContent>
@@ -245,7 +247,7 @@ export function CohortAnalytics() {
       {stats && stats.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Program Breakdown</CardTitle>
+            <CardTitle className="text-lg">{t('analytics.programBreakdown', 'Detalhe por Programa')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -257,23 +259,23 @@ export function CohortAnalytics() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Critical/At Risk</span>
+                      <span className="text-muted-foreground">{t('analytics.criticalAtRisk', 'Crítico/Em Risco')}</span>
                       <p className="font-medium text-red-500">
                         {program.healthDistribution.critical + program.healthDistribution.at_risk}
                       </p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Healthy/Thriving</span>
+                      <span className="text-muted-foreground">{t('analytics.healthyThriving', 'Saudável/Excelente')}</span>
                       <p className="font-medium text-green-500">
                         {program.healthDistribution.healthy + program.healthDistribution.thriving}
                       </p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Avg Overdue</span>
+                      <span className="text-muted-foreground">{t('analytics.avgOverdue', 'Média Atrasadas')}</span>
                       <p className="font-medium">{program.avgOverdueActions.toFixed(1)}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">KPI Rate</span>
+                      <span className="text-muted-foreground">{t('analytics.kpiRate', 'Taxa KPIs')}</span>
                       <p className="font-medium">{program.kpiCompletionRate.toFixed(0)}%</p>
                     </div>
                   </div>

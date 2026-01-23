@@ -687,6 +687,7 @@ function KanbanColumn({
   onOwnerChange,
   onDelete,
 }: KanbanColumnProps) {
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[status];
   
   return (
@@ -704,7 +705,7 @@ function KanbanColumn({
       <CardContent className="px-2 pb-3 space-y-2 max-h-[600px] overflow-y-auto">
         {items.length === 0 ? (
           <div className="py-8 text-center text-xs text-muted-foreground">
-            No items
+            {t('actions.noItems', 'Sem ações')}
           </div>
         ) : (
           items.map(item => (

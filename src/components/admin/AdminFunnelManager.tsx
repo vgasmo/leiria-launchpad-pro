@@ -157,7 +157,7 @@ export function AdminFunnelManager() {
                     ))}
                     {stageItems.length === 0 && (
                       <div className="p-4 text-center text-muted-foreground text-sm border border-dashed rounded-lg">
-                        No items
+                        {t('crm.emptyColumn', 'Arraste leads para aqui')}
                       </div>
                     )}
                   </div>
