@@ -28,6 +28,7 @@ interface AuthContextType {
   isFounder: boolean;
   isAccountApproved: boolean;
   isAccountPending: boolean;
+  isAccountSuspended: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, selectedRole?: 'founder' | 'mentor_externo') => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -186,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Account approval status
   const isAccountApproved = profile?.account_status === 'approved';
   const isAccountPending = profile?.account_status === 'pending';
+  const isAccountSuspended = profile?.account_status === 'suspended';
 
   return (
     <AuthContext.Provider value={{
@@ -201,6 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isFounder,
       isAccountApproved,
       isAccountPending,
+      isAccountSuspended,
       signIn,
       signUp,
       signOut
