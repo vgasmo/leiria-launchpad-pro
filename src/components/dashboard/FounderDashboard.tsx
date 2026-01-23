@@ -215,7 +215,7 @@ export function FounderDashboard({
         <div className="bg-muted/40 p-4 sm:p-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12 rounded-xl border border-border/50">
-              <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
+              <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" alt={workspace.startup?.name || 'Startup logo'} />
               <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold">
                 {workspace.startup?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>

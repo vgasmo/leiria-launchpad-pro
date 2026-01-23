@@ -71,7 +71,7 @@ export function TopBar() {
               </p>
             </div>
             <Avatar className="h-9 w-9 ring-2 ring-border transition-all duration-200 hover:ring-primary/50">
-              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User avatar'} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {initials}
               </AvatarFallback>

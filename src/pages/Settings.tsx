@@ -275,7 +275,7 @@ export default function Settings() {
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <Avatar className="h-20 w-20">
-                        <AvatarImage src={avatarUrl || undefined} />
+                        <AvatarImage src={avatarUrl || undefined} alt={profile?.full_name || 'User avatar'} />
                         <AvatarFallback className="bg-primary text-primary-foreground text-xl">
                           {initials}
                         </AvatarFallback>

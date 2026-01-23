@@ -372,7 +372,7 @@ export function AppSidebar() {
               "transition-all duration-300",
               collapsed ? "h-8 w-8" : "h-9 w-9"
             )}>
-              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User avatar'} />
               <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>

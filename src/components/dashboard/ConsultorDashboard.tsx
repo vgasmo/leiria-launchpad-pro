@@ -292,7 +292,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                   <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 rounded-lg">
-                        <AvatarImage src={item.workspace.startup?.logo_url || undefined} />
+                        <AvatarImage src={item.workspace.startup?.logo_url || undefined} alt={item.workspace.startup?.name || 'Startup logo'} />
                         <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
                           {item.workspace.startup?.name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
@@ -496,7 +496,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                     onClick={() => navigate(`/workspace/${w.id}?tab=sessions`)}
                   >
                     <Avatar className="h-7 w-7 rounded">
-                      <AvatarImage src={w.startup?.logo_url || undefined} />
+                      <AvatarImage src={w.startup?.logo_url || undefined} alt={w.startup?.name || 'Startup logo'} />
                       <AvatarFallback className="rounded bg-primary/10 text-primary text-[10px] font-semibold">
                         {w.startup?.name?.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
@@ -545,7 +545,7 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
                     onClick={() => navigate(`/workspace/${w.id}?tab=actions`)}
                   >
                     <Avatar className="h-7 w-7 rounded">
-                      <AvatarImage src={w.startup?.logo_url || undefined} />
+                      <AvatarImage src={w.startup?.logo_url || undefined} alt={w.startup?.name || 'Startup logo'} />
                       <AvatarFallback className="rounded bg-primary/10 text-primary text-[10px] font-semibold">
                         {w.startup?.name?.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
