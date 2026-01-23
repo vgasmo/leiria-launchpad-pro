@@ -3,7 +3,7 @@ import { LogOut, ShieldX, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 
 export default function SuspendedAccount() {
   const { t } = useTranslation();

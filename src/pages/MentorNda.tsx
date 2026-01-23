@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Shield, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
-import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
 const NDA_FORUM = 'Leiria';

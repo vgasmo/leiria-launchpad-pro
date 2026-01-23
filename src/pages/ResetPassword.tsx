@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import startupLeiriaLogo from '@/assets/startup-leiria-logo.png';
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 
 export default function ResetPassword() {
   const { t } = useTranslation();
