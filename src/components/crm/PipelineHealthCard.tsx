@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { differenceInDays } from 'date-fns';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { getFunnelStageLabel } from '@/lib/stageLabels';
 
 interface PipelineHealthProps {
   items: FunnelItem[];
@@ -38,20 +39,6 @@ const STAGE_ORDER: FunnelStage[] = [
   'negotiating',
   'contracted'
 ];
-
-const STAGE_LABELS: Record<FunnelStage, string> = {
-  new: 'New',
-  first_contact_booked: 'Meeting Booked',
-  met: 'Met',
-  qualified: 'Qualified',
-  proposal_sent: 'Proposal Sent',
-  negotiating: 'Negotiating',
-  contracted: 'Contracted',
-  incubating: 'Incubating',
-  accelerating: 'Accelerating',
-  rejected: 'Rejected',
-  archived: 'Archived',
-};
 
 export function PipelineHealthCard({ items }: PipelineHealthProps) {
   const { t } = useTranslation();
@@ -88,7 +75,7 @@ export function PipelineHealthCard({ items }: PipelineHealthProps) {
 
     return {
       stage,
-      label: STAGE_LABELS[stage],
+      label: getFunnelStageLabel(t, stage),
       count: stageItems.length,
       avgDaysInStage,
       conversionRate: index < STAGE_ORDER.length - 1 ? conversionRate : 100,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { 
   Shield, 
@@ -36,6 +37,7 @@ import { useStageGateReviews, useStageGateCriteria, useRequestStageGateReview, u
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { StartupStage } from '@/types/database';
+import { getStartupStageLabel } from '@/lib/stageLabels';
 
 interface GovernanceTabProps {
   workspaceId: string;
@@ -46,15 +48,8 @@ interface GovernanceTabProps {
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 
-const STAGE_LABELS: Record<StartupStage, string> = {
-  ideation: 'Ideation',
-  validation: 'Validation',
-  mvp: 'MVP',
-  growth: 'Growth',
-  scale: 'Scale',
-};
-
 export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }: GovernanceTabProps) {
+  const { t } = useTranslation();
   const { isAdmin, isConsultor, isFounder } = useAuth();
   const isStaff = isAdmin || isConsultor;
   
@@ -256,7 +251,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
               className="w-full"
             >
               <Send className="h-4 w-4 mr-2" />
-              Request Stage Gate Review to {STAGE_LABELS[nextStage]}
+              {t('governance.requestReviewTo', 'Request Stage Gate Review to {{stage}}', { stage: getStartupStageLabel(t, nextStage) })}
             </Button>
           )}
 
@@ -275,7 +270,10 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileCheck className="h-5 w-5 text-primary" />
-              Requirements for {STAGE_LABELS[currentStage]} → {nextStage ? STAGE_LABELS[nextStage] : 'Next Stage'}
+              {t('governance.requirementsFor', 'Requirements for {{from}} → {{to}}', { 
+                from: getStartupStageLabel(t, currentStage), 
+                to: nextStage ? getStartupStageLabel(t, nextStage) : t('governance.nextStage', 'Next Stage') 
+              })}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -330,9 +328,12 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
       <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Stage Gate Review</DialogTitle>
+            <DialogTitle>{t('governance.requestReviewTitle', 'Request Stage Gate Review')}</DialogTitle>
             <DialogDescription>
-              Request a review to advance from {STAGE_LABELS[currentStage]} to {nextStage ? STAGE_LABELS[nextStage] : 'next stage'}
+              {t('governance.requestReviewDesc', 'Request a review to advance from {{from}} to {{to}}', { 
+                from: getStartupStageLabel(t, currentStage), 
+                to: nextStage ? getStartupStageLabel(t, nextStage) : t('governance.nextStage', 'next stage') 
+              })}
             </DialogDescription>
           </DialogHeader>
           
@@ -364,11 +365,14 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Review Stage Gate Request</DialogTitle>
+            <DialogTitle>{t('governance.reviewRequestTitle', 'Review Stage Gate Request')}</DialogTitle>
             <DialogDescription>
               {selectedReview && (
                 <>
-                  Review request from {STAGE_LABELS[selectedReview.from_stage as StartupStage]} to {STAGE_LABELS[selectedReview.to_stage as StartupStage]}
+                  {t('governance.reviewRequestDesc', 'Review request from {{from}} to {{to}}', {
+                    from: getStartupStageLabel(t, selectedReview.from_stage as StartupStage),
+                    to: getStartupStageLabel(t, selectedReview.to_stage as StartupStage)
+                  })}
                 </>
               )}
             </DialogDescription>
