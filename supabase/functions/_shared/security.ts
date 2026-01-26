@@ -196,13 +196,15 @@ export async function requireCronOrStaff(
     };
   }
 
-  // Check if user is staff
+  // Check if user is staff (admin, consultor, or administrativo)
   const { data: roles } = await supabaseAdminClient
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id);
 
-  const isStaff = roles?.some(r => r.role === 'admin' || r.role === 'consultor');
+  const isStaff = roles?.some(r => 
+    r.role === 'admin' || r.role === 'consultor' || r.role === 'administrativo'
+  );
   
   if (!isStaff) {
     return {

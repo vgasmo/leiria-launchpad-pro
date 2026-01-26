@@ -4341,5 +4341,47 @@
     "doing": "A Fazer",
     "done": "Concluída",
     "noItems": "Sem ações"
+  },
+  "crm": {
+    "bulk": {
+      "selectedCount": "{{count}} selecionados",
+      "moveTo": "Mover para",
+      "assign": "Atribuir",
+      "moveConfirmTitle": "Mover {{count}} leads para {{stage}}?",
+      "moveConfirmDesc": "Isto irá atualizar o estágio para todos os leads selecionados, registar a alteração e acionar emails configurados.",
+      "moveSuccess": "{{count}} leads movidos para {{stage}}",
+      "moveFailed": "Falha ao atualizar leads",
+      "assignConfirmTitle": "Atribuir {{count}} leads a {{name}}?",
+      "assignConfirmDesc": "Isto irá atualizar o proprietário para todos os leads selecionados.",
+      "assignSuccess": "{{count}} leads atribuídos a {{name}}",
+      "assignFailed": "Falha ao atribuir leads",
+      "nextActionConfirmTitle": "Definir próxima ação para {{count}} leads?",
+      "nextActionConfirmDesc": "Isto irá definir a data da próxima ação para amanhã ({{date}}) para todos os leads sem próxima ação.",
+      "nextActionSuccess": "Próximas ações definidas",
+      "nextActionFailed": "Falha ao definir próximas ações",
+      "archiveConfirmTitle": "Arquivar {{count}} leads?",
+      "archiveConfirmDesc": "Isto irá mover todos os leads selecionados para arquivado. Pode restaurá-los mais tarde.",
+      "archiveSuccess": "{{count}} leads arquivados",
+      "archiveFailed": "Falha ao arquivar leads",
+      "setNextAction": "Definir Próxima Ação (Amanhã)",
+      "archiveSelected": "Arquivar Selecionados",
+      "selectLeads": "Selecione leads para ações em massa"
+    }
+  },
+  "governance": {
+    "requestReviewTo": "Pedir Revisão Stage Gate para {{stage}}",
+    "requirementsFor": "Requisitos para {{from}} → {{to}}",
+    "nextStage": "Próxima Fase",
+    "requestReviewTitle": "Pedir Revisão Stage Gate",
+    "requestReviewDesc": "Pedir uma revisão para avançar de {{from}} para {{to}}",
+    "reviewRequestTitle": "Rever Pedido Stage Gate",
+    "reviewRequestDesc": "Rever pedido de {{from}} para {{to}}"
+  },
+  "stages": {
+    "ideation": "Ideação",
+    "validation": "Validação",
+    "mvp": "MVP",
+    "growth": "Crescimento",
+    "scale": "Escala"
   }
 }

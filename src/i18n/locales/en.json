@@ -3964,5 +3964,47 @@
     "completed": "Completed",
     "cancelled": "Cancelled",
     "delayed": "Delayed"
+  },
+  "crm": {
+    "bulk": {
+      "selectedCount": "{{count}} selected",
+      "moveTo": "Move to",
+      "assign": "Assign",
+      "moveConfirmTitle": "Move {{count}} leads to {{stage}}?",
+      "moveConfirmDesc": "This will update the stage for all selected leads, log the change, and trigger any configured emails.",
+      "moveSuccess": "{{count}} leads moved to {{stage}}",
+      "moveFailed": "Failed to update leads",
+      "assignConfirmTitle": "Assign {{count}} leads to {{name}}?",
+      "assignConfirmDesc": "This will update the owner for all selected leads.",
+      "assignSuccess": "{{count}} leads assigned to {{name}}",
+      "assignFailed": "Failed to assign leads",
+      "nextActionConfirmTitle": "Set next action for {{count}} leads?",
+      "nextActionConfirmDesc": "This will set the next action date to tomorrow ({{date}}) for all selected leads without a next action.",
+      "nextActionSuccess": "Next actions set for leads",
+      "nextActionFailed": "Failed to set next actions",
+      "archiveConfirmTitle": "Archive {{count}} leads?",
+      "archiveConfirmDesc": "This will move all selected leads to the archived stage. You can restore them later if needed.",
+      "archiveSuccess": "{{count}} leads archived",
+      "archiveFailed": "Failed to archive leads",
+      "setNextAction": "Set Next Action (Tomorrow)",
+      "archiveSelected": "Archive Selected",
+      "selectLeads": "Select leads to perform bulk actions"
+    }
+  },
+  "governance": {
+    "requestReviewTo": "Request Stage Gate Review to {{stage}}",
+    "requirementsFor": "Requirements for {{from}} → {{to}}",
+    "nextStage": "Next Stage",
+    "requestReviewTitle": "Request Stage Gate Review",
+    "requestReviewDesc": "Request a review to advance from {{from}} to {{to}}",
+    "reviewRequestTitle": "Review Stage Gate Request",
+    "reviewRequestDesc": "Review request from {{from}} to {{to}}"
+  },
+  "stages": {
+    "ideation": "Ideation",
+    "validation": "Validation",
+    "mvp": "MVP",
+    "growth": "Growth",
+    "scale": "Scale"
   }
 }
