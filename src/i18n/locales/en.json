@@ -541,7 +541,22 @@
     "failedToUpdate": "Failed to update",
     "updatedCount": "Updated {{count}} actions",
     "deletedCount": "Deleted {{count}} actions",
-    "failedToLoad": "Failed to load action items"
+    "failedToLoad": "Failed to load action items",
+    "statusOpen": "Open",
+    "statusDoing": "In Progress",
+    "statusDone": "Done",
+    "statusCancelled": "Cancelled",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "formTitle": "Title",
+    "formTitlePlaceholder": "What needs to be done?",
+    "formDescription": "Description",
+    "formDescriptionPlaceholder": "Additional details...",
+    "formDueDate": "Due Date",
+    "formPriority": "Priority",
+    "assign": "Assign",
+    "unassigned": "Unassigned"
   },
   "milestones": {
     "title": "Milestones",
@@ -1120,7 +1135,15 @@
     "aboutToOpen": "You are about to open an external website:",
     "externalLinkWarning": "This link leads to an external site. Make sure you trust this destination before proceeding.",
     "openLink": "Open Link",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "categoryPitchDeck": "Pitch Deck",
+    "categoryFinancialModel": "Financial Model",
+    "categoryLegal": "Legal",
+    "categoryMarketing": "Marketing",
+    "categoryProduct": "Product",
+    "categoryTeam": "Team",
+    "categoryOther": "Other",
+    "downloadFailed": "Failed to generate download link"
   },
   "team": {
     "title": "Co-founders",

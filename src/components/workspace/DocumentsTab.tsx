@@ -51,14 +51,14 @@ interface DocumentsTabProps {
   canWrite: boolean;
 }
 
-const CATEGORIES = [
-  'Pitch Deck',
-  'Financial Model',
-  'Legal',
-  'Marketing',
-  'Product',
-  'Team',
-  'Other',
+const CATEGORY_KEYS = [
+  { key: 'pitch_deck', labelKey: 'documents.categoryPitchDeck' },
+  { key: 'financial_model', labelKey: 'documents.categoryFinancialModel' },
+  { key: 'legal', labelKey: 'documents.categoryLegal' },
+  { key: 'marketing', labelKey: 'documents.categoryMarketing' },
+  { key: 'product', labelKey: 'documents.categoryProduct' },
+  { key: 'team', labelKey: 'documents.categoryTeam' },
+  { key: 'other', labelKey: 'documents.categoryOther' },
 ];
 
 function getFileIcon(documentType: string) {
@@ -97,24 +97,25 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   useEffect(() => {
     const uploadCategory = searchParams.get('upload');
     if (uploadCategory && canWrite) {
-      // Map common param values to actual category names
-      const categoryMap: Record<string, string> = {
-        'pitch_deck': 'Pitch Deck',
-        'pitch-deck': 'Pitch Deck',
-        'pitchdeck': 'Pitch Deck',
-        'financial_model': 'Financial Model',
-        'financial-model': 'Financial Model',
-        'legal': 'Legal',
-        'marketing': 'Marketing',
-        'product': 'Product',
-        'team': 'Team',
-        'other': 'Other',
+      // Map common param values to category keys
+      const categoryKeyMap: Record<string, string> = {
+        'pitch_deck': 'pitch_deck',
+        'pitch-deck': 'pitch_deck',
+        'pitchdeck': 'pitch_deck',
+        'financial_model': 'financial_model',
+        'financial-model': 'financial_model',
+        'legal': 'legal',
+        'marketing': 'marketing',
+        'product': 'product',
+        'team': 'team',
+        'other': 'other',
       };
-      const mappedCategory = categoryMap[uploadCategory.toLowerCase()] || uploadCategory;
+      const mappedCategoryKey = categoryKeyMap[uploadCategory.toLowerCase()] || 'other';
       
-      // Only set if it's a valid category
-      if (CATEGORIES.includes(mappedCategory)) {
-        setSelectedCategory(mappedCategory);
+      // Only set if it's a valid category key
+      const validCategoryKeys = CATEGORY_KEYS.map(c => c.key);
+      if (validCategoryKeys.includes(mappedCategoryKey)) {
+        setSelectedCategory(mappedCategoryKey);
       }
       setUploadOpen(true);
       
@@ -174,7 +175,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
         const url = await getDocumentUrl(doc.file_path);
         window.open(url, '_blank');
       } catch (error) {
-        toast.error('Failed to generate download link');
+        toast.error(t('documents.downloadFailed'));
       }
     }
   };
@@ -284,8 +285,8 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                       <SelectValue placeholder={t('documents.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      {CATEGORY_KEYS.map((cat) => (
+                        <SelectItem key={cat.key} value={cat.key}>{t(cat.labelKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -346,8 +347,8 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                       <SelectValue placeholder={t('documents.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      {CATEGORY_KEYS.map((cat) => (
+                        <SelectItem key={cat.key} value={cat.key}>{t(cat.labelKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -455,7 +456,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDownload(doc)}
-                              title={doc.external_url ? 'Open link' : 'Download'}
+                              title={doc.external_url ? t('documents.openLink') : t('common.download', 'Download')}
                             >
                               {doc.external_url ? (
                                 <ExternalLink className="h-4 w-4" />

@@ -35,17 +35,17 @@ interface ActionItemsTabProps {
   canWrite: boolean;
 }
 
-const STATUS_CONFIG: Record<ActionStatus, { label: string; color: string }> = {
-  pending: { label: 'Open', color: 'bg-muted text-muted-foreground' },
-  in_progress: { label: 'Doing', color: 'bg-primary/20 text-primary' },
-  completed: { label: 'Done', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  cancelled: { label: 'Cancelled', color: 'bg-muted text-muted-foreground line-through' },
+const STATUS_CONFIG: Record<ActionStatus, { labelKey: string; color: string }> = {
+  pending: { labelKey: 'actions.statusOpen', color: 'bg-muted text-muted-foreground' },
+  in_progress: { labelKey: 'actions.statusDoing', color: 'bg-primary/20 text-primary' },
+  completed: { labelKey: 'actions.statusDone', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  cancelled: { labelKey: 'actions.statusCancelled', color: 'bg-muted text-muted-foreground line-through' },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Low', color: 'text-muted-foreground' },
-  medium: { label: 'Medium', color: 'text-yellow-600 dark:text-yellow-400' },
-  high: { label: 'High', color: 'text-destructive' },
+const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  low: { labelKey: 'actions.priorityLow', color: 'text-muted-foreground' },
+  medium: { labelKey: 'actions.priorityMedium', color: 'text-yellow-600 dark:text-yellow-400' },
+  high: { labelKey: 'actions.priorityHigh', color: 'text-destructive' },
 };
 
 export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
@@ -297,7 +297,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
             <SelectItem value="all">{t('actions.allOwners')}</SelectItem>
             {members?.map(m => (
               <SelectItem key={m.user_id} value={m.user_id}>
-                {m.profile?.full_name || m.profile?.email || 'Unknown'}
+                {m.profile?.full_name || m.profile?.email || t('common.unknown')}
               </SelectItem>
             ))}
           </SelectContent>
@@ -462,27 +462,27 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">{t('actions.formTitle')} *</Label>
               <Input
                 id="title"
                 value={newAction.title}
                 onChange={e => setNewAction(a => ({ ...a, title: e.target.value }))}
-                placeholder="What needs to be done?"
+                placeholder={t('actions.formTitlePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('actions.formDescription')}</Label>
               <Textarea
                 id="description"
                 value={newAction.description}
                 onChange={e => setNewAction(a => ({ ...a, description: e.target.value }))}
-                placeholder="Additional details..."
+                placeholder={t('actions.formDescriptionPlaceholder')}
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="due_date">Due Date</Label>
+                <Label htmlFor="due_date">{t('actions.formDueDate')}</Label>
                 <Input
                   id="due_date"
                   type="date"
@@ -491,7 +491,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
+                <Label htmlFor="priority">{t('actions.formPriority')}</Label>
                 <Select 
                   value={newAction.priority} 
                   onValueChange={v => setNewAction(a => ({ ...a, priority: v }))}
@@ -500,9 +500,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="low">{t('actions.priorityLow')}</SelectItem>
+                    <SelectItem value="medium">{t('actions.priorityMedium')}</SelectItem>
+                    <SelectItem value="high">{t('actions.priorityHigh')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -815,7 +815,7 @@ function ActionItemCard({
           </Select>
         ) : (
           <Badge variant="outline" className="text-xs">
-            {STATUS_CONFIG[item.status].label}
+            {t(STATUS_CONFIG[item.status].labelKey)}
           </Badge>
         )}
 
@@ -858,7 +858,7 @@ function ActionItemCard({
               <SelectItem value="none">{t('actions.unassigned', 'Não atribuído')}</SelectItem>
               {members.map(m => (
                 <SelectItem key={m.user_id} value={m.user_id}>
-                  {m.profile?.full_name || m.profile?.email || 'Unknown'}
+                  {m.profile?.full_name || m.profile?.email || t('common.unknown')}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -871,7 +871,7 @@ function ActionItemCard({
         ) : null}
 
         <span className={`text-xs ${priorityConfig.color}`}>
-          {priorityConfig.label}
+          {t(priorityConfig.labelKey)}
         </span>
       </div>
     </div>

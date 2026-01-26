@@ -187,8 +187,8 @@ serve(async (req: Request) => {
       });
 
       const subject = isApproved
-        ? `✅ Template aprovado: ${templateName}`
-        : `📝 Alterações necessárias: ${templateName}`;
+        ? `✅ Template aprovado: ${templateName} - ${startupName}`
+        : `📝 Alterações necessárias: ${templateName} - ${startupName}`;
 
       try {
         const emailResponse = await fetch("https://api.resend.com/emails", {
