@@ -594,6 +594,7 @@ function MilestoneActionGroup({
   isSelected,
   onToggleSelect,
 }: MilestoneActionGroupProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
@@ -610,7 +611,7 @@ function MilestoneActionGroup({
                 <div className="flex items-center gap-2">
                   <span className="font-medium truncate">{milestone.title}</span>
                   <Badge variant="outline" className="text-xs shrink-0">
-                    {completedCount}/{actions.length} actions
+                    {completedCount}/{actions.length} {t('actions.actionsLabel', 'ações')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -629,7 +630,7 @@ function MilestoneActionGroup({
                   }}
                 >
                   <Plus className="h-3 w-3 mr-1" />
-                  Add
+                  {t('common.add', 'Adicionar')}
                 </Button>
               )}
             </div>
@@ -639,7 +640,7 @@ function MilestoneActionGroup({
           <CardContent className="px-4 pb-4 pt-0 space-y-2">
             {actions.length === 0 ? (
               <div className="py-4 text-center text-sm text-muted-foreground">
-                No actions yet. Add actions to track progress.
+                {t('actions.noActionsYet', 'Ainda sem ações. Adicione ações para acompanhar o progresso.')}
               </div>
             ) : (
               actions.map(item => (
@@ -751,7 +752,8 @@ function ActionItemCard({
   isSelected,
   onToggleSelect,
 }: ActionItemCardProps) {
-  const isOverdue = item.due_date && 
+  const { t } = useTranslation();
+  const isOverdue = item.due_date &&
     isPast(parseISO(item.due_date)) && 
     !isToday(parseISO(item.due_date)) && 
     item.status !== 'completed';
@@ -795,7 +797,7 @@ function ActionItemCard({
       {isOverdue && (
         <div className="flex items-center gap-1 text-xs text-destructive font-medium">
           <AlertTriangle className="h-3 w-3" />
-          Overdue
+          {t('actions.overdue', 'Atrasada')}
         </div>
       )}
 
@@ -806,9 +808,9 @@ function ActionItemCard({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="pending">Open</SelectItem>
-              <SelectItem value="in_progress">Doing</SelectItem>
-              <SelectItem value="completed">Done</SelectItem>
+              <SelectItem value="pending">{t('status.open', 'Aberta')}</SelectItem>
+              <SelectItem value="in_progress">{t('status.doing', 'A Fazer')}</SelectItem>
+              <SelectItem value="completed">{t('status.done', 'Concluída')}</SelectItem>
             </SelectContent>
           </Select>
         ) : (
@@ -849,11 +851,11 @@ function ActionItemCard({
             <SelectTrigger className="h-6 w-auto px-2 text-xs border-dashed max-w-[100px]">
               <User className="h-3 w-3 mr-1 shrink-0" />
               <span className="truncate">
-                {item.owner?.full_name?.split(' ')[0] || 'Assign'}
+                {item.owner?.full_name?.split(' ')[0] || t('actions.assign', 'Atribuir')}
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">Unassigned</SelectItem>
+              <SelectItem value="none">{t('actions.unassigned', 'Não atribuído')}</SelectItem>
               {members.map(m => (
                 <SelectItem key={m.user_id} value={m.user_id}>
                   {m.profile?.full_name || m.profile?.email || 'Unknown'}
