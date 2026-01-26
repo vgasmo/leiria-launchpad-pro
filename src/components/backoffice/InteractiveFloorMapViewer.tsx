@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2 } from 'lucide-react';
+import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2, Square, Pentagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type Room, type FloorMap, useUpdateRoom } from '@/hooks/useBackoffice';
+import { type Room, type FloorMap, type RoomShapeRect, type RoomShapePolygon, useUpdateRoom } from '@/hooks/useBackoffice';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -38,10 +38,18 @@ export function InteractiveFloorMapViewer({
   const imageRef = useRef<HTMLDivElement>(null);
   const updateRoom = useUpdateRoom();
 
-  // Get rooms that have pins on this floor map
-  const roomsWithPins = rooms.filter(r => r.floor_map_id === floorMap?.id && r.pin_x != null && r.pin_y != null);
+  // Get rooms on this floor map (with pins or shapes)
+  const roomsOnMap = rooms.filter(r => 
+    r.floor_map_id === floorMap?.id && 
+    ((r.shape_type === 'pin' && r.pin_x != null && r.pin_y != null) ||
+     (r.shape_type !== 'pin' && r.shape_json))
+  );
+
+  // Separate rooms by type for rendering order (shapes first, then pins on top)
+  const roomsWithShapes = roomsOnMap.filter(r => r.shape_type !== 'pin' && r.shape_json);
+  const roomsWithPins = roomsOnMap.filter(r => r.shape_type === 'pin' || (!r.shape_json && r.pin_x != null));
   
-  // Get rooms that could be placed on this map (same floor/building, no pin yet or on this map)
+  // Get rooms that could be placed on this map (same floor/building, no placement yet or on this map)
   const availableRoomsForPinning = rooms.filter(r => 
     !r.floor_map_id || r.floor_map_id === floorMap?.id
   );
@@ -158,7 +166,95 @@ export function InteractiveFloorMapViewer({
                   draggable={false}
                 />
 
-                {/* Render pins */}
+                {/* SVG Overlay for shapes */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  {roomsWithShapes.map(room => {
+                    const allocation = room.current_allocation;
+                    const isOccupied = !!allocation;
+                    const fillClass = isOccupied ? 'fill-primary/30' : 'fill-accent/30';
+                    const strokeClass = isOccupied ? 'stroke-primary' : 'stroke-accent-foreground';
+                    
+                    if (room.shape_type === 'rect' && room.shape_json) {
+                      const shape = room.shape_json as RoomShapeRect;
+                      return (
+                        <g key={room.id} className="pointer-events-auto cursor-pointer">
+                          <rect
+                            x={`${shape.x}%`}
+                            y={`${shape.y}%`}
+                            width={`${shape.w}%`}
+                            height={`${shape.h}%`}
+                            className={cn(
+                              fillClass,
+                              strokeClass,
+                              'stroke-2 transition-all hover:opacity-80'
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!editMode && onRoomClick) {
+                                onRoomClick(room);
+                              }
+                            }}
+                          />
+                          <text
+                            x={`${shape.x + shape.w / 2}%`}
+                            y={`${shape.y + shape.h / 2}%`}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className={cn(
+                              'text-xs font-medium pointer-events-none',
+                              isOccupied ? 'fill-primary' : 'fill-foreground'
+                            )}
+                          >
+                            {room.name}
+                          </text>
+                        </g>
+                      );
+                    }
+                    
+                    if (room.shape_type === 'polygon' && room.shape_json) {
+                      const shape = room.shape_json as RoomShapePolygon;
+                      const points = shape.points.map(p => `${p.x}%,${p.y}%`).join(' ');
+                      // Calculate centroid for label
+                      const cx = shape.points.reduce((sum, p) => sum + p.x, 0) / shape.points.length;
+                      const cy = shape.points.reduce((sum, p) => sum + p.y, 0) / shape.points.length;
+                      
+                      return (
+                        <g key={room.id} className="pointer-events-auto cursor-pointer">
+                          <polygon
+                            points={points}
+                            className={cn(
+                              fillClass,
+                              strokeClass,
+                              'stroke-2 transition-all hover:opacity-80'
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!editMode && onRoomClick) {
+                                onRoomClick(room);
+                              }
+                            }}
+                          />
+                          <text
+                            x={`${cx}%`}
+                            y={`${cy}%`}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className={cn(
+                              'text-xs font-medium pointer-events-none',
+                              isOccupied ? 'fill-primary' : 'fill-foreground'
+                            )}
+                          >
+                            {room.name}
+                          </text>
+                        </g>
+                      );
+                    }
+                    
+                    return null;
+                  })}
+                </svg>
+
+                {/* Render pins (fallback for rooms without shapes) */}
                 <TooltipProvider>
                   {roomsWithPins.map(room => {
                     const allocation = room.current_allocation;
@@ -190,12 +286,12 @@ export function InteractiveFloorMapViewer({
                               <MapPin
                                 className={cn(
                                   'h-8 w-8 drop-shadow-lg',
-                                  isOccupied ? 'text-primary fill-primary/20' : 'text-green-500 fill-green-500/20'
+                                  isOccupied ? 'text-primary fill-primary/20' : 'text-accent-foreground fill-accent/20'
                                 )}
                               />
                               <span className={cn(
                                 'text-xs font-medium px-1.5 py-0.5 rounded bg-background/90 shadow-sm -mt-1',
-                                isOccupied ? 'text-primary' : 'text-green-600'
+                                isOccupied ? 'text-primary' : 'text-accent-foreground'
                               )}>
                                 {room.name}
                               </span>
@@ -220,7 +316,7 @@ export function InteractiveFloorMapViewer({
                                 )}
                               </div>
                             ) : (
-                              <div className="text-xs text-green-600 font-medium mt-1">
+                              <div className="text-xs text-accent-foreground font-medium mt-1">
                                 {t('backoffice.vacant', 'Vacant')}
                               </div>
                             )}
@@ -264,7 +360,7 @@ export function InteractiveFloorMapViewer({
                       <SelectItem key={room.id} value={room.id}>
                         <span className="flex items-center gap-2">
                           {room.name}
-                          {room.pin_x != null && <Check className="h-3 w-3 text-green-500" />}
+                          {room.pin_x != null && <Check className="h-3 w-3 text-accent-foreground" />}
                         </span>
                       </SelectItem>
                     ))}
@@ -352,11 +448,11 @@ export function InteractiveFloorMapViewer({
             <span>{t('backoffice.occupied', 'Occupied')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-green-500 fill-green-500/20" />
+            <MapPin className="h-4 w-4 text-accent-foreground fill-accent/20" />
             <span>{t('backoffice.vacant', 'Vacant')}</span>
           </div>
           <div className="ml-auto text-muted-foreground text-xs">
-            {roomsWithPins.length} {t('backoffice.roomsPlaced', 'rooms placed')}
+            {roomsOnMap.length} {t('backoffice.roomsPlaced', 'rooms placed')}
           </div>
         </div>
       </DialogContent>

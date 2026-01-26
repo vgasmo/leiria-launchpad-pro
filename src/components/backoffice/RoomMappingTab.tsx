@@ -15,6 +15,8 @@ import {
   DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye
 } from 'lucide-react';
 import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
+import { BuildingOccupancyPanel } from './BuildingOccupancyPanel';
+import { StartupSpaceSearch } from './StartupSpaceSearch';
 import {
   useRoomsWithAllocations,
   useCreateRoom,
@@ -534,13 +536,13 @@ export function RoomMappingTab() {
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-green-600">{availableCount}</div>
+            <div className="text-2xl font-bold text-accent-foreground">{availableCount}</div>
             <p className="text-sm text-muted-foreground">{t('backoffice.availableRooms', 'Available')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-blue-600">{occupiedCount}</div>
+            <div className="text-2xl font-bold text-primary">{occupiedCount}</div>
             <p className="text-sm text-muted-foreground">{t('backoffice.occupiedRooms', 'Occupied')}</p>
           </CardContent>
         </Card>
@@ -561,6 +563,10 @@ export function RoomMappingTab() {
           <TabsTrigger value="maps">
             <Image className="h-4 w-4 mr-2" />
             {t('backoffice.floorMaps', 'Floor Maps')}
+          </TabsTrigger>
+          <TabsTrigger value="overview">
+            <Building2 className="h-4 w-4 mr-2" />
+            {t('backoffice.overview', 'Overview')}
           </TabsTrigger>
         </TabsList>
 
@@ -705,6 +711,23 @@ export function RoomMappingTab() {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </TabsContent>
+
+        {/* Overview Tab with Occupancy Panel and Search */}
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BuildingOccupancyPanel />
+            <StartupSpaceSearch
+              onViewRoom={(room) => {
+                setSelectedRoom(room);
+                setRoomDialogOpen(true);
+              }}
+              onViewFloorMap={(floorMap, room) => {
+                setSelectedFloorMap(floorMap);
+                setViewerOpen(true);
+              }}
+            />
           </div>
         </TabsContent>
       </Tabs>
