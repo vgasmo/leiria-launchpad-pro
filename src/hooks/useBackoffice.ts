@@ -611,6 +611,19 @@ export function useBackofficeDashboard() {
 // ROOMS
 // ============================================
 
+export type RoomShapeType = 'pin' | 'rect' | 'polygon';
+
+export interface RoomShapeRect {
+  x: number; // percentage 0-100
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface RoomShapePolygon {
+  points: Array<{ x: number; y: number }>; // percentage 0-100
+}
+
 export interface Room {
   id: string;
   space_id: string;
@@ -628,6 +641,9 @@ export interface Room {
   pin_x: number | null;
   pin_y: number | null;
   floor_map_id: string | null;
+  // Shape data for interactive maps (optional, defaults to pin)
+  shape_type: RoomShapeType;
+  shape_json: RoomShapeRect | RoomShapePolygon | null;
   // Joined
   space?: OfficeSpace;
   current_allocation?: RoomAllocation | null;
@@ -746,6 +762,8 @@ export function useRoomsWithAllocations(spaceId?: string) {
 
       return (rooms || []).map(room => ({
         ...room,
+        shape_type: (room.shape_type || 'pin') as RoomShapeType,
+        shape_json: (room.shape_json as unknown) as RoomShapeRect | RoomShapePolygon | null,
         current_allocation: allocMap.get(room.id) || null,
       })) as Room[];
     },
