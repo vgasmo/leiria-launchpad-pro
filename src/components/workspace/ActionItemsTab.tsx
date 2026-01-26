@@ -508,18 +508,18 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="owner">Owner</Label>
+              <Label htmlFor="owner">{t('actions.owner')}</Label>
               <Select 
                 value={newAction.owner_user_id} 
                 onValueChange={v => setNewAction(a => ({ ...a, owner_user_id: v }))}
               >
                 <SelectTrigger id="owner">
-                  <SelectValue placeholder="Assign to..." />
+                  <SelectValue placeholder={t('actions.assignTo')} />
                 </SelectTrigger>
                 <SelectContent>
                   {members?.map(m => (
                     <SelectItem key={m.user_id} value={m.user_id}>
-                      {m.profile?.full_name || m.profile?.email || 'Unknown'}
+                      {m.profile?.full_name || m.profile?.email || t('common.unknown')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -528,10 +528,10 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleCreate} disabled={createAction.isPending || !newAction.milestone_id}>
-              Create
+              {t('common.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -541,15 +541,15 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Action Item</AlertDialogTitle>
+            <AlertDialogTitle>{t('actions.deleteActionTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+              {t('actions.deleteActionConfirmation', { title: deleteTarget?.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -824,7 +824,7 @@ function ActionItemCard({
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className={`h-6 px-2 text-xs border-dashed ${isOverdue ? 'text-destructive border-destructive' : isDueToday ? 'text-yellow-600 border-yellow-500' : ''}`}>
                 <Calendar className="h-3 w-3 mr-1" />
-                {item.due_date ? format(parseISO(item.due_date), 'MMM d') : 'Due'}
+                {item.due_date ? format(parseISO(item.due_date), 'd MMM') : t('actions.dueDate')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -839,7 +839,7 @@ function ActionItemCard({
         ) : item.due_date ? (
           <Badge variant="outline" className={`text-xs ${isOverdue ? 'text-destructive border-destructive' : ''}`}>
             <Calendar className="h-3 w-3 mr-1" />
-            {format(parseISO(item.due_date), 'MMM d')}
+            {format(parseISO(item.due_date), 'd MMM')}
           </Badge>
         ) : null}
 

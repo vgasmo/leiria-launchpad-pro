@@ -530,7 +530,13 @@
     "formDueDate": "Data Limite",
     "formPriority": "Prioridade",
     "assign": "Atribuir",
-    "unassigned": "Não atribuído"
+    "unassigned": "Não atribuído",
+    "assignTo": "Atribuir a...",
+    "deleteActionTitle": "Eliminar Item de Ação",
+    "deleteActionConfirmation": "Tem a certeza que quer eliminar \"{{title}}\"? Esta ação não pode ser desfeita.",
+    "actionsLabel": "ações",
+    "noActionsYet": "Ainda sem ações. Adicione ações para acompanhar o progresso.",
+    "noItems": "Sem ações"
   },
   "milestones": {
     "title": "Marcos",

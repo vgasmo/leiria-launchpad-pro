@@ -30,9 +30,11 @@ export function GlobalQuickActions() {
     setShowFab(isWorkspacePage);
   }, [location.pathname]);
 
-  // Extract workspace ID from current path if on workspace detail page
+  // Extract workspace ID and current tab from path/query
   const workspaceMatch = location.pathname.match(/\/workspace\/([a-f0-9-]+)/);
   const currentWorkspaceId = workspaceMatch?.[1];
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab');
 
   const actions: QuickAction[] = [
     { 
@@ -144,7 +146,15 @@ export function GlobalQuickActions() {
           </DialogHeader>
 
           <div className="grid gap-2 py-4">
-            {actions.map((action) => (
+            {actions
+              .filter((action) => {
+                // Hide action if we're already on that tab
+                if (currentWorkspaceId && currentTab === action.tab) {
+                  return false;
+                }
+                return true;
+              })
+              .map((action) => (
               <Button
                 key={action.id}
                 variant="ghost"
