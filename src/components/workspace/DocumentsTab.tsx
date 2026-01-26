@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +44,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { FinancialModelPanel } from './FinancialModelPanel';
+import { useSearchParams } from 'react-router-dom';
 
 interface DocumentsTabProps {
   workspaceId: string;
@@ -73,6 +74,7 @@ function getFileIcon(documentType: string) {
 
 export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: documents, isLoading } = useDocuments(workspaceId);
   const uploadMutation = useUploadDocument();
   const addLinkMutation = useAddExternalLink();
@@ -90,6 +92,37 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
   
   const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+
+  // B6 Fix: Auto-open upload dialog with pre-selected category via query param
+  useEffect(() => {
+    const uploadCategory = searchParams.get('upload');
+    if (uploadCategory && canWrite) {
+      // Map common param values to actual category names
+      const categoryMap: Record<string, string> = {
+        'pitch_deck': 'Pitch Deck',
+        'pitch-deck': 'Pitch Deck',
+        'pitchdeck': 'Pitch Deck',
+        'financial_model': 'Financial Model',
+        'financial-model': 'Financial Model',
+        'legal': 'Legal',
+        'marketing': 'Marketing',
+        'product': 'Product',
+        'team': 'Team',
+        'other': 'Other',
+      };
+      const mappedCategory = categoryMap[uploadCategory.toLowerCase()] || uploadCategory;
+      
+      // Only set if it's a valid category
+      if (CATEGORIES.includes(mappedCategory)) {
+        setSelectedCategory(mappedCategory);
+      }
+      setUploadOpen(true);
+      
+      // Clean up the URL param
+      searchParams.delete('upload');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, canWrite]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

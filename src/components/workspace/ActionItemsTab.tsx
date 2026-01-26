@@ -848,10 +848,10 @@ function ActionItemCard({
             value={item.owner_user_id || 'none'} 
             onValueChange={(v) => onOwnerChange(item, v)}
           >
-            <SelectTrigger className="h-6 w-auto px-2 text-xs border-dashed max-w-[100px]">
+            <SelectTrigger className="h-6 w-auto px-2 text-xs border-dashed max-w-[140px]">
               <User className="h-3 w-3 mr-1 shrink-0" />
               <span className="truncate">
-                {item.owner?.full_name?.split(' ')[0] || t('actions.assign', 'Atribuir')}
+                {item.owner?.full_name || t('actions.assign', 'Atribuir')}
               </span>
             </SelectTrigger>
             <SelectContent>
@@ -864,9 +864,9 @@ function ActionItemCard({
             </SelectContent>
           </Select>
         ) : item.owner ? (
-          <Badge variant="outline" className="text-xs">
-            <User className="h-3 w-3 mr-1" />
-            {item.owner.full_name?.split(' ')[0]}
+          <Badge variant="outline" className="text-xs max-w-[140px]">
+            <User className="h-3 w-3 mr-1 shrink-0" />
+            <span className="truncate">{item.owner.full_name}</span>
           </Badge>
         ) : null}
 

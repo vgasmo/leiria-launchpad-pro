@@ -1508,7 +1508,8 @@
     "filled": "Preenchido",
     "copyToClipboard": "Copiar para Área de Transferência",
     "exportMarkdown": "Exportar Markdown",
-    "exportSuccess": "Atualização exportada como Markdown"
+    "exportSuccess": "Atualização exportada como Markdown",
+    "draftRestored": "Rascunho restaurado da sessão anterior"
   },
   "login": {
     "welcome": "Bem-vindo",

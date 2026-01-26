@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,7 +38,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { KpiImportDialog } from './KpiImportDialog';
 import { QuickHelp } from '@/components/ui/GlossaryTooltip';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { KpiSparkline } from './KpiSparkline';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 
@@ -48,6 +48,7 @@ interface KpisTabProps {
 }
 
 export function KpisTab({ workspaceId }: KpisTabProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const { data: workspace } = useWorkspace(workspaceId);
@@ -80,6 +81,16 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [pendingTargets, setPendingTargets] = useState<Record<string, string>>({});
+
+  // B2 Fix: Auto-open config dialog when navigating with ?openAddKpis=1
+  useEffect(() => {
+    if (searchParams.get('openAddKpis') === '1') {
+      setShowConfigDialog(true);
+      // Clean up the URL param after opening
+      searchParams.delete('openAddKpis');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Check if user can edit KPIs (founder or admin)
   const canEditKpis = isAdmin || userRole === 'founder';
