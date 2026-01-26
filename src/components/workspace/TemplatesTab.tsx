@@ -478,8 +478,12 @@ function TemplateEditorDialog({
     }
   }, [template?.id, instance?.id, instance?.data_json]);
 
-  // Reset form when dialog opens with new template
+  // Handle dialog close with unsaved changes protection
   const handleOpenChange = (open: boolean) => {
+    if (!open && hasChanges) {
+      const confirmClose = window.confirm(t('templates.unsavedChangesWarning', 'You have unsaved changes. Are you sure you want to close?'));
+      if (!confirmClose) return;
+    }
     if (!open) {
       onClose();
       setFormData({});

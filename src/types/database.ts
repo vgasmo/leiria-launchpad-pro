@@ -1,6 +1,6 @@
 // Application types derived from database schema
 
-export type AppRole = 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member';
+export type AppRole = 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member' | 'backoffice';
 export type StartupStage = 'ideation' | 'validation' | 'mvp' | 'growth' | 'scale';
 export type HealthScore = 'critical' | 'at_risk' | 'stable' | 'healthy' | 'thriving';
 export type WorkspacePriority = 'star' | 'high' | 'standard' | 'maintenance';

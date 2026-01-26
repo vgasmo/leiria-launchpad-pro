@@ -203,7 +203,7 @@ export async function requireCronOrStaff(
     .eq('user_id', user.id);
 
   const isStaff = roles?.some(r => 
-    r.role === 'admin' || r.role === 'consultor' || r.role === 'administrativo'
+    r.role === 'admin' || r.role === 'consultor' || r.role === 'backoffice'
   );
   
   if (!isStaff) {

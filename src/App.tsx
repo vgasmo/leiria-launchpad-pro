@@ -47,9 +47,9 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
-  const { user, isLoading, isAuthReady, isAdmin, isAccountApproved, isAccountPending, isAccountSuspended } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isStaff, isAccountPending, isAccountSuspended } = useAuth();
 
   // Wait for both auth check AND profile/roles to be fully loaded
   if (isLoading || !isAuthReady) {
@@ -73,11 +73,16 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   }
 
   // Check if account is pending approval (non-staff users)
-  if (isAccountPending && !isAdmin) {
+  if (isAccountPending && !isStaff) {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Only check admin after isAuthReady is true (roles are loaded)
+  // Staff-only routes (admin, consultor, backoffice)
+  if (staffOnly && !isStaff) {
+    return <Navigate to="/my-workspaces" replace />;
+  }
+
+  // Admin-only routes (strictly admin role)
   if (adminOnly && !isAdmin) {
     return <Navigate to="/my-workspaces" replace />;
   }
@@ -114,11 +119,11 @@ function AppRoutes() {
       <Route path="/integrations-setup" element={<ProtectedRoute><IntegrationsSetup /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
       <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
-      <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+      <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
       <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
-      <Route path="/admin/crm-diagnostics" element={<ProtectedRoute><CrmDiagnostics /></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-      <Route path="/admin/datarooms" element={<ProtectedRoute adminOnly><AdminDatarooms /></ProtectedRoute>} />
+      <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
+      <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
       <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
       <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
       <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />

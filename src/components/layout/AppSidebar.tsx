@@ -56,9 +56,8 @@ interface NavItem {
 export function AppSidebar() {
   const location = useLocation();
   const { t } = useTranslation();
-  const { profile, isAdmin, isMentor, isConsultor, roles, signOut } = useAuth();
+  const { profile, isAdmin, isMentor, isConsultor, isBackoffice, isStaff, roles, signOut } = useAuth();
   const isFounder = roles.includes('founder');
-  const isStaff = isAdmin || isConsultor;
   const [collapsed, setCollapsed] = useState(false);
   const [messagingOpen, setMessagingOpen] = useState(false);
   
@@ -115,7 +114,7 @@ export function AppSidebar() {
     { name: t('nav.mentor.notesActions', 'Notas & Ações'), href: '/my-workspaces', icon: NotebookPen },
     { name: t('nav.mentor.resources', 'Recursos'), href: '/mentors', icon: BookOpen },
     { name: t('nav.mentor.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
-    { name: t('nav.mentor.profile', 'Perfil'), href: '/profile', icon: UserCircle },
+    { name: t('nav.mentor.profile', 'Perfil'), href: '/settings', icon: UserCircle },
   ];
 
   // ADMIN Navigation (simplified)
@@ -139,6 +138,10 @@ export function AppSidebar() {
     }
     // Admin who is also consultor - show admin nav (they can access consultor tools via admin)
     if (isAdmin && isConsultor) {
+      return adminNavigation;
+    }
+    // Backoffice role sees admin nav (limited to backoffice tabs at component level)
+    if (isBackoffice) {
       return adminNavigation;
     }
     // Consultor (not admin) sees portfolio OS

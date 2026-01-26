@@ -759,6 +759,7 @@
     "export": "Exportar",
     "canvasSaved": "Canvas guardado",
     "canvasSaveFailed": "Falha ao guardar canvas",
+    "unsavedChangesWarning": "Tem alterações não guardadas. Tem a certeza que deseja fechar?",
     "submittedForReview": "Submetido para revisão",
     "submitFailed": "Falha ao submeter",
     "canvasReviewSection": "Revisão de Canvas",

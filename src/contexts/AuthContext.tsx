@@ -24,6 +24,8 @@ interface AuthContextType {
   isAuthReady: boolean;
   isAdmin: boolean;
   isConsultor: boolean;
+  isBackoffice: boolean;
+  isStaff: boolean;
   isMentor: boolean;
   isFounder: boolean;
   isAccountApproved: boolean;
@@ -181,6 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = roles.includes('admin');
   const isConsultor = roles.includes('consultor');
+  const isBackoffice = roles.includes('backoffice');
+  const isStaff = isAdmin || isConsultor || isBackoffice;
   const isMentor = roles.includes('mentor_externo') || isConsultor || isAdmin;
   const isFounder = roles.includes('founder');
   
@@ -199,6 +203,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthReady,
       isAdmin,
       isConsultor,
+      isBackoffice,
+      isStaff,
       isMentor,
       isFounder,
       isAccountApproved,
