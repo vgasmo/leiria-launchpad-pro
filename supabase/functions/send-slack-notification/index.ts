@@ -1,9 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronOrStaff } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 interface SlackNotificationRequest {
@@ -19,11 +20,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+  const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
+  });
+
+  // Security guard: require cron secret OR authenticated staff user
+  const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabase = supabaseAdmin;
 
     const { workspace_id, message, title, type = "info", link } = await req.json() as SlackNotificationRequest;
 

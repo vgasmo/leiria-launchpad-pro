@@ -133,6 +133,18 @@ export function useUpdateFunnelItem() {
           to_stage: updates.stage,
           performed_by: user?.id,
         });
+
+        // Trigger CRM stage transition email (fire-and-forget)
+        // Edge function handles idempotency and rule matching
+        supabase.functions.invoke('send-crm-stage-transition-email', {
+          body: {
+            funnel_item_id: id,
+            from_stage: current?.stage,
+            to_stage: updates.stage,
+          },
+        }).catch((err) => {
+          console.warn('CRM stage email trigger failed (non-blocking):', err);
+        });
       }
 
       return data;

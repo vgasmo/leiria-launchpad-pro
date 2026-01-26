@@ -1,12 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { requireCronOrStaff } from "../_shared/security.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 interface HealthAlertEmailRequest {
@@ -18,10 +19,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+  const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
+  });
+
+  // Security guard: require cron secret OR authenticated staff user
+  const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = supabaseAdmin;
 
     const { alert_id }: HealthAlertEmailRequest = await req.json();
 

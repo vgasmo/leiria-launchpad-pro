@@ -1,0 +1,193 @@
+/**
+ * Edge Function: send-crm-stage-transition-email
+ * 
+ * Sends automated email when a CRM funnel item transitions between stages.
+ * Uses idempotency via crm_stage_email_log to prevent duplicate sends.
+ */
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { requireCronOrStaff } from "../_shared/security.ts";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+interface StageTransitionRequest {
+  funnel_item_id: string;
+  from_stage: string;
+  to_stage: string;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+  const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
+  });
+
+  // Security guard: require cron secret OR authenticated staff user
+  const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+  if ("error" in authResult) {
+    return authResult.error;
+  }
+
+  try {
+    const { funnel_item_id, from_stage, to_stage }: StageTransitionRequest = await req.json();
+
+    if (!funnel_item_id || !from_stage || !to_stage) {
+      return new Response(
+        JSON.stringify({ error: 'funnel_item_id, from_stage, and to_stage are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Processing stage transition email: ${from_stage} → ${to_stage} for item ${funnel_item_id}`);
+
+    // 1. Find active rule for this transition
+    const { data: rule, error: ruleError } = await supabaseAdmin
+      .from('crm_stage_email_rules')
+      .select('*')
+      .eq('from_stage', from_stage)
+      .eq('to_stage', to_stage)
+      .eq('enabled', true)
+      .maybeSingle();
+
+    if (ruleError) {
+      console.error('Error fetching rule:', ruleError);
+      throw ruleError;
+    }
+
+    if (!rule) {
+      console.log(`No active email rule for transition ${from_stage} → ${to_stage}`);
+      return new Response(
+        JSON.stringify({ success: true, action: 'no_rule', sent: false }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 2. Try to insert log entry (idempotency check via UNIQUE constraint)
+    const { data: logEntry, error: logError } = await supabaseAdmin
+      .from('crm_stage_email_log')
+      .insert({
+        funnel_item_id,
+        from_stage,
+        to_stage,
+        rule_id: rule.id,
+        status: 'queued',
+      })
+      .select()
+      .single();
+
+    if (logError) {
+      // If UNIQUE constraint violation, email was already sent
+      if (logError.code === '23505') {
+        console.log(`Email already sent for this transition (idempotency check)`);
+        return new Response(
+          JSON.stringify({ success: true, action: 'already_sent', sent: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw logError;
+    }
+
+    // 3. Get funnel item details
+    const { data: funnelItem, error: itemError } = await supabaseAdmin
+      .from('funnel_items')
+      .select('id, contact_name, contact_email, organization_name')
+      .eq('id', funnel_item_id)
+      .single();
+
+    if (itemError || !funnelItem) {
+      console.error('Funnel item not found:', itemError);
+      await supabaseAdmin
+        .from('crm_stage_email_log')
+        .update({ status: 'failed', error_message: 'Funnel item not found' })
+        .eq('id', logEntry.id);
+      throw new Error(`Funnel item not found: ${funnel_item_id}`);
+    }
+
+    if (!funnelItem.contact_email) {
+      console.log('No contact email for funnel item, skipping');
+      await supabaseAdmin
+        .from('crm_stage_email_log')
+        .update({ status: 'skipped', error_message: 'No contact email' })
+        .eq('id', logEntry.id);
+      return new Response(
+        JSON.stringify({ success: true, action: 'no_email', sent: false }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 4. Prepare email with variable substitution
+    const recipientName = funnelItem.contact_name || funnelItem.organization_name || 'there';
+    const subject = rule.subject
+      .replace('{{name}}', recipientName)
+      .replace('{{organization}}', funnelItem.organization_name || '')
+      .replace('{{from_stage}}', from_stage)
+      .replace('{{to_stage}}', to_stage);
+
+    const bodyHtml = rule.body_html
+      .replace(/\{\{name\}\}/g, recipientName)
+      .replace(/\{\{organization\}\}/g, funnelItem.organization_name || '')
+      .replace(/\{\{from_stage\}\}/g, from_stage)
+      .replace(/\{\{to_stage\}\}/g, to_stage);
+
+    // 5. Send email via Resend
+    try {
+      const emailResult = await resend.emails.send({
+        from: rule.from_email || "Startup Leiria <noreply@startupleiria.com>",
+        to: [funnelItem.contact_email],
+        reply_to: rule.reply_to || undefined,
+        subject,
+        html: bodyHtml,
+      });
+
+      console.log(`Email sent successfully to ${funnelItem.contact_email}`);
+
+      // Update log entry with success
+      await supabaseAdmin
+        .from('crm_stage_email_log')
+        .update({
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+          provider_message_id: emailResult.data?.id || null,
+        })
+        .eq('id', logEntry.id);
+
+      return new Response(
+        JSON.stringify({ success: true, action: 'sent', sent: true, messageId: emailResult.data?.id }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (emailError: unknown) {
+      const errorMessage = emailError instanceof Error ? emailError.message : 'Unknown email error';
+      console.error('Failed to send email:', errorMessage);
+
+      await supabaseAdmin
+        .from('crm_stage_email_log')
+        .update({ status: 'failed', error_message: errorMessage })
+        .eq('id', logEntry.id);
+
+      return new Response(
+        JSON.stringify({ success: false, error: errorMessage }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error in send-crm-stage-transition-email:', error);
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});

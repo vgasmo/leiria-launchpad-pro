@@ -205,3 +205,7 @@ verify_jwt = false
 
 [functions.accept-workspace-invite]
 verify_jwt = false
+
+# CRM Stage Email Automation
+[functions.send-crm-stage-transition-email]
+verify_jwt = false

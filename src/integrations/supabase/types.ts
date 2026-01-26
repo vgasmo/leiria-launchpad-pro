@@ -908,6 +908,102 @@ export type Database = {
           },
         ]
       }
+      crm_stage_email_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          from_stage: string
+          funnel_item_id: string
+          id: string
+          provider_message_id: string | null
+          rule_id: string | null
+          sent_at: string | null
+          status: string | null
+          to_stage: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          from_stage: string
+          funnel_item_id: string
+          id?: string
+          provider_message_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          to_stage: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          from_stage?: string
+          funnel_item_id?: string
+          id?: string
+          provider_message_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_stage_email_log_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stage_email_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "crm_stage_email_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_stage_email_rules: {
+        Row: {
+          body_html: string
+          created_at: string | null
+          created_by: string | null
+          enabled: boolean | null
+          from_email: string | null
+          from_stage: string
+          id: string
+          reply_to: string | null
+          subject: string
+          to_stage: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_html: string
+          created_at?: string | null
+          created_by?: string | null
+          enabled?: boolean | null
+          from_email?: string | null
+          from_stage: string
+          id?: string
+          reply_to?: string | null
+          subject: string
+          to_stage: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_html?: string
+          created_at?: string | null
+          created_by?: string | null
+          enabled?: boolean | null
+          from_email?: string | null
+          from_stage?: string
+          id?: string
+          reply_to?: string | null
+          subject?: string
+          to_stage?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       dataroom_items: {
         Row: {
           created_at: string
@@ -3692,6 +3788,8 @@ export type Database = {
           pin_y: number | null
           room_number: string | null
           room_type: string
+          shape_json: Json | null
+          shape_type: string | null
           space_id: string
           status: string
           updated_at: string
@@ -3710,6 +3808,8 @@ export type Database = {
           pin_y?: number | null
           room_number?: string | null
           room_type?: string
+          shape_json?: Json | null
+          shape_type?: string | null
           space_id: string
           status?: string
           updated_at?: string
@@ -3728,6 +3828,8 @@ export type Database = {
           pin_y?: number | null
           room_number?: string | null
           room_type?: string
+          shape_json?: Json | null
+          shape_type?: string | null
           space_id?: string
           status?: string
           updated_at?: string

@@ -1,11 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronOrStaff } from "../_shared/security.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 interface TemplateNotificationRequest {
@@ -23,13 +24,22 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+    const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
+    });
+
+    // Security guard: require cron secret OR authenticated staff user
+    const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+    if ("error" in authResult) {
+      return authResult.error;
+    }
 
     const body: TemplateNotificationRequest = await req.json();
     console.log("Template notification request:", body);
 
     // Get template instance with related data
-    const { data: instance, error: instanceError } = await supabase
+    const { data: instance, error: instanceError } = await supabaseAdmin
       .from("template_instances")
       .select(`
         *,
@@ -53,7 +63,7 @@ serve(async (req: Request) => {
 
     if (body.type === "submitted") {
       // Notify consultors and mentors assigned to this workspace
-      const { data: workspaceUsers } = await supabase
+      const { data: workspaceUsers } = await supabaseAdmin
         .from("workspace_users")
         .select("user_id, role")
         .eq("workspace_id", workspaceId)
@@ -71,7 +81,7 @@ serve(async (req: Request) => {
       // Get submitter info
       let submitterName = "A founder";
       if (instance.created_by) {
-        const { data: submitter } = await supabase
+        const { data: submitter } = await supabaseAdmin
           .from("profiles")
           .select("full_name")
           .eq("id", instance.created_by)
@@ -83,7 +93,7 @@ serve(async (req: Request) => {
 
       let emailsSent = 0;
       for (const wu of workspaceUsers) {
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseAdmin
           .from("profiles")
           .select("email, full_name")
           .eq("id", wu.user_id)
@@ -138,7 +148,7 @@ serve(async (req: Request) => {
         );
       }
 
-      const { data: creator } = await supabase
+      const { data: creator } = await supabaseAdmin
         .from("profiles")
         .select("email, full_name")
         .eq("id", instance.created_by)
@@ -155,7 +165,7 @@ serve(async (req: Request) => {
       // Get reviewer name
       let reviewerName = "A team member";
       if (instance.reviewer_id) {
-        const { data: reviewer } = await supabase
+        const { data: reviewer } = await supabaseAdmin
           .from("profiles")
           .select("full_name")
           .eq("id", instance.reviewer_id)
