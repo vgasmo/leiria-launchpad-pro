@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { Plus, AlertTriangle, Calendar, User, Trash2, GripVertical, Target, ChevronDown, ChevronRight, Download } from 'lucide-react';
@@ -49,6 +50,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 
 export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: actionItems, isLoading, error } = useActionItems(workspaceId);
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
@@ -364,11 +366,11 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       {(!milestones || milestones.length === 0) ? (
         <EmptyState
           icon={Target}
-          title={t('emptyStates.actions.title')}
-          description={t('emptyStates.actions.description')}
+          title={t('emptyStates.milestones.title')}
+          description={t('emptyStates.milestones.description')}
           action={canWrite ? {
             label: t('milestones.addMilestone'),
-            onClick: () => {},
+            onClick: () => navigate(`/workspace/${workspaceId}?tab=milestones`),
             icon: Plus,
           } : undefined}
         />

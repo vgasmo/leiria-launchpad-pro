@@ -146,6 +146,10 @@ export function TeamTab({ startupId, canEdit = false }: TeamTabProps) {
             </CardTitle>
             <CardDescription>
               {t('team.memberCount', { count: members?.length || 0 })}
+              {' · '}
+              <span className="text-xs">
+                {t('team.inviteHint', 'Para dar acesso à plataforma a cofounders, use o botão "Convidar Founder" na página da startup.')}
+              </span>
             </CardDescription>
           </div>
           {canEdit && (
