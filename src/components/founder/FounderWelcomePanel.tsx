@@ -84,7 +84,8 @@ export function FounderWelcomePanel({
       label: t('onboarding.setKpis', 'Track your metrics'),
       description: t('onboarding.setKpisDesc', 'Define what matters to your growth'),
       completed: hasKpis,
-      action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=kpis`),
+      // B2 Fix: Navigate with query param to auto-open add dialog
+      action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=kpis&openAddKpis=1`),
       actionLabel: t('onboarding.addKpis', 'Add'),
       icon: <TrendingUp className="h-4 w-4" />,
     },
@@ -93,7 +94,8 @@ export function FounderWelcomePanel({
       label: t('onboarding.uploadDeck', 'Upload your deck'),
       description: t('onboarding.uploadDeckDesc', 'Share with mentors and investors'),
       completed: hasDocuments,
-      action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=documents`),
+      // B6 Fix: Navigate with query param to auto-open upload with Pitch Deck selected
+      action: () => workspaceId && navigate(`/workspace/${workspaceId}?tab=documents&upload=pitch_deck`),
       actionLabel: t('onboarding.uploadDeck', 'Upload'),
       icon: <FileText className="h-4 w-4" />,
     },

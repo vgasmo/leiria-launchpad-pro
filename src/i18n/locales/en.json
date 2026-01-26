@@ -1564,7 +1564,8 @@
     "filled": "Filled",
     "copyToClipboard": "Copy to Clipboard",
     "exportMarkdown": "Export Markdown",
-    "exportSuccess": "Update exported as Markdown"
+    "exportSuccess": "Update exported as Markdown",
+    "draftRestored": "Draft restored from previous session"
   },
   "documents": {
     "title": "Documents",

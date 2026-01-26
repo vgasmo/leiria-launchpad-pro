@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Sparkles, Copy, Search, Edit3, Download, X, ArrowLeft } from 'lucide-react';
+import { FileText, Sparkles, Copy, Search, Edit3, Download, X, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
 interface InvestorTemplate {
@@ -112,6 +113,32 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
   const [previewOpen, setPreviewOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingSections, setEditingSections] = useState<{ title: string; content: string; placeholder: string }[]>([]);
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  // B4 Fix: Draft persistence key
+  const getDraftKey = useCallback((templateId: string) => `investor_template_draft_${templateId}`, []);
+
+  // B4 Fix: Save draft to localStorage whenever editingSections changes
+  useEffect(() => {
+    if (editorOpen && selectedTemplate && editingSections.length > 0) {
+      const hasContent = editingSections.some(s => s.content.trim());
+      if (hasContent) {
+        const draftData = {
+          templateId: selectedTemplate.id,
+          sections: editingSections,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(getDraftKey(selectedTemplate.id), JSON.stringify(draftData));
+      }
+    }
+  }, [editingSections, editorOpen, selectedTemplate, getDraftKey]);
+
+  // B4 Fix: Clear draft after successful export/copy
+  const clearDraft = useCallback(() => {
+    if (selectedTemplate) {
+      localStorage.removeItem(getDraftKey(selectedTemplate.id));
+    }
+  }, [selectedTemplate, getDraftKey]);
 
   const audienceLabels: Record<string, { label: string; color: string }> = {
     angel: { label: t('investorUpdates.angel'), color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
@@ -134,13 +161,35 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
 
   const handleEditTemplate = (template: InvestorTemplate) => {
     setSelectedTemplate(template);
-    setEditingSections(template.sections.map(s => ({ ...s, content: '' })));
+    setDraftRestored(false);
+    
+    // B4 Fix: Check for existing draft
+    const draftKey = getDraftKey(template.id);
+    const savedDraft = localStorage.getItem(draftKey);
+    
+    if (savedDraft) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        if (draftData.templateId === template.id && draftData.sections) {
+          setEditingSections(draftData.sections);
+          setDraftRestored(true);
+        } else {
+          setEditingSections(template.sections.map(s => ({ ...s, content: '' })));
+        }
+      } catch {
+        setEditingSections(template.sections.map(s => ({ ...s, content: '' })));
+      }
+    } else {
+      setEditingSections(template.sections.map(s => ({ ...s, content: '' })));
+    }
+    
     setPreviewOpen(false);
     setEditorOpen(true);
   };
 
   const handleSectionChange = (index: number, content: string) => {
     setEditingSections(prev => prev.map((s, i) => i === index ? { ...s, content } : s));
+    setDraftRestored(false); // Clear the "restored" banner once user starts editing
   };
 
   const handleCopyToClipboard = () => {
@@ -149,6 +198,8 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
       .map(s => `## ${s.title}\n${s.content || s.placeholder}`)
       .join('\n\n');
     navigator.clipboard.writeText(templateText);
+    // B4 Fix: Clear draft after successful copy
+    clearDraft();
     toast.success(t('investorUpdates.templateCopied'), {
       description: t('investorUpdates.templateCopiedDesc'),
     });
@@ -168,6 +219,8 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
     a.click();
     URL.revokeObjectURL(url);
     
+    // B4 Fix: Clear draft after successful export
+    clearDraft();
     toast.success(t('investorUpdates.exportSuccess'));
   };
 
@@ -281,12 +334,12 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
         </DialogContent>
       </Dialog>
 
-      {/* Editor Dialog */}
+      {/* Editor Dialog - B3 Fix: Improved scroll layout */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden">
           {selectedTemplate && (
             <>
-              <DialogHeader>
+              <DialogHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
                     <DialogTitle className="flex items-center gap-2">
@@ -303,7 +356,18 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
                 </div>
               </DialogHeader>
               
-              <ScrollArea className="flex-1 pr-4">
+              {/* B4 Fix: Show banner when draft was restored */}
+              {draftRestored && (
+                <Alert className="flex-shrink-0 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-300">
+                    {t('investorUpdates.draftRestored', 'Draft restored from previous session')}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {/* B3 Fix: Explicit height calculation for proper scrolling */}
+              <ScrollArea className="flex-1 min-h-0 pr-4">
                 <div className="space-y-6 py-4">
                   {editingSections.map((section, i) => (
                     <div key={i} className="space-y-2">
