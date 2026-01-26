@@ -12,11 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Plus, MapPin, Users, Building2, Monitor,
-  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye
+  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye, History
 } from 'lucide-react';
 import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
 import { BuildingOccupancyPanel } from './BuildingOccupancyPanel';
 import { StartupSpaceSearch } from './StartupSpaceSearch';
+import { RoomAllocationHistory } from './RoomAllocationHistory';
 import {
   useRoomsWithAllocations,
   useCreateRoom,
@@ -511,6 +512,13 @@ export function RoomMappingTab() {
                     defaultValue={selectedRoom?.notes || ''}
                   />
                 </div>
+
+                {/* Allocation History (only when editing existing room) */}
+                {selectedRoom && (
+                  <div className="border-t pt-4">
+                    <RoomAllocationHistory roomId={selectedRoom.id} roomName={selectedRoom.name} />
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setRoomDialogOpen(false)}>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfDay, endOfDay, addDays, subDays } from 'date-fns';
-import type { FunnelStage } from './useFunnel';
+import type { FunnelStage } from '@/constants/funnelStages';
 
 export interface CrmInboxItem {
   id: string;
@@ -37,13 +37,21 @@ interface UseCrmInboxFilters {
   currentUserId?: string;
 }
 
+// Explicit select for funnel_items (P1.2 optimization)
+const FUNNEL_ITEM_FIELDS = `
+  id, stage, type, owner_consultant_id, program_id,
+  contact_name, contact_email, organization_name,
+  next_action_at, next_action_description, last_activity_at,
+  linked_workspace_id, created_at, updated_at
+`;
+
 export function useCrmInbox(filters?: UseCrmInboxFilters) {
   return useQuery({
     queryKey: ['crm-inbox', filters],
     queryFn: async (): Promise<CrmInboxGroups> => {
       let query = supabase
         .from('funnel_items')
-        .select('*')
+        .select(FUNNEL_ITEM_FIELDS)
         .not('stage', 'in', '(rejected,archived)')
         .order('next_action_at', { ascending: true, nullsFirst: false });
 
