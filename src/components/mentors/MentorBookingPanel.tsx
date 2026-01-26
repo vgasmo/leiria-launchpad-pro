@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, Check, X, Loader2, MessageSquare } from 'lucide-react';
 import { format, addDays, isBefore, startOfDay } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +39,7 @@ export function MentorBookingPanel({
   workspaceId,
   mode 
 }: MentorBookingPanelProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<string>('');
@@ -66,7 +68,7 @@ export function MentorBookingPanel({
 
   const handleBookSession = () => {
     if (!selectedDate || !selectedSlot || !mentorId) {
-      toast.error('Please select a date and time slot');
+      toast.error(t('mentors.selectDateAndSlot', 'Please select a date and time slot'));
       return;
     }
 
@@ -81,14 +83,14 @@ export function MentorBookingPanel({
       message: message.trim() || undefined,
     }, {
       onSuccess: () => {
-        toast.success('Booking request sent!');
+        toast.success(t('mentors.bookingRequestSent', 'Booking request sent!'));
         setShowBookingForm(false);
         setSelectedDate(undefined);
         setSelectedSlot('');
         setMessage('');
       },
       onError: (error: any) => {
-        toast.error(error.message || 'Failed to create booking');
+        toast.error(error.message || t('mentors.failedToCreateBooking', 'Failed to create booking'));
       },
     });
   };
@@ -96,10 +98,13 @@ export function MentorBookingPanel({
   const handleUpdateStatus = (booking: MentorBooking, status: 'accepted' | 'declined') => {
     updateStatus.mutate({ id: booking.id, status }, {
       onSuccess: () => {
-        toast.success(`Booking ${status}`);
+        const statusText = status === 'accepted' 
+          ? t('mentors.bookingAccepted', 'Booking accepted') 
+          : t('mentors.bookingDeclined', 'Booking declined');
+        toast.success(statusText);
       },
       onError: (error: any) => {
-        toast.error(error.message || 'Failed to update booking');
+        toast.error(error.message || t('mentors.failedToUpdateBooking', 'Failed to update booking'));
       },
     });
   };
@@ -121,8 +126,8 @@ export function MentorBookingPanel({
               <AvatarFallback>{getInitials(mentorName || null)}</AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-lg">Book Session with {mentorName}</CardTitle>
-              <CardDescription>Select an available time slot</CardDescription>
+              <CardTitle className="text-lg">{t('mentors.bookSessionWith', { name: mentorName })}</CardTitle>
+              <CardDescription>{t('mentors.selectAvailableSlot')}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -135,17 +140,17 @@ export function MentorBookingPanel({
           ) : !availability?.length ? (
             <div className="text-center py-6 text-muted-foreground">
               <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>This mentor hasn't set their availability yet.</p>
+              <p>{t('mentors.noAvailabilityYet')}</p>
             </div>
           ) : showBookingForm ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Select Date</Label>
+                <Label>{t('mentors.selectDate')}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {selectedDate ? format(selectedDate, 'PPP') : 'Pick a date'}
+                      {selectedDate ? format(selectedDate, 'PPP') : t('mentors.pickDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -163,10 +168,10 @@ export function MentorBookingPanel({
 
               {selectedDate && (
                 <div className="space-y-2">
-                  <Label>Select Time Slot</Label>
+                  <Label>{t('mentors.selectTimeSlot')}</Label>
                   <Select value={selectedSlot} onValueChange={setSelectedSlot}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose a time slot" />
+                      <SelectValue placeholder={t('mentors.chooseTimeSlot')} />
                     </SelectTrigger>
                     <SelectContent>
                       {getAvailableSlotsForDate(selectedDate).map(slot => (
@@ -180,11 +185,11 @@ export function MentorBookingPanel({
               )}
 
               <div className="space-y-2">
-                <Label>Message (optional)</Label>
+                <Label>{t('mentors.messageOptional')}</Label>
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="What would you like to discuss?"
+                  placeholder={t('mentors.whatToDiscuss')}
                   rows={3}
                 />
               </div>
@@ -195,7 +200,7 @@ export function MentorBookingPanel({
                   onClick={() => setShowBookingForm(false)} 
                   className="flex-1"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   onClick={handleBookSession} 
@@ -205,14 +210,14 @@ export function MentorBookingPanel({
                   {createBooking.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Request Booking
+                  {t('mentors.requestBooking')}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-2">Available on:</p>
+                <p className="font-medium mb-2">{t('mentors.availableOn')}</p>
                 <div className="flex flex-wrap gap-2">
                   {[...new Set(availability.map(a => a.day_of_week))].sort().map(day => (
                     <Badge key={day} variant="secondary">
@@ -224,13 +229,13 @@ export function MentorBookingPanel({
 
               <Button onClick={() => setShowBookingForm(true)} className="w-full">
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule a Session
+                {t('mentors.scheduleSession')}
               </Button>
 
               {/* Show existing bookings with this mentor */}
               {myMentorBookings.length > 0 && (
                 <div className="pt-4 border-t">
-                  <p className="text-sm font-medium mb-2">Your Bookings</p>
+                  <p className="text-sm font-medium mb-2">{t('mentors.yourBookings')}</p>
                   <div className="space-y-2">
                     {myMentorBookings.map(booking => (
                       <div key={booking.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg text-sm">
@@ -266,7 +271,7 @@ export function MentorBookingPanel({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Pending Requests
+            {t('mentors.pendingRequests')}
             {pendingBookings.length > 0 && (
               <Badge>{pendingBookings.length}</Badge>
             )}
@@ -281,7 +286,7 @@ export function MentorBookingPanel({
           ) : pendingBookings.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No pending booking requests</p>
+              <p>{t('mentors.noPendingRequests')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -332,14 +337,14 @@ export function MentorBookingPanel({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-600" />
-              Confirmed Sessions
+              <Check className="h-5 w-5 text-primary" />
+              {t('mentors.confirmedSessions')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {confirmedBookings.map(booking => (
-                <div key={booking.id} className="flex items-center gap-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div key={booking.id} className="flex items-center gap-3 p-2 bg-primary/10 rounded-lg">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={booking.founder?.avatar_url || undefined} />
                     <AvatarFallback>{getInitials(booking.founder?.full_name || null)}</AvatarFallback>
@@ -350,7 +355,7 @@ export function MentorBookingPanel({
                       {format(new Date(booking.requested_date), 'MMM d')} at {booking.requested_start_time.slice(0, 5)}
                     </p>
                   </div>
-                  <Badge variant="outline" className="text-green-600">Confirmed</Badge>
+                  <Badge variant="outline" className="text-primary">{t('mentors.confirmed')}</Badge>
                 </div>
               ))}
             </div>
