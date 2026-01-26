@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,7 @@ interface WizardPlaybooksStepProps {
 }
 
 export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlaybooksStepProps) {
+  const { t } = useTranslation();
   const activeStages = stages.filter((s) => s.is_active);
 
   // Initialize playbooks for each active stage if empty
@@ -216,7 +218,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                           onClick={() => handleAddItem(stage.stage_key, 'milestone')}
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Add Milestone
+                          {t('milestones.addMilestone')}
                         </Button>
                       </div>
                     </ScrollArea>
