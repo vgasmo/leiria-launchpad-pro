@@ -122,11 +122,12 @@ export function AdminWorkspacesManager() {
       const userIds = roleData?.map(r => r.user_id) || [];
       if (userIds.length === 0) return [];
 
-      // Get profiles for these users
+      // Get profiles for these users (sorted alphabetically by name)
       const { data: consultorProfiles } = await supabase
         .from('profiles')
         .select('id, email, full_name, avatar_url')
-        .in('id', userIds);
+        .in('id', userIds)
+        .order('full_name', { ascending: true, nullsFirst: false });
 
       return consultorProfiles || [];
     },

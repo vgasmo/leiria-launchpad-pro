@@ -51,10 +51,15 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            Session Feedback
-          </CardTitle>
+          <div>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Session Feedback
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Rate and comment on this session (visible to all participants)
+            </p>
+          </div>
           <Button variant="outline" size="sm" onClick={() => {
             setRating(myFeedback?.rating || 0);
             setFeedback(myFeedback?.feedback || '');
