@@ -785,6 +785,7 @@
     "export": "Export",
     "canvasSaved": "Canvas saved",
     "canvasSaveFailed": "Failed to save canvas",
+    "unsavedChangesWarning": "You have unsaved changes. Are you sure you want to close?",
     "submittedForReview": "Submitted for review",
     "submitFailed": "Failed to submit",
     "canvasReviewSection": "Canvas Review",
