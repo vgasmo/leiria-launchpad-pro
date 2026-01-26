@@ -41,19 +41,21 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
-const ROOM_TYPE_CONFIG: Record<string, { label: string; icon: typeof DoorOpen }> = {
-  office: { label: 'Office', icon: Building2 },
-  desk: { label: 'Desk', icon: Monitor },
-  meeting_room: { label: 'Meeting Room', icon: Users },
-  lab: { label: 'Lab', icon: Wrench },
-  event_space: { label: 'Event Space', icon: Users },
+// Room type config with i18n keys
+const ROOM_TYPE_ICONS: Record<string, typeof DoorOpen> = {
+  office: Building2,
+  desk: Monitor,
+  meeting_room: Users,
+  lab: Wrench,
+  event_space: Users,
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  available: { label: 'Available', color: 'bg-green-500' },
-  occupied: { label: 'Occupied', color: 'bg-blue-500' },
-  maintenance: { label: 'Maintenance', color: 'bg-yellow-500' },
-  reserved: { label: 'Reserved', color: 'bg-purple-500' },
+// Status colors (labels come from i18n)
+const STATUS_COLORS: Record<string, string> = {
+  available: 'bg-green-500',
+  occupied: 'bg-blue-500',
+  maintenance: 'bg-yellow-500',
+  reserved: 'bg-purple-500',
 };
 
 // FloorMapCard component to handle async URL loading
@@ -475,9 +477,11 @@ export function RoomMappingTab() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(ROOM_TYPE_CONFIG).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                        ))}
+                        <SelectItem value="office">{t('backoffice.roomTypes.office', 'Escritório')}</SelectItem>
+                        <SelectItem value="desk">{t('backoffice.roomTypes.desk', 'Secretária')}</SelectItem>
+                        <SelectItem value="meeting_room">{t('backoffice.roomTypes.meeting_room', 'Sala de Reuniões')}</SelectItem>
+                        <SelectItem value="lab">{t('backoffice.roomTypes.lab', 'Laboratório')}</SelectItem>
+                        <SelectItem value="event_space">{t('backoffice.roomTypes.event_space', 'Espaço de Eventos')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -498,9 +502,10 @@ export function RoomMappingTab() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                      ))}
+                      <SelectItem value="available">{t('backoffice.roomStatus.available', 'Disponível')}</SelectItem>
+                      <SelectItem value="occupied">{t('backoffice.roomStatus.occupied', 'Ocupado')}</SelectItem>
+                      <SelectItem value="maintenance">{t('backoffice.roomStatus.maintenance', 'Manutenção')}</SelectItem>
+                      <SelectItem value="reserved">{t('backoffice.roomStatus.reserved', 'Reservado')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -587,14 +592,14 @@ export function RoomMappingTab() {
                 <div key={floor} className="space-y-3">
                   <h3 className="font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    Floor {floor}
-                    <Badge variant="secondary">{floorRooms.length} rooms</Badge>
+                    {t('backoffice.floor', 'Piso')} {floor}
+                    <Badge variant="secondary">{floorRooms.length} {t('backoffice.rooms', 'salas')}</Badge>
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {floorRooms.map(room => {
-                      const TypeIcon = ROOM_TYPE_CONFIG[room.room_type]?.icon || DoorOpen;
-                      const statusConfig = STATUS_CONFIG[room.status] || STATUS_CONFIG.available;
+                      const TypeIcon = ROOM_TYPE_ICONS[room.room_type] || DoorOpen;
+                      const statusColor = STATUS_COLORS[room.status] || STATUS_COLORS.available;
                       const allocation = room.current_allocation;
                       const occupantName = allocation?.workspace?.startup?.name || 
                         allocation?.funnel_item?.organization_name || 
@@ -619,17 +624,17 @@ export function RoomMappingTab() {
                                   )}
                                 </div>
                               </div>
-                              <div className={cn('h-2 w-2 rounded-full', statusConfig.color)} />
+                              <div className={cn('h-2 w-2 rounded-full', statusColor)} />
                             </div>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground flex items-center gap-1">
                                 <Users className="h-3 w-3" />
-                                {room.capacity || '?'} people
+                                {room.capacity || '?'} {t('backoffice.people', 'pessoas')}
                               </span>
                               <Badge variant="outline" className="text-xs">
-                                {ROOM_TYPE_CONFIG[room.room_type]?.label || room.room_type}
+                                {t(`backoffice.roomTypes.${room.room_type}`, room.room_type)}
                               </Badge>
                             </div>
 
@@ -640,7 +645,7 @@ export function RoomMappingTab() {
                                   <span className="font-medium">{occupantName}</span>
                                 </div>
                                 <span className="text-xs text-muted-foreground">
-                                  Since {format(new Date(allocation.start_date), 'MMM yyyy')}
+                                  {t('backoffice.since', 'Desde')} {format(new Date(allocation.start_date), 'MMM yyyy')}
                                 </span>
                               </div>
                             )}
