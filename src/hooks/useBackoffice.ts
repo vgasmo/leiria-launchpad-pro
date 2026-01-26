@@ -162,9 +162,9 @@ export function useCreateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Incubation type created');
+      toast.success('Tipo de incubação criado');
     },
-    onError: () => toast.error('Failed to create incubation type'),
+    onError: () => toast.error('Erro ao criar tipo de incubação'),
   });
 }
 
@@ -183,9 +183,9 @@ export function useUpdateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Incubation type updated');
+      toast.success('Tipo de incubação atualizado');
     },
-    onError: () => toast.error('Failed to update incubation type'),
+    onError: () => toast.error('Erro ao atualizar tipo de incubação'),
   });
 }
 
@@ -221,9 +221,9 @@ export function useCreateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Building created');
+      toast.success('Edifício criado');
     },
-    onError: () => toast.error('Failed to create building'),
+    onError: () => toast.error('Erro ao criar edifício'),
   });
 }
 
@@ -242,9 +242,9 @@ export function useUpdateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Building updated');
+      toast.success('Edifício atualizado');
     },
-    onError: () => toast.error('Failed to update building'),
+    onError: () => toast.error('Erro ao atualizar edifício'),
   });
 }
 
@@ -294,9 +294,9 @@ export function useCreateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contract created');
+      toast.success('Contrato criado');
     },
-    onError: () => toast.error('Failed to create contract'),
+    onError: () => toast.error('Erro ao criar contrato'),
   });
 }
 
@@ -315,9 +315,9 @@ export function useUpdateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contract updated');
+      toast.success('Contrato atualizado');
     },
-    onError: () => toast.error('Failed to update contract'),
+    onError: () => toast.error('Erro ao atualizar contrato'),
   });
 }
 
@@ -366,9 +366,9 @@ export function useCreateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Invoice created');
+      toast.success('Fatura criada');
     },
-    onError: () => toast.error('Failed to create invoice'),
+    onError: () => toast.error('Erro ao criar fatura'),
   });
 }
 
@@ -387,9 +387,9 @@ export function useUpdateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Invoice updated');
+      toast.success('Fatura atualizada');
     },
-    onError: () => toast.error('Failed to update invoice'),
+    onError: () => toast.error('Erro ao atualizar fatura'),
   });
 }
 
@@ -435,9 +435,9 @@ export function useRecordPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Payment recorded');
+      toast.success('Pagamento registado');
     },
-    onError: () => toast.error('Failed to record payment'),
+    onError: () => toast.error('Erro ao registar pagamento'),
   });
 }
 
@@ -473,9 +473,9 @@ export function useCreateOfficeSpace() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Office space created');
+      toast.success('Espaço criado');
     },
-    onError: () => toast.error('Failed to create office space'),
+    onError: () => toast.error('Erro ao criar espaço'),
   });
 }
 
@@ -494,9 +494,9 @@ export function useUpdateOfficeSpace() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Office space updated');
+      toast.success('Espaço atualizado');
     },
-    onError: () => toast.error('Failed to update office space'),
+    onError: () => toast.error('Erro ao atualizar espaço'),
   });
 }
 
@@ -546,9 +546,9 @@ export function useCreateSpaceAllocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Space allocated');
+      toast.success('Espaço atribuído');
     },
-    onError: () => toast.error('Failed to allocate space'),
+    onError: () => toast.error('Erro ao atribuir espaço'),
   });
 }
 
@@ -785,9 +785,9 @@ export function useCreateRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Room created');
+      toast.success('Sala criada');
     },
-    onError: () => toast.error('Failed to create room'),
+    onError: () => toast.error('Erro ao criar sala'),
   });
 }
 
@@ -807,9 +807,9 @@ export function useUpdateRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Room updated');
+      toast.success('Sala atualizada');
     },
-    onError: () => toast.error('Failed to update room'),
+    onError: () => toast.error('Erro ao atualizar sala'),
   });
 }
 
@@ -823,9 +823,9 @@ export function useDeleteRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Room deleted');
+      toast.success('Sala eliminada');
     },
-    onError: () => toast.error('Failed to delete room'),
+    onError: () => toast.error('Erro ao eliminar sala'),
   });
 }
 
@@ -880,9 +880,9 @@ export function useCreateRoomAllocation() {
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Room allocated');
+      toast.success('Sala atribuída');
     },
-    onError: () => toast.error('Failed to allocate room'),
+    onError: () => toast.error('Erro ao atribuir sala'),
   });
 }
 
@@ -914,9 +914,9 @@ export function useEndRoomAllocation() {
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Allocation ended');
+      toast.success('Atribuição terminada');
     },
-    onError: () => toast.error('Failed to end allocation'),
+    onError: () => toast.error('Erro ao terminar atribuição'),
   });
 }
 
@@ -958,9 +958,9 @@ export function useCreateFloorMap() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floor-maps'] });
-      toast.success('Floor map uploaded');
+      toast.success('Mapa carregado');
     },
-    onError: () => toast.error('Failed to upload floor map'),
+    onError: () => toast.error('Erro ao carregar mapa'),
   });
 }
 
@@ -976,9 +976,9 @@ export function useDeleteFloorMap() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floor-maps'] });
-      toast.success('Floor map deleted');
+      toast.success('Mapa eliminado');
     },
-    onError: () => toast.error('Failed to delete floor map'),
+    onError: () => toast.error('Erro ao eliminar mapa'),
   });
 }
 
@@ -1027,9 +1027,9 @@ export function useCreateWaitingListRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-waiting-list'] });
-      toast.success('Request added to waiting list');
+      toast.success('Pedido adicionado à lista de espera');
     },
-    onError: () => toast.error('Failed to add request'),
+    onError: () => toast.error('Erro ao adicionar pedido'),
   });
 }
 
@@ -1048,9 +1048,9 @@ export function useUpdateWaitingListRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-waiting-list'] });
-      toast.success('Request updated');
+      toast.success('Pedido atualizado');
     },
-    onError: () => toast.error('Failed to update request'),
+    onError: () => toast.error('Erro ao atualizar pedido'),
   });
 }
 
@@ -1108,8 +1108,8 @@ export function useFulfillWaitingListRequest() {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
-      toast.success('Request fulfilled');
+      toast.success('Pedido satisfeito');
     },
-    onError: () => toast.error('Failed to fulfill request'),
+    onError: () => toast.error('Erro ao satisfazer pedido'),
   });
 }

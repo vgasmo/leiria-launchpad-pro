@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2, Square, Pentagon } from 'lucide-react';
+import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2, Square, Pentagon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Room, type FloorMap, type RoomShapeRect, type RoomShapePolygon, useUpdateRoom } from '@/hooks/useBackoffice';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { renderPdfToImage, isPdfFile } from '@/lib/pdfRenderer';
 
 
 interface InteractiveFloorMapViewerProps {
@@ -31,6 +32,7 @@ export function InteractiveFloorMapViewer({
 }: InteractiveFloorMapViewerProps) {
   const { t } = useTranslation();
   const [signedUrl, setSignedUrl] = useState<string>('');
+  const [displayImageUrl, setDisplayImageUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [selectedRoomForPin, setSelectedRoomForPin] = useState<string>('');
@@ -62,14 +64,32 @@ export function InteractiveFloorMapViewer({
 
     const loadUrl = async () => {
       setLoading(true);
-      const { data, error } = await supabase.storage.from('floor-maps').createSignedUrl(floorMap.file_path, 3600);
-      if (!error && data?.signedUrl) {
-        setSignedUrl(data.signedUrl);
+      try {
+        const { data, error } = await supabase.storage.from('floor-maps').createSignedUrl(floorMap.file_path, 3600);
+        if (!error && data?.signedUrl) {
+          setSignedUrl(data.signedUrl);
+          
+          // If it's a PDF, render first page to image
+          if (isPdfFile(floorMap.file_path)) {
+            try {
+              const result = await renderPdfToImage(data.signedUrl);
+              setDisplayImageUrl(result.dataUrl);
+            } catch (pdfError) {
+              console.error('Failed to render PDF:', pdfError);
+              toast.error(t('backoffice.pdfRenderError', 'Erro ao renderizar PDF'));
+              setDisplayImageUrl('');
+            }
+          } else {
+            setDisplayImageUrl(data.signedUrl);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load floor map:', err);
       }
       setLoading(false);
     };
     loadUrl();
-  }, [floorMap?.file_path]);
+  }, [floorMap?.file_path, t]);
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!editMode || !placingPin || !selectedRoomForPin || !imageRef.current) return;
@@ -102,8 +122,8 @@ export function InteractiveFloorMapViewer({
     );
   };
 
-  const isPdf = floorMap?.file_path.toLowerCase().endsWith('.pdf');
-
+  const isPdf = floorMap?.file_path ? isPdfFile(floorMap.file_path) : false;
+  const canRenderInteractive = !isPdf || displayImageUrl;
   if (!floorMap) return null;
 
   return (
@@ -137,17 +157,20 @@ export function InteractiveFloorMapViewer({
           {/* Main map area */}
           <div className="flex-1 flex flex-col min-w-0">
             {loading ? (
-              <div className="flex-1 bg-muted rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground">{t('common.loading')}</span>
+              <div className="flex-1 bg-muted rounded-lg flex flex-col items-center justify-center gap-2">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="text-muted-foreground text-sm">
+                  {isPdf ? t('backoffice.renderingPdf', 'A processar PDF...') : t('common.loading')}
+                </span>
               </div>
-            ) : isPdf ? (
+            ) : !canRenderInteractive ? (
               <div className="flex-1 bg-muted rounded-lg flex flex-col items-center justify-center gap-4">
                 <MapPin className="h-12 w-12 text-muted-foreground" />
                 <p className="text-muted-foreground text-center max-w-xs">
-                  {t('backoffice.pdfNotSupported', 'PDF floor plans cannot be used for interactive mapping. Please upload a PNG or JPG image.')}
+                  {t('backoffice.pdfLoadError', 'Não foi possível carregar a planta. Tente novamente ou faça upload de uma imagem PNG/JPG.')}
                 </p>
                 <Button variant="outline" onClick={() => window.open(signedUrl, '_blank')}>
-                  {t('backoffice.openPdf', 'Open PDF')}
+                  {t('backoffice.openPdf', 'Abrir PDF')}
                 </Button>
               </div>
             ) : (
@@ -160,11 +183,18 @@ export function InteractiveFloorMapViewer({
                 onClick={handleMapClick}
               >
                 <img
-                  src={signedUrl}
+                  src={displayImageUrl}
                   alt={floorMap.name}
                   className="w-full h-full object-contain"
                   draggable={false}
                 />
+                {isPdf && (
+                  <div className="absolute top-2 left-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {t('backoffice.pdfRendered', 'PDF')}
+                    </Badge>
+                  </div>
+                )}
 
                 {/* SVG Overlay for shapes */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -340,7 +370,7 @@ export function InteractiveFloorMapViewer({
           </div>
 
           {/* Sidebar for edit mode */}
-          {editMode && !isPdf && (
+          {editMode && canRenderInteractive && (
             <div className="w-72 flex flex-col border-l pl-4 min-h-0">
               <h3 className="font-medium mb-3">{t('backoffice.placeRoomPins', 'Place Room Pins')}</h3>
               

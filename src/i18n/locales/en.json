@@ -556,7 +556,13 @@
     "formDueDate": "Due Date",
     "formPriority": "Priority",
     "assign": "Assign",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "assignTo": "Assign to...",
+    "deleteActionTitle": "Delete Action Item",
+    "deleteActionConfirmation": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+    "actionsLabel": "actions",
+    "noActionsYet": "No actions yet. Add actions to track progress.",
+    "noItems": "No actions"
   },
   "milestones": {
     "title": "Milestones",
