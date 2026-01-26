@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { type FunnelStage, type FunnelType } from '@/constants/funnelStages';
 
-export type FunnelStage = 'new' | 'first_contact_booked' | 'met' | 'qualified' | 'proposal_sent' | 'negotiating' | 'contracted' | 'incubating' | 'accelerating' | 'rejected' | 'archived';
-export type FunnelType = 'lead' | 'contract' | 'startup_candidate' | 'startup_active';
+// Re-export for backward compatibility
+export type { FunnelStage, FunnelType };
 
 export interface FunnelItem {
   id: string;

@@ -39,7 +39,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
-import type { FunnelStage } from '@/hooks/useFunnel';
+import { PIPELINE_STAGE_OPTIONS, STAGE_LABELS, type FunnelStage } from '@/constants/funnelStages';
 
 interface CrmBulkActionsProps {
   items: CrmInboxItem[];
@@ -50,16 +50,11 @@ interface CrmBulkActionsProps {
   consultants: { id: string; full_name: string | null }[];
 }
 
-const STAGE_OPTIONS: { value: FunnelStage; label: string }[] = [
-  { value: 'new', label: 'New' },
-  { value: 'first_contact_booked', label: 'Meeting Booked' },
-  { value: 'met', label: 'Met' },
-  { value: 'qualified', label: 'Qualified' },
-  { value: 'proposal_sent', label: 'Proposal Sent' },
-  { value: 'negotiating', label: 'Negotiating' },
-  { value: 'contracted', label: 'Contracted' },
-  { value: 'rejected', label: 'Rejected' },
-  { value: 'archived', label: 'Archived' },
+// Add rejected/archived to bulk options
+const STAGE_OPTIONS = [
+  ...PIPELINE_STAGE_OPTIONS,
+  { value: 'rejected' as FunnelStage, label: 'Rejected' },
+  { value: 'archived' as FunnelStage, label: 'Archived' },
 ];
 
 export function CrmBulkActions({
@@ -84,33 +79,52 @@ export function CrmBulkActions({
   const allSelected = items.length > 0 && selectedCount === items.length;
   const someSelected = selectedCount > 0 && selectedCount < items.length;
 
-  const handleBulkStageChange = async (stage: FunnelStage) => {
+  const handleBulkStageChange = async (newStage: FunnelStage) => {
     setConfirmDialog({
       action: 'stage_change',
-      title: `Move ${selectedCount} leads to ${STAGE_OPTIONS.find((s) => s.value === stage)?.label}?`,
-      description: 'This will update the stage for all selected leads and log the change.',
+      title: `Move ${selectedCount} leads to ${STAGE_LABELS[newStage]}?`,
+      description: 'This will update the stage for all selected leads, log the change, and trigger any configured emails.',
       onConfirm: async () => {
         setIsProcessing(true);
         try {
           const ids = Array.from(selectedIds);
+          
+          // Fetch current stages for each item (needed for email trigger)
+          const { data: currentItems } = await supabase
+            .from('funnel_items')
+            .select('id, stage')
+            .in('id', ids);
+          
+          const stageMap = new Map(currentItems?.map(i => [i.id, i.stage]) || []);
+          
           const { error } = await supabase
             .from('funnel_items')
-            .update({ stage, updated_at: new Date().toISOString() })
+            .update({ stage: newStage, updated_at: new Date().toISOString() })
             .in('id', ids);
 
           if (error) throw error;
 
-          // Log events
+          // Log events and trigger emails for each item
           for (const id of ids) {
+            const oldStage = stageMap.get(id);
+            
             await supabase.from('funnel_events').insert({
               funnel_item_id: id,
               event_type: 'stage_changed',
-              to_stage: stage,
+              from_stage: oldStage,
+              to_stage: newStage,
               metadata: { bulk_action: true },
             });
+            
+            // Trigger CRM stage transition email (fire-and-forget)
+            if (oldStage && oldStage !== newStage) {
+              supabase.functions.invoke('send-crm-stage-transition-email', {
+                body: { funnel_item_id: id, from_stage: oldStage, to_stage: newStage },
+              }).catch((err) => console.warn('CRM email trigger failed (bulk):', err));
+            }
           }
 
-          toast.success(`${selectedCount} leads moved to ${STAGE_OPTIONS.find((s) => s.value === stage)?.label}`);
+          toast.success(`${selectedCount} leads moved to ${STAGE_LABELS[newStage]}`);
           queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
           queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
           onClearSelection();

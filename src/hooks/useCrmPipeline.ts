@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { FunnelStage } from './useFunnel';
+import { PIPELINE_STAGES, type FunnelStage } from '@/constants/funnelStages';
 import type { CrmInboxItem } from './useCrmInbox';
+
+// Re-export for backward compatibility
+export { PIPELINE_STAGES };
 
 export interface CrmPipelineGroups {
   [key: string]: CrmInboxItem[];
@@ -15,15 +18,13 @@ interface UseCrmPipelineFilters {
   currentUserId?: string;
 }
 
-export const PIPELINE_STAGES: FunnelStage[] = [
-  'new',
-  'first_contact_booked',
-  'met',
-  'qualified',
-  'proposal_sent',
-  'negotiating',
-  'contracted',
-];
+// Explicit select for funnel_items (P1.2 optimization)
+const FUNNEL_ITEM_FIELDS = `
+  id, stage, type, owner_consultant_id, program_id,
+  contact_name, contact_email, organization_name,
+  next_action_at, next_action_description, last_activity_at,
+  linked_workspace_id, created_at, updated_at
+`;
 
 export function useCrmPipeline(filters?: UseCrmPipelineFilters) {
   return useQuery({
@@ -31,7 +32,7 @@ export function useCrmPipeline(filters?: UseCrmPipelineFilters) {
     queryFn: async (): Promise<CrmPipelineGroups> => {
       let query = supabase
         .from('funnel_items')
-        .select('*')
+        .select(FUNNEL_ITEM_FIELDS)
         .in('stage', PIPELINE_STAGES)
         .order('next_action_at', { ascending: true, nullsFirst: false });
 
