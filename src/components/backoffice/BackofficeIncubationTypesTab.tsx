@@ -14,13 +14,13 @@ import { useIncubationTypes, useCreateIncubationType, useUpdateIncubationType, t
 import { cn } from '@/lib/utils';
 
 const CONTRACT_TYPES = [
-  { value: 'domiciliation', labelKey: 'backoffice.contractTypes.domiciliation' },
-  { value: 'virtual_incubation', labelKey: 'backoffice.contractTypes.virtualIncubation' },
-  { value: 'office_standard', labelKey: 'backoffice.contractTypes.officeStandard' },
-  { value: 'office_sqm', labelKey: 'backoffice.contractTypes.officeSqm' },
-  { value: 'office_social', labelKey: 'backoffice.contractTypes.officeSocial' },
-  { value: 'desk', labelKey: 'backoffice.contractTypes.desk' },
-  { value: 'hot_desk', labelKey: 'backoffice.contractTypes.hotDesk' },
+  { value: 'domiciliation', labelKey: 'admin.backoffice.contractTypes.domiciliation' },
+  { value: 'virtual_incubation', labelKey: 'admin.backoffice.contractTypes.virtualIncubation' },
+  { value: 'office_standard', labelKey: 'admin.backoffice.contractTypes.officeStandard' },
+  { value: 'office_sqm', labelKey: 'admin.backoffice.contractTypes.officeSqm' },
+  { value: 'office_social', labelKey: 'admin.backoffice.contractTypes.officeSocial' },
+  { value: 'desk', labelKey: 'admin.backoffice.contractTypes.desk' },
+  { value: 'hot_desk', labelKey: 'admin.backoffice.contractTypes.hotDesk' },
 ];
 
 export function BackofficeIncubationTypesTab() {
@@ -68,21 +68,21 @@ export function BackofficeIncubationTypesTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{t('backoffice.incubationTypes')}</h2>
-          <p className="text-sm text-muted-foreground">{t('backoffice.incubationTypesDesc')}</p>
+          <h2 className="text-lg font-semibold">{t('admin.backoffice.incubationTypes')}</h2>
+          <p className="text-sm text-muted-foreground">{t('admin.backoffice.incubationTypesDesc')}</p>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedType(null)}>
               <Plus className="h-4 w-4 mr-2" />
-              {t('backoffice.addType')}
+              {t('admin.backoffice.addType')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedType ? t('backoffice.editType') : t('backoffice.addType')}
+                {selectedType ? t('admin.backoffice.editType') : t('admin.backoffice.addType')}
               </DialogTitle>
             </DialogHeader>
             <form
@@ -93,7 +93,7 @@ export function BackofficeIncubationTypesTab() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label>{t('backoffice.typeName')}</Label>
+                <Label>{t('admin.backoffice.typeName')}</Label>
                 <Input
                   name="name"
                   placeholder="Pre-Incubation, Incubation, Acceleration..."
@@ -103,7 +103,7 @@ export function BackofficeIncubationTypesTab() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('backoffice.description')}</Label>
+                <Label>{t('admin.backoffice.description')}</Label>
                 <Textarea
                   name="description"
                   defaultValue={selectedType?.description || ''}
@@ -111,10 +111,10 @@ export function BackofficeIncubationTypesTab() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('backoffice.contractType')}</Label>
+                <Label>{t('admin.backoffice.contractType')}</Label>
                 <Select name="contract_type" defaultValue={selectedType?.contract_type || ''}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('backoffice.selectContractType')} />
+                    <SelectValue placeholder={t('admin.backoffice.selectContractType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CONTRACT_TYPES.map(ct => (
@@ -128,7 +128,7 @@ export function BackofficeIncubationTypesTab() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('backoffice.baseMonthlyFee')}</Label>
+                  <Label>{t('admin.backoffice.baseMonthlyFee')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -138,7 +138,7 @@ export function BackofficeIncubationTypesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.pricePerSqm')}</Label>
+                  <Label>{t('admin.backoffice.pricePerSqm')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -149,7 +149,7 @@ export function BackofficeIncubationTypesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.durationMonths')}</Label>
+                  <Label>{t('admin.backoffice.durationMonths')}</Label>
                   <Input
                     type="number"
                     name="duration_months"
@@ -159,7 +159,7 @@ export function BackofficeIncubationTypesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.mentoringHours')}</Label>
+                  <Label>{t('admin.backoffice.mentoringHours')}</Label>
                   <Input
                     type="number"
                     name="includes_mentoring_hours"
@@ -168,7 +168,7 @@ export function BackofficeIncubationTypesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.meetingRoomHours')}</Label>
+                  <Label>{t('admin.backoffice.meetingRoomHours')}</Label>
                   <Input
                     type="number"
                     name="includes_meeting_room_hours"
@@ -177,7 +177,7 @@ export function BackofficeIncubationTypesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.equityPercentage')}</Label>
+                  <Label>{t('admin.backoffice.equityPercentage')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -194,7 +194,7 @@ export function BackofficeIncubationTypesTab() {
                     name="includes_office_space"
                     defaultChecked={selectedType?.includes_office_space ?? false}
                   />
-                  <Label>{t('backoffice.includesOfficeSpace')}</Label>
+                  <Label>{t('admin.backoffice.includesOfficeSpace')}</Label>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export function BackofficeIncubationTypesTab() {
                     name="requires_space"
                     defaultChecked={selectedType?.requires_space ?? false}
                   />
-                  <Label>{t('backoffice.requiresSpace')}</Label>
+                  <Label>{t('admin.backoffice.requiresSpace')}</Label>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export function BackofficeIncubationTypesTab() {
                     name="is_virtual"
                     defaultChecked={selectedType?.is_virtual ?? false}
                   />
-                  <Label>{t('backoffice.isVirtual')}</Label>
+                  <Label>{t('admin.backoffice.isVirtual')}</Label>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ export function BackofficeIncubationTypesTab() {
                     name="is_active"
                     defaultChecked={selectedType?.is_active ?? true}
                   />
-                  <Label>{t('backoffice.active')}</Label>
+                  <Label>{t('admin.backoffice.active')}</Label>
                 </div>
               </div>
 
@@ -257,7 +257,7 @@ export function BackofficeIncubationTypesTab() {
                   </div>
                   <div className="flex flex-col gap-1 items-end">
                     <Badge variant={type.is_active ? 'default' : 'secondary'}>
-                      {type.is_active ? t('backoffice.active') : t('backoffice.inactive')}
+                      {type.is_active ? t('admin.backoffice.active') : t('admin.backoffice.inactive')}
                     </Badge>
                     {type.is_virtual && (
                       <Badge variant="outline" className="text-xs">
@@ -330,7 +330,7 @@ export function BackofficeIncubationTypesTab() {
 
           {types?.length === 0 && (
             <div className="col-span-full text-center py-8 text-muted-foreground">
-              {t('backoffice.noTypes')}
+              {t('admin.backoffice.noTypes')}
             </div>
           )}
         </div>

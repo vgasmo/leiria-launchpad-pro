@@ -484,9 +484,9 @@ function ConvertForm({
       </div>
       
       <div className="space-y-2">
-        <Label>{t('backoffice.incubationType')}</Label>
+        <Label>{t('admin.backoffice.incubationType')}</Label>
         <Select value={incubationTypeId} onValueChange={setIncubationTypeId}>
-          <SelectTrigger><SelectValue placeholder={t('backoffice.selectIncubationType')} /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('admin.backoffice.selectIncubationType')} /></SelectTrigger>
           <SelectContent>
             {incubationTypes?.filter(t => t.is_active).map(t => (
               <SelectItem key={t.id} value={t.id}>
@@ -498,9 +498,9 @@ function ConvertForm({
       </div>
       
       <div className="space-y-2">
-        <Label>{t('backoffice.building')}</Label>
+        <Label>{t('admin.backoffice.building')}</Label>
         <Select value={buildingId} onValueChange={setBuildingId}>
-          <SelectTrigger><SelectValue placeholder={t('backoffice.selectBuilding')} /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('admin.backoffice.selectBuilding')} /></SelectTrigger>
           <SelectContent>
             {buildings?.filter(b => b.is_active).map(b => (
               <SelectItem key={b.id} value={b.id}>
@@ -514,7 +514,7 @@ function ConvertForm({
       {requiresSpace && (
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>{t('backoffice.squareMeters')}</Label>
+            <Label>{t('admin.backoffice.squareMeters')}</Label>
             <Input 
               type="number" 
               step="0.01"
@@ -524,7 +524,7 @@ function ConvertForm({
             />
           </div>
           <div className="space-y-2">
-            <Label>{t('backoffice.monthlyFee')}</Label>
+            <Label>{t('admin.backoffice.monthlyFee')}</Label>
             <Input 
               type="number" 
               step="0.01"

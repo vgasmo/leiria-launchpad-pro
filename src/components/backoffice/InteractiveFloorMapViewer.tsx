@@ -76,7 +76,7 @@ export function InteractiveFloorMapViewer({
               setDisplayImageUrl(result.dataUrl);
             } catch (pdfError) {
               console.error('Failed to render PDF:', pdfError);
-              toast.error(t('backoffice.pdfRenderError', 'Erro ao renderizar PDF'));
+              toast.error(t('admin.backoffice.pdfRenderError', 'Erro ao renderizar PDF'));
               setDisplayImageUrl('');
             }
           } else {
@@ -103,7 +103,7 @@ export function InteractiveFloorMapViewer({
       { id: selectedRoomForPin, pin_x: x, pin_y: y, floor_map_id: floorMap?.id },
       {
         onSuccess: () => {
-          toast.success(t('backoffice.pinPlaced', 'Pin placed successfully'));
+          toast.success(t('admin.backoffice.pinPlaced', 'Pin placed successfully'));
           setPlacingPin(false);
           setSelectedRoomForPin('');
         },
@@ -116,7 +116,7 @@ export function InteractiveFloorMapViewer({
       { id: roomId, pin_x: null, pin_y: null, floor_map_id: null },
       {
         onSuccess: () => {
-          toast.success(t('backoffice.pinRemoved', 'Pin removed'));
+          toast.success(t('admin.backoffice.pinRemoved', 'Pin removed'));
         },
       }
     );
@@ -147,7 +147,7 @@ export function InteractiveFloorMapViewer({
                 }}
               >
                 {editMode ? <Eye className="h-4 w-4 mr-2" /> : <Edit2 className="h-4 w-4 mr-2" />}
-                {editMode ? t('backoffice.viewMode', 'View Mode') : t('backoffice.editMode', 'Edit Mode')}
+                {editMode ? t('admin.backoffice.viewMode', 'View Mode') : t('admin.backoffice.editMode', 'Edit Mode')}
               </Button>
             </div>
           </div>
@@ -160,17 +160,17 @@ export function InteractiveFloorMapViewer({
               <div className="flex-1 bg-muted rounded-lg flex flex-col items-center justify-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 <span className="text-muted-foreground text-sm">
-                  {isPdf ? t('backoffice.renderingPdf', 'A processar PDF...') : t('common.loading')}
+                  {isPdf ? t('admin.backoffice.renderingPdf', 'A processar PDF...') : t('common.loading')}
                 </span>
               </div>
             ) : !canRenderInteractive ? (
               <div className="flex-1 bg-muted rounded-lg flex flex-col items-center justify-center gap-4">
                 <MapPin className="h-12 w-12 text-muted-foreground" />
                 <p className="text-muted-foreground text-center max-w-xs">
-                  {t('backoffice.pdfLoadError', 'Não foi possível carregar a planta. Tente novamente ou faça upload de uma imagem PNG/JPG.')}
+                  {t('admin.backoffice.pdfLoadError', 'Não foi possível carregar a planta. Tente novamente ou faça upload de uma imagem PNG/JPG.')}
                 </p>
                 <Button variant="outline" onClick={() => window.open(signedUrl, '_blank')}>
-                  {t('backoffice.openPdf', 'Abrir PDF')}
+                  {t('admin.backoffice.openPdf', 'Abrir PDF')}
                 </Button>
               </div>
             ) : (
@@ -191,7 +191,7 @@ export function InteractiveFloorMapViewer({
                 {isPdf && (
                   <div className="absolute top-2 left-2">
                     <Badge variant="secondary" className="text-xs">
-                      {t('backoffice.pdfRendered', 'PDF')}
+                      {t('admin.backoffice.pdfRendered', 'PDF')}
                     </Badge>
                   </div>
                 )}
@@ -347,7 +347,7 @@ export function InteractiveFloorMapViewer({
                               </div>
                             ) : (
                               <div className="text-xs text-accent-foreground font-medium mt-1">
-                                {t('backoffice.vacant', 'Vacant')}
+                                {t('admin.backoffice.vacant', 'Vacant')}
                               </div>
                             )}
                           </div>
@@ -361,7 +361,7 @@ export function InteractiveFloorMapViewer({
                 {editMode && placingPin && (
                   <div className="absolute inset-0 bg-primary/5 pointer-events-none flex items-center justify-center">
                     <div className="bg-background/95 rounded-lg px-4 py-2 shadow-lg">
-                      <span className="text-sm">{t('backoffice.clickToPlacePin', 'Click on the map to place the pin')}</span>
+                      <span className="text-sm">{t('admin.backoffice.clickToPlacePin', 'Click on the map to place the pin')}</span>
                     </div>
                   </div>
                 )}
@@ -372,7 +372,7 @@ export function InteractiveFloorMapViewer({
           {/* Sidebar for edit mode */}
           {editMode && canRenderInteractive && (
             <div className="w-72 flex flex-col border-l pl-4 min-h-0">
-              <h3 className="font-medium mb-3">{t('backoffice.placeRoomPins', 'Place Room Pins')}</h3>
+              <h3 className="font-medium mb-3">{t('admin.backoffice.placeRoomPins', 'Place Room Pins')}</h3>
               
               <div className="space-y-3 mb-4">
                 <Select
@@ -383,7 +383,7 @@ export function InteractiveFloorMapViewer({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t('backoffice.selectRoom', 'Select a room...')} />
+                    <SelectValue placeholder={t('admin.backoffice.selectRoom', 'Select a room...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableRoomsForPinning.map(room => (
@@ -404,7 +404,7 @@ export function InteractiveFloorMapViewer({
                     disabled={placingPin}
                   >
                     <MapPin className="h-4 w-4 mr-2" />
-                    {placingPin ? t('backoffice.clickOnMap', 'Click on map...') : t('backoffice.placePin', 'Place Pin')}
+                    {placingPin ? t('admin.backoffice.clickOnMap', 'Click on map...') : t('admin.backoffice.placePin', 'Place Pin')}
                   </Button>
                 )}
 
@@ -426,7 +426,7 @@ export function InteractiveFloorMapViewer({
               {/* List of placed pins */}
               <div className="flex-1 min-h-0">
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  {t('backoffice.placedPins', 'Placed Pins')} ({roomsWithPins.length})
+                  {t('admin.backoffice.placedPins', 'Placed Pins')} ({roomsWithPins.length})
                 </h4>
                 <ScrollArea className="h-full">
                   <div className="space-y-2 pr-2">
@@ -461,7 +461,7 @@ export function InteractiveFloorMapViewer({
 
                     {roomsWithPins.length === 0 && (
                       <p className="text-xs text-muted-foreground text-center py-4">
-                        {t('backoffice.noPinsYet', 'No pins placed yet')}
+                        {t('admin.backoffice.noPinsYet', 'No pins placed yet')}
                       </p>
                     )}
                   </div>
@@ -475,14 +475,14 @@ export function InteractiveFloorMapViewer({
         <div className="flex items-center gap-6 pt-2 border-t text-sm">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary fill-primary/20" />
-            <span>{t('backoffice.occupied', 'Occupied')}</span>
+            <span>{t('admin.backoffice.occupied', 'Occupied')}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-accent-foreground fill-accent/20" />
-            <span>{t('backoffice.vacant', 'Vacant')}</span>
+            <span>{t('admin.backoffice.vacant', 'Vacant')}</span>
           </div>
           <div className="ml-auto text-muted-foreground text-xs">
-            {roomsOnMap.length} {t('backoffice.roomsPlaced', 'rooms placed')}
+            {roomsOnMap.length} {t('admin.backoffice.roomsPlaced', 'rooms placed')}
           </div>
         </div>
       </DialogContent>

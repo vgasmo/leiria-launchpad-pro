@@ -112,7 +112,7 @@ export function RoomShapeEditor({
       } else if (shapeType === 'polygon' && polygonPoints.length >= 3) {
         shapeJson = { points: polygonPoints };
       } else {
-        toast.error(t('backoffice.noShapeDrawn', 'Please draw a shape first'));
+        toast.error(t('admin.backoffice.noShapeDrawn', 'Please draw a shape first'));
         return;
       }
 
@@ -124,11 +124,11 @@ export function RoomShapeEditor({
         pin_x: pinX,
         pin_y: pinY,
       });
-      toast.success(t('backoffice.shapeUpdated', 'Room shape updated'));
+      toast.success(t('admin.backoffice.shapeUpdated', 'Room shape updated'));
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save shape:', error);
-      toast.error(t('backoffice.shapeUpdateFailed', 'Failed to update room shape'));
+      toast.error(t('admin.backoffice.shapeUpdateFailed', 'Failed to update room shape'));
     }
   };
 
@@ -142,7 +142,7 @@ export function RoomShapeEditor({
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {t('backoffice.editRoomShape', 'Edit Room Shape')}
+            {t('admin.backoffice.editRoomShape', 'Edit Room Shape')}
             <Badge variant="secondary">{room.name}</Badge>
           </DialogTitle>
         </DialogHeader>
@@ -152,7 +152,7 @@ export function RoomShapeEditor({
           <div className="w-48 space-y-4">
             <div>
               <Label className="text-sm font-medium mb-2 block">
-                {t('backoffice.shapeType', 'Shape Type')}
+                {t('admin.backoffice.shapeType', 'Shape Type')}
               </Label>
               <RadioGroup
                 value={shapeType}
@@ -169,21 +169,21 @@ export function RoomShapeEditor({
                   <RadioGroupItem value="pin" id="pin" />
                   <Label htmlFor="pin" className="flex items-center gap-2 cursor-pointer">
                     <MapPin className="h-4 w-4" />
-                    {t('backoffice.pin', 'Pin')}
+                    {t('admin.backoffice.pin', 'Pin')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="rect" id="rect" />
                   <Label htmlFor="rect" className="flex items-center gap-2 cursor-pointer">
                     <Square className="h-4 w-4" />
-                    {t('backoffice.rectangle', 'Rectangle')}
+                    {t('admin.backoffice.rectangle', 'Rectangle')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="polygon" id="polygon" />
                   <Label htmlFor="polygon" className="flex items-center gap-2 cursor-pointer">
                     <Pentagon className="h-4 w-4" />
-                    {t('backoffice.polygon', 'Polygon')}
+                    {t('admin.backoffice.polygon', 'Polygon')}
                   </Label>
                 </div>
               </RadioGroup>
@@ -191,13 +191,13 @@ export function RoomShapeEditor({
 
             <div className="text-xs text-muted-foreground space-y-1">
               {shapeType === 'pin' && (
-                <p>{t('backoffice.pinInstructions', 'Click on the map to place a pin marker.')}</p>
+                <p>{t('admin.backoffice.pinInstructions', 'Click on the map to place a pin marker.')}</p>
               )}
               {shapeType === 'rect' && (
-                <p>{t('backoffice.rectInstructions', 'Click and drag to draw a rectangle area.')}</p>
+                <p>{t('admin.backoffice.rectInstructions', 'Click and drag to draw a rectangle area.')}</p>
               )}
               {shapeType === 'polygon' && (
-                <p>{t('backoffice.polygonInstructions', 'Click to add points. Need at least 3 points.')}</p>
+                <p>{t('admin.backoffice.polygonInstructions', 'Click to add points. Need at least 3 points.')}</p>
               )}
             </div>
 
