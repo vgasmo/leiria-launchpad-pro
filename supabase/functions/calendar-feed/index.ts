@@ -69,16 +69,37 @@ Deno.serve(async (req: Request) => {
       }
     }
     
-    // If no JWT auth, check for calendar feed token
+    // If no JWT auth, check for calendar feed token (stored as SHA-256 hash)
     if (!authenticatedUserId && token) {
-      // Validate token (stored in profiles.calendar_feed_token)
+      // Hash the provided token to compare with stored hash
+      const tokenHash = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(token)
+      );
+      const tokenHashHex = Array.from(new Uint8Array(tokenHash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      // Validate token hash and check expiration
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('calendar_feed_token', token)
+        .select('id, calendar_token_expires_at')
+        .eq('calendar_feed_token', tokenHashHex)
         .maybeSingle();
       
       if (profile && !error) {
+        // Check if token is expired
+        if (profile.calendar_token_expires_at) {
+          const expiresAt = new Date(profile.calendar_token_expires_at);
+          if (expiresAt < new Date()) {
+            log.warn('Calendar token expired');
+            return new Response('Token expired. Please generate a new calendar token.', {
+              status: 401,
+              headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+            });
+          }
+        }
+        
         authenticatedUserId = profile.id;
         log.info('Token validated for user', { userId: profile.id });
       } else {

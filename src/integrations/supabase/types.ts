@@ -3077,6 +3077,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           calendar_feed_token: string | null
+          calendar_token_expires_at: string | null
           created_at: string
           email: string
           expertise: string[] | null
@@ -3091,6 +3092,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           calendar_feed_token?: string | null
+          calendar_token_expires_at?: string | null
           created_at?: string
           email: string
           expertise?: string[] | null
@@ -3105,6 +3107,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           calendar_feed_token?: string | null
+          calendar_token_expires_at?: string | null
           created_at?: string
           email?: string
           expertise?: string[] | null
