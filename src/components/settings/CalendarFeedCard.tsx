@@ -32,10 +32,12 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
   const [copied, setCopied] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [calendarToken, setCalendarToken] = useState<string | null>(null);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<Date | null>(null);
+  const [needsRegeneration, setNeedsRegeneration] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch existing calendar token
+  // Fetch existing calendar token info
   useEffect(() => {
     const fetchToken = async () => {
       if (!user?.id) {
@@ -45,12 +47,29 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('calendar_feed_token')
+        .select('calendar_feed_token, calendar_token_expires_at')
         .eq('id', user.id)
         .single();
       
       if (!error && data?.calendar_feed_token) {
-        setCalendarToken(data.calendar_feed_token);
+        // Token exists but is hashed - user needs to regenerate to get a usable URL
+        // Check if we have the original token in sessionStorage (for same-session use)
+        const cachedToken = sessionStorage.getItem(`calendar_token_${user.id}`);
+        
+        if (cachedToken) {
+          setCalendarToken(cachedToken);
+        } else {
+          // Token is hashed, user needs to regenerate
+          setNeedsRegeneration(true);
+        }
+        
+        if (data.calendar_token_expires_at) {
+          const expiresAt = new Date(data.calendar_token_expires_at);
+          setTokenExpiresAt(expiresAt);
+          if (expiresAt < new Date()) {
+            setNeedsRegeneration(true);
+          }
+        }
       }
       setIsLoading(false);
     };
@@ -77,15 +96,37 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
       
+      // Hash the token before storing (SHA-256)
+      const tokenHashBuffer = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(token)
+      );
+      const tokenHash = Array.from(new Uint8Array(tokenHashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      // Set expiration to 90 days from now
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 90);
+      
       const { error } = await supabase
         .from('profiles')
-        .update({ calendar_feed_token: token })
+        .update({ 
+          calendar_feed_token: tokenHash,
+          calendar_token_expires_at: expiresAt.toISOString()
+        })
         .eq('id', user.id);
       
       if (error) throw error;
       
+      // Store the original token in sessionStorage for same-session URL generation
+      sessionStorage.setItem(`calendar_token_${user.id}`, token);
+      
+      // Store the original token in state (not the hash) for URL generation
       setCalendarToken(token);
-      toast.success('Calendar feed token generated successfully');
+      setTokenExpiresAt(expiresAt);
+      setNeedsRegeneration(false);
+      toast.success('Calendar feed token generated successfully (valid for 90 days)');
     } catch (err) {
       console.error('Error generating token:', err);
       toast.error('Failed to generate calendar token');
@@ -153,8 +194,31 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Token Regeneration Needed Alert */}
+        {needsRegeneration && user && (
+          <Alert variant="destructive">
+            <RefreshCw className="h-4 w-4" />
+            <AlertTitle>Token Regeneration Required</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p className="text-sm">
+                {tokenExpiresAt && tokenExpiresAt < new Date() 
+                  ? 'Your calendar token has expired. Please generate a new one to continue using calendar sync.'
+                  : 'For security reasons, your calendar token needs to be regenerated. Your calendar subscriptions will need to be updated with the new URL.'}
+              </p>
+              <Button
+                size="sm"
+                onClick={generateToken}
+                disabled={isGenerating}
+                className="mt-2"
+              >
+                {isGenerating ? 'Generating...' : 'Regenerate Calendar Token'}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Generate Token Section */}
-        {!calendarToken && user && (
+        {!calendarToken && !needsRegeneration && user && (
           <Alert>
             <Key className="h-4 w-4" />
             <AlertTitle>Secure Calendar Access</AlertTitle>
@@ -162,6 +226,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
               <p className="text-sm">
                 Generate a secure token to subscribe to your calendar feed. 
                 This token allows calendar apps to access your sessions without logging in.
+                Tokens are valid for 90 days.
               </p>
               <Button
                 size="sm"
@@ -193,7 +258,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                 title="Copy URL"
               >
                 {copied ? (
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4 text-success" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
