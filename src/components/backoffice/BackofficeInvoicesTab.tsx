@@ -88,13 +88,13 @@ export function BackofficeInvoicesTab() {
         <Card>
           <CardContent className="pt-4">
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t('backoffice.totalInvoices')}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.backoffice.totalInvoices')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="text-2xl font-bold text-blue-600">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">{t('backoffice.pendingPayment')}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.backoffice.pendingPayment')}</p>
           </CardContent>
         </Card>
         <Card className={cn(stats.overdue > 0 && 'border-amber-500/50')}>
@@ -103,13 +103,13 @@ export function BackofficeInvoicesTab() {
               {stats.overdue}
               {stats.overdue > 0 && <AlertTriangle className="h-4 w-4" />}
             </div>
-            <p className="text-xs text-muted-foreground">{t('backoffice.overdueInvoices')}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.backoffice.overdueInvoices')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="text-2xl font-bold">€{stats.outstanding.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">{t('backoffice.totalOutstanding')}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.backoffice.totalOutstanding')}</p>
           </CardContent>
         </Card>
       </div>
@@ -119,7 +119,7 @@ export function BackofficeInvoicesTab() {
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={t('backoffice.searchInvoices')}
+            placeholder={t('admin.backoffice.searchInvoices')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -128,10 +128,10 @@ export function BackofficeInvoicesTab() {
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder={t('backoffice.allStatuses')} />
+            <SelectValue placeholder={t('admin.backoffice.allStatuses')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('backoffice.allStatuses')}</SelectItem>
+            <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
             {Object.entries(STATUS_CONFIG).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
             ))}
@@ -144,7 +144,7 @@ export function BackofficeInvoicesTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
-            {t('backoffice.invoices')}
+            {t('admin.backoffice.invoices')}
             <Badge variant="secondary" className="ml-2">{filteredInvoices?.length || 0}</Badge>
           </CardTitle>
         </CardHeader>
@@ -155,12 +155,12 @@ export function BackofficeInvoicesTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('backoffice.invoiceNumber')}</TableHead>
-                  <TableHead>{t('backoffice.startup')}</TableHead>
-                  <TableHead>{t('backoffice.issueDate')}</TableHead>
-                  <TableHead>{t('backoffice.dueDate')}</TableHead>
-                  <TableHead>{t('backoffice.status')}</TableHead>
-                  <TableHead className="text-right">{t('backoffice.total')}</TableHead>
+                  <TableHead>{t('admin.backoffice.invoiceNumber')}</TableHead>
+                  <TableHead>{t('admin.backoffice.startup')}</TableHead>
+                  <TableHead>{t('admin.backoffice.issueDate')}</TableHead>
+                  <TableHead>{t('admin.backoffice.dueDate')}</TableHead>
+                  <TableHead>{t('admin.backoffice.status')}</TableHead>
+                  <TableHead className="text-right">{t('admin.backoffice.total')}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -207,7 +207,7 @@ export function BackofficeInvoicesTab() {
                             }}
                           >
                             <CreditCard className="h-3 w-3 mr-1" />
-                            {t('backoffice.recordPayment')}
+                            {t('admin.backoffice.recordPayment')}
                           </Button>
                         )}
                       </TableCell>
@@ -217,7 +217,7 @@ export function BackofficeInvoicesTab() {
                 {filteredInvoices?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      {t('backoffice.noInvoices')}
+                      {t('admin.backoffice.noInvoices')}
                     </TableCell>
                   </TableRow>
                 )}
@@ -231,7 +231,7 @@ export function BackofficeInvoicesTab() {
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('backoffice.recordPayment')}</DialogTitle>
+            <DialogTitle>{t('admin.backoffice.recordPayment')}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -241,12 +241,12 @@ export function BackofficeInvoicesTab() {
             className="space-y-4"
           >
             <div className="space-y-2">
-              <Label>{t('backoffice.invoiceNumber')}</Label>
+              <Label>{t('admin.backoffice.invoiceNumber')}</Label>
               <Input value={selectedInvoice?.invoice_number || ''} disabled />
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.amount')}</Label>
+              <Label>{t('admin.backoffice.amount')}</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -257,7 +257,7 @@ export function BackofficeInvoicesTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.paymentDate')}</Label>
+              <Label>{t('admin.backoffice.paymentDate')}</Label>
               <Input
                 type="date"
                 name="payment_date"
@@ -267,25 +267,25 @@ export function BackofficeInvoicesTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.paymentMethod')}</Label>
+              <Label>{t('admin.backoffice.paymentMethod')}</Label>
               <Select name="payment_method" defaultValue="bank_transfer">
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="bank_transfer">{t('backoffice.bankTransfer')}</SelectItem>
-                  <SelectItem value="card">{t('backoffice.card')}</SelectItem>
-                  <SelectItem value="cash">{t('backoffice.cash')}</SelectItem>
-                  <SelectItem value="other">{t('backoffice.other')}</SelectItem>
+                  <SelectItem value="bank_transfer">{t('admin.backoffice.bankTransfer')}</SelectItem>
+                  <SelectItem value="card">{t('admin.backoffice.card')}</SelectItem>
+                  <SelectItem value="cash">{t('admin.backoffice.cash')}</SelectItem>
+                  <SelectItem value="other">{t('admin.backoffice.other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.reference')}</Label>
+              <Label>{t('admin.backoffice.reference')}</Label>
               <Input
                 name="reference"
-                placeholder={t('backoffice.referencePlaceholder')}
+                placeholder={t('admin.backoffice.referencePlaceholder')}
               />
             </div>
 
@@ -294,7 +294,7 @@ export function BackofficeInvoicesTab() {
                 {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {t('backoffice.confirmPayment')}
+                {t('admin.backoffice.confirmPayment')}
               </Button>
             </div>
           </form>

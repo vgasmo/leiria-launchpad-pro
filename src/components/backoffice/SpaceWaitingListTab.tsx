@@ -118,10 +118,10 @@ export function SpaceWaitingListTab() {
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <ListOrdered className="h-5 w-5" />
-            {t('backoffice.waitingList', 'Space Waiting List')}
+            {t('admin.backoffice.waitingList', 'Space Waiting List')}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {t('backoffice.waitingListDesc', 'Manage requests for office space from leads and startups')}
+            {t('admin.backoffice.waitingListDesc', 'Manage requests for office space from leads and startups')}
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export function SpaceWaitingListTab() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('backoffice.allStatuses')}</SelectItem>
+              <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
               {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                 <SelectItem key={key} value={key}>{config.label}</SelectItem>
               ))}
@@ -142,12 +142,12 @@ export function SpaceWaitingListTab() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('backoffice.addToWaitlist', 'Add to Waitlist')}
+                {t('admin.backoffice.addToWaitlist', 'Add to Waitlist')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>{t('backoffice.addWaitlistRequest', 'Add Waiting List Request')}</DialogTitle>
+                <DialogTitle>{t('admin.backoffice.addWaitlistRequest', 'Add Waiting List Request')}</DialogTitle>
               </DialogHeader>
               <form
                 onSubmit={(e) => {
@@ -157,7 +157,7 @@ export function SpaceWaitingListTab() {
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <Label>{t('backoffice.requestFor', 'Request For')}</Label>
+                  <Label>{t('admin.backoffice.requestFor', 'Request For')}</Label>
                   <Tabs defaultValue="startup" className="w-full">
                     <TabsList className="w-full">
                       <TabsTrigger value="startup" className="flex-1">Startup</TabsTrigger>
@@ -198,7 +198,7 @@ export function SpaceWaitingListTab() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('backoffice.requestType', 'Request Type')}</Label>
+                    <Label>{t('admin.backoffice.requestType', 'Request Type')}</Label>
                     <Select name="request_type" defaultValue="office">
                       <SelectTrigger>
                         <SelectValue />
@@ -212,13 +212,13 @@ export function SpaceWaitingListTab() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('backoffice.preferredCapacity', 'Preferred Capacity')}</Label>
+                    <Label>{t('admin.backoffice.preferredCapacity', 'Preferred Capacity')}</Label>
                     <Input type="number" name="preferred_capacity" placeholder="Number of people" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.preferredBuilding', 'Preferred Building')}</Label>
+                  <Label>{t('admin.backoffice.preferredBuilding', 'Preferred Building')}</Label>
                   <Select name="preferred_space_id">
                     <SelectTrigger>
                       <SelectValue placeholder="Any building..." />
@@ -232,7 +232,7 @@ export function SpaceWaitingListTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.priority', 'Priority')}: {priority[0]}</Label>
+                  <Label>{t('admin.backoffice.priority', 'Priority')}: {priority[0]}</Label>
                   <Slider
                     value={priority}
                     onValueChange={setPriority}
@@ -247,7 +247,7 @@ export function SpaceWaitingListTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.notes', 'Notes')}</Label>
+                  <Label>{t('admin.backoffice.notes', 'Notes')}</Label>
                   <Textarea name="notes" placeholder="Any special requirements..." />
                 </div>
 
@@ -256,7 +256,7 @@ export function SpaceWaitingListTab() {
                     {t('common.cancel')}
                   </Button>
                   <Button type="submit">
-                    {t('backoffice.addToList', 'Add to List')}
+                    {t('admin.backoffice.addToList', 'Add to List')}
                   </Button>
                 </div>
               </form>
@@ -434,11 +434,11 @@ export function SpaceWaitingListTab() {
           ) : (
             <div className="text-center py-12">
               <ListOrdered className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium">{t('backoffice.noWaitingRequests', 'No Requests')}</h3>
+              <h3 className="font-medium">{t('admin.backoffice.noWaitingRequests', 'No Requests')}</h3>
               <p className="text-sm text-muted-foreground">
                 {statusFilter === 'waiting' 
-                  ? t('backoffice.noWaitingDesc', 'No one is currently waiting for space')
-                  : t('backoffice.noRequestsInStatus', 'No requests with this status')}
+                  ? t('admin.backoffice.noWaitingDesc', 'No one is currently waiting for space')
+                  : t('admin.backoffice.noRequestsInStatus', 'No requests with this status')}
               </p>
             </div>
           )}
@@ -449,7 +449,7 @@ export function SpaceWaitingListTab() {
       <Dialog open={fulfillDialogOpen} onOpenChange={setFulfillDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('backoffice.fulfillRequest', 'Fulfill Request')}</DialogTitle>
+            <DialogTitle>{t('admin.backoffice.fulfillRequest', 'Fulfill Request')}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -473,7 +473,7 @@ export function SpaceWaitingListTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.assignRoom', 'Assign Room')}</Label>
+              <Label>{t('admin.backoffice.assignRoom', 'Assign Room')}</Label>
               <Select name="room_id" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select available room..." />
@@ -489,7 +489,7 @@ export function SpaceWaitingListTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.startDate', 'Start Date')}</Label>
+              <Label>{t('admin.backoffice.startDate', 'Start Date')}</Label>
               <Input
                 type="date"
                 name="start_date"
@@ -503,7 +503,7 @@ export function SpaceWaitingListTab() {
                 {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {t('backoffice.confirmFulfill', 'Confirm & Assign')}
+                {t('admin.backoffice.confirmFulfill', 'Confirm & Assign')}
               </Button>
             </div>
           </form>

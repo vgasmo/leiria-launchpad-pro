@@ -21,7 +21,7 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
     return alloc.workspace?.startup?.name ||
       alloc.funnel_item?.organization_name ||
       alloc.funnel_item?.contact_name ||
-      t('backoffice.unknownOccupant', 'Unknown');
+      t('admin.backoffice.unknownOccupant', 'Unknown');
   };
 
   const isActive = (alloc: RoomAllocation): boolean => {
@@ -53,7 +53,7 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">{t('backoffice.noAllocationHistory', 'No allocation history for this room')}</p>
+        <p className="text-sm">{t('admin.backoffice.noAllocationHistory', 'No allocation history for this room')}</p>
       </div>
     );
   }
@@ -63,10 +63,10 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          {t('backoffice.allocationHistory', 'Allocation History')}
+          {t('admin.backoffice.allocationHistory', 'Allocation History')}
         </h4>
         <Badge variant="secondary" className="text-xs">
-          {allocations.length} {t('backoffice.allocations', 'allocations')}
+          {allocations.length} {t('admin.backoffice.allocations', 'allocations')}
         </Badge>
       </div>
 
@@ -108,7 +108,7 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
                         {alloc.end_date ? (
                           <span>{format(new Date(alloc.end_date), 'MMM dd, yyyy')}</span>
                         ) : (
-                          <span className="text-primary font-medium">{t('backoffice.present', 'Present')}</span>
+                          <span className="text-primary font-medium">{t('admin.backoffice.present', 'Present')}</span>
                         )}
                       </div>
 
@@ -123,7 +123,7 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
                       {getAllocTypeBadge(alloc.allocation_type)}
                       {active && (
                         <Badge variant="default" className="text-xs bg-accent text-accent-foreground">
-                          {t('backoffice.active', 'Active')}
+                          {t('admin.backoffice.active', 'Active')}
                         </Badge>
                       )}
                     </div>
@@ -131,7 +131,7 @@ export function RoomAllocationHistory({ roomId, roomName }: RoomAllocationHistor
 
                   {active && alloc.start_date && (
                     <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
-                      {t('backoffice.occupiedFor', 'Occupied for')} {formatDistanceToNow(new Date(alloc.start_date))}
+                      {t('admin.backoffice.occupiedFor', 'Occupied for')} {formatDistanceToNow(new Date(alloc.start_date))}
                     </div>
                   )}
                 </CardContent>

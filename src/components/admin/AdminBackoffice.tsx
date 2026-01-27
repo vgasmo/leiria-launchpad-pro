@@ -438,7 +438,7 @@ export function AdminBackoffice() {
               <SelectValue placeholder={t('backoffice.consultant')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('backoffice.allConsultants')}</SelectItem>
+              <SelectItem value="all">{t('admin.backoffice.allConsultants')}</SelectItem>
               {consultants?.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.full_name || c.email}</SelectItem>
               ))}
@@ -447,13 +447,13 @@ export function AdminBackoffice() {
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder={t('backoffice.status')} />
+              <SelectValue placeholder={t('admin.backoffice.status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('backoffice.allStatuses')}</SelectItem>
-              <SelectItem value="active">{t('backoffice.active')}</SelectItem>
-              <SelectItem value="blocked">{t('backoffice.blocked')}</SelectItem>
-              <SelectItem value="archived">{t('backoffice.archived')}</SelectItem>
+              <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
+              <SelectItem value="active">{t('admin.backoffice.active')}</SelectItem>
+              <SelectItem value="blocked">{t('admin.backoffice.blocked')}</SelectItem>
+              <SelectItem value="archived">{t('admin.backoffice.archived')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -467,11 +467,11 @@ export function AdminBackoffice() {
 
         {/* Stats */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>{filteredData.length} {t('backoffice.startups')}</span>
+          <span>{filteredData.length} {t('admin.backoffice.startups')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.status === 'active').length} {t('backoffice.active')}</span>
+          <span>{filteredData.filter(d => d.status === 'active').length} {t('admin.backoffice.active')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.health_score !== null && d.health_score < 50).length} {t('backoffice.needAttention')}</span>
+          <span>{filteredData.filter(d => d.health_score !== null && d.health_score < 50).length} {t('admin.backoffice.needAttention')}</span>
         </div>
 
         {/* Table */}
@@ -486,22 +486,22 @@ export function AdminBackoffice() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('backoffice.startup')}</TableHead>
-                  <TableHead>{t('backoffice.program')}</TableHead>
-                  <TableHead>{t('backoffice.stage')}</TableHead>
-                  <TableHead>{t('backoffice.priority')}</TableHead>
-                  <TableHead>{t('backoffice.health')}</TableHead>
-                  <TableHead>{t('backoffice.consultant')}</TableHead>
-                  <TableHead>{t('backoffice.nextSession')}</TableHead>
-                  <TableHead>{t('backoffice.status')}</TableHead>
-                  <TableHead>{t('backoffice.actions')}</TableHead>
+                  <TableHead>{t('admin.backoffice.startup')}</TableHead>
+                  <TableHead>{t('admin.backoffice.program')}</TableHead>
+                  <TableHead>{t('admin.backoffice.stage')}</TableHead>
+                  <TableHead>{t('admin.backoffice.priority')}</TableHead>
+                  <TableHead>{t('admin.backoffice.health')}</TableHead>
+                  <TableHead>{t('admin.backoffice.consultant')}</TableHead>
+                  <TableHead>{t('admin.backoffice.nextSession')}</TableHead>
+                  <TableHead>{t('admin.backoffice.status')}</TableHead>
+                  <TableHead>{t('admin.backoffice.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      {t('backoffice.noStartups')}
+                      {t('admin.backoffice.noStartups')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -526,7 +526,7 @@ export function AdminBackoffice() {
                         <Popover>
                           <PopoverTrigger asChild>
                             <button className="flex items-center gap-1 hover:bg-muted rounded px-1 -ml-1 text-sm">
-                              {item.program_name || <span className="text-muted-foreground">{t('backoffice.noProgram')}</span>}
+                              {item.program_name || <span className="text-muted-foreground">{t('admin.backoffice.noProgram')}</span>}
                               <ChevronDown className="h-3 w-3 text-muted-foreground" />
                             </button>
                           </PopoverTrigger>
