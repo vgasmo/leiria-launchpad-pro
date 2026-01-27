@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface ShareLinkRequest {
   token: string;
@@ -38,10 +34,8 @@ function checkRateLimit(key: string, limitMap: Map<string, { count: number; rese
 
 // Get client IP from request headers
 function getClientIp(req: Request): string {
-  // Check standard proxy headers
   const forwardedFor = req.headers.get('x-forwarded-for');
   if (forwardedFor) {
-    // Take the first IP in the chain (original client)
     return forwardedFor.split(',')[0].trim();
   }
   
@@ -50,7 +44,6 @@ function getClientIp(req: Request): string {
     return realIp.trim();
   }
   
-  // Fallback - use a hash of available identifying info
   const cfConnectingIp = req.headers.get('cf-connecting-ip');
   if (cfConnectingIp) {
     return cfConnectingIp.trim();
@@ -70,17 +63,16 @@ async function sha256(str: string): Promise<string> {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
     // SECURITY: Apply IP-based rate limiting BEFORE any token processing
-    // This prevents token enumeration attacks by limiting requests per IP
     const clientIp = getClientIp(req);
     if (!checkRateLimit(clientIp, rateLimitMap, RATE_LIMIT_MAX_REQUESTS)) {
-      return new Response(
-        JSON.stringify({ error: "Too many requests. Please try again later." }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      return corsJsonResponse(
+        { error: "Too many requests. Please try again later." },
+        req, 429
       );
     }
 
@@ -92,13 +84,10 @@ serve(async (req) => {
     const { token } = body;
 
     if (!token) {
-      return new Response(JSON.stringify({ error: "Token required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Token required" }, req, 400);
     }
 
     // SECURITY: Hash the token for database lookup
-    // This prevents direct exposure of tokens if the database is compromised
     const tokenHash = await sha256(token);
 
     // Find share link using hashed token
@@ -110,25 +99,20 @@ serve(async (req) => {
       .single();
 
     if (linkError || !shareLink) {
-      return new Response(JSON.stringify({ error: "Invalid or expired link" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Invalid or expired link" }, req, 404);
     }
 
     // SECURITY: Apply secondary rate limiting per valid token hash
-    // This provides additional protection for valid share links
     if (!checkRateLimit(tokenHash, tokenRateLimitMap, TOKEN_RATE_LIMIT_MAX_REQUESTS)) {
-      return new Response(
-        JSON.stringify({ error: "Too many requests for this link. Please try again later." }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      return corsJsonResponse(
+        { error: "Too many requests for this link. Please try again later." },
+        req, 429
       );
     }
 
     // Check expiration
     if (new Date(shareLink.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ error: "Link expired" }), {
-        status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Link expired" }, req, 410);
     }
 
     // Increment view count (non-blocking)
@@ -164,7 +148,6 @@ serve(async (req) => {
 
     // Add data based on scope
     if (shareLink.scope === "kpis_only" || shareLink.scope === "full_readonly") {
-      const currentMonth = new Date().toISOString().slice(0, 7) + "-01";
       const { data: kpis } = await supabase
         .from("kpi_values")
         .select(`
@@ -179,7 +162,6 @@ serve(async (req) => {
     }
 
     if (shareLink.scope === "report_only" || shareLink.scope === "full_readonly") {
-      // Get latest investor update
       const { data: updates } = await supabase
         .from("investor_updates")
         .select("*")
@@ -191,7 +173,6 @@ serve(async (req) => {
     }
 
     if (shareLink.scope === "full_readonly") {
-      // Get milestones
       const { data: milestones } = await supabase
         .from("milestones")
         .select("title, status, target_date, completed_at")
@@ -203,17 +184,9 @@ serve(async (req) => {
       responseData.health_components = workspace.health_score_components;
     }
 
-    return new Response(
-      JSON.stringify({ success: true, data: responseData }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ success: true, data: responseData }, req);
   } catch (error: unknown) {
-    // Log detailed error server-side only
     console.error("Error in get-shared-workspace:", error);
-    // Return generic error to client to prevent information leakage
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ error: "Internal server error" }, req, 500);
   }
 });

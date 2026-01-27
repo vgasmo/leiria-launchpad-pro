@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface WorkspaceInviteRequest {
   workspaceId: string;
@@ -72,7 +68,7 @@ function validateInput(payload: WorkspaceInviteRequest): { valid: boolean; error
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -84,10 +80,7 @@ serve(async (req) => {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
       console.error("No authorization header");
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
     
     const token = authHeader.replace("Bearer ", "");
@@ -98,10 +91,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
     if (authError || !user) {
       console.error("Auth failed:", authError?.message);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
     
     const payload: WorkspaceInviteRequest = await req.json();
@@ -109,10 +99,7 @@ serve(async (req) => {
     // Validate input
     const validation = validateInput(payload);
     if (!validation.valid) {
-      return new Response(
-        JSON.stringify({ error: validation.error }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: validation.error }, req, 400);
     }
     
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
@@ -125,18 +112,12 @@ serve(async (req) => {
     
     if (rolesError) {
       console.error("Failed to fetch user roles:", rolesError);
-      return new Response(
-        JSON.stringify({ error: "Failed to verify permissions" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: "Failed to verify permissions" }, req, 500);
     }
     
     const roles = userRoles?.map(r => r.role) || [];
     if (!roles.includes('admin') && !roles.includes('consultor')) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden: Only staff can send invitations" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: "Forbidden: Only staff can send invitations" }, req, 403);
     }
     
     // Get workspace and startup info
@@ -151,10 +132,7 @@ serve(async (req) => {
     
     if (wsError || !workspace) {
       console.error("Workspace not found:", wsError);
-      return new Response(
-        JSON.stringify({ error: "Workspace not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return corsJsonResponse({ error: "Workspace not found" }, req, 404);
     }
     
     const startup = workspace.startup as unknown as { id: string; name: string; main_contact_email: string | null; main_contact_name: string | null } | null;
@@ -174,9 +152,9 @@ serve(async (req) => {
     
     if (existingInvite) {
       if (existingInvite.accepted_at) {
-        return new Response(
-          JSON.stringify({ error: "This email has already accepted an invitation" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        return corsJsonResponse(
+          { error: "This email has already accepted an invitation" },
+          req, 400
         );
       }
       
@@ -192,10 +170,7 @@ serve(async (req) => {
       
       if (updateError) {
         console.error("Failed to update invitation:", updateError);
-        return new Response(
-          JSON.stringify({ error: "Failed to update invitation" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return corsJsonResponse({ error: "Failed to update invitation" }, req, 500);
       }
     } else {
       // Create new invitation
@@ -212,10 +187,7 @@ serve(async (req) => {
       
       if (insertError) {
         console.error("Failed to create invitation:", insertError);
-        return new Response(
-          JSON.stringify({ error: "Failed to create invitation" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return corsJsonResponse({ error: "Failed to create invitation" }, req, 500);
       }
     }
     
@@ -288,20 +260,14 @@ serve(async (req) => {
     
     console.log(`Invitation sent to ${payload.email} for workspace ${payload.workspaceId}`, emailResult);
     
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: `Invitation sent to ${payload.email}`,
-        invitationId: existingInvite?.id || 'new'
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ 
+      success: true, 
+      message: `Invitation sent to ${payload.email}`,
+      invitationId: existingInvite?.id || 'new'
+    }, req);
     
   } catch (err) {
     console.error("Error in send-workspace-invite:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ error: "Internal server error" }, req, 500);
   }
 });
