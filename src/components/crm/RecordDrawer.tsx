@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
+import { getFunnelStageLabel } from '@/lib/stageLabels';
 import {
   Sheet,
   SheetContent,
@@ -85,18 +86,19 @@ const STAGE_OPTIONS: FunnelStage[] = [
 
 type TaskStatusFilter = 'open' | 'done' | 'canceled';
 
-const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
-  new: { label: 'New', color: 'bg-slate-500' },
-  first_contact_booked: { label: 'Meeting Booked', color: 'bg-blue-500' },
-  met: { label: 'Met', color: 'bg-indigo-500' },
-  qualified: { label: 'Qualified', color: 'bg-purple-500' },
-  proposal_sent: { label: 'Proposal Sent', color: 'bg-amber-500' },
-  negotiating: { label: 'Negotiating', color: 'bg-orange-500' },
-  contracted: { label: 'Contracted', color: 'bg-green-500' },
-  incubating: { label: 'Incubating', color: 'bg-emerald-600' },
-  accelerating: { label: 'Accelerating', color: 'bg-primary' },
-  rejected: { label: 'Rejected', color: 'bg-destructive' },
-  archived: { label: 'Archived', color: 'bg-muted-foreground' },
+// Stage colors only - labels are fetched via i18n
+const STAGE_COLORS: Record<FunnelStage, string> = {
+  new: 'bg-slate-500',
+  first_contact_booked: 'bg-blue-500',
+  met: 'bg-indigo-500',
+  qualified: 'bg-purple-500',
+  proposal_sent: 'bg-amber-500',
+  negotiating: 'bg-orange-500',
+  contracted: 'bg-green-500',
+  incubating: 'bg-emerald-600',
+  accelerating: 'bg-primary',
+  rejected: 'bg-destructive',
+  archived: 'bg-muted-foreground',
 };
 
 interface RecordDrawerProps {
@@ -269,7 +271,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   if (!item) return null;
 
-  const stageConfig = STAGE_CONFIG[item.stage];
+  const stageColor = STAGE_COLORS[item.stage];
+  const stageLabel = getFunnelStageLabel(t, item.stage);
   // Get next action from the item (need to cast as the type might not have these fields yet)
   const nextActionAt = (item as any).next_action_at as string | null;
   const nextActionDescription = (item as any).next_action_description as string | null;
@@ -309,13 +312,13 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               onValueChange={(value) => handleStageChange(value as FunnelStage)}
               disabled={updateFunnelItem.isPending}
             >
-              <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageConfig.color, 'text-white border-0 hover:opacity-90')}>
-                <SelectValue>{stageConfig.label}</SelectValue>
+              <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageColor, 'text-white border-0 hover:opacity-90')}>
+                <SelectValue>{stageLabel}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {STAGE_OPTIONS.map((stage) => (
                   <SelectItem key={stage} value={stage}>
-                    {STAGE_CONFIG[stage].label}
+                    {getFunnelStageLabel(t, stage)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -646,7 +649,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
             <div className="grid gap-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t('crm.stage')}</span>
-                <Badge className={cn(stageConfig.color, 'text-white')}>{stageConfig.label}</Badge>
+                <Badge className={cn(stageColor, 'text-white')}>{stageLabel}</Badge>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t('crm.owner')}</span>

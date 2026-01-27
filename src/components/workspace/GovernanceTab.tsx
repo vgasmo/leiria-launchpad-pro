@@ -160,10 +160,10 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Stage Gate Progress
+            {t('governance.stageGateProgress', 'Stage Gate Progress')}
           </CardTitle>
           <CardDescription>
-            Track your progress through program stages
+            {t('governance.stageGateProgressDesc', 'Track your progress through program stages')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -191,11 +191,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
             {STAGES.map((stage, index) => (
               <span 
                 key={stage} 
-                className={`capitalize ${
+                className={`${
                   index === currentStageIndex ? 'font-semibold text-foreground' : ''
                 }`}
               >
-                {stage}
+                {getStartupStageLabel(t, stage)}
               </span>
             ))}
           </div>
@@ -204,13 +204,13 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           <div className="p-4 rounded-lg bg-muted/50 mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Current Stage</p>
-                <p className="text-lg font-semibold capitalize">{currentStage}</p>
+                <p className="text-sm text-muted-foreground">{t('governance.currentStage', 'Current Stage')}</p>
+                <p className="text-lg font-semibold">{getStartupStageLabel(t, currentStage)}</p>
               </div>
               {nextStage && (
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Next Stage</p>
-                  <p className="text-lg font-semibold capitalize text-primary">{nextStage}</p>
+                  <p className="text-sm text-muted-foreground">{t('governance.nextStage', 'Next Stage')}</p>
+                  <p className="text-lg font-semibold text-primary">{getStartupStageLabel(t, nextStage)}</p>
                 </div>
               )}
             </div>
@@ -223,9 +223,9 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-amber-600" />
                   <div>
-                    <p className="font-medium">Stage gate review pending</p>
+                    <p className="font-medium">{t('governance.reviewPending', 'Stage gate review pending')}</p>
                     <p className="text-sm text-muted-foreground">
-                      Requested {format(new Date(pendingReview.requested_at), 'MMM d, yyyy')}
+                      {t('governance.requestedAt', 'Requested {{date}}', { date: format(new Date(pendingReview.requested_at), 'MMM d, yyyy') })}
                     </p>
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
                       setShowApproveDialog(true);
                     }}
                   >
-                    Review
+                    {t('governance.review', 'Review')}
                   </Button>
                 )}
               </div>
@@ -258,7 +258,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           {!nextStage && (
             <div className="text-center py-4 text-muted-foreground">
               <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
-              <p>Congratulations! You've reached the final stage.</p>
+              <p>{t('governance.completedAllStages', 'Congratulations! You\'ve completed all stages.')}</p>
             </div>
           )}
         </CardContent>
@@ -295,7 +295,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
       {reviewHistory.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Review History</CardTitle>
+            <CardTitle>{t('governance.reviewHistory', 'Review History')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -339,11 +339,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Evidence & Notes (optional)</Label>
+              <Label>{t('governance.evidenceNotes', 'Evidence & Notes (optional)')}</Label>
               <Textarea
                 value={evidence}
                 onChange={(e) => setEvidence(e.target.value)}
-                placeholder="Describe why you're ready for the next stage, key achievements, metrics..."
+                placeholder={t('governance.evidencePlaceholder', 'Describe why you\'re ready for the next stage, key achievements, metrics...')}
                 rows={4}
               />
             </div>
@@ -351,11 +351,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRequestDialog(false)}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button onClick={handleRequestReview} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Submit Request
+              {t('governance.submitRequest', 'Submit Request')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -389,7 +389,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
             )}
             
             <div className="space-y-2">
-              <Label>Decision</Label>
+              <Label>{t('governance.decision', 'Decision')}</Label>
               <Select value={decision} onValueChange={(v) => setDecision(v as typeof decision)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -398,19 +398,19 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
                   <SelectItem value="approved">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Approve
+                      {t('governance.approved', 'Approve')}
                     </div>
                   </SelectItem>
                   <SelectItem value="conditional">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-amber-500" />
-                      Conditional Approval
+                      {t('governance.conditionalApproval', 'Conditional Approval')}
                     </div>
                   </SelectItem>
                   <SelectItem value="rejected">
                     <div className="flex items-center gap-2">
                       <XCircle className="h-4 w-4 text-destructive" />
-                      Reject
+                      {t('governance.rejected', 'Reject')}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -419,11 +419,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
 
             {decision === 'conditional' && (
               <div className="space-y-2">
-                <Label>Conditions</Label>
+                <Label>{t('governance.conditions', 'Conditions')}</Label>
                 <Textarea
                   value={conditions}
                   onChange={(e) => setConditions(e.target.value)}
-                  placeholder="Describe the conditions that must be met..."
+                  placeholder={t('governance.conditionsPlaceholder', 'Describe the conditions that must be met...')}
                   rows={3}
                 />
               </div>
@@ -432,7 +432,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button 
               onClick={handleApproveReview} 
@@ -440,7 +440,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
               variant={decision === 'rejected' ? 'destructive' : 'default'}
             >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {decision === 'approved' ? 'Approve' : decision === 'conditional' ? 'Approve with Conditions' : 'Reject'}
+              {decision === 'approved' 
+                ? t('governance.approved', 'Approve') 
+                : decision === 'conditional' 
+                ? t('governance.approveWithConditions', 'Approve with Conditions') 
+                : t('governance.rejected', 'Reject')}
             </Button>
           </DialogFooter>
         </DialogContent>
