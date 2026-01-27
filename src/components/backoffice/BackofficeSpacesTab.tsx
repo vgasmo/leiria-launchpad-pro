@@ -103,21 +103,21 @@ export function BackofficeSpacesTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{t('backoffice.officeSpaces')}</h2>
-          <p className="text-sm text-muted-foreground">{t('backoffice.manageSpaces')}</p>
+          <h2 className="text-lg font-semibold">{t('admin.backoffice.officeSpaces')}</h2>
+          <p className="text-sm text-muted-foreground">{t('admin.backoffice.manageSpaces')}</p>
         </div>
 
         <Dialog open={spaceDialogOpen} onOpenChange={setSpaceDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedSpace(null)}>
               <Plus className="h-4 w-4 mr-2" />
-              {t('backoffice.addSpace')}
+              {t('admin.backoffice.addSpace')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {selectedSpace ? t('backoffice.editSpace') : t('backoffice.addSpace')}
+                {selectedSpace ? t('admin.backoffice.editSpace') : t('admin.backoffice.addSpace')}
               </DialogTitle>
             </DialogHeader>
             <form
@@ -128,7 +128,7 @@ export function BackofficeSpacesTab() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label>{t('backoffice.spaceName')}</Label>
+                <Label>{t('admin.backoffice.spaceName')}</Label>
                 <Input
                   name="name"
                   placeholder="Desk A1, Office 101..."
@@ -139,7 +139,7 @@ export function BackofficeSpacesTab() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('backoffice.type')}</Label>
+                  <Label>{t('admin.backoffice.type')}</Label>
                   <Select name="type" defaultValue={selectedSpace?.type || 'desk'}>
                     <SelectTrigger>
                       <SelectValue />
@@ -153,7 +153,7 @@ export function BackofficeSpacesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.floor')}</Label>
+                  <Label>{t('admin.backoffice.floor')}</Label>
                   <Input
                     name="floor"
                     placeholder="1, Ground, Mezzanine..."
@@ -162,7 +162,7 @@ export function BackofficeSpacesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.capacity')}</Label>
+                  <Label>{t('admin.backoffice.capacity')}</Label>
                   <Input
                     type="number"
                     name="capacity"
@@ -171,7 +171,7 @@ export function BackofficeSpacesTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.monthlyCost')}</Label>
+                  <Label>{t('admin.backoffice.monthlyCost')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -186,11 +186,11 @@ export function BackofficeSpacesTab() {
                   name="is_available"
                   defaultChecked={selectedSpace?.is_available ?? true}
                 />
-                <Label>{t('backoffice.available')}</Label>
+                <Label>{t('admin.backoffice.available')}</Label>
               </div>
 
               <div className="space-y-2">
-                <Label>{t('backoffice.notes')}</Label>
+                <Label>{t('admin.backoffice.notes')}</Label>
                 <Textarea
                   name="notes"
                   defaultValue={selectedSpace?.notes || ''}
@@ -253,7 +253,7 @@ export function BackofficeSpacesTab() {
                             )}
                           </div>
                           <Badge variant={isOccupied ? 'default' : 'outline'}>
-                            {isOccupied ? t('backoffice.occupied') : t('backoffice.vacant')}
+                            {isOccupied ? t('admin.backoffice.occupied') : t('admin.backoffice.vacant')}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -261,18 +261,18 @@ export function BackofficeSpacesTab() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            {space.capacity} {t('backoffice.people')}
+                            {space.capacity} {t('admin.backoffice.people')}
                           </span>
                           <span className="font-medium">€{space.monthly_cost}/mo</span>
                         </div>
 
                         {isOccupied && startupName && (
                           <div className="text-sm bg-primary/10 rounded p-2">
-                            <span className="text-muted-foreground">{t('backoffice.occupiedBy')}:</span>
+                            <span className="text-muted-foreground">{t('admin.backoffice.occupiedBy')}:</span>
                             <span className="font-medium ml-1">{startupName}</span>
                             {allocation?.start_date && (
                               <span className="text-xs text-muted-foreground ml-2">
-                                ({t('backoffice.since')} {format(new Date(allocation.start_date), 'MMM yyyy')})
+                                ({t('admin.backoffice.since')} {format(new Date(allocation.start_date), 'MMM yyyy')})
                               </span>
                             )}
                           </div>
@@ -299,7 +299,7 @@ export function BackofficeSpacesTab() {
                                 setAllocationDialogOpen(true);
                               }}
                             >
-                              {t('backoffice.allocate')}
+                              {t('admin.backoffice.allocate')}
                             </Button>
                           )}
                         </div>
@@ -317,7 +317,7 @@ export function BackofficeSpacesTab() {
       <Dialog open={allocationDialogOpen} onOpenChange={setAllocationDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('backoffice.allocateSpace')}</DialogTitle>
+            <DialogTitle>{t('admin.backoffice.allocateSpace')}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -327,15 +327,15 @@ export function BackofficeSpacesTab() {
             className="space-y-4"
           >
             <div className="space-y-2">
-              <Label>{t('backoffice.space')}</Label>
+              <Label>{t('admin.backoffice.space')}</Label>
               <Input value={selectedSpaceForAllocation?.name || ''} disabled />
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.startup')}</Label>
+              <Label>{t('admin.backoffice.startup')}</Label>
               <Select name="workspace_id" required>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('backoffice.selectStartup')} />
+                  <SelectValue placeholder={t('admin.backoffice.selectStartup')} />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces?.map(w => (
@@ -349,7 +349,7 @@ export function BackofficeSpacesTab() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t('backoffice.startDate')}</Label>
+                <Label>{t('admin.backoffice.startDate')}</Label>
                 <Input
                   type="date"
                   name="start_date"
@@ -359,7 +359,7 @@ export function BackofficeSpacesTab() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('backoffice.endDate')}</Label>
+                <Label>{t('admin.backoffice.endDate')}</Label>
                 <Input
                   type="date"
                   name="end_date"
@@ -368,7 +368,7 @@ export function BackofficeSpacesTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.monthlyCostOverride')}</Label>
+              <Label>{t('admin.backoffice.monthlyCostOverride')}</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -378,7 +378,7 @@ export function BackofficeSpacesTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('backoffice.notes')}</Label>
+              <Label>{t('admin.backoffice.notes')}</Label>
               <Textarea name="notes" />
             </div>
 
@@ -387,7 +387,7 @@ export function BackofficeSpacesTab() {
                 {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {t('backoffice.confirmAllocation')}
+                {t('admin.backoffice.confirmAllocation')}
               </Button>
             </div>
           </form>

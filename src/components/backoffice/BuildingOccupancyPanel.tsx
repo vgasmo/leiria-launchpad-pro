@@ -36,7 +36,7 @@ export function BuildingOccupancyPanel() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            {t('backoffice.buildingOccupancy', 'Building Occupancy')}
+            {t('admin.backoffice.buildingOccupancy', 'Building Occupancy')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -70,7 +70,7 @@ export function BuildingOccupancyPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          {t('backoffice.buildingOccupancy', 'Building Occupancy')}
+          {t('admin.backoffice.buildingOccupancy', 'Building Occupancy')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -78,26 +78,26 @@ export function BuildingOccupancyPanel() {
         <div className="grid grid-cols-4 gap-4">
           <div className="text-center p-3 bg-muted rounded-lg">
             <div className="text-2xl font-bold">{overallStats.total}</div>
-            <div className="text-xs text-muted-foreground">{t('backoffice.totalRooms', 'Total Rooms')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.backoffice.totalRooms', 'Total Rooms')}</div>
           </div>
           <div className="text-center p-3 bg-primary/10 rounded-lg">
             <div className="text-2xl font-bold text-primary">{overallStats.occupied}</div>
-            <div className="text-xs text-muted-foreground">{t('backoffice.occupied', 'Occupied')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.backoffice.occupied', 'Occupied')}</div>
           </div>
           <div className="text-center p-3 bg-accent rounded-lg">
             <div className="text-2xl font-bold text-accent-foreground">{overallStats.available}</div>
-            <div className="text-xs text-muted-foreground">{t('backoffice.available', 'Available')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.backoffice.available', 'Available')}</div>
           </div>
           <div className="text-center p-3 bg-secondary rounded-lg">
             <div className="text-2xl font-bold text-secondary-foreground">{overallStats.maintenance}</div>
-            <div className="text-xs text-muted-foreground">{t('backoffice.maintenance', 'Maintenance')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.backoffice.maintenance', 'Maintenance')}</div>
           </div>
         </div>
 
         {/* Per Building Breakdown */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-muted-foreground">
-            {t('backoffice.byBuilding', 'By Building')}
+            {t('admin.backoffice.byBuilding', 'By Building')}
           </h4>
           
           {buildings?.map(building => {
@@ -119,7 +119,7 @@ export function BuildingOccupancyPanel() {
                   <Badge 
                     variant={stats.occupancyRate > 80 ? 'default' : stats.occupancyRate > 50 ? 'secondary' : 'outline'}
                   >
-                    {stats.occupancyRate}% {t('backoffice.occupancy', 'occupancy')}
+                    {stats.occupancyRate}% {t('admin.backoffice.occupancy', 'occupancy')}
                   </Badge>
                 </div>
                 
@@ -128,14 +128,14 @@ export function BuildingOccupancyPanel() {
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
                     <DoorOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>{stats.total} {t('backoffice.rooms', 'rooms')}</span>
+                    <span>{stats.total} {t('admin.backoffice.rooms', 'rooms')}</span>
                   </div>
                   <div className="flex items-center gap-1 text-primary">
                     <Users className="h-3.5 w-3.5" />
-                    <span>{stats.occupied} {t('backoffice.occupied', 'occupied')}</span>
+                    <span>{stats.occupied} {t('admin.backoffice.occupied', 'occupied')}</span>
                   </div>
                   <div className="flex items-center gap-1 text-accent-foreground">
-                    <span>{stats.available} {t('backoffice.free', 'free')}</span>
+                    <span>{stats.available} {t('admin.backoffice.free', 'free')}</span>
                   </div>
                   {stats.maintenance > 0 && (
                     <div className="flex items-center gap-1 text-secondary-foreground">
@@ -153,7 +153,7 @@ export function BuildingOccupancyPanel() {
             <div className="border border-dashed rounded-lg p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <DoorOpen className="h-4 w-4" />
-                <span>{t('backoffice.unassignedRooms', 'Unassigned Rooms')}</span>
+                <span>{t('admin.backoffice.unassignedRooms', 'Unassigned Rooms')}</span>
                 <Badge variant="outline">{roomsByBuilding.get('unknown')!.length}</Badge>
               </div>
             </div>

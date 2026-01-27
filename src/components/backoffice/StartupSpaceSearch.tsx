@@ -64,14 +64,14 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Search className="h-5 w-5" />
-          {t('backoffice.findStartupLocation', 'Find Startup Location')}
+          {t('admin.backoffice.findStartupLocation', 'Find Startup Location')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={t('backoffice.searchStartupPlaceholder', 'Search by startup name, organization, or room...')}
+            placeholder={t('admin.backoffice.searchStartupPlaceholder', 'Search by startup name, organization, or room...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -87,7 +87,7 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  {t('backoffice.noResultsFound', 'No results found')}
+                  {t('admin.backoffice.noResultsFound', 'No results found')}
                 </div>
               ) : (
                 searchResults.map(room => {
@@ -135,7 +135,7 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
                           </div>
 
                           <div className="text-xs text-muted-foreground mt-1">
-                            {t('backoffice.since', 'Since')} {format(new Date(allocation.start_date), 'MMM yyyy')}
+                            {t('admin.backoffice.since', 'Since')} {format(new Date(allocation.start_date), 'MMM yyyy')}
                           </div>
                         </div>
 
@@ -145,7 +145,7 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
                               variant="ghost"
                               size="sm"
                               onClick={() => onViewFloorMap?.(floorMap, room)}
-                              title={t('backoffice.viewOnMap', 'View on map')}
+                              title={t('admin.backoffice.viewOnMap', 'View on map')}
                             >
                               <MapPin className="h-4 w-4" />
                             </Button>
@@ -154,7 +154,7 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
                             variant="ghost"
                             size="sm"
                             onClick={() => onViewRoom?.(room)}
-                            title={t('backoffice.viewDetails', 'View details')}
+                            title={t('admin.backoffice.viewDetails', 'View details')}
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>
@@ -170,7 +170,7 @@ export function StartupSpaceSearch({ onViewRoom, onViewFloorMap }: StartupSpaceS
 
         {!searchQuery.trim() && (
           <div className="text-center py-8 text-muted-foreground text-sm">
-            {t('backoffice.startTypingToSearch', 'Start typing to search for startups and their locations')}
+            {t('admin.backoffice.startTypingToSearch', 'Start typing to search for startups and their locations')}
           </div>
         )}
       </CardContent>
