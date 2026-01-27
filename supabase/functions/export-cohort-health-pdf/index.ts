@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface ExportRequest {
   program_id: string;
@@ -14,7 +10,7 @@ interface ExportRequest {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -25,20 +21,14 @@ serve(async (req) => {
     // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
 
     // Check if user is admin or consultor
@@ -49,10 +39,7 @@ serve(async (req) => {
 
     const isStaff = roles?.some(r => r.role === "admin" || r.role === "consultor");
     if (!isStaff) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Forbidden" }, req, 403);
     }
 
     const body: ExportRequest = await req.json();
@@ -72,10 +59,7 @@ serve(async (req) => {
       .single();
 
     if (!program) {
-      return new Response(JSON.stringify({ error: "Program not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Program not found" }, req, 404);
     }
 
     // Get workspaces for this program
@@ -296,22 +280,16 @@ serve(async (req) => {
 
     console.log(`Report generated: ${fileName}`);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        report_url: signedUrl?.signedUrl,
-        file_name: fileName,
-        distribution,
-        workspace_count: workspaces?.length || 0,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({
+      success: true,
+      report_url: signedUrl?.signedUrl,
+      file_name: fileName,
+      distribution,
+      workspace_count: workspaces?.length || 0,
+    }, req);
   } catch (error: unknown) {
     console.error("Error in export-cohort-health-pdf:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return corsJsonResponse({ error: message }, req, 500);
   }
 });

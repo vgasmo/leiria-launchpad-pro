@@ -1,15 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireCronOrStaff } from "../_shared/security.ts";
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-// CORS headers for this function
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 interface NotificationData {
   user_id: string;
@@ -23,7 +17,7 @@ interface NotificationData {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -64,10 +58,7 @@ Deno.serve(async (req) => {
     const staffUserIds = [...new Set(staffRoles?.map(r => r.user_id) || [])];
 
     if (staffUserIds.length === 0) {
-      return new Response(
-        JSON.stringify({ success: true, created: 0, dry_run, message: 'No staff users found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ success: true, created: 0, dry_run, message: 'No staff users found' }, req);
     }
 
     // Get existing recent notifications to avoid duplicates
@@ -215,26 +206,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        dry_run,
-        created: createdCount,
-        would_create: notificationsToCreate.length,
-        would_escalate: escalationCount,
-        checked: {
-          tasks: tasks?.length || 0,
-          funnelItems: funnelItems?.length || 0,
-        },
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return corsJsonResponse({
+      success: true,
+      dry_run,
+      created: createdCount,
+      would_create: notificationsToCreate.length,
+      would_escalate: escalationCount,
+      checked: {
+        tasks: tasks?.length || 0,
+        funnelItems: funnelItems?.length || 0,
+      },
+    }, req);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error generating CRM notifications:', error);
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return corsJsonResponse({ error: message }, req, 500);
   }
 });

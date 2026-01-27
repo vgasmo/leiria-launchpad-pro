@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface GenerateSummaryRequest {
   sessionId: string;
@@ -62,16 +58,13 @@ function validateRequest(payload: unknown): { valid: true; data: GenerateSummary
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "No authorization header" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "No authorization header" }, req, 401);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -80,10 +73,7 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!lovableApiKey) {
-      return new Response(JSON.stringify({ error: "AI service not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "AI service not configured" }, req, 500);
     }
 
     // Create client with user's auth to validate access
@@ -93,10 +83,7 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Unauthorized" }, req, 401);
     }
 
     // Parse and validate request body
@@ -104,18 +91,12 @@ serve(async (req) => {
     try {
       rawPayload = await req.json();
     } catch {
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Invalid JSON body" }, req, 400);
     }
     
     const validation = validateRequest(rawPayload);
     if (!validation.valid) {
-      return new Response(JSON.stringify({ error: validation.error }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: validation.error }, req, 400);
     }
     
     const { sessionId, transcript } = validation.data;
@@ -138,10 +119,7 @@ serve(async (req) => {
 
     if (sessionError || !session) {
       console.error("Session fetch error:", sessionError);
-      return new Response(JSON.stringify({ error: "Session not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Session not found" }, req, 404);
     }
 
     // Check workspace access using user's client
@@ -150,20 +128,14 @@ serve(async (req) => {
     });
 
     if (!hasAccess) {
-      return new Response(JSON.stringify({ error: "Access denied to this workspace" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Access denied to this workspace" }, req, 403);
     }
 
     // Prepare content for AI analysis
     const contentToAnalyze = transcript || session.raw_transcript || session.notes || session.agenda || "";
     
     if (!contentToAnalyze.trim()) {
-      return new Response(JSON.stringify({ error: "No content to analyze. Please add notes, transcript, or agenda first." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "No content to analyze. Please add notes, transcript, or agenda first." }, req, 400);
     }
 
     const startupName = (session.workspace as any)?.startup?.name || "the startup";
@@ -215,32 +187,20 @@ Respond ONLY with this JSON structure:
       console.error("AI Gateway error:", aiResponse.status, errorText);
       
       if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "AI rate limit exceeded. Please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return corsJsonResponse({ error: "AI rate limit exceeded. Please try again later." }, req, 429);
       }
       if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return corsJsonResponse({ error: "AI credits exhausted. Please add credits." }, req, 402);
       }
       
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "AI service error" }, req, 500);
     }
 
     const aiData = await aiResponse.json();
     const aiContent = aiData.choices?.[0]?.message?.content;
 
     if (!aiContent) {
-      return new Response(JSON.stringify({ error: "No response from AI" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "No response from AI" }, req, 500);
     }
 
     let parsedOutput;
@@ -248,10 +208,7 @@ Respond ONLY with this JSON structure:
       parsedOutput = JSON.parse(aiContent);
     } catch (e) {
       console.error("Failed to parse AI response:", aiContent);
-      return new Response(JSON.stringify({ error: "Failed to parse AI response" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Failed to parse AI response" }, req, 500);
     }
 
     // Store transcript if provided
@@ -278,10 +235,7 @@ Respond ONLY with this JSON structure:
 
     if (updateError) {
       console.error("Failed to update session:", updateError);
-      return new Response(JSON.stringify({ error: "Failed to save AI outputs" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ error: "Failed to save AI outputs" }, req, 500);
     }
 
     // Log activity
@@ -296,23 +250,18 @@ Respond ONLY with this JSON structure:
 
     console.log("AI summary generated for session:", sessionId);
 
-    return new Response(JSON.stringify({
+    return corsJsonResponse({
       success: true,
       summary: parsedOutput.summary,
       decisions: parsedOutput.decisions,
       risks: parsedOutput.risks,
       actionSuggestions: parsedOutput.actionSuggestions,
       kpiPrompts: parsedOutput.kpiPrompts,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    }, req);
   } catch (error: unknown) {
     // Log full error server-side for debugging
     console.error("Error in generate-session-summary:", error instanceof Error ? error.message : error);
     // Return sanitized error to client
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return corsJsonResponse({ error: "Internal server error" }, req, 500);
   }
 });

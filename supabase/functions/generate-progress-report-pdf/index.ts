@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 interface ReportRequest {
   workspaceId: string;
@@ -13,7 +9,7 @@ interface ReportRequest {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -24,19 +20,13 @@ serve(async (req) => {
     // Get auth user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
     }
 
     const { workspaceId, month }: ReportRequest = await req.json();
@@ -49,10 +39,7 @@ serve(async (req) => {
     });
 
     if (!access) {
-      return new Response(JSON.stringify({ error: 'Access denied' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Access denied' }, req, 403);
     }
 
     // Calculate date range
@@ -113,10 +100,7 @@ serve(async (req) => {
 
     if (workspaceResult.error || !workspaceResult.data) {
       console.error('Workspace not found:', workspaceResult.error);
-      return new Response(JSON.stringify({ error: 'Workspace not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Workspace not found' }, req, 404);
     }
 
     const workspace = workspaceResult.data;
@@ -160,7 +144,6 @@ serve(async (req) => {
     // Process milestones
     const milestones = milestonesResult.data || [];
     const completedMilestones = milestones.filter((m: any) => m.status === 'completed');
-    const inProgressMilestones = milestones.filter((m: any) => m.status === 'in_progress');
 
     // Get AI summary from most recent session if available
     const sessions = sessionsResult.data || [];
@@ -190,7 +173,6 @@ serve(async (req) => {
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; background: #fff; padding: 40px; max-width: 800px; margin: 0 auto; }
     h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     h2 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: #333; border-bottom: 2px solid #e5e5e5; padding-bottom: 8px; }
-    h3 { font-size: 14px; font-weight: 600; color: #666; margin-bottom: 8px; }
     .header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e5e5e5; }
     .subtitle { color: #666; font-size: 14px; }
     .date { color: #999; font-size: 12px; margin-top: 8px; }
@@ -342,24 +324,18 @@ serve(async (req) => {
 
     console.log('Progress report generated successfully');
 
-    return new Response(JSON.stringify({ 
+    return corsJsonResponse({ 
       html,
       metadata: {
         startupName: startup?.name,
         month: reportMonth,
         generatedAt: new Date().toISOString(),
       }
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    }, req);
 
   } catch (err) {
     const error = err as Error;
     console.error('Error generating progress report:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return corsJsonResponse({ error: error.message }, req, 500);
   }
 });
