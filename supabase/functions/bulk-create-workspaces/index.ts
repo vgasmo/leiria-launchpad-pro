@@ -1,14 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
@@ -19,19 +15,13 @@ Deno.serve(async (req) => {
     // Get auth user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'No authorization header' }, req, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
     }
 
     // Verify user has admin or consultor role - SECURITY: This is critical
@@ -43,19 +33,13 @@ Deno.serve(async (req) => {
 
     if (rolesError) {
       console.error('Error checking user roles:', rolesError);
-      return new Response(JSON.stringify({ error: 'Failed to verify permissions' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Failed to verify permissions' }, req, 500);
     }
 
     const isStaff = roles?.some(r => r.role === 'admin' || r.role === 'consultor');
     if (!isStaff) {
       console.warn('Non-staff user attempted bulk workspace creation:', user.id);
-      return new Response(JSON.stringify({ error: 'Forbidden - Staff access required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return corsJsonResponse({ error: 'Forbidden - Staff access required' }, req, 403);
     }
 
     console.log('Staff user authenticated:', user.id);
@@ -81,7 +65,7 @@ Deno.serve(async (req) => {
     console.log(`Found ${items?.length || 0} funnel items without workspaces`);
 
     if (dryRun) {
-      return new Response(JSON.stringify({
+      return corsJsonResponse({
         dryRun: true,
         count: items?.length || 0,
         items: items?.map(i => ({
@@ -91,9 +75,7 @@ Deno.serve(async (req) => {
           program_id: i.program_id,
           owner: i.owner_consultant_id,
         })),
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      }, req);
     }
 
     const results = {
@@ -185,16 +167,11 @@ Deno.serve(async (req) => {
 
     console.log(`Completed: ${results.created} created, ${results.errors.length} errors`);
 
-    return new Response(JSON.stringify(results), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return corsJsonResponse(results, req);
   } catch (error) {
     console.error('Error in bulk-create-workspaces:', error);
-    return new Response(JSON.stringify({ 
+    return corsJsonResponse({ 
       error: error instanceof Error ? error.message : 'Unknown error' 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    }, req, 500);
   }
 });
