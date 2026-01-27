@@ -7,11 +7,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 // Input validation constants
 const MAX_NAME_LENGTH = 200;
@@ -25,10 +21,7 @@ const TIME_REGEX = /^\d{2}:\d{2}$/;
 
 interface BookingRequest {
   token: string;
-  slot: {
-    date: string;
-    time: string;
-  };
+  slot: { date: string; time: string };
   contact: {
     name: string;
     email: string;
@@ -46,12 +39,10 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
 
   const req = body as Record<string, unknown>;
 
-  // Token validation
   if (!req.token || typeof req.token !== 'string' || req.token.length > 500) {
     return { valid: false, error: 'Invalid token' };
   }
 
-  // Slot validation
   if (!req.slot || typeof req.slot !== 'object') {
     return { valid: false, error: 'Invalid slot' };
   }
@@ -64,7 +55,6 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
     return { valid: false, error: 'Invalid time format (expected HH:MM)' };
   }
 
-  // Contact validation
   if (!req.contact || typeof req.contact !== 'object') {
     return { valid: false, error: 'Invalid contact information' };
   }
@@ -85,7 +75,6 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
     return { valid: false, error: 'Invalid email address' };
   }
 
-  // Optional fields validation
   let phone: string | undefined;
   if (contact.phone !== undefined && contact.phone !== null) {
     if (typeof contact.phone !== 'string' || contact.phone.length > MAX_PHONE_LENGTH) {
@@ -114,22 +103,13 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
     valid: true,
     data: {
       token: req.token as string,
-      slot: {
-        date: slot.date as string,
-        time: slot.time as string,
-      },
-      contact: {
-        name: (contact.name as string).trim(),
-        email,
-        phone,
-        organization,
-        message,
-      },
+      slot: { date: slot.date as string, time: slot.time as string },
+      contact: { name: (contact.name as string).trim(), email, phone, organization, message },
     },
   };
 }
 
-// Get Graph credentials with env var priority - support both integration types
+// Get Graph credentials with env var priority
 async function getGraphCredentials(supabase: any): Promise<{
   tenantId: string;
   clientId: string;
@@ -137,7 +117,6 @@ async function getGraphCredentials(supabase: any): Promise<{
 } | null> {
   const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
   
-  // Support both 'graph_api' and 'microsoft_graph' for backward compatibility
   const { data: graphSettings } = await supabase
     .from('global_integration_settings')
     .select('settings_json, is_enabled')
@@ -199,10 +178,9 @@ async function createCalendarEvent(
   slot: { date: string; time: string },
   contact: { name: string; email: string; organization?: string; message?: string }
 ): Promise<{ eventId: string; teamsLink: string | null }> {
-  // Parse time and create ISO datetime
   const startDateTime = `${slot.date}T${slot.time}:00`;
   const [hours, minutes] = slot.time.split(':').map(Number);
-  const endHours = hours + 1; // 1-hour meeting
+  const endHours = hours + 1;
   const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   const endDateTime = `${slot.date}T${endTime}:00`;
   
@@ -219,23 +197,9 @@ async function createCalendarEvent(
         <p><em>Booked via FoundersBook public booking</em></p>
       `,
     },
-    start: {
-      dateTime: startDateTime,
-      timeZone: "Europe/Lisbon",
-    },
-    end: {
-      dateTime: endDateTime,
-      timeZone: "Europe/Lisbon",
-    },
-    attendees: [
-      {
-        emailAddress: {
-          address: contact.email,
-          name: contact.name,
-        },
-        type: "required",
-      },
-    ],
+    start: { dateTime: startDateTime, timeZone: "Europe/Lisbon" },
+    end: { dateTime: endDateTime, timeZone: "Europe/Lisbon" },
+    attendees: [{ emailAddress: { address: contact.email, name: contact.name }, type: "required" }],
     isOnlineMeeting: true,
     onlineMeetingProvider: "teamsForBusiness",
   };
@@ -267,33 +231,20 @@ async function createCalendarEvent(
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
-    // Parse and validate request body
     let rawBody: unknown;
     try {
       rawBody = await req.json();
     } catch {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Invalid JSON body" 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ success: false, error: "Invalid JSON body" }, req, 400);
     }
 
     const validation = validateBookingRequest(rawBody);
     if (!validation.valid) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: validation.error 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ success: false, error: validation.error }, req, 400);
     }
 
     const { token, slot, contact } = validation.data;
@@ -310,13 +261,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!flag?.enabled) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Public booking is not enabled" 
-      }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return corsJsonResponse({ success: false, error: "Public booking is not enabled" }, req, 403);
     }
 
     // Rate limiting - check if this email has booked recently (max 2 per 24h)
@@ -327,29 +272,20 @@ serve(async (req) => {
       .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
     if (recentBookings && recentBookings.length >= 2) {
-      return new Response(JSON.stringify({ 
+      return corsJsonResponse({ 
         success: false, 
         error: "Too many booking attempts. Please try again later." 
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      }, req, 429);
     }
 
     // Get consultant info for calendar event
     let consultantEmail: string | null = null;
     let consultantId: string | null = null;
     
-    // Try to get assigned consultant from token link
     if (token !== 'demo') {
       try {
-        const tokenHash = await crypto.subtle.digest(
-          "SHA-256",
-          new TextEncoder().encode(token)
-        );
-        const tokenHex = Array.from(new Uint8Array(tokenHash))
-          .map(b => b.toString(16).padStart(2, "0"))
-          .join("");
+        const tokenHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+        const tokenHex = Array.from(new Uint8Array(tokenHash)).map(b => b.toString(16).padStart(2, "0")).join("");
 
         const { data: linkData } = await supabase
           .from("public_booking_links")
@@ -394,10 +330,7 @@ serve(async (req) => {
     }
 
     // Get the first program for the funnel item
-    const { data: programs } = await supabase
-      .from("programs")
-      .select("id")
-      .limit(1);
+    const { data: programs } = await supabase.from("programs").select("id").limit(1);
     const programId = programs?.[0]?.id || null;
 
     // Create funnel item
@@ -426,10 +359,7 @@ serve(async (req) => {
       funnel_item_id: funnelItem.id,
       event_type: "created",
       to_stage: "first_contact_booked",
-      metadata: { 
-        source: "public_booking",
-        slot: slot,
-      },
+      metadata: { source: "public_booking", slot },
     });
 
     // Create calendar event via Graph API if configured
@@ -441,19 +371,13 @@ serve(async (req) => {
     if (credentials && consultantEmail) {
       try {
         const accessToken = await getGraphAccessToken(credentials);
-        const eventResult = await createCalendarEvent(
-          accessToken,
-          consultantEmail,
-          slot,
-          contact
-        );
+        const eventResult = await createCalendarEvent(accessToken, consultantEmail, slot, contact);
         
         calendarEventId = eventResult.eventId;
         teamsLink = eventResult.teamsLink;
         
         console.log("Created calendar event:", calendarEventId, "Teams link:", teamsLink);
         
-        // Update funnel item with calendar info (store in notes for now)
         if (teamsLink || calendarEventId) {
           await supabase
             .from("funnel_items")
@@ -464,13 +388,12 @@ serve(async (req) => {
         }
       } catch (graphError) {
         console.error("Graph API error (non-fatal):", graphError);
-        // Don't fail the booking if calendar creation fails
       }
     } else {
       console.log("Graph API not configured, skipping calendar event creation");
     }
 
-    return new Response(JSON.stringify({ 
+    return corsJsonResponse({ 
       success: true,
       funnelItemId: funnelItem.id,
       teamsLink,
@@ -478,18 +401,10 @@ serve(async (req) => {
       message: teamsLink 
         ? "Your booking has been confirmed. You'll receive a calendar invite with Teams link shortly."
         : "Your booking has been confirmed. The consultant will send you meeting details.",
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    }, req);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error("Error:", message);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return corsJsonResponse({ success: false, error: message }, req, 500);
   }
 });

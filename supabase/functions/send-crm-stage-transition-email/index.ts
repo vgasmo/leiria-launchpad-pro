@@ -8,14 +8,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { requireCronOrStaff } from "../_shared/security.ts";
+import { handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 interface StageTransitionRequest {
   funnel_item_id: string;
@@ -25,7 +20,7 @@ interface StageTransitionRequest {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -45,9 +40,9 @@ Deno.serve(async (req) => {
     const { funnel_item_id, from_stage, to_stage }: StageTransitionRequest = await req.json();
 
     if (!funnel_item_id || !from_stage || !to_stage) {
-      return new Response(
-        JSON.stringify({ error: 'funnel_item_id, from_stage, and to_stage are required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return corsJsonResponse(
+        { error: 'funnel_item_id, from_stage, and to_stage are required' },
+        req, 400
       );
     }
 
@@ -69,10 +64,7 @@ Deno.serve(async (req) => {
 
     if (!rule) {
       console.log(`No active email rule for transition ${from_stage} → ${to_stage}`);
-      return new Response(
-        JSON.stringify({ success: true, action: 'no_rule', sent: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ success: true, action: 'no_rule', sent: false }, req);
     }
 
     // 2. Try to insert log entry (idempotency check via UNIQUE constraint)
@@ -92,10 +84,7 @@ Deno.serve(async (req) => {
       // If UNIQUE constraint violation, email was already sent
       if (logError.code === '23505') {
         console.log(`Email already sent for this transition (idempotency check)`);
-        return new Response(
-          JSON.stringify({ success: true, action: 'already_sent', sent: false }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return corsJsonResponse({ success: true, action: 'already_sent', sent: false }, req);
       }
       throw logError;
     }
@@ -122,10 +111,7 @@ Deno.serve(async (req) => {
         .from('crm_stage_email_log')
         .update({ status: 'skipped', error_message: 'No contact email' })
         .eq('id', logEntry.id);
-      return new Response(
-        JSON.stringify({ success: true, action: 'no_email', sent: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ success: true, action: 'no_email', sent: false }, req);
     }
 
     // 4. Prepare email with variable substitution
@@ -164,9 +150,9 @@ Deno.serve(async (req) => {
         })
         .eq('id', logEntry.id);
 
-      return new Response(
-        JSON.stringify({ success: true, action: 'sent', sent: true, messageId: emailResult.data?.id }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return corsJsonResponse(
+        { success: true, action: 'sent', sent: true, messageId: emailResult.data?.id },
+        req
       );
     } catch (emailError: unknown) {
       const errorMessage = emailError instanceof Error ? emailError.message : 'Unknown email error';
@@ -177,17 +163,11 @@ Deno.serve(async (req) => {
         .update({ status: 'failed', error_message: errorMessage })
         .eq('id', logEntry.id);
 
-      return new Response(
-        JSON.stringify({ success: false, error: errorMessage }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return corsJsonResponse({ success: false, error: errorMessage }, req, 500);
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in send-crm-stage-transition-email:', error);
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return corsJsonResponse({ error: message }, req, 500);
   }
 });
