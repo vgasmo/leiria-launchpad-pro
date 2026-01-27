@@ -4022,13 +4022,29 @@
     }
   },
   "governance": {
+    "stageGateProgress": "Stage Gate Progress",
+    "stageGateProgressDesc": "Track your progress through program stages",
+    "currentStage": "Current Stage",
+    "nextStage": "Next Stage",
+    "reviewPending": "Stage gate review pending",
+    "requestedAt": "Requested {{date}}",
+    "review": "Review",
+    "evidenceNotes": "Evidence & Notes (optional)",
+    "evidencePlaceholder": "Describe why you're ready for the next stage, key achievements, metrics...",
+    "submitRequest": "Submit Request",
     "requestReviewTo": "Request Stage Gate Review to {{stage}}",
     "requirementsFor": "Requirements for {{from}} → {{to}}",
-    "nextStage": "Next Stage",
     "requestReviewTitle": "Request Stage Gate Review",
     "requestReviewDesc": "Request a review to advance from {{from}} to {{to}}",
     "reviewRequestTitle": "Review Stage Gate Request",
-    "reviewRequestDesc": "Review request from {{from}} to {{to}}"
+    "reviewRequestDesc": "Review request from {{from}} to {{to}}",
+    "completedAllStages": "Congratulations! You've completed all stages.",
+    "decision": "Decision",
+    "approved": "Approved",
+    "conditional": "Conditional",
+    "rejected": "Rejected",
+    "conditions": "Conditions",
+    "conditionsPlaceholder": "Specify conditions for approval..."
   },
   "stages": {
     "ideation": "Ideation",

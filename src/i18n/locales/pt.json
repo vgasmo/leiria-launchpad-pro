@@ -4399,13 +4399,29 @@
     }
   },
   "governance": {
+    "stageGateProgress": "Progresso Stage Gate",
+    "stageGateProgressDesc": "Acompanhe o seu progresso nas fases do programa",
+    "currentStage": "Fase Atual",
+    "nextStage": "Próxima Fase",
+    "reviewPending": "Revisão stage gate pendente",
+    "requestedAt": "Pedido em {{date}}",
+    "review": "Rever",
+    "evidenceNotes": "Evidências e Notas (opcional)",
+    "evidencePlaceholder": "Descreva porque está pronto para a próxima fase, conquistas chave, métricas...",
+    "submitRequest": "Submeter Pedido",
     "requestReviewTo": "Pedir Revisão Stage Gate para {{stage}}",
     "requirementsFor": "Requisitos para {{from}} → {{to}}",
-    "nextStage": "Próxima Fase",
     "requestReviewTitle": "Pedir Revisão Stage Gate",
     "requestReviewDesc": "Pedir uma revisão para avançar de {{from}} para {{to}}",
     "reviewRequestTitle": "Rever Pedido Stage Gate",
-    "reviewRequestDesc": "Rever pedido de {{from}} para {{to}}"
+    "reviewRequestDesc": "Rever pedido de {{from}} para {{to}}",
+    "completedAllStages": "Parabéns! Completou todas as fases.",
+    "decision": "Decisão",
+    "approved": "Aprovado",
+    "conditional": "Condicional",
+    "rejected": "Rejeitado",
+    "conditions": "Condições",
+    "conditionsPlaceholder": "Especifique as condições para aprovação..."
   },
   "stages": {
     "ideation": "Ideação",
