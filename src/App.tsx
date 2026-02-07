@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { GlobalQuickActions } from "@/components/ui/GlobalQuickActions";
+import { CommandPalette } from "@/components/command/CommandPalette";
 import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
@@ -90,7 +90,7 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   return (
     <>
       <SessionTimeoutWarning timeoutMs={24 * 60 * 60 * 1000} warningTimeMs={10 * 60 * 1000} />
-      <GlobalQuickActions />
+      <CommandPalette />
       {children}
     </>
   );
