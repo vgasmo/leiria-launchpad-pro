@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { 
   CheckCircle2, 
@@ -19,6 +20,7 @@ import {
   Info,
   Settings2
 } from 'lucide-react';
+import { useGraphConfigStatus } from '@/hooks/useGraphConfigStatus';
 import { useOutlookSettings, useUpdateOutlookSettings } from '@/hooks/useOutlookCalendar';
 
 // Outlook icon component
@@ -37,6 +39,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
   const { t } = useTranslation();
   const { data: settings, isLoading } = useOutlookSettings(workspaceId || '');
   const updateSettings = useUpdateOutlookSettings(workspaceId || '');
+  const { data: graphSecretConfigured, isLoading: graphStatusLoading } = useGraphConfigStatus();
   
   const [webhookUrl, setWebhookUrl] = useState('');
   const [showSetup, setShowSetup] = useState(false);
@@ -45,6 +48,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
   const isEnabled = settings?.enabled ?? false;
   const syncMode = settings?.sync_mode ?? 'webhook';
   const hasWebhook = !!currentWebhookUrl;
+  const graphAvailable = !!graphSecretConfigured;
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && syncMode === 'webhook' && !hasWebhook) {
@@ -139,13 +143,32 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
                 <span className="text-xs text-muted-foreground">Recommended - Easy setup</span>
               </Label>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="graph" id="graph" disabled />
-              <Label htmlFor="graph" className="flex flex-col cursor-pointer opacity-60">
-                <span className="font-medium">Microsoft Graph API</span>
-                <span className="text-xs text-muted-foreground">Coming soon</span>
-              </Label>
-            </div>
+            {graphAvailable ? (
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="graph" id="graph" disabled={!canEdit} />
+                <Label htmlFor="graph" className="flex flex-col cursor-pointer">
+                  <span className="font-medium">Microsoft Graph API</span>
+                  <span className="text-xs text-muted-foreground">Direct integration</span>
+                </Label>
+              </div>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center space-x-2 opacity-50 cursor-not-allowed">
+                      <RadioGroupItem value="graph" id="graph" disabled />
+                      <Label htmlFor="graph" className="flex flex-col pointer-events-none">
+                        <span className="font-medium">Microsoft Graph API</span>
+                        <span className="text-xs text-muted-foreground">Not configured</span>
+                      </Label>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ask admin to configure MS_GRAPH_CLIENT_SECRET</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </RadioGroup>
         </div>
 

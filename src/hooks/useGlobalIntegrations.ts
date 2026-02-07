@@ -54,17 +54,15 @@ export function useUpdateGlobalGraphSettings() {
     mutationFn: async (settings: {
       tenant_id: string;
       client_id: string;
-      client_secret?: string; // Optional for updates
       is_enabled?: boolean;
     }) => {
-      // Use edge function to save settings - secrets are handled server-side
+      // Use edge function to save settings - only non-sensitive identifiers
       const { data, error } = await invokeWithAuth('set-global-integrations', {
         body: {
           integration_type: 'graph_api',
           settings: {
             tenant_id: settings.tenant_id,
             client_id: settings.client_id,
-            client_secret: settings.client_secret,
           },
           is_enabled: settings.is_enabled ?? true,
         },
