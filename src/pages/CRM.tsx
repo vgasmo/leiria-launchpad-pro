@@ -36,6 +36,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
+import { SavedViewsDropdown } from '@/components/crm/SavedViewsDropdown';
 import { supabase } from '@/integrations/supabase/client';
 import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
@@ -283,7 +284,24 @@ export default function CRM() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 ml-auto flex-wrap">
+            <SavedViewsDropdown
+              viewType="crm"
+              currentFilters={{
+                programFilter,
+                stageFilter,
+                assigneeFilter,
+                myItemsOnly,
+                focusMode,
+              }}
+              onApplyView={(filters) => {
+                if (filters.programFilter) setProgramFilter(filters.programFilter as string);
+                if (filters.stageFilter) setStageFilter(filters.stageFilter as string);
+                if (filters.assigneeFilter) setAssigneeFilter(filters.assigneeFilter as string);
+                if (typeof filters.myItemsOnly === 'boolean') setMyItemsOnly(filters.myItemsOnly);
+                if (typeof filters.focusMode === 'boolean') setFocusMode(filters.focusMode);
+              }}
+            />
             <div className="flex items-center gap-2">
               <Switch
                 id="focus-mode"
