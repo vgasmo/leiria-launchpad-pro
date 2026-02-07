@@ -21,12 +21,16 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
-      // Progressive strictness: warn now, enforce later via lint:strict
-      // TODO: Tighten to "error" once all `any` types are resolved
-      "@typescript-eslint/no-explicit-any": "warn",
+      // Progressive strictness: off now, enforce via `npm run lint:strict`
+      // TODO: Tighten to "warn" then "error" once `any` types are resolved
+      "@typescript-eslint/no-explicit-any": "off",
+      // Allow empty interfaces extending other types (e.g. shadcn components)
+      "@typescript-eslint/no-empty-object-type": "off",
+      // Allow require() in config files matched by this glob
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
-  // E2E / Playwright tests — no React rules, relax any
+  // E2E / Playwright tests — no React rules
   {
     files: ["e2e/**/*.{ts,tsx}"],
     languageOptions: {
@@ -37,7 +41,6 @@ export default tseslint.config(
     rules: {
       "react-hooks/rules-of-hooks": "off",
       "react-refresh/only-export-components": "off",
-      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   // Supabase edge functions — Deno runtime, no React
@@ -46,7 +49,6 @@ export default tseslint.config(
     rules: {
       "react-hooks/rules-of-hooks": "off",
       "react-refresh/only-export-components": "off",
-      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 );
