@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,14 +10,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Plus, MapPin, Users, Building2, Monitor,
-  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye, History
+  DoorOpen, Wrench, Image, Upload, Trash2, UserCheck, Eye, History, Search
 } from 'lucide-react';
 import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
 import { BuildingOccupancyPanel } from './BuildingOccupancyPanel';
 import { StartupSpaceSearch } from './StartupSpaceSearch';
 import { RoomAllocationHistory } from './RoomAllocationHistory';
+import { BuildingSelectorCards } from './BuildingSelectorCards';
+import { SpaceOccupancyChart } from './SpaceOccupancyChart';
 import {
   useRoomsWithAllocations,
   useCreateRoom,
@@ -319,6 +322,81 @@ export function RoomMappingTab() {
 
   const occupiedCount = rooms?.filter(r => r.current_allocation).length || 0;
   const availableCount = rooms?.filter(r => !r.current_allocation && r.status === 'available').length || 0;
+  const maintenanceCount = rooms?.filter(r => r.status === 'maintenance').length || 0;
+
+  // Build building cards data
+  const buildingCardsData = useMemo(() => {
+    if (!buildings || !rooms || !spaces) return [];
+    return buildings.filter(b => b.is_active !== false).map(building => {
+      const buildingSpaceIds = spaces.filter((s: any) => s.building_id === building.id).map(s => s.id);
+      const buildingRooms = rooms.filter(r => buildingSpaceIds.includes(r.space_id));
+      const occupied = buildingRooms.filter(r => r.current_allocation).length;
+      const available = buildingRooms.filter(r => !r.current_allocation && r.status === 'available').length;
+      const maintenance = buildingRooms.filter(r => r.status === 'maintenance').length;
+      return {
+        id: building.id,
+        name: building.name,
+        code: building.code,
+        city: building.city,
+        total: buildingRooms.length,
+        occupied,
+        available,
+        maintenance,
+        occupancyRate: buildingRooms.length > 0 ? Math.round((occupied / buildingRooms.length) * 100) : 0,
+      };
+    }).filter(b => b.total > 0);
+  }, [buildings, rooms, spaces]);
+
+  // Room search/filter
+  const [roomSearch, setRoomSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  const filteredRoomsByFloor = useMemo(() => {
+    if (!roomsByFloor) return {};
+    const result: Record<string, Room[]> = {};
+    for (const [floor, floorRooms] of Object.entries(roomsByFloor)) {
+      const filtered = floorRooms.filter(room => {
+        if (statusFilter === 'occupied' && !room.current_allocation) return false;
+        if (statusFilter === 'available' && (room.current_allocation || room.status !== 'available')) return false;
+        if (statusFilter === 'maintenance' && room.status !== 'maintenance') return false;
+        if (roomSearch) {
+          const q = roomSearch.toLowerCase();
+          const occupant = room.current_allocation?.workspace?.startup?.name ||
+            room.current_allocation?.funnel_item?.organization_name || '';
+          return room.name.toLowerCase().includes(q) ||
+            (room.room_number || '').toLowerCase().includes(q) ||
+            occupant.toLowerCase().includes(q);
+        }
+        return true;
+      });
+      if (filtered.length > 0) result[floor] = filtered;
+    }
+    return result;
+  }, [roomsByFloor, roomSearch, statusFilter]);
+
+  // Find space IDs for a given building
+  const getSpaceIdsForBuilding = (buildingId: string) => {
+    return spaces?.filter((s: any) => s.building_id === buildingId).map(s => s.id) || [];
+  };
+
+  // Handle building selection from cards
+  const handleBuildingSelect = (id: string) => {
+    if (id === 'all') {
+      setSelectedSpace('all');
+    } else {
+      const spaceIds = getSpaceIdsForBuilding(id);
+      if (spaceIds.length > 0) {
+        setSelectedSpace(spaceIds[0]);
+      }
+    }
+  };
+
+  // Determine which building is selected
+  const selectedBuildingId = useMemo(() => {
+    if (selectedSpace === 'all') return 'all';
+    const space = spaces?.find(s => s.id === selectedSpace);
+    return (space as any)?.building_id || 'all';
+  }, [selectedSpace, spaces]);
 
   return (
     <div className="space-y-6">
@@ -332,18 +410,6 @@ export function RoomMappingTab() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={selectedSpace} onValueChange={setSelectedSpace}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Buildings" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('admin.backoffice.allBuildings', 'All Buildings')}</SelectItem>
-              {spaces?.map(space => (
-                <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
@@ -518,7 +584,6 @@ export function RoomMappingTab() {
                   />
                 </div>
 
-                {/* Allocation History (only when editing existing room) */}
                 {selectedRoom && (
                   <div className="border-t pt-4">
                     <RoomAllocationHistory roomId={selectedRoom.id} roomName={selectedRoom.name} />
@@ -539,30 +604,59 @@ export function RoomMappingTab() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Visual Building Selector */}
+      {buildingCardsData.length > 0 && (
+        <BuildingSelectorCards
+          buildings={buildingCardsData}
+          selectedId={selectedBuildingId}
+          onSelect={handleBuildingSelect}
+        />
+      )}
+
+      {/* Visual Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{rooms?.length || 0}</div>
-            <p className="text-sm text-muted-foreground">{t('admin.backoffice.totalRooms', 'Total Rooms')}</p>
+        <Card className="rounded-xl border-l-4 border-l-primary/60">
+          <CardContent className="pt-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <DoorOpen className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{rooms?.length || 0}</div>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.totalRooms', 'Total Rooms')}</p>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-accent-foreground">{availableCount}</div>
-            <p className="text-sm text-muted-foreground">{t('admin.backoffice.availableRooms', 'Available')}</p>
+        <Card className="rounded-xl border-l-4 border-l-accent">
+          <CardContent className="pt-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+              <DoorOpen className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-accent-foreground">{availableCount}</div>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.availableRooms', 'Available')}</p>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-primary">{occupiedCount}</div>
-            <p className="text-sm text-muted-foreground">{t('admin.backoffice.occupiedRooms', 'Occupied')}</p>
+        <Card className="rounded-xl border-l-4 border-l-primary">
+          <CardContent className="pt-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-primary">{occupiedCount}</div>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.occupiedRooms', 'Occupied')}</p>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{floorMaps?.length || 0}</div>
-            <p className="text-sm text-muted-foreground">{t('admin.backoffice.floorMaps', 'Floor Maps')}</p>
+        <Card className="rounded-xl border-l-4 border-l-muted-foreground/30">
+          <CardContent className="pt-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <Image className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{floorMaps?.length || 0}</div>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.floorMaps', 'Floor Maps')}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -584,11 +678,52 @@ export function RoomMappingTab() {
         </TabsList>
 
         <TabsContent value="rooms">
+          {/* Room search & filter bar */}
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={roomSearch}
+                onChange={(e) => setRoomSearch(e.target.value)}
+                placeholder={t('admin.backoffice.searchRooms', 'Search rooms or occupants...')}
+                className="pl-9 h-9"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              {['all', 'available', 'occupied', 'maintenance'].map(status => (
+                <Button
+                  key={status}
+                  variant={statusFilter === status ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setStatusFilter(status)}
+                >
+                  {status === 'all' ? t('common.all', 'All') :
+                   status === 'available' ? t('admin.backoffice.available', 'Available') :
+                   status === 'occupied' ? t('admin.backoffice.occupied', 'Occupied') :
+                   t('admin.backoffice.maintenance', 'Maintenance')}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
           ) : (
             <div className="space-y-6">
-              {roomsByFloor && Object.entries(roomsByFloor).map(([floor, floorRooms]) => (
+              {Object.keys(filteredRoomsByFloor).length === 0 ? (
+                <Card className="rounded-xl">
+                  <CardContent className="py-12 text-center">
+                    <DoorOpen className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      {roomSearch || statusFilter !== 'all'
+                        ? t('admin.backoffice.noMatchingRooms', 'No rooms match your filters')
+                        : t('admin.backoffice.noRooms', 'No rooms yet')}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                Object.entries(filteredRoomsByFloor).map(([floor, floorRooms]) => (
                 <div key={floor} className="space-y-3">
                   <h3 className="font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -606,91 +741,114 @@ export function RoomMappingTab() {
                         allocation?.funnel_item?.contact_name;
 
                       return (
-                        <Card
-                          key={room.id}
-                          className={cn(
-                            'transition-all hover:shadow-md',
-                            allocation && 'border-primary/30 bg-primary/5'
-                          )}
-                        >
-                          <CardHeader className="pb-2">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2">
-                                <TypeIcon className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <CardTitle className="text-base">{room.name}</CardTitle>
-                                  {room.room_number && (
-                                    <CardDescription>#{room.room_number}</CardDescription>
-                                  )}
-                                </div>
-                              </div>
-                              <div className={cn('h-2 w-2 rounded-full', statusColor)} />
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                {room.capacity || '?'} {t('admin.backoffice.people', 'pessoas')}
-                              </span>
-                              <Badge variant="outline" className="text-xs">
-                                {t(`admin.backoffice.roomTypes.${room.room_type}`, room.room_type)}
-                              </Badge>
-                            </div>
-
-                            {allocation && occupantName && (
-                              <div className="text-sm bg-primary/10 rounded p-2">
-                                <div className="flex items-center gap-1">
-                                  <UserCheck className="h-3 w-3 text-primary" />
-                                  <span className="font-medium">{occupantName}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {t('admin.backoffice.since', 'Desde')} {format(new Date(allocation.start_date), 'MMM yyyy')}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                                onClick={() => {
-                                  setSelectedRoom(room);
-                                  setRoomDialogOpen(true);
-                                }}
+                        <TooltipProvider key={room.id}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Card
+                                className={cn(
+                                  'transition-all hover:shadow-lg hover:-translate-y-0.5 rounded-xl group relative overflow-hidden',
+                                  allocation && 'border-primary/30',
+                                  room.status === 'maintenance' && 'border-secondary/50'
+                                )}
                               >
-                                {t('common.edit')}
-                              </Button>
-                              {!allocation && room.status === 'available' ? (
-                                <Button
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => {
-                                    setRoomToAllocate(room);
-                                    setAllocateDialogOpen(true);
-                                  }}
-                                >
-                                  {t('admin.backoffice.allocate', 'Allocate')}
-                                </Button>
-                              ) : allocation ? (
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => endAllocation.mutate({ id: allocation.id, roomId: room.id })}
-                                >
-                                  {t('admin.backoffice.endAllocation', 'End')}
-                                </Button>
-                              ) : null}
-                            </div>
-                          </CardContent>
-                        </Card>
+                                {/* Status strip at top */}
+                                <div className={cn('h-1 w-full', statusColor)} />
+                                <CardHeader className="pb-2 pt-3">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className={cn(
+                                        'h-8 w-8 rounded-lg flex items-center justify-center',
+                                        allocation ? 'bg-primary/10' : 'bg-muted'
+                                      )}>
+                                        <TypeIcon className={cn('h-4 w-4', allocation ? 'text-primary' : 'text-muted-foreground')} />
+                                      </div>
+                                      <div>
+                                        <CardTitle className="text-sm">{room.name}</CardTitle>
+                                        {room.room_number && (
+                                          <CardDescription className="text-[10px]">#{room.room_number}</CardDescription>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <Badge
+                                      variant={allocation ? 'default' : room.status === 'maintenance' ? 'secondary' : 'outline'}
+                                      className="text-[10px] px-1.5"
+                                    >
+                                      {allocation ? t('admin.backoffice.occupied', 'Occupied') :
+                                       t(`admin.backoffice.roomStatus.${room.status}`, room.status)}
+                                    </Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-2 pb-3">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-muted-foreground flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      {room.capacity || '?'} {t('admin.backoffice.people', 'pessoas')}
+                                    </span>
+                                    <Badge variant="outline" className="text-[10px] px-1">
+                                      {t(`admin.backoffice.roomTypes.${room.room_type}`, room.room_type)}
+                                    </Badge>
+                                  </div>
+
+                                  {allocation && occupantName && (
+                                    <div className="text-xs bg-primary/10 rounded-lg p-2 flex items-center gap-2">
+                                      <UserCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-medium block truncate">{occupantName}</span>
+                                        <span className="text-[10px] text-muted-foreground">
+                                          {t('admin.backoffice.since', 'Desde')} {format(new Date(allocation.start_date), 'MMM yyyy')}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div className="flex gap-2 pt-1">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex-1 h-7 text-xs"
+                                      onClick={() => {
+                                        setSelectedRoom(room);
+                                        setRoomDialogOpen(true);
+                                      }}
+                                    >
+                                      {t('common.edit')}
+                                    </Button>
+                                    {!allocation && room.status === 'available' ? (
+                                      <Button
+                                        size="sm"
+                                        className="flex-1 h-7 text-xs"
+                                        onClick={() => {
+                                          setRoomToAllocate(room);
+                                          setAllocateDialogOpen(true);
+                                        }}
+                                      >
+                                        {t('admin.backoffice.allocate', 'Allocate')}
+                                      </Button>
+                                    ) : allocation ? (
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="flex-1 h-7 text-xs"
+                                        onClick={() => endAllocation.mutate({ id: allocation.id, roomId: room.id })}
+                                      >
+                                        {t('admin.backoffice.endAllocation', 'End')}
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="font-medium">{room.name}</p>
+                              {room.notes && <p className="text-xs text-muted-foreground mt-1">{room.notes}</p>}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       );
                     })}
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           )}
         </TabsContent>
