@@ -1,0 +1,102 @@
+/**
+ * Backoffice hooks - Contracts domain
+ * Split from useBackoffice.ts for maintainability
+ */
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import type { IncubationType } from './useIncubationTypes';
+import type { Building } from './useBuildings';
+
+export interface StartupContract {
+  id: string;
+  workspace_id: string;
+  incubation_type_id: string | null;
+  contract_number: string | null;
+  status: 'draft' | 'pending_signature' | 'active' | 'suspended' | 'terminated' | 'expired';
+  start_date: string;
+  end_date: string | null;
+  signed_at: string | null;
+  monthly_fee: number;
+  currency: string;
+  discount_percentage: number;
+  discount_reason: string | null;
+  discount_applied_by: string | null;
+  equity_percentage: number | null;
+  billing_day: number;
+  payment_terms_days: number;
+  notes: string | null;
+  document_url: string | null;
+  square_meters: number | null;
+  building_id: string | null;
+  funnel_item_id: string | null;
+  created_at: string;
+  workspace?: { id: string; startup?: { name: string } | null };
+  incubation_type?: IncubationType | null;
+  building?: Building | null;
+}
+
+export function useContracts(filters?: { status?: string; workspaceId?: string }) {
+  return useQuery({
+    queryKey: ['contracts', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('startup_contracts')
+        .select(`
+          *,
+          workspace:workspaces(id, startup:startups(name)),
+          incubation_type:incubation_types(*),
+          building:buildings(*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filters?.status) query = query.eq('status', filters.status);
+      if (filters?.workspaceId) query = query.eq('workspace_id', filters.workspaceId);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as StartupContract[];
+    },
+  });
+}
+
+export function useCreateContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data, error } = await supabase
+        .from('startup_contracts')
+        .insert(payload as any)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success('Contrato criado');
+    },
+    onError: () => toast.error('Erro ao criar contrato'),
+  });
+}
+
+export function useUpdateContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...payload }: Record<string, unknown> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('startup_contracts')
+        .update(payload as any)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success('Contrato atualizado');
+    },
+    onError: () => toast.error('Erro ao atualizar contrato'),
+  });
+}
