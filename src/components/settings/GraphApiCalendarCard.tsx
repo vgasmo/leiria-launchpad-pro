@@ -28,6 +28,13 @@ interface GraphApiCalendarCardProps {
   canEdit?: boolean;
 }
 
+/**
+ * Graph API Calendar Card
+ * 
+ * SECURITY: Client secrets are NEVER entered or stored via this UI.
+ * They must be configured server-side as environment variables (MS_GRAPH_CLIENT_SECRET).
+ * Only non-sensitive identifiers (tenant_id, client_id) are managed here.
+ */
 export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCalendarCardProps) {
   const { t } = useTranslation();
   const { data: settings, isLoading } = useOutlookSettings(workspaceId || '');
@@ -35,7 +42,6 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
   
   const [tenantId, setTenantId] = useState('');
   const [clientId, setClientId] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
   const [showSetup, setShowSetup] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -44,12 +50,11 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
   const isEnabled = settings?.enabled && isGraphMode;
 
   const handleSaveCredentials = async () => {
-    if (!tenantId || !clientId || !clientSecret) {
-      toast.error('All Azure AD credentials are required');
+    if (!tenantId || !clientId) {
+      toast.error('Tenant ID and Client ID are required');
       return;
     }
 
-    // Basic validation
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(tenantId)) {
       toast.error('Invalid Tenant ID format (should be a GUID)');
@@ -65,13 +70,11 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
       await updateSettings.mutateAsync({
         graph_tenant_id: tenantId,
         graph_client_id: clientId,
-        graph_secret_key: clientSecret,
         sync_mode: 'graph',
       });
-      toast.success('Azure AD credentials saved');
-      setClientSecret(''); // Clear secret from UI
+      toast.success('Azure AD identifiers saved');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save credentials');
+      toast.error(error.message || 'Failed to save identifiers');
     } finally {
       setIsSaving(false);
     }
@@ -79,7 +82,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && !isConfigured) {
-      toast.error('Please configure Azure AD credentials first');
+      toast.error('Please configure Azure AD identifiers first');
       return;
     }
     try {
@@ -102,7 +105,6 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
     );
   }
 
-  // Admin view (no workspaceId) - show reference only
   const isAdminView = !workspaceId;
 
   return (
@@ -156,7 +158,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           </div>
         </div>
 
-        {/* Azure AD Credentials */}
+        {/* Azure AD Identifiers (NO secrets) */}
         <div className="space-y-3 pt-3 border-t">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-amber-500" />
@@ -189,26 +191,22 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="client-secret" className="text-xs">Client Secret</Label>
-            <Input
-              id="client-secret"
-              type="password"
-              placeholder={settings?.graph_client_id ? '••••••••••••••••' : 'Enter client secret'}
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
-              className="font-mono text-xs"
-              disabled={!canEdit}
-            />
-          </div>
+          {/* Security notice about client secret */}
+          <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+            <Shield className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
+              <strong>Client Secret</strong> is configured server-side as an environment variable (MS_GRAPH_CLIENT_SECRET) 
+              and is never stored in the database. Contact your administrator to configure it.
+            </AlertDescription>
+          </Alert>
 
           <Button 
             onClick={handleSaveCredentials}
-            disabled={(!tenantId || !clientId || !clientSecret) || isSaving || !canEdit}
+            disabled={(!tenantId || !clientId) || isSaving || !canEdit}
             size="sm"
             className="w-full"
           >
-            {isSaving ? 'Saving...' : isConfigured ? 'Update Credentials' : 'Save Credentials'}
+            {isSaving ? 'Saving...' : isConfigured ? 'Update Identifiers' : 'Save Identifiers'}
           </Button>
         </div>
 
@@ -245,11 +243,12 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
                 <li>Click "Grant admin consent" (requires admin)</li>
               </ol>
 
-              <h4 className="font-medium pt-2">Create Client Secret:</h4>
+              <h4 className="font-medium pt-2">Configure Client Secret:</h4>
               <ol className="list-decimal list-inside text-muted-foreground space-y-2 text-xs">
                 <li>Go to "Certificates & secrets"</li>
                 <li>Click "New client secret"</li>
-                <li>Copy the secret value (shown only once!)</li>
+                <li>Copy the secret value</li>
+                <li><strong>Important:</strong> Provide this secret to your system administrator to configure as the <code className="bg-muted px-1 rounded">MS_GRAPH_CLIENT_SECRET</code> environment variable</li>
               </ol>
 
               <Alert className="mt-3">
