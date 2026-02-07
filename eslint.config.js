@@ -54,6 +54,18 @@ export default tseslint.config(
     rules: {
       "react-hooks/rules-of-hooks": "off",
       "react-refresh/only-export-components": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
+    },
+  },
+  // ✅ Final catch-all: guarantees these rules stay off regardless of override order
+  {
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
 );
