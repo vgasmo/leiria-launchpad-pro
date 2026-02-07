@@ -228,120 +228,181 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           isUpdating={updateFunnelItem.isPending}
         />
 
-        <Tabs defaultValue="activity" className="flex-1 flex flex-col">
-          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-2">
-            <TabsTrigger value="activity">{t('crm.activity')}</TabsTrigger>
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-3">
             <TabsTrigger value="overview">{t('crm.overview')}</TabsTrigger>
+            <TabsTrigger value="timeline">{t('crm.timeline', 'Timeline')}</TabsTrigger>
+            <TabsTrigger value="tasks">{t('crm.tasks')}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="activity" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden">
-            {/* AI Recap Card */}
-            {aiRecapEnabled && (
-              <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
-                <Card className="border-primary/20 bg-primary/5">
-                  <CardContent className="p-3">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-sm">{t('crm.aiRecap')}</span>
-                      </div>
-                      {recapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    </CollapsibleTrigger>
-                    
-                    {loadingRecap ? (
-                      <Skeleton className="h-12 w-full mt-2" />
-                    ) : recap ? (
-                      <>
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                          {recap.summary}
-                        </p>
-                        <CollapsibleContent className="mt-3 space-y-3">
-                          {recap.key_points?.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                <Target className="h-3 w-3" /> {t('crm.keyPoints')}
-                              </p>
-                              <ul className="text-xs text-muted-foreground space-y-1">
-                                {recap.key_points.map((p: string, i: number) => (
-                                  <li key={i}>• {p}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {recap.open_loops?.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                <Clock className="h-3 w-3" /> {t('crm.openLoops')}
-                              </p>
-                              <ul className="text-xs text-muted-foreground space-y-1">
-                                {recap.open_loops.map((p: string, i: number) => (
-                                  <li key={i}>• {p}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {recap.risks?.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium flex items-center gap-1 mb-1 text-destructive">
-                                <AlertTriangle className="h-3 w-3" /> {t('crm.risks')}
-                              </p>
-                              <ul className="text-xs text-muted-foreground space-y-1">
-                                {recap.risks.map((p: string, i: number) => (
-                                  <li key={i}>• {p}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {recap.next_best_actions?.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium flex items-center gap-1 mb-1 text-primary">
-                                <Lightbulb className="h-3 w-3" /> {t('crm.nextActions')}
-                              </p>
-                              <ul className="text-xs text-muted-foreground space-y-1">
-                                {recap.next_best_actions.map((p: string, i: number) => (
-                                  <li key={i}>• {p}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          <p className="text-[10px] text-muted-foreground">
-                            {t('crm.itemsAnalyzed', { count: recap.items_analyzed })} • {formatRelativeTime(recap.generated_at)}
+          {/* Overview Tab - Contact details + AI Recap + Next Action */}
+          <TabsContent value="overview" className="flex-1 overflow-hidden">
+            <div className="p-4 pt-2 space-y-4">
+              {/* AI Recap Card */}
+              {aiRecapEnabled && (
+                <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
+                  <Card className="border-primary/20 bg-primary/5">
+                    <CardContent className="p-3">
+                      <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-sm">{t('crm.aiRecap')}</span>
+                        </div>
+                        {recapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </CollapsibleTrigger>
+                      
+                      {loadingRecap ? (
+                        <Skeleton className="h-12 w-full mt-2" />
+                      ) : recap ? (
+                        <>
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                            {recap.summary}
                           </p>
-                        </CollapsibleContent>
-                      </>
-                    ) : (
-                      <div className="mt-2">
+                          <CollapsibleContent className="mt-3 space-y-3">
+                            {recap.key_points?.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
+                                  <Target className="h-3 w-3" /> {t('crm.keyPoints')}
+                                </p>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                  {recap.key_points.map((p: string, i: number) => (
+                                    <li key={i}>• {p}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {recap.open_loops?.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
+                                  <Clock className="h-3 w-3" /> {t('crm.openLoops')}
+                                </p>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                  {recap.open_loops.map((p: string, i: number) => (
+                                    <li key={i}>• {p}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {recap.risks?.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-destructive">
+                                  <AlertTriangle className="h-3 w-3" /> {t('crm.risks')}
+                                </p>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                  {recap.risks.map((p: string, i: number) => (
+                                    <li key={i}>• {p}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {recap.next_best_actions?.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-primary">
+                                  <Lightbulb className="h-3 w-3" /> {t('crm.nextActions')}
+                                </p>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                  {recap.next_best_actions.map((p: string, i: number) => (
+                                    <li key={i}>• {p}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            <p className="text-[10px] text-muted-foreground">
+                              {t('crm.itemsAnalyzed', { count: recap.items_analyzed })} • {formatRelativeTime(recap.generated_at)}
+                            </p>
+                          </CollapsibleContent>
+                        </>
+                      ) : (
+                        <div className="mt-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs"
+                            onClick={() => generateRecap.mutate({ funnelItemId: item.id, language })}
+                            disabled={generateRecap.isPending}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            {generateRecap.isPending ? t('common.generating') : t('crm.generateRecap')}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {recap && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-xs"
+                          className="h-6 text-[10px] mt-2 text-muted-foreground"
                           onClick={() => generateRecap.mutate({ funnelItemId: item.id, language })}
                           disabled={generateRecap.isPending}
                         >
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          {generateRecap.isPending ? t('common.generating') : t('crm.generateRecap')}
+                          <RefreshCw className={cn('h-3 w-3 mr-1', generateRecap.isPending && 'animate-spin')} />
+                          {t('crm.regenerate')}
                         </Button>
-                      </div>
-                    )}
-                    
-                    {recap && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 text-[10px] mt-2 text-muted-foreground"
-                        onClick={() => generateRecap.mutate({ funnelItemId: item.id, language })}
-                        disabled={generateRecap.isPending}
-                      >
-                        <RefreshCw className={cn('h-3 w-3 mr-1', generateRecap.isPending && 'animate-spin')} />
-                        {t('crm.regenerate')}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              </Collapsible>
-            )}
+                      )}
+                    </CardContent>
+                  </Card>
+                </Collapsible>
+              )}
 
-            {/* Tasks Section */}
+              {/* Overview details */}
+              <OverviewTab
+                item={item}
+                nextActionAt={nextActionAt}
+                nextActionDescription={nextActionDescription}
+                lastActivityAt={lastActivityAt}
+                onSetNextAction={() => setNextActionDialog(true)}
+                onClearNextAction={handleClearNextAction}
+                isClearingNextAction={clearNextAction.isPending}
+              />
+            </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden">
+            {/* Quick Actions */}
+            <QuickActions
+              onAddActivity={(type) => setAddActivityDialog(type)}
+              onAddTask={() => setAddTaskDialog(true)}
+              onSyncEmails={() => syncEmails.mutate({ funnelItemId: item.id })}
+              emailSyncEnabled={emailSyncEnabled}
+              isSyncingEmails={syncEmails.isPending}
+            />
+
+            {/* Activity Timeline */}
+            <ScrollArea className="flex-1 -mx-4 px-4">
+              {loadingActivities ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : Object.keys(groupedActivities).length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+                  <p className="text-sm text-muted-foreground">{t('crm.noActivityYet')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('crm.noActivityHint')}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(groupedActivities).map(([period, items]) => (
+                    <div key={period}>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        {period}
+                      </p>
+                      <div className="space-y-2">
+                        {items.map((activity) => (
+                          <ActivityItem key={activity.id} activity={activity} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Tasks Tab */}
+          <TabsContent value="tasks" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">
@@ -407,59 +468,15 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 )}
               </CardContent>
             </Card>
-
-            {/* Quick Actions */}
-            <QuickActions
-              onAddActivity={(type) => setAddActivityDialog(type)}
-              onAddTask={() => setAddTaskDialog(true)}
-              onSyncEmails={() => syncEmails.mutate({ funnelItemId: item.id })}
-              emailSyncEnabled={emailSyncEnabled}
-              isSyncingEmails={syncEmails.isPending}
-            />
-
-            {/* Activity Timeline */}
-            <ScrollArea className="flex-1 -mx-4 px-4">
-              {loadingActivities ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              ) : Object.keys(groupedActivities).length === 0 && openTasks.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
-                  <p className="text-sm text-muted-foreground">{t('crm.noActivityYet')}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('crm.noActivityHint')}</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(groupedActivities).map(([period, items]) => (
-                    <div key={period}>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                        {period}
-                      </p>
-                      <div className="space-y-2">
-                        {items.map((activity) => (
-                          <ActivityItem key={activity.id} activity={activity} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-
-          <TabsContent value="overview" className="flex-1 overflow-hidden">
-            <OverviewTab
-              item={item}
-              nextActionAt={nextActionAt}
-              nextActionDescription={nextActionDescription}
-              lastActivityAt={lastActivityAt}
-              onSetNextAction={() => setNextActionDialog(true)}
-              onClearNextAction={handleClearNextAction}
-              isClearingNextAction={clearNextAction.isPending}
-            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setAddTaskDialog(true)}
+            >
+              <CheckSquare className="h-3.5 w-3.5 mr-2" />
+              {t('crm.addTask')}
+            </Button>
           </TabsContent>
         </Tabs>
 

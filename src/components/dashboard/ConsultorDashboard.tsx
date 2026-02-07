@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { FocusModeProvider, FocusModeToggle, useFocusMode } from '@/components/ui/FocusModeToggle';
 import { 
   AlertCircle, 
   Calendar, 
@@ -48,9 +49,18 @@ interface RiskItem {
 }
 
 export function ConsultorDashboard({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
+  return (
+    <FocusModeProvider defaultFocused={true}>
+      <ConsultorDashboardInner workspaces={workspaces} isLoading={isLoading} programsCount={programsCount} />
+    </FocusModeProvider>
+  );
+}
+
+function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { isFocused } = useFocusMode();
 
   // Fetch CRM pipeline for snapshot
   const { data: pipeline } = useCrmPipeline({ 
@@ -248,15 +258,18 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
               {t('consultor.hero.subtitle')}
             </p>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/my-workspaces?filter=attention')}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('common.viewAll')}
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <FocusModeToggle />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/my-workspaces?filter=attention')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t('common.viewAll')}
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
 
         {riskItems.length === 0 ? (
@@ -567,45 +580,47 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </Card>
       </div>
 
-      {/* SECTION 4: Weekly Impact Summary */}
-      <section className="grid gap-4 lg:grid-cols-2">
-        <WorkQueuePanel compact />
-        
-        {/* Weekly Impact Card */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              {t('consultor.weeklyImpact.title')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold">{upcomingSessions.length}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.sessionsCompleted')}
-                </p>
+      {/* SECTION 4: Weekly Impact Summary - Hidden in Focus mode */}
+      {!isFocused && (
+        <section className="grid gap-4 lg:grid-cols-2">
+          <WorkQueuePanel compact />
+          
+          {/* Weekly Impact Card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                {t('consultor.weeklyImpact.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-2xl font-bold">{upcomingSessions.length}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('consultor.weeklyImpact.sessionsCompleted')}
+                  </p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-2xl font-bold">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('consultor.weeklyImpact.actionsCreated')}
+                  </p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-health-healthy/10">
+                  <p className="text-2xl font-bold text-health-healthy">{pipelineSnapshot?.contracted || 0}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('consultor.weeklyImpact.leadsConverted')}
+                  </p>
+                </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold">{criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.actionsCreated')}
-                </p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-health-healthy/10">
-                <p className="text-2xl font-bold text-health-healthy">{pipelineSnapshot?.contracted || 0}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('consultor.weeklyImpact.leadsConverted')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
-      {/* SECTION 5: Data Quality Alerts */}
-      {dataAlerts.length > 0 && (
+      {/* SECTION 5: Data Quality Alerts - Hidden in Focus mode */}
+      {!isFocused && dataAlerts.length > 0 && (
         <section>
           <Card className="border-health-at-risk/30">
             <CardHeader className="pb-2">
@@ -637,10 +652,12 @@ export function ConsultorDashboard({ workspaces, isLoading, programsCount }: Con
         </section>
       )}
 
-      {/* SECTION 6: Calendar */}
-      <section>
-        <CalendarWidget />
-      </section>
+      {/* SECTION 6: Calendar - Hidden in Focus mode */}
+      {!isFocused && (
+        <section>
+          <CalendarWidget />
+        </section>
+      )}
     </div>
   );
 }
