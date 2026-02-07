@@ -4,30 +4,37 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default [
+  // ignore build output
   { ignores: ["dist"] },
 
-  // 1) Base TS/TSX rules (NO react-hooks here)
+  // base recommended configs
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+
+  // ✅ Project-wide TS overrides (put AFTER recommended so they win)
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "@typescript-eslint/no-require-imports": "off",
       "no-control-regex": "off",
       "no-useless-escape": "off",
-      "no-case-declarations": "off",
       "prefer-const": "off",
+      "no-case-declarations": "off",
+      "@typescript-eslint/no-unused-vars": "off",
     },
   },
 
-  // 2) React-only rules (apply ONLY to TSX so e2e .ts fixtures aren't affected)
+  // ✅ React rules ONLY for TSX
   {
     files: ["**/*.tsx"],
     plugins: {
@@ -36,9 +43,26 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-hooks/rules-of-hooks": "warn",
-      "react-hooks/exhaustive-deps": "warn",
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "react-refresh/only-export-components": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
-);
+
+  // e2e — no React hooks
+  {
+    files: ["e2e/**/*.{ts,tsx}"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
+
+  // supabase functions — not React
+  {
+    files: ["supabase/functions/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "off",
+    },
+  },
+];
