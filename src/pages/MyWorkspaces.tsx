@@ -21,6 +21,7 @@ import { ViewMode } from '@/components/ui/ViewToggle';
 import { QuickFilterChips, QuickFilter } from '@/components/ui/QuickFilterChips';
 import { WorkspaceCard } from '@/components/dashboard/WorkspaceCard';
 import { ConsultorDashboard } from '@/components/dashboard/ConsultorDashboard';
+import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
 import { MentorDashboard } from '@/components/dashboard/MentorDashboard';
 import { FounderDashboard } from '@/components/dashboard/FounderDashboard';
 import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
@@ -46,8 +47,10 @@ export default function MyWorkspaces() {
   const isFounder = roles.includes('founder');
   const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
   
-  // Consultant view mode - assigned only by default
+  // Consultant view mode - assigned only by default (not for admins)
   const [showAssignedOnly, setShowAssignedOnly] = useState(isConsultor && !isAdmin);
+  // Admin can toggle between Admin dashboard and Portfolio view
+  const [adminViewMode, setAdminViewMode] = useState<'admin' | 'portfolio'>('admin');
   
   // Filter state
   const [search, setSearch] = useState('');
@@ -100,10 +103,11 @@ export default function MyWorkspaces() {
   }, []);
 
   // Determine which dashboard to show
-  const showConsultorDashboard = (isConsultor || isAdmin) && !showDetailedView;
+  const showAdminDashboard = isAdmin && !showDetailedView && adminViewMode === 'admin';
+  const showConsultorDashboard = (isConsultor || (isAdmin && adminViewMode === 'portfolio')) && !isAdmin ? !showDetailedView : (isAdmin && adminViewMode === 'portfolio' && !showDetailedView);
   const showMentorDashboard = isExternalMentor && !showDetailedView;
   const showFounderDashboard = isFounder && !isConsultor && !isAdmin && !isExternalMentor && !showDetailedView;
-  const showListView = showDetailedView || (!showConsultorDashboard && !showMentorDashboard && !showFounderDashboard);
+  const showListView = showDetailedView || (!showAdminDashboard && !showConsultorDashboard && !showMentorDashboard && !showFounderDashboard);
 
   const { data: programs } = usePrograms();
   
@@ -220,6 +224,7 @@ export default function MyWorkspaces() {
   // Page title/subtitle
   const getPageTitle = () => {
     if (showDetailedView) return t('myWorkspaces.allStartups');
+    if (showAdminDashboard) return t('admin.commandCenter', 'Command Center');
     if (showConsultorDashboard) return t('myWorkspaces.portfolioOverview');
     if (showMentorDashboard) return t('myWorkspaces.myMentorships');
     if (showFounderDashboard) {
@@ -231,6 +236,7 @@ export default function MyWorkspaces() {
 
   const getPageSubtitle = () => {
     if (showDetailedView) return t('myWorkspaces.startupsCount', { count: totalItems });
+    if (showAdminDashboard) return undefined;
     if (showConsultorDashboard) return t('myWorkspaces.managingStartups', { count: workspaces?.length || 0 });
     if (showMentorDashboard) return t('myWorkspaces.activeMentorships', { count: workspaces?.length || 0 });
     return undefined;
@@ -268,7 +274,7 @@ export default function MyWorkspaces() {
             </Button>
           )}
           {/* View All button for staff dashboards */}
-          {(showConsultorDashboard || showMentorDashboard) && (
+          {(showAdminDashboard || showConsultorDashboard || showMentorDashboard) && (
             <Button variant="outline" size="sm" onClick={() => setShowDetailedView(true)} className="gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.viewAll')}</span>
@@ -283,7 +289,7 @@ export default function MyWorkspaces() {
           )}
           {/* Back to dashboard button when in detailed view */}
           {showDetailedView && (
-            <Button variant="outline" size="sm" onClick={() => setShowDetailedView(false)} className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => { setShowDetailedView(false); if (isAdmin) setAdminViewMode('admin'); }} className="gap-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
@@ -303,6 +309,14 @@ export default function MyWorkspaces() {
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
 
       {/* Role-Specific Dashboards */}
+      {showAdminDashboard && (
+        <AdminDashboard 
+          workspaces={workspaces || []} 
+          isLoading={isLoading} 
+          programsCount={programs?.length || 0} 
+          onSwitchToPortfolio={() => setAdminViewMode('portfolio')}
+        />
+      )}
       {showConsultorDashboard && (
         <ConsultorDashboard workspaces={workspaces || []} isLoading={isLoading} programsCount={programs?.length || 0} />
       )}
