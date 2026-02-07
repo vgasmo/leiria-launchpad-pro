@@ -111,6 +111,9 @@ verify_jwt = false
 # JWT disabled at gateway, validated at runtime
 # ============================================
 
+[functions.graph-config-status]
+verify_jwt = false
+
 [functions.get-global-integrations]
 verify_jwt = false
 

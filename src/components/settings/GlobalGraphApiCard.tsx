@@ -34,7 +34,6 @@ export function GlobalGraphApiCard() {
   
   const [tenantId, setTenantId] = useState('');
   const [clientId, setClientId] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
   const [showSetup, setShowSetup] = useState(false);
   const [showPolicyGuide, setShowPolicyGuide] = useState(false);
   const [testEmail, setTestEmail] = useState('');
@@ -55,14 +54,8 @@ export function GlobalGraphApiCard() {
   }, [settingsJson, isInitialized]);
 
   const handleSaveCredentials = async () => {
-    // For new setup, require all fields. For update, secret is optional.
     if (!tenantId || !clientId) {
       toast.error('Tenant ID and Client ID are required');
-      return;
-    }
-    
-    if (!isConfigured && !clientSecret) {
-      toast.error('Client Secret is required for initial setup');
       return;
     }
 
@@ -79,9 +72,7 @@ export function GlobalGraphApiCard() {
     await updateSettings.mutateAsync({
       tenant_id: tenantId,
       client_id: clientId,
-      client_secret: clientSecret || undefined, // Only send if provided
     });
-    setClientSecret('');
   };
 
   const handleToggle = async (enabled: boolean) => {
@@ -213,28 +204,20 @@ export function GlobalGraphApiCard() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="global-client-secret" className="text-xs">Client Secret</Label>
-            <Input
-              id="global-client-secret"
-              type="password"
-              placeholder={isConfigured ? '••••••••••••••••' : 'Enter client secret'}
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
-              className="font-mono text-xs"
-            />
-            <p className="text-xs text-muted-foreground">
-              Secret is stored securely and never exposed to the frontend.
-            </p>
-          </div>
+          <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+            <Shield className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
+              <strong>Client Secret</strong> is configured server-side as the <code className="bg-muted px-1 rounded">MS_GRAPH_CLIENT_SECRET</code> environment variable and is never stored in the database.
+            </AlertDescription>
+          </Alert>
 
           <Button 
             onClick={handleSaveCredentials}
-            disabled={(!tenantId || !clientId || (!clientSecret && !isConfigured)) || updateSettings.isPending}
+            disabled={(!tenantId || !clientId) || updateSettings.isPending}
             size="sm"
             className="w-full"
           >
-            {updateSettings.isPending ? 'Saving...' : isConfigured ? 'Update Credentials' : 'Save Credentials'}
+            {updateSettings.isPending ? 'Saving...' : isConfigured ? 'Update Identifiers' : 'Save Identifiers'}
           </Button>
         </div>
 
