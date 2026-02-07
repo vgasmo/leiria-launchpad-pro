@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
-import { GlobalSearchInput } from '@/components/search/GlobalSearchInput';
+import { Search } from 'lucide-react';
 
 export function TopBar() {
   const navigate = useNavigate();
@@ -42,10 +42,19 @@ export function TopBar() {
 
   return (
     <div className="flex items-center gap-1 sm:gap-2">
-      {/* Global Search - hidden on small mobile */}
-      <div className="hidden sm:block">
-        <GlobalSearchInput />
-      </div>
+      {/* Command Palette trigger */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="hidden sm:flex items-center gap-2 text-muted-foreground h-9 px-3 w-[200px] justify-start"
+        onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+      >
+        <Search className="h-4 w-4" />
+        <span className="text-sm">{t('common.search', 'Search')}...</span>
+        <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+      </Button>
       
       {/* Notifications Bell */}
       <NotificationCenter />
