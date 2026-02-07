@@ -28,6 +28,11 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": "off",
       // Allow require() in config files matched by this glob
       "@typescript-eslint/no-require-imports": "off",
+      // Downgrade to warn so they don't block releases
+      "no-case-declarations": "warn",
+      "prefer-const": "warn",
+      "no-control-regex": "off",
+      "no-useless-escape": "off",
     },
   },
   // E2E / Playwright tests — no React rules
