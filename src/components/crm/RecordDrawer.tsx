@@ -221,7 +221,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[500px] sm:max-w-[500px] p-0 flex flex-col">
+      <SheetContent className="w-[500px] sm:max-w-[500px] p-0 flex flex-col" data-testid="record-drawer">
         <RecordDrawerHeader
           item={item}
           onStageChange={handleStageChange}
@@ -358,7 +358,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden">
+          <TabsContent value="timeline" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden" data-testid="timeline">
             {/* Quick Actions */}
             <QuickActions
               onAddActivity={(type) => setAddActivityDialog(type)}
@@ -402,7 +402,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Tasks Tab */}
-          <TabsContent value="tasks" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden">
+          <TabsContent value="tasks" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-hidden" data-testid="task-list">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">

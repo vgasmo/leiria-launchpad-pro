@@ -19,6 +19,15 @@ All gates must pass before any release is considered shippable.
 
 ## Running Locally
 
+Use the release check script:
+
+```bash
+# Runs all local checks (lint, build, tests, i18n, secrets)
+./scripts/release-check.sh
+```
+
+Or run individual steps:
+
 ```bash
 # 1. Lint + Typecheck + Build
 npm run lint
@@ -30,6 +39,7 @@ npx vitest run --reporter=verbose
 
 # 3. i18n parity check
 node scripts/i18n-check.cjs
+# To fix issues: node scripts/i18n-sync.cjs
 
 # 4. Secret leak scan
 node scripts/secret-scan.cjs
@@ -37,12 +47,7 @@ node scripts/secret-scan.cjs
 # 5. Playwright E2E (requires credentials in .env or env vars)
 export E2E_CONSULTANT_EMAIL=...
 export E2E_CONSULTANT_PASSWORD=...
-export E2E_FOUNDER_EMAIL=...
-export E2E_FOUNDER_PASSWORD=...
-export E2E_MENTOR_EMAIL=...
-export E2E_MENTOR_PASSWORD=...
-export E2E_ADMIN_EMAIL=...
-export E2E_ADMIN_PASSWORD=...
+# ... (set all roles)
 npx playwright install --with-deps chromium
 npx playwright test
 
@@ -57,6 +62,9 @@ Create test accounts for each role in your staging environment:
 - **Founder**: A user with `founder` role and an active workspace
 - **Mentor**: A user with `mentor` role
 - **Admin**: A user with `admin` role
+
+**Seed Data Requirement:**
+The E2E tests require at least one "Lead" in the CRM for the consultant flow. Ensure your staging database has this data.
 
 Set the credentials as repository secrets in GitHub:
 - `E2E_CONSULTANT_EMAIL` / `E2E_CONSULTANT_PASSWORD`
@@ -75,7 +83,7 @@ Set the credentials as repository secrets in GitHub:
 
 ## Notes
 
-- Playwright tests **skip gracefully** if E2E credentials are not configured
+- Playwright tests **skip gracefully** if E2E credentials are not configured locally, but **FAIL** in CI on main.
 - pgTAP tests run against the connected database; use `supabase test db` locally
 - The i18n parity script has **zero tolerance** — every key must exist in both locales
 - The secret scan checks Git-tracked files only; `.env` is ignored (not tracked)

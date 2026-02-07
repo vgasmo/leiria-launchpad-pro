@@ -271,6 +271,7 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
         isOverdue && 'border-l-2 border-l-amber-500',
         isDragging && 'opacity-50 shadow-lg'
       )}
+      data-testid="crm-record"
     >
       <CardContent className="p-3">
         <div className="flex items-start gap-2">

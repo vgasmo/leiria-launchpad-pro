@@ -64,7 +64,7 @@ export function OverviewTab({
                 <p className="text-sm text-muted-foreground">{nextActionDescription}</p>
               )}
               <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onSetNextAction}>
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onSetNextAction} data-testid="next-action-open">
                   {t('crm.updateNextAction')}
                 </Button>
                 <Button
@@ -82,7 +82,7 @@ export function OverviewTab({
           ) : (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">{t('crm.noNextActionSet')}</p>
-              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onSetNextAction}>
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onSetNextAction} data-testid="next-action-open">
                 <Plus className="h-3 w-3 mr-1" />
                 {t('crm.setNextAction')}
               </Button>

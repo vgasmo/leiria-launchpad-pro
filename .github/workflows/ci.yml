@@ -144,7 +144,15 @@ jobs:
           NODE_ENV: production
 
       - name: Wait for server
-        run: npx wait-on http://localhost:5173 --timeout 15000 || true
+        run: npx wait-on http://localhost:5173 --timeout 15000
+
+      - name: Check E2E credentials
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ -z "$E2E_CONSULTANT_EMAIL" ]; then
+            echo "::error::E2E_CONSULTANT_EMAIL not set"
+            exit 1
+          fi
 
       - name: Run Playwright tests
         run: npx playwright test
@@ -180,7 +188,7 @@ jobs:
   # ──────────────────────────────────────────────
   db-tests:
     runs-on: ubuntu-latest
-    if: ${{ vars.ENABLE_DB_TESTS == 'true' }}
+    if: ${{ vars.ENABLE_DB_TESTS == 'true' || github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
