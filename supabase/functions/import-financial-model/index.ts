@@ -24,7 +24,7 @@ interface KeyMetrics {
 function extractNumber(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return isNaN(value) ? null : value;
-  const cleaned = String(value).replace(/[^0-9.,\-]/g, '').replace(',', '.');
+  const cleaned = String(value).replace(/[^0-9.,-]/g, '').replace(',', '.');
   const num = parseFloat(cleaned);
   return isNaN(num) ? null : num;
 }

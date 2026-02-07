@@ -810,7 +810,7 @@ function TemplateFormField({ field, value, onChange, disabled }: TemplateFormFie
           </div>
         );
       
-      case 'checklist':
+      case 'checklist': {
         const checkedItems = (value as string[]) || [];
         return (
           <div className="space-y-2">
@@ -833,6 +833,7 @@ function TemplateFormField({ field, value, onChange, disabled }: TemplateFormFie
             ))}
           </div>
         );
+      }
       
       default:
         return null;
