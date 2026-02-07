@@ -14,7 +14,7 @@ const linkedinUrl = z.string().trim().refine(
 
 // Phone validation - allows common formats
 const optionalPhone = z.string().trim().max(30, 'Phone number is too long').refine(
-  (val) => val === '' || /^[\d\s\+\-\(\)\.]+$/.test(val),
+  (val) => val === '' || /^[\d\s+\-().]+$/.test(val),
   { message: 'Invalid phone number format' }
 ).transform(val => val || null);
 

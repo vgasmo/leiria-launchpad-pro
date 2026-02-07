@@ -197,12 +197,7 @@ export default function Mentors() {
     isFounder ? 'founder' : 'mentor'
   );
 
-  // Redirect external mentors to NDA page if not accepted
-  if (isMentor && !isStaff && isAuthReady && !ndaLoading && !ndaAcceptance) {
-    return <Navigate to="/mentor-nda" replace />;
-  }
-
-  // Update connection status mutation (for mentors)
+  // Update connection status mutation (for mentors) — must be above early return to respect Rules of Hooks
   const updateConnectionStatus = useMutation({
     mutationFn: async ({ connectionId, status, founderId }: { connectionId: string; status: string; founderId: string }) => {
       const { error } = await supabase
@@ -250,6 +245,11 @@ export default function Mentors() {
       toast.error(error.message || t('mentorsPage.failedToUpdate'));
     },
   });
+
+  // Redirect external mentors to NDA page if not accepted (after all hooks)
+  if (isMentor && !isStaff && isAuthReady && !ndaLoading && !ndaAcceptance) {
+    return <Navigate to="/mentor-nda" replace />;
+  }
 
   const getInitials = (name: string | null) => {
     return name

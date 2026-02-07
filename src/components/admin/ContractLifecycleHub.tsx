@@ -224,18 +224,19 @@ export function ContractLifecycleHub() {
   
   const handleAlertAction = (alert: LifecycleAlert) => {
     switch (alert.actionType) {
-      case 'convert':
+      case 'convert': {
         const item = funnelItems?.find(i => i.id === alert.entityId);
         if (item) setConvertDialogItem(item);
         break;
+      }
       case 'renew':
-      case 'review':
-        // Navigate to contract detail or workspace
+      case 'review': {
         const contract = contracts?.find(c => c.id === alert.entityId);
         if (contract?.workspace_id) {
           navigate(`/workspace/${contract.workspace_id}`);
         }
         break;
+      }
       case 'archive':
         toast.info(t('lifecycle.archiveNotImplemented', 'Archive functionality coming soon'));
         break;
