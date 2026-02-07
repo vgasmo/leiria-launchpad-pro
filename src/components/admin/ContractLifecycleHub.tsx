@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FileText, AlertTriangle, Clock, ArrowRight, CheckCircle2, 
   Calendar, Building2, Users, TrendingUp, Bell, Rocket,
-  ChevronRight, RefreshCw, Mail
+  ChevronRight, RefreshCw, Mail, Sparkles
 } from 'lucide-react';
+import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelligenceCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -495,6 +496,33 @@ export function ContractLifecycleHub() {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* AI Contract Intelligence */}
+            {contracts && contracts.filter(c => c.status === 'active').length > 0 && (
+              <Card className="md:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {t('lifecycle.aiAnalysis', 'AI Contract Intelligence')}
+                  </CardTitle>
+                  <CardDescription>
+                    {t('lifecycle.aiAnalysisDesc', 'Select a contract to analyze with AI — extracts key dates, risks, and recommended actions')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {contracts.filter(c => c.status === 'active').slice(0, 6).map(contract => (
+                      <div key={contract.id} className="flex items-center gap-2">
+                        <ContractIntelligenceCard
+                          contractId={contract.id}
+                          contractLabel={contract.workspace?.startup?.name || 'Contract'}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="alerts" className="mt-4">

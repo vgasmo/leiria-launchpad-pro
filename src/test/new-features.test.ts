@@ -40,3 +40,28 @@ describe('useCrmSavedViews', () => {
     expect(mod.useDeleteCrmView).toBeDefined();
   });
 });
+
+describe('FocusModeToggle', () => {
+  it('module exports correctly', async () => {
+    const mod = await import('@/components/ui/FocusModeToggle');
+    expect(mod.FocusModeToggle).toBeDefined();
+    expect(mod.FocusModeProvider).toBeDefined();
+    expect(mod.useFocusMode).toBeDefined();
+  });
+});
+
+describe('WorkQueuePanel', () => {
+  it('module exports correctly', async () => {
+    const mod = await import('@/components/staff/WorkQueuePanel');
+    expect(mod.WorkQueuePanel).toBeDefined();
+    expect(typeof mod.WorkQueuePanel).toBe('function');
+  });
+});
+
+describe('NotificationCenter', () => {
+  it('module exports correctly', async () => {
+    const mod = await import('@/components/notifications/NotificationCenter');
+    expect(mod.NotificationCenter).toBeDefined();
+    expect(typeof mod.NotificationCenter).toBe('function');
+  });
+});
