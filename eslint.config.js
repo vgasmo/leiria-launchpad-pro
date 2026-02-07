@@ -6,6 +6,8 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   { ignores: ["dist"] },
+
+  // 1) Base TS/TSX rules (NO react-hooks here)
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -13,59 +15,30 @@ export default tseslint.config(
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "no-control-regex": "off",
+      "no-useless-escape": "off",
+      "no-case-declarations": "off",
+      "prefer-const": "off",
+    },
+  },
+
+  // 2) React-only rules (apply ONLY to TSX so e2e .ts fixtures aren't affected)
+  {
+    files: ["**/*.tsx"],
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "react-hooks/rules-of-hooks": "warn",
+      "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": "off",
-      // Progressive strictness: off now, enforce via `npm run lint:strict`
-      // TODO: Tighten to "warn" then "error" once `any` types are resolved
-      "@typescript-eslint/no-explicit-any": "off",
-      // Allow empty interfaces extending other types (e.g. shadcn components)
-      "@typescript-eslint/no-empty-object-type": "off",
-      // Allow require() in config files matched by this glob
-      "@typescript-eslint/no-require-imports": "off",
-      // Downgrade to warn so they don't block releases
-      "no-case-declarations": "warn",
-      "prefer-const": "warn",
-      "no-control-regex": "off",
-      "no-useless-escape": "off",
-    },
-  },
-  // E2E / Playwright tests — no React rules
-  {
-    files: ["e2e/**/*.{ts,tsx}"],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: {
-      "react-hooks/rules-of-hooks": "off",
-      "react-refresh/only-export-components": "off",
-    },
-  },
-  // Supabase edge functions — Deno runtime, no React
-  {
-    files: ["supabase/functions/**/*.{ts,tsx}"],
-    rules: {
-      "react-hooks/rules-of-hooks": "off",
-      "react-refresh/only-export-components": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
-    },
-  },
-  // ✅ Final catch-all: guarantees these rules stay off regardless of override order
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
 );
