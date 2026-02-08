@@ -1,21 +1,26 @@
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   shimmer?: boolean;
 }
 
-function Skeleton({ className, shimmer = true, ...props }: SkeletonProps) {
-  return (
-    <div 
-      className={cn(
-        "rounded-md bg-muted",
-        shimmer && "animate-shimmer",
-        className
-      )} 
-      {...props} 
-    />
-  );
-}
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ className, shimmer = true, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "rounded-md bg-muted",
+          shimmer && "animate-shimmer",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+Skeleton.displayName = "Skeleton";
 
 function SkeletonText({ lines = 3, className }: { lines?: number; className?: string }) {
   return (
