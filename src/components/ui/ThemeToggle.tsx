@@ -1,5 +1,6 @@
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -28,7 +30,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             "absolute h-4 w-4 transition-all duration-300",
             resolvedTheme === 'dark' ? "rotate-0 scale-100" : "-rotate-90 scale-0"
           )} />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">{t('ui.theme.toggle', { defaultValue: 'Toggle theme' })}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -37,21 +39,21 @@ export function ThemeToggle({ className }: { className?: string }) {
           className={cn(theme === 'light' && "bg-accent")}
         >
           <Sun className="mr-2 h-4 w-4" />
-          Light
+          {t('ui.theme.light', { defaultValue: 'Light' })}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('dark')}
           className={cn(theme === 'dark' && "bg-accent")}
         >
           <Moon className="mr-2 h-4 w-4" />
-          Dark
+          {t('ui.theme.dark', { defaultValue: 'Dark' })}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('system')}
           className={cn(theme === 'system' && "bg-accent")}
         >
           <Monitor className="mr-2 h-4 w-4" />
-          System
+          {t('ui.theme.system', { defaultValue: 'System' })}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

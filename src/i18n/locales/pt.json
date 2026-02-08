@@ -4252,5 +4252,13 @@
     "mvp": "MVP",
     "growth": "Crescimento",
     "scale": "Escala"
+  },
+  "ui": {
+    "theme": {
+      "toggle": "Alternar tema",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    }
   }
 }
