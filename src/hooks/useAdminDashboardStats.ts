@@ -42,14 +42,14 @@ export function useAdminDashboardStats() {
           .select('id', { count: 'exact', head: true })
           .eq('status', 'overdue'),
 
-        // 4. Total office spaces
+        // 4. Total rooms (office spaces)
         supabase
-          .from('office_spaces' as any)
+          .from('rooms')
           .select('id', { count: 'exact', head: true }),
 
-        // 5. Occupied office spaces
+        // 5. Occupied rooms
         supabase
-          .from('office_spaces' as any)
+          .from('rooms')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'occupied'),
       ]);
