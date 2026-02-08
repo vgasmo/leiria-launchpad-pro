@@ -30,7 +30,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             "absolute h-4 w-4 transition-all duration-300",
             resolvedTheme === 'dark' ? "rotate-0 scale-100" : "-rotate-90 scale-0"
           )} />
-          <span className="sr-only">{t('ui.theme.toggle', { defaultValue: 'Toggle theme' })}</span>
+          <span className="sr-only">{t('ui.theme.toggle')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -39,21 +39,21 @@ export function ThemeToggle({ className }: { className?: string }) {
           className={cn(theme === 'light' && "bg-accent")}
         >
           <Sun className="mr-2 h-4 w-4" />
-          {t('ui.theme.light', { defaultValue: 'Light' })}
+          {t('ui.theme.light')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('dark')}
           className={cn(theme === 'dark' && "bg-accent")}
         >
           <Moon className="mr-2 h-4 w-4" />
-          {t('ui.theme.dark', { defaultValue: 'Dark' })}
+          {t('ui.theme.dark')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('system')}
           className={cn(theme === 'system' && "bg-accent")}
         >
           <Monitor className="mr-2 h-4 w-4" />
-          {t('ui.theme.system', { defaultValue: 'System' })}
+          {t('ui.theme.system')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

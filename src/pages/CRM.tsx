@@ -279,7 +279,7 @@ export default function CRM() {
             <SelectContent>
               <SelectItem value="all">{t('crm.allAssignees')}</SelectItem>
               {consultors?.map(c => (
-                <SelectItem key={c.id} value={c.id}>{c.full_name || 'Unnamed'}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>{c.full_name || t('common.unnamed')}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -346,7 +346,7 @@ export default function CRM() {
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <TrendingUp className="h-4 w-4" />
-              {t('crm.analytics', 'Analytics')}
+              {t('crm.analytics')}
             </TabsTrigger>
           </TabsList>
 
@@ -399,7 +399,7 @@ export default function CRM() {
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
                                   <p className="text-sm font-medium truncate">
-                                    {item.organization_name || item.contact_name || 'Unnamed'}
+                                    {item.organization_name || item.contact_name || t('common.unnamed')}
                                   </p>
                                   <Badge className={cn('h-5 text-[10px]', statusConfig.bgColor, statusConfig.color)}>
                                     {t(`crm.relationshipStatus.${status}`)}
@@ -561,7 +561,7 @@ function InboxGroup({
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">
-                      {item.organization_name || item.contact_name || 'Unnamed'}
+                      {item.organization_name || item.contact_name || t('common.unnamed')}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge className={cn('h-5 text-[10px]', STAGE_COLORS[item.stage], 'text-white')}>
