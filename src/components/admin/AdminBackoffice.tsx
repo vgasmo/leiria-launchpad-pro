@@ -136,7 +136,7 @@ export function AdminBackoffice() {
         return {
           workspace_id: w.id,
           startup_id: w.startup_id,
-          startup_name: startup?.name || t('common.unknown', 'Unknown'),
+          startup_name: startup?.name || t('common.unknown'),
           startup_nif: startup?.nif || null,
           startup_contact_email: startup?.main_contact_email || null,
           program_id: w.program_id,
@@ -183,7 +183,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.stageUpdated', 'Stage updated'));
+      toast.success(t('admin.backoffice.stageUpdated'));
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -195,7 +195,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.priorityUpdated', 'Priority updated'));
+      toast.success(t('admin.backoffice.priorityUpdated'));
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -207,7 +207,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.programUpdated', 'Program updated'));
+      toast.success(t('admin.backoffice.programUpdated'));
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -223,7 +223,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.consultantAssigned', 'Consultant assigned'));
+      toast.success(t('admin.backoffice.consultantAssigned'));
       setOpenConsultorPopover(null);
       setConsultorSearch('');
     },
@@ -237,7 +237,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.consultantRemoved', 'Consultant removed'));
+      toast.success(t('admin.backoffice.consultantRemoved'));
       setOpenConsultorPopover(null);
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
@@ -250,7 +250,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.workspaceBlocked', 'Workspace blocked'));
+      toast.success(t('admin.backoffice.workspaceBlocked'));
       setBlockDialogOpen(false);
       setWorkspaceToBlock(null);
       setBlockReason('');
@@ -265,7 +265,7 @@ export function AdminBackoffice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backoffice-unified'] });
-      toast.success(t('admin.backoffice.workspaceUnblocked', 'Workspace unblocked'));
+      toast.success(t('admin.backoffice.workspaceUnblocked'));
     },
     onError: (error) => toast.error(`${t('common.error')}: ${error.message}`),
   });
@@ -344,7 +344,7 @@ export function AdminBackoffice() {
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="dashboard" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.dashboard', 'Dashboard')}
+            {t('admin.backoffice.dashboard')}
           </TabsTrigger>
           <TabsTrigger value="overview" className="gap-1.5">
             <Building2 className="h-4 w-4" />
@@ -416,7 +416,7 @@ export function AdminBackoffice() {
             <SelectContent>
               <SelectItem value="all">{t('admin.backoffice.allStages')}</SelectItem>
               {STAGES.map(s => (
-                <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                <SelectItem key={s} value={s} className="capitalize">{t(`stages.${s}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -566,7 +566,7 @@ export function AdminBackoffice() {
                                 onClick={() => changeStageMutation.mutate({ workspaceId: item.workspace_id, stage: s })}
                                 className="w-full text-left px-2 py-1.5 text-sm hover:bg-muted rounded capitalize"
                               >
-                                {s}
+                                {t(`stages.${s}`)}
                               </button>
                             ))}
                           </PopoverContent>
@@ -597,7 +597,7 @@ export function AdminBackoffice() {
                                 {p === 'high' && <Star className="h-4 w-4 text-orange-500" />}
                                 {p === 'standard' && <span className="h-4 w-4 text-center">—</span>}
                                 {p === 'maintenance' && <span className="h-4 w-4 text-center">🔧</span>}
-                                <span className="capitalize">{p}</span>
+                                <span className="capitalize">{t(`admin.backoffice.priorityLevels.${p}`)}</span>
                               </button>
                             ))}
                           </PopoverContent>
@@ -685,7 +685,7 @@ export function AdminBackoffice() {
                       {/* Status */}
                       <TableCell>
                         <Badge variant={item.status === 'active' ? 'secondary' : item.status === 'blocked' ? 'destructive' : 'outline'}>
-                          {item.status}
+                          {t(`admin.backoffice.${item.status}`)}
                         </Badge>
                       </TableCell>
                       

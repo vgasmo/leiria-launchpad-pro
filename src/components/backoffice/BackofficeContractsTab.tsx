@@ -19,13 +19,13 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
-  pending_signature: { label: 'Pending Signature', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  active: { label: 'Active', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  suspended: { label: 'Suspended', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' },
-  terminated: { label: 'Terminated', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-  expired: { label: 'Expired', className: 'bg-muted text-muted-foreground' },
+const STATUS_COLORS: Record<string, string> = {
+  draft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  pending_signature: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+  suspended: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+  terminated: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  expired: 'bg-muted text-muted-foreground',
 };
 
 // Helper to calculate incubation tenure
@@ -50,7 +50,7 @@ function getAnniversaryAlert(startDate: string) {
     return {
       type: 'year3' as const,
       severity: 'critical' as const,
-      message: isOver3 ? '3+ years - review required' : 'Approaching 3-year mark',
+      messageKey: isOver3 ? 'over3Years' : 'approaching3Years',
     };
   }
   
@@ -61,7 +61,8 @@ function getAnniversaryAlert(startDate: string) {
     return {
       type: 'anniversary' as const,
       severity: years >= 2 ? 'warning' as const : 'info' as const,
-      message: `Year ${years + 1} anniversary in ${daysUntil} days`,
+      messageKey: 'yearAnniversary',
+      messageParams: { year: years + 1, days: daysUntil },
     };
   }
   
@@ -120,7 +121,7 @@ export function BackofficeContractsTab() {
 
   const handleBulkCreateContracts = async () => {
     if (selectedWorkspaces.size === 0) {
-      toast.error(t('admin.backoffice.selectWorkspacesFirst', 'Select workspaces first'));
+      toast.error(t('admin.backoffice.selectWorkspacesFirst'));
       return;
     }
     
@@ -151,9 +152,9 @@ export function BackofficeContractsTab() {
     setSelectedWorkspaces(new Set());
     
     if (errors > 0) {
-      toast.warning(t('admin.backoffice.bulkCreatePartial', { defaultValue: `Created ${created} contracts, ${errors} failed` }));
+      toast.warning(t('admin.backoffice.bulkCreatePartial', { created, errors }));
     } else {
-      toast.success(t('admin.backoffice.bulkCreateSuccess', { defaultValue: `Created ${created} contracts` }));
+      toast.success(t('admin.backoffice.bulkCreateSuccess', { count: created }));
     }
   };
 
@@ -212,8 +213,8 @@ export function BackofficeContractsTab() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
-            {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-              <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`, { defaultValue: config.label })}</SelectItem>
+            {Object.keys(STATUS_COLORS).map(key => (
+              <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -303,8 +304,8 @@ export function BackofficeContractsTab() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                       {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                         <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`, { defaultValue: config.label })}</SelectItem>
+                       {Object.keys(STATUS_COLORS).map(key => (
+                         <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -396,13 +397,13 @@ export function BackofficeContractsTab() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
               <Zap className="h-5 w-5" />
-              {t('admin.backoffice.workspacesWithoutContracts', { defaultValue: 'Workspaces Without Contracts' })}
+              {t('admin.backoffice.workspacesWithoutContracts')}
               <Badge variant="secondary" className="ml-2 bg-amber-200 dark:bg-amber-800">
                 {workspacesWithoutContracts.length}
               </Badge>
             </CardTitle>
             <CardDescription>
-              {t('admin.backoffice.bulkCreateDescription', { defaultValue: 'Select workspaces and create contracts in bulk' })}
+              {t('admin.backoffice.bulkCreateDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -431,7 +432,7 @@ export function BackofficeContractsTab() {
                     <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
+                    <SelectItem value="none">{t('common.none')}</SelectItem>
                     {buildings?.filter(b => b.is_active).map(b => (
                       <SelectItem key={b.id} value={b.id}>
                         <span className="flex items-center gap-1">
@@ -451,8 +452,8 @@ export function BackofficeContractsTab() {
               >
                 <Zap className="h-4 w-4 mr-2" />
                 {isBulkCreating 
-                  ? t('common.processing', 'Processing...') 
-                  : t('admin.backoffice.createContractsCount', { defaultValue: `Create ${selectedWorkspaces.size} Contracts` })}
+                  ? t('common.processing') 
+                  : t('admin.backoffice.createContractsCount', { count: selectedWorkspaces.size })}
               </Button>
             </div>
             
@@ -468,8 +469,8 @@ export function BackofficeContractsTab() {
                       />
                     </TableHead>
                      <TableHead>{t('admin.backoffice.startup')}</TableHead>
-                    <TableHead>{t('admin.backoffice.stage', { defaultValue: 'Stage' })}</TableHead>
-                    <TableHead>{t('admin.backoffice.createdAt', { defaultValue: 'Created' })}</TableHead>
+                    <TableHead>{t('admin.backoffice.stage')}</TableHead>
+                    <TableHead>{t('admin.backoffice.createdAt')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -482,7 +483,7 @@ export function BackofficeContractsTab() {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {workspace.startup?.name || t('common.unnamed', 'Unnamed')}
+                        {workspace.startup?.name || t('common.unnamed')}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
@@ -521,7 +522,7 @@ export function BackofficeContractsTab() {
                   <TableHead>{t('admin.backoffice.contractNumber')}</TableHead>
                   <TableHead>{t('admin.backoffice.type')}</TableHead>
                   <TableHead>{t('admin.backoffice.building')}</TableHead>
-                  <TableHead>{t('admin.backoffice.timeIncubated', { defaultValue: 'Time Incubated' })}</TableHead>
+                  <TableHead>{t('admin.backoffice.timeIncubated')}</TableHead>
                   <TableHead>{t('admin.backoffice.status')}</TableHead>
                   <TableHead>{t('admin.backoffice.monthlyFee')}</TableHead>
                   <TableHead></TableHead>
@@ -529,7 +530,7 @@ export function BackofficeContractsTab() {
               </TableHeader>
               <TableBody>
                 {filteredContracts?.map(contract => {
-                  const statusConfig = STATUS_CONFIG[contract.status];
+                  const statusClassName = STATUS_COLORS[contract.status];
                   const startup = (contract.workspace as any)?.startup;
                   const incubationType = contract.incubation_type as IncubationType | null;
                   const building = contract.building as { name: string; city?: string } | null;
@@ -596,15 +597,15 @@ export function BackofficeContractsTab() {
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-xs">
-                                <div>{t('admin.backoffice.startedOn', { defaultValue: 'Started' })}: {format(new Date(contract.start_date), 'dd MMM yyyy')}</div>
-                                <div>{t('admin.backoffice.totalMonths', { defaultValue: 'Total' })}: {tenure.months} {t('admin.backoffice.months', { defaultValue: 'months' })}</div>
+                                <div>{t('admin.backoffice.startedOn')}: {format(new Date(contract.start_date), 'dd MMM yyyy')}</div>
+                                <div>{t('admin.backoffice.totalMonths')}: {tenure.months} {t('admin.backoffice.months')}</div>
                                 {alert && (
                                   <div className={cn(
                                     'mt-1 font-medium',
                                     alert.severity === 'critical' && 'text-red-400',
                                     alert.severity === 'warning' && 'text-yellow-400',
                                   )}>
-                                    {alert.message}
+                                    {t(`admin.backoffice.dashboardPanel.${alert.messageKey}`, alert.messageParams || {})}
                                   </div>
                                 )}
                               </div>
@@ -613,8 +614,8 @@ export function BackofficeContractsTab() {
                         </TooltipProvider>
                       </TableCell>
                       <TableCell>
-                        <Badge className={cn('text-xs', statusConfig?.className)}>
-                          {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: statusConfig?.label })}
+                        <Badge className={cn('text-xs', statusClassName)}>
+                          {t(`admin.backoffice.contractStatus.${contract.status}`)}
                         </Badge>
                       </TableCell>
                       <TableCell>
