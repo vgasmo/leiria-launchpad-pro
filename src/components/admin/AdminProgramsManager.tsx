@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ interface Stage {
 }
 
 function StagesManager({ programId }: { programId: string }) {
+  const { t } = useTranslation();
   const { data: stages, isLoading } = useStages(programId);
   const createStage = useCreateStage();
   const updateStage = useUpdateStage();
@@ -87,15 +89,15 @@ function StagesManager({ programId }: { programId: string }) {
   return (
     <div className="pl-6 border-l border-border/50 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">Stages</span>
+        <span className="text-sm font-medium text-muted-foreground">{t('adminPrograms.stages')}</span>
         <Button variant="ghost" size="sm" onClick={handleCreate}>
           <Plus className="h-3 w-3 mr-1" />
-          Add Stage
+          {t('adminPrograms.addStage')}
         </Button>
       </div>
       
       {stages?.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No stages yet</p>
+        <p className="text-sm text-muted-foreground">{t('adminPrograms.noStages')}</p>
       ) : (
         <div className="space-y-1">
           {stages?.map(stage => (
@@ -119,25 +121,25 @@ function StagesManager({ programId }: { programId: string }) {
       <Dialog open={isCreating || !!editingStage} onOpenChange={(open) => { if (!open) { setIsCreating(false); setEditingStage(null); }}}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingStage ? 'Edit Stage' : 'New Stage'}</DialogTitle>
+            <DialogTitle>{editingStage ? t('adminPrograms.editStage') : t('adminPrograms.newStage')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Name *</Label>
+              <Label>{t('adminPrograms.name')} *</Label>
               <Input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div>
-              <Label>Position</Label>
+              <Label>{t('adminPrograms.position')}</Label>
               <Input type="number" value={formData.position} onChange={e => setFormData(f => ({ ...f, position: parseInt(e.target.value) || 0 }))} />
             </div>
             <div>
-              <Label>Description</Label>
+              <Label>{t('adminPrograms.description')}</Label>
               <Textarea value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} rows={2} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingStage(null); }}>Cancel</Button>
-            <Button onClick={handleSave}>{editingStage ? 'Update' : 'Create'}</Button>
+            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingStage(null); }}>{t('adminPrograms.cancel')}</Button>
+            <Button onClick={handleSave}>{editingStage ? t('adminPrograms.update') : t('adminPrograms.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -145,12 +147,12 @@ function StagesManager({ programId }: { programId: string }) {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Stage</AlertDialogTitle>
-            <AlertDialogDescription>Delete "{deleteTarget?.name}"? This cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{t('adminPrograms.deleteStage')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('adminPrograms.deleteStageDescription', { name: deleteTarget?.name })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('adminPrograms.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">{t('adminPrograms.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -159,6 +161,7 @@ function StagesManager({ programId }: { programId: string }) {
 }
 
 export function AdminProgramsManager() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: programs, isLoading } = usePrograms();
   const { data: drafts } = useProgramSetupDrafts();
@@ -173,12 +176,10 @@ export function AdminProgramsManager() {
   const [deleteTarget, setDeleteTarget] = useState<Program | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '', start_date: '', end_date: '' });
 
-  // Find pending drafts for programs
   const getProgramDraft = (programId: string) => drafts?.find(d => d.program_id === programId);
   const hasNewProgramDraft = drafts?.some(d => !d.program_id);
 
   const handleNewProgramWizard = async () => {
-    // Check if there's already a new program draft
     const existingDraft = drafts?.find(d => !d.program_id);
     if (existingDraft) {
       navigate(`/admin/programs/new/${existingDraft.id}`);
@@ -259,17 +260,17 @@ export function AdminProgramsManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Programs & Stages</h2>
-          <p className="text-sm text-muted-foreground">Manage incubation programs and their stages</p>
+          <h2 className="text-lg font-semibold">{t('adminPrograms.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('adminPrograms.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleNewProgramWizard} disabled={createDraft.isPending}>
             <Wand2 className="h-4 w-4 mr-1" />
-            {hasNewProgramDraft ? 'Continue Draft' : 'New Program (Wizard)'}
+            {hasNewProgramDraft ? t('adminPrograms.continueDraft') : t('adminPrograms.newProgramWizard')}
           </Button>
           <Button variant="outline" onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-1" />
-            Quick Create
+            {t('adminPrograms.quickCreate')}
           </Button>
         </div>
       </div>
@@ -277,7 +278,7 @@ export function AdminProgramsManager() {
       {programs?.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No programs yet. Create your first program to get started.
+            {t('adminPrograms.emptyState')}
           </CardContent>
         </Card>
       ) : (
@@ -296,11 +297,11 @@ export function AdminProgramsManager() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium">{program.name}</h3>
                         <Badge variant={program.is_active ? 'default' : 'secondary'}>
-                          {program.is_active ? 'Active' : 'Inactive'}
+                          {program.is_active ? t('adminPrograms.active') : t('adminPrograms.inactive')}
                         </Badge>
                         {getProgramDraft(program.id) && (
                           <Badge variant="outline" className="text-orange-600 border-orange-300">
-                            Draft
+                            {t('adminPrograms.draft')}
                           </Badge>
                         )}
                       </div>
@@ -321,7 +322,7 @@ export function AdminProgramsManager() {
                         disabled={createDraft.isPending}
                       >
                         <FileEdit className="h-3 w-3 mr-1" />
-                        {getProgramDraft(program.id) ? 'Continue Setup' : 'Setup'}
+                        {getProgramDraft(program.id) ? t('adminPrograms.continueSetup') : t('adminPrograms.setup')}
                       </Button>
                       <Switch checked={program.is_active} onCheckedChange={() => handleToggleActive(program)} />
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(program)}>
@@ -345,31 +346,31 @@ export function AdminProgramsManager() {
       <Dialog open={isCreating || !!editingProgram} onOpenChange={(open) => { if (!open) { setIsCreating(false); setEditingProgram(null); }}}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingProgram ? 'Edit Program' : 'New Program'}</DialogTitle>
+            <DialogTitle>{editingProgram ? t('adminPrograms.editProgram') : t('adminPrograms.newProgram')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Name *</Label>
-              <Input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g., Accelerator 2025" />
+              <Label>{t('adminPrograms.name')} *</Label>
+              <Input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} placeholder={t('adminPrograms.namePlaceholder')} />
             </div>
             <div>
-              <Label>Description</Label>
+              <Label>{t('adminPrograms.description')}</Label>
               <Textarea value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} rows={2} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Start Date</Label>
+                <Label>{t('adminPrograms.startDate')}</Label>
                 <Input type="date" value={formData.start_date} onChange={e => setFormData(f => ({ ...f, start_date: e.target.value }))} />
               </div>
               <div>
-                <Label>End Date</Label>
+                <Label>{t('adminPrograms.endDate')}</Label>
                 <Input type="date" value={formData.end_date} onChange={e => setFormData(f => ({ ...f, end_date: e.target.value }))} />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingProgram(null); }}>Cancel</Button>
-            <Button onClick={handleSave}>{editingProgram ? 'Update' : 'Create'}</Button>
+            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingProgram(null); }}>{t('adminPrograms.cancel')}</Button>
+            <Button onClick={handleSave}>{editingProgram ? t('adminPrograms.update') : t('adminPrograms.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -377,14 +378,14 @@ export function AdminProgramsManager() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Program</AlertDialogTitle>
+            <AlertDialogTitle>{t('adminPrograms.deleteProgram')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Delete "{deleteTarget?.name}"? This will also delete all stages. Workspaces using this program may be affected.
+              {t('adminPrograms.deleteProgramDescription', { name: deleteTarget?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('adminPrograms.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">{t('adminPrograms.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

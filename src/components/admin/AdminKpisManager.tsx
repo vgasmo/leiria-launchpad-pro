@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Pencil, Trash2, Target, Settings2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,14 +35,11 @@ interface KpiDefinition {
   program_id: string | null;
 }
 
-const CATEGORIES = ['Growth', 'Revenue', 'Product', 'Team', 'Fundraising', 'Other'];
-const DIRECTIONS = [
-  { value: 'up', label: 'Higher is better' },
-  { value: 'down', label: 'Lower is better' },
-  { value: 'target', label: 'Target value' },
-];
+const CATEGORY_KEYS = ['Growth', 'Revenue', 'Product', 'Team', 'Fundraising', 'Other'] as const;
+const DIRECTION_VALUES = ['up', 'down', 'target'] as const;
 
 export function AdminKpisManager() {
+  const { t } = useTranslation();
   const { data: kpis, isLoading } = useKpiDefinitions();
   const { data: workspaceKpis } = useWorkspaceKpis();
   const { data: workspaces } = useAllWorkspaces();
@@ -64,6 +62,27 @@ export function AdminKpisManager() {
     direction: 'up',
     is_global: true,
   });
+
+  const directionLabel = (value: string) => {
+    const map: Record<string, string> = {
+      up: t('adminKpis.directionUp'),
+      down: t('adminKpis.directionDown'),
+      target: t('adminKpis.directionTarget'),
+    };
+    return map[value] || value;
+  };
+
+  const categoryLabel = (value: string) => {
+    const map: Record<string, string> = {
+      Growth: t('adminKpis.categoryGrowth'),
+      Revenue: t('adminKpis.categoryRevenue'),
+      Product: t('adminKpis.categoryProduct'),
+      Team: t('adminKpis.categoryTeam'),
+      Fundraising: t('adminKpis.categoryFundraising'),
+      Other: t('adminKpis.categoryOther'),
+    };
+    return map[value] || value;
+  };
 
   const handleCreate = () => {
     setFormData({ name: '', description: '', unit: '', category: '', direction: 'up', is_global: true });
@@ -142,32 +161,32 @@ export function AdminKpisManager() {
     <div className="space-y-6">
       <Tabs defaultValue="definitions">
         <TabsList>
-          <TabsTrigger value="definitions">KPI Definitions</TabsTrigger>
-          <TabsTrigger value="workspace-config">Workspace Configuration</TabsTrigger>
+          <TabsTrigger value="definitions">{t('adminKpis.definitions')}</TabsTrigger>
+          <TabsTrigger value="workspace-config">{t('adminKpis.workspaceConfig')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="definitions" className="space-y-6 mt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold">KPI Definitions</h2>
-              <p className="text-sm text-muted-foreground">Define metrics that startups will track</p>
+              <h2 className="text-lg font-semibold">{t('adminKpis.definitionsTitle')}</h2>
+              <p className="text-sm text-muted-foreground">{t('adminKpis.definitionsSubtitle')}</p>
             </div>
             <Button onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-1" />
-              New KPI
+              {t('adminKpis.newKpi')}
             </Button>
           </div>
 
           {Object.keys(groupedKpis).length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                No KPI definitions yet. Create your first KPI to get started.
+                {t('adminKpis.emptyState')}
               </CardContent>
             </Card>
           ) : (
             Object.entries(groupedKpis).map(([category, catKpis]) => (
               <div key={category}>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">{category}</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">{categoryLabel(category)}</h3>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {catKpis.map(kpi => (
                     <Card key={kpi.id} className="group">
@@ -183,9 +202,9 @@ export function AdminKpisManager() {
                             )}
                             <div className="flex items-center gap-2 mt-2">
                               <Badge variant="outline" className="text-xs">
-                                {DIRECTIONS.find(d => d.value === kpi.direction)?.label || kpi.direction}
+                                {directionLabel(kpi.direction || 'up')}
                               </Badge>
-                              {kpi.is_global && <Badge variant="secondary" className="text-xs">Global</Badge>}
+                              {kpi.is_global && <Badge variant="secondary" className="text-xs">{t('adminKpis.global')}</Badge>}
                             </div>
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -208,14 +227,14 @@ export function AdminKpisManager() {
 
         <TabsContent value="workspace-config" className="space-y-6 mt-6">
           <div>
-            <h2 className="text-lg font-semibold">Workspace KPI Configuration</h2>
-            <p className="text-sm text-muted-foreground">Set required KPIs and targets per workspace</p>
+            <h2 className="text-lg font-semibold">{t('adminKpis.workspaceKpiTitle')}</h2>
+            <p className="text-sm text-muted-foreground">{t('adminKpis.workspaceKpiSubtitle')}</p>
           </div>
 
           {workspaces?.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                No workspaces found.
+                {t('adminKpis.noWorkspaces')}
               </CardContent>
             </Card>
           ) : (
@@ -224,7 +243,7 @@ export function AdminKpisManager() {
                 <Card key={ws.id}>
                   <CardHeader className="py-3">
                     <CardTitle className="text-sm font-medium">
-                      {ws.startup?.name || 'Unknown'} 
+                      {ws.startup?.name || t('adminKpis.unknown')} 
                       <span className="text-muted-foreground font-normal ml-2">({ws.program?.name})</span>
                     </CardTitle>
                   </CardHeader>
@@ -241,12 +260,12 @@ export function AdminKpisManager() {
                             <div className="flex-1 min-w-0">
                               <span className="text-sm">{kpi.name}</span>
                               {config?.required && (
-                                <span className="text-xs text-muted-foreground ml-1">(required)</span>
+                                <span className="text-xs text-muted-foreground ml-1">({t('adminKpis.required')})</span>
                               )}
                             </div>
                             {config?.target_value !== undefined && config?.target_value !== null && (
                               <Badge variant="outline" className="text-xs">
-                                Target: {config.target_value}
+                                {t('adminKpis.target')}: {config.target_value}
                               </Badge>
                             )}
                           </div>
@@ -265,57 +284,57 @@ export function AdminKpisManager() {
       <Dialog open={isCreating || !!editingKpi} onOpenChange={(open) => { if (!open) { setIsCreating(false); setEditingKpi(null); }}}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingKpi ? 'Edit KPI' : 'New KPI Definition'}</DialogTitle>
+            <DialogTitle>{editingKpi ? t('adminKpis.editKpi') : t('adminKpis.newKpiDefinition')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Name *</Label>
-              <Input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g., Monthly Recurring Revenue" />
+              <Label>{t('adminKpis.name')} *</Label>
+              <Input value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} placeholder={t('adminKpis.namePlaceholder')} />
             </div>
             <div>
-              <Label>Description</Label>
+              <Label>{t('adminKpis.description')}</Label>
               <Textarea value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} rows={2} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Unit</Label>
-                <Input value={formData.unit} onChange={e => setFormData(f => ({ ...f, unit: e.target.value }))} placeholder="e.g., USD, %, users" />
+                <Label>{t('adminKpis.unit')}</Label>
+                <Input value={formData.unit} onChange={e => setFormData(f => ({ ...f, unit: e.target.value }))} placeholder={t('adminKpis.unitPlaceholder')} />
               </div>
               <div>
-                <Label>Category</Label>
+                <Label>{t('adminKpis.category')}</Label>
                 <Select value={formData.category} onValueChange={v => setFormData(f => ({ ...f, category: v }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('adminKpis.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    {CATEGORY_KEYS.map(cat => (
+                      <SelectItem key={cat} value={cat}>{categoryLabel(cat)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div>
-              <Label>Direction</Label>
+              <Label>{t('adminKpis.direction')}</Label>
               <Select value={formData.direction} onValueChange={v => setFormData(f => ({ ...f, direction: v }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DIRECTIONS.map(d => (
-                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  {DIRECTION_VALUES.map(d => (
+                    <SelectItem key={d} value={d}>{directionLabel(d)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={formData.is_global} onCheckedChange={v => setFormData(f => ({ ...f, is_global: v }))} />
-              <Label>Global (available to all programs)</Label>
+              <Label>{t('adminKpis.globalLabel')}</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingKpi(null); }}>Cancel</Button>
-            <Button onClick={handleSave}>{editingKpi ? 'Update' : 'Create'}</Button>
+            <Button variant="outline" onClick={() => { setIsCreating(false); setEditingKpi(null); }}>{t('adminKpis.cancel')}</Button>
+            <Button onClick={handleSave}>{editingKpi ? t('adminKpis.update') : t('adminKpis.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -324,14 +343,14 @@ export function AdminKpisManager() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete KPI Definition</AlertDialogTitle>
+            <AlertDialogTitle>{t('adminKpis.deleteKpi')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Delete "{deleteTarget?.name}"? This will remove all recorded values for this KPI.
+              {t('adminKpis.deleteKpiDescription', { name: deleteTarget?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('adminKpis.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">{t('adminKpis.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
