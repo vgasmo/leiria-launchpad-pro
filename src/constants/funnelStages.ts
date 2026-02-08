@@ -39,7 +39,22 @@ export const PIPELINE_STAGES: FunnelStage[] = [
   'contracted',
 ];
 
-/** Stage labels for display */
+/** i18n label keys for each stage – resolve via t(STAGE_LABEL_KEYS[stage]) */
+export const STAGE_LABEL_KEYS: Record<FunnelStage, string> = {
+  new: 'pipeline.stages.new',
+  first_contact_booked: 'pipeline.stages.first_contact_booked',
+  met: 'pipeline.stages.met',
+  qualified: 'pipeline.stages.qualified',
+  proposal_sent: 'pipeline.stages.proposal_sent',
+  negotiating: 'pipeline.stages.negotiating',
+  contracted: 'pipeline.stages.contracted',
+  incubating: 'pipeline.stages.incubating',
+  accelerating: 'pipeline.stages.accelerating',
+  rejected: 'pipeline.stages.rejected',
+  archived: 'pipeline.stages.archived',
+};
+
+/** @deprecated Use STAGE_LABEL_KEYS with t() instead */
 export const STAGE_LABELS: Record<FunnelStage, string> = {
   new: 'New',
   first_contact_booked: 'Meeting Booked',
