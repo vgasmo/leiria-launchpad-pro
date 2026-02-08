@@ -42,18 +42,18 @@ import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMo
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
-const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
-  new: { label: 'New', color: 'bg-slate-500' },
-  first_contact_booked: { label: 'Meeting Booked', color: 'bg-blue-500' },
-  met: { label: 'Met', color: 'bg-indigo-500' },
-  qualified: { label: 'Qualified', color: 'bg-purple-500' },
-  proposal_sent: { label: 'Proposal Sent', color: 'bg-amber-500' },
-  negotiating: { label: 'Negotiating', color: 'bg-orange-500' },
-  contracted: { label: 'Contracted', color: 'bg-green-500' },
-  incubating: { label: 'Incubating', color: 'bg-emerald-600' },
-  accelerating: { label: 'Accelerating', color: 'bg-primary' },
-  rejected: { label: 'Rejected', color: 'bg-destructive' },
-  archived: { label: 'Archived', color: 'bg-muted-foreground' },
+const STAGE_COLORS: Record<FunnelStage, string> = {
+  new: 'bg-slate-500',
+  first_contact_booked: 'bg-blue-500',
+  met: 'bg-indigo-500',
+  qualified: 'bg-purple-500',
+  proposal_sent: 'bg-amber-500',
+  negotiating: 'bg-orange-500',
+  contracted: 'bg-green-500',
+  incubating: 'bg-emerald-600',
+  accelerating: 'bg-primary',
+  rejected: 'bg-destructive',
+  archived: 'bg-muted-foreground',
 };
 
 const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'contracted'];
@@ -267,7 +267,7 @@ export default function CRM() {
             <SelectContent>
               <SelectItem value="all">{t('crm.allStages')}</SelectItem>
               {ACTIVE_STAGES.map(s => (
-                <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
+                <SelectItem key={s} value={s}>{t(`pipeline.stages.${s}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -406,8 +406,8 @@ export default function CRM() {
                                   </Badge>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                  <Badge className={cn('h-5 text-[10px]', STAGE_CONFIG[item.stage].color, 'text-white')}>
-                                    {STAGE_CONFIG[item.stage].label}
+                                  <Badge className={cn('h-5 text-[10px]', STAGE_COLORS[item.stage], 'text-white')}>
+                                    {t(`pipeline.stages.${item.stage}`)}
                                   </Badge>
                                   {item.next_action_at && (
                                     <span className={cn(
@@ -564,8 +564,8 @@ function InboxGroup({
                       {item.organization_name || item.contact_name || 'Unnamed'}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge className={cn('h-5 text-[10px]', STAGE_CONFIG[item.stage].color, 'text-white')}>
-                        {STAGE_CONFIG[item.stage].label}
+                      <Badge className={cn('h-5 text-[10px]', STAGE_COLORS[item.stage], 'text-white')}>
+                        {t(`pipeline.stages.${item.stage}`)}
                       </Badge>
                       {item.next_action_at && (
                         <span className={cn(

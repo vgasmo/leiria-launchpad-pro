@@ -25,18 +25,18 @@ import { formatRelativeTime } from '@/lib/dateUtils';
 import { IntakeRoutingManager } from './IntakeRoutingManager';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
 
-const STAGE_CONFIG: Record<FunnelStage, { label: string; color: string }> = {
-  new: { label: 'New', color: 'bg-slate-500' },
-  first_contact_booked: { label: 'Meeting Booked', color: 'bg-blue-500' },
-  met: { label: 'Met', color: 'bg-indigo-500' },
-  qualified: { label: 'Qualified', color: 'bg-purple-500' },
-  proposal_sent: { label: 'Proposal Sent', color: 'bg-amber-500' },
-  negotiating: { label: 'Negotiating', color: 'bg-orange-500' },
-  contracted: { label: 'Contracted', color: 'bg-green-500' },
-  incubating: { label: 'Incubating', color: 'bg-emerald-600' },
-  accelerating: { label: 'Accelerating', color: 'bg-primary' },
-  rejected: { label: 'Rejected', color: 'bg-destructive' },
-  archived: { label: 'Archived', color: 'bg-muted-foreground' },
+const STAGE_COLORS: Record<FunnelStage, string> = {
+  new: 'bg-slate-500',
+  first_contact_booked: 'bg-blue-500',
+  met: 'bg-indigo-500',
+  qualified: 'bg-purple-500',
+  proposal_sent: 'bg-amber-500',
+  negotiating: 'bg-orange-500',
+  contracted: 'bg-green-500',
+  incubating: 'bg-emerald-600',
+  accelerating: 'bg-primary',
+  rejected: 'bg-destructive',
+  archived: 'bg-muted-foreground',
 };
 
 const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'contracted'];
@@ -132,14 +132,13 @@ export function AdminFunnelManager() {
         {/* Kanban Board */}
         <div className="flex gap-4 overflow-x-auto pb-4">
           {ACTIVE_STAGES.map(stage => {
-            const config = STAGE_CONFIG[stage];
             const stageItems = itemsByStage[stage];
             
             return (
               <div key={stage} className="flex-shrink-0 w-72">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className={cn('h-3 w-3 rounded-full', config.color)} />
-                  <span className="font-medium text-sm">{config.label}</span>
+                  <div className={cn('h-3 w-3 rounded-full', STAGE_COLORS[stage])} />
+                  <span className="font-medium text-sm">{t(`pipeline.stages.${stage}`)}</span>
                   <Badge variant="secondary" className="ml-auto text-xs">{stageItems.length}</Badge>
                 </div>
                 <ScrollArea className="h-[600px]">
@@ -172,7 +171,7 @@ export function AdminFunnelManager() {
           <Dialog open={!!convertDialogItem} onOpenChange={() => setConvertDialogItem(null)}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Convert to Startup</DialogTitle>
+                <DialogTitle>{t('crm.convertToStartup', 'Converter para Startup')}</DialogTitle>
               </DialogHeader>
               <ConvertForm
                 item={convertDialogItem}
@@ -293,13 +292,13 @@ function FunnelCard({
         <div className="flex gap-1 pt-1" onClick={e => e.stopPropagation()}>
           <Select onValueChange={(v) => onStageChange(item, v as FunnelStage)}>
             <SelectTrigger className="h-7 text-xs flex-1">
-              <SelectValue placeholder="Move to..." />
+              <SelectValue placeholder={t('crm.moveTo', 'Mover para...')} />
             </SelectTrigger>
             <SelectContent>
               {ACTIVE_STAGES.filter(s => s !== item.stage).map(s => (
-                <SelectItem key={s} value={s}>{STAGE_CONFIG[s].label}</SelectItem>
+                <SelectItem key={s} value={s}>{t(`pipeline.stages.${s}`)}</SelectItem>
               ))}
-              <SelectItem value="rejected">Reject</SelectItem>
+              <SelectItem value="rejected">{t('pipeline.stages.rejected')}</SelectItem>
             </SelectContent>
           </Select>
           
