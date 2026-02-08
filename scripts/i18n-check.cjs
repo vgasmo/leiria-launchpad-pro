@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /**
- * i18n Key Parity & Completeness Check
+ * i18n Key Parity & Completeness Check (STRICT)
  *
  * Ensures EN and PT locale files have identical key sets and no empty values.
- * Exit code 1 on failure so CI gates can block.
+ * Exit code 1 on ANY failure so CI gates block.
+ *
+ * IMPORTANT: Run i18n-sync.cjs BEFORE this script to auto-fill missing keys.
+ * release-check.sh does this automatically.
  */
 const fs = require('fs');
 const path = require('path');
@@ -44,14 +47,16 @@ function run() {
   const missingInPt = [...enKeys].filter(k => !ptKeys.has(k));
   if (missingInPt.length > 0) {
     errors.push(`\n🇵🇹 Missing in pt.json (${missingInPt.length}):`);
-    missingInPt.forEach(k => errors.push(`  - ${k}`));
+    missingInPt.slice(0, 30).forEach(k => errors.push(`  - ${k}`));
+    if (missingInPt.length > 30) errors.push(`  ... and ${missingInPt.length - 30} more`);
   }
 
   // Keys in PT but missing from EN
   const missingInEn = [...ptKeys].filter(k => !enKeys.has(k));
   if (missingInEn.length > 0) {
     errors.push(`\n🇬🇧 Missing in en.json (${missingInEn.length}):`);
-    missingInEn.forEach(k => errors.push(`  - ${k}`));
+    missingInEn.slice(0, 30).forEach(k => errors.push(`  - ${k}`));
+    if (missingInEn.length > 30) errors.push(`  ... and ${missingInEn.length - 30} more`);
   }
 
   // Empty values in EN
@@ -69,22 +74,14 @@ function run() {
   }
 
   if (errors.length > 0) {
-    // After sync, only empty values are hard failures.
-    // Missing-key drift is auto-fixed by i18n-sync.cjs (run before this in release-check.sh).
-    const hasEmptyValues = emptyEn.length > 0 || emptyPt.length > 0;
-    if (hasEmptyValues) {
-      console.error('❌ i18n Parity Check FAILED (empty values found)');
-      errors.forEach(e => console.error(e));
-      console.error(`\n  EN keys: ${enKeys.size}  |  PT keys: ${ptKeys.size}`);
-      process.exit(1);
-    }
-    // Missing keys are warnings (sync script should have fixed them)
-    console.warn('⚠️  i18n Parity Check — warnings (missing keys, will be fixed by sync):');
-    errors.forEach(e => console.warn(e));
-    console.warn(`\n  EN keys: ${enKeys.size}  |  PT keys: ${ptKeys.size}`);
+    console.error('❌ i18n Parity Check FAILED');
+    errors.forEach(e => console.error(e));
+    console.error(`\n  EN keys: ${enKeys.size}  |  PT keys: ${ptKeys.size}`);
+    console.error('\n  💡 Run: node scripts/i18n-sync.cjs to auto-fix missing keys.');
+    process.exit(1);
   }
 
-  console.log(`✅ i18n Parity Check PASSED — ${enKeys.size} EN keys, ${ptKeys.size} PT keys.`);
+  console.log(`✅ i18n Parity Check PASSED — ${enKeys.size} keys in sync, no empty values.`);
   process.exit(0);
 }
 
