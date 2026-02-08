@@ -2233,7 +2233,8 @@
         "1to2Years": "1-2 years",
         "2to3Years": "2-3 years",
         "startupsOver3Years": "startups over 3 years",
-        "reviewRecommended": "Review recommended for price adjustment or graduation"
+        "reviewRecommended": "Review recommended for price adjustment or graduation",
+        "months": "months"
       }
     },
     "backofficeExtended": {
