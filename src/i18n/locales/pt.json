@@ -228,7 +228,7 @@
     "admin": {
       "operations": "Operações",
       "crm": "CRM",
-      "programsCohorts": "Programas & Cohorts",
+      "programsCohorts": "Programas e Coortes",
       "reports": "Relatórios",
       "usersPermissions": "Utilizadores & Permissões",
       "systemConfig": "Configuração do Sistema",
@@ -3389,7 +3389,7 @@
       "content": "Conteúdo",
       "insights": "Insights",
       "system": "Sistema",
-      "programs": "Programas & Cohorts",
+      "programs": "Programas e Coortes",
       "reports": "Relatórios",
       "users": "Utilizadores & Permissões"
     },
@@ -4106,7 +4106,7 @@
       "content": "Conteúdo",
       "insights": "Insights",
       "system": "Sistema",
-      "programs": "Programas & Cohorts",
+      "programs": "Programas e Coortes",
       "reports": "Relatórios",
       "users": "Utilizadores"
     }
