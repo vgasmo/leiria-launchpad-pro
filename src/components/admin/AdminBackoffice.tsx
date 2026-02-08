@@ -402,7 +402,7 @@ export function AdminBackoffice() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t('backoffice.searchPlaceholder')}
+              placeholder={t('admin.backoffice.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -411,10 +411,10 @@ export function AdminBackoffice() {
           
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={t('backoffice.stage')} />
+              <SelectValue placeholder={t('admin.backoffice.stage')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('backoffice.allStages')}</SelectItem>
+              <SelectItem value="all">{t('admin.backoffice.allStages')}</SelectItem>
               {STAGES.map(s => (
                 <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
               ))}
@@ -423,10 +423,10 @@ export function AdminBackoffice() {
 
           <Select value={programFilter} onValueChange={setProgramFilter}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('backoffice.program')} />
+              <SelectValue placeholder={t('admin.backoffice.program')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('backoffice.allPrograms')}</SelectItem>
+              <SelectItem value="all">{t('admin.backoffice.allPrograms')}</SelectItem>
               {programs?.map(p => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
               ))}
@@ -435,7 +435,7 @@ export function AdminBackoffice() {
 
           <Select value={consultantFilter} onValueChange={setConsultantFilter}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder={t('backoffice.consultant')} />
+              <SelectValue placeholder={t('admin.backoffice.consultant')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('admin.backoffice.allConsultants')}</SelectItem>
@@ -628,14 +628,14 @@ export function AdminBackoffice() {
                                   {item.assigned_consultant_name}
                                 </>
                               ) : (
-                                <span className="text-muted-foreground">{t('backoffice.unassigned')}</span>
+                                <span className="text-muted-foreground">{t('admin.backoffice.unassigned')}</span>
                               )}
                               <ChevronDown className="h-3 w-3 text-muted-foreground" />
                             </button>
                           </PopoverTrigger>
                           <PopoverContent className="w-64 p-2">
                             <Input
-                              placeholder={t('backoffice.searchConsultant')}
+                              placeholder={t('admin.backoffice.searchConsultant')}
                               value={consultorSearch}
                               onChange={(e) => setConsultorSearch(e.target.value)}
                               className="mb-2"
@@ -663,7 +663,7 @@ export function AdminBackoffice() {
                                 onClick={() => removeConsultorMutation.mutate(item.workspace_id)}
                               >
                                 <Trash2 className="h-3 w-3 mr-1" />
-                                {t('backoffice.removeConsultant')}
+                                {t('admin.backoffice.removeConsultant')}
                               </Button>
                             )}
                           </PopoverContent>
@@ -698,7 +698,7 @@ export function AdminBackoffice() {
                             onClick={() => unblockMutation.mutate(item.workspace_id)}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            {t('backoffice.unblock')}
+                            {t('admin.backoffice.unblock')}
                           </Button>
                         ) : (
                           <Button
@@ -710,7 +710,7 @@ export function AdminBackoffice() {
                             }}
                           >
                             <Ban className="h-4 w-4 mr-1" />
-                            {t('backoffice.block')}
+                            {t('admin.backoffice.block')}
                           </Button>
                         )}
                       </TableCell>
@@ -728,19 +728,19 @@ export function AdminBackoffice() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
-                {t('backoffice.blockWorkspace')}
+                {t('admin.backoffice.blockWorkspace')}
               </DialogTitle>
               <DialogDescription>
-                {t('backoffice.blockDescription', { name: workspaceToBlock?.name })}
+                {t('admin.backoffice.blockDescription', { name: workspaceToBlock?.name })}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>{t('backoffice.reason')}</Label>
+                <Label>{t('admin.backoffice.reason')}</Label>
                 <Input
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
-                  placeholder={t('backoffice.reasonPlaceholder')}
+                  placeholder={t('admin.backoffice.reasonPlaceholder')}
                 />
               </div>
             </div>
@@ -752,7 +752,7 @@ export function AdminBackoffice() {
                 variant="destructive" 
                 onClick={() => workspaceToBlock && blockMutation.mutate({ workspaceId: workspaceToBlock.id, reason: blockReason })}
               >
-                {t('backoffice.confirmBlock')}
+                {t('admin.backoffice.confirmBlock')}
               </Button>
             </DialogFooter>
           </DialogContent>

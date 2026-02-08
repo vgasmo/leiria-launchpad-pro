@@ -120,7 +120,7 @@ export function BackofficeContractsTab() {
 
   const handleBulkCreateContracts = async () => {
     if (selectedWorkspaces.size === 0) {
-      toast.error(t('backoffice.selectWorkspacesFirst', 'Select workspaces first'));
+      toast.error(t('admin.backoffice.selectWorkspacesFirst', 'Select workspaces first'));
       return;
     }
     
@@ -151,9 +151,9 @@ export function BackofficeContractsTab() {
     setSelectedWorkspaces(new Set());
     
     if (errors > 0) {
-      toast.warning(t('backoffice.bulkCreatePartial', `Created ${created} contracts, ${errors} failed`));
+      toast.warning(t('admin.backoffice.bulkCreatePartial', { defaultValue: `Created ${created} contracts, ${errors} failed` }));
     } else {
-      toast.success(t('backoffice.bulkCreateSuccess', `Created ${created} contracts`));
+      toast.success(t('admin.backoffice.bulkCreateSuccess', { defaultValue: `Created ${created} contracts` }));
     }
   };
 
@@ -199,7 +199,7 @@ export function BackofficeContractsTab() {
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={t('backoffice.searchContracts')}
+            placeholder={t('admin.backoffice.searchContracts')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -208,12 +208,12 @@ export function BackofficeContractsTab() {
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder={t('backoffice.allStatuses')} />
+            <SelectValue placeholder={t('admin.backoffice.allStatuses')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('backoffice.allStatuses')}</SelectItem>
+            <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
             {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-              <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`, { defaultValue: config.label })}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -222,13 +222,13 @@ export function BackofficeContractsTab() {
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedContract(null)}>
               <Plus className="h-4 w-4 mr-2" />
-              {t('backoffice.newContract')}
+              {t('admin.backoffice.newContract')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {selectedContract ? t('backoffice.editContract') : t('backoffice.newContract')}
+                {selectedContract ? t('admin.backoffice.editContract') : t('admin.backoffice.newContract')}
               </DialogTitle>
             </DialogHeader>
             <form
@@ -240,10 +240,10 @@ export function BackofficeContractsTab() {
             >
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('backoffice.startup')}</Label>
+                  <Label>{t('admin.backoffice.startup')}</Label>
                   <Select name="workspace_id" defaultValue={selectedContract?.workspace_id}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('backoffice.selectStartup')} />
+                      <SelectValue placeholder={t('admin.backoffice.selectStartup')} />
                     </SelectTrigger>
                     <SelectContent>
                       {workspaces?.map(w => (
@@ -256,10 +256,10 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.incubationType')}</Label>
+                  <Label>{t('admin.backoffice.incubationType')}</Label>
                   <Select name="incubation_type_id" defaultValue={selectedContract?.incubation_type_id || undefined}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('backoffice.selectType')} />
+                       <SelectValue placeholder={t('admin.backoffice.selectType')} />
                     </SelectTrigger>
                     <SelectContent>
                       {incubationTypes?.map(t => (
@@ -272,10 +272,10 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.building')}</Label>
+                  <Label>{t('admin.backoffice.building')}</Label>
                   <Select name="building_id" defaultValue={selectedContract?.building_id || undefined}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('backoffice.selectBuilding')} />
+                       <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
                     </SelectTrigger>
                     <SelectContent>
                       {buildings?.filter(b => b.is_active).map(b => (
@@ -288,7 +288,7 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.contractNumber')}</Label>
+                  <Label>{t('admin.backoffice.contractNumber')}</Label>
                   <Input
                     name="contract_number"
                     placeholder="INC-2025-001"
@@ -297,21 +297,21 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.status')}</Label>
+                  <Label>{t('admin.backoffice.status')}</Label>
                   <Select name="status" defaultValue={selectedContract?.status || 'draft'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                       {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                         <SelectItem key={key} value={key}>{t(`admin.backoffice.contractStatus.${key}`, { defaultValue: config.label })}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.startDate')}</Label>
+                  <Label>{t('admin.backoffice.startDate')}</Label>
                   <Input
                     type="date"
                     name="start_date"
@@ -321,7 +321,7 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.endDate')}</Label>
+                  <Label>{t('admin.backoffice.endDate')}</Label>
                   <Input
                     type="date"
                     name="end_date"
@@ -330,7 +330,7 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.monthlyFee')}</Label>
+                  <Label>{t('admin.backoffice.monthlyFee')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -340,7 +340,7 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.discount')} (%)</Label>
+                  <Label>{t('admin.backoffice.discount')} (%)</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -350,16 +350,16 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="col-span-2 space-y-2">
-                  <Label>{t('backoffice.discountReason')}</Label>
+                   <Label>{t('admin.backoffice.discountReason')}</Label>
                   <Input
                     name="discount_reason"
-                    placeholder={t('backoffice.discountReasonPlaceholder')}
+                    placeholder={t('admin.backoffice.discountReasonPlaceholder')}
                     defaultValue={selectedContract?.discount_reason || ''}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('backoffice.equity')} (%)</Label>
+                  <Label>{t('admin.backoffice.equity')} (%)</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -369,7 +369,7 @@ export function BackofficeContractsTab() {
                 </div>
 
                 <div className="col-span-2 space-y-2">
-                  <Label>{t('backoffice.notes')}</Label>
+                  <Label>{t('admin.backoffice.notes')}</Label>
                   <Textarea
                     name="notes"
                     defaultValue={selectedContract?.notes || ''}
@@ -396,23 +396,23 @@ export function BackofficeContractsTab() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
               <Zap className="h-5 w-5" />
-              {t('backoffice.workspacesWithoutContracts', 'Workspaces Without Contracts')}
+              {t('admin.backoffice.workspacesWithoutContracts', { defaultValue: 'Workspaces Without Contracts' })}
               <Badge variant="secondary" className="ml-2 bg-amber-200 dark:bg-amber-800">
                 {workspacesWithoutContracts.length}
               </Badge>
             </CardTitle>
             <CardDescription>
-              {t('backoffice.bulkCreateDescription', 'Select workspaces and create contracts in bulk')}
+              {t('admin.backoffice.bulkCreateDescription', { defaultValue: 'Select workspaces and create contracts in bulk' })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Bulk Options */}
             <div className="flex flex-wrap gap-3 items-end bg-background/80 p-3 rounded-lg border">
               <div className="space-y-1.5">
-                <Label className="text-xs">{t('backoffice.incubationType')}</Label>
+                <Label className="text-xs">{t('admin.backoffice.incubationType')}</Label>
                 <Select value={bulkIncubationType} onValueChange={setBulkIncubationType}>
                   <SelectTrigger className="w-48">
-                    <SelectValue placeholder={t('backoffice.selectType')} />
+                    <SelectValue placeholder={t('admin.backoffice.selectType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {incubationTypes?.map(it => (
@@ -425,10 +425,10 @@ export function BackofficeContractsTab() {
               </div>
               
               <div className="space-y-1.5">
-                <Label className="text-xs">{t('backoffice.building')}</Label>
+                <Label className="text-xs">{t('admin.backoffice.building')}</Label>
                 <Select value={bulkBuilding} onValueChange={setBulkBuilding}>
                   <SelectTrigger className="w-48">
-                    <SelectValue placeholder={t('backoffice.selectBuilding')} />
+                    <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
@@ -452,7 +452,7 @@ export function BackofficeContractsTab() {
                 <Zap className="h-4 w-4 mr-2" />
                 {isBulkCreating 
                   ? t('common.processing', 'Processing...') 
-                  : t('backoffice.createContractsCount', `Create ${selectedWorkspaces.size} Contracts`)}
+                  : t('admin.backoffice.createContractsCount', { defaultValue: `Create ${selectedWorkspaces.size} Contracts` })}
               </Button>
             </div>
             
@@ -467,9 +467,9 @@ export function BackofficeContractsTab() {
                         onCheckedChange={toggleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>{t('backoffice.startup')}</TableHead>
-                    <TableHead>{t('backoffice.stage', 'Stage')}</TableHead>
-                    <TableHead>{t('backoffice.createdAt', 'Created')}</TableHead>
+                     <TableHead>{t('admin.backoffice.startup')}</TableHead>
+                    <TableHead>{t('admin.backoffice.stage', { defaultValue: 'Stage' })}</TableHead>
+                    <TableHead>{t('admin.backoffice.createdAt', { defaultValue: 'Created' })}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -506,7 +506,7 @@ export function BackofficeContractsTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            {t('backoffice.contracts')}
+            {t('admin.backoffice.contracts')}
             <Badge variant="secondary" className="ml-2">{filteredContracts?.length || 0}</Badge>
           </CardTitle>
         </CardHeader>
@@ -517,13 +517,13 @@ export function BackofficeContractsTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('backoffice.startup')}</TableHead>
-                  <TableHead>{t('backoffice.contractNumber')}</TableHead>
-                  <TableHead>{t('backoffice.type')}</TableHead>
-                  <TableHead>{t('backoffice.building')}</TableHead>
-                  <TableHead>{t('backoffice.timeIncubated', 'Time Incubated')}</TableHead>
-                  <TableHead>{t('backoffice.status')}</TableHead>
-                  <TableHead>{t('backoffice.monthlyFee')}</TableHead>
+                   <TableHead>{t('admin.backoffice.startup')}</TableHead>
+                  <TableHead>{t('admin.backoffice.contractNumber')}</TableHead>
+                  <TableHead>{t('admin.backoffice.type')}</TableHead>
+                  <TableHead>{t('admin.backoffice.building')}</TableHead>
+                  <TableHead>{t('admin.backoffice.timeIncubated', { defaultValue: 'Time Incubated' })}</TableHead>
+                  <TableHead>{t('admin.backoffice.status')}</TableHead>
+                  <TableHead>{t('admin.backoffice.monthlyFee')}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -596,8 +596,8 @@ export function BackofficeContractsTab() {
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-xs">
-                                <div>{t('backoffice.startedOn', 'Started')}: {format(new Date(contract.start_date), 'dd MMM yyyy')}</div>
-                                <div>{t('backoffice.totalMonths', 'Total')}: {tenure.months} {t('backoffice.dashboard.months', 'months')}</div>
+                                <div>{t('admin.backoffice.startedOn', { defaultValue: 'Started' })}: {format(new Date(contract.start_date), 'dd MMM yyyy')}</div>
+                                <div>{t('admin.backoffice.totalMonths', { defaultValue: 'Total' })}: {tenure.months} {t('admin.backoffice.months', { defaultValue: 'months' })}</div>
                                 {alert && (
                                   <div className={cn(
                                     'mt-1 font-medium',
@@ -614,7 +614,7 @@ export function BackofficeContractsTab() {
                       </TableCell>
                       <TableCell>
                         <Badge className={cn('text-xs', statusConfig?.className)}>
-                          {statusConfig?.label}
+                          {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: statusConfig?.label })}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -645,7 +645,7 @@ export function BackofficeContractsTab() {
                 {filteredContracts?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      {t('backoffice.noContracts')}
+                      {t('admin.backoffice.noContracts')}
                     </TableCell>
                   </TableRow>
                 )}
