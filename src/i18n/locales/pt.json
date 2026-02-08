@@ -163,7 +163,9 @@
     "copyUrl": "Copiar URL",
     "goBack": "Voltar",
     "accessDenied": "Acesso Negado",
-    "go": "Ir"
+    "go": "Ir",
+    "unnamed": "Sem Nome",
+    "processing": "A processar..."
   },
   "filters": {
     "overdueActions": "Ações Atrasadas",
@@ -3919,6 +3921,12 @@
       "pricePerSqm": "Preço por m²",
       "calculatedFee": "Mensalidade Calculada",
       "inactive": "Inativo",
+      "priorityLevels": {
+        "star": "Estrela",
+        "high": "Alta",
+        "standard": "Standard",
+        "maintenance": "Manutenção"
+      },
       "typeName": "Nome do Tipo",
       "description": "Descrição",
       "baseMonthlyFee": "Mensalidade Base",

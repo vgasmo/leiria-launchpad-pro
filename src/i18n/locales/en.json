@@ -196,7 +196,9 @@
     "lessDetails": "Less details",
     "copy": "Copy",
     "accessDenied": "Access Denied",
-    "go": "Go"
+    "go": "Go",
+    "unnamed": "Unnamed",
+    "processing": "Processing..."
   },
   "filters": {
     "overdueActions": "Overdue Actions",
@@ -2109,6 +2111,12 @@
       "pricePerSqm": "Price per m²",
       "calculatedFee": "Calculated Fee",
       "inactive": "Inactive",
+      "priorityLevels": {
+        "star": "Star",
+        "high": "High",
+        "standard": "Standard",
+        "maintenance": "Maintenance"
+      },
       "typeName": "Type Name",
       "description": "Description",
       "baseMonthlyFee": "Base Monthly Fee",
