@@ -15,10 +15,13 @@ npm run build
 echo "4️⃣  Running Unit Tests..."
 npx vitest run
 
-echo "5️⃣  Checking i18n Parity..."
+echo "5️⃣  Syncing i18n keys..."
+node scripts/i18n-sync.cjs
+
+echo "6️⃣  Checking i18n Parity..."
 node scripts/i18n-check.cjs
 
-echo "6️⃣  Scanning for Secrets..."
+echo "7️⃣  Scanning for Secrets..."
 node scripts/secret-scan.cjs
 
 echo "✅ Release Check Passed!"
