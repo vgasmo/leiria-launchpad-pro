@@ -12,6 +12,7 @@ export default defineConfig({
     ? [['html', { outputFolder: 'playwright-report' }], ['github']]
     : [['html', { open: 'never' }]],
   timeout: 60_000,
+  globalSetup: './e2e/global-setup.ts',
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
@@ -24,7 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: process.env.CI
-    ? undefined // CI will start the dev server separately
+    ? undefined // CI will start the server separately
     : {
         command: 'npm run dev',
         url: BASE_URL,

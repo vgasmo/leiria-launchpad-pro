@@ -48,7 +48,6 @@ jobs:
 
   # ──────────────────────────────────────────────
   # Gate 2: Vitest unit/integration tests
-  # (includes Gate 6: i18n runtime gate)
   # ──────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
@@ -109,12 +108,12 @@ jobs:
 
   # ──────────────────────────────────────────────
   # Gates 3, 7, 8, 9: Playwright E2E tests
-  # (role flows, navigation, permissions, a11y)
+  # Uses local Supabase — no secrets required
   # ──────────────────────────────────────────────
   e2e:
     runs-on: ubuntu-latest
     needs: lint-and-build
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -131,12 +130,44 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Get Supabase status
+        id: supabase
+        run: |
+          # Extract values from supabase status
+          API_URL=$(supabase status --output json | jq -r '.API_URL // empty' 2>/dev/null || supabase status | grep 'API URL' | awk '{print $NF}')
+          ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY // empty' 2>/dev/null || supabase status | grep 'anon key' | awk '{print $NF}')
+          SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.SERVICE_ROLE_KEY // empty' 2>/dev/null || supabase status | grep 'service_role key' | awk '{print $NF}')
+
+          # Fallback defaults for local supabase
+          API_URL=${API_URL:-http://127.0.0.1:54321}
+          ANON_KEY=${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}
+          SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU}
+
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "anon_key=$ANON_KEY" >> $GITHUB_OUTPUT
+          echo "service_role_key=$SERVICE_ROLE_KEY" >> $GITHUB_OUTPUT
+          echo "✅ Supabase local: $API_URL"
+
+      - name: Seed test data
+        run: npx tsx scripts/e2e/seed-local-supabase.ts
+        env:
+          SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.service_role_key }}
+
       - name: Build app for E2E
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL || 'https://example.supabase.co' }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.E2E_SUPABASE_KEY || 'dummy-key-for-build' }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.E2E_SUPABASE_PROJECT_ID || 'example' }}
+          VITE_SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ steps.supabase.outputs.anon_key }}
+          VITE_SUPABASE_PROJECT_ID: local
 
       - name: Start preview server
         run: npx vite preview --port 5173 &
@@ -146,26 +177,10 @@ jobs:
       - name: Wait for server
         run: npx wait-on http://localhost:5173 --timeout 15000
 
-      - name: Check E2E credentials
-        if: github.ref == 'refs/heads/main'
-        run: |
-          if [ -z "$E2E_CONSULTANT_EMAIL" ]; then
-            echo "::error::E2E_CONSULTANT_EMAIL not set"
-            exit 1
-          fi
-
       - name: Run Playwright tests
         run: npx playwright test
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5173
-          E2E_CONSULTANT_EMAIL: ${{ secrets.E2E_CONSULTANT_EMAIL }}
-          E2E_CONSULTANT_PASSWORD: ${{ secrets.E2E_CONSULTANT_PASSWORD }}
-          E2E_FOUNDER_EMAIL: ${{ secrets.E2E_FOUNDER_EMAIL }}
-          E2E_FOUNDER_PASSWORD: ${{ secrets.E2E_FOUNDER_PASSWORD }}
-          E2E_MENTOR_EMAIL: ${{ secrets.E2E_MENTOR_EMAIL }}
-          E2E_MENTOR_PASSWORD: ${{ secrets.E2E_MENTOR_PASSWORD }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
