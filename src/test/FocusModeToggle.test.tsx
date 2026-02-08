@@ -1,8 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { FocusModeProvider, FocusModeToggle, useFocusMode } from '@/components/ui/FocusModeToggle';
+
+// Mock Radix tooltip as passthrough so tests don't need TooltipProvider
+vi.mock('@radix-ui/react-tooltip', () => ({
+  Provider: ({ children }: any) => <>{children}</>,
+  Root: ({ children }: any) => <>{children}</>,
+  Trigger: ({ children }: any) => <>{children}</>,
+  Content: ({ children }: any) => <>{children}</>,
+  Portal: ({ children }: any) => <>{children}</>,
+  Arrow: () => null,
+}));
+
+vi.mock('@/components/ui/tooltip', () => ({
+  TooltipProvider: ({ children }: any) => <>{children}</>,
+  Tooltip: ({ children }: any) => <>{children}</>,
+  TooltipTrigger: ({ children, asChild, ...props }: any) => <span {...props}>{children}</span>,
+  TooltipContent: ({ children }: any) => <span>{children}</span>,
+}));
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -12,6 +27,8 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+import { FocusModeProvider, FocusModeToggle, useFocusMode } from '@/components/ui/FocusModeToggle';
+
 // Test helper component
 function FocusConsumer() {
   const { isFocused } = useFocusMode();
@@ -20,11 +37,9 @@ function FocusConsumer() {
 
 function Wrapper({ children, defaultFocused = true }: { children: React.ReactNode; defaultFocused?: boolean }) {
   return (
-    <TooltipProvider>
-      <FocusModeProvider defaultFocused={defaultFocused}>
-        {children}
-      </FocusModeProvider>
-    </TooltipProvider>
+    <FocusModeProvider defaultFocused={defaultFocused}>
+      {children}
+    </FocusModeProvider>
   );
 }
 

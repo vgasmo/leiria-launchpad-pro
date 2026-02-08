@@ -7,7 +7,6 @@
  * @vitest-environment node
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -26,14 +25,8 @@ function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 
   }, {} as Record<string, unknown>);
 }
 
-// Run sync before tests to ensure parity
-beforeAll(() => {
-  try {
-    execSync('node scripts/i18n-sync.cjs', { encoding: 'utf-8', timeout: 30000 });
-  } catch (e) {
-    console.warn('i18n sync failed, proceeding with existing files:', (e as Error).message);
-  }
-});
+// Read-only parity gate: does NOT run sync.
+// Run `node scripts/i18n-sync.cjs` separately if keys are missing.
 
 describe('i18n strict parity', () => {
   let enFlat: Record<string, unknown>;
