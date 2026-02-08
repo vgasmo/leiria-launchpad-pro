@@ -225,7 +225,7 @@ export function BackofficeDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">{data.totalActiveContracts}</div>
-                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboard.activeContracts', 'Active Contracts')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboardPanel.activeContracts', 'Active Contracts')}</p>
               </div>
               <FileText className="h-8 w-8 text-primary/20" />
             </div>
@@ -237,7 +237,7 @@ export function BackofficeDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">€{data.totalMonthlyRevenue.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboard.monthlyRevenue', 'Monthly Revenue')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboardPanel.monthlyRevenue', 'Monthly Revenue')}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500/20" />
             </div>
@@ -250,7 +250,7 @@ export function BackofficeDashboard() {
               <div>
                 <div className="text-2xl font-bold">{data.occupancyRate}%</div>
                 <p className="text-sm text-muted-foreground">
-                  {t('admin.backoffice.dashboard.occupancy', 'Occupancy')} ({data.occupiedRooms}/{data.totalRooms})
+                  {t('admin.backoffice.dashboardPanel.occupancy', 'Occupancy')} ({data.occupiedRooms}/{data.totalRooms})
                 </p>
               </div>
               <Building2 className="h-8 w-8 text-blue-500/20" />
@@ -264,9 +264,9 @@ export function BackofficeDashboard() {
               <div>
                 <div className="text-2xl font-bold">{data.waitingListCount}</div>
                 <p className="text-sm text-muted-foreground">
-                  {t('admin.backoffice.dashboard.waitingList', 'Waiting List')}
+                  {t('admin.backoffice.dashboardPanel.waitingList', 'Waiting List')}
                   {data.highPriorityWaiting > 0 && (
-                    <span className="text-orange-600 ml-1">({data.highPriorityWaiting} {t('admin.backoffice.dashboard.urgent', 'urgent')})</span>
+                    <span className="text-orange-600 ml-1">({data.highPriorityWaiting} {t('admin.backoffice.dashboardPanel.urgent', 'urgent')})</span>
                   )}
                 </p>
               </div>
@@ -283,20 +283,20 @@ export function BackofficeDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className={cn('h-5 w-5', data.criticalAlerts > 0 ? 'text-red-500' : 'text-muted-foreground')} />
-              {t('admin.backoffice.dashboard.alerts', 'Alerts & Anniversaries')}
+              {t('admin.backoffice.dashboardPanel.alerts', 'Alerts & Anniversaries')}
               {data.criticalAlerts > 0 && (
-                <Badge variant="destructive" className="ml-2">{data.criticalAlerts} {t('admin.backoffice.dashboard.critical', 'critical')}</Badge>
+                <Badge variant="destructive" className="ml-2">{data.criticalAlerts} {t('admin.backoffice.dashboardPanel.critical', 'critical')}</Badge>
               )}
             </CardTitle>
             <CardDescription>
-              {t('admin.backoffice.dashboard.alertsDesc', 'Upcoming anniversaries, contract renewals, and 3-year milestones')}
+              {t('admin.backoffice.dashboardPanel.alertsDesc', 'Upcoming anniversaries, contract renewals, and 3-year milestones')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {data.alerts.length === 0 ? (
               <div className="flex items-center gap-2 text-muted-foreground py-4">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
-                {t('admin.backoffice.dashboard.noAlerts', 'No upcoming alerts')}
+                {t('admin.backoffice.dashboardPanel.noAlerts', 'No upcoming alerts')}
               </div>
             ) : (
               <ScrollArea className="h-[280px]">
@@ -332,31 +332,31 @@ export function BackofficeDashboard() {
                             <>
                               <span className="font-medium text-red-600">
                                 {alert.yearsIncubated >= 3 
-                                  ? t('admin.backoffice.dashboard.over3Years', '3+ years incubated')
-                                  : t('admin.backoffice.dashboard.approaching3Years', 'Approaching 3-year mark')}
+                                  ? t('admin.backoffice.dashboardPanel.over3Years', '3+ years incubated')
+                                  : t('admin.backoffice.dashboardPanel.approaching3Years', 'Approaching 3-year mark')}
                               </span>
                               {' — '}
-                              {t('admin.backoffice.dashboard.priceIncreaseOrExit', 'Review for price increase or graduation')}
+                              {t('admin.backoffice.dashboardPanel.priceIncreaseOrExit', 'Review for price increase or graduation')}
                             </>
                           )}
                           {alert.alertType === 'anniversary' && (
                             <>
-                              {t('admin.backoffice.dashboard.yearAnniversary', 'Year {{year}} anniversary', { year: alert.yearsIncubated })}
+                              {t('admin.backoffice.dashboardPanel.yearAnniversary', 'Year {{year}} anniversary', { year: alert.yearsIncubated })}
                               {' — '}
-                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboard.daysAway', 'days away')}
+                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboardPanel.daysAway', 'days away')}
                             </>
                           )}
                           {alert.alertType === 'expiring' && (
                             <>
-                              {t('admin.backoffice.dashboard.contractExpiring', 'Contract expiring')}
+                              {t('admin.backoffice.dashboardPanel.contractExpiring', 'Contract expiring')}
                               {' — '}
-                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboard.daysRemaining', 'days remaining')}
+                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboardPanel.daysRemaining', 'days remaining')}
                             </>
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {t('admin.backoffice.dashboard.incubatedSince', 'Incubated since')} {format(new Date(alert.startDate), 'MMM yyyy')} 
-                          {' '}({alert.monthsIncubated} {t('admin.backoffice.dashboard.months', 'months')})
+                          {t('admin.backoffice.dashboardPanel.incubatedSince', 'Incubated since')} {format(new Date(alert.startDate), 'MMM yyyy')} 
+                          {' '}({alert.monthsIncubated} {t('admin.backoffice.dashboardPanel.months', 'months')})
                         </div>
                       </div>
                       <Button 
@@ -379,19 +379,19 @@ export function BackofficeDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Timer className="h-5 w-5" />
-              {t('admin.backoffice.dashboard.tenureBreakdown', 'Incubation Tenure')}
+              {t('admin.backoffice.dashboardPanel.tenureBreakdown', 'Incubation Tenure')}
             </CardTitle>
             <CardDescription>
-              {t('admin.backoffice.dashboard.tenureDesc', 'Distribution of startups by time incubated')}
+              {t('admin.backoffice.dashboardPanel.tenureDesc', 'Distribution of startups by time incubated')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { key: 'under1year', label: t('admin.backoffice.dashboard.under1Year', '< 1 year'), color: 'bg-green-500' },
-                { key: '1to2years', label: t('admin.backoffice.dashboard.1to2Years', '1-2 years'), color: 'bg-blue-500' },
-                { key: '2to3years', label: t('admin.backoffice.dashboard.2to3Years', '2-3 years'), color: 'bg-yellow-500' },
-                { key: 'over3years', label: t('admin.backoffice.dashboard.over3Years', '3+ years'), color: 'bg-red-500' },
+                { key: 'under1year', label: t('admin.backoffice.dashboardPanel.under1Year', '< 1 year'), color: 'bg-green-500' },
+                { key: '1to2years', label: t('admin.backoffice.dashboardPanel.1to2Years', '1-2 years'), color: 'bg-blue-500' },
+                { key: '2to3years', label: t('admin.backoffice.dashboardPanel.2to3Years', '2-3 years'), color: 'bg-yellow-500' },
+                { key: 'over3years', label: t('admin.backoffice.dashboardPanel.over3Years', '3+ years'), color: 'bg-red-500' },
               ].map(item => {
                 const count = data.contractsByAge[item.key] || 0;
                 const percentage = data.totalActiveContracts > 0 
@@ -421,10 +421,10 @@ export function BackofficeDashboard() {
                   <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
                   <div className="text-sm">
                     <span className="font-medium text-red-700 dark:text-red-400">
-                      {data.contractsByAge['over3years']} {t('backoffice.dashboard.startupsOver3Years', 'startups over 3 years')}
+                      {data.contractsByAge['over3years']} {t('admin.backoffice.dashboardPanel.startupsOver3Years', 'startups over 3 years')}
                     </span>
                     <p className="text-muted-foreground mt-0.5">
-                      {t('backoffice.dashboard.reviewRecommended', 'Review recommended for price adjustment or graduation')}
+                      {t('admin.backoffice.dashboardPanel.reviewRecommended', 'Review recommended for price adjustment or graduation')}
                     </p>
                   </div>
                 </div>
