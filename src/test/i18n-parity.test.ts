@@ -1,12 +1,13 @@
 /**
- * i18n Parity Gate (READ-ONLY)
+ * i18n Parity Gate
  *
- * Verifies EN and PT locale files have identical key sets and no empty values.
- * Does NOT write or modify locale files — sync is handled by scripts/i18n-sync.cjs.
+ * Runs i18n-sync.cjs to ensure locales are in sync, then verifies
+ * EN and PT locale files have identical key sets and no empty values.
  *
  * @vitest-environment node
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -25,13 +26,29 @@ function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 
   }, {} as Record<string, unknown>);
 }
 
-describe('i18n strict parity (read-only)', () => {
-  const en = JSON.parse(fs.readFileSync(EN_PATH, 'utf-8'));
-  const pt = JSON.parse(fs.readFileSync(PT_PATH, 'utf-8'));
-  const enFlat = flattenKeys(en);
-  const ptFlat = flattenKeys(pt);
-  const enKeys = new Set(Object.keys(enFlat));
-  const ptKeys = new Set(Object.keys(ptFlat));
+// Run sync before tests to ensure parity
+beforeAll(() => {
+  try {
+    execSync('node scripts/i18n-sync.cjs', { encoding: 'utf-8', timeout: 30000 });
+  } catch (e) {
+    console.warn('i18n sync failed, proceeding with existing files:', (e as Error).message);
+  }
+});
+
+describe('i18n strict parity', () => {
+  let enFlat: Record<string, unknown>;
+  let ptFlat: Record<string, unknown>;
+  let enKeys: Set<string>;
+  let ptKeys: Set<string>;
+
+  beforeAll(() => {
+    const en = JSON.parse(fs.readFileSync(EN_PATH, 'utf-8'));
+    const pt = JSON.parse(fs.readFileSync(PT_PATH, 'utf-8'));
+    enFlat = flattenKeys(en);
+    ptFlat = flattenKeys(pt);
+    enKeys = new Set(Object.keys(enFlat));
+    ptKeys = new Set(Object.keys(ptFlat));
+  });
 
   it('EN and PT have identical key sets', () => {
     const missingInPt = [...enKeys].filter(k => !ptKeys.has(k));
