@@ -81,7 +81,7 @@ export function PendingMentorRequestsPanel() {
       // Fetch requester info
       const requesterIds = [...new Set(data.map(r => r.requested_by))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email')
         .in('id', requesterIds);
       
@@ -110,7 +110,7 @@ export function PendingMentorRequestsPanel() {
       const mentorIds = mentorRoles.map(r => r.user_id);
       
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url, expertise')
         .in('id', mentorIds);
       

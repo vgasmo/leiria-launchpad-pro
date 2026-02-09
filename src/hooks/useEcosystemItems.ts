@@ -137,7 +137,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
       let ownerNames: Record<string, string> = {};
       if (ownerIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name')
           .in('id', ownerIds as string[]);
         profiles?.forEach(p => { ownerNames[p.id] = p.full_name || 'Unknown'; });

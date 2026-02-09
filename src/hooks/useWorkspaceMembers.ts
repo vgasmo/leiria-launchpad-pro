@@ -34,7 +34,7 @@ export function useWorkspaceMembers(workspaceId: string | undefined) {
 
       // Fetch profiles
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name, avatar_url')
         .in('id', userIds);
 

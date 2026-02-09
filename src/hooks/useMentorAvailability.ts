@@ -115,7 +115,7 @@ export function useMyBookings() {
       // Fetch profiles
       const userIds = [...new Set([...data.map(b => b.mentor_id), ...data.map(b => b.founder_id)])];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', userIds);
 

@@ -97,7 +97,7 @@ export function AdminBackoffice() {
           ? supabase.from('programs').select('id, name').in('id', programIds)
           : Promise.resolve({ data: [] }),
         consultantIds.length > 0
-          ? supabase.from('profiles').select('id, full_name').in('id', consultantIds)
+          ? supabase.from('profiles_safe').select('id, full_name').in('id', consultantIds)
           : Promise.resolve({ data: [] }),
         supabase
           .from('sessions')
@@ -170,7 +170,7 @@ export function AdminBackoffice() {
       const { data: roleData } = await supabase.from('user_roles').select('user_id').eq('role', 'consultor');
       if (!roleData?.length) return [];
       const userIds = roleData.map(r => r.user_id);
-      const { data } = await supabase.from('profiles').select('id, full_name, email, avatar_url').in('id', userIds);
+      const { data } = await supabase.from('profiles_safe').select('id, full_name, email, avatar_url').in('id', userIds);
       return data || [];
     },
   });

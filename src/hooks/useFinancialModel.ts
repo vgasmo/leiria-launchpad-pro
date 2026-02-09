@@ -274,7 +274,7 @@ export function useFinancialModelVersions(workspaceId: string | undefined) {
 
       if (uploaderIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, avatar_url')
           .in('id', uploaderIds);
 

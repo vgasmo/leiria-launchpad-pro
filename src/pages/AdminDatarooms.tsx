@@ -73,7 +73,7 @@ export default function AdminDatarooms() {
       
       // Get profiles
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name, avatar_url')
         .in('id', userIds);
       
@@ -99,7 +99,7 @@ export default function AdminDatarooms() {
     mutationFn: async (email: string) => {
       // Find user by email
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id')
         .eq('email', email.toLowerCase())
         .maybeSingle();

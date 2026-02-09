@@ -35,7 +35,7 @@ export function useWorkspaceOwner(workspaceId: string | undefined) {
       let consultor = null;
       if (data.assigned_consultor_id) {
         const { data: profile } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, email, avatar_url')
           .eq('id', data.assigned_consultor_id)
           .maybeSingle();
@@ -102,7 +102,7 @@ export function useConsultors() {
       const userIds = [...new Set(roleUsers.map(r => r.user_id))];
 
       const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', userIds)
         .order('full_name');

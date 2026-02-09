@@ -69,7 +69,7 @@ export function AdminWorkspacesManager() {
       // Get profiles for these users
       const userIds = [...new Set(wsUsers?.map(wu => wu.user_id) || [])];
       const { data: userProfiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name, avatar_url')
         .in('id', userIds);
 
@@ -102,7 +102,7 @@ export function AdminWorkspacesManager() {
   const { data: profiles } = useQuery({
     queryKey: ['admin-profiles-list'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('id, email, full_name, avatar_url').order('email');
+      const { data, error } = await supabase.from('profiles_safe').select('id, email, full_name, avatar_url').order('email');
       if (error) throw error;
       return data;
     },
@@ -124,7 +124,7 @@ export function AdminWorkspacesManager() {
 
       // Get profiles for these users (sorted alphabetically by name)
       const { data: consultorProfiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name, avatar_url')
         .in('id', userIds)
         .order('full_name', { ascending: true, nullsFirst: false });

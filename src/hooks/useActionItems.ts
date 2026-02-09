@@ -66,7 +66,7 @@ export function useActionItems(workspaceId: string | undefined) {
       
       if (ownerIds.length > 0) {
         const { data: profilesData } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, avatar_url')
           .in('id', ownerIds as string[]);
         profiles = profilesData || [];
@@ -243,7 +243,7 @@ export function useActionItemsByMilestone(milestoneId: string | undefined) {
       
       if (ownerIds.length > 0) {
         const { data: profilesData } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, avatar_url')
           .in('id', ownerIds as string[]);
         profiles = profilesData || [];

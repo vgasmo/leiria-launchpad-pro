@@ -79,7 +79,7 @@ export function useConversations() {
       // Get profiles
       const userIds = [...new Set(allParticipants?.map(p => p.user_id) || [])];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', userIds);
 
@@ -172,7 +172,7 @@ export function useMessages(conversationId: string | undefined) {
       // Get sender profiles
       const senderIds = [...new Set(data.map(m => m.sender_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', senderIds);
 

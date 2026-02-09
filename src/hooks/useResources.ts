@@ -40,7 +40,7 @@ export function useResources(programId?: string | null) {
       
       const creatorIds = [...new Set(data.filter(r => r.created_by).map(r => r.created_by!))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name')
         .in('id', creatorIds);
       
