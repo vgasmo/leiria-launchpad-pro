@@ -2541,6 +2541,12 @@
     "exportCalendar": "Export Calendar",
     "downloadICS": "Download .ics File"
   },
+  "commandPalette": {
+    "placeholder": "Search or type a command...",
+    "typeToSearch": "Type to search...",
+    "quickActions": "Quick Actions",
+    "navigation": "Navigation"
+  },
   "quickActions": {
     "title": "Quick Actions",
     "description": "Quickly access common tasks",

@@ -1735,6 +1735,12 @@
     "exportCalendar": "Exportar Calendário",
     "downloadICS": "Transferir Ficheiro .ics"
   },
+  "commandPalette": {
+    "placeholder": "Pesquisar ou escrever um comando...",
+    "typeToSearch": "Escreva para pesquisar...",
+    "quickActions": "Ações Rápidas",
+    "navigation": "Navegação"
+  },
   "quickActions": {
     "title": "Ações Rápidas",
     "description": "Aceda rapidamente às tarefas comuns",

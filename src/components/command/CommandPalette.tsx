@@ -75,8 +75,8 @@ export function CommandPalette() {
 
   if (isStaff) {
     navItems.push(
-      { id: 'crm', label: 'CRM Pipeline', icon: <Briefcase className="h-4 w-4" />, path: '/crm' },
-      { id: 'admin', label: t('nav.admin', 'Admin'), icon: <Building2 className="h-4 w-4" />, path: '/admin' },
+      { id: 'crm', label: t('nav.crm'), icon: <Briefcase className="h-4 w-4" />, path: '/crm' },
+      { id: 'admin', label: t('nav.adminPanel'), icon: <Building2 className="h-4 w-4" />, path: '/admin' },
     );
   }
   if (isStaff || isMentor) {
@@ -108,7 +108,7 @@ export function CommandPalette() {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput
-        placeholder={t('commandPalette.placeholder', 'Search or type a command...')}
+        placeholder={t('commandPalette.placeholder')}
         value={query}
         onValueChange={setQuery}
       />
@@ -116,7 +116,7 @@ export function CommandPalette() {
         <CommandEmpty>
           {query.length >= 2
             ? t('search.noResultsFor', { query })
-            : t('commandPalette.typeToSearch', 'Type to search...')}
+            : t('commandPalette.typeToSearch')}
         </CommandEmpty>
 
         {/* Search Results */}
@@ -147,7 +147,7 @@ export function CommandPalette() {
         {showQuickActions && (
           <>
             {hasSearchResults && <CommandSeparator />}
-            <CommandGroup heading={t('commandPalette.quickActions', 'Quick Actions')}>
+            <CommandGroup heading={t('commandPalette.quickActions')}>
               {quickActions.map(action => (
                 <CommandItem key={action.id} onSelect={() => runAction(action.path)} className="gap-3">
                   {action.icon}
@@ -163,7 +163,7 @@ export function CommandPalette() {
         {showNav && (
           <>
             <CommandSeparator />
-            <CommandGroup heading={t('commandPalette.navigation', 'Navigation')}>
+            <CommandGroup heading={t('commandPalette.navigation')}>
               {navItems.map(item => (
                 <CommandItem key={item.id} onSelect={() => runAction(item.path)} className="gap-3">
                   {item.icon}
