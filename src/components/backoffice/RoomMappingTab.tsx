@@ -95,7 +95,7 @@ function FloorMapCard({
           <div>
             <CardTitle className="text-base">{map.name}</CardTitle>
             <CardDescription>
-              {map.space?.name} {map.floor && `• Floor ${map.floor}`}
+              {map.space?.name} {map.floor && `• ${t('admin.backoffice.floor')} ${map.floor}`}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1">
@@ -104,7 +104,7 @@ function FloorMapCard({
               size="icon"
               className="h-8 w-8 text-primary hover:text-primary/80"
               onClick={onViewInteractive}
-              title={t('admin.backoffice.viewInteractive', 'View interactive map')}
+              title={t('admin.backoffice.viewInteractive')}
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -122,7 +122,7 @@ function FloorMapCard({
       <CardContent>
         {loading ? (
           <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">{t('common.loading', 'Loading...')}</span>
+            <span className="text-muted-foreground text-sm">{t('common.loading')}</span>
           </div>
         ) : signedUrl ? (
           isPdf ? (
@@ -134,7 +134,7 @@ function FloorMapCard({
             >
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Image className="h-10 w-10" />
-                <span className="text-sm font-medium">{t('admin.backoffice.openPdf', 'Open PDF')}</span>
+                <span className="text-sm font-medium">{t('admin.backoffice.openPdf')}</span>
               </div>
             </a>
           ) : (
@@ -156,7 +156,7 @@ function FloorMapCard({
           )
         ) : (
           <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">Unable to load</span>
+            <span className="text-muted-foreground text-sm">{t('common.error')}</span>
           </div>
         )}
       </CardContent>
@@ -243,7 +243,7 @@ export function RoomMappingTab() {
     if (!file || !user) return;
 
     if (!mapBuildingId) {
-      toast.error(t('admin.backoffice.selectBuildingFirst', 'Please select a building first'));
+      toast.error(t('admin.backoffice.selectBuildingFirst'));
       inputEl.value = '';
       return;
     }
@@ -304,8 +304,8 @@ export function RoomMappingTab() {
       const details = getErrorMessage(error);
       toast.error(
         details
-          ? `${t('admin.backoffice.uploadMapFailed', 'Failed to upload floor map')}: ${details}`
-          : t('admin.backoffice.uploadMapFailed', 'Failed to upload floor map')
+           ? `${t('admin.backoffice.uploadMapFailed')}: ${details}`
+           : t('admin.backoffice.uploadMapFailed')
       );
     } finally {
       setUploading(false);
@@ -314,7 +314,7 @@ export function RoomMappingTab() {
 
   // Group rooms by floor
   const roomsByFloor = rooms?.reduce((acc, room) => {
-    const floor = room.floor || 'Unknown';
+    const floor = room.floor || t('common.unknown');
     if (!acc[floor]) acc[floor] = [];
     acc[floor].push(room);
     return acc;
@@ -403,9 +403,9 @@ export function RoomMappingTab() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-lg font-semibold">{t('admin.backoffice.roomMapping', 'Room Mapping')}</h2>
+          <h2 className="text-lg font-semibold">{t('admin.backoffice.roomMapping')}</h2>
           <p className="text-sm text-muted-foreground">
-            {t('admin.backoffice.roomMappingDesc', 'Map rooms and track which startups are where')}
+            {t('admin.backoffice.roomMappingDesc')}
           </p>
         </div>
 
@@ -414,19 +414,19 @@ export function RoomMappingTab() {
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Image className="h-4 w-4 mr-2" />
-                {t('admin.backoffice.uploadMap', 'Upload Map')}
+                {t('admin.backoffice.uploadMap')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t('admin.backoffice.uploadFloorMap', 'Upload Floor Map')}</DialogTitle>
+                <DialogTitle>{t('admin.backoffice.uploadFloorMap')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.building', 'Building')}</Label>
+                   <Label>{t('admin.backoffice.building')}</Label>
                   <Select value={mapBuildingId} onValueChange={setMapBuildingId}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('admin.backoffice.selectBuilding', 'Select building...')} />
+                      <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
                     </SelectTrigger>
                     <SelectContent>
                       {buildings?.map((building) => (
@@ -439,24 +439,24 @@ export function RoomMappingTab() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.mapName', 'Map Name')}</Label>
+                    <Label>{t('admin.backoffice.mapName')}</Label>
                     <Input
                       value={mapName}
                       onChange={(e) => setMapName(e.target.value)}
-                      placeholder={t('admin.backoffice.mapNamePlaceholder', 'Ground Floor Layout')}
+                      placeholder={t('admin.backoffice.mapNamePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.floor', 'Floor')}</Label>
+                     <Label>{t('admin.backoffice.floor')}</Label>
                     <Input
                       value={mapFloor}
                       onChange={(e) => setMapFloor(e.target.value)}
-                      placeholder={t('admin.backoffice.floorPlaceholder', 'Ground, 1, 2...')}
+                      placeholder={t('admin.backoffice.floorPlaceholder')}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.mapFile', 'Map File')}</Label>
+                  <Label>{t('admin.backoffice.mapFile')}</Label>
                   <Input
                     type="file"
                     accept="image/*,.pdf"
@@ -465,7 +465,7 @@ export function RoomMappingTab() {
                   />
                   {!mapBuildingId && (
                     <p className="text-xs text-muted-foreground">
-                      {t('admin.backoffice.selectBuildingFirst', 'Please select a building first')}
+                      {t('admin.backoffice.selectBuildingFirst')}
                     </p>
                   )}
                 </div>
@@ -477,13 +477,13 @@ export function RoomMappingTab() {
             <DialogTrigger asChild>
               <Button onClick={() => setSelectedRoom(null)}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('admin.backoffice.addRoom', 'Add Room')}
+                {t('admin.backoffice.addRoom')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {selectedRoom ? t('admin.backoffice.editRoom', 'Edit Room') : t('admin.backoffice.addRoom', 'Add Room')}
+                  {selectedRoom ? t('admin.backoffice.editRoom') : t('admin.backoffice.addRoom')}
                 </DialogTitle>
               </DialogHeader>
               <form
@@ -494,10 +494,10 @@ export function RoomMappingTab() {
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.building', 'Building')}</Label>
-                  <Select name="space_id" defaultValue={selectedRoom?.space_id || selectedSpace !== 'all' ? selectedSpace : undefined} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select building..." />
+                   <Label>{t('admin.backoffice.building')}</Label>
+                   <Select name="space_id" defaultValue={selectedRoom?.space_id || selectedSpace !== 'all' ? selectedSpace : undefined} required>
+                     <SelectTrigger>
+                       <SelectValue placeholder={t('admin.backoffice.selectBuilding')} />
                     </SelectTrigger>
                     <SelectContent>
                       {spaces?.map(space => (
@@ -509,7 +509,7 @@ export function RoomMappingTab() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.roomName', 'Room Name')}</Label>
+                    <Label>{t('admin.backoffice.roomName')}</Label>
                     <Input
                       name="name"
                       placeholder="Office A1, Lab 2..."
@@ -518,7 +518,7 @@ export function RoomMappingTab() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.roomNumber', 'Room Number')}</Label>
+                    <Label>{t('admin.backoffice.roomNumber')}</Label>
                     <Input
                       name="room_number"
                       placeholder="101, A-23..."
@@ -529,7 +529,7 @@ export function RoomMappingTab() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.floor', 'Floor')}</Label>
+                    <Label>{t('admin.backoffice.floor')}</Label>
                     <Input
                       name="floor"
                       placeholder="Ground, 1, 2..."
@@ -537,22 +537,22 @@ export function RoomMappingTab() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.type', 'Type')}</Label>
+                    <Label>{t('admin.backoffice.type')}</Label>
                     <Select name="room_type" defaultValue={selectedRoom?.room_type || 'office'}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="office">{t('admin.backoffice.roomTypes.office', 'Escritório')}</SelectItem>
-                        <SelectItem value="desk">{t('admin.backoffice.roomTypes.desk', 'Secretária')}</SelectItem>
-                        <SelectItem value="meeting_room">{t('admin.backoffice.roomTypes.meeting_room', 'Sala de Reuniões')}</SelectItem>
-                        <SelectItem value="lab">{t('admin.backoffice.roomTypes.lab', 'Laboratório')}</SelectItem>
-                        <SelectItem value="event_space">{t('admin.backoffice.roomTypes.event_space', 'Espaço de Eventos')}</SelectItem>
+                         <SelectItem value="office">{t('admin.backoffice.roomTypes.office')}</SelectItem>
+                         <SelectItem value="desk">{t('admin.backoffice.roomTypes.desk')}</SelectItem>
+                         <SelectItem value="meeting_room">{t('admin.backoffice.roomTypes.meeting_room')}</SelectItem>
+                         <SelectItem value="lab">{t('admin.backoffice.roomTypes.lab')}</SelectItem>
+                         <SelectItem value="event_space">{t('admin.backoffice.roomTypes.event_space')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('admin.backoffice.capacity', 'Capacity')}</Label>
+                    <Label>{t('admin.backoffice.capacity')}</Label>
                     <Input
                       type="number"
                       name="capacity"
@@ -562,22 +562,22 @@ export function RoomMappingTab() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.status', 'Status')}</Label>
+                  <Label>{t('admin.backoffice.status')}</Label>
                   <Select name="status" defaultValue={selectedRoom?.status || 'available'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="available">{t('admin.backoffice.roomStatus.available', 'Disponível')}</SelectItem>
-                      <SelectItem value="occupied">{t('admin.backoffice.roomStatus.occupied', 'Ocupado')}</SelectItem>
-                      <SelectItem value="maintenance">{t('admin.backoffice.roomStatus.maintenance', 'Manutenção')}</SelectItem>
-                      <SelectItem value="reserved">{t('admin.backoffice.roomStatus.reserved', 'Reservado')}</SelectItem>
+                       <SelectItem value="available">{t('admin.backoffice.roomStatus.available')}</SelectItem>
+                       <SelectItem value="occupied">{t('admin.backoffice.roomStatus.occupied')}</SelectItem>
+                       <SelectItem value="maintenance">{t('admin.backoffice.roomStatus.maintenance')}</SelectItem>
+                       <SelectItem value="reserved">{t('admin.backoffice.roomStatus.reserved')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t('admin.backoffice.notes', 'Notes')}</Label>
+                   <Label>{t('admin.backoffice.notes')}</Label>
                   <Textarea
                     name="notes"
                     defaultValue={selectedRoom?.notes || ''}
@@ -622,7 +622,7 @@ export function RoomMappingTab() {
             </div>
             <div>
               <div className="text-2xl font-bold">{rooms?.length || 0}</div>
-              <p className="text-xs text-muted-foreground">{t('admin.backoffice.totalRooms', 'Total Rooms')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.totalRooms')}</p>
             </div>
           </CardContent>
         </Card>
@@ -633,7 +633,7 @@ export function RoomMappingTab() {
             </div>
             <div>
               <div className="text-2xl font-bold text-accent-foreground">{availableCount}</div>
-              <p className="text-xs text-muted-foreground">{t('admin.backoffice.availableRooms', 'Available')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.availableRooms')}</p>
             </div>
           </CardContent>
         </Card>
@@ -644,7 +644,7 @@ export function RoomMappingTab() {
             </div>
             <div>
               <div className="text-2xl font-bold text-primary">{occupiedCount}</div>
-              <p className="text-xs text-muted-foreground">{t('admin.backoffice.occupiedRooms', 'Occupied')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.occupiedRooms')}</p>
             </div>
           </CardContent>
         </Card>
@@ -655,7 +655,7 @@ export function RoomMappingTab() {
             </div>
             <div>
               <div className="text-2xl font-bold">{floorMaps?.length || 0}</div>
-              <p className="text-xs text-muted-foreground">{t('admin.backoffice.floorMaps', 'Floor Maps')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.backoffice.floorMaps')}</p>
             </div>
           </CardContent>
         </Card>
@@ -665,15 +665,15 @@ export function RoomMappingTab() {
         <TabsList>
           <TabsTrigger value="rooms">
             <DoorOpen className="h-4 w-4 mr-2" />
-            {t('admin.backoffice.rooms', 'Rooms')}
+            {t('admin.backoffice.rooms')}
           </TabsTrigger>
           <TabsTrigger value="maps">
             <Image className="h-4 w-4 mr-2" />
-            {t('admin.backoffice.floorMaps', 'Floor Maps')}
+            {t('admin.backoffice.floorMaps')}
           </TabsTrigger>
           <TabsTrigger value="overview">
             <Building2 className="h-4 w-4 mr-2" />
-            {t('admin.backoffice.overview', 'Overview')}
+            {t('admin.backoffice.overview')}
           </TabsTrigger>
         </TabsList>
 
@@ -685,7 +685,7 @@ export function RoomMappingTab() {
               <Input
                 value={roomSearch}
                 onChange={(e) => setRoomSearch(e.target.value)}
-                placeholder={t('admin.backoffice.searchRooms', 'Search rooms or occupants...')}
+                placeholder={t('admin.backoffice.searchRooms')}
                 className="pl-9 h-9"
               />
             </div>
@@ -698,10 +698,10 @@ export function RoomMappingTab() {
                   className="h-8 text-xs"
                   onClick={() => setStatusFilter(status)}
                 >
-                  {status === 'all' ? t('common.all', 'All') :
-                   status === 'available' ? t('admin.backoffice.available', 'Available') :
-                   status === 'occupied' ? t('admin.backoffice.occupied', 'Occupied') :
-                   t('admin.backoffice.maintenance', 'Maintenance')}
+                   {status === 'all' ? t('common.all') :
+                    status === 'available' ? t('admin.backoffice.available') :
+                    status === 'occupied' ? t('admin.backoffice.occupied') :
+                    t('admin.backoffice.maintenance')}
                 </Button>
               ))}
             </div>
@@ -717,8 +717,8 @@ export function RoomMappingTab() {
                     <DoorOpen className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">
                       {roomSearch || statusFilter !== 'all'
-                        ? t('admin.backoffice.noMatchingRooms', 'No rooms match your filters')
-                        : t('admin.backoffice.noRooms', 'No rooms yet')}
+                         ? t('admin.backoffice.noMatchingRooms')
+                         : t('admin.backoffice.noRooms')}
                     </p>
                   </CardContent>
                 </Card>
@@ -727,8 +727,8 @@ export function RoomMappingTab() {
                 <div key={floor} className="space-y-3">
                   <h3 className="font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    {t('admin.backoffice.floor', 'Piso')} {floor}
-                    <Badge variant="secondary">{floorRooms.length} {t('admin.backoffice.rooms', 'salas')}</Badge>
+                     {t('admin.backoffice.floor')} {floor}
+                     <Badge variant="secondary">{floorRooms.length} {t('admin.backoffice.rooms')}</Badge>
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -773,8 +773,8 @@ export function RoomMappingTab() {
                                       variant={allocation ? 'default' : room.status === 'maintenance' ? 'secondary' : 'outline'}
                                       className="text-[10px] px-1.5"
                                     >
-                                      {allocation ? t('admin.backoffice.occupied', 'Occupied') :
-                                       t(`admin.backoffice.roomStatus.${room.status}`, room.status)}
+                                       {allocation ? t('admin.backoffice.occupied') :
+                                        t(`admin.backoffice.roomStatus.${room.status}`)}
                                     </Badge>
                                   </div>
                                 </CardHeader>
@@ -782,10 +782,10 @@ export function RoomMappingTab() {
                                   <div className="flex items-center justify-between text-xs">
                                     <span className="text-muted-foreground flex items-center gap-1">
                                       <Users className="h-3 w-3" />
-                                      {room.capacity || '?'} {t('admin.backoffice.people', 'pessoas')}
+                                      {room.capacity || '?'} {t('admin.backoffice.people')}
                                     </span>
                                     <Badge variant="outline" className="text-[10px] px-1">
-                                      {t(`admin.backoffice.roomTypes.${room.room_type}`, room.room_type)}
+                                      {t(`admin.backoffice.roomTypes.${room.room_type}`)}
                                     </Badge>
                                   </div>
 
@@ -795,7 +795,7 @@ export function RoomMappingTab() {
                                       <div className="min-w-0">
                                         <span className="font-medium block truncate">{occupantName}</span>
                                         <span className="text-[10px] text-muted-foreground">
-                                          {t('admin.backoffice.since', 'Desde')} {format(new Date(allocation.start_date), 'MMM yyyy')}
+                                          {t('admin.backoffice.since')} {format(new Date(allocation.start_date), 'MMM yyyy')}
                                         </span>
                                       </div>
                                     </div>
@@ -822,7 +822,7 @@ export function RoomMappingTab() {
                                           setAllocateDialogOpen(true);
                                         }}
                                       >
-                                        {t('admin.backoffice.allocate', 'Allocate')}
+                                        {t('admin.backoffice.allocate')}
                                       </Button>
                                     ) : allocation ? (
                                       <Button
@@ -831,7 +831,7 @@ export function RoomMappingTab() {
                                         className="flex-1 h-7 text-xs"
                                         onClick={() => endAllocation.mutate({ id: allocation.id, roomId: room.id })}
                                       >
-                                        {t('admin.backoffice.endAllocation', 'End')}
+                                        {t('admin.backoffice.endAllocation')}
                                       </Button>
                                     ) : null}
                                   </div>
@@ -871,13 +871,13 @@ export function RoomMappingTab() {
               <Card className="col-span-full">
                 <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                   <Image className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="font-medium">{t('admin.backoffice.noFloorMaps', 'No Floor Maps')}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {t('admin.backoffice.noFloorMapsDesc', 'Upload floor plans to help visualize your spaces')}
+                   <h3 className="font-medium">{t('admin.backoffice.noFloorMaps')}</h3>
+                   <p className="text-sm text-muted-foreground mb-4">
+                     {t('admin.backoffice.noFloorMapsDesc')}
                   </p>
                   <Button onClick={() => setMapDialogOpen(true)}>
                     <Upload className="h-4 w-4 mr-2" />
-                    {t('admin.backoffice.uploadMap', 'Upload Map')}
+                    {t('admin.backoffice.uploadMap')}
                   </Button>
                 </CardContent>
               </Card>
@@ -907,7 +907,7 @@ export function RoomMappingTab() {
       <Dialog open={allocateDialogOpen} onOpenChange={setAllocateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('admin.backoffice.allocateRoom', 'Allocate Room')}</DialogTitle>
+            <DialogTitle>{t('admin.backoffice.allocateRoom')}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -917,26 +917,26 @@ export function RoomMappingTab() {
             className="space-y-4"
           >
             <div className="p-3 bg-muted rounded-lg">
-              <span className="text-sm text-muted-foreground">{t('admin.backoffice.room', 'Room')}:</span>
+              <span className="text-sm text-muted-foreground">{t('admin.backoffice.room')}:</span>
               <span className="font-medium ml-2">{roomToAllocate?.name}</span>
             </div>
 
             <div className="space-y-2">
-              <Label>{t('admin.backoffice.allocateTo', 'Allocate To')}</Label>
+              <Label>{t('admin.backoffice.allocateTo')}</Label>
               <Tabs defaultValue="startup" className="w-full">
                 <TabsList className="w-full">
-                  <TabsTrigger value="startup" className="flex-1">Startup</TabsTrigger>
-                  <TabsTrigger value="lead" className="flex-1">Lead/Prospect</TabsTrigger>
+                   <TabsTrigger value="startup" className="flex-1">{t('admin.backoffice.startupWorkspace')}</TabsTrigger>
+                   <TabsTrigger value="lead" className="flex-1">{t('admin.backoffice.leadFunnelItem')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="startup" className="mt-2">
                   <Select name="workspace_id">
                     <SelectTrigger>
-                      <SelectValue placeholder={t('admin.backoffice.selectStartup', 'Select startup...')} />
+                      <SelectValue placeholder={t('admin.backoffice.selectStartup')} />
                     </SelectTrigger>
                     <SelectContent>
                       {workspaces?.map(w => (
                         <SelectItem key={w.id} value={w.id}>
-                          {w.startup?.name || 'Unnamed'}
+                          {w.startup?.name || t('common.unnamed')}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -945,13 +945,13 @@ export function RoomMappingTab() {
                 <TabsContent value="lead" className="mt-2">
                   <Select name="funnel_item_id">
                     <SelectTrigger>
-                      <SelectValue placeholder={t('admin.backoffice.selectLead', 'Select lead...')} />
+                      <SelectValue placeholder={t('admin.backoffice.selectLead')} />
                     </SelectTrigger>
                     <SelectContent>
                       <ScrollArea className="h-[200px]">
                         {funnelItems?.map(item => (
                           <SelectItem key={item.id} value={item.id}>
-                            {item.organization_name || item.contact_name || 'Unnamed'}
+                            {item.organization_name || item.contact_name || t('common.unnamed')}
                           </SelectItem>
                         ))}
                       </ScrollArea>
@@ -962,22 +962,22 @@ export function RoomMappingTab() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('admin.backoffice.allocationType', 'Type')}</Label>
-              <Select name="allocation_type" defaultValue="permanent">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="permanent">Permanent</SelectItem>
-                  <SelectItem value="temporary">Temporary</SelectItem>
-                  <SelectItem value="hotdesk">Hot Desk</SelectItem>
-                </SelectContent>
-              </Select>
+               <Label>{t('admin.backoffice.allocationTypeLabel')}</Label>
+               <Select name="allocation_type" defaultValue="permanent">
+                 <SelectTrigger>
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="permanent">{t('admin.backoffice.allocationTypePermanent')}</SelectItem>
+                   <SelectItem value="temporary">{t('admin.backoffice.allocationTypeTemporary')}</SelectItem>
+                   <SelectItem value="hotdesk">{t('admin.backoffice.allocationTypeHotdesk')}</SelectItem>
+                 </SelectContent>
+               </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t('admin.backoffice.startDate', 'Start Date')}</Label>
+                <Label>{t('admin.backoffice.startDate')}</Label>
                 <Input
                   type="date"
                   name="start_date"
@@ -986,13 +986,13 @@ export function RoomMappingTab() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t('admin.backoffice.endDate', 'End Date')}</Label>
+                <Label>{t('admin.backoffice.endDate')}</Label>
                 <Input type="date" name="end_date" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>{t('admin.backoffice.notes', 'Notes')}</Label>
+              <Label>{t('admin.backoffice.notes')}</Label>
               <Textarea name="notes" />
             </div>
 
@@ -1001,7 +1001,7 @@ export function RoomMappingTab() {
                 {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {t('admin.backoffice.confirmAllocation', 'Confirm Allocation')}
+                {t('admin.backoffice.confirmAllocation')}
               </Button>
             </div>
           </form>
