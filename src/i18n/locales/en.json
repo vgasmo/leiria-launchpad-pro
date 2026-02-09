@@ -2129,6 +2129,8 @@
       "editRoom": "Edit Room",
       "roomName": "Room Name",
       "roomNumber": "Room Number",
+      "roomNamePlaceholder": "Office A1, Lab 2...",
+      "roomNumberPlaceholder": "101, A-23...",
       "roomType": "Room Type",
       "amenities": "Amenities",
       "allocateRoom": "Allocate Room",

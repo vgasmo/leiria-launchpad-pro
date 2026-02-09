@@ -4002,6 +4002,8 @@
       "editRoom": "Editar Sala",
       "roomName": "Nome da Sala",
       "roomNumber": "Número da Sala",
+      "roomNamePlaceholder": "Gabinete A1, Lab 2...",
+      "roomNumberPlaceholder": "101, A-23...",
       "roomType": "Tipo de Sala",
       "amenities": "Comodidades",
       "allocateRoom": "Atribuir Sala",
