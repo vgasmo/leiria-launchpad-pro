@@ -150,25 +150,25 @@ export function RoleSpecificPrepCard({ sessionId, workspaceId }: RoleSpecificPre
               {prepData.pendingActions.filter(a => a.isOverdue).length > 0 && (
                 <li className="flex items-center gap-2 text-red-600">
                   <CheckCircle2 className="h-3 w-3" />
-                  Review {prepData.pendingActions.filter(a => a.isOverdue).length} overdue action items
+                  {t('sessionPrep.reviewOverdueActions', { defaultValue: 'Rever {{count}} ações em atraso', count: prepData.pendingActions.filter(a => a.isOverdue).length })}
                 </li>
               )}
               {prepData.milestones.filter(m => m.isOverdue).length > 0 && (
                 <li className="flex items-center gap-2 text-amber-600">
                   <Target className="h-3 w-3" />
-                  Discuss {prepData.milestones.filter(m => m.isOverdue).length} delayed milestones
+                  {t('sessionPrep.discussDelayedMilestones', { defaultValue: 'Discutir {{count}} milestones em atraso', count: prepData.milestones.filter(m => m.isOverdue).length })}
                 </li>
               )}
               {healthData && (healthData.health_score_numeric ?? 100) < 60 && (
                 <li className="flex items-center gap-2 text-amber-600">
                   <Activity className="h-3 w-3" />
-                  Address health score concerns ({healthData.health_score_numeric}%)
+                  {t('sessionPrep.addressHealthScore', { defaultValue: 'Abordar preocupações de saúde ({{score}}%)', score: healthData.health_score_numeric })}
                 </li>
               )}
               {prepData.recentKpis.filter(k => k.trend === 'down').length > 0 && (
                 <li className="flex items-center gap-2">
                   <TrendingUp className="h-3 w-3" />
-                  Explore declining KPIs: {prepData.recentKpis.filter(k => k.trend === 'down').map(k => k.name).join(', ')}
+                  {t('sessionPrep.exploreDecliningKpis', { defaultValue: 'Explorar KPIs em declínio: {{kpis}}', kpis: prepData.recentKpis.filter(k => k.trend === 'down').map(k => k.name).join(', ') })}
                 </li>
               )}
             </ul>
@@ -189,10 +189,10 @@ export function RoleSpecificPrepCard({ sessionId, workspaceId }: RoleSpecificPre
                   <p className="text-muted-foreground line-clamp-3">{prepData.previousSessions[0].ai_summary}</p>
                 ) : prepData.previousSessions[0].decisions ? (
                   <p className="text-muted-foreground line-clamp-2">
-                    <span className="font-medium">Decisions:</span> {prepData.previousSessions[0].decisions}
+                    <span className="font-medium">{t('sessionPrep.decisions', { defaultValue: 'Decisões' })}:</span> {prepData.previousSessions[0].decisions}
                   </p>
                 ) : (
-                  <p className="text-muted-foreground italic">No summary available</p>
+                  <p className="text-muted-foreground italic">{t('sessionPrep.noSummaryAvailable', { defaultValue: 'Sem resumo disponível' })}</p>
                 )}
               </div>
             </div>
@@ -237,15 +237,15 @@ export function RoleSpecificPrepCard({ sessionId, workspaceId }: RoleSpecificPre
           <ul className="space-y-1.5 text-sm">
             <li className="flex items-start gap-2 p-2 rounded bg-muted/30">
               <span className="text-primary">•</span>
-              What blockers have you encountered this week/month?
+              {t('sessionPrep.questionBlockers', { defaultValue: 'Que bloqueios encontrou esta semana/mês?' })}
             </li>
             <li className="flex items-start gap-2 p-2 rounded bg-muted/30">
               <span className="text-primary">•</span>
-              What decisions do you need help with?
+              {t('sessionPrep.questionDecisions', { defaultValue: 'Que decisões precisa de ajuda para tomar?' })}
             </li>
             <li className="flex items-start gap-2 p-2 rounded bg-muted/30">
               <span className="text-primary">•</span>
-              What key metrics would you like to discuss?
+              {t('sessionPrep.questionMetrics', { defaultValue: 'Que métricas chave gostaria de discutir?' })}
             </li>
           </ul>
         </div>
@@ -265,7 +265,7 @@ export function RoleSpecificPrepCard({ sessionId, workspaceId }: RoleSpecificPre
                 )}>
                   <span className="truncate">{action.title}</span>
                   {action.isOverdue && (
-                    <Badge variant="destructive" className="text-xs">Overdue</Badge>
+                    <Badge variant="destructive" className="text-xs">{t('sessionPrep.overdue', { defaultValue: 'Atrasado' })}</Badge>
                   )}
                 </div>
               ))}

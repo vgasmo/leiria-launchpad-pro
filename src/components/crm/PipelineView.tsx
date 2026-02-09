@@ -13,10 +13,11 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronRight, AlertTriangle, GripVertical } from 'lucide-react';
+import { ChevronRight, AlertTriangle, GripVertical, Flame, ThermometerSun, Snowflake } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { useCrmPipeline, PIPELINE_STAGES } from '@/hooks/useCrmPipeline';
+import { calculateLeadScore } from './LeadScoreCard';
 import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -252,6 +253,7 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
   const { t } = useTranslation();
   const now = new Date();
   const isOverdue = item.next_action_at && new Date(item.next_action_at) < now;
+  const { temperature, totalScore } = calculateLeadScore(item);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: item.id,
@@ -299,6 +301,19 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
             )}
 
             <div className="flex items-center gap-2 mt-2 flex-wrap">
+              {/* Lead Score Temperature */}
+              <div className={cn(
+                'flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full',
+                temperature === 'hot' && 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                temperature === 'warm' && 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+                temperature === 'cold' && 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+              )}>
+                {temperature === 'hot' && <Flame className="h-3 w-3" />}
+                {temperature === 'warm' && <ThermometerSun className="h-3 w-3" />}
+                {temperature === 'cold' && <Snowflake className="h-3 w-3" />}
+                {totalScore}
+              </div>
+
               {item.owner && (
                 <Badge variant="outline" className="text-[10px] h-5 px-1.5">
                   {item.owner.full_name?.split(' ')[0] || t('crm.unassigned')}
