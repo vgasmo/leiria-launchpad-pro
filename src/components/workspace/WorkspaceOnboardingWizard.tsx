@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, addDays, addWeeks } from 'date-fns';
 import {
   Sparkles,
@@ -295,6 +296,7 @@ export function WorkspaceOnboardingWizard({
 }: WorkspaceOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('welcome');
   const [prevStep, setPrevStep] = useState<WizardStep>('welcome');
+  const { t } = useTranslation();
   const [isProcessing, setIsProcessing] = useState(false);
   const confettiTriggered = useRef(false);
   
@@ -362,19 +364,19 @@ export function WorkspaceOnboardingWizard({
   // Build steps dynamically based on whether this is founder onboarding
   const steps: { key: WizardStep; label: string; icon: React.ElementType }[] = isFounderOnboarding
     ? [
-        { key: 'welcome', label: 'Welcome', icon: Sparkles },
-        { key: 'company', label: 'Company', icon: Building2 },
-        { key: 'kpis', label: 'KPIs', icon: TrendingUp },
-        { key: 'milestones', label: 'Milestones', icon: Target },
-        { key: 'meeting', label: 'Meeting', icon: Calendar },
-        { key: 'complete', label: 'Done', icon: Check },
+        { key: 'welcome', label: t('onboardingWizard.stepWelcome', { defaultValue: 'Welcome' }), icon: Sparkles },
+        { key: 'company', label: t('onboardingWizard.stepCompany', { defaultValue: 'Company' }), icon: Building2 },
+        { key: 'kpis', label: t('onboardingWizard.stepKpis', { defaultValue: 'KPIs' }), icon: TrendingUp },
+        { key: 'milestones', label: t('onboardingWizard.stepMilestones', { defaultValue: 'Milestones' }), icon: Target },
+        { key: 'meeting', label: t('onboardingWizard.stepMeeting', { defaultValue: 'Meeting' }), icon: Calendar },
+        { key: 'complete', label: t('onboardingWizard.stepDone', { defaultValue: 'Done' }), icon: Check },
       ]
     : [
-        { key: 'welcome', label: 'Welcome', icon: Sparkles },
-        { key: 'kpis', label: 'KPIs', icon: TrendingUp },
-        { key: 'milestones', label: 'Milestones', icon: Target },
-        { key: 'meeting', label: 'Meeting', icon: Calendar },
-        { key: 'complete', label: 'Done', icon: Check },
+        { key: 'welcome', label: t('onboardingWizard.stepWelcome', { defaultValue: 'Welcome' }), icon: Sparkles },
+        { key: 'kpis', label: t('onboardingWizard.stepKpis', { defaultValue: 'KPIs' }), icon: TrendingUp },
+        { key: 'milestones', label: t('onboardingWizard.stepMilestones', { defaultValue: 'Milestones' }), icon: Target },
+        { key: 'meeting', label: t('onboardingWizard.stepMeeting', { defaultValue: 'Meeting' }), icon: Calendar },
+        { key: 'complete', label: t('onboardingWizard.stepDone', { defaultValue: 'Done' }), icon: Check },
       ];
 
   // Helper for step transitions
@@ -398,13 +400,13 @@ export function WorkspaceOnboardingWizard({
       const result = await applyDefaults.mutateAsync(stage);
       setKpisApplied(true);
       if (result.length > 0) {
-        toast.success(`Added ${result.length} KPIs for ${stage} stage`);
+        toast.success(t('onboardingWizard.kpisApplied', { defaultValue: 'KPIs applied successfully' }));
       } else {
-        toast.info('Default KPIs already configured');
+        toast.info(t('onboardingWizard.kpisAlreadyConfigured', { defaultValue: 'Default KPIs already configured' }));
       }
       goToStep('milestones');
     } catch {
-      toast.error('Failed to apply KPI defaults');
+      toast.error(t('onboardingWizard.kpisFailed', { defaultValue: 'Failed to apply KPI defaults' }));
     } finally {
       setIsProcessing(false);
     }
@@ -439,10 +441,10 @@ export function WorkspaceOnboardingWizard({
       }
       
       setMilestonesCreated(true);
-      toast.success(`Created ${milestonesToCreate.length} milestones with ${totalActionsCreated} actions`);
+      toast.success(t('onboardingWizard.milestonesCreated', { defaultValue: 'Milestones created successfully' }));
       goToStep('meeting');
     } catch {
-      toast.error('Failed to create milestones');
+      toast.error(t('onboardingWizard.milestonesFailed', { defaultValue: 'Failed to create milestones' }));
     } finally {
       setIsProcessing(false);
     }
@@ -450,7 +452,7 @@ export function WorkspaceOnboardingWizard({
 
   const handleScheduleSession = async () => {
     if (!meetingTitle.trim()) {
-      toast.error('Please enter a session title');
+      toast.error(t('onboardingWizard.meetingTitleRequired', { defaultValue: 'Please enter a session title' }));
       return;
     }
     
@@ -469,10 +471,10 @@ export function WorkspaceOnboardingWizard({
       });
       
       setMeetingScheduled(true);
-      toast.success('Session scheduled');
+      toast.success(t('onboardingWizard.meetingScheduled', { defaultValue: 'Session scheduled' }));
       goToStep('complete');
     } catch {
-      toast.error('Failed to schedule session');
+      toast.error(t('onboardingWizard.meetingFailed', { defaultValue: 'Failed to schedule session' }));
     } finally {
       setIsProcessing(false);
     }
@@ -501,11 +503,11 @@ export function WorkspaceOnboardingWizard({
       if (error) throw error;
       
       setCompanySaved(true);
-      toast.success('Company details saved');
+      toast.success(t('onboardingWizard.companySaved', { defaultValue: 'Company details saved' }));
       goToStep('kpis');
     } catch (err) {
       console.error('Failed to save company details:', err);
-      toast.error('Failed to save company details');
+      toast.error(t('onboardingWizard.companyFailed', { defaultValue: 'Failed to save company details' }));
     } finally {
       setIsProcessing(false);
     }
@@ -524,10 +526,10 @@ export function WorkspaceOnboardingWizard({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Workspace Setup Wizard
+            {t('onboardingWizard.title', { defaultValue: 'Workspace Setup Wizard' })}
           </DialogTitle>
           <DialogDescription>
-            Let's set up your workspace for success in the {stage} stage.
+            {t('onboardingWizard.setupDesc', { defaultValue: "Let's set up your workspace for success in the {{stage}} stage.", stage })}
           </DialogDescription>
         </DialogHeader>
 
@@ -568,21 +570,20 @@ export function WorkspaceOnboardingWizard({
               <div className="text-center py-6 space-y-4">
                 <WizardIllustration type="welcome" size="lg" className="mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Welcome to {companyDetails.startupName}!</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('onboardingWizard.welcomeTo', { defaultValue: 'Welcome to {{name}}!', name: companyDetails.startupName })}</h3>
                   <p className="text-muted-foreground text-sm">
                     {isFounderOnboarding 
-                      ? 'This wizard will help you complete your company profile, set up KPIs, milestones, and schedule your first meeting.'
-                      : 'This wizard will help you set up your workspace with stage-appropriate KPIs, initial milestones, and schedule your first meeting.'}
+                      ? t('onboardingWizard.founderWelcomeDesc', { defaultValue: 'This wizard will help you complete your company profile, set up KPIs, milestones, and schedule your first meeting.' })
+                      : t('onboardingWizard.staffWelcomeDesc', { defaultValue: 'This wizard will help you set up your workspace with stage-appropriate KPIs, initial milestones, and schedule your first meeting.' })}
                   </p>
                 </div>
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-left">
                   <div className="flex items-start gap-2">
                     <BookOpen className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-primary">Pro tip: Use Playbooks</p>
+                      <p className="text-sm font-medium text-primary">{t('onboardingWizard.proTip', { defaultValue: 'Pro tip: Use Playbooks' })}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        After setup, visit the <strong>Playbooks</strong> tab to instantly apply pre-built 
-                        milestone and action templates specific to your stage.
+                        {t('onboardingWizard.proTipDesc', { defaultValue: 'After setup, visit the <strong>Playbooks</strong> tab to instantly apply pre-built milestone and action templates specific to your stage.' })}
                       </p>
                     </div>
                   </div>
@@ -606,21 +607,20 @@ export function WorkspaceOnboardingWizard({
               <div className="space-y-4">
                 <div className="text-center">
                   <WizardIllustration type="kpis" className="mx-auto mb-3" />
-                  <h3 className="font-semibold mb-1">Setup KPI Tracking</h3>
+                  <h3 className="font-semibold mb-1">{t('onboardingWizard.setupKpis', { defaultValue: 'Setup KPI Tracking' })}</h3>
                   <p className="text-sm text-muted-foreground">
-                    We'll add the recommended KPIs for the <Badge variant="secondary">{stage}</Badge> stage.
+                    {t('onboardingWizard.setupKpisDesc', { defaultValue: "We'll add the recommended KPIs for the {{stage}} stage.", stage })}
                   </p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-sm">
                   <p className="text-muted-foreground">
-                    This will add key metrics like revenue, burn rate, active users, and more based
-                    on what matters most at your current stage.
+                    {t('onboardingWizard.kpisExplain', { defaultValue: 'This will add key metrics like revenue, burn rate, active users, and more based on what matters most at your current stage.' })}
                   </p>
                 </div>
                 {kpisApplied && (
                   <div className="flex items-center gap-2 text-green-600 justify-center">
                     <Check className="h-4 w-4" />
-                    <span className="text-sm">KPIs applied successfully</span>
+                    <span className="text-sm">{t('onboardingWizard.kpisApplied', { defaultValue: 'KPIs applied successfully' })}</span>
                   </div>
                 )}
               </div>
@@ -630,9 +630,9 @@ export function WorkspaceOnboardingWizard({
               <div className="space-y-4">
                 <div className="text-center">
                   <WizardIllustration type="milestones" className="mx-auto mb-3" />
-                  <h3 className="font-semibold mb-1">Create Initial Milestones</h3>
+                  <h3 className="font-semibold mb-1">{t('onboardingWizard.createMilestones', { defaultValue: 'Create Initial Milestones' })}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Select the milestones to add for your {stage} stage journey.
+                    {t('onboardingWizard.selectMilestones', { defaultValue: 'Select the milestones to add for your {{stage}} stage journey.', stage })}
                   </p>
                 </div>
                 <ScrollArea className="h-[180px]">
@@ -658,7 +658,7 @@ export function WorkspaceOnboardingWizard({
                           <p className="font-medium text-sm">{m.title}</p>
                           <p className="text-xs text-muted-foreground">{m.description}</p>
                           <Badge variant="outline" className="mt-1 text-xs">
-                            ~{m.weeksOut} weeks
+                            {t('onboardingWizard.weeks', { defaultValue: '~{{count}} weeks', count: m.weeksOut })}
                           </Badge>
                         </div>
                       </label>
@@ -668,7 +668,7 @@ export function WorkspaceOnboardingWizard({
                 {milestonesCreated && (
                   <div className="flex items-center gap-2 text-green-600 justify-center">
                     <Check className="h-4 w-4" />
-                    <span className="text-sm">Milestones created successfully</span>
+                    <span className="text-sm">{t('onboardingWizard.milestonesCreated', { defaultValue: 'Milestones created successfully' })}</span>
                   </div>
                 )}
               </div>
@@ -678,14 +678,14 @@ export function WorkspaceOnboardingWizard({
               <div className="space-y-4">
                 <div className="text-center">
                   <WizardIllustration type="meeting" className="mx-auto mb-3" />
-                  <h3 className="font-semibold mb-1">Schedule Kickoff Meeting</h3>
+                  <h3 className="font-semibold mb-1">{t('onboardingWizard.scheduleKickoff', { defaultValue: 'Schedule Kickoff Meeting' })}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Set up your first team meeting to align on goals.
+                    {t('onboardingWizard.scheduleKickoffDesc', { defaultValue: 'Set up your first team meeting to align on goals.' })}
                   </p>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="meeting-title">Meeting Title</Label>
+                    <Label htmlFor="meeting-title">{t('onboardingWizard.meetingTitle', { defaultValue: 'Meeting Title' })}</Label>
                     <Input
                       id="meeting-title"
                       value={meetingTitle}
@@ -694,7 +694,7 @@ export function WorkspaceOnboardingWizard({
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <Label htmlFor="meeting-date">Date</Label>
+                      <Label htmlFor="meeting-date">{t('onboardingWizard.meetingDate', { defaultValue: 'Date' })}</Label>
                       <Input
                         id="meeting-date"
                         type="date"
@@ -703,7 +703,7 @@ export function WorkspaceOnboardingWizard({
                       />
                     </div>
                     <div>
-                      <Label htmlFor="meeting-time">Time</Label>
+                      <Label htmlFor="meeting-time">{t('onboardingWizard.meetingTime', { defaultValue: 'Time' })}</Label>
                       <Input
                         id="meeting-time"
                         type="time"
@@ -712,7 +712,7 @@ export function WorkspaceOnboardingWizard({
                       />
                     </div>
                     <div>
-                      <Label htmlFor="meeting-duration">Duration</Label>
+                      <Label htmlFor="meeting-duration">{t('onboardingWizard.meetingDuration', { defaultValue: 'Duration' })}</Label>
                       <Input
                         id="meeting-duration"
                         type="number"
@@ -727,7 +727,7 @@ export function WorkspaceOnboardingWizard({
                 {meetingScheduled && (
                   <div className="flex items-center gap-2 text-green-600 justify-center">
                     <Check className="h-4 w-4" />
-                    <span className="text-sm">Meeting scheduled successfully</span>
+                    <span className="text-sm">{t('onboardingWizard.meetingScheduled', { defaultValue: 'Meeting scheduled successfully' })}</span>
                   </div>
                 )}
               </div>
@@ -737,26 +737,25 @@ export function WorkspaceOnboardingWizard({
               <div className="text-center py-6 space-y-4">
                 <WizardIllustration type="complete" size="lg" className="mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">You're all set! 🎉</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('onboardingWizard.allSet', { defaultValue: "You're all set! 🎉" })}</h3>
                   <p className="text-muted-foreground text-sm">
-                    Your workspace is ready to go. You can now track KPIs, manage milestones,
-                    and collaborate with your team.
+                    {t('onboardingWizard.allSetDesc', { defaultValue: 'Your workspace is ready to go. You can now track KPIs, manage milestones, and collaborate with your team.' })}
                   </p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 text-sm">
                   {kpisApplied && (
                     <Badge variant="secondary" className="gap-1">
-                      <Check className="h-3 w-3" /> KPIs configured
+                      <Check className="h-3 w-3" /> {t('onboardingWizard.kpisConfigured', { defaultValue: 'KPIs configured' })}
                     </Badge>
                   )}
                   {milestonesCreated && (
                     <Badge variant="secondary" className="gap-1">
-                      <Check className="h-3 w-3" /> Milestones created
+                      <Check className="h-3 w-3" /> {t('onboardingWizard.milestonesCreatedBadge', { defaultValue: 'Milestones created' })}
                     </Badge>
                   )}
                   {meetingScheduled && (
                     <Badge variant="secondary" className="gap-1">
-                      <Check className="h-3 w-3" /> Meeting scheduled
+                      <Check className="h-3 w-3" /> {t('onboardingWizard.meetingScheduledBadge', { defaultValue: 'Meeting scheduled' })}
                     </Badge>
                   )}
                 </div>
@@ -764,7 +763,7 @@ export function WorkspaceOnboardingWizard({
                   <div className="flex items-center gap-2 justify-center text-sm">
                     <BookOpen className="h-4 w-4 text-primary" />
                     <span className="text-muted-foreground">
-                      Next step: Check <strong className="text-foreground">Playbooks</strong> tab for stage-specific templates
+                      {t('onboardingWizard.nextStepPlaybooks', { defaultValue: 'Next step: Check <strong>Playbooks</strong> tab for stage-specific templates' })}
                     </span>
                   </div>
                 </div>
@@ -784,7 +783,7 @@ export function WorkspaceOnboardingWizard({
               }}
               disabled={isProcessing}
             >
-              Back
+              {t('onboardingWizard.back', { defaultValue: 'Back' })}
             </Button>
           )}
           
@@ -794,7 +793,8 @@ export function WorkspaceOnboardingWizard({
               onClick={() => goToStep(isFounderOnboarding ? 'company' : 'kpis')} 
               className="w-full sm:w-auto"
             >
-              Get Started
+              {t('onboardingWizard.getStarted', { defaultValue: 'Get Started' })}
+              <ChevronRight className="h-4 w-4 ml-1" />
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}
@@ -802,7 +802,7 @@ export function WorkspaceOnboardingWizard({
           {currentStep === 'company' && (
             <div className="flex gap-2 w-full sm:w-auto">
               <Button type="button" variant="outline" onClick={() => goToStep('kpis')} disabled={isProcessing}>
-                Skip
+                {t('onboardingWizard.skip', { defaultValue: 'Skip' })}
               </Button>
               <Button 
                 type="button" 
@@ -810,7 +810,7 @@ export function WorkspaceOnboardingWizard({
                 disabled={isProcessing || companySaved}
               >
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                {companySaved ? 'Saved' : 'Save & Continue'}
+                {companySaved ? t('onboardingWizard.saved', { defaultValue: 'Saved' }) : t('onboardingWizard.saveAndContinue', { defaultValue: 'Save & Continue' })}
               </Button>
             </div>
           )}
@@ -818,11 +818,11 @@ export function WorkspaceOnboardingWizard({
           {currentStep === 'kpis' && (
             <div className="flex gap-2 w-full sm:w-auto">
               <Button type="button" variant="outline" onClick={() => goToStep('milestones')} disabled={isProcessing}>
-                Skip
+                {t('onboardingWizard.skip', { defaultValue: 'Skip' })}
               </Button>
               <Button type="button" onClick={handleApplyKpis} disabled={isProcessing || kpisApplied}>
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                {kpisApplied ? 'Applied' : 'Apply KPIs'}
+                {kpisApplied ? t('onboardingWizard.applied', { defaultValue: 'Applied' }) : t('onboardingWizard.applyKpis', { defaultValue: 'Apply KPIs' })}
               </Button>
             </div>
           )}
@@ -830,7 +830,7 @@ export function WorkspaceOnboardingWizard({
           {currentStep === 'milestones' && (
             <div className="flex gap-2 w-full sm:w-auto">
               <Button type="button" variant="outline" onClick={() => goToStep('meeting')} disabled={isProcessing}>
-                Skip
+                {t('onboardingWizard.skip', { defaultValue: 'Skip' })}
               </Button>
               <Button 
                 type="button"
@@ -838,7 +838,7 @@ export function WorkspaceOnboardingWizard({
                 disabled={isProcessing || selectedMilestones.size === 0 || milestonesCreated}
               >
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                {milestonesCreated ? 'Created' : `Create ${selectedMilestones.size} Milestones`}
+                {milestonesCreated ? t('onboardingWizard.created', { defaultValue: 'Created' }) : t('onboardingWizard.createCount', { defaultValue: 'Create {{count}} Milestones', count: selectedMilestones.size })}
               </Button>
             </div>
           )}
@@ -846,18 +846,18 @@ export function WorkspaceOnboardingWizard({
           {currentStep === 'meeting' && (
             <div className="flex gap-2 w-full sm:w-auto">
               <Button type="button" variant="outline" onClick={() => goToStep('complete')} disabled={isProcessing}>
-                Skip
+                {t('onboardingWizard.skip', { defaultValue: 'Skip' })}
               </Button>
               <Button type="button" onClick={handleScheduleSession} disabled={isProcessing || meetingScheduled}>
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                {meetingScheduled ? 'Scheduled' : 'Schedule Session'}
+                {meetingScheduled ? t('onboardingWizard.scheduled', { defaultValue: 'Scheduled' }) : t('onboardingWizard.scheduleSession', { defaultValue: 'Schedule Session' })}
               </Button>
             </div>
           )}
           
           {currentStep === 'complete' && (
             <Button type="button" onClick={handleClose} className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
-              🎉 Go to Workspace
+              {t('onboardingWizard.goToWorkspace', { defaultValue: '🎉 Go to Workspace' })}
             </Button>
           )}
         </DialogFooter>
