@@ -3,12 +3,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
+import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import Login from "./pages/Login";
 import MyWorkspaces from "./pages/MyWorkspaces";
 import WorkspaceDetail from "./pages/WorkspaceDetail";
@@ -50,9 +51,11 @@ const queryClient = new QueryClient({
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
   const { user, isLoading, isAuthReady, isAdmin, isStaff, isAccountPending, isAccountSuspended } = useAuth();
+  const { needsNda, isLoading: ndaLoading } = useMentorNdaStatus();
+  const location = useLocation();
 
   // Wait for both auth check AND profile/roles to be fully loaded
-  if (isLoading || !isAuthReady) {
+  if (isLoading || !isAuthReady || ndaLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -75,6 +78,11 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   // Check if account is pending approval (non-staff users)
   if (isAccountPending && !isStaff) {
     return <Navigate to="/pending-approval" replace />;
+  }
+
+  // NDA gate for mentor_externo: redirect to /mentor-nda unless already there
+  if (needsNda && location.pathname !== '/mentor-nda') {
+    return <Navigate to="/mentor-nda" replace />;
   }
 
   // Staff-only routes (admin, consultor, backoffice)
