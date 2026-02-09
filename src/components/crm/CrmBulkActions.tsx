@@ -73,25 +73,23 @@ export function CrmBulkActions({
   const allSelected = items.length > 0 && selectedCount === items.length;
   const someSelected = selectedCount > 0 && selectedCount < items.length;
 
-  // Build stage options with i18n
   const STAGE_OPTIONS = [
     ...getFunnelStageOptions(t, PIPELINE_STAGES),
-    { value: 'rejected' as FunnelStage, label: t('pipeline.stages.rejected', 'Rejected') },
-    { value: 'archived' as FunnelStage, label: t('pipeline.stages.archived', 'Archived') },
+    { value: 'rejected' as FunnelStage, label: t('pipeline.stages.rejected') },
+    { value: 'archived' as FunnelStage, label: t('pipeline.stages.archived') },
   ];
 
   const handleBulkStageChange = async (newStage: FunnelStage) => {
     const stageLabel = getFunnelStageLabel(t, newStage);
     setConfirmDialog({
       action: 'stage_change',
-      title: t('crm.bulk.moveConfirmTitle', 'Move {{count}} leads to {{stage}}?', { count: selectedCount, stage: stageLabel }),
-      description: t('crm.bulk.moveConfirmDesc', 'This will update the stage for all selected leads, log the change, and trigger any configured emails.'),
+      title: t('crm.bulk.moveConfirmTitle', { count: selectedCount, stage: stageLabel }),
+      description: t('crm.bulk.moveConfirmDesc'),
       onConfirm: async () => {
         setIsProcessing(true);
         try {
           const ids = Array.from(selectedIds);
           
-          // Fetch current stages for each item (needed for email trigger)
           const { data: currentItems } = await supabase
             .from('funnel_items')
             .select('id, stage')
@@ -106,7 +104,6 @@ export function CrmBulkActions({
 
           if (error) throw error;
 
-          // Log events and trigger emails for each item
           for (const id of ids) {
             const oldStage = stageMap.get(id);
             
@@ -118,7 +115,6 @@ export function CrmBulkActions({
               metadata: { bulk_action: true },
             });
             
-            // Trigger CRM stage transition email (fire-and-forget)
             if (oldStage && oldStage !== newStage) {
               supabase.functions.invoke('send-crm-stage-transition-email', {
                 body: { funnel_item_id: id, from_stage: oldStage, to_stage: newStage },
@@ -126,12 +122,12 @@ export function CrmBulkActions({
             }
           }
 
-          toast.success(t('crm.bulk.moveSuccess', '{{count}} leads moved to {{stage}}', { count: selectedCount, stage: stageLabel }));
+          toast.success(t('crm.bulk.moveSuccess', { count: selectedCount, stage: stageLabel }));
           queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
           queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
           onClearSelection();
         } catch (error) {
-          toast.error(t('crm.bulk.moveFailed', 'Failed to update leads'));
+          toast.error(t('crm.bulk.moveFailed'));
           console.error(error);
         } finally {
           setIsProcessing(false);
@@ -144,8 +140,8 @@ export function CrmBulkActions({
     const consultant = consultants.find((c) => c.id === consultantId);
     setConfirmDialog({
       action: 'assign',
-      title: t('crm.bulk.assignConfirmTitle', 'Assign {{count}} leads to {{name}}?', { count: selectedCount, name: consultant?.full_name || t('common.unknown', 'Unknown') }),
-      description: t('crm.bulk.assignConfirmDesc', 'This will update the owner for all selected leads.'),
+      title: t('crm.bulk.assignConfirmTitle', { count: selectedCount, name: consultant?.full_name || t('common.unknown') }),
+      description: t('crm.bulk.assignConfirmDesc'),
       onConfirm: async () => {
         setIsProcessing(true);
         try {
@@ -157,12 +153,12 @@ export function CrmBulkActions({
 
           if (error) throw error;
 
-          toast.success(t('crm.bulk.assignSuccess', '{{count}} leads assigned to {{name}}', { count: selectedCount, name: consultant?.full_name }));
+          toast.success(t('crm.bulk.assignSuccess', { count: selectedCount, name: consultant?.full_name }));
           queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
           queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
           onClearSelection();
         } catch (error) {
-          toast.error(t('crm.bulk.assignFailed', 'Failed to assign leads'));
+          toast.error(t('crm.bulk.assignFailed'));
           console.error(error);
         } finally {
           setIsProcessing(false);
@@ -172,15 +168,14 @@ export function CrmBulkActions({
   };
 
   const handleBulkSetNextAction = async () => {
-    // For now, set next action to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(10, 0, 0, 0);
 
     setConfirmDialog({
       action: 'next_action',
-      title: t('crm.bulk.nextActionConfirmTitle', 'Set next action for {{count}} leads?', { count: selectedCount }),
-      description: t('crm.bulk.nextActionConfirmDesc', 'This will set the next action date to tomorrow ({{date}}) for all selected leads without a next action.', { date: tomorrow.toLocaleDateString() }),
+      title: t('crm.bulk.nextActionConfirmTitle', { count: selectedCount }),
+      description: t('crm.bulk.nextActionConfirmDesc', { date: tomorrow.toLocaleDateString() }),
       onConfirm: async () => {
         setIsProcessing(true);
         try {
@@ -197,12 +192,12 @@ export function CrmBulkActions({
 
           if (error) throw error;
 
-          toast.success(t('crm.bulk.nextActionSuccess', 'Next actions set for leads'));
+          toast.success(t('crm.bulk.nextActionSuccess'));
           queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
           queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
           onClearSelection();
         } catch (error) {
-          toast.error(t('crm.bulk.nextActionFailed', 'Failed to set next actions'));
+          toast.error(t('crm.bulk.nextActionFailed'));
           console.error(error);
         } finally {
           setIsProcessing(false);
@@ -214,8 +209,8 @@ export function CrmBulkActions({
   const handleBulkArchive = async () => {
     setConfirmDialog({
       action: 'archive',
-      title: t('crm.bulk.archiveConfirmTitle', 'Archive {{count}} leads?', { count: selectedCount }),
-      description: t('crm.bulk.archiveConfirmDesc', 'This will move all selected leads to the archived stage. You can restore them later if needed.'),
+      title: t('crm.bulk.archiveConfirmTitle', { count: selectedCount }),
+      description: t('crm.bulk.archiveConfirmDesc'),
       onConfirm: async () => {
         setIsProcessing(true);
         try {
@@ -227,12 +222,12 @@ export function CrmBulkActions({
 
           if (error) throw error;
 
-          toast.success(t('crm.bulk.archiveSuccess', '{{count}} leads archived', { count: selectedCount }));
+          toast.success(t('crm.bulk.archiveSuccess', { count: selectedCount }));
           queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
           queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
           onClearSelection();
         } catch (error) {
-          toast.error(t('crm.bulk.archiveFailed', 'Failed to archive leads'));
+          toast.error(t('crm.bulk.archiveFailed'));
           console.error(error);
         } finally {
           setIsProcessing(false);
@@ -246,7 +241,6 @@ export function CrmBulkActions({
   return (
     <>
       <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg border">
-        {/* Select All Checkbox */}
         <Button
           variant="ghost"
           size="sm"
@@ -265,17 +259,15 @@ export function CrmBulkActions({
         {selectedCount > 0 ? (
           <>
             <Badge variant="secondary" className="text-xs">
-              {t('crm.bulk.selectedCount', '{{count}} selected', { count: selectedCount })}
+              {t('crm.bulk.selectedCount', { count: selectedCount })}
             </Badge>
 
-            {/* Bulk Actions */}
             <div className="flex items-center gap-1 ml-2">
-              {/* Stage Change */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 gap-1" disabled={isProcessing}>
                     <ArrowRight className="h-3.5 w-3.5" />
-                    {t('crm.bulk.moveTo', 'Move to')}
+                    {t('crm.bulk.moveTo')}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -290,24 +282,22 @@ export function CrmBulkActions({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Assign */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 gap-1" disabled={isProcessing}>
                     <UserPlus className="h-3.5 w-3.5" />
-                    {t('crm.bulk.assign', 'Assign')}
+                    {t('crm.bulk.assign')}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {consultants.map((c) => (
                     <DropdownMenuItem key={c.id} onClick={() => handleBulkAssign(c.id)}>
-                      {c.full_name || t('common.unknown', 'Unknown')}
+                      {c.full_name || t('common.unknown')}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* More Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8" disabled={isProcessing}>
@@ -317,7 +307,7 @@ export function CrmBulkActions({
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={handleBulkSetNextAction}>
                     <Calendar className="h-4 w-4 mr-2" />
-                    {t('crm.bulk.setNextAction', 'Set Next Action (Tomorrow)')}
+                    {t('crm.bulk.setNextAction')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -325,19 +315,18 @@ export function CrmBulkActions({
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    {t('crm.bulk.archiveSelected', 'Archive Selected')}
+                    {t('crm.bulk.archiveSelected')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Clear Selection */}
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 text-muted-foreground"
                 onClick={onClearSelection}
               >
-                {t('common.clear', 'Clear')}
+                {t('common.clear')}
               </Button>
             </div>
 
@@ -347,12 +336,11 @@ export function CrmBulkActions({
           </>
         ) : (
           <span className="text-xs text-muted-foreground">
-            {t('crm.bulk.selectLeads', 'Select leads to perform bulk actions')}
+            {t('crm.bulk.selectLeads')}
           </span>
         )}
       </div>
 
-      {/* Confirmation Dialog */}
       <AlertDialog open={!!confirmDialog} onOpenChange={() => setConfirmDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -363,7 +351,7 @@ export function CrmBulkActions({
             <AlertDialogDescription>{confirmDialog?.description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isProcessing}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmDialog?.onConfirm().then(() => setConfirmDialog(null))}
               disabled={isProcessing}
@@ -371,10 +359,10 @@ export function CrmBulkActions({
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('common.loading', 'Processing...')}
+                  {t('common.loading')}
                 </>
               ) : (
-                t('common.confirm', 'Confirm')
+                t('common.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -38,18 +38,18 @@ interface StageMetrics {
   overdueCount: number;
 }
 
-const STAGE_CONFIG: Record<FunnelStage, { label: string; targetDays: number }> = {
-  new: { label: 'New', targetDays: 2 },
-  first_contact_booked: { label: 'Meeting Booked', targetDays: 7 },
-  met: { label: 'Met', targetDays: 14 },
-  qualified: { label: 'Qualified', targetDays: 7 },
-  proposal_sent: { label: 'Proposal', targetDays: 14 },
-  negotiating: { label: 'Negotiating', targetDays: 21 },
-  contracted: { label: 'Contracted', targetDays: 7 },
-  incubating: { label: 'Incubating', targetDays: 365 },
-  accelerating: { label: 'Accelerating', targetDays: 365 },
-  rejected: { label: 'Rejected', targetDays: 0 },
-  archived: { label: 'Archived', targetDays: 0 },
+const STAGE_TARGET_DAYS: Record<FunnelStage, number> = {
+  new: 2,
+  first_contact_booked: 7,
+  met: 14,
+  qualified: 7,
+  proposal_sent: 14,
+  negotiating: 21,
+  contracted: 7,
+  incubating: 365,
+  accelerating: 365,
+  rejected: 0,
+  archived: 0,
 };
 
 export function CrmAnalyticsDashboard({
@@ -79,7 +79,6 @@ export function CrmAnalyticsDashboard({
       const nextStage = PIPELINE_STAGES[idx + 1];
       const nextStageItems = nextStage ? pipeline[nextStage] || [] : [];
 
-      // Average days in stage (from created_at or last stage change)
       const daysInStage = items.map((item) => {
         const enteredAt = item.created_at;
         return differenceInDays(now, new Date(enteredAt));
@@ -88,13 +87,11 @@ export function CrmAnalyticsDashboard({
         ? Math.round(daysInStage.reduce((a, b) => a + b, 0) / daysInStage.length)
         : 0;
 
-      // Conversion rate (items that moved to next stage)
       const conversionRate = items.length > 0 && nextStageItems.length > 0
         ? Math.round((nextStageItems.length / (items.length + nextStageItems.length)) * 100)
         : 0;
 
-      // Overdue count (items past target SLA)
-      const targetDays = STAGE_CONFIG[stage].targetDays;
+      const targetDays = STAGE_TARGET_DAYS[stage];
       const overdueCount = items.filter((item) => {
         const enteredAt = item.created_at;
         return differenceInDays(now, new Date(enteredAt)) > targetDays;
@@ -109,7 +106,6 @@ export function CrmAnalyticsDashboard({
       };
     });
 
-    // Overall pipeline metrics
     const totalLeads = activeItems.length;
     const overdueTotal = activeItems.filter((i) => {
       if (!i.next_action_at) return false;
@@ -122,27 +118,17 @@ export function CrmAnalyticsDashboard({
     }).length;
     const noNextAction = activeItems.filter((i) => !i.next_action_at).length;
 
-    // Velocity metrics
     const contractedThisMonth = (pipeline['contracted'] || []).filter((i) => {
       const converted = i.created_at;
       return converted && differenceInDays(now, new Date(converted)) <= 30;
     }).length;
 
-    // Lead scoring (simple heuristic)
-    const hotLeads = activeItems.filter((i) => {
-      const score = calculateLeadScore(i, now);
-      return score >= 70;
-    }).length;
-
+    const hotLeads = activeItems.filter((i) => calculateLeadScore(i, now) >= 70).length;
     const warmLeads = activeItems.filter((i) => {
       const score = calculateLeadScore(i, now);
       return score >= 40 && score < 70;
     }).length;
-
-    const coldLeads = activeItems.filter((i) => {
-      const score = calculateLeadScore(i, now);
-      return score < 40;
-    }).length;
+    const coldLeads = activeItems.filter((i) => calculateLeadScore(i, now) < 40).length;
 
     return {
       totalLeads,
@@ -176,31 +162,31 @@ export function CrmAnalyticsDashboard({
       <div className="grid gap-4 md:grid-cols-4">
         <MetricCard
           icon={Users}
-          label="Active Pipeline"
+          label={t('crm.analyticsDashboard.activePipeline')}
           value={analytics.totalLeads}
-          subtext={`${analytics.hotLeads} hot, ${analytics.warmLeads} warm, ${analytics.coldLeads} cold`}
+          subtext={t('crm.analyticsDashboard.hotWarmCold', { hot: analytics.hotLeads, warm: analytics.warmLeads, cold: analytics.coldLeads })}
           color="text-primary"
         />
         <MetricCard
           icon={AlertTriangle}
-          label="Needs Attention"
+          label={t('crm.analyticsDashboard.needsAttention')}
           value={analytics.overdueTotal + analytics.noNextAction}
-          subtext={`${analytics.overdueTotal} overdue, ${analytics.noNextAction} no action set`}
+          subtext={t('crm.analyticsDashboard.overdueNoAction', { overdue: analytics.overdueTotal, noAction: analytics.noNextAction })}
           color="text-destructive"
           alert={analytics.overdueTotal > 0}
         />
         <MetricCard
           icon={Clock}
-          label="Due Today"
+          label={t('crm.analyticsDashboard.dueToday')}
           value={analytics.dueToday}
-          subtext="Actions scheduled for today"
+          subtext={t('crm.analyticsDashboard.dueTodayDesc')}
           color="text-amber-600"
         />
         <MetricCard
           icon={CheckCircle2}
-          label="Converted (30d)"
+          label={t('crm.analyticsDashboard.converted30d')}
           value={analytics.contractedThisMonth}
-          subtext="Leads → Contracted this month"
+          subtext={t('crm.analyticsDashboard.converted30dDesc')}
           color="text-green-600"
         />
       </div>
@@ -212,29 +198,30 @@ export function CrmAnalyticsDashboard({
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
-                Pipeline Health
+                {t('crm.analyticsDashboard.pipelineHealth')}
               </CardTitle>
-              <CardDescription>Stage distribution and conversion rates</CardDescription>
+              <CardDescription>{t('crm.analyticsDashboard.stageDistribution')}</CardDescription>
             </div>
             <Badge variant="outline">
-              Avg cycle: {calculateAverageCycleTime(analytics.stageMetrics)} days
+              {t('crm.analyticsDashboard.avgCycle', { days: calculateAverageCycleTime(analytics.stageMetrics) })}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {analytics.stageMetrics.filter((m) => !['rejected', 'archived', 'incubating', 'accelerating'].includes(m.stage)).map((metric, idx, arr) => {
-              const config = STAGE_CONFIG[metric.stage];
-              const isOverTargetTime = metric.avgDaysInStage > config.targetDays;
+              const targetDays = STAGE_TARGET_DAYS[metric.stage];
+              const isOverTargetTime = metric.avgDaysInStage > targetDays;
               const hasOverdue = metric.overdueCount > 0;
               const isLastStage = idx === arr.length - 1;
+              const stageLabel = t(`pipeline.stages.${metric.stage}`);
 
               return (
                 <div key={metric.stage} className="flex items-center gap-4">
                   {/* Stage Info */}
                   <div className="w-32 shrink-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{config.label}</p>
+                      <p className="text-sm font-medium">{stageLabel}</p>
                       {hasOverdue && (
                         <Badge variant="destructive" className="text-[10px] px-1 py-0">
                           {metric.overdueCount}
@@ -242,7 +229,7 @@ export function CrmAnalyticsDashboard({
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {metric.count} leads
+                      {metric.count} {t('crm.analyticsDashboard.leads')}
                     </p>
                   </div>
 
@@ -286,8 +273,8 @@ export function CrmAnalyticsDashboard({
                         'text-xs',
                         isOverTargetTime ? 'text-amber-600' : 'text-muted-foreground'
                       )}>
-                        Avg {metric.avgDaysInStage}d in stage
-                        {isOverTargetTime && ` (target: ${config.targetDays}d)`}
+                        {t('crm.analyticsDashboard.avgDaysInStage', { days: metric.avgDaysInStage })}
+                        {isOverTargetTime && ` ${t('crm.analyticsDashboard.targetDays', { days: targetDays })}`}
                       </span>
                     </div>
                   </div>
@@ -303,7 +290,7 @@ export function CrmAnalyticsDashboard({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
-            Lead Scoring Distribution
+            {t('crm.analyticsDashboard.leadScoring')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -314,7 +301,7 @@ export function CrmAnalyticsDashboard({
               </div>
               <div>
                 <p className="text-2xl font-bold text-red-700 dark:text-red-300">{analytics.hotLeads}</p>
-                <p className="text-xs text-red-600 dark:text-red-400">Hot Leads (70+ score)</p>
+                <p className="text-xs text-red-600 dark:text-red-400">{t('crm.analyticsDashboard.hotLeads')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
@@ -323,7 +310,7 @@ export function CrmAnalyticsDashboard({
               </div>
               <div>
                 <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{analytics.warmLeads}</p>
-                <p className="text-xs text-amber-600 dark:text-amber-400">Warm Leads (40-69)</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">{t('crm.analyticsDashboard.warmLeads')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-800">
@@ -332,12 +319,12 @@ export function CrmAnalyticsDashboard({
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-700 dark:text-slate-300">{analytics.coldLeads}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Cold Leads (&lt;40)</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{t('crm.analyticsDashboard.coldLeads')}</p>
               </div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            Score based on: recency of activity, stage progression, response time, and engagement level
+            {t('crm.analyticsDashboard.scoreExplanation')}
           </p>
         </CardContent>
       </Card>
@@ -379,14 +366,12 @@ function MetricCard({
 }
 
 function calculateLeadScore(item: CrmInboxItem, now: Date): number {
-  let score = 50; // Base score
+  let score = 50;
 
-  // Stage progression bonus
   const stageOrder = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'contracted'];
   const stageIndex = stageOrder.indexOf(item.stage);
-  score += stageIndex * 8; // +8 per stage advancement
+  score += stageIndex * 8;
 
-  // Recency bonus
   const lastActivity = item.last_activity_at || item.created_at;
   if (lastActivity) {
     const daysSinceActivity = differenceInDays(now, new Date(lastActivity));
@@ -396,17 +381,14 @@ function calculateLeadScore(item: CrmInboxItem, now: Date): number {
     else if (daysSinceActivity > 30) score -= 20;
   }
 
-  // Has next action set
   if (item.next_action_at) {
     score += 10;
-    // Bonus if next action is soon
     const daysUntilAction = differenceInDays(new Date(item.next_action_at), now);
     if (daysUntilAction <= 3 && daysUntilAction >= 0) score += 5;
   } else {
     score -= 15;
   }
 
-  // Penalty for overdue
   if (item.next_action_at && new Date(item.next_action_at) < now) {
     const daysOverdue = differenceInDays(now, new Date(item.next_action_at));
     score -= Math.min(30, daysOverdue * 5);

@@ -48,21 +48,21 @@ export function SavedViewsDropdown({ viewType, currentFilters, onApplyView }: Sa
         filters: currentFilters,
         isDefault,
       });
-      toast.success(t('savedViews.saved', 'View saved'));
+      toast.success(t('savedViews.saved'));
       setSaveDialog(false);
       setViewName('');
       setIsDefault(false);
     } catch {
-      toast.error(t('savedViews.saveFailed', 'Failed to save view'));
+      toast.error(t('savedViews.saveFailed'));
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteView.mutateAsync(id);
-      toast.success(t('savedViews.deleted', 'View deleted'));
+      toast.success(t('savedViews.deleted'));
     } catch {
-      toast.error(t('savedViews.deleteFailed', 'Failed to delete view'));
+      toast.error(t('savedViews.deleteFailed'));
     }
   };
 
@@ -77,7 +77,7 @@ export function SavedViewsDropdown({ viewType, currentFilters, onApplyView }: Sa
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2 h-8">
             <Bookmark className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline text-xs">{t('savedViews.title', 'Views')}</span>
+            <span className="hidden sm:inline text-xs">{t('savedViews.title')}</span>
             {views && views.length > 0 && (
               <Badge variant="secondary" className="h-4 w-4 p-0 text-[10px] flex items-center justify-center rounded-full">
                 {views.length}
@@ -114,12 +114,12 @@ export function SavedViewsDropdown({ viewType, currentFilters, onApplyView }: Sa
             </>
           ) : (
             <div className="px-2 py-3 text-center text-xs text-muted-foreground">
-              {t('savedViews.noViews', 'No saved views yet')}
+              {t('savedViews.noViews')}
             </div>
           )}
           <DropdownMenuItem onClick={() => setSaveDialog(true)}>
             <Plus className="h-3.5 w-3.5 mr-2" />
-            {t('savedViews.saveCurrentView', 'Save current view')}
+            {t('savedViews.saveCurrentView')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -127,34 +127,34 @@ export function SavedViewsDropdown({ viewType, currentFilters, onApplyView }: Sa
       <Dialog open={saveDialog} onOpenChange={setSaveDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{t('savedViews.saveView', 'Save View')}</DialogTitle>
+            <DialogTitle>{t('savedViews.saveView')}</DialogTitle>
             <DialogDescription>
-              {t('savedViews.saveDescription', 'Save the current filters as a named view for quick access.')}
+              {t('savedViews.saveDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label>{t('savedViews.viewName', 'View name')}</Label>
+              <Label>{t('savedViews.viewName')}</Label>
               <Input
                 value={viewName}
                 onChange={(e) => setViewName(e.target.value)}
-                placeholder={t('savedViews.namePlaceholder', 'e.g. My active leads')}
+                placeholder={t('savedViews.namePlaceholder')}
                 className="mt-1"
               />
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={isDefault} onCheckedChange={setIsDefault} id="default-view" />
               <Label htmlFor="default-view" className="text-sm">
-                {t('savedViews.setAsDefault', 'Set as default view')}
+                {t('savedViews.setAsDefault')}
               </Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSaveDialog(false)}>
-              {t('common.cancel', 'Cancel')}
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={!viewName.trim() || saveView.isPending}>
-              {t('common.save', 'Save')}
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

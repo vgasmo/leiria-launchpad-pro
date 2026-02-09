@@ -3895,7 +3895,42 @@
       "setNextAction": "Set Next Action (Tomorrow)",
       "archiveSelected": "Archive Selected",
       "selectLeads": "Select leads to perform bulk actions"
+    },
+    "analyticsDashboard": {
+      "activePipeline": "Active Pipeline",
+      "hotWarmCold": "{{hot}} hot, {{warm}} warm, {{cold}} cold",
+      "needsAttention": "Needs Attention",
+      "overdueNoAction": "{{overdue}} overdue, {{noAction}} no action set",
+      "dueToday": "Due Today",
+      "dueTodayDesc": "Actions scheduled for today",
+      "converted30d": "Converted (30d)",
+      "converted30dDesc": "Leads → Contracted this month",
+      "pipelineHealth": "Pipeline Health",
+      "stageDistribution": "Stage distribution and conversion rates",
+      "avgCycle": "Avg cycle: {{days}} days",
+      "leads": "leads",
+      "avgDaysInStage": "Avg {{days}}d in stage",
+      "targetDays": "(target: {{days}}d)",
+      "leadScoring": "Lead Scoring Distribution",
+      "hotLeads": "Hot Leads (70+ score)",
+      "warmLeads": "Warm Leads (40-69)",
+      "coldLeads": "Cold Leads (<40)",
+      "scoreExplanation": "Score based on: recency of activity, stage progression, response time, and engagement level"
     }
+  },
+  "savedViews": {
+    "title": "Views",
+    "saved": "View saved",
+    "deleted": "View deleted",
+    "saveFailed": "Failed to save view",
+    "deleteFailed": "Failed to delete view",
+    "noViews": "No saved views yet",
+    "saveCurrentView": "Save current view",
+    "saveView": "Save View",
+    "saveDescription": "Save the current filters as a named view for quick access.",
+    "viewName": "View name",
+    "namePlaceholder": "e.g. My active leads",
+    "setAsDefault": "Set as default view"
   },
   "notifications": {
     "title": "Notifications",
