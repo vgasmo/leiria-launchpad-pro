@@ -56,7 +56,7 @@ export function useFunnelItems(filters?: { stage?: FunnelStage; consultantId?: s
       
       if (ownerIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, email')
           .in('id', ownerIds as string[]);
         profiles?.forEach(p => { owners[p.id] = p; });

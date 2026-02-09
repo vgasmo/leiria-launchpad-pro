@@ -99,7 +99,7 @@ function useAssignedMentors(userId: string | undefined) {
 
       // Get mentor profiles
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
         .in('id', mentorIds);
 
@@ -141,7 +141,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
       if (otherIds.length === 0) return data as MentorConnection[];
 
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
         .in('id', otherIds);
 

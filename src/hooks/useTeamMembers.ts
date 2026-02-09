@@ -23,7 +23,7 @@ export function useTeamMembers(startupId: string | undefined) {
     queryFn: async (): Promise<TeamMember[]> => {
       if (!startupId) return [];
       const { data, error } = await supabase
-        .from('team_members')
+        .from('team_members_safe')
         .select('*')
         .eq('startup_id', startupId)
         .is('left_at', null)

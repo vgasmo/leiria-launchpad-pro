@@ -30,7 +30,7 @@ export function useSessionFeedback(sessionId: string | undefined) {
       
       const userIds = [...new Set(data.map(f => f.user_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, avatar_url')
         .in('id', userIds);
       

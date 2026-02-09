@@ -64,7 +64,7 @@ export function AdminEcosystemManager() {
           ? supabase.from('programs').select('id, name').in('id', programIds)
           : Promise.resolve({ data: [] }),
         consultantIds.length > 0
-          ? supabase.from('profiles').select('id, full_name').in('id', consultantIds)
+          ? supabase.from('profiles_safe').select('id, full_name').in('id', consultantIds)
           : Promise.resolve({ data: [] }),
         supabase
           .from('sessions')

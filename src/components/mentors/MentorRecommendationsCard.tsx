@@ -57,7 +57,7 @@ export function MentorRecommendationsCard({ workspaceId, stage, className }: Men
     queryKey: ['recommended-mentors', stage],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url, bio, expertise')
         .not('expertise', 'is', null)
         .limit(6);

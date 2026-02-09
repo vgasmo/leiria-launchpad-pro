@@ -54,7 +54,7 @@ function useExternalMentors() {
 
       // Get mentor profiles
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name, avatar_url, linkedin_url, bio, expertise')
         .in('id', mentorIds);
 
@@ -148,7 +148,7 @@ function useNonMentorUsers() {
       const mentorIds = mentorRoles?.map(r => r.user_id) || [];
 
       const query = supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, email, full_name')
         .order('full_name');
 

@@ -47,7 +47,7 @@ export function PendingUsersManager() {
       if (error) {
         // Fallback: query profiles directly
         const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select(`
             id,
             full_name,

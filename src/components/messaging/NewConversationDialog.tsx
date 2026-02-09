@@ -40,7 +40,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
 
       // Get all profiles except current user
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .neq('id', currentUser.id)
         .order('full_name');

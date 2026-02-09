@@ -35,7 +35,7 @@ export function useConsultantNotes(workspaceId: string | undefined) {
       // Get author profiles
       const authorIds = [...new Set(data.map(n => n.author_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', authorIds);
 

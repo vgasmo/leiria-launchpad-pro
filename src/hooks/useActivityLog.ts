@@ -40,7 +40,7 @@ export function useActivityLog(workspaceId?: string) {
       // Fetch profiles separately
       const userIds = [...new Set(data.map(d => d.user_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', userIds);
 

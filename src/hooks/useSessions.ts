@@ -81,7 +81,7 @@ export function useSessions(workspaceId: string | undefined) {
       
       if (creatorIds.length > 0) {
         const { data } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name, avatar_url')
           .in('id', creatorIds);
         profiles = data || [];
@@ -173,7 +173,7 @@ export function useCreateSession(workspaceId: string) {
           // Fetch owner/consultant name if available
           if ((ws as any)?.owner_user_id) {
             const { data: profile } = await supabase
-              .from('profiles')
+              .from('profiles_safe')
               .select('full_name, email')
               .eq('id', (ws as any).owner_user_id)
               .maybeSingle();
@@ -256,7 +256,7 @@ export function useUpdateSession(workspaceId: string) {
             
             if ((ws as any)?.owner_user_id) {
               const { data: profile } = await supabase
-                .from('profiles')
+                .from('profiles_safe')
                 .select('full_name, email')
                 .eq('id', (ws as any).owner_user_id)
                 .maybeSingle();
@@ -400,7 +400,7 @@ export function useWorkspaceMembers(workspaceId: string | undefined) {
       // Fetch profiles separately
       const userIds = members.map(m => m.user_id);
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', userIds);
 

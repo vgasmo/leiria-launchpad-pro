@@ -80,7 +80,7 @@ export function useCrmInbox(filters?: UseCrmInboxFilters) {
       let owners: Record<string, { id: string; full_name: string | null }> = {};
       if (ownerIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('profiles_safe')
           .select('id, full_name')
           .in('id', ownerIds as string[]);
         profiles?.forEach(p => { owners[p.id] = p; });

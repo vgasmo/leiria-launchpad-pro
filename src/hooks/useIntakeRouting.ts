@@ -109,7 +109,7 @@ export function useConsultants() {
       const userIds = data.map(r => r.user_id);
       
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email')
         .in('id', userIds);
       

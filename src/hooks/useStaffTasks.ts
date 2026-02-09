@@ -59,7 +59,7 @@ export function useStaffTasks() {
       // Fetch assignee profiles separately
       const assigneeIds = [...new Set(data.map(t => t.assignee_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', assigneeIds);
       
@@ -98,7 +98,7 @@ export function useMyStaffTasks() {
       
       // Add assignee (current user's profile)
       const { data: profile } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .eq('id', user.id)
         .single();
@@ -136,7 +136,7 @@ export function useWorkspaceStaffTasks(workspaceId: string | undefined) {
       // Fetch assignee profiles
       const assigneeIds = [...new Set(data.map(t => t.assignee_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url')
         .in('id', assigneeIds);
       

@@ -6725,6 +6725,7 @@ export type Database = {
           role: string | null
           startup_id: string | null
           title: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -6740,6 +6741,7 @@ export type Database = {
           role?: string | null
           startup_id?: string | null
           title?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
@@ -6755,6 +6757,7 @@ export type Database = {
           role?: string | null
           startup_id?: string | null
           title?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [

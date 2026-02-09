@@ -52,7 +52,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
         
         if (workspace?.assigned_consultor_id) {
           const { data: profile } = await supabase
-            .from('profiles')
+            .from('profiles_safe')
             .select('email')
             .eq('id', workspace.assigned_consultor_id)
             .single();

@@ -59,7 +59,7 @@ export function MentorRecommendationWidget({
       const mentorIds = mentorRoles.map(r => r.user_id);
       
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_safe')
         .select('id, full_name, email, avatar_url, bio, expertise, linkedin_url')
         .in('id', mentorIds);
       
