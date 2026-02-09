@@ -512,7 +512,7 @@ export function RoomMappingTab() {
                     <Label>{t('admin.backoffice.roomName')}</Label>
                     <Input
                       name="name"
-                      placeholder="Office A1, Lab 2..."
+                      placeholder={t('admin.backoffice.roomNamePlaceholder')}
                       defaultValue={selectedRoom?.name || ''}
                       required
                     />
@@ -521,7 +521,7 @@ export function RoomMappingTab() {
                     <Label>{t('admin.backoffice.roomNumber')}</Label>
                     <Input
                       name="room_number"
-                      placeholder="101, A-23..."
+                      placeholder={t('admin.backoffice.roomNumberPlaceholder')}
                       defaultValue={selectedRoom?.room_number || ''}
                     />
                   </div>
@@ -532,7 +532,7 @@ export function RoomMappingTab() {
                     <Label>{t('admin.backoffice.floor')}</Label>
                     <Input
                       name="floor"
-                      placeholder="Ground, 1, 2..."
+                      placeholder={t('admin.backoffice.floorPlaceholder')}
                       defaultValue={selectedRoom?.floor || ''}
                     />
                   </div>
