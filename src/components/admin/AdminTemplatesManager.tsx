@@ -68,7 +68,7 @@ export function AdminTemplatesManager() {
 
   const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!canUploadAssets) {
-      toast.error('You do not have permission to upload assets');
+      toast.error(t('adminTemplates.uploadPermissionDenied', { defaultValue: 'You do not have permission to upload assets' }));
       return;
     }
     
@@ -80,7 +80,7 @@ export function AdminTemplatesManager() {
     const isXlsx = fileName.endsWith('.xlsx');
     
     if (!isXlsm && !isXlsx) {
-      toast.error('Please upload an Excel file (.xlsm or .xlsx)');
+      toast.error(t('adminTemplates.uploadExcelOnly', { defaultValue: 'Please upload an Excel file (.xlsm or .xlsx)' }));
       return;
     }
 
@@ -107,10 +107,10 @@ export function AdminTemplatesManager() {
 
       const publicUrl = getTemplatePublicUrl();
       setAssetUrl(publicUrl);
-      toast.success('Template uploaded successfully');
+      toast.success(t('adminTemplates.uploadSuccess', { defaultValue: 'Template uploaded successfully' }));
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error(error.message || 'Failed to upload template');
+      toast.error(error.message || t('adminTemplates.uploadFailed', { defaultValue: 'Failed to upload template' }));
     } finally {
       setIsUploadingAsset(false);
       if (assetFileInputRef.current) assetFileInputRef.current.value = '';
@@ -121,9 +121,9 @@ export function AdminTemplatesManager() {
     const url = getTemplatePublicUrl();
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('Copied to clipboard');
+      toast.success(t('adminTemplates.copiedToClipboard', { defaultValue: 'Copied to clipboard' }));
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('adminTemplates.copyFailed', { defaultValue: 'Failed to copy' }));
     }
   };
 
@@ -144,7 +144,7 @@ export function AdminTemplatesManager() {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('adminTemplates.nameRequired', { defaultValue: 'Name is required' }));
       return;
     }
 
@@ -154,7 +154,7 @@ export function AdminTemplatesManager() {
         schema = JSON.parse(formData.schema_json);
       }
     } catch {
-      toast.error('Invalid JSON in schema');
+      toast.error(t('adminTemplates.invalidJson', { defaultValue: 'Invalid JSON in schema' }));
       return;
     }
 
@@ -167,7 +167,7 @@ export function AdminTemplatesManager() {
           category: formData.category || null,
           schema_json: schema,
         });
-        toast.success('Template updated');
+        toast.success(t('adminTemplates.templateUpdated', { defaultValue: 'Template updated' }));
       } else {
         await createTemplate.mutateAsync({
           name: formData.name,
@@ -176,12 +176,12 @@ export function AdminTemplatesManager() {
           schema_json: schema,
           is_global: true,
         });
-        toast.success('Template created');
+        toast.success(t('adminTemplates.templateCreated', { defaultValue: 'Template created' }));
       }
       setEditingTemplate(null);
       setIsCreating(false);
     } catch {
-      toast.error('Failed to save template');
+      toast.error(t('adminTemplates.templatesFailed', { defaultValue: 'Failed to save template' }));
     }
   };
 
@@ -189,10 +189,10 @@ export function AdminTemplatesManager() {
     if (!deleteTarget) return;
     try {
       await deleteTemplate.mutateAsync(deleteTarget.id);
-      toast.success('Template deleted');
+      toast.success(t('adminTemplates.templateDeleted', { defaultValue: 'Template deleted' }));
       setDeleteTarget(null);
     } catch {
-      toast.error('Failed to delete template');
+      toast.error(t('adminTemplates.deleteFailed', { defaultValue: 'Failed to delete template' }));
     }
   };
 
@@ -212,9 +212,9 @@ export function AdminTemplatesManager() {
         }
       }
       await refetch();
-      toast.success('Initial templates created');
+      toast.success(t('adminTemplates.seedSuccess', { defaultValue: 'Initial templates created' }));
     } catch {
-      toast.error('Failed to seed templates');
+      toast.error(t('adminTemplates.seedFailed', { defaultValue: 'Failed to seed templates' }));
     }
   };
 
@@ -242,17 +242,17 @@ export function AdminTemplatesManager() {
       {canUploadAssets && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
+             <CardTitle className="text-base flex items-center gap-2">
               <FileSpreadsheet className="h-4 w-4" />
-              Program Assets
+              {t('adminTemplates.programAssets', { defaultValue: 'Program Assets' })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start justify-between gap-4 p-4 rounded-lg border bg-muted/30">
               <div className="flex-1">
-                <h4 className="font-medium text-sm">Financial Model Template</h4>
+                <h4 className="font-medium text-sm">{t('adminTemplates.financialModelTemplate', { defaultValue: 'Financial Model Template' })}</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  The canonical .xlsm template available for all startups to download
+                  {t('adminTemplates.financialModelDesc', { defaultValue: 'The canonical .xlsm template available for all startups to download' })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ export function AdminTemplatesManager() {
                   ) : (
                     <Upload className="h-4 w-4 mr-1" />
                   )}
-                  {isUploadingAsset ? t('common.uploading', 'Uploading...') : t('admin.templates.uploadTemplate', 'Upload Template')}
+                  {isUploadingAsset ? t('common.uploading', { defaultValue: 'Uploading...' }) : t('adminTemplates.uploadTemplate', { defaultValue: 'Upload Template' })}
                 </Button>
                 <Button
                   size="sm"
@@ -282,13 +282,13 @@ export function AdminTemplatesManager() {
                   onClick={handleCopyAssetUrl}
                 >
                   <Copy className="h-4 w-4 mr-1" />
-                  {t('common.copyUrl', 'Copy URL')}
+                  {t('adminTemplates.copyUrl', { defaultValue: 'Copy URL' })}
                 </Button>
               </div>
             </div>
             {assetUrl && (
               <p className="text-xs text-muted-foreground">
-                Last uploaded template URL copied. Startups can download from Workspace &gt; Financial Model.
+                {t('adminTemplates.lastUploadedNote', { defaultValue: 'Last uploaded template URL copied. Startups can download from Workspace > Financial Model.' })}
               </p>
             )}
           </CardContent>
@@ -299,18 +299,18 @@ export function AdminTemplatesManager() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Templates Library</h2>
-          <p className="text-sm text-muted-foreground">Manage templates available to all workspaces</p>
+          <h2 className="text-lg font-semibold">{t('adminTemplates.templatesLibrary', { defaultValue: 'Templates Library' })}</h2>
+          <p className="text-sm text-muted-foreground">{t('adminTemplates.templatesLibraryDesc', { defaultValue: 'Manage templates available to all workspaces' })}</p>
         </div>
         <div className="flex items-center gap-2">
           {(!templates || templates.length === 0) && (
             <Button variant="outline" onClick={handleSeedTemplates}>
-              Seed Initial Templates
+              {t('adminTemplates.seedInitial', { defaultValue: 'Seed Initial Templates' })}
             </Button>
           )}
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-1" />
-            New Template
+            {t('adminTemplates.newTemplate', { defaultValue: 'New Template' })}
           </Button>
         </div>
       </div>
@@ -319,13 +319,13 @@ export function AdminTemplatesManager() {
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            No templates yet. Click "Seed Initial Templates" to add starter templates.
+            {t('adminTemplates.noTemplatesYet', { defaultValue: 'No templates yet. Click "Seed Initial Templates" to add starter templates.' })}
           </CardContent>
         </Card>
       ) : (
         Object.entries(groupedTemplates).map(([category, catTemplates]) => (
           <div key={category}>
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">{category}</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">{t(`templates.categories.${category}`, { defaultValue: category })}</h3>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {catTemplates.map(template => (
                 <Card key={template.id} className="group">
@@ -344,7 +344,7 @@ export function AdminTemplatesManager() {
                           )}
                           {template.schema_json?.sections?.length ? (
                             <span className="text-xs text-muted-foreground">
-                              {template.schema_json.sections.length} sections
+                              {t('adminTemplates.sections', { defaultValue: '{{count}} sections', count: template.schema_json.sections.length })}
                             </span>
                           ) : null}
                         </div>
@@ -375,54 +375,54 @@ export function AdminTemplatesManager() {
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>{editingTemplate ? 'Edit Template' : 'New Template'}</DialogTitle>
+            <DialogTitle>{editingTemplate ? t('adminTemplates.editTemplate', { defaultValue: 'Edit Template' }) : t('adminTemplates.newTemplate', { defaultValue: 'New Template' })}</DialogTitle>
           </DialogHeader>
           
           <Tabs defaultValue="basic" className="flex-1">
             <TabsList>
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
+              <TabsTrigger value="basic">{t('adminTemplates.basicInfo', { defaultValue: 'Basic Info' })}</TabsTrigger>
               <TabsTrigger value="schema">
                 <Code className="h-3.5 w-3.5 mr-1" />
-                Schema (JSON)
+                {t('adminTemplates.schemaJson', { defaultValue: 'Schema (JSON)' })}
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="basic" className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t('common.name', { defaultValue: 'Name' })} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g., Lean Canvas"
+                  placeholder={t('adminTemplates.namePlaceholder', { defaultValue: 'e.g., Lean Canvas' })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('common.description', { defaultValue: 'Description' })}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Brief description of this template"
+                  placeholder={t('adminTemplates.descriptionPlaceholder', { defaultValue: 'Brief description of this template' })}
                   rows={2}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category">{t('common.category', { defaultValue: 'Category' })}</Label>
                 <Input
                   id="category"
                   value={formData.category}
                   onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
-                  placeholder="e.g., Strategy, Finance, Growth"
+                  placeholder={t('adminTemplates.categoryPlaceholder', { defaultValue: 'e.g., Strategy, Finance, Growth' })}
                 />
               </div>
             </TabsContent>
             
             <TabsContent value="schema" className="py-4">
               <div className="space-y-2">
-                <Label>Schema JSON</Label>
+                <Label>{t('adminTemplates.schemaJson', { defaultValue: 'Schema JSON' })}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Define sections and fields. Field types: text, textarea, number, checkbox, checklist
+                  {t('adminTemplates.schemaDescription', { defaultValue: 'Define sections and fields. Field types: text, textarea, number, checkbox, checklist' })}
                 </p>
                 <Textarea
                   value={formData.schema_json}
@@ -439,10 +439,10 @@ export function AdminTemplatesManager() {
               setIsCreating(false);
               setEditingTemplate(null);
             }}>
-              Cancel
+              {t('common.cancel', { defaultValue: 'Cancel' })}
             </Button>
             <Button onClick={handleSave} disabled={createTemplate.isPending || updateTemplate.isPending}>
-              {editingTemplate ? 'Update' : 'Create'}
+              {editingTemplate ? t('common.update', { defaultValue: 'Update' }) : t('common.create', { defaultValue: 'Create' })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -452,15 +452,15 @@ export function AdminTemplatesManager() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogTitle>{t('adminTemplates.deleteTitle', { defaultValue: 'Delete Template' })}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.name}"? This will also delete all workspace instances of this template.
+              {t('adminTemplates.deleteDescription', { defaultValue: 'Are you sure you want to delete "{{name}}"? This will also delete all workspace instances of this template.', name: deleteTarget?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Cancel' })}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t('common.delete', { defaultValue: 'Delete' })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
