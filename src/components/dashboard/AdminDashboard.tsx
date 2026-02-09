@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
+import { useEcosystemInsights } from '@/hooks/useEcosystemInsights';
+import { EcosystemInsights } from '@/components/dashboard/EcosystemInsights';
 import type { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 
 interface AdminDashboardProps {
@@ -34,6 +36,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
   // Compute health distribution from workspaces
   const healthDistribution = { critical: 0, at_risk: 0, stable: 0, healthy: 0, thriving: 0 };
   const overdueCount = workspaces.filter(w => w.overdueActionsCount > 0).length;
+  const totalOverdueActions = workspaces.reduce((sum, w) => sum + (w.overdueActionsCount || 0), 0);
 
   workspaces.forEach(w => {
     const h = (w.health_score_override || w.health_score || 'stable') as keyof typeof healthDistribution;
@@ -41,6 +44,20 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
   });
 
   const needsAttention = healthDistribution.critical + healthDistribution.at_risk;
+
+  // Smart insights
+  const insights = useEcosystemInsights({
+    totalStartups: workspaces.length,
+    activeStartups: workspaces.length,
+    healthDistribution,
+    overdueActionsCount: totalOverdueActions,
+    missingKpisCount: 0, // TODO: compute from workspaces
+    sessionsThisWeek: 0, // TODO: add to stats hook
+    pendingApprovals: stats?.pendingApprovalsCount ?? 0,
+    totalMentors: 0,
+    activeMentors: 0,
+    totalConsultants: 0,
+  });
 
   const signals = [
     {
@@ -145,6 +162,9 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
           );
         })}
       </div>
+
+      {/* Smart Insights */}
+      <EcosystemInsights insights={insights} />
 
       {/* Portfolio Health Summary */}
       <Card className="rounded-2xl">
