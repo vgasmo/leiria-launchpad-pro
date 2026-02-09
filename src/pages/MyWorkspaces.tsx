@@ -224,7 +224,7 @@ export default function MyWorkspaces() {
   // Page title/subtitle
   const getPageTitle = () => {
     if (showDetailedView) return t('myWorkspaces.allStartups');
-    if (showAdminDashboard) return t('admin.commandCenter', 'Command Center');
+    if (showAdminDashboard) return t('admin.commandCenter');
     if (showConsultorDashboard) return t('myWorkspaces.portfolioOverview');
     if (showMentorDashboard) return t('myWorkspaces.myMentorships');
     if (showFounderDashboard) {

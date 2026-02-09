@@ -1703,6 +1703,17 @@
     "reports": "Reports",
     "integrations": "Integrations",
     "crmDiagnostics": "CRM Diagnostics",
+    "commandCenter": "Command Center",
+    "ecosystemSummary": "{{startups}} startups · {{programs}} programs",
+    "portfolioView": "Portfolio View",
+    "contractRenewals": "Contract Renewals (30d)",
+    "overdueInvoices": "Overdue Invoices",
+    "occupancy": "Space Occupancy",
+    "portfolioHealth": "Portfolio Health",
+    "needAttention": "need attention",
+    "overdueStartups": "{{count}} startups with overdue actions",
+    "crmPipeline": "CRM Pipeline",
+    "operations": "Operations",
     "noPendingApprovals": "No Pending Applications",
     "allReviewed": "All startup applications have been reviewed.",
     "pendingApprovals": "Pending Approvals",
@@ -4142,5 +4153,28 @@
     "categoryTeam": "Team",
     "categoryFundraising": "Fundraising",
     "categoryOther": "Other"
+  },
+  "tour": {
+    "workspaces": {
+      "title": "Your Workspaces",
+      "content": "Welcome to FoundersBook! 🚀 Your workspaces appear here. Each workspace is a dedicated space for a startup."
+    },
+    "search": {
+      "title": "Quick Search",
+      "content": "Search anything: startups, documents, sessions, KPIs. Press ⌘K or / to open instantly."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "content": "Stay updated with alerts, reminders, and team activity. Important items are highlighted."
+    },
+    "profile": {
+      "title": "Your Profile",
+      "content": "Access your profile, settings, and switch themes here. You can restart this tour anytime from settings."
+    },
+    "back": "Back",
+    "close": "Close",
+    "done": "Done",
+    "next": "Next",
+    "skip": "Skip tour"
   }
 }
