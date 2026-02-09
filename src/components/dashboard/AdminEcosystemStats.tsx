@@ -85,7 +85,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
             {t('admin.stats.ecosystemOverview')}
           </CardTitle>
           <Button variant="ghost" size="sm" onClick={() => navigate('/ecosystem')}>
-            {t('common.viewAll', 'View All')}
+            {t('common.viewAll')}
           </Button>
         </div>
       </CardHeader>
@@ -189,7 +189,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           >
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              {t('admin.pendingApprovals', 'Pending')}
+              {t('admin.pendingApprovals')}
             </div>
             <span className={cn('text-lg font-bold', stats.pendingApprovals > 0 && 'text-amber-600')}>
               {stats.pendingApprovals}

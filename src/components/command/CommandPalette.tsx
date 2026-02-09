@@ -60,17 +60,17 @@ export function CommandPalette() {
 
   if (currentWorkspaceId) {
     quickActions.push(
-      { id: 'kpis', label: t('quickActions.updateKpis', 'Update KPIs'), icon: <BarChart3 className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=kpis` },
-      { id: 'action', label: t('quickActions.newAction', 'New Action'), icon: <CheckSquare className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=actions` },
-      { id: 'session', label: t('quickActions.scheduleSession', 'Schedule Session'), icon: <Calendar className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=sessions` },
-      { id: 'document', label: t('quickActions.uploadDocument', 'Upload Document'), icon: <FileText className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=documents` },
+      { id: 'kpis', label: t('quickActions.updateKpis'), icon: <BarChart3 className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=kpis` },
+      { id: 'action', label: t('quickActions.newAction'), icon: <CheckSquare className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=actions` },
+      { id: 'session', label: t('quickActions.scheduleSession'), icon: <Calendar className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=sessions` },
+      { id: 'document', label: t('quickActions.uploadDocument'), icon: <FileText className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=documents` },
     );
   }
 
   // Navigation items based on role
   const navItems = [
-    { id: 'home', label: t('nav.home', 'Home'), icon: <Home className="h-4 w-4" />, path: '/my-workspaces' },
-    { id: 'settings', label: t('nav.settings', 'Settings'), icon: <Settings className="h-4 w-4" />, path: '/settings' },
+    { id: 'home', label: t('nav.home'), icon: <Home className="h-4 w-4" />, path: '/my-workspaces' },
+    { id: 'settings', label: t('nav.settings'), icon: <Settings className="h-4 w-4" />, path: '/settings' },
   ];
 
   if (isStaff) {
@@ -81,7 +81,7 @@ export function CommandPalette() {
   }
   if (isStaff || isMentor) {
     navItems.push(
-      { id: 'mentors', label: t('nav.mentors', 'Mentors'), icon: <Users className="h-4 w-4" />, path: '/mentors' },
+      { id: 'mentors', label: t('nav.mentors'), icon: <Users className="h-4 w-4" />, path: '/mentors' },
     );
   }
 
@@ -93,12 +93,12 @@ export function CommandPalette() {
   }, {} as Record<string, SearchResult[]>) || {};
 
   const typeLabels: Record<string, string> = {
-    session: t('search.types.sessions', 'Sessions'),
-    action: t('search.types.actions', 'Actions'),
-    note: t('search.types.notes', 'Notes'),
-    document: t('search.types.documents', 'Documents'),
-    message: t('search.types.messages', 'Messages'),
-    milestone: t('search.types.milestones', 'Milestones'),
+    session: t('search.types.sessions'),
+    action: t('search.types.actions'),
+    note: t('search.types.notes'),
+    document: t('search.types.documents'),
+    message: t('search.types.messages'),
+    milestone: t('search.types.milestones'),
   };
 
   const hasSearchResults = searchResults && searchResults.length > 0;
