@@ -135,11 +135,11 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
         {/* Health Distribution Bar */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t('admin.portfolioHealth', 'Portfolio Health')}</span>
+            <span className="text-muted-foreground">{t('admin.portfolioHealth')}</span>
             <div className="flex items-center gap-3 text-xs">
               {needsAttention > 0 && (
                 <Badge variant="destructive" className="text-xs">
-                  {needsAttention} {t('admin.needAttention', 'need attention')}
+                  {needsAttention} {t('admin.needAttention')}
                 </Badge>
               )}
               {healthyCount > 0 && (

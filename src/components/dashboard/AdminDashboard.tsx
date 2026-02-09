@@ -45,7 +45,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
   const signals = [
     {
       key: 'approvals',
-      label: t('admin.pendingApprovals', 'Pending Approvals'),
+      label: t('admin.pendingApprovals'),
       value: stats?.pendingApprovalsCount ?? 0,
       icon: Users,
       href: '/admin?tab=users',
@@ -53,7 +53,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
     },
     {
       key: 'renewals',
-      label: t('admin.contractRenewals', 'Contract Renewals (30d)'),
+      label: t('admin.contractRenewals'),
       value: stats?.contractRenewals30d ?? 0,
       icon: FileText,
       href: '/admin?tab=backoffice',
@@ -61,7 +61,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
     },
     {
       key: 'overdue',
-      label: t('admin.overdueInvoices', 'Overdue Invoices'),
+      label: t('admin.overdueInvoices'),
       value: stats?.overdueInvoicesCount ?? 0,
       icon: AlertTriangle,
       href: '/admin?tab=backoffice',
@@ -69,7 +69,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
     },
     {
       key: 'occupancy',
-      label: t('admin.occupancy', 'Space Occupancy'),
+      label: t('admin.occupancy'),
       value: stats ? `${stats.occupiedSpaces}/${stats.totalSpaces}` : '—',
       icon: Building2,
       href: '/admin?tab=backoffice',
@@ -95,9 +95,9 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       {/* Switch to portfolio view */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{t('admin.commandCenter', 'Command Center')}</h2>
+          <h2 className="text-lg font-semibold">{t('admin.commandCenter')}</h2>
           <p className="text-sm text-muted-foreground">
-            {t('admin.ecosystemSummary', '{{startups}} startups · {{programs}} programs', {
+            {t('admin.ecosystemSummary', {
               startups: workspaces.length,
               programs: programsCount,
             })}
@@ -105,7 +105,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
         </div>
         <Button variant="outline" size="sm" onClick={onSwitchToPortfolio} className="gap-2">
           <RefreshCw className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('admin.portfolioView', 'Portfolio View')}</span>
+          <span className="hidden sm:inline">{t('admin.portfolioView')}</span>
         </Button>
       </div>
 
@@ -150,10 +150,10 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       <Card className="rounded-2xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            {t('admin.portfolioHealth', 'Portfolio Health')}
+            {t('admin.portfolioHealth')}
             {needsAttention > 0 && (
               <Badge variant="destructive" className="text-xs">
-                {needsAttention} {t('admin.needAttention', 'need attention')}
+                {needsAttention} {t('admin.needAttention')}
               </Badge>
             )}
           </CardTitle>
@@ -188,7 +188,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
                 onClick={() => navigate('/my-workspaces?filter=attention')}
               >
                 <Clock className="h-4 w-4 mr-2" />
-                {t('admin.overdueStartups', '{{count}} startups with overdue actions', { count: overdueCount })}
+                {t('admin.overdueStartups', { count: overdueCount })}
               </Button>
             </div>
           )}
@@ -198,10 +198,10 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       {/* Quick Links */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {[
-          { label: t('admin.crmPipeline', 'CRM Pipeline'), href: '/crm', icon: Users },
-          { label: t('admin.operations', 'Operations'), href: '/admin?tab=backoffice', icon: Building2 },
-          { label: t('admin.programs', 'Programs'), href: '/admin?tab=programs-setup', icon: FileText },
-          { label: t('admin.reports', 'Reports'), href: '/admin?tab=reports', icon: AlertTriangle },
+          { label: t('admin.crmPipeline'), href: '/crm', icon: Users },
+          { label: t('admin.operations'), href: '/admin?tab=backoffice', icon: Building2 },
+          { label: t('admin.programs'), href: '/admin?tab=programs-setup', icon: FileText },
+          { label: t('admin.reports'), href: '/admin?tab=reports', icon: AlertTriangle },
         ].map((link) => {
           const Icon = link.icon;
           return (

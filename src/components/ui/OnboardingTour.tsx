@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Joyride, { Step, CallBackProps, STATUS, ACTIONS, EVENTS } from 'react-joyride';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const TOUR_KEY = 'foundersbook-tour-completed';
 
@@ -9,33 +10,36 @@ const TOUR_KEY = 'foundersbook-tour-completed';
  * P3: Simplified onboarding tour - only 4 essential steps, role-aware.
  * Focuses on the most critical actions for new users.
  */
-const tourSteps: Step[] = [
-  {
-    target: '[data-tour="workspaces"]',
-    content: 'Welcome to FoundersBook! 🚀 Your workspaces appear here. Each workspace is a dedicated space for a startup.',
-    placement: 'right',
-    disableBeacon: true,
-    title: 'Your Workspaces',
-  },
-  {
-    target: '[data-tour="global-search"]',
-    content: 'Search anything: startups, documents, sessions, KPIs. Press ⌘K or / to open instantly.',
-    placement: 'bottom',
-    title: 'Quick Search',
-  },
-  {
-    target: '[data-tour="notifications"]',
-    content: 'Stay updated with alerts, reminders, and team activity. Important items are highlighted.',
-    placement: 'bottom',
-    title: 'Notifications',
-  },
-  {
-    target: '[data-tour="user-menu"]',
-    content: 'Access your profile, settings, and switch themes here. You can restart this tour anytime from settings.',
-    placement: 'left',
-    title: 'Your Profile',
-  },
-];
+function useTourSteps(): Step[] {
+  const { t } = useTranslation();
+  return useMemo(() => [
+    {
+      target: '[data-tour="workspaces"]',
+      content: t('tour.workspaces.content'),
+      placement: 'right' as const,
+      disableBeacon: true,
+      title: t('tour.workspaces.title'),
+    },
+    {
+      target: '[data-tour="global-search"]',
+      content: t('tour.search.content'),
+      placement: 'bottom' as const,
+      title: t('tour.search.title'),
+    },
+    {
+      target: '[data-tour="notifications"]',
+      content: t('tour.notifications.content'),
+      placement: 'bottom' as const,
+      title: t('tour.notifications.title'),
+    },
+    {
+      target: '[data-tour="user-menu"]',
+      content: t('tour.profile.content'),
+      placement: 'left' as const,
+      title: t('tour.profile.title'),
+    },
+  ], [t]);
+}
 
 interface OnboardingTourProps {
   run?: boolean;
@@ -43,12 +47,15 @@ interface OnboardingTourProps {
 }
 
 export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { theme } = useTheme();
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
   // Filter steps to only include targets that exist in the DOM
+  const tourSteps = useTourSteps();
+
   const availableSteps = useMemo(() => {
     if (typeof document === 'undefined') return tourSteps;
     
@@ -57,7 +64,7 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
       if (!target) return true;
       return document.querySelector(target) !== null;
     });
-  }, [runTour]); // Re-check when tour starts
+  }, [runTour, tourSteps]); // Re-check when tour starts
 
   useEffect(() => {
     // Only run tour for logged-in users who haven't completed it
@@ -159,11 +166,11 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
         },
       }}
       locale={{
-        back: 'Back',
-        close: 'Close',
-        last: 'Done',
-        next: 'Next',
-        skip: 'Skip tour',
+        back: t('tour.back'),
+        close: t('tour.close'),
+        last: t('tour.done'),
+        next: t('tour.next'),
+        skip: t('tour.skip'),
       }}
     />
   );

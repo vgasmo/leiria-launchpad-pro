@@ -3410,6 +3410,17 @@
     "reports": "Relatórios",
     "integrations": "Integrações",
     "crmDiagnostics": "Diagnóstico CRM",
+    "commandCenter": "Centro de Comando",
+    "ecosystemSummary": "{{startups}} startups · {{programs}} programas",
+    "portfolioView": "Vista de Portefólio",
+    "contractRenewals": "Renovações de Contratos (30d)",
+    "overdueInvoices": "Faturas em Atraso",
+    "occupancy": "Ocupação de Espaços",
+    "portfolioHealth": "Saúde do Portefólio",
+    "needAttention": "precisam de atenção",
+    "overdueStartups": "{{count}} startups com ações em atraso",
+    "crmPipeline": "Pipeline CRM",
+    "operations": "Operações",
     "noPendingApprovals": "Sem Candidaturas Pendentes",
     "allReviewed": "Todas as candidaturas foram revistas.",
     "pendingApprovals": "Aprovações Pendentes",
@@ -4343,5 +4354,28 @@
     "categoryTeam": "Equipa",
     "categoryFundraising": "Captação de Investimento",
     "categoryOther": "Outro"
+  },
+  "tour": {
+    "workspaces": {
+      "title": "Os Seus Workspaces",
+      "content": "Bem-vindo ao FoundersBook! 🚀 Os seus workspaces aparecem aqui. Cada workspace é um espaço dedicado a uma startup."
+    },
+    "search": {
+      "title": "Pesquisa Rápida",
+      "content": "Pesquise tudo: startups, documentos, sessões, KPIs. Prima ⌘K ou / para abrir instantaneamente."
+    },
+    "notifications": {
+      "title": "Notificações",
+      "content": "Fique atualizado com alertas, lembretes e atividade da equipa. Os itens importantes são destacados."
+    },
+    "profile": {
+      "title": "O Seu Perfil",
+      "content": "Aceda ao seu perfil, definições e altere o tema aqui. Pode reiniciar este guia a qualquer momento nas definições."
+    },
+    "back": "Anterior",
+    "close": "Fechar",
+    "done": "Concluído",
+    "next": "Seguinte",
+    "skip": "Saltar guia"
   }
 }
