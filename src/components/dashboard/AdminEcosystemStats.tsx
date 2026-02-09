@@ -82,7 +82,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
-            {t('admin.ecosystemOverview', 'Ecosystem Overview')}
+            {t('admin.stats.ecosystemOverview')}
           </CardTitle>
           <Button variant="ghost" size="sm" onClick={() => navigate('/ecosystem')}>
             {t('common.viewAll', 'View All')}
@@ -96,29 +96,29 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Rocket className="h-4 w-4" />
-              <span className="text-xs">{t('admin.startups', 'Startups')}</span>
+              <span className="text-xs">{t('admin.stats.startups')}</span>
             </div>
             <p className="text-xl font-bold">{stats.activeStartups}</p>
             <p className="text-xs text-muted-foreground">
-              {t('admin.ofTotal', 'of {{total}} total', { total: stats.totalStartups })}
+              {t('admin.stats.ofTotal', { total: stats.totalStartups })}
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-accent/5 border border-accent/10">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Users className="h-4 w-4" />
-              <span className="text-xs">{t('admin.mentors', 'Mentors')}</span>
+              <span className="text-xs">{t('admin.stats.mentors')}</span>
             </div>
             <p className="text-xl font-bold">{stats.activeMentors}</p>
             <p className="text-xs text-muted-foreground">
-              {t('admin.active', 'active')}
+              {t('admin.stats.active')}
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-muted/50">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <UserCheck className="h-4 w-4" />
-              <span className="text-xs">{t('admin.consultants', 'Consultants')}</span>
+              <span className="text-xs">{t('admin.stats.consultants')}</span>
             </div>
             <p className="text-xl font-bold">{stats.totalConsultants}</p>
           </div>
@@ -126,7 +126,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           <div className="p-3 rounded-lg bg-muted/50">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Building2 className="h-4 w-4" />
-              <span className="text-xs">{t('admin.founders', 'Founders')}</span>
+              <span className="text-xs">{t('admin.stats.founders')}</span>
             </div>
             <p className="text-xl font-bold">{stats.totalFounders}</p>
           </div>
@@ -144,7 +144,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
               )}
               {healthyCount > 0 && (
                 <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50">
-                  {healthyCount} {t('admin.thriving', 'thriving')}
+                  {healthyCount} {t('admin.stats.thriving')}
                 </Badge>
               )}
             </div>
@@ -206,7 +206,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           >
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <AlertTriangle className="h-3.5 w-3.5" />
-              {t('admin.overdueActions', 'Overdue')}
+              {t('admin.stats.overdueActions')}
             </div>
             <span className={cn('text-lg font-bold', stats.overdueActionsCount > 0 && 'text-red-600')}>
               {stats.overdueActionsCount}
@@ -220,7 +220,7 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           >
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <TrendingUp className="h-3.5 w-3.5" />
-              {t('admin.missingKpis', 'Missing KPIs')}
+              {t('admin.stats.missingKpis')}
             </div>
             <span className="text-lg font-bold">{stats.missingKpisCount}</span>
           </Button>
@@ -231,11 +231,11 @@ export function AdminEcosystemStats({ stats, className }: AdminEcosystemStatsPro
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              <span>{stats.sessionsThisWeek} {t('admin.sessionsThisWeek', 'sessions this week')}</span>
+              <span>{stats.sessionsThisWeek} {t('admin.stats.sessionsThisWeek')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span>{stats.actionsCompletedThisWeek} {t('admin.actionsCompleted', 'actions completed')}</span>
+              <span>{stats.actionsCompletedThisWeek} {t('admin.stats.actionsCompleted')}</span>
             </div>
           </div>
         </div>
