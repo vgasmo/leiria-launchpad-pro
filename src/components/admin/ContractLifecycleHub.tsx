@@ -71,11 +71,11 @@ export function ContractLifecycleHub() {
         id: `pending-${item.id}`,
         type: 'pending_contract',
         severity: 'critical',
-        title: t('lifecycle.pendingContract', 'Pending Contract Creation'),
-        description: t('lifecycle.pendingContractDesc', 'Lead marked as contracted but no contract exists'),
+        title: t('lifecycle.pendingContract'),
+        description: t('lifecycle.pendingContractDesc'),
         entityId: item.id,
         entityName: item.organization_name || item.contact_name || 'Unknown',
-        actionLabel: t('lifecycle.createContract', 'Create Contract'),
+        actionLabel: t('lifecycle.createContract'),
         actionType: 'convert',
       });
     });
@@ -95,12 +95,12 @@ export function ContractLifecycleHub() {
           id: `expired-${contract.id}`,
           type: 'expired',
           severity: 'critical',
-          title: t('lifecycle.expired', 'Contract Expired'),
-          description: t('lifecycle.expiredDesc', 'Contract has passed its end date'),
+          title: t('lifecycle.expired'),
+          description: t('lifecycle.expiredDesc'),
           entityId: contract.id,
           entityName: startupName,
           daysUntil: daysUntilEnd,
-          actionLabel: t('lifecycle.renew', 'Renew Contract'),
+          actionLabel: t('lifecycle.renew'),
           actionType: 'renew',
         });
       } else if (daysUntilEnd <= 30) {
@@ -108,12 +108,12 @@ export function ContractLifecycleHub() {
           id: `renewal-30-${contract.id}`,
           type: 'renewal_due',
           severity: 'critical',
-          title: t('lifecycle.renewalCritical', 'Renewal Due Soon'),
-          description: t('lifecycle.renewalCriticalDesc', 'Contract expires in {{days}} days', { days: daysUntilEnd }),
+          title: t('lifecycle.renewalCritical'),
+          description: t('lifecycle.renewalCriticalDesc', { days: daysUntilEnd }),
           entityId: contract.id,
           entityName: startupName,
           daysUntil: daysUntilEnd,
-          actionLabel: t('lifecycle.initiateRenewal', 'Initiate Renewal'),
+          actionLabel: t('lifecycle.initiateRenewal'),
           actionType: 'renew',
         });
       } else if (daysUntilEnd <= 60) {
@@ -121,12 +121,12 @@ export function ContractLifecycleHub() {
           id: `renewal-60-${contract.id}`,
           type: 'renewal_due',
           severity: 'warning',
-          title: t('lifecycle.renewalWarning', 'Renewal Approaching'),
-          description: t('lifecycle.renewalWarningDesc', 'Contract expires in {{days}} days', { days: daysUntilEnd }),
+          title: t('lifecycle.renewalWarning'),
+          description: t('lifecycle.renewalWarningDesc', { days: daysUntilEnd }),
           entityId: contract.id,
           entityName: startupName,
           daysUntil: daysUntilEnd,
-          actionLabel: t('lifecycle.scheduleReview', 'Schedule Review'),
+          actionLabel: t('lifecycle.scheduleReview'),
           actionType: 'review',
         });
       } else if (daysUntilEnd <= 90) {
@@ -134,12 +134,12 @@ export function ContractLifecycleHub() {
           id: `renewal-90-${contract.id}`,
           type: 'renewal_due',
           severity: 'info',
-          title: t('lifecycle.renewalInfo', 'Renewal in 90 Days'),
-          description: t('lifecycle.renewalInfoDesc', 'Start planning contract renewal'),
+          title: t('lifecycle.renewalInfo'),
+          description: t('lifecycle.renewalInfoDesc'),
           entityId: contract.id,
           entityName: startupName,
           daysUntil: daysUntilEnd,
-          actionLabel: t('lifecycle.planRenewal', 'Plan Renewal'),
+          actionLabel: t('lifecycle.planRenewal'),
           actionType: 'review',
         });
       }
@@ -162,14 +162,14 @@ export function ContractLifecycleHub() {
           id: `anniversary-${contract.id}`,
           type: 'anniversary',
           severity,
-          title: t('lifecycle.anniversary', 'Year {{year}} Anniversary', { year: years + 1 }),
+          title: t('lifecycle.anniversary', { year: years + 1 }),
           description: years >= 2 
-            ? t('lifecycle.anniversaryReview', 'Consider fee review after {{years}} years', { years: years + 1 })
-            : t('lifecycle.anniversaryInfo', 'Incubation anniversary approaching'),
+            ? t('lifecycle.anniversaryReview', { years: years + 1 })
+            : t('lifecycle.anniversaryInfo'),
           entityId: contract.id,
           entityName: startupName,
           daysUntil: daysUntilAnniversary,
-          actionLabel: t('lifecycle.reviewFees', 'Review Fees'),
+          actionLabel: t('lifecycle.reviewFees'),
           actionType: 'review',
         });
       }
@@ -180,11 +180,11 @@ export function ContractLifecycleHub() {
           id: `3year-${contract.id}`,
           type: 'anniversary',
           severity: 'critical',
-          title: t('lifecycle.threeYearMark', '3+ Year Mark'),
-          description: t('lifecycle.threeYearMarkDesc', 'Startup has been incubating for over 3 years - review required'),
+          title: t('lifecycle.threeYearMark'),
+          description: t('lifecycle.threeYearMarkDesc'),
           entityId: contract.id,
           entityName: startupName,
-          actionLabel: t('lifecycle.conductReview', 'Conduct Review'),
+          actionLabel: t('lifecycle.conductReview'),
           actionType: 'review',
         });
       }
@@ -238,7 +238,7 @@ export function ContractLifecycleHub() {
         break;
       }
       case 'archive':
-        toast.info(t('lifecycle.archiveNotImplemented', 'Archive functionality coming soon'));
+        toast.info(t('lifecycle.archiveNotImplemented'));
         break;
     }
   };
@@ -252,9 +252,9 @@ export function ContractLifecycleHub() {
         ...data,
       });
       setConvertDialogItem(null);
-      toast.success(t('lifecycle.converted', 'Successfully converted to startup with contract'));
+      toast.success(t('lifecycle.converted'));
     } catch (err) {
-      toast.error(t('lifecycle.convertError', 'Failed to convert lead'));
+      toast.error(t('lifecycle.convertError'));
     }
   };
   
@@ -275,17 +275,17 @@ export function ContractLifecycleHub() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              {t('lifecycle.title', 'Contract Lifecycle Hub')}
+              {t('lifecycle.title')}
             </h2>
             <p className="text-muted-foreground">
-              {t('lifecycle.subtitle', 'Manage the complete journey from lead to renewal')}
+              {t('lifecycle.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {stats.criticalAlerts > 0 && (
               <Badge variant="destructive" className="gap-1">
                 <AlertTriangle className="h-3 w-3" />
-                {stats.criticalAlerts} {t('lifecycle.criticalAlerts', 'Critical')}
+                {stats.criticalAlerts} {t('lifecycle.criticalAlerts')}
               </Badge>
             )}
           </div>
@@ -296,13 +296,13 @@ export function ContractLifecycleHub() {
           <Card className="border-l-4 border-l-green-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('lifecycle.activeContracts', 'Active Contracts')}
+                {t('lifecycle.activeContracts')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalActive}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.pendingSignature > 0 && `+${stats.pendingSignature} pending signature`}
+                {stats.pendingSignature > 0 && t('lifecycle.pendingSignature', { count: stats.pendingSignature })}
               </p>
             </CardContent>
           </Card>
@@ -310,13 +310,13 @@ export function ContractLifecycleHub() {
           <Card className="border-l-4 border-l-amber-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('lifecycle.expiringContracts', 'Expiring in 30 Days')}
+                {t('lifecycle.expiringContracts')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-amber-600">{stats.expiringIn30}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.expiringIn90} in 90 days
+                {t('lifecycle.expiringIn90', { count: stats.expiringIn90 })}
               </p>
             </CardContent>
           </Card>
@@ -324,13 +324,13 @@ export function ContractLifecycleHub() {
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('lifecycle.readyForContract', 'Ready for Contract')}
+                {t('lifecycle.readyForContract')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">{stats.leadsReadyForContract}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Leads in contracted stage
+                {t('lifecycle.leadsInContracted')}
               </p>
             </CardContent>
           </Card>
@@ -338,13 +338,13 @@ export function ContractLifecycleHub() {
           <Card className="border-l-4 border-l-slate-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {t('lifecycle.drafts', 'Draft Contracts')}
+                {t('lifecycle.drafts')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.drafts}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Awaiting completion
+                {t('lifecycle.awaitingCompletion')}
               </p>
             </CardContent>
           </Card>
@@ -354,20 +354,20 @@ export function ContractLifecycleHub() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">
-              {t('lifecycle.pipeline', 'Lead to Contract Pipeline')}
+              {t('lifecycle.pipeline')}
             </CardTitle>
             <CardDescription>
-              {t('lifecycle.pipelineDesc', 'Visual overview of your conversion funnel')}
+              {t('lifecycle.pipelineDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between gap-2">
               {[
-                { label: 'New Leads', count: pipeline.new, color: 'bg-slate-500' },
-                { label: 'In Meetings', count: pipeline.meeting, color: 'bg-blue-500' },
-                { label: 'Qualified', count: pipeline.qualified, color: 'bg-purple-500' },
-                { label: 'Contracted', count: pipeline.contracted, color: 'bg-green-500' },
-                { label: 'Active', count: pipeline.active, color: 'bg-emerald-600' },
+                { label: t('lifecycle.pipelineNew'), count: pipeline.new, color: 'bg-slate-500' },
+                { label: t('lifecycle.pipelineMeetings'), count: pipeline.meeting, color: 'bg-blue-500' },
+                { label: t('lifecycle.pipelineQualified'), count: pipeline.qualified, color: 'bg-purple-500' },
+                { label: t('lifecycle.pipelineContracted'), count: pipeline.contracted, color: 'bg-green-500' },
+                { label: t('lifecycle.pipelineActive'), count: pipeline.active, color: 'bg-emerald-600' },
               ].map((stage, i, arr) => (
                 <div key={stage.label} className="flex items-center flex-1">
                   <div className="flex-1 text-center">
@@ -390,18 +390,18 @@ export function ContractLifecycleHub() {
           <TabsList>
             <TabsTrigger value="overview" className="gap-1.5">
               <TrendingUp className="h-4 w-4" />
-              {t('lifecycle.tabOverview', 'Overview')}
+              {t('lifecycle.tabOverview')}
             </TabsTrigger>
             <TabsTrigger value="alerts" className="gap-1.5">
               <Bell className="h-4 w-4" />
-              {t('lifecycle.tabAlerts', 'Alerts')}
+              {t('lifecycle.tabAlerts')}
               {alerts.length > 0 && (
                 <Badge variant="secondary" className="ml-1 text-xs">{alerts.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-1.5">
               <Rocket className="h-4 w-4" />
-              {t('lifecycle.tabPendingConversions', 'Pending Conversions')}
+              {t('lifecycle.tabPendingConversions')}
               {contractedLeadsWithoutContract.length > 0 && (
                 <Badge variant="destructive" className="ml-1 text-xs">{contractedLeadsWithoutContract.length}</Badge>
               )}
@@ -415,7 +415,7 @@ export function ContractLifecycleHub() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {t('lifecycle.upcomingRenewals', 'Upcoming Renewals')}
+                    {t('lifecycle.upcomingRenewals')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -423,7 +423,7 @@ export function ContractLifecycleHub() {
                     {alerts.filter(a => a.type === 'renewal_due').length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-8">
                         <CheckCircle2 className="h-8 w-8 mb-2 text-green-500" />
-                        <p className="text-sm">{t('lifecycle.noUpcomingRenewals', 'No renewals due in the next 90 days')}</p>
+                        <p className="text-sm">{t('lifecycle.noUpcomingRenewals')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -442,7 +442,7 @@ export function ContractLifecycleHub() {
                               <span className="text-sm font-medium">{alert.entityName}</span>
                             </div>
                             <Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>
-                              {alert.daysUntil} days
+                              {t('lifecycle.daysRemaining', { count: alert.daysUntil })}
                             </Badge>
                           </div>
                         ))}
@@ -457,7 +457,7 @@ export function ContractLifecycleHub() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    {t('lifecycle.anniversaryReviews', 'Anniversary Reviews')}
+                    {t('lifecycle.anniversaryReviews')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -465,7 +465,7 @@ export function ContractLifecycleHub() {
                     {alerts.filter(a => a.type === 'anniversary').length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-8">
                         <CheckCircle2 className="h-8 w-8 mb-2 text-green-500" />
-                        <p className="text-sm">{t('lifecycle.noAnniversaries', 'No anniversaries requiring attention')}</p>
+                        <p className="text-sm">{t('lifecycle.noAnniversaries')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -504,10 +504,10 @@ export function ContractLifecycleHub() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    {t('lifecycle.aiAnalysis', 'AI Contract Intelligence')}
+                    {t('lifecycle.aiAnalysis')}
                   </CardTitle>
                   <CardDescription>
-                    {t('lifecycle.aiAnalysisDesc', 'Select a contract to analyze with AI — extracts key dates, risks, and recommended actions')}
+                    {t('lifecycle.aiAnalysisDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -530,18 +530,18 @@ export function ContractLifecycleHub() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
-                  {t('lifecycle.allAlerts', 'All Lifecycle Alerts')}
+                  {t('lifecycle.allAlerts')}
                 </CardTitle>
                 <CardDescription>
-                  {t('lifecycle.alertsDesc', 'Action items requiring your attention')}
+                  {t('lifecycle.alertsDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {alerts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-                    <h3 className="text-lg font-medium">{t('lifecycle.noAlerts', 'All Clear!')}</h3>
-                    <p className="text-muted-foreground">{t('lifecycle.noAlertsDesc', 'No lifecycle alerts at this time')}</p>
+                    <h3 className="text-lg font-medium">{t('lifecycle.noAlerts')}</h3>
+                    <p className="text-muted-foreground">{t('lifecycle.noAlertsDesc')}</p>
                   </div>
                 ) : (
                   <ScrollArea className="h-[400px]">
@@ -596,18 +596,18 @@ export function ContractLifecycleHub() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Rocket className="h-4 w-4" />
-                  {t('lifecycle.pendingConversions', 'Leads Ready for Conversion')}
+                  {t('lifecycle.pendingConversions')}
                 </CardTitle>
                 <CardDescription>
-                  {t('lifecycle.pendingConversionsDesc', 'These leads are in the contracted stage and need workspace + contract setup')}
+                  {t('lifecycle.pendingConversionsDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {contractedLeadsWithoutContract.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-                    <h3 className="text-lg font-medium">{t('lifecycle.allConverted', 'All Caught Up!')}</h3>
-                    <p className="text-muted-foreground">{t('lifecycle.allConvertedDesc', 'All contracted leads have been converted')}</p>
+                    <h3 className="text-lg font-medium">{t('lifecycle.allConverted')}</h3>
+                    <p className="text-muted-foreground">{t('lifecycle.allConvertedDesc')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -633,7 +633,7 @@ export function ContractLifecycleHub() {
                           className="gap-1"
                         >
                           <Rocket className="h-4 w-4" />
-                          {t('lifecycle.convert', 'Convert to Startup')}
+                          {t('lifecycle.convert')}
                         </Button>
                       </div>
                     ))}
@@ -692,10 +692,10 @@ function ConvertDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Rocket className="h-5 w-5" />
-            {t('lifecycle.convertToStartup', 'Convert to Startup')}
+            {t('lifecycle.convertToStartup')}
           </DialogTitle>
           <DialogDescription>
-            {t('lifecycle.convertDesc', 'Create workspace and contract for {{name}}', { 
+            {t('lifecycle.convertDesc', { 
               name: item.organization_name || item.contact_name 
             })}
           </DialogDescription>
@@ -703,10 +703,10 @@ function ConvertDialog({
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>{t('lifecycle.program', 'Program')}</Label>
+            <Label>{t('lifecycle.program')}</Label>
             <Select value={programId} onValueChange={setProgramId}>
               <SelectTrigger>
-                <SelectValue placeholder={t('lifecycle.selectProgram', 'Select program')} />
+                <SelectValue placeholder={t('lifecycle.selectProgram')} />
               </SelectTrigger>
               <SelectContent>
                 {programs.map(p => (
@@ -717,25 +717,25 @@ function ConvertDialog({
           </div>
           
           <div className="space-y-2">
-            <Label>{t('lifecycle.stage', 'Stage')}</Label>
+            <Label>{t('lifecycle.stage')}</Label>
             <Select value={stage} onValueChange={setStage}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ideation">Ideation</SelectItem>
-                <SelectItem value="validation">Validation</SelectItem>
-                <SelectItem value="product_development">Product Development</SelectItem>
-                <SelectItem value="growth">Growth</SelectItem>
+                <SelectItem value="ideation">{t('lifecycle.stageIdeation')}</SelectItem>
+                <SelectItem value="validation">{t('lifecycle.stageValidation')}</SelectItem>
+                <SelectItem value="product_development">{t('lifecycle.stageProductDev')}</SelectItem>
+                <SelectItem value="growth">{t('lifecycle.stageGrowth')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="space-y-2">
-            <Label>{t('lifecycle.incubationType', 'Incubation Type')}</Label>
+            <Label>{t('lifecycle.incubationType')}</Label>
             <Select value={incubationTypeId} onValueChange={setIncubationTypeId}>
               <SelectTrigger>
-                <SelectValue placeholder={t('lifecycle.selectType', 'Select type')} />
+                <SelectValue placeholder={t('lifecycle.selectType')} />
               </SelectTrigger>
               <SelectContent>
                 {incubationTypes.filter(t => t.is_active).map(type => (
@@ -749,10 +749,10 @@ function ConvertDialog({
           
           {selectedType?.requires_space && (
             <div className="space-y-2">
-              <Label>{t('lifecycle.building', 'Building')}</Label>
+              <Label>{t('lifecycle.building')}</Label>
               <Select value={buildingId} onValueChange={setBuildingId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('lifecycle.selectBuilding', 'Select building')} />
+                  <SelectValue placeholder={t('lifecycle.selectBuilding')} />
                 </SelectTrigger>
                 <SelectContent>
                   {buildings.filter(b => b.is_active).map(b => (
@@ -765,14 +765,14 @@ function ConvertDialog({
           
           {selectedType && (
             <div className="p-3 rounded-lg bg-muted/50 text-sm">
-              <p className="font-medium">{t('lifecycle.contractPreview', 'Contract Preview')}</p>
+              <p className="font-medium">{t('lifecycle.contractPreview')}</p>
               <div className="mt-2 space-y-1 text-muted-foreground">
-                <p>Monthly Fee: €{selectedType.base_monthly_fee}</p>
+                <p>{t('lifecycle.monthlyFee', { amount: selectedType.base_monthly_fee })}</p>
                 {selectedType.includes_mentoring_hours > 0 && (
-                  <p>Mentoring: {selectedType.includes_mentoring_hours}h/month</p>
+                  <p>{t('lifecycle.mentoring', { hours: selectedType.includes_mentoring_hours })}</p>
                 )}
                 {selectedType.equity_percentage && (
-                  <p>Equity: {selectedType.equity_percentage}%</p>
+                  <p>{t('lifecycle.equity', { percentage: selectedType.equity_percentage })}</p>
                 )}
               </div>
             </div>
@@ -781,7 +781,7 @@ function ConvertDialog({
         
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            {t('common.cancel', 'Cancel')}
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={() => onConvert({ 
@@ -796,12 +796,12 @@ function ConvertDialog({
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {t('lifecycle.converting', 'Converting...')}
+                {t('lifecycle.converting')}
               </>
             ) : (
               <>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                {t('lifecycle.createWorkspaceContract', 'Create Workspace & Contract')}
+                {t('lifecycle.createWorkspaceContract')}
               </>
             )}
           </Button>
