@@ -3155,7 +3155,42 @@
       "setNextAction": "Definir Próxima Ação (Amanhã)",
       "archiveSelected": "Arquivar Selecionados",
       "selectLeads": "Selecione leads para ações em massa"
+    },
+    "analyticsDashboard": {
+      "activePipeline": "Pipeline Ativo",
+      "hotWarmCold": "{{hot}} quentes, {{warm}} mornos, {{cold}} frios",
+      "needsAttention": "Requer Atenção",
+      "overdueNoAction": "{{overdue}} em atraso, {{noAction}} sem ação definida",
+      "dueToday": "Para Hoje",
+      "dueTodayDesc": "Ações agendadas para hoje",
+      "converted30d": "Convertidos (30d)",
+      "converted30dDesc": "Leads → Contratados este mês",
+      "pipelineHealth": "Saúde do Pipeline",
+      "stageDistribution": "Distribuição por fases e taxas de conversão",
+      "avgCycle": "Ciclo médio: {{days}} dias",
+      "leads": "leads",
+      "avgDaysInStage": "Média {{days}}d na fase",
+      "targetDays": "(objetivo: {{days}}d)",
+      "leadScoring": "Distribuição de Pontuação",
+      "hotLeads": "Leads Quentes (70+)",
+      "warmLeads": "Leads Mornos (40-69)",
+      "coldLeads": "Leads Frios (<40)",
+      "scoreExplanation": "Pontuação baseada em: recência de atividade, progressão de fase, tempo de resposta e nível de envolvimento"
     }
+  },
+  "savedViews": {
+    "title": "Vistas",
+    "saved": "Vista guardada",
+    "deleted": "Vista eliminada",
+    "saveFailed": "Falha ao guardar vista",
+    "deleteFailed": "Falha ao eliminar vista",
+    "noViews": "Ainda sem vistas guardadas",
+    "saveCurrentView": "Guardar vista atual",
+    "saveView": "Guardar Vista",
+    "saveDescription": "Guarde os filtros atuais como vista nomeada para acesso rápido.",
+    "viewName": "Nome da vista",
+    "namePlaceholder": "ex. Meus leads ativos",
+    "setAsDefault": "Definir como vista padrão"
   },
   "oneThingToday": {
     "focusToday": "Foco de Hoje",
