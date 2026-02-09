@@ -61,8 +61,8 @@ function generateBreadcrumbs(pathname: string, t: (key: string) => string): Brea
 
   const routeLabels: Record<string, string> = {
     'my-workspaces': t('nav.myWorkspaces'),
-    'workspace': 'Workspace',
-    'admin': t('nav.admin'),
+    'workspace': t('nav.workspaces'),
+    'admin': t('nav.adminPanel'),
     'settings': t('nav.settings'),
     'mentors': t('nav.mentors'),
   };
@@ -79,7 +79,7 @@ function generateBreadcrumbs(pathname: string, t: (key: string) => string): Brea
     if (isUuid) {
       // For UUIDs, we'll show a generic label or skip
       breadcrumbs.push({
-        label: t('common.details') || 'Details',
+        label: t('common.details'),
         href: currentPath,
       });
     } else {
