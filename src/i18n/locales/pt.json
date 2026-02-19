@@ -1175,7 +1175,37 @@
     "currentModel": "Modelo Financeiro Atual",
     "replaceModel": "Substituir Modelo",
     "noFinancialModel": "Nenhum modelo financeiro carregado ainda",
-    "uploadToTrack": "Carregue o seu modelo financeiro para ativar o acompanhamento de valorização e projeções"
+    "uploadToTrack": "Carregue o seu modelo financeiro para ativar o acompanhamento de valorização e projeções",
+    "categories": {
+      "pitch_deck": "Pitch Deck",
+      "financial_model": "Modelo Financeiro",
+      "legal": "Legal",
+      "marketing": "Marketing",
+      "product": "Produto",
+      "team": "Equipa",
+      "market": "Mercado",
+      "operations": "Operações",
+      "funding": "Financiamento",
+      "other": "Outro"
+    },
+    "allCategories": "Todas as categorias"
+  },
+  "documentsPage": {
+    "title": "Repositório",
+    "subtitle": "Documentos submetidos e templates disponíveis.",
+    "submittedDocs": "Documentos",
+    "templates": "Templates",
+    "searchPlaceholder": "Pesquisar documentos...",
+    "searchTemplates": "Pesquisar templates...",
+    "documentsFound": "documentos",
+    "filtered": "filtrado",
+    "emptyTitle": "Sem documentos",
+    "emptyDescription": "Os documentos submetidos nos espaços de trabalho aparecerão aqui.",
+    "noTemplates": "Sem templates disponíveis",
+    "noTemplatesDesc": "Ainda não existem templates configurados.",
+    "globalTemplate": "Template global",
+    "programTemplate": "Template de programa",
+    "downloadFailed": "Falha no download"
   },
   "team": {
     "title": "Co-fundadores",

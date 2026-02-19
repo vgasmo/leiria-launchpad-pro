@@ -1720,7 +1720,37 @@
     "currentModel": "Current Financial Model",
     "replaceModel": "Replace Model",
     "noFinancialModel": "No financial model uploaded yet",
-    "uploadToTrack": "Upload your financial model to enable valuation tracking and projections"
+    "uploadToTrack": "Upload your financial model to enable valuation tracking and projections",
+    "categories": {
+      "pitch_deck": "Pitch Deck",
+      "financial_model": "Financial Model",
+      "legal": "Legal",
+      "marketing": "Marketing",
+      "product": "Product",
+      "team": "Team",
+      "market": "Market",
+      "operations": "Operations",
+      "funding": "Funding",
+      "other": "Other"
+    },
+    "allCategories": "All categories"
+  },
+  "documentsPage": {
+    "title": "Repository",
+    "subtitle": "Submitted documents and available templates.",
+    "submittedDocs": "Documents",
+    "templates": "Templates",
+    "searchPlaceholder": "Search documents...",
+    "searchTemplates": "Search templates...",
+    "documentsFound": "documents",
+    "filtered": "filtered",
+    "emptyTitle": "No documents",
+    "emptyDescription": "Documents submitted in workspaces will appear here.",
+    "noTemplates": "No templates available",
+    "noTemplatesDesc": "No templates configured yet.",
+    "globalTemplate": "Global template",
+    "programTemplate": "Program template",
+    "downloadFailed": "Download failed"
   },
   "login": {
     "welcome": "Welcome",

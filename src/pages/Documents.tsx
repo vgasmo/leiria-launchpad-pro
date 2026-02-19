@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { pt as ptLocale, enUS } from 'date-fns/locale';
 import {
   FileText,
   File,
@@ -46,18 +47,17 @@ const DOCUMENT_CATEGORY_KEYS = [
   'other',
 ] as const;
 
+function normalizeCategoryKey(raw: string): string {
+  // Handle both "Financial Model" (label) and "financial_model" (key) formats
+  const normalized = raw.toLowerCase().replace(/[\s-]+/g, '_');
+  const validKeys = ['pitch_deck', 'financial_model', 'legal', 'marketing', 'product', 'team', 'market', 'operations', 'funding', 'other'];
+  return validKeys.includes(normalized) ? normalized : 'other';
+}
+
 function getCategoryLabel(key: string, t: (k: string, opts?: Record<string, string>) => string): string {
-  const map: Record<string, string> = {
-    all: t('documents.allCategories', { defaultValue: 'Todas as categorias' }),
-    pitch_deck: t('documents.categories.pitch_deck', { defaultValue: 'Pitch Deck' }),
-    financial_model: t('documents.categories.financial_model', { defaultValue: 'Modelo Financeiro' }),
-    legal: t('documents.categories.legal', { defaultValue: 'Legal' }),
-    marketing: t('documents.categories.marketing', { defaultValue: 'Marketing' }),
-    product: t('documents.categories.product', { defaultValue: 'Produto' }),
-    team: t('documents.categories.team', { defaultValue: 'Equipa' }),
-    other: t('documents.categories.other', { defaultValue: 'Outro' }),
-  };
-  return map[key] || key;
+  if (key === 'all') return t('documents.allCategories', { defaultValue: 'Todas as categorias' });
+  const normalizedKey = normalizeCategoryKey(key);
+  return t(`documents.categories.${normalizedKey}`, { defaultValue: key });
 }
 
 function getFileIcon(documentType: string) {
@@ -72,7 +72,8 @@ function getFileIcon(documentType: string) {
 }
 
 export default function Documents() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('pt') ? ptLocale : enUS;
   const { data: documents, isLoading: docsLoading } = useAllDocuments();
   const { data: templates, isLoading: templatesLoading } = useTemplates();
   const getDocumentUrl = useGetDocumentUrl();
@@ -89,7 +90,7 @@ export default function Documents() {
         doc.name.toLowerCase().includes(search.toLowerCase()) ||
         doc.description?.toLowerCase().includes(search.toLowerCase()) ||
         doc.workspace_name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
+      const matchesCategory = categoryFilter === 'all' || normalizeCategoryKey(doc.category || 'other') === categoryFilter;
       return matchesSearch && matchesCategory;
     });
   }, [documents, search, categoryFilter]);
@@ -259,7 +260,7 @@ export default function Documents() {
                                       <span className="truncate max-w-[100px]">{doc.uploader.full_name}</span>
                                     </div>
                                   )}
-                                  <span>{format(new Date(doc.created_at), 'dd MMM yyyy')}</span>
+                                  <span>{format(new Date(doc.created_at), 'dd MMM yyyy', { locale: dateLocale })}</span>
                                 </div>
                               </div>
                             </div>
