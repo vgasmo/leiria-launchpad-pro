@@ -320,14 +320,17 @@ export function AppSidebar() {
             collapsed ? "justify-center px-2" : "justify-center px-4"
           )}
         >
-          <img 
-            src={startupLeiriaLogo} 
-            alt="Startup Leiria" 
-            className={cn(
-              "transition-all duration-300 pointer-events-none brightness-0 invert",
-              collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
-            )}
-          />
+          <div className={cn(
+            "transition-all duration-300 rounded-lg overflow-hidden",
+            collapsed ? "h-8 w-auto max-w-[40px]" : "h-10 w-auto max-w-[180px]"
+          )}>
+            <img 
+              src={startupLeiriaLogo} 
+              alt="Startup Leiria" 
+              className="h-full w-auto object-contain pointer-events-none"
+              style={{ filter: 'invert(1)', mixBlendMode: 'screen' }}
+            />
+          </div>
         </Link>
 
         {/* Collapse toggle */}
