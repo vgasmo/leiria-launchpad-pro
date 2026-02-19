@@ -203,7 +203,7 @@ export default function PublicBooking() {
             <CardContent>
               {Object.keys(slotsByDate).length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">
-                  No available slots at the moment. Please try again later.
+                  Sem horários disponíveis de momento. Tente novamente mais tarde.
                 </p>
               ) : (
                 <div className="space-y-4">

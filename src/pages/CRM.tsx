@@ -380,6 +380,7 @@ export default function CRM() {
                       <div className="p-8 text-center text-muted-foreground">
                         <Focus className="h-12 w-12 mx-auto mb-3 opacity-20" />
                         <p className="font-medium">{t('crm.noFocusItems')}</p>
+                        <p className="text-xs mt-1">{t('crm.noFocusItemsHint', { defaultValue: 'Não existem leads que precisem de atenção imediata. Bom trabalho!' })}</p>
                       </div>
                     ) : (
                       <div className="divide-y">
