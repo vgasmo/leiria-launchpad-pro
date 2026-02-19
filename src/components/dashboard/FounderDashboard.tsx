@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -6,6 +6,8 @@ import {
   Plus,
   Clock,
   RotateCcw,
+  BookOpenCheck,
+  X,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -200,7 +202,8 @@ export function FounderDashboard({
         workspaceId={workspace.id}
       />
 
-      {/* HERO BLOCK: Focus Today */}
+      {/* Quick Guide Banner for first-time founders */}
+      <QuickGuideBanner />
       <section className="space-y-4">
         {/* One Thing Today - Single focus action */}
         <OneThingToday workspace={workspace} />
@@ -280,5 +283,56 @@ export function FounderDashboard({
         onScheduleSession={handleScheduleSession}
       />
     </div>
+  );
+}
+
+function QuickGuideBanner() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [dismissed, setDismissed] = useState(() => {
+    return localStorage.getItem('shown_quickguide_founder') === 'true';
+  });
+
+  if (dismissed) return null;
+
+  const handleDismiss = () => {
+    localStorage.setItem('shown_quickguide_founder', 'true');
+    setDismissed(true);
+  };
+
+  return (
+    <Card className="border-primary/20 bg-primary/5">
+      <CardContent className="py-3 px-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+            <BookOpenCheck className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">
+              {t('quickGuideBanner.title', { defaultValue: 'Novo aqui? Consulta o Guia Rápido' })}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t('quickGuideBanner.description', { defaultValue: 'Aprende a tirar o máximo partido da plataforma passo a passo.' })}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { handleDismiss(); navigate('/guide'); }}
+            className="shrink-0 gap-1.5"
+          >
+            {t('quickGuideBanner.cta', { defaultValue: 'Abrir Guia' })}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleDismiss}
+            className="h-7 w-7 shrink-0 text-muted-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -148,7 +148,7 @@ export function useInstantiatePlaybook() {
         .select('id, status')
         .eq('workspace_id', workspaceId)
         .eq('playbook_id', playbookId)
-        .single();
+        .maybeSingle();
 
       if (existing?.status === 'instantiated') {
         throw new Error(t('playbooks.errors.alreadyInstantiated'));
@@ -312,7 +312,7 @@ export function useDismissPlaybook() {
         .select('id')
         .eq('workspace_id', workspaceId)
         .eq('playbook_id', playbookId)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         const { error } = await supabase

@@ -170,7 +170,46 @@
   "filters": {
     "overdueActions": "Ações Atrasadas",
     "meetingsToday": "Reuniões Hoje",
-    "missingKpi": "KPIs em Falta"
+    "missingKpi": "KPIs em Falta",
+    "searchStartups": "Pesquisar startups...",
+    "sortBy": "Ordenar",
+    "byPriority": "Por Prioridade",
+    "byUrgency": "Por Urgência",
+    "byNextMeeting": "Por Próxima Reunião",
+    "byName": "Por Nome",
+    "lastUpdated": "Última Atualização",
+    "program": "Programa",
+    "allPrograms": "Todos os Programas",
+    "noProgramsAvailable": "Sem programas disponíveis",
+    "stage": "Fase",
+    "allStages": "Todas as Fases",
+    "health": "Saúde",
+    "allHealth": "Toda a Saúde",
+    "priority": "Prioridade",
+    "allPriorities": "Todas as Prioridades",
+    "more": "Mais",
+    "missingKpiMonth": "KPI em falta este mês",
+    "overdueActionItems": "Ações em atraso",
+    "clearAll": "Limpar Todos os Filtros",
+    "clearQuickFilters": "Limpar filtros rápidos"
+  },
+  "emptyState": {
+    "noMatchingWorkspaces": "Sem resultados correspondentes",
+    "adjustFilters": "Tenta ajustar os filtros ou termos de pesquisa para encontrar o que procuras.",
+    "clearFilters": "Limpar Todos os Filtros",
+    "welcomeFounder": "Começa a Tua Jornada",
+    "welcomeToWorkspace": "Bem-vindo aos Espaços de Trabalho",
+    "founderNoStartups": "Regista a tua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.",
+    "noAccess": "Ainda não tens acesso a nenhum espaço de trabalho. Contacta um administrador ou junta-te a um programa.",
+    "founderValue": "Obtém orientação de mentores e acompanha os teus KPIs num único lugar.",
+    "createFirstStartup": "Criar a Tua Startup",
+    "explorePrograms": "Explorar Programas"
+  },
+  "quickGuideBanner": {
+    "title": "Novo aqui? Consulta o Guia Rápido",
+    "description": "Aprende a tirar o máximo partido da plataforma passo a passo.",
+    "cta": "Abrir Guia Rápido",
+    "dismiss": "Entendido"
   },
   "nav": {
     "home": "Início",

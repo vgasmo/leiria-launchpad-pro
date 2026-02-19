@@ -203,7 +203,46 @@
   "filters": {
     "overdueActions": "Overdue Actions",
     "meetingsToday": "Meetings Today",
-    "missingKpi": "Missing KPIs"
+    "missingKpi": "Missing KPIs",
+    "searchStartups": "Search startups...",
+    "sortBy": "Sort by",
+    "byPriority": "By Priority",
+    "byUrgency": "By Urgency",
+    "byNextMeeting": "By Next Meeting",
+    "byName": "By Name",
+    "lastUpdated": "Last Updated",
+    "program": "Program",
+    "allPrograms": "All Programs",
+    "noProgramsAvailable": "No programs available",
+    "stage": "Stage",
+    "allStages": "All Stages",
+    "health": "Health",
+    "allHealth": "All Health",
+    "priority": "Priority",
+    "allPriorities": "All Priorities",
+    "more": "More",
+    "missingKpiMonth": "Missing KPI this month",
+    "overdueActionItems": "Overdue action items",
+    "clearAll": "Clear All Filters",
+    "clearQuickFilters": "Clear quick filters"
+  },
+  "emptyState": {
+    "noMatchingWorkspaces": "No matching results",
+    "adjustFilters": "Try adjusting your filters or search terms to find what you're looking for.",
+    "clearFilters": "Clear All Filters",
+    "welcomeFounder": "Start Your Startup Journey",
+    "welcomeToWorkspace": "Welcome to Workspaces",
+    "founderNoStartups": "Register your startup to track progress, connect with mentors, and prepare for investment.",
+    "noAccess": "You don't have access to any workspaces yet. Contact an administrator or join a program.",
+    "founderValue": "Get guidance from mentors and track your KPIs in one place.",
+    "createFirstStartup": "Create Your Startup",
+    "explorePrograms": "Explore Programs"
+  },
+  "quickGuideBanner": {
+    "title": "New here? Check the Quick Guide",
+    "description": "Learn how to get the most out of the platform step by step.",
+    "cta": "Open Quick Guide",
+    "dismiss": "Got it"
   },
   "nav": {
     "home": "Home",

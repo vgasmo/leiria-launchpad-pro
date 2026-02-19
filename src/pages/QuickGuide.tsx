@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Building2, 
   Target, 
@@ -24,7 +25,6 @@ import {
   Rocket,
   Users,
   TrendingUp,
-  Clock,
   Star,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,14 +57,15 @@ const ROLE_GUIDES: RoleGuide[] = [
     icon: Rocket,
     mission: 'O teu centro de comando diário. Foca-te no que importa hoje para crescer amanhã.',
     quickStart: [
-      'Completa o perfil da tua startup',
-      'Define os teus primeiros KPIs',
-      'Agenda uma sessão com o consultor',
-      'Cria as tuas primeiras ações',
+      '1. Define os teus Milestones — os marcos de progresso da tua startup',
+      '2. Cria Ações derivadas de cada milestone com prazos claros',
+      '3. Configura KPIs e atualiza-os semanalmente (MRR, utilizadores, etc.)',
+      '4. Carrega documentos e evidências para preparar investidores',
+      '5. Agenda sessões com o teu consultor ou pede mentoria quando bloqueado',
     ],
     navigation: [
-      { icon: Home, title: 'Início', description: 'O teu painel diário com foco no "Hoje" - ações prioritárias e próximos passos' },
-      { icon: Building2, title: 'A Minha Startup', description: 'Visão geral da tua startup, equipa, saúde e progresso' },
+      { icon: Home, title: 'Início', description: 'O teu painel diário com foco no "Hoje" — ações prioritárias e próximos passos' },
+      { icon: Building2, title: 'A Minha Startup', description: 'Visão geral da tua startup: equipa, saúde, progresso e milestones' },
       { icon: Target, title: 'Objetivos & KPIs', description: 'Acompanha métricas chave: MRR, utilizadores, runway, etc.' },
       { icon: Calendar, title: 'Sessões & Mentoria', description: 'Agenda e histórico de sessões com consultores e mentores' },
       { icon: CheckSquare, title: 'Ações & Plano', description: 'Lista de tarefas e milestones com prazos' },
@@ -74,7 +75,7 @@ const ROLE_GUIDES: RoleGuide[] = [
     tips: [
       '🎯 Foca-te em 1-3 ações por dia, não mais',
       '📊 Atualiza KPIs semanalmente para ver tendências',
-      '📅 Agenda sessões regularmente - consistência é chave',
+      '📅 Agenda sessões regularmente — consistência é chave',
       '📝 Documenta aprendizagens após cada sessão',
     ],
   },
@@ -101,7 +102,7 @@ const ROLE_GUIDES: RoleGuide[] = [
       { icon: BarChart3, title: 'Relatórios', description: 'Analytics e métricas agregadas' },
     ],
     tips: [
-      '🔴 Prioriza startups "at-risk" no início do dia',
+      '🔴 Prioriza startups "em risco" no início do dia',
       '📞 Marca follow-up no fim de cada sessão',
       '📊 Usa frameworks de sessão para consistência',
       '🎯 Define KPIs específicos por fase da startup',
@@ -144,14 +145,14 @@ const ROLE_GUIDES: RoleGuide[] = [
     mission: 'Garante a operação do ecossistema. Gere utilizadores, programas e configurações.',
     quickStart: [
       'Configura integrações (Microsoft Graph)',
-      'Cria programas e cohorts',
+      'Cria programas e coortes',
       'Gere permissões de utilizadores',
       'Monitoriza qualidade de dados',
     ],
     navigation: [
       { icon: Briefcase, title: 'Operações', description: 'Dashboard operacional com métricas chave' },
       { icon: Contact, title: 'CRM', description: 'Pipeline de entrada e gestão de leads' },
-      { icon: GraduationCap, title: 'Programas & Cohorts', description: 'Configuração de programas de incubação' },
+      { icon: GraduationCap, title: 'Programas & Coortes', description: 'Configuração de programas de incubação' },
       { icon: BarChart3, title: 'Relatórios', description: 'Analytics e exportação de dados' },
       { icon: Users, title: 'Utilizadores & Permissões', description: 'Gestão de roles e acessos' },
       { icon: Cog, title: 'Configuração', description: 'Integrações, feature flags e sistema' },
@@ -167,22 +168,46 @@ const ROLE_GUIDES: RoleGuide[] = [
 
 export default function QuickGuide() {
   const { t } = useTranslation();
-  const { roles, isAdmin, isConsultor, isMentor } = useAuth();
+  const { roles, isAdmin, isConsultor, isMentor, isAuthReady } = useAuth();
   const isFounder = roles.includes('founder');
+  const isStaff = isAdmin || isConsultor;
+
+  // Show skeleton until auth is ready
+  if (!isAuthReady) {
+    return (
+      <AppLayout title={t('guide.title', { defaultValue: 'Guia Rápido' })}>
+        <div className="p-6 max-w-5xl mx-auto space-y-6">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   // Determine default tab based on user's role
   const getDefaultTab = () => {
+    if (isFounder && !isStaff) return 'founder';
+    if (isMentor && !isStaff && !isFounder) return 'mentor';
     if (isAdmin) return 'admin';
     if (isConsultor) return 'consultor';
-    if (isMentor) return 'mentor';
-    if (isFounder) return 'founder';
     return 'founder';
   };
 
+  // Filter which guides to show based on role
+  const getVisibleGuides = (): RoleGuide[] => {
+    if (isStaff) return ROLE_GUIDES; // Staff can see all
+    if (isFounder) return ROLE_GUIDES.filter(g => g.id === 'founder');
+    if (isMentor) return ROLE_GUIDES.filter(g => g.id === 'mentor');
+    return ROLE_GUIDES.filter(g => g.id === 'founder'); // fallback
+  };
+
+  const visibleGuides = getVisibleGuides();
+
   return (
     <AppLayout 
-      title={t('guide.title', 'Guia Rápido')} 
-      subtitle={t('guide.subtitle', 'Tudo o que precisas de saber para começar')}
+      title={t('guide.title', { defaultValue: 'Guia Rápido' })} 
+      subtitle={t('guide.subtitle', { defaultValue: 'Tudo o que precisas de saber para começar' })}
     >
       <div className="p-6 max-w-5xl mx-auto">
         {/* Hero */}
@@ -194,10 +219,10 @@ export default function QuickGuide() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold mb-2">
-                  {t('guide.welcome', 'Bem-vindo ao FoundersBook')}
+                  {t('guide.welcome', { defaultValue: 'Bem-vindo ao FoundersBook' })}
                 </h2>
                 <p className="text-muted-foreground">
-                  {t('guide.intro', 'Esta plataforma adapta-se ao teu perfil. Explora o guia abaixo para entenderes como tirar o máximo partido.')}
+                  {t('guide.intro', { defaultValue: 'Esta plataforma adapta-se ao teu perfil. Explora o guia abaixo para entenderes como tirar o máximo partido.' })}
                 </p>
               </div>
             </div>
@@ -206,21 +231,23 @@ export default function QuickGuide() {
 
         {/* Role Tabs */}
         <Tabs defaultValue={getDefaultTab()} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto gap-2 bg-transparent p-0">
-            {ROLE_GUIDES.map((guide) => (
-              <TabsTrigger
-                key={guide.id}
-                value={guide.id}
-                className="flex flex-col items-center gap-1 py-3 px-4 data-[state=active]:bg-card data-[state=active]:shadow-md border border-transparent data-[state=active]:border-border rounded-lg"
-              >
-                <guide.icon className={cn("h-5 w-5", guide.color)} />
-                <span className="text-sm font-medium">{guide.title}</span>
-                <span className="text-xs text-muted-foreground">{guide.tagline}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {visibleGuides.length > 1 && (
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto gap-2 bg-transparent p-0">
+              {visibleGuides.map((guide) => (
+                <TabsTrigger
+                  key={guide.id}
+                  value={guide.id}
+                  className="flex flex-col items-center gap-1 py-3 px-4 data-[state=active]:bg-card data-[state=active]:shadow-md border border-transparent data-[state=active]:border-border rounded-lg"
+                >
+                  <guide.icon className={cn("h-5 w-5", guide.color)} />
+                  <span className="text-sm font-medium">{guide.title}</span>
+                  <span className="text-xs text-muted-foreground">{guide.tagline}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          )}
 
-          {ROLE_GUIDES.map((guide) => (
+          {visibleGuides.map((guide) => (
             <TabsContent key={guide.id} value={guide.id} className="space-y-6">
               {/* Mission */}
               <Card>
@@ -242,7 +269,7 @@ export default function QuickGuide() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Rocket className="h-4 w-4" />
-                    {t('guide.quickStart', 'Para Começar')}
+                    {t('guide.quickStart', { defaultValue: 'Para Começar' })}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -264,10 +291,10 @@ export default function QuickGuide() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <ArrowRight className="h-4 w-4" />
-                    {t('guide.navigation', 'Navegação')}
+                    {t('guide.navigation', { defaultValue: 'Navegação' })}
                   </CardTitle>
                   <CardDescription>
-                    {t('guide.navigationDesc', 'O que encontras em cada secção')}
+                    {t('guide.navigationDesc', { defaultValue: 'O que encontras em cada secção' })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -292,7 +319,7 @@ export default function QuickGuide() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2 text-warning-foreground">
                     <TrendingUp className="h-4 w-4" />
-                    {t('guide.proTips', 'Dicas Pro')}
+                    {t('guide.proTips', { defaultValue: 'Dicas Pro' })}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -311,7 +338,7 @@ export default function QuickGuide() {
 
         {/* Footer CTA */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>{t('guide.helpLink', 'Precisas de mais ajuda? Consulta o')} <a href="/help" className="text-primary hover:underline">{t('guide.glossary', 'Glossário de Conceitos')}</a></p>
+          <p>{t('guide.helpLink', { defaultValue: 'Precisas de mais ajuda? Consulta o' })} <a href="/help" className="text-primary hover:underline">{t('guide.glossary', { defaultValue: 'Glossário de Conceitos' })}</a></p>
         </div>
       </div>
     </AppLayout>

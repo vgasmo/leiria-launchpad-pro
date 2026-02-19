@@ -11,6 +11,7 @@ import {
   Plus,
   Users,
   ArrowRight,
+  X,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -153,24 +154,25 @@ export default function MyWorkspaces() {
   const quickFilterChips: QuickFilter[] = useMemo(() => {
     if (!dashboardStats) return [];
     return [
-      { id: 'critical', label: 'Critical', icon: <AlertCircle className="h-3.5 w-3.5" />, count: dashboardStats.healthCounts.critical, variant: 'destructive' as const, active: quickFilters.critical || false },
-      { id: 'at_risk', label: 'At Risk', icon: <AlertTriangle className="h-3.5 w-3.5" />, count: dashboardStats.healthCounts.at_risk, variant: 'warning' as const, active: quickFilters.at_risk || false },
-      { id: 'overdue', label: 'Overdue Actions', icon: <Clock className="h-3.5 w-3.5" />, count: dashboardStats.overdueCount, variant: 'destructive' as const, active: quickFilters.overdue || false },
-      { id: 'meetings_today', label: 'Meetings Today', icon: <Calendar className="h-3.5 w-3.5" />, count: dashboardStats.meetingsTodayCount, variant: 'default' as const, active: quickFilters.meetings_today || false },
+      { id: 'critical', label: t('health.levels.critical', { defaultValue: 'Crítico' }), icon: <AlertCircle className="h-3.5 w-3.5" />, count: dashboardStats.healthCounts.critical, variant: 'destructive' as const, active: quickFilters.critical || false },
+      { id: 'at_risk', label: t('health.levels.at_risk', { defaultValue: 'Em Risco' }), icon: <AlertTriangle className="h-3.5 w-3.5" />, count: dashboardStats.healthCounts.at_risk, variant: 'warning' as const, active: quickFilters.at_risk || false },
+      { id: 'overdue', label: t('filters.overdueActions', { defaultValue: 'Ações em atraso' }), icon: <Clock className="h-3.5 w-3.5" />, count: dashboardStats.overdueCount, variant: 'destructive' as const, active: quickFilters.overdue || false },
+      { id: 'meetings_today', label: t('filters.meetingsToday', { defaultValue: 'Reuniões hoje' }), icon: <Calendar className="h-3.5 w-3.5" />, count: dashboardStats.meetingsTodayCount, variant: 'default' as const, active: quickFilters.meetings_today || false },
     ];
-  }, [dashboardStats, quickFilters]);
+  }, [dashboardStats, quickFilters, t]);
 
   // Apply quick filters to workspaces
   const filteredWorkspaces = useMemo(() => {
     if (!workspaces) return [];
     let filtered = [...workspaces];
 
-    if (quickFilters.critical) {
-      filtered = filtered.filter(w => (w.health_score_override || w.health_score) === 'critical');
+    // Health chips (critical/at_risk) are OR (union) — selecting both shows either
+    const healthQuickFilters = [quickFilters.critical && 'critical', quickFilters.at_risk && 'at_risk'].filter(Boolean) as string[];
+    if (healthQuickFilters.length > 0) {
+      filtered = filtered.filter(w => healthQuickFilters.includes(w.health_score_override || w.health_score || 'stable'));
     }
-    if (quickFilters.at_risk) {
-      filtered = filtered.filter(w => (w.health_score_override || w.health_score) === 'at_risk');
-    }
+
+    // Overdue and meetings_today are AND — combine with health
     if (quickFilters.overdue) {
       filtered = filtered.filter(w => w.overdueActionsCount > 0);
     }
@@ -337,8 +339,19 @@ export default function MyWorkspaces() {
         <>
           {/* Quick Filter Chips */}
           {dashboardStats && !isLoading && (
-            <div className="mb-4 animate-fade-in">
+            <div className="mb-4 animate-fade-in flex items-center gap-3 flex-wrap">
               <QuickFilterChips filters={quickFilterChips} onToggle={handleQuickFilterToggle} />
+              {activeQuickFiltersCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setQuickFilters({})}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground h-8"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  {t('filters.clearQuickFilters', { defaultValue: 'Limpar filtros rápidos' })}
+                </Button>
+              )}
             </div>
           )}
 

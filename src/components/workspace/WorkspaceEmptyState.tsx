@@ -27,14 +27,14 @@ export const WorkspaceEmptyState = memo(function WorkspaceEmptyState({
             <Search className="h-7 w-7 text-muted-foreground" />
           </div>
           <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-            {t('emptyState.noMatchingWorkspaces', 'No matching results')}
+            {t('emptyState.noMatchingWorkspaces', { defaultValue: 'Sem resultados correspondentes' })}
           </h3>
           <p className="text-muted-foreground text-center max-w-sm mb-6">
-            {t('emptyState.adjustFilters', 'Try adjusting your filters or search terms to find what you\'re looking for.')}
+            {t('emptyState.adjustFilters', { defaultValue: 'Tenta ajustar os filtros ou termos de pesquisa.' })}
           </p>
           <Button variant="outline" onClick={onClearFilters} className="gap-2">
             <Filter className="h-4 w-4" />
-            {t('emptyState.clearFilters', 'Clear All Filters')}
+            {t('emptyState.clearFilters', { defaultValue: 'Limpar Todos os Filtros' })}
           </Button>
         </CardContent>
       </Card>
@@ -57,20 +57,20 @@ export const WorkspaceEmptyState = memo(function WorkspaceEmptyState({
         
         <h3 className="font-heading text-2xl font-bold text-foreground mb-3 text-center">
           {isFounder 
-            ? t('emptyState.welcomeFounder', 'Start Your Startup Journey')
-            : t('emptyState.welcomeToWorkspace', 'Welcome to Workspaces')}
+            ? t('emptyState.welcomeFounder', { defaultValue: 'Começa a Tua Jornada' })
+            : t('emptyState.welcomeToWorkspace', { defaultValue: 'Bem-vindo aos Espaços de Trabalho' })}
         </h3>
         
         <p className="text-muted-foreground text-center max-w-md mb-4">
           {isFounder
-            ? t('emptyState.founderNoStartups', 'Register your startup to track progress, connect with mentors, and prepare for investment.')
-            : t('emptyState.noAccess', 'You don\'t have access to any workspaces yet. Contact an administrator or join a program.')}
+            ? t('emptyState.founderNoStartups', { defaultValue: 'Regista a tua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.' })
+            : t('emptyState.noAccess', { defaultValue: 'Ainda não tens acesso a nenhum espaço de trabalho. Contacta um administrador ou junta-te a um programa.' })}
         </p>
         
         {isFounder && (
           <p className="text-sm text-primary/80 font-medium text-center max-w-sm mb-6 flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            {t('emptyState.founderValue', 'Get guidance from mentors and track your KPIs in one place.')}
+            {t('emptyState.founderValue', { defaultValue: 'Obtém orientação de mentores e acompanha os teus KPIs num único lugar.' })}
           </p>
         )}
         
@@ -78,11 +78,11 @@ export const WorkspaceEmptyState = memo(function WorkspaceEmptyState({
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <Button onClick={onCreateStartup} size="lg" className="gap-2 shadow-lg">
               <Rocket className="h-5 w-5" />
-              {t('emptyState.createFirstStartup', 'Create Your Startup')}
+              {t('emptyState.createFirstStartup', { defaultValue: 'Criar a Tua Startup' })}
             </Button>
             <Button variant="ghost" size="lg" className="gap-2 text-muted-foreground">
               <TrendingUp className="h-4 w-4" />
-              {t('emptyState.explorePrograms', 'Explore Programs')}
+              {t('emptyState.explorePrograms', { defaultValue: 'Explorar Programas' })}
             </Button>
           </div>
         )}
