@@ -342,6 +342,41 @@ export function useDismissPlaybook() {
   });
 }
 
+// Restore a dismissed playbook (undo dismiss)
+export function useRestorePlaybook() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ workspaceId, playbookId }: { workspaceId: string; playbookId: string }) => {
+      const { data: existing } = await supabase
+        .from('workspace_playbook_instances')
+        .select('id')
+        .eq('workspace_id', workspaceId)
+        .eq('playbook_id', playbookId)
+        .eq('status', 'dismissed')
+        .maybeSingle();
+
+      if (existing) {
+        // Delete the dismissed instance to restore it to "suggested" state
+        const { error } = await supabase
+          .from('workspace_playbook_instances')
+          .delete()
+          .eq('id', existing.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, { workspaceId }) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-playbook-instances', workspaceId] });
+      toast.success(t('playbooks.restoredSuccess', { defaultValue: 'Playbook restaurado' }));
+    },
+    onError: (error: Error) => {
+      toast.error(t('playbooks.errors.restoreFailed', { defaultValue: 'Falha ao restaurar playbook' }));
+      console.error('Playbook restore error:', error.message);
+    },
+  });
+}
+
 // Admin: Create playbook
 export function useCreatePlaybook() {
   const queryClient = useQueryClient();

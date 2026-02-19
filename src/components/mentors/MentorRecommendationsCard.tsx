@@ -73,12 +73,13 @@ export function MentorRecommendationsCard({ workspaceId, stage, className }: Men
     mutationFn: async ({ mentorIds, message }: { mentorIds: string[]; message: string }) => {
       if (!user) throw new Error('Not authenticated');
       
-      // Create mentor requests for each selected mentor
+      // Create mentor requests for each selected mentor, including assigned_mentor_id
       const requests = mentorIds.map(mentorId => ({
         workspace_id: workspaceId,
         requested_by: user.id,
-        expertise_tags: [],
-        description: message,
+        assigned_mentor_id: mentorId,
+        expertise_tags: [] as string[],
+        description: message || null,
         status: 'pending',
       }));
 

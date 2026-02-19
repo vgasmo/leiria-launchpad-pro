@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
+import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useRestorePlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
 import { usePlaybookProgress } from '@/hooks/usePlaybookProgress';
 import { RequestPlaybookDialog } from '@/components/workspace/RequestPlaybookDialog';
 import { formatShortDate } from '@/lib/dateUtils';
@@ -48,6 +48,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
   const { data: consultantNotes } = useConsultantNotes(workspaceId);
   const instantiate = useInstantiatePlaybook();
   const dismiss = useDismissPlaybook();
+  const restorePlaybook = useRestorePlaybook();
 
   const getInstanceStatus = (playbookId: string) => {
     return instances?.find(i => i.playbook_id === playbookId)?.status;
@@ -306,10 +307,10 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground"
-                          onClick={() => dismiss.mutate({ workspaceId, playbookId: playbook.id })}
-                          disabled={dismiss.isPending || !canWrite}
+                          onClick={() => restorePlaybook.mutate({ workspaceId, playbookId: playbook.id })}
+                          disabled={restorePlaybook.isPending || !canWrite}
                         >
-                          {t('playbooks.undoDismiss', 'Restore')}
+                          {t('playbooks.undoDismiss', { defaultValue: 'Restaurar' })}
                         </Button>
                       </div>
                     ) : (
