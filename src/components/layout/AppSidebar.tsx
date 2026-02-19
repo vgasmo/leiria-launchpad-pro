@@ -102,10 +102,10 @@ export function AppSidebar() {
           { name: t('nav.founder.goalsKpis', { defaultValue: 'Objetivos & KPIs' }), href: `/workspace/${firstWorkspaceId}?tab=kpis`, icon: Target },
           { name: t('nav.founder.sessionsMentoring', { defaultValue: 'Sessões & Mentoria' }), href: `/workspace/${firstWorkspaceId}?tab=sessions`, icon: Calendar },
           { name: t('nav.founder.actionsPlan', { defaultValue: 'Ações & Plano' }), href: `/workspace/${firstWorkspaceId}?tab=actions`, icon: CheckSquare },
+          { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: `/workspace/${firstWorkspaceId}?tab=documents`, icon: FolderOpen },
         ],
       },
     ] : []),
-    { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/resources', icon: Network },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
@@ -125,25 +125,22 @@ export function AppSidebar() {
 
   // MENTOR COMPANION Navigation
   const mentorNavigation: NavItem[] = [
-    { name: t('nav.mentor.home', 'Início'), href: '/my-workspaces', icon: Home, exact: true },
-    { name: t('nav.mentor.upcomingSessions', 'Próximas Sessões'), href: '/my-workspaces', icon: Calendar },
-    { name: t('nav.mentor.assignedStartups', 'Startups Atribuídas'), href: '/my-workspaces', icon: Building2 },
-    { name: t('nav.mentor.notesActions', 'Notas & Ações'), href: '/my-workspaces', icon: NotebookPen },
-    { name: t('nav.mentor.resources', 'Recursos'), href: '/mentors', icon: BookOpen },
-    { name: t('nav.mentor.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
-    { name: t('nav.mentor.profile', 'Perfil'), href: '/settings', icon: UserCircle },
+    { name: t('nav.mentor.home', { defaultValue: 'Início' }), href: '/my-workspaces', icon: Home, exact: true },
+    { name: t('nav.mentor.assignedStartups', { defaultValue: 'Startups Atribuídas' }), href: '/my-workspaces', icon: Building2 },
+    { name: t('nav.mentor.resources', { defaultValue: 'Recursos' }), href: '/mentors', icon: BookOpen },
+    { name: t('nav.mentor.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
+    { name: t('nav.mentor.profile', { defaultValue: 'Perfil' }), href: '/settings', icon: UserCircle },
   ];
 
   // ADMIN Navigation (simplified)
   const adminNavigation: NavItem[] = [
-    { name: t('nav.admin.operations', 'Operações'), href: '/admin', icon: ClipboardList, exact: true },
-    { name: t('nav.admin.crm', 'CRM'), href: '/crm', icon: Contact },
-    // Default to the Programs wizard / setup view instead of KPIs
-    { name: t('nav.admin.programsCohorts', 'Programas & Cohorts'), href: '/admin?tab=programs-setup', icon: GraduationCap },
-    { name: t('nav.admin.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
-    { name: t('nav.admin.usersPermissions', 'Utilizadores & Permissões'), href: '/admin?tab=users', icon: Shield },
-    { name: t('nav.admin.systemConfig', 'Configuração do Sistema'), href: '/admin?tab=integrations', icon: Cog },
-    { name: t('nav.admin.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
+    { name: t('nav.admin.operations', { defaultValue: 'Operações' }), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('nav.admin.crm', { defaultValue: 'CRM' }), href: '/crm', icon: Contact },
+    { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas & Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
+    { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
+    { name: t('nav.admin.usersPermissions', { defaultValue: 'Utilizadores & Permissões' }), href: '/admin?tab=users', icon: Shield },
+    { name: t('nav.admin.systemConfig', { defaultValue: 'Configuração do Sistema' }), href: '/admin?tab=integrations', icon: Cog },
+    { name: t('nav.admin.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
   ];
 
   // Determine which navigation to show based on role priority

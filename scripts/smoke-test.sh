@@ -76,9 +76,10 @@ echo ""
 echo "📋 3. SPA Content Verification"
 echo "------------------------------"
 check_contains "$BASE_URL/" "<div id=\"root\">" "Root element present in HTML"
-check_contains "$BASE_URL/" "src=\"/src/main.tsx\"" "Main entry point referenced (dev) OR"
-# In production build, it would be a hashed JS file
+# In production build, the entry point is a hashed JS file, not /src/main.tsx
 check_contains "$BASE_URL/" "<script" "Script tag present"
+# Verify the bundled JS/CSS assets are referenced
+check_contains "$BASE_URL/" "assets/" "Bundled assets referenced in HTML"
 
 echo ""
 echo "📋 4. PWA Manifest"
