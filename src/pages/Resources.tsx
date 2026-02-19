@@ -17,7 +17,7 @@ import {
   RESOURCES_CATALOG,
   CATEGORY_LABELS,
   STAGE_LABELS,
-  type CatalogResource,
+  type ResourceItem,
   getFavorites,
   toggleFavorite,
   addRecent,
@@ -30,7 +30,7 @@ function useLabel(item: { pt: string; en: string }) {
   return i18n.language === 'pt' ? item.pt : item.en;
 }
 
-function ResourceCard({ r, favs, onToggleFav, lang }: { r: CatalogResource; favs: string[]; onToggleFav: (id: string) => void; lang: string }) {
+function ResourceCard({ r, favs, onToggleFav, lang }: { r: ResourceItem; favs: string[]; onToggleFav: (id: string) => void; lang: string }) {
   const isFav = favs.includes(r.id);
   const title = lang === 'pt' ? r.title_pt : r.title_en;
   const desc = lang === 'pt' ? r.desc_pt : r.desc_en;
@@ -61,7 +61,7 @@ function ResourceCard({ r, favs, onToggleFav, lang }: { r: CatalogResource; favs
         </div>
         <div className="flex flex-wrap gap-1 mt-1">
           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{catLabel}</Badge>
-          {r.stage.slice(0, 2).map(s => (
+          {r.stages.slice(0, 2).map(s => (
             <Badge key={s} variant="outline" className="text-[10px] px-1.5 py-0">{STAGE_LABELS[s]?.[lang === 'pt' ? 'pt' : 'en'] || s}</Badge>
           ))}
         </div>
@@ -102,7 +102,7 @@ export default function Resources() {
     let items = RESOURCES_CATALOG;
     if (filterType !== 'all') items = items.filter(r => r.type === filterType);
     if (filterCategory) items = items.filter(r => r.category === filterCategory);
-    if (filterStage) items = items.filter(r => r.stage.includes(filterStage as any));
+    if (filterStage) items = items.filter(r => r.stages.includes(filterStage as any));
     if (query.trim()) {
       const q = query.toLowerCase();
       items = items.filter(r =>
@@ -134,7 +134,7 @@ export default function Resources() {
   // Search results grouped
   const searchGroups = useMemo(() => {
     if (!isSearching) return null;
-    const groups: Record<string, CatalogResource[]> = {};
+    const groups: Record<string, ResourceItem[]> = {};
     for (const r of filtered) {
       const key = r.type === 'internal' ? (lang === 'pt' ? 'Internos' : 'Internal') : (CATEGORY_LABELS[r.category]?.[lang === 'pt' ? 'pt' : 'en'] || r.category);
       if (!groups[key]) groups[key] = [];
@@ -147,7 +147,7 @@ export default function Resources() {
   const recommended = useMemo(() => {
     return RESOURCES_CATALOG
       .filter(r => r.roles.includes(userRole))
-      .filter(r => r.stage.includes('pre_seed') || r.stage.includes('ideacao'))
+      .filter(r => r.stages.includes('pre_seed') || r.stages.includes('ideation'))
       .slice(0, 3);
   }, [userRole]);
 
@@ -343,7 +343,7 @@ export default function Resources() {
                 desc={t('resources.sections.templatesToolsDesc', { defaultValue: 'Modelos prontos para pitch decks, financeiros, legais e mais.' })}
               >
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {RESOURCES_CATALOG.filter(r => r.category === 'investimento' || r.category === 'financas').slice(0, 3).map(r => (
+                  {RESOURCES_CATALOG.filter(r => r.category === 'fundraising' || r.category === 'finance').slice(0, 3).map(r => (
                     <ResourceCard key={r.id} r={r} favs={favs} onToggleFav={handleToggleFav} lang={lang} />
                   ))}
                 </div>
@@ -366,7 +366,7 @@ export default function Resources() {
                 desc={t('resources.sections.playbooksDesc', { defaultValue: 'Guias processuais passo a passo para cada fase da sua startup.' })}
               >
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {RESOURCES_CATALOG.filter(r => r.category === 'produto' || r.category === 'vendas').slice(0, 3).map(r => (
+                  {RESOURCES_CATALOG.filter(r => r.category === 'product' || r.category === 'gtm').slice(0, 3).map(r => (
                     <ResourceCard key={r.id} r={r} favs={favs} onToggleFav={handleToggleFav} lang={lang} />
                   ))}
                 </div>
