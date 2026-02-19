@@ -221,12 +221,11 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
     return acc;
   }, {} as Record<string, Document[]>) || {};
 
-  // Sort categories to show Financial Model first
+  // Sort categories: untranslated → use normalized key for order
   const sortedCategories = Object.keys(groupedDocuments).sort((a, b) => {
-    if (a === 'Financial Model') return -1;
-    if (b === 'Financial Model') return 1;
-    if (a === t('documents.uncategorized')) return 1;
-    if (b === t('documents.uncategorized')) return -1;
+    const uncategorized = t('documents.uncategorized');
+    if (a === uncategorized) return 1;
+    if (b === uncategorized) return -1;
     return a.localeCompare(b);
   });
 
@@ -375,7 +374,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
       )}
 
       {/* Documents List */}
-      {sortedCategories.length === 0 || (sortedCategories.length === 1 && !documents?.some(d => d.category !== 'Financial Model')) ? (
+      {sortedCategories.length === 0 ? (
         <EmptyState
           icon={FileText}
           title={t('emptyStates.documents.title')}
@@ -391,22 +390,22 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
           } : undefined}
         />
       ) : (
-        sortedCategories
-          .filter(cat => cat !== 'Financial Model')
-          .map((category) => {
+        sortedCategories.map((category) => {
             const docs = groupedDocuments[category] || [];
             
             if (docs.length === 0) return null;
+
+            // Translate category label
+            const categoryLabel = CATEGORY_KEYS.find(c => c.key === category)
+              ? t(CATEGORY_KEYS.find(c => c.key === category)!.labelKey)
+              : category;
 
             return (
               <Card key={category}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    {category === 'Financial Model' && <FileSpreadsheet className="h-5 w-5 text-green-600" />}
-                    {category === 'Pitch Deck' && <Presentation className="h-5 w-5 text-blue-600" />}
-                    {category === 'Legal' && <FileText className="h-5 w-5 text-amber-600" />}
-                    {!['Financial Model', 'Pitch Deck', 'Legal'].includes(category) && <File className="h-5 w-5 text-muted-foreground" />}
-                    {category}
+                    <File className="h-5 w-5 text-muted-foreground" />
+                    {categoryLabel}
                     <Badge variant="secondary" className="ml-2">{docs.length}</Badge>
                   </CardTitle>
                 </CardHeader>
@@ -438,7 +437,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                                   </div>
                                 )}
                                 <span>•</span>
-                                <span>{format(new Date(doc.created_at), 'MMM d, yyyy')}</span>
+                                <span>{format(new Date(doc.created_at), 'dd MMM yyyy')}</span>
                               </div>
                               {doc.description && (
                                 <p className="text-xs text-muted-foreground mt-1 truncate">

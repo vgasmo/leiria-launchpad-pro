@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
+import { pt as ptLocale, enUS } from 'date-fns/locale';
 import { 
   Calendar, 
   CheckCircle2, 
@@ -114,9 +115,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       .eq('id', workspace.id);
 
     if (error) {
-      toast.error('Failed to update stage');
+      toast.error(t('workspaceOverview.stageUpdateFailed', { defaultValue: 'Falha ao atualizar fase' }));
     } else {
-      toast.success('Stage updated');
+      toast.success(t('workspaceOverview.stageUpdated', { defaultValue: 'Fase atualizada' }));
       queryClient.invalidateQueries({ queryKey: ['workspace', workspace.id] });
     }
   };
@@ -178,9 +179,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       <Dialog open={!!activeSurveyId} onOpenChange={() => setActiveSurveyId(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('surveys.completeSurvey', 'Complete Survey')}</DialogTitle>
+            <DialogTitle>{t('surveys.completeSurvey', { defaultValue: 'Completar Inquérito' })}</DialogTitle>
             <DialogDescription>
-              {t('surveys.pendingSurveysDesc', 'You have surveys waiting to be completed')}
+              {t('surveys.pendingSurveysDesc', { defaultValue: 'Tem inquéritos a aguardar resposta' })}
             </DialogDescription>
           </DialogHeader>
           {activeSurveyId && (
@@ -252,7 +253,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                     onAddTag={(tagId) => addWorkspaceTag.mutate({ workspaceId: workspace.id, tagId })}
                     onRemoveTag={(tagId) => removeWorkspaceTag.mutate({ workspaceId: workspace.id, tagId })}
                     disabled={!canWrite}
-                    placeholder="Add tags..."
+                    placeholder={t('workspaceOverview.addTags', { defaultValue: 'Adicionar etiquetas...' })}
                     size="sm"
                   />
                 </div>
@@ -531,6 +532,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
 }
 
 function ActionItem({ action }: { action: any }) {
+  const { t } = useTranslation();
   const isOverdue = action.due_date && isPast(new Date(action.due_date)) && !isToday(new Date(action.due_date));
   const isDueToday = action.due_date && isToday(new Date(action.due_date));
 
@@ -546,8 +548,8 @@ function ActionItem({ action }: { action: any }) {
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {action.due_date && (
             <span className={isOverdue ? 'text-destructive font-medium' : isDueToday ? 'text-amber-600 font-medium' : ''}>
-              {isOverdue ? 'Overdue: ' : isDueToday ? 'Today' : ''}
-              {!isDueToday && format(new Date(action.due_date), 'MMM d')}
+              {isOverdue ? t('workspaceOverview.overduePrefix', { defaultValue: 'Em atraso: ' }) : isDueToday ? t('workspaceOverview.today', { defaultValue: 'Hoje' }) : ''}
+              {!isDueToday && format(new Date(action.due_date), 'dd MMM')}
             </span>
           )}
           {action.priority && action.priority !== 'medium' && (
@@ -624,6 +626,7 @@ function MilestoneCount({ label, count, color }: { label: string; count: number;
 }
 
 function SessionItem({ session }: { session: any }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
       <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -632,13 +635,13 @@ function SessionItem({ session }: { session: any }) {
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{session.title}</p>
         <p className="text-sm text-muted-foreground">
-          {format(new Date(session.scheduled_at), 'MMM d, yyyy')}
+          {format(new Date(session.scheduled_at), 'dd MMM yyyy')}
           {session.duration && ` • ${session.duration} min`}
         </p>
       </div>
       {session.notes && (
         <Badge variant="secondary" className="flex-shrink-0">
-          Has notes
+          {t('workspaceOverview.hasNotes', { defaultValue: 'Com notas' })}
         </Badge>
       )}
     </div>

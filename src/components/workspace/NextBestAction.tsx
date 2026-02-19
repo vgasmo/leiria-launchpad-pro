@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceNextSession } from '@/hooks/useWorkspaceData';
 import { usePendingCheckin } from '@/hooks/useCheckins';
 import { format, isThisMonth } from 'date-fns';
+import { pt as ptLocale, enUS } from 'date-fns/locale';
 
 interface NextBestActionProps {
   workspaceId: string;
@@ -36,7 +37,8 @@ interface ActionItem {
 }
 
 export function NextBestAction({ workspaceId, programId, stage, canWrite }: NextBestActionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('pt') ? ptLocale : enUS;
   const [, setSearchParams] = useSearchParams();
   const { data: actions } = useWorkspaceActions(workspaceId);
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
@@ -73,7 +75,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         type: 'checkin',
         priority: 2,
         title: t('nextBestAction.weeklyCheckinPending'),
-        description: t('nextBestAction.dueOn', { date: format(new Date(pendingCheckin.due_date), 'EEEE') }),
+        description: t('nextBestAction.dueOn', { date: format(new Date(pendingCheckin.due_date), 'EEEE', { locale: dateLocale }) }),
         icon: <ClipboardList className="h-5 w-5" />,
         variant: 'warning',
         action: () => setSearchParams({ tab: 'overview' }),
@@ -111,7 +113,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
           type: 'session',
           priority: 4,
           title: t('nextBestAction.prepareSession'),
-          description: t('nextBestAction.sessionOn', { title: nextSession.title, date: format(sessionDate, 'EEE, MMM d') }),
+          description: t('nextBestAction.sessionOn', { title: nextSession.title, date: format(sessionDate, 'EEE, dd MMM', { locale: dateLocale }) }),
           icon: <Calendar className="h-5 w-5" />,
           variant: 'default',
           action: () => setSearchParams({ tab: 'sessions' }),
