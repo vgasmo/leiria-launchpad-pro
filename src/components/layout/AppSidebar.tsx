@@ -7,6 +7,7 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   AlertCircle,
   MessageCircle,
   Target,
@@ -28,6 +29,8 @@ import {
   Shield,
   Cog,
   BookOpenCheck,
+  HelpCircle,
+  FolderOpen,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -42,6 +45,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import startupLeiriaLogo from '@/assets/startup-leiria-logo-transparent.png';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 import { SidebarContactInfo } from './SidebarContactInfo';
@@ -51,6 +59,7 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   exact?: boolean;
+  children?: NavItem[];
 }
 
 export function AppSidebar() {
@@ -77,15 +86,28 @@ export function AppSidebar() {
   // ROLE-SPECIFIC NAVIGATION ITEMS
   // ============================================
 
-  // FOUNDER OS Navigation - simplified: no tab-level links (tabs live inside WorkspaceDetail)
+  // FOUNDER OS Navigation - rational structure with collapsible "A Minha Startup"
+  const [startupExpanded, setStartupExpanded] = useState(
+    location.pathname.startsWith('/workspace/')
+  );
+
   const founderNavigation: NavItem[] = [
     { name: t('nav.founder.home', { defaultValue: 'Início' }), href: '/my-workspaces', icon: Home, exact: true },
     ...(firstWorkspaceId ? [
-      { name: t('nav.founder.myStartup', { defaultValue: 'A Minha Startup' }), href: `/workspace/${firstWorkspaceId}`, icon: Building2 },
+      { 
+        name: t('nav.founder.myStartup', { defaultValue: 'A Minha Startup' }), 
+        href: `/workspace/${firstWorkspaceId}`, 
+        icon: Building2,
+        children: [
+          { name: t('nav.founder.goalsKpis', { defaultValue: 'Objetivos & KPIs' }), href: `/workspace/${firstWorkspaceId}?tab=kpis`, icon: Target },
+          { name: t('nav.founder.sessionsMentoring', { defaultValue: 'Sessões & Mentoria' }), href: `/workspace/${firstWorkspaceId}?tab=sessions`, icon: Calendar },
+          { name: t('nav.founder.actionsPlan', { defaultValue: 'Ações & Plano' }), href: `/workspace/${firstWorkspaceId}?tab=actions`, icon: CheckSquare },
+        ],
+      },
     ] : []),
+    { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: firstWorkspaceId ? `/workspace/${firstWorkspaceId}?tab=documents` : '/my-workspaces', icon: FolderOpen },
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/mentors', icon: Network },
-    { name: t('nav.founder.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
-    { name: t('nav.founder.glossary', { defaultValue: 'Glossário' }), href: '/help', icon: Headphones },
+    { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
 
   // CONSULTOR OS Navigation (Portfolio OS)
@@ -185,8 +207,66 @@ export function AppSidebar() {
 
   const renderNavItem = (item: NavItem) => {
     const isActive = isActiveRoute(item);
+    const hasActiveChild = item.children?.some(child => isActiveRoute(child));
     
-    // Premium nav styling: subtle bg + slim left accent bar when active
+    // If item has children, render as collapsible dropdown
+    if (item.children && !collapsed) {
+      return (
+        <Collapsible 
+          key={item.name} 
+          open={startupExpanded} 
+          onOpenChange={setStartupExpanded}
+        >
+          <div className="space-y-0.5">
+            <div className="flex items-center">
+              <Link
+                to={item.href}
+                className={cn(
+                  "flex-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 relative",
+                  (isActive && !location.search) || hasActiveChild
+                    ? "bg-sidebar-accent/60 text-sidebar-foreground before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-r before:bg-sidebar-primary"
+                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
+                )}
+              >
+                <item.icon className={cn("h-[18px] w-[18px] shrink-0", (isActive || hasActiveChild) && "text-sidebar-primary")} />
+                <span className="truncate flex-1">{item.name}</span>
+              </Link>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 shrink-0"
+                >
+                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", startupExpanded && "rotate-180")} />
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="pl-4 space-y-0.5">
+              {item.children.map(child => {
+                const childActive = isActiveRoute(child);
+                return (
+                  <Link
+                    key={child.name}
+                    to={child.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 relative",
+                      childActive
+                        ? "bg-sidebar-accent/60 text-sidebar-foreground font-medium before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-0.5 before:rounded-r before:bg-sidebar-primary"
+                        : "text-sidebar-foreground/50 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <child.icon className={cn("h-4 w-4 shrink-0", childActive && "text-sidebar-primary")} />
+                    <span className="truncate">{child.name}</span>
+                  </Link>
+                );
+              })}
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      );
+    }
+
+    // Standard nav item (no children or collapsed)
     const NavLink = (
       <Link
         key={item.name}
