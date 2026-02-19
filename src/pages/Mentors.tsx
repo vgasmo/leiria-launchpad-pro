@@ -403,14 +403,16 @@ export default function Mentors() {
                             </div>
                           )}
 
-                          <div className="flex gap-2 mt-4">
-                            <Button size="sm" variant="outline" asChild>
-                              <a href={`mailto:${mentor.profile?.email}`}>
-                                <Mail className="h-4 w-4 mr-2" />
-                                {t('mentorsPage.contact')}
-                              </a>
-                            </Button>
-                          </div>
+                          {mentor.profile?.email && (
+                            <div className="flex gap-2 mt-4">
+                              <Button size="sm" variant="outline" asChild>
+                                <a href={`mailto:${mentor.profile.email}`}>
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  {t('mentorsPage.contact')}
+                                </a>
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>
