@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,11 +31,24 @@ const TERM_CATEGORIES: Record<string, { icon: typeof TrendingUp; terms: Glossary
   },
 };
 
+// FAQ category groups for organised display
+const FAQ_TAG_GROUPS: { key: string; label_pt: string; label_en: string; tags: string[] }[] = [
+  { key: 'onboarding', label_pt: 'Onboarding', label_en: 'Onboarding', tags: ['onboarding', 'value', 'navigation', 'permissions', 'security', 'i18n', 'settings'] },
+  { key: 'mentoring', label_pt: 'Mentoria & Sessões', label_en: 'Mentoring & Sessions', tags: ['mentoring', 'process', 'sessions', 'coaching'] },
+  { key: 'docs', label_pt: 'Documentos & Templates', label_en: 'Documents & Templates', tags: ['documents', 'workflow', 'feedback', 'templates', 'docs'] },
+  { key: 'execution', label_pt: 'Playbooks & KPIs', label_en: 'Playbooks & KPIs', tags: ['playbooks', 'guides', 'kpis', 'metrics', 'execution', 'planning'] },
+  { key: 'troubleshooting', label_pt: 'Problemas comuns', label_en: 'Common issues', tags: ['troubleshooting'] },
+];
+
 export default function HelpGlossary() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [faqSearch, setFaqSearch] = useState('');
+
+  // Determine default tab from hash
+  const defaultTab = location.hash === '#faq' ? 'faq' : location.hash === '#glossary' ? 'glossary' : 'faq';
 
   // Flatten all terms with their translations
   const allTerms = useMemo(() => {
@@ -96,13 +110,21 @@ export default function HelpGlossary() {
     return items;
   }, [faqSearch]);
 
+  // Group FAQ items by category
+  const faqGrouped = useMemo(() => {
+    return FAQ_TAG_GROUPS.map(group => {
+      const items = faqItems.filter(f => f.tags.some(t => group.tags.includes(t)));
+      return { ...group, items };
+    }).filter(g => g.items.length > 0);
+  }, [faqItems]);
+
   return (
     <AppLayout
       title={t('help.pageTitle', { defaultValue: 'Glossário & FAQ' })}
       subtitle={t('help.pageSubtitle', { defaultValue: 'Conceitos, perguntas frequentes e suporte' })}
     >
       <div className="space-y-6 p-6">
-        <Tabs defaultValue="faq" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="faq" className="gap-1.5">
               <HelpCircle className="h-4 w-4" />
@@ -128,19 +150,28 @@ export default function HelpGlossary() {
                 />
               </div>
 
-              {faqItems.length > 0 ? (
-                <Accordion type="multiple" className="space-y-2">
-                  {faqItems.map(item => (
-                    <AccordionItem key={item.id} value={item.id} className="border rounded-lg px-4">
-                      <AccordionTrigger className="text-sm font-medium hover:no-underline">
-                        {lang === 'pt' ? item.q_pt : item.q_en}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                        {lang === 'pt' ? item.a_pt : item.a_en}
-                      </AccordionContent>
-                    </AccordionItem>
+              {faqGrouped.length > 0 ? (
+                <div className="space-y-6">
+                  {faqGrouped.map(group => (
+                    <div key={group.key}>
+                      <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                        {lang === 'pt' ? group.label_pt : group.label_en}
+                      </h3>
+                      <Accordion type="multiple" className="space-y-2">
+                        {group.items.map(item => (
+                          <AccordionItem key={item.id} value={item.id} className="border rounded-lg px-4">
+                            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                              {lang === 'pt' ? item.q_pt : item.q_en}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                              {lang === 'pt' ? item.a_pt : item.a_en}
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </div>
                   ))}
-                </Accordion>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-6">
                   {t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}
