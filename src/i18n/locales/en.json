@@ -2895,7 +2895,13 @@
     "join": "Join",
     "recentSessions": "Recent Sessions",
     "noSessionsRecorded": "No sessions recorded yet",
-    "moreSessionsHistory": "+{{count}} more in history"
+    "moreSessionsHistory": "+{{count}} more in history",
+    "stageUpdateFailed": "Failed to update stage",
+    "stageUpdated": "Stage updated",
+    "addTags": "Add tags...",
+    "overduePrefix": "Overdue: ",
+    "today": "Today",
+    "hasNotes": "Has notes"
   },
   "quickKpi": {
     "title": "Quick KPI Entry",
