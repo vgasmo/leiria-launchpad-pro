@@ -106,7 +106,7 @@ export function AppSidebar() {
       },
     ] : []),
     { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
-    { name: t('nav.founder.mentorsResources', { defaultValue: 'Mentores & Recursos' }), href: '/mentors', icon: Network },
+    { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/resources', icon: Network },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
 
