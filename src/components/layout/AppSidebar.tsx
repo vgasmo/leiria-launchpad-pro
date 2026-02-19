@@ -321,14 +321,16 @@ export function AppSidebar() {
           )}
         >
           <div className={cn(
-            "transition-all duration-300 rounded-lg overflow-hidden",
-            collapsed ? "h-8 w-auto max-w-[40px]" : "h-10 w-auto max-w-[180px]"
+            "rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center",
+            collapsed ? "p-1.5" : "px-3 py-2"
           )}>
             <img 
               src={startupLeiriaLogo} 
               alt="Startup Leiria" 
-              className="h-full w-auto object-contain pointer-events-none"
-              style={{ filter: 'invert(1)', mixBlendMode: 'screen' }}
+              className={cn(
+                "transition-all duration-300 pointer-events-none",
+                collapsed ? "h-7 w-auto max-w-[36px] object-contain" : "h-9 w-auto max-w-[170px]"
+              )}
             />
           </div>
         </Link>
