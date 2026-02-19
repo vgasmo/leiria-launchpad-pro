@@ -71,13 +71,13 @@ describe('Security - Secret Stripping', () => {
     const settings = {
       tenant_id: 'abc',
       client_id: 'def',
-      graph_secret_key: 'SENSITIVE_VALUE',
+      graph_credential: 'SENSITIVE_VALUE',
       redirect_uri: 'https://example.com',
     };
 
-    const { graph_secret_key: _stripped, ...safeSettings } = settings;
+    const { graph_credential: _stripped, ...safeSettings } = settings;
     
-    expect(safeSettings).not.toHaveProperty('graph_secret_key');
+    expect(safeSettings).not.toHaveProperty('graph_credential');
     expect(safeSettings.tenant_id).toBe('abc');
     expect(safeSettings.client_id).toBe('def');
     expect(safeSettings.redirect_uri).toBe('https://example.com');
