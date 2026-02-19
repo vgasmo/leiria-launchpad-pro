@@ -31,6 +31,38 @@
       "financialModelDesc": "Análise financeira"
     }
   },
+  "alerts": {
+    "title": "Alertas",
+    "activeAlerts": "Alertas Ativos",
+    "healthAlerts": "Alertas de Saúde",
+    "noActiveAlerts": "Sem alertas ativos",
+    "noRecentAlerts": "Sem alertas recentes",
+    "allOnTrack": "Todas as startups estão no caminho certo!",
+    "everythingOnTrack": "Tudo a funcionar bem!",
+    "critical": "Crítico",
+    "warning": "Aviso",
+    "info": "Info",
+    "active": "ativo",
+    "recalculate": "Recalcular",
+    "viewDetails": "Ver detalhes",
+    "markResolved": "Marcar como resolvido",
+    "ignoreAlert": "Ignorar alerta",
+    "acknowledged": "Alerta confirmado",
+    "acknowledgeFailed": "Falha ao confirmar alerta",
+    "snoozedDays": "Alerta adiado por {{days}} dias",
+    "snoozeFailed": "Falha ao adiar alerta",
+    "acknowledge": "Confirmar",
+    "snooze1Day": "Adiar 1 dia",
+    "snooze7Days": "Adiar 7 dias"
+  },
+  "pendingApproval": {
+    "title": "Conta Pendente de Aprovação",
+    "description": "A sua conta está a ser analisada pela nossa equipa. Terá acesso completo à plataforma após aprovação.",
+    "pending": "Em Análise",
+    "responseTime": "Normalmente respondemos em 1-2 dias úteis",
+    "contactSupport": "Precisa de ajuda? Contacte o suporte",
+    "logout": "Terminar Sessão"
+  },
   "pipeline": {
     "stages": {
       "new": "Novo",
@@ -45,59 +77,6 @@
       "rejected": "Rejeitado",
       "archived": "Arquivado"
     }
-  },
-  "dataroom": {
-    "title": "Dataroom",
-    "description": "Documentos e relatórios para investidores",
-    "addItem": "Adicionar Item",
-    "addFirstItem": "Adicionar primeiro item",
-    "emptyState": "Nenhum item no dataroom. Adicione documentos ou relatórios para partilhar com investidores.",
-    "itemAdded": "Item adicionado ao dataroom",
-    "failedToAdd": "Falha ao adicionar item",
-    "itemDeleted": "Item removido",
-    "failedToDelete": "Falha ao remover item",
-    "visibilityUpdated": "Visibilidade atualizada",
-    "confirmDelete": "Tem a certeza que quer remover este item?",
-    "confirmRevoke": "Tem a certeza que quer revogar este link?",
-    "shareLinks": "Links de Partilha",
-    "shareLinksDesc": "Crie links seguros para partilhar o dataroom com investidores externos",
-    "createLink": "Criar Link",
-    "linkCreated": "Link criado com sucesso",
-    "failedToCreateLink": "Falha ao criar link",
-    "linkRevoked": "Link revogado",
-    "failedToRevoke": "Falha ao revogar link",
-    "noLinks": "Nenhum link de partilha criado",
-    "activeLinks": "Links Ativos",
-    "expiredLinks": "Links Expirados/Revogados",
-    "active": "Ativo",
-    "revoked": "Revogado",
-    "expired": "Expirado",
-    "views": "visualizações",
-    "created": "Criado",
-    "expires": "Expira",
-    "revoke": "Revogar",
-    "public": "Investidores",
-    "internal": "Interno",
-    "toggleVisibility": "Alternar visibilidade",
-    "addToDataroom": "Adicionar ao Dataroom",
-    "addItemDesc": "Selecione o tipo de item para adicionar ao dataroom",
-    "itemType": "Tipo de Item",
-    "typeDocument": "Documento",
-    "typeInvestorUpdate": "Investor Update",
-    "typeLink": "Link Externo",
-    "selectUpdate": "Selecionar Update",
-    "selectUpdatePlaceholder": "Selecione um investor update",
-    "updateMonth": "Mês",
-    "externalUrl": "URL Externa",
-    "itemTitle": "Título",
-    "itemDescription": "Descrição",
-    "linkSettings": "Configurações do Link",
-    "expiresInDays": "Expira em (dias)",
-    "neverExpires": "0 = Nunca expira",
-    "allowDownload": "Permitir Download",
-    "allowDownloadDesc": "Investidores podem descarregar documentos",
-    "linkReady": "Link pronto para partilhar",
-    "autoAddedToDataroom": "Report adicionado automaticamente ao dataroom"
   },
   "common": {
     "save": "Guardar",
@@ -192,18 +171,6 @@
     "overdueActionItems": "Ações em atraso",
     "clearAll": "Limpar Todos os Filtros",
     "clearQuickFilters": "Limpar filtros rápidos"
-  },
-  "emptyState": {
-    "noMatchingWorkspaces": "Sem resultados correspondentes",
-    "adjustFilters": "Tenta ajustar os filtros ou termos de pesquisa para encontrar o que procuras.",
-    "clearFilters": "Limpar Todos os Filtros",
-    "welcomeFounder": "Começa a Tua Jornada",
-    "welcomeToWorkspace": "Bem-vindo aos Espaços de Trabalho",
-    "founderNoStartups": "Regista a tua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.",
-    "noAccess": "Ainda não tens acesso a nenhum espaço de trabalho. Contacta um administrador ou junta-te a um programa.",
-    "founderValue": "Obtém orientação de mentores e acompanha os teus KPIs num único lugar.",
-    "createFirstStartup": "Criar a Tua Startup",
-    "explorePrograms": "Explorar Programas"
   },
   "quickGuideBanner": {
     "title": "Novo aqui? Consulta o Guia Rápido",
@@ -1166,7 +1133,14 @@
     "today": "Hoje",
     "week": "Semana",
     "month": "Mês",
-    "noEvents": "Sem eventos agendados"
+    "noEvents": "Sem eventos agendados",
+    "upcomingSessions": "Próximas Sessões",
+    "noSessions": "Sem sessões agendadas",
+    "noSessionsDesc": "Agende uma sessão com o seu mentor para obter orientação e feedback.",
+    "bookSession": "Agendar Sessão",
+    "thisWeek": "Esta Semana",
+    "online": "Online",
+    "inPerson": "Presencial"
   },
   "documents": {
     "title": "Documentos",
@@ -2024,7 +1998,19 @@
     "linkInvalid": "Link Inválido",
     "linkInvalidDesc": "Este link não é válido ou não existe.",
     "emptyPublic": "Sem conteúdo disponível",
-    "poweredBy": "Powered by Startup Leiria"
+    "poweredBy": "Powered by Startup Leiria",
+    "failedToAdd": "Falha ao adicionar item",
+    "failedToDelete": "Falha ao remover item",
+    "failedToCreateLink": "Falha ao criar link",
+    "failedToRevoke": "Falha ao revogar link",
+    "externalUrl": "URL Externa",
+    "itemTitle": "Título",
+    "itemDescription": "Descrição",
+    "linkSettings": "Configurações do Link",
+    "expiresInDays": "Expira em (dias)",
+    "neverExpires": "0 = Nunca expira",
+    "allowDownloadDesc": "Investidores podem descarregar documentos",
+    "autoAddedToDataroom": "Report adicionado automaticamente ao dataroom"
   },
   "nda": {
     "title": "Acordo de Confidencialidade",
@@ -2286,18 +2272,6 @@
       "overdueActions": "Ações atrasadas",
       "atRisk": "Em risco"
     }
-  },
-  "emptyState": {
-    "noMatchingWorkspaces": "Sem resultados",
-    "adjustFilters": "Tente ajustar os seus filtros ou termos de pesquisa para encontrar o que procura.",
-    "clearFilters": "Limpar Todos os Filtros",
-    "welcomeToWorkspace": "Bem-vindo aos Workspaces",
-    "welcomeFounder": "Inicie a Sua Jornada Startup",
-    "founderNoStartups": "Registe a sua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.",
-    "founderValue": "Obtenha orientação de mentores e acompanhe os seus KPIs num só lugar.",
-    "noAccess": "Ainda não tem acesso a nenhum workspace. Contacte um administrador ou junte-se a um programa.",
-    "createFirstStartup": "Criar a Sua Startup",
-    "explorePrograms": "Explorar Programas"
   },
   "integrations": {
     "title": "Integrações e Captura",
@@ -3517,16 +3491,6 @@
     "backHome": "Voltar ao início",
     "description": "A página que procura não existe ou foi movida."
   },
-  "calendar": {
-    "upcomingSessions": "Próximas Sessões",
-    "noSessions": "Sem sessões agendadas",
-    "noSessionsDesc": "Agende uma sessão com o seu mentor para obter orientação e feedback.",
-    "bookSession": "Agendar Sessão",
-    "today": "Hoje",
-    "thisWeek": "Esta Semana",
-    "online": "Online",
-    "inPerson": "Presencial"
-  },
   "stages": {
     "new": "Novo",
     "first_contact_booked": "Reunião Agendada",
@@ -4535,17 +4499,6 @@
     "open": "Aberta",
     "doing": "A Fazer",
     "done": "Concluída"
-  },
-  "actions": {
-    "actionsLabel": "ações",
-    "overdue": "Atrasada",
-    "noActionsYet": "Ainda sem ações. Adicione ações para acompanhar o progresso.",
-    "assign": "Atribuir",
-    "unassigned": "Não atribuído",
-    "open": "Aberta",
-    "doing": "A Fazer",
-    "done": "Concluída",
-    "noItems": "Sem ações"
   },
   "governance": {
     "stageGateProgress": "Progresso Stage Gate",
