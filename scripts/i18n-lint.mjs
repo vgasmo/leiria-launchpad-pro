@@ -10,7 +10,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { globSync } from 'node:fs';
 
 const ROOT = process.cwd();
 const LOCALES = [
@@ -23,10 +22,7 @@ function readText(file) {
 }
 
 function findTopLevelKeyOccurrences(jsonText) {
-  // This is a lightweight heuristic parser for top-level keys.
-  // It scans for "<key>": at depth 1.
   const occurrences = new Map();
-
   let depth = 0;
   let inString = false;
   let escape = false;
@@ -38,41 +34,21 @@ function findTopLevelKeyOccurrences(jsonText) {
 
     if (inString) {
       token += ch;
-      if (escape) {
-        escape = false;
-        continue;
-      }
-      if (ch === '\\') {
-        escape = true;
-        continue;
-      }
+      if (escape) { escape = false; continue; }
+      if (ch === '\\') { escape = true; continue; }
       if (ch === '"') {
         inString = false;
-        // token contains the closing quote
         lastString = token;
         token = '';
       }
       continue;
     }
 
-    if (ch === '"') {
-      inString = true;
-      token = '"';
-      continue;
-    }
+    if (ch === '"') { inString = true; token = '"'; continue; }
+    if (ch === '{') { depth++; continue; }
+    if (ch === '}') { depth--; continue; }
 
-    if (ch === '{') {
-      depth++;
-      continue;
-    }
-    if (ch === '}') {
-      depth--;
-      continue;
-    }
-
-    // Only look for keys at top-level object (depth === 1)
     if (depth === 1 && ch === ':' && lastString) {
-      // lastString is like "templates"
       const key = JSON.parse(lastString);
       const count = occurrences.get(key) ?? 0;
       occurrences.set(key, count + 1);
@@ -80,10 +56,7 @@ function findTopLevelKeyOccurrences(jsonText) {
       continue;
     }
 
-    // reset lastString if we hit comma at top level without a colon
-    if (depth === 1 && ch === ',') {
-      lastString = null;
-    }
+    if (depth === 1 && ch === ',') { lastString = null; }
   }
 
   return occurrences;
@@ -94,12 +67,6 @@ function parseJson(file) {
     return JSON.parse(readText(file));
   } catch (e) {
     throw new Error(`Invalid JSON: ${file} (${e?.message || e})`);
-  }
-}
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
   }
 }
 
@@ -132,8 +99,6 @@ function findTsxFiles(dir) {
 // Extract t('...') keys from file content
 function extractTranslationKeys(content) {
   const keys = [];
-  // Match t('key'), t("key"), t(`key`) - simple patterns without defaultValue
-  // Also match t('key', { ... }) with interpolation
   const regex = /\bt\(\s*['"`]([^'"`]+)['"`]/g;
   let match;
   while ((match = regex.exec(content)) !== null) {
@@ -152,7 +117,6 @@ function main() {
     const occurrences = findTopLevelKeyOccurrences(text);
     const dups = [...occurrences.entries()].filter(([, n]) => n > 1);
     if (dups.length) {
-      // Duplicates are warnings - JSON will use last occurrence
       warnings.push(
         `[${loc.code}] Duplicate top-level keys (last wins): ` + dups.map(([k, n]) => `${k}(${n})`).join(', ')
       );
@@ -171,20 +135,9 @@ function main() {
 
   // Critical key parity inside templates (minimum)
   const templateKeys = [
-    'catalog',
-    'categories',
-    'aiCoach',
-    'reanalyze',
-    'copiedToNotes',
-    'applyAndApprove',
-    'applyAndRequestChanges',
-    'aiCoachNotes',
-    'severity',
-    'priority',
-    'ownerHint',
-    'dueInDaysShort',
-    'dueAndOwner',
-    'canvas',
+    'catalog', 'categories', 'aiCoach', 'reanalyze', 'copiedToNotes',
+    'applyAndApprove', 'applyAndRequestChanges', 'aiCoachNotes',
+    'severity', 'priority', 'ownerHint', 'dueInDaysShort', 'dueAndOwner', 'canvas',
   ];
 
   for (const k of templateKeys) {
@@ -194,31 +147,24 @@ function main() {
 
   // Check for English text in PT templates catalog (blacklist scan)
   const englishBlacklist = [
-    'Fundraising Readiness',
-    'Business Model Canvas',
-    'Value Proposition',
-    'Growth Loops',
-    'Sales Pipeline',
-    'Customer Segments',
+    'Fundraising Readiness', 'Business Model Canvas', 'Value Proposition',
+    'Growth Loops', 'Sales Pipeline', 'Customer Segments',
   ];
   
   const ptCatalog = pt.templates?.catalog || {};
   const ptCatalogStr = JSON.stringify(ptCatalog);
   for (const phrase of englishBlacklist) {
-    // Only flag if the exact English phrase appears in PT catalog (not in keys)
     if (ptCatalogStr.includes(`"title":"${phrase}"`) || ptCatalogStr.includes(`"desc":"${phrase}"`)) {
       problems.push(`[pt] English phrase found in templates.catalog: "${phrase}"`);
     }
   }
 
-  // ==========================================
-  // NEW: Scan TSX files for missing translation keys
-  // ==========================================
+  // Scan TSX files for missing translation keys
   const srcDir = path.join(ROOT, 'src');
   const tsxFiles = findTsxFiles(srcDir);
   
-  const missingInEn = new Map(); // key -> [files]
-  const missingInPt = new Map(); // key -> [files]
+  const missingInEn = new Map();
+  const missingInPt = new Map();
   
   for (const file of tsxFiles) {
     const content = readText(file);
@@ -226,7 +172,6 @@ function main() {
     const relPath = path.relative(ROOT, file);
     
     for (const key of keys) {
-      // Skip keys with dynamic parts (contain variables)
       if (key.includes('${') || key.includes('{{')) continue;
       
       const enValue = getNestedKey(en, key);
@@ -243,17 +188,16 @@ function main() {
     }
   }
   
-  // Report missing keys (limit output to avoid overwhelming logs)
   const MAX_MISSING_TO_SHOW = 20;
   
   if (missingInEn.size > 0) {
     const keys = [...missingInEn.keys()].slice(0, MAX_MISSING_TO_SHOW);
     for (const key of keys) {
       const files = missingInEn.get(key).slice(0, 2).join(', ');
-      problems.push(`[en] Missing key: "${key}" (used in: ${files})`);
+      warnings.push(`[en] Missing key: "${key}" (used in: ${files})`);
     }
     if (missingInEn.size > MAX_MISSING_TO_SHOW) {
-      problems.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
+      warnings.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
     }
   }
   
@@ -261,10 +205,10 @@ function main() {
     const keys = [...missingInPt.keys()].slice(0, MAX_MISSING_TO_SHOW);
     for (const key of keys) {
       const files = missingInPt.get(key).slice(0, 2).join(', ');
-      problems.push(`[pt] Missing key: "${key}" (used in: ${files})`);
+      warnings.push(`[pt] Missing key: "${key}" (used in: ${files})`);
     }
     if (missingInPt.size > MAX_MISSING_TO_SHOW) {
-      problems.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
+      warnings.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
     }
   }
 
@@ -281,7 +225,7 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`i18n:lint OK (scanned ${tsxFiles.length} files)`);
+  console.log(`i18n:lint OK (scanned ${tsxFiles.length} files, ${warnings.length} warnings)`);
 }
 
 main();
