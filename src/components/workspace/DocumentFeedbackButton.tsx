@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, Send, Copy, ExternalLink } from 'lucide-react';
+import { MessageSquare, Send, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { Json } from '@/integrations/supabase/types';
 import {
   Dialog,
   DialogContent,
@@ -25,8 +26,8 @@ interface DocumentFeedbackButtonProps {
 }
 
 /**
- * Request feedback button for documents (Item J from audit).
- * Creates a feedback request via messaging or copies a share link.
+ * Request feedback button for documents.
+ * Sends notifications to workspace consultants/mentors (not the requester).
  */
 export function DocumentFeedbackButton({
   documentId,
@@ -44,7 +45,7 @@ export function DocumentFeedbackButton({
   const handleCopyLink = async () => {
     const shareUrl = `${window.location.origin}/workspace/${workspaceId}?tab=documents&doc=${documentId}`;
     await navigator.clipboard.writeText(shareUrl);
-    toast.success(t('documentFeedback.linkCopied', 'Link copied! Share it to request feedback.'));
+    toast.success(t('documentFeedback.linkCopied', { defaultValue: 'Link copiado!' }));
     setShowDialog(false);
   };
 
@@ -53,28 +54,48 @@ export function DocumentFeedbackButton({
     
     setIsSending(true);
     try {
-      // Create a notification for workspace consultants
+      // Get workspace members who are consultants or mentors (excluding requester)
+      const { data: members, error: membersError } = await supabase
+        .from('workspace_users')
+        .select('user_id, role')
+        .eq('workspace_id', workspaceId)
+        .eq('active', true)
+        .in('role', ['consultor', 'mentor_externo', 'admin'])
+        .neq('user_id', user.id);
+
+      if (membersError) throw membersError;
+
+      if (!members || members.length === 0) {
+        toast.info(t('documentFeedback.noReviewers', { defaultValue: 'Sem consultores ou mentores atribuídos para notificar.' }));
+        setShowDialog(false);
+        return;
+      }
+
+      // Create notifications for each consultant/mentor
+      const notifications = members.map(member => ({
+        user_id: member.user_id,
+        type: 'feedback_request',
+        title: t('documentFeedback.requestTitle', { defaultValue: 'Pedido de feedback' }),
+        message: t('documentFeedback.requestMessage', {
+          defaultValue: '{{user}} pediu feedback sobre "{{doc}}"',
+          user: user.email,
+          doc: documentName,
+        }),
+        link: `/workspace/${workspaceId}?tab=documents&doc=${documentId}`,
+        metadata: { documentId, workspaceId, requestedBy: user.id, message } as unknown as Json,
+      }));
+
       const { error } = await supabase
         .from('notifications')
-        .insert({
-          user_id: user.id, // This would typically be the consultant/mentor
-          type: 'feedback_request',
-          title: t('documentFeedback.requestTitle', 'Feedback requested'),
-          message: t('documentFeedback.requestMessage', '{{user}} requested feedback on "{{doc}}"', {
-            user: user.email,
-            doc: documentName,
-          }),
-          link: `/workspace/${workspaceId}?tab=documents&doc=${documentId}`,
-          metadata: { documentId, workspaceId, requestedBy: user.id, message },
-        });
+        .insert(notifications);
 
       if (error) throw error;
 
-      toast.success(t('documentFeedback.requestSent', 'Feedback request sent!'));
+      toast.success(t('documentFeedback.requestSent', { defaultValue: 'Pedido de feedback enviado!' }));
       setShowDialog(false);
       setMessage('');
     } catch (error) {
-      toast.error(t('documentFeedback.requestFailed', 'Failed to send request. Please try again.'));
+      toast.error(t('documentFeedback.requestFailed', { defaultValue: 'Falha ao enviar pedido.' }));
     } finally {
       setIsSending(false);
     }
@@ -86,11 +107,11 @@ export function DocumentFeedbackButton({
         variant={variant}
         size={size}
         onClick={() => setShowDialog(true)}
-        title={t('documentFeedback.requestFeedback', 'Request Feedback')}
+        title={t('documentFeedback.requestFeedback', { defaultValue: 'Pedir Feedback' })}
       >
         <MessageSquare className="h-4 w-4" />
         {size !== 'icon' && (
-          <span className="ml-1.5">{t('documentFeedback.feedback', 'Feedback')}</span>
+          <span className="ml-1.5">{t('documentFeedback.feedback', { defaultValue: 'Feedback' })}</span>
         )}
       </Button>
 
@@ -99,10 +120,11 @@ export function DocumentFeedbackButton({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              {t('documentFeedback.title', 'Request Feedback')}
+              {t('documentFeedback.title', { defaultValue: 'Pedir Feedback' })}
             </DialogTitle>
             <DialogDescription>
-              {t('documentFeedback.description', 'Ask for feedback on "{{name}}" from your mentors or consultants.', {
+              {t('documentFeedback.description', {
+                defaultValue: 'Peça feedback sobre "{{name}}" aos seus consultores e mentores.',
                 name: documentName,
               })}
             </DialogDescription>
@@ -111,37 +133,37 @@ export function DocumentFeedbackButton({
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="feedback-message">
-                {t('documentFeedback.whatFeedback', 'What feedback are you looking for?')}
+                {t('documentFeedback.whatFeedback', { defaultValue: 'Que feedback procura?' })}
               </Label>
               <Textarea
                 id="feedback-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder={t('documentFeedback.placeholder', 'e.g., "Please review my pitch deck structure and financial projections..."')}
+                placeholder={t('documentFeedback.placeholder', { defaultValue: 'ex: "Reveja a estrutura do pitch deck e projeções financeiras..."' })}
                 rows={3}
               />
             </div>
 
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground mb-2">
-                {t('documentFeedback.orShare', 'Or share a link for feedback:')}
+                {t('documentFeedback.orShare', { defaultValue: 'Ou partilhe um link para feedback:' })}
               </p>
               <Button variant="outline" size="sm" onClick={handleCopyLink} className="w-full">
                 <Copy className="h-4 w-4 mr-2" />
-                {t('documentFeedback.copyLink', 'Copy Share Link')}
+                {t('documentFeedback.copyLink', { defaultValue: 'Copiar Link' })}
               </Button>
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>
-              {t('common.cancel', 'Cancel')}
+              {t('common.cancel', { defaultValue: 'Cancelar' })}
             </Button>
             <Button onClick={handleSendRequest} disabled={isSending}>
               <Send className="h-4 w-4 mr-1.5" />
               {isSending 
-                ? t('common.sending', 'Sending...') 
-                : t('documentFeedback.sendRequest', 'Send Request')
+                ? t('common.sending', { defaultValue: 'A enviar...' }) 
+                : t('documentFeedback.sendRequest', { defaultValue: 'Enviar Pedido' })
               }
             </Button>
           </DialogFooter>

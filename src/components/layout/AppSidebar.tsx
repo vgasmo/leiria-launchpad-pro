@@ -106,7 +106,7 @@ export function AppSidebar() {
       },
     ] : []),
     { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
-    { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/mentors', icon: Network },
+    { name: t('nav.founder.mentorsResources', { defaultValue: 'Mentores & Recursos' }), href: '/mentors', icon: Network },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
 
@@ -219,17 +219,21 @@ export function AppSidebar() {
           onOpenChange={setStartupExpanded}
         >
           <div className="space-y-0.5">
-            <div className="flex items-center">
+           <div className="flex items-center">
               <Link
                 to={item.href}
                 className={cn(
                   "flex-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 relative",
-                  (isActive && !location.search) || hasActiveChild
+                  // Parent is only "active" when exact match without ?tab (no query params)
+                  // When a child is active, parent is just "expanded" (open) but not highlighted
+                  isActive && !location.search
                     ? "bg-sidebar-accent/60 text-sidebar-foreground before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-r before:bg-sidebar-primary"
-                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
+                    : hasActiveChild
+                      ? "text-sidebar-foreground hover:bg-sidebar-accent/40"
+                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
                 )}
               >
-                <item.icon className={cn("h-[18px] w-[18px] shrink-0", (isActive || hasActiveChild) && "text-sidebar-primary")} />
+                <item.icon className={cn("h-[18px] w-[18px] shrink-0", (isActive && !location.search) && "text-sidebar-primary")} />
                 <span className="truncate flex-1">{item.name}</span>
               </Link>
               <CollapsibleTrigger asChild>
