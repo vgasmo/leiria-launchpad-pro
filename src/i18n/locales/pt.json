@@ -2793,8 +2793,8 @@
     "description": "Precisa de um roteiro para algo específico? Informe o seu consultor sobre o que está a trabalhar.",
     "descriptionSpecific": "O seu consultor vai analisar e ativar este playbook quando for adequado para a sua fase.",
     "playbookLabel": "Playbook",
-    "goalLabel": "O que está a tentar alcançar?",
-    "goalPlaceholder": "ex: Preparar para Série A, Lançar em novo mercado, Construir equipa de vendas...",
+    "goalLabel": "Qual é o seu objetivo?",
+    "goalPlaceholder": "ex: Preparar para Série A, Lançar em novo mercado, Construir equipa comercial...",
     "prefillGoal": "Gostaria de ativar o playbook \"{{title}}\"",
     "urgencyLabel": "Quando precisa disto?",
     "thisWeek": "Esta semana",
@@ -2805,7 +2805,7 @@
     "submitted": "Pedido enviado! O seu consultor vai analisá-lo em breve.",
     "failed": "Falha ao enviar pedido. Por favor tente novamente.",
     "failedHint": "Verifique a sua ligação e tente novamente.",
-    "goalRequired": "Por favor descreva o que está a tentar alcançar."
+    "goalRequired": "Por favor descreva o seu objetivo."
   },
   "publicBooking": {
     "title": "Marcar Reunião",

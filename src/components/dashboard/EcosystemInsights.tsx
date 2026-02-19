@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -53,52 +54,55 @@ const severityConfig: Record<InsightSeverity, {
   },
 };
 
-export function EcosystemInsights({ insights, className }: EcosystemInsightsProps) {
-  const navigate = useNavigate();
+export const EcosystemInsights = React.forwardRef<HTMLDivElement, EcosystemInsightsProps>(
+  function EcosystemInsights({ insights, className }, ref) {
+    const navigate = useNavigate();
 
-  if (insights.length === 0) return null;
+    if (insights.length === 0) return null;
 
-  return (
-    <div className={cn('space-y-2', className)}>
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
-        <Lightbulb className="h-4 w-4" />
-        <span>Insights</span>
-      </div>
-      {insights.map((insight) => {
-        const config = severityConfig[insight.severity];
-        const Icon = config.icon;
-        return (
-          <div
-            key={insight.id}
-            className={cn(
-              'flex items-start gap-3 p-3 rounded-xl border transition-colors',
-              config.bg,
-              config.border,
-            )}
-          >
-            <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', config.iconColor)} />
-            <div className="flex-1 min-w-0">
-              <p className={cn('text-sm font-medium', config.text)}>
-                {insight.title}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {insight.description}
-              </p>
+    return (
+      <div ref={ref} className={cn('space-y-2', className)}>
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
+          <Lightbulb className="h-4 w-4" />
+          <span>Insights</span>
+        </div>
+        {insights.map((insight) => {
+          const config = severityConfig[insight.severity];
+          const Icon = config.icon;
+          return (
+            <div
+              key={insight.id}
+              className={cn(
+                'flex items-start gap-3 p-3 rounded-xl border transition-colors',
+                config.bg,
+                config.border,
+              )}
+            >
+              <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', config.iconColor)} />
+              <div className="flex-1 min-w-0">
+                <p className={cn('text-sm font-medium', config.text)}>
+                  {insight.title}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {insight.description}
+                </p>
+              </div>
+              {insight.actionLabel && insight.actionHref && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 text-xs h-7 gap-1"
+                  onClick={() => navigate(insight.actionHref!)}
+                >
+                  {insight.actionLabel}
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              )}
             </div>
-            {insight.actionLabel && insight.actionHref && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shrink-0 text-xs h-7 gap-1"
-                onClick={() => navigate(insight.actionHref!)}
-              >
-                {insight.actionLabel}
-                <ArrowRight className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+          );
+        })}
+      </div>
+    );
+  }
+);
+EcosystemInsights.displayName = 'EcosystemInsights';

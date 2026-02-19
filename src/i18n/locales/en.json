@@ -3658,7 +3658,7 @@
     "title": "Request a Custom Playbook",
     "titleSpecific": "Request \"{{title}}\"",
     "description": "Need a roadmap for something specific? Let your consultant know what you're working towards.",
-    "descriptionSpecific": "Your consultant will review and deploy this playbook when it's right for your stage.",
+    "descriptionSpecific": "Your consultant will review and activate this playbook when it's right for your stage.",
     "playbookLabel": "Playbook",
     "goalLabel": "What are you trying to achieve?",
     "goalPlaceholder": "e.g., Prepare for Series A, Launch in new market, Build sales team...",
