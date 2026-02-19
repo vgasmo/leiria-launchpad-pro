@@ -105,7 +105,7 @@ export function AppSidebar() {
         ],
       },
     ] : []),
-    { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: firstWorkspaceId ? `/workspace/${firstWorkspaceId}?tab=documents` : '/my-workspaces', icon: FolderOpen },
+    { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/mentors', icon: Network },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
@@ -116,6 +116,7 @@ export function AppSidebar() {
     { name: t('nav.consultor.startups', 'Startups'), href: '/my-workspaces', icon: Building2 },
     { name: t('nav.consultor.sessions', 'Sessões'), href: '/consultor-tools', icon: Calendar },
     { name: t('nav.consultor.actionsFollowups', 'Ações & Follow-ups'), href: '/consultor-tools?tab=actions', icon: CheckSquare },
+    { name: t('nav.consultor.documents', 'Documentos'), href: '/documents', icon: FolderOpen },
     { name: t('nav.consultor.crmPipeline', 'CRM & Pipeline'), href: '/crm', icon: Contact },
     // Default to the Programs wizard / setup view instead of KPIs
     { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=programs-setup', icon: GraduationCap },
