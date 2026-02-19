@@ -38,6 +38,7 @@ import AdminDataImport from "./pages/AdminDataImport";
 import Ecosystem from "./pages/Ecosystem";
 import AcceptInvite from "./pages/AcceptInvite";
 import Documents from "./pages/Documents";
+import Resources from "./pages/Resources";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +128,7 @@ function AppRoutes() {
       <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       <Route path="/integrations-setup" element={<ProtectedRoute><IntegrationsSetup /></ProtectedRoute>} />
       <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+      <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
       <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
       <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />

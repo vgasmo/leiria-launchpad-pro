@@ -4734,5 +4734,35 @@
     "copyFailed": "Falha ao copiar",
     "nameRequired": "O nome é obrigatório",
     "invalidJson": "JSON inválido no esquema"
+  },
+  "resources": {
+    "title": "Rede & Recursos",
+    "subtitle": "Mentoria, templates e guias para avançar mais depressa — sem perder rigor.",
+    "searchPlaceholder": "Pesquisar mentores, templates, playbooks, termos e FAQs…",
+    "recommendedForYou": "Recomendado para si",
+    "sections": {
+      "getStarted": "Começar / Próximos passos",
+      "getStartedDesc": "Passos essenciais para arrancar com a sua startup na plataforma.",
+      "mentoringNetwork": "Mentoria & Rede",
+      "mentoringNetworkDesc": "Conecte-se com mentores especializados e expanda a sua rede.",
+      "templatesTools": "Templates & Ferramentas",
+      "templatesToolsDesc": "Modelos prontos para pitch decks, financeiros, legais e mais.",
+      "playbooks": "Playbooks",
+      "playbooksDesc": "Guias processuais passo a passo para cada fase da sua startup.",
+      "learn": "Aprender",
+      "learnDesc": "Glossário, FAQs e recursos externos essenciais para crescer."
+    },
+    "filters": {
+      "all": "Todos",
+      "external": "Externos",
+      "internal": "Internos"
+    },
+    "actions": {
+      "openMentoring": "Abrir Mentoria",
+      "openTemplates": "Ver templates",
+      "openRepository": "Abrir repositório",
+      "openPlaybooks": "Abrir playbooks",
+      "openGlossary": "Abrir Glossário & FAQ"
+    }
   }
 }
