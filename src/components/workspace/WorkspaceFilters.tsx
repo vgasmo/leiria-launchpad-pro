@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Filter, ArrowUpDown, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -79,13 +80,15 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
   activeQuickFiltersCount,
   onClearFilters,
 }: WorkspaceFiltersProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="mb-6 space-y-4">
       {/* Search - always full width on mobile */}
       <div className="relative w-full lg:max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search startups..."
+          placeholder={t('filters.searchStartups', { defaultValue: 'Pesquisar startups...' })}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-10"
@@ -99,28 +102,34 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
         <Select value={sortBy} onValueChange={(v) => onSortByChange(v as SortOption)}>
           <SelectTrigger className="w-[130px] sm:w-[150px] flex-shrink-0">
             <ArrowUpDown className="h-4 w-4 mr-1 sm:mr-2" />
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t('filters.sortBy', { defaultValue: 'Ordenar' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="priority">By Priority</SelectItem>
-            <SelectItem value="urgency">By Urgency</SelectItem>
-            <SelectItem value="meeting">By Next Meeting</SelectItem>
-            <SelectItem value="name">By Name</SelectItem>
-            <SelectItem value="updated">Last Updated</SelectItem>
+            <SelectItem value="priority">{t('filters.byPriority', { defaultValue: 'Por Prioridade' })}</SelectItem>
+            <SelectItem value="urgency">{t('filters.byUrgency', { defaultValue: 'Por Urgência' })}</SelectItem>
+            <SelectItem value="meeting">{t('filters.byNextMeeting', { defaultValue: 'Por Próxima Reunião' })}</SelectItem>
+            <SelectItem value="name">{t('filters.byName', { defaultValue: 'Por Nome' })}</SelectItem>
+            <SelectItem value="updated">{t('filters.lastUpdated', { defaultValue: 'Última Atualização' })}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={programFilter} onValueChange={onProgramFilterChange}>
           <SelectTrigger className="w-[130px] sm:w-[160px] flex-shrink-0">
-            <SelectValue placeholder="Program" />
+            <SelectValue placeholder={t('filters.program', { defaultValue: 'Programa' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
-            {programs?.map((program) => (
-              <SelectItem key={program.id} value={program.id}>
-                {program.name}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">{t('filters.allPrograms', { defaultValue: 'Todos os Programas' })}</SelectItem>
+            {programs?.length > 0 ? (
+              programs.map((program) => (
+                <SelectItem key={program.id} value={program.id}>
+                  {program.name}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                {t('filters.noProgramsAvailable', { defaultValue: 'Sem programas disponíveis' })}
+              </div>
+            )}
           </SelectContent>
         </Select>
 
@@ -131,13 +140,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           onValueChange={(v) => onStageFilterChange(v as StartupStage | 'all')}
         >
           <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
-            <SelectValue placeholder="Stage" />
+            <SelectValue placeholder={t('filters.stage', { defaultValue: 'Fase' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Stages</SelectItem>
+            <SelectItem value="all">{t('filters.allStages', { defaultValue: 'Todas as Fases' })}</SelectItem>
             {stages.map((stage) => (
-              <SelectItem key={stage} value={stage} className="capitalize">
-                {stage}
+              <SelectItem key={stage} value={stage}>
+                {t(`stages.${stage}`, { defaultValue: stage })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -148,13 +157,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           onValueChange={(v) => onHealthFilterChange(v as HealthScore | 'all')}
         >
           <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
-            <SelectValue placeholder="Health" />
+            <SelectValue placeholder={t('filters.health', { defaultValue: 'Saúde' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Health</SelectItem>
+            <SelectItem value="all">{t('filters.allHealth', { defaultValue: 'Toda a Saúde' })}</SelectItem>
             {healthScores.map((health) => (
-              <SelectItem key={health} value={health} className="capitalize">
-                {health.replace('_', ' ')}
+              <SelectItem key={health} value={health}>
+                {t(`health.levels.${health}`, { defaultValue: health.replace('_', ' ') })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -165,13 +174,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           onValueChange={(v) => onPriorityFilterChange(v as WorkspacePriority | 'all')}
         >
           <SelectTrigger className="w-[120px] sm:w-[140px] flex-shrink-0">
-            <SelectValue placeholder="Priority" />
+            <SelectValue placeholder={t('filters.priority', { defaultValue: 'Prioridade' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="all">{t('filters.allPriorities', { defaultValue: 'Todas as Prioridades' })}</SelectItem>
             {priorities.map((priority) => (
-              <SelectItem key={priority} value={priority} className="capitalize">
-                {priority === 'star' ? '⭐ Star' : priority.charAt(0).toUpperCase() + priority.slice(1)}
+              <SelectItem key={priority} value={priority}>
+                {priority === 'star' ? `⭐ ${t('priorities.star', { defaultValue: 'Estrela' })}` : t(`priorities.${priority}`, { defaultValue: priority })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -182,7 +191,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-1 sm:gap-2 flex-shrink-0">
               <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">More</span>
+              <span className="hidden sm:inline">{t('filters.more', { defaultValue: 'Mais' })}</span>
               {activeFiltersCount > 0 && (
                 <Badge
                   variant="secondary"
@@ -202,7 +211,7 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
                   onCheckedChange={(v) => onMissingKpiChange(!!v)}
                 />
                 <Label htmlFor="missing-kpi" className="text-sm cursor-pointer">
-                  Missing KPI this month
+                  {t('filters.missingKpi', { defaultValue: 'KPI em falta este mês' })}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
@@ -212,13 +221,13 @@ export const WorkspaceFilters = memo(function WorkspaceFilters({
                   onCheckedChange={(v) => onOverdueActionsChange(!!v)}
                 />
                 <Label htmlFor="overdue-actions" className="text-sm cursor-pointer">
-                  Overdue action items
+                  {t('filters.overdueActionItems', { defaultValue: 'Ações em atraso' })}
                 </Label>
               </div>
               {(activeFiltersCount > 0 || activeQuickFiltersCount > 0) && (
                 <Button variant="ghost" size="sm" className="w-full" onClick={onClearFilters}>
                   <X className="h-4 w-4 mr-2" />
-                  Clear All Filters
+                  {t('filters.clearAll', { defaultValue: 'Limpar Todos os Filtros' })}
                 </Button>
               )}
             </div>

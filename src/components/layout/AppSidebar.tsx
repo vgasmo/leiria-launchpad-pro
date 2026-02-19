@@ -42,7 +42,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import startupLeiriaLogo from '@/assets/startup-leiria.svg';
+import startupLeiriaLogo from '@/assets/startup-leiria-logo-transparent.png';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 import { SidebarContactInfo } from './SidebarContactInfo';
 
