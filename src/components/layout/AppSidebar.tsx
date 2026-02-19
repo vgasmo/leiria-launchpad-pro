@@ -320,14 +320,19 @@ export function AppSidebar() {
             collapsed ? "justify-center px-2" : "justify-center px-4"
           )}
         >
-          <img 
-            src={startupLeiriaLogo} 
-            alt="FoundersBook" 
-            className={cn(
-              "transition-all duration-300 pointer-events-none",
-              collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
-            )}
-          />
+          <div className={cn(
+            "rounded-lg bg-white/95 dark:bg-white/90 flex items-center justify-center",
+            collapsed ? "p-1.5" : "px-3 py-1.5"
+          )}>
+            <img 
+              src={startupLeiriaLogo} 
+              alt="Startup Leiria" 
+              className={cn(
+                "transition-all duration-300 pointer-events-none",
+                collapsed ? "h-7 w-auto max-w-[36px] object-contain" : "h-9 w-auto max-w-[170px]"
+              )}
+            />
+          </div>
         </Link>
 
         {/* Collapse toggle */}
