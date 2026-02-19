@@ -129,7 +129,24 @@
     "allowDownload": "Allow Download",
     "allowDownloadDesc": "Investors can download documents",
     "linkReady": "Link ready to share",
-    "autoAddedToDataroom": "Report automatically added to dataroom"
+    "autoAddedToDataroom": "Report automatically added to dataroom",
+    "titlePlaceholder": "Item title",
+    "visibleToInvestors": "Visible to investors",
+    "createShareLink": "Create Share Link",
+    "createLinkDesc": "Generate a secure link to share the dataroom",
+    "expiresIn": "Expires in",
+    "never": "Never",
+    "day": "day",
+    "days": "days",
+    "openLink": "Open Link",
+    "download": "Download",
+    "linkExpired": "Link Expired",
+    "linkExpiredDesc": "This share link has expired. Contact the startup for a new link.",
+    "linkRevokedDesc": "This link has been revoked by the owner.",
+    "linkInvalid": "Invalid Link",
+    "linkInvalidDesc": "This link is not valid or does not exist.",
+    "emptyPublic": "No content available",
+    "poweredBy": "Powered by Startup Leiria"
   },
   "common": {
     "save": "Save",
@@ -225,18 +242,6 @@
     "overdueActionItems": "Overdue action items",
     "clearAll": "Clear All Filters",
     "clearQuickFilters": "Clear quick filters"
-  },
-  "emptyState": {
-    "noMatchingWorkspaces": "No matching results",
-    "adjustFilters": "Try adjusting your filters or search terms to find what you're looking for.",
-    "clearFilters": "Clear All Filters",
-    "welcomeFounder": "Start Your Startup Journey",
-    "welcomeToWorkspace": "Welcome to Workspaces",
-    "founderNoStartups": "Register your startup to track progress, connect with mentors, and prepare for investment.",
-    "noAccess": "You don't have access to any workspaces yet. Contact an administrator or join a program.",
-    "founderValue": "Get guidance from mentors and track your KPIs in one place.",
-    "createFirstStartup": "Create Your Startup",
-    "explorePrograms": "Explore Programs"
   },
   "quickGuideBanner": {
     "title": "New here? Check the Quick Guide",
@@ -1192,43 +1197,14 @@
     "today": "Today",
     "week": "Week",
     "month": "Month",
-    "noEvents": "No events scheduled"
-  },
-  "documents": {
-    "title": "Documents",
-    "upload": "Upload",
-    "uploadFile": "Upload File",
-    "uploadDocument": "Upload Document",
-    "noDocuments": "No documents found",
-    "noDocumentsDesc": "No documents yet.",
-    "getStarted": "Upload a file or add a link to get started.",
-    "addDocument": "Add Document",
-    "addLink": "Add Link",
-    "addExternalLink": "Add External Link",
-    "category": "Category",
-    "selectCategory": "Select category",
-    "descriptionOptional": "Description (optional)",
-    "descriptionPlaceholder": "Brief description...",
-    "file": "File",
-    "name": "Name",
-    "namePlaceholder": "e.g., Pitch Deck on Google Drive",
-    "url": "URL",
-    "urlPlaceholder": "https://...",
-    "provideNameAndUrl": "Please provide both name and URL",
-    "openingExternalLink": "Opening External Link",
-    "aboutToOpen": "You are about to open an external website:",
-    "externalLinkWarning": "This link leads to an external site. Make sure you trust this destination before proceeding.",
-    "openLink": "Open Link",
-    "uncategorized": "Uncategorized",
-    "categoryPitchDeck": "Pitch Deck",
-    "categoryFinancialModel": "Financial Model",
-    "categoryLegal": "Legal",
-    "categoryMarketing": "Marketing",
-    "categoryProduct": "Product",
-    "categoryTeam": "Team",
-    "categoryOther": "Other",
-    "downloadFailed": "Failed to generate download link",
-    "untitled": "Untitled"
+    "noEvents": "No events scheduled",
+    "upcomingSessions": "Upcoming Sessions",
+    "noSessions": "No sessions scheduled",
+    "noSessionsDesc": "Schedule a session with your mentor to get guidance and feedback.",
+    "bookSession": "Book Session",
+    "thisWeek": "This Week",
+    "online": "Online",
+    "inPerson": "In Person"
   },
   "team": {
     "title": "Co-founders",
@@ -1768,7 +1744,9 @@
       "funding": "Funding",
       "other": "Other"
     },
-    "allCategories": "All categories"
+    "allCategories": "All categories",
+    "downloadFailed": "Failed to generate download link",
+    "untitled": "Untitled"
   },
   "documentsPage": {
     "title": "Repository",
@@ -3164,7 +3142,41 @@
     "founderValue": "Get guidance from mentors and track your KPIs in one place.",
     "noAccess": "You don't have access to any workspaces yet. Contact an administrator or join a program.",
     "createFirstStartup": "Create Your Startup",
-    "explorePrograms": "Explore Programs"
+    "explorePrograms": "Explore Programs",
+    "noData": "No data available",
+    "noResults": "No results",
+    "tryDifferentFilters": "Try different filters or add new items."
+  },
+  "loading": {
+    "default": "Loading...",
+    "preparingData": "Preparing data...",
+    "savingChanges": "Saving changes...",
+    "processing": "Processing...",
+    "almostThere": "Almost there..."
+  },
+  "accessibility": {
+    "skipToContent": "Skip to content",
+    "menuToggle": "Toggle menu",
+    "closeDialog": "Close dialog",
+    "expandSection": "Expand section",
+    "collapseSection": "Collapse section",
+    "required": "Required",
+    "optional": "Optional",
+    "loading": "Loading",
+    "sortAscending": "Sort ascending",
+    "sortDescending": "Sort descending"
+  },
+  "feedback": {
+    "saved": "Saved",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "completed": "Completed!",
+    "achieved": "Achieved!",
+    "actionRequired": "Action Required",
+    "success": "Success!",
+    "error": "An error occurred",
+    "tryAgain": "Please try again."
   },
   "integrations": {
     "title": "Integrations & Capture",
