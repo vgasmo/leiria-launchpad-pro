@@ -248,7 +248,7 @@ export function FounderMentorRequestPanel() {
               {t('mentorsPage.pendingRequests')}
             </CardTitle>
             <CardDescription>
-              {t('mentorsPage.expectedResponse', 'Our team typically matches mentors within 2-3 business days')}
+              {t('mentorsPage.expectedResponse', { defaultValue: 'A nossa equipa atribui mentores em 2-3 dias úteis.' })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -261,7 +261,7 @@ export function FounderMentorRequestPanel() {
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
                       <Clock className="h-3 w-3 mr-1" />
-                      {t('mentorsPage.awaitingMatch', 'Awaiting Match')}
+                      {t('mentorsPage.awaitingMatch', { defaultValue: 'Em triagem' })}
                     </Badge>
                     <Badge variant="secondary">{getWorkspaceName(req.workspace_id)}</Badge>
                     <span className="text-xs text-muted-foreground">

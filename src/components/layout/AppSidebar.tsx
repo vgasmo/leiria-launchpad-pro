@@ -77,19 +77,15 @@ export function AppSidebar() {
   // ROLE-SPECIFIC NAVIGATION ITEMS
   // ============================================
 
-  // FOUNDER OS Navigation - uses ?tab= query params to match WorkspaceDetail routing
+  // FOUNDER OS Navigation - simplified: no tab-level links (tabs live inside WorkspaceDetail)
   const founderNavigation: NavItem[] = [
-    { name: t('nav.founder.home', 'Início'), href: '/my-workspaces', icon: Home, exact: true },
+    { name: t('nav.founder.home', { defaultValue: 'Início' }), href: '/my-workspaces', icon: Home, exact: true },
     ...(firstWorkspaceId ? [
-      { name: t('nav.founder.myStartup', 'A Minha Startup'), href: `/workspace/${firstWorkspaceId}`, icon: Building2, exact: true },
-      { name: t('nav.founder.goalsKpis', 'Objetivos & KPIs'), href: `/workspace/${firstWorkspaceId}?tab=kpis`, icon: Target },
-      { name: t('nav.founder.sessionsMentoring', 'Sessões & Mentoria'), href: `/workspace/${firstWorkspaceId}?tab=sessions`, icon: Calendar },
-      { name: t('nav.founder.actionsPlan', 'Ações & Plano'), href: `/workspace/${firstWorkspaceId}?tab=actions`, icon: CheckSquare },
-      { name: t('nav.founder.documents', 'Documentos'), href: `/workspace/${firstWorkspaceId}?tab=documents`, icon: FileText },
+      { name: t('nav.founder.myStartup', { defaultValue: 'A Minha Startup' }), href: `/workspace/${firstWorkspaceId}`, icon: Building2 },
     ] : []),
-    { name: t('nav.founder.networkResources', 'Rede & Recursos'), href: '/mentors', icon: Network },
-    { name: t('nav.founder.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
-    { name: t('nav.founder.support', 'Suporte'), href: '/help', icon: Headphones },
+    { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/mentors', icon: Network },
+    { name: t('nav.founder.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
+    { name: t('nav.founder.glossary', { defaultValue: 'Glossário' }), href: '/help', icon: Headphones },
   ];
 
   // CONSULTOR OS Navigation (Portfolio OS)

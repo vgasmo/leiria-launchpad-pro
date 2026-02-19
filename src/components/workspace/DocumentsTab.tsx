@@ -424,7 +424,7 @@ export function DocumentsTab({ workspaceId, canWrite }: DocumentsTabProps) {
                               <Icon className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium truncate">{doc.name}</p>
+                              <p className="font-medium truncate">{doc.name || t('documents.untitled', { defaultValue: 'Sem título' })}</p>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 {doc.uploader && (
                                   <div className="flex items-center gap-1">

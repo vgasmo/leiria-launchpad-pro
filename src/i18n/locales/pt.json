@@ -1165,6 +1165,7 @@
     "categoryTeam": "Equipa",
     "categoryOther": "Outros",
     "downloadFailed": "Falha ao gerar link de download",
+    "untitled": "Sem título",
     "financialModel": "Modelo Financeiro",
     "financialModelDesc": "Carregue o seu modelo financeiro (Excel/Folha de cálculo) para cálculos de valorização",
     "uploadFinancialModel": "Carregar Modelo Financeiro",
@@ -1972,7 +1973,7 @@
     "allFilled": "Todos os KPIs deste mês já estão preenchidos"
   },
   "investorReadiness": {
-    "title": "Prontidão para Investidores",
+    "title": "Preparação para Investidores",
     "pitchDeck": "Pitch Deck",
     "pitchDeckDesc": "Carregue o seu pitch deck atual",
     "investorUpdate": "Update para Investidores",
@@ -2395,7 +2396,10 @@
     "mentorAssigned": "Mentor atribuído com sucesso!",
     "assignmentFailed": "Falha ao atribuir mentor. Tente novamente.",
     "findAndAssign": "Encontrar e Atribuir Mentores",
-    "findAndAssignDesc": "Procure todos os mentores e atribua-os a startups."
+    "findAndAssignDesc": "Procure todos os mentores e atribua-os a startups.",
+    "expectedResponse": "A nossa equipa atribui mentores em 2-3 dias úteis.",
+    "awaitingMatch": "Em triagem",
+    "cancelRequest": "Cancelar pedido"
   },
   "glossary": {
     "title": "Glossário",
@@ -2494,7 +2498,7 @@
     "program": "Programa"
   },
   "investorReadiness": {
-    "title": "Prontidão para Investidor",
+    "title": "Preparação para Investidores",
     "whyMattersTitle": "Porque isto importa",
     "whyMatters": "Investidores avaliam startups pela preparação e organização. Um perfil completo mostra que é sério.",
     "itemsComplete": "itens completos",
@@ -2511,7 +2515,7 @@
   "quickWins": {
     "pitchDeckUploaded": {
       "title": "🎉 Pitch deck carregado!",
-      "description": "A sua prontidão para investidor melhorou"
+      "description": "A sua preparação para investidores melhorou"
     },
     "kpiAdded": {
       "title": "📊 KPI registado!",
@@ -2748,24 +2752,24 @@
     },
     "staff": {
       "emptyTitle": "Nenhum Playbook Configurado",
-      "emptyDescription": "Não há playbooks disponíveis para esta fase. Configure playbooks no painel Admin para permitir o deployment.",
+      "emptyDescription": "Não há playbooks disponíveis para esta fase. Configure playbooks no painel Admin para permitir a ativação.",
       "emptyValue": "Playbooks ajudam founders a seguir roteiros estruturados para cada fase da startup.",
       "introTitle": "Gestão de Playbooks",
-      "introDescription": "Implante playbooks para criar marcos e ações para esta startup. Acompanhe o progresso e ajuste conforme necessário.",
+      "introDescription": "Ative playbooks para criar marcos e ações para esta startup. Acompanhe o progresso e ajuste conforme necessário.",
       "availableFor": "Disponíveis para Fase {{stage}}",
-      "deploy": "Implantar Playbook",
-      "deployed": "Playbooks Implantados",
-      "deployedOn": "Implantado {{date}}",
-      "deployedBadge": "Implantado",
+      "deploy": "Ativar Playbook",
+      "deployed": "Playbooks Ativos",
+      "deployedOn": "Ativado {{date}}",
+      "deployedBadge": "Ativo",
       "available": "disponíveis",
-      "allDeployedTitle": "Todos os Playbooks Implantados",
-      "allDeployedDescription": "Todos os playbooks disponíveis para esta fase foram implantados. Acompanhe o progresso em Marcos e Ações.",
-      "confirmDeployTitle": "Implantar Playbook?",
+      "allDeployedTitle": "Todos os Playbooks Ativos",
+      "allDeployedDescription": "Todos os playbooks disponíveis para esta fase foram ativados. Acompanhe o progresso em Marcos e Ações.",
+      "confirmDeployTitle": "Ativar Playbook?",
       "confirmDeployDesc": "Isto vai criar {{milestones}} marcos e {{actions}} ações de \"{{title}}\".",
-      "confirmDeploy": "Implantar",
-      "deploySuccess": "Playbook implantado: {{milestones}} marcos e {{actions}} ações criadas",
-      "deployFailed": "Falha ao implantar playbook",
-      "alreadyDeployed": "Este playbook já está implantado"
+      "confirmDeploy": "Ativar",
+      "deploySuccess": "Playbook ativado: {{milestones}} marcos e {{actions}} ações criadas",
+      "deployFailed": "Falha ao ativar playbook",
+      "alreadyDeployed": "Este playbook já está ativo"
     }
   },
   "playbookProgress": {
@@ -2787,7 +2791,7 @@
     "title": "Pedir um Playbook Personalizado",
     "titleSpecific": "Pedir \"{{title}}\"",
     "description": "Precisa de um roteiro para algo específico? Informe o seu consultor sobre o que está a trabalhar.",
-    "descriptionSpecific": "O seu consultor vai analisar e implantar este playbook quando for adequado para a sua fase.",
+    "descriptionSpecific": "O seu consultor vai analisar e ativar este playbook quando for adequado para a sua fase.",
     "playbookLabel": "Playbook",
     "goalLabel": "O que está a tentar alcançar?",
     "goalPlaceholder": "ex: Preparar para Série A, Lançar em novo mercado, Construir equipa de vendas...",
