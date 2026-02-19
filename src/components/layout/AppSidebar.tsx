@@ -112,17 +112,15 @@ export function AppSidebar() {
 
   // CONSULTOR OS Navigation (Portfolio OS)
   const consultorNavigation: NavItem[] = [
-    { name: t('nav.consultor.portfolio', 'Portefólio'), href: '/my-workspaces', icon: Briefcase, exact: true },
-    { name: t('nav.consultor.startups', 'Startups'), href: '/my-workspaces', icon: Building2 },
-    { name: t('nav.consultor.sessions', 'Sessões'), href: '/consultor-tools', icon: Calendar },
-    { name: t('nav.consultor.actionsFollowups', 'Ações & Follow-ups'), href: '/consultor-tools?tab=actions', icon: CheckSquare },
-    { name: t('nav.consultor.documents', 'Documentos'), href: '/documents', icon: FolderOpen },
-    { name: t('nav.consultor.crmPipeline', 'CRM & Pipeline'), href: '/crm', icon: Contact },
-    // Default to the Programs wizard / setup view instead of KPIs
-    { name: t('nav.consultor.programs', 'Programas'), href: '/admin?tab=programs-setup', icon: GraduationCap },
-    { name: t('nav.consultor.reports', 'Relatórios'), href: '/admin?tab=analytics', icon: BarChart3 },
-    { name: t('nav.consultor.dataQuality', 'Qualidade de Dados'), href: '/admin?tab=data-quality', icon: Database },
-    { name: t('nav.consultor.quickGuide', 'Guia Rápido'), href: '/guide', icon: BookOpenCheck },
+    { name: t('nav.consultor.portfolio', { defaultValue: 'Portefólio' }), href: '/my-workspaces', icon: Briefcase, exact: true },
+    { name: t('nav.consultor.sessions', { defaultValue: 'Sessões' }), href: '/consultor-tools', icon: Calendar },
+    { name: t('nav.consultor.actionsFollowups', { defaultValue: 'Ações & Follow-ups' }), href: '/consultor-tools?tab=actions', icon: CheckSquare },
+    { name: t('nav.consultor.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
+    { name: t('nav.consultor.crmPipeline', { defaultValue: 'CRM & Pipeline' }), href: '/crm', icon: Contact },
+    { name: t('nav.consultor.programs', { defaultValue: 'Programas' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
+    { name: t('nav.consultor.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
+    { name: t('nav.consultor.dataQuality', { defaultValue: 'Qualidade de Dados' }), href: '/admin?tab=data-quality', icon: Database },
+    { name: t('nav.consultor.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
   ];
 
   // MENTOR COMPANION Navigation

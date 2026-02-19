@@ -1,206 +1,145 @@
-# CRM v1.2 + v1.3 Regression Checklist
+# Regression Checklist — Startup Leiria Ecosystem OS (Release Candidate)
 
-## Audit Report Summary
+## Per-Profile Journeys
 
-### ✅ Code Quality
-- TypeScript builds without errors
-- No duplicate components detected
-- CRM routes properly configured: `/crm`, `/admin/crm-diagnostics`
-- RLS policies maintain staff vs founder visibility correctly
-- Unused imports cleaned up
+### Founder
+- [ ] Login → Dashboard com "Próxima melhor ação" visível
+- [ ] Sidebar: "A Minha Startup" expande com sub-itens (Objetivos, Sessões, Ações)
+- [ ] Criar startup via formulário → candidatura pendente
+- [ ] Workspace aprovado → aceder Objetivos & KPIs, atualizar valores
+- [ ] Sessões & Mentoria → criar sessão, gerar resumo IA, criar ações
+- [ ] Ações & Plano → criar ação, marcar como concluída
+- [ ] Documentos → carregar ficheiro, adicionar link, ver templates
+- [ ] Playbooks → aplicar playbook, descartar playbook (sem erro RLS)
+- [ ] Rede & Recursos → pesquisar, ver recomendações
+- [ ] Glossário & FAQ → pesquisar perguntas, ver glossário
+- [ ] Pedir mentor → pedido visível e rastreável
+- [ ] Dataroom → adicionar item, criar link de partilha
 
-### ✅ CRM v1.2 Hardening (Completed)
-- [x] CRM Diagnostics page at `/admin/crm-diagnostics`
-- [x] Schema check (communication_log, funnel_items, notifications)
-- [x] Permissions check (staff query validation)
-- [x] Notifications dry run and live modes
-- [x] Graph email sync with dry_run support
-- [x] Record drawer timeline load test
-- [x] CRM metrics calculation
-- [x] i18n keys for EN and PT (diagnostics namespace)
-- [x] Deep-link robustness: `/crm?open=<id>` fetches if not in inbox
+### Mentor Externo
+- [ ] Login → NDA gate se necessário
+- [ ] Dashboard com startups atribuídas
+- [ ] Ver detalhes da startup (KPIs, ações, última sessão)
+- [ ] Agenda e pedidos de mentoria
+- [ ] Preparação de sessão + notas
+- [ ] Sem itens de CRM/Admin visíveis no menu
 
-### ✅ CRM v1.3 Founder Engagement (Completed)
-- [x] OneThingToday card with soft urgency tones
-- [x] YourWeekCard limited to 2 priorities with soft amber styling
-- [x] FounderDashboard with progressive disclosure
-- [x] InteractionsCard for shared visibility items
-- [x] Focus Mode for consultants in CRM dashboard
-- [x] EnhancedNextSteps with neutral/soft urgency colors
-- [x] AlertsPanel with reduced red intensity
-- [x] NextBestAction with soft amber borders (not red)
-- [x] HealthAlertsCard with softer critical styling
-- [x] CRM inbox overdue items use amber instead of red
-- [x] RecordDrawer overdue indicators softened to amber
-- [x] Task lifecycle: Open/Done/Canceled tabs with inline edit
-- [x] "Clear next action also?" confirmation when completing matching tasks
+### Consultor Interno
+- [ ] Login → Portefólio com alertas/risco
+- [ ] CRM Pipeline → clicar lead → drawer abre como overlay (sem empurrar conteúdo)
+- [ ] CRM → criar lead, mover entre stages
+- [ ] Sessões → agendar, preparar, registar notas
+- [ ] Ações & Follow-ups → ver ações atrasadas
+- [ ] Documentos (repositório global) → pesquisar, filtrar
+- [ ] Programas → configurar, gerir coortes
+- [ ] Relatórios → visualizar analytics
+- [ ] Templates e playbooks → aplicar a workspace
 
-### ✅ UI Aesthetics Pass (Completed)
-- [x] Removed destructive/red backgrounds from urgency indicators
-- [x] Consistent amber tones for overdue/at-risk items
-- [x] Softer badges (amber-100 bg, amber-600 text)
-- [x] Dark mode compatible color choices
+### Administrativo
+- [ ] Login → Admin dashboard
+- [ ] Utilizadores & Permissões → aprovar conta, atribuir roles
+- [ ] Programas & Coortes → criar programa, configurar módulos
+- [ ] Configuração do Sistema → integrações, feature flags
+- [ ] Contratos / Lifecycle Hub → ver alertas, converter leads
+- [ ] Datarooms → gerir partilhas
+- [ ] Importação de dados → funcional
 
-### ⚠️ Risk Areas (Monitor)
-- Graph API requires consultant email to match Azure AD tenant
-- Feature flags gate new functionality (safe)
-- Notification deduplication uses 24h window
+## Per-Module Checks
 
----
+### CRM Pipeline
+- [ ] Board view renderiza corretamente
+- [ ] Drawer abre como Sheet overlay (não empurra layout)
+- [ ] Tabs (Overview, Timeline, Tasks) funcionam
+- [ ] Empty states com mensagem clara
+- [ ] Stages traduzidas PT-PT
 
-## Manual Test Steps
+### Workspaces / Startups
+- [ ] Imagem de startup carrega corretamente
+- [ ] Tabs da workspace não duplicam menu lateral
+- [ ] Workspace bloqueado mostra mensagem adequada
+- [ ] Workspace pendente restringe acesso
 
-### Founder Flow
+### Programas / Coortes
+- [ ] Criar programa com wizard
+- [ ] Clonar programa existente
+- [ ] Atribuir startups a coortes
 
-1. **My Workspaces Page**
-   - [ ] Navigate to `/my-workspaces`
-   - [ ] Verify startup card displays with health badge
-   - [ ] Verify "One Thing Today" card shows motivating action (not overwhelming)
-   - [ ] Verify streak hero shows if applicable
+### Documentos & Templates
+- [ ] Repositório com 2 tabs (Documentos, Templates)
+- [ ] Pesquisa e filtro por categoria funcionam
+- [ ] Datas formatadas no locale correto (PT)
+- [ ] Upload funcional, download funcional
+- [ ] Links externos abrem em nova tab
 
-2. **Workspace Overview**
-   - [ ] Open a workspace
-   - [ ] Verify "One Thing Today" shows priority action
-   - [ ] Verify overdue items use softer amber (not all red)
-   - [ ] Verify shared interactions appear in InteractionsCard
+### Sessões & Mentoria
+- [ ] Criar sessão com data/hora
+- [ ] Enviar convite (email/ICS)
+- [ ] Notas e decisões editáveis
+- [ ] Análise IA gera resumo e ações
+- [ ] Link Teams/Meet quando disponível
 
-3. **Next Steps / Actions**
-   - [ ] Navigate to Actions tab
-   - [ ] Verify overdue actions show clearly but not alarmingly
-   - [ ] Add a new action item
-   - [ ] Mark an action complete
-   - [ ] Verify completion toast appears
+### KPIs & Objetivos
+- [ ] Definir KPIs para workspace
+- [ ] Atualizar valores mensais
+- [ ] Visualizar gráficos de tendência
+- [ ] Benchmarks / percentis visíveis
 
-4. **Schedule Session**
-   - [ ] Navigate to Sessions tab
-   - [ ] Verify upcoming sessions display
-   - [ ] Book/request a session (if enabled)
+### Playbooks
+- [ ] Aplicar playbook → cria marcos e ações
+- [ ] Descartar playbook → sem erro RLS
+- [ ] Playbook descartado não reaparece
 
-5. **Update KPIs**
-   - [ ] Navigate to KPIs tab
-   - [ ] Add or update a KPI value
-   - [ ] Verify health score reflects update
+### Dataroom
+- [ ] Criar dataroom para workspace
+- [ ] Adicionar itens (docs, updates, links)
+- [ ] Criar link de partilha com expiração
+- [ ] Revogar link funcional
 
----
+### Integrações (Teams/Outlook)
+- [ ] UI "Conectar" clara + estado
+- [ ] Fallback útil quando não ligado (exportar ICS)
+- [ ] Sync Outlook funcional se configurado
 
-### Consultant Flow
+### IA
+- [ ] Resumo de sessão gera sem erro
+- [ ] Coach de template funcional
+- [ ] Rate limiting funciona
+- [ ] Erros de IA mostram mensagem clara
 
-1. **CRM Dashboard**
-   - [ ] Navigate to `/crm`
-   - [ ] Verify inbox groups display (Overdue, Today, Upcoming, Stale)
-   - [ ] Toggle "Focus Mode" - verify urgent items filter
-   - [ ] Toggle "My Items Only" - verify filter works
+### Localização (i18n)
+- [ ] Zero strings EN visíveis em modo PT
+- [ ] Datas formatadas em PT (date-fns locale)
+- [ ] Categorias de documentos traduzidas
+- [ ] Stages do CRM traduzidas
 
-2. **Record Drawer**
-   - [ ] Click on a lead to open drawer
-   - [ ] Verify AI Recap section (if enabled)
-   - [ ] Verify timeline loads with activities
-   - [ ] Test task tabs: Open / Done / Canceled
+### Segurança
+- [ ] Sem service role no frontend
+- [ ] Edge functions falham de forma clara se env vars faltarem
+- [ ] RLS suporta todas as operações (playbooks dismiss, docs upload, etc.)
+- [ ] Workspace pendente não acede a tabelas sensíveis
+- [ ] Public booking com token inválido retorna erro seguro
 
-3. **Task Lifecycle**
-   - [ ] Add a new task
-   - [ ] Edit task subject and due date
-   - [ ] Mark task complete
-   - [ ] Verify "Clear next action also?" confirmation if applicable
-   - [ ] Cancel a task
-   - [ ] Reopen a task
+## Build Acceptance
+- [ ] `npm run build` PASS
+- [ ] `npm run lint` PASS
+- [ ] `npm run typecheck` PASS
+- [ ] Zero erros na consola nas rotas principais
+- [ ] Sem mistura de idiomas no UI (PT-PT first)
+- [ ] Empty states sempre com explicação + CTA
 
-4. **Next Action Management**
-   - [ ] Set next action from drawer
-   - [ ] Update next action
-   - [ ] Clear next action
+## GO / NO-GO
 
----
+| Área | Estado | Notas |
+|------|--------|-------|
+| Build & Types | ⬜ | |
+| i18n Parity | ⬜ | |
+| Segurança / RLS | ⬜ | |
+| CRM | ⬜ | |
+| Documentos | ⬜ | |
+| Playbooks | ⬜ | |
+| Sessões | ⬜ | |
+| Integrações | ⬜ | |
+| Empty States | ⬜ | |
 
-### Notifications
-
-1. **Notification Bell**
-   - [ ] Click bell icon in top bar
-   - [ ] Verify notifications list opens without layout shift
-   - [ ] Verify CRM notification types show correct icons:
-     - task_due: Clock icon
-     - task_overdue: AlertTriangle icon
-     - next_action_due: Clock icon
-     - next_action_overdue: AlertTriangle icon
-   - [ ] Mark single notification as read
-   - [ ] Mark all notifications as read
-   - [ ] Delete a notification
-
-2. **Deep Link**
-   - [ ] Navigate to `/crm?open=<valid-funnel-item-id>`
-   - [ ] Verify drawer opens automatically
-   - [ ] Navigate to `/crm?open=<invalid-id>`
-   - [ ] Verify friendly error toast and param cleared
-
----
-
-### CRM Diagnostics (Admin/Consultor Only)
-
-1. **Access Control**
-   - [ ] Navigate to `/admin/crm-diagnostics`
-   - [ ] Verify only admin/consultor can access
-   - [ ] Founders see AccessDenied component
-
-2. **Infrastructure Tests**
-   - [ ] Run Schema Check - verify pass
-   - [ ] Run Permissions Check - verify pass
-
-3. **Notification Tests**
-   - [ ] Run Notifications (Dry Run) - verify count returned
-   - [ ] Optionally run Notifications (Live) - verify notifications created
-
-4. **Data Tests (with funnel_item_id)**
-   - [ ] Enter a valid funnel_item_id
-   - [ ] Run Graph Email Sync (Dry Run) - verify no data inserted
-   - [ ] Run Record Drawer Load - verify timeline count
-
-5. **Metrics**
-   - [ ] Run CRM Metrics - verify counts for overdue, today, stale
-
-6. **Logs**
-   - [ ] Expand logs panel
-   - [ ] Verify log entries appear
-   - [ ] Clear logs
-
----
-
-## Edge Function Safety Checks
-
-### sync-graph-email-history
-- [x] Supports `dry_run: true` parameter
-- [x] Does NOT update `last_activity_at` in dry_run mode
-- [x] Returns `would_insert` count in dry_run mode
-- [x] Sanitizes preview text (max 500 chars)
-- [x] Uses upsert with conflict handling for duplicates
-
-### generate-crm-notifications
-- [x] Deduplicates using 24h window (existingKeys check)
-- [x] Includes entity_type and entity_id in notifications
-- [x] Supports dry_run for counting without inserting
-- [x] Only notifies assigned staff users
-
----
-
-## Visibility Rules Verification
-
-### Founders Should NOT See:
-- [ ] Staff-only notes (visibility = 'staff')
-- [ ] Internal CRM tasks unless marked shared
-- [ ] Raw Graph email sync data (staff only)
-
-### Founders CAN See:
-- [ ] Shared visibility items in InteractionsCard
-- [ ] Consultant requests marked as shared
-- [ ] Their own action items and milestones
-
----
-
-## UI/Aesthetics Checklist
-
-- [ ] No heavy red backgrounds dominating the UI
-- [ ] Neutral surfaces with colored badges for urgency
-- [ ] Consistent button sizing (h-8 to h-10)
-- [ ] Proper spacing rhythm (gap-2 to gap-4)
-- [ ] Skeleton loading states where lists load
-- [ ] Mobile responsive: primary CTAs visible
-- [ ] Sidebar legible and not alarm-like for founders
+**Decisão**: ⬜ GO / ⬜ NO-GO  
+**Data**: _______________
