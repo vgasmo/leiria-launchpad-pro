@@ -1190,7 +1190,8 @@
     "categoryProduct": "Product",
     "categoryTeam": "Team",
     "categoryOther": "Other",
-    "downloadFailed": "Failed to generate download link"
+    "downloadFailed": "Failed to generate download link",
+    "untitled": "Untitled"
   },
   "team": {
     "title": "Co-founders",
@@ -3262,7 +3263,10 @@
     "mentorAssigned": "Mentor assigned successfully!",
     "assignmentFailed": "Failed to assign mentor. Please try again.",
     "findAndAssign": "Find & Assign Mentors",
-    "findAndAssignDesc": "Browse all mentors and assign them to startups."
+    "findAndAssignDesc": "Browse all mentors and assign them to startups.",
+    "expectedResponse": "Our team typically matches mentors within 2-3 business days.",
+    "awaitingMatch": "Awaiting Match",
+    "cancelRequest": "Cancel request"
   },
   "glossary": {
     "title": "Glossary",

@@ -158,10 +158,10 @@ export default function WorkspaceDetail() {
         <TabsList className="bg-muted/30 h-auto gap-0.5 p-1 flex flex-wrap">
           {/* Core tabs - always visible (extended to include Playbooks & Templates) */}
           <TabsTrigger value="overview" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.overview')}</TabsTrigger>
-          <TabsTrigger value="sessions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.sessions')}</TabsTrigger>
-          <TabsTrigger value="actions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.actions')}</TabsTrigger>
           <TabsTrigger value="milestones" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.milestones')}</TabsTrigger>
+          <TabsTrigger value="actions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.actions')}</TabsTrigger>
           <TabsTrigger value="kpis" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.kpis')}</TabsTrigger>
+          <TabsTrigger value="sessions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.sessions')}</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.documents')}</TabsTrigger>
           <TabsTrigger value="playbooks" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.playbooks')}</TabsTrigger>
           <TabsTrigger value="templates" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.templates')}</TabsTrigger>
@@ -248,14 +248,14 @@ export default function WorkspaceDetail() {
           />
         </TabsContent>
 
-        <TabsContent value="sessions">
-          <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
+        <TabsContent value="milestones">
+          <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="actions">
           <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
-        <TabsContent value="milestones">
-          <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
+        <TabsContent value="sessions">
+          <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
         </TabsContent>
         <TabsContent value="kpis">
           <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
