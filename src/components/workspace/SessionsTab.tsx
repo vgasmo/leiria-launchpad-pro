@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, addDays, startOfDay } from 'date-fns';
+import { downloadICSFile } from '@/lib/icsExport';
 import { 
   Search, 
   Plus, 
@@ -1075,6 +1076,17 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
 
   const isPastSession = isPast(new Date(session.scheduled_at));
 
+  const handleExportICS = () => {
+    downloadICSFile({
+      title: session.title,
+      description: session.agenda || session.notes || '',
+      startDate: new Date(session.scheduled_at),
+      durationMinutes: session.duration || 60,
+      meetingLink: session.meeting_url || undefined,
+    });
+    toast.success(t('sessions.icsExported', { defaultValue: 'Sessão exportada para calendário' }));
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1088,22 +1100,33 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
                   {session.duration && ` • ${session.duration} min`}
                 </DialogDescription>
               </div>
-              {canUseFacilitator && (
+              <div className="flex items-center gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onOpenFacilitator(session);
-                  }}
-                  className="shrink-0"
+                  onClick={handleExportICS}
+                  title={t('sessions.exportIcs', { defaultValue: 'Exportar para calendário (.ics)' })}
                 >
-                  <Play className="h-4 w-4 mr-1" />
-                  Facilitator Mode
+                  <Download className="h-4 w-4 mr-1" />
+                  .ics
                 </Button>
-              )}
+                {canUseFacilitator && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onOpenFacilitator(session);
+                    }}
+                  >
+                    <Play className="h-4 w-4 mr-1" />
+                    {t('sessions.facilitatorMode', { defaultValue: 'Modo Facilitador' })}
+                  </Button>
+                )}
+              </div>
             </div>
           </DialogHeader>
 

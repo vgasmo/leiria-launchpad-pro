@@ -126,10 +126,10 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
       setCalendarToken(token);
       setTokenExpiresAt(expiresAt);
       setNeedsRegeneration(false);
-      toast.success('Calendar feed token generated successfully (valid for 90 days)');
+      toast.success(t('calendarFeed.tokenGenerated', { defaultValue: 'Token de calendário gerado com sucesso (válido por 90 dias)' }));
     } catch (err) {
       console.error('Error generating token:', err);
-      toast.error('Failed to generate calendar token');
+      toast.error(t('calendarFeed.generateFailed', { defaultValue: 'Falha ao gerar token de calendário' }));
     } finally {
       setIsGenerating(false);
     }
@@ -137,7 +137,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
 
   const regenerateToken = async () => {
     if (!user?.id) return;
-    if (!confirm('Regenerating the token will invalidate your current calendar subscriptions. Continue?')) {
+    if (!confirm(t('calendarFeed.regenerateConfirm', { defaultValue: 'Regenerar o token irá invalidar as subscrições atuais. Continuar?' }))) {
       return;
     }
     await generateToken();
@@ -149,9 +149,9 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
       await navigator.clipboard.writeText(feedUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success('Calendar URL copied to clipboard');
+      toast.success(t('calendarFeed.urlCopied', { defaultValue: 'URL do calendário copiado' }));
     } catch (err) {
-      toast.error('Failed to copy URL');
+      toast.error(t('calendarFeed.copyFailed', { defaultValue: 'Falha ao copiar URL' }));
     }
   };
 
@@ -166,7 +166,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Calendar Feed
+            {t('calendarFeed.title', { defaultValue: 'Feed de Calendário' })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -183,14 +183,14 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />
-          Calendar Feed
+          {t('calendarFeed.title', { defaultValue: 'Feed de Calendário' })}
           <Badge variant="secondary" className="gap-1">
             <Rss className="h-3 w-3" />
             ICS
           </Badge>
         </CardTitle>
         <CardDescription>
-          Subscribe to your sessions calendar in Outlook, Google Calendar, or Apple Calendar
+          {t('calendarFeed.description', { defaultValue: 'Subscreva o seu calendário de sessões no Outlook, Google Calendar ou Apple Calendar' })}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -198,12 +198,12 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         {needsRegeneration && user && (
           <Alert variant="destructive">
             <RefreshCw className="h-4 w-4" />
-            <AlertTitle>Token Regeneration Required</AlertTitle>
+            <AlertTitle>{t('calendarFeed.regenerationRequired', { defaultValue: 'Regeneração necessária' })}</AlertTitle>
             <AlertDescription className="space-y-2">
               <p className="text-sm">
                 {tokenExpiresAt && tokenExpiresAt < new Date() 
-                  ? 'Your calendar token has expired. Please generate a new one to continue using calendar sync.'
-                  : 'For security reasons, your calendar token needs to be regenerated. Your calendar subscriptions will need to be updated with the new URL.'}
+                  ? t('calendarFeed.tokenExpired', { defaultValue: 'O seu token expirou. Gere um novo para continuar a sincronizar.' })
+                  : t('calendarFeed.tokenNeedsRegeneration', { defaultValue: 'Por razões de segurança, o token precisa de ser regenerado. As subscrições de calendário terão de ser atualizadas com o novo URL.' })}
               </p>
               <Button
                 size="sm"
@@ -211,7 +211,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                 disabled={isGenerating}
                 className="mt-2"
               >
-                {isGenerating ? 'Generating...' : 'Regenerate Calendar Token'}
+                {isGenerating ? t('common.generating', { defaultValue: 'A gerar...' }) : t('calendarFeed.regenerateToken', { defaultValue: 'Regenerar Token' })}
               </Button>
             </AlertDescription>
           </Alert>
@@ -221,12 +221,10 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         {!calendarToken && !needsRegeneration && user && (
           <Alert>
             <Key className="h-4 w-4" />
-            <AlertTitle>Secure Calendar Access</AlertTitle>
+            <AlertTitle>{t('calendarFeed.secureAccess', { defaultValue: 'Acesso Seguro ao Calendário' })}</AlertTitle>
             <AlertDescription className="space-y-2">
               <p className="text-sm">
-                Generate a secure token to subscribe to your calendar feed. 
-                This token allows calendar apps to access your sessions without logging in.
-                Tokens are valid for 90 days.
+                {t('calendarFeed.generateDesc', { defaultValue: 'Gere um token seguro para subscrever o feed de calendário. Este token permite que aplicações de calendário acedam às suas sessões sem fazer login. Válido por 90 dias.' })}
               </p>
               <Button
                 size="sm"
@@ -234,7 +232,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                 disabled={isGenerating}
                 className="mt-2"
               >
-                {isGenerating ? 'Generating...' : 'Generate Calendar Token'}
+                {isGenerating ? t('common.generating', { defaultValue: 'A gerar...' }) : t('calendarFeed.generateToken', { defaultValue: 'Gerar Token de Calendário' })}
               </Button>
             </AlertDescription>
           </Alert>
@@ -243,7 +241,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
         {/* Calendar URL */}
         {calendarToken && (
           <div className="space-y-2">
-            <Label>Calendar subscription URL</Label>
+            <Label>{t('calendarFeed.subscriptionUrl', { defaultValue: 'URL de subscrição do calendário' })}</Label>
             <div className="flex gap-2">
               <Input
                 value={feedUrl}
@@ -255,7 +253,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                 size="icon"
                 onClick={copyToClipboard}
                 disabled={!feedUrl}
-                title="Copy URL"
+                title={t('calendarFeed.copyUrl', { defaultValue: 'Copiar URL' })}
               >
                 {copied ? (
                   <Check className="h-4 w-4 text-success" />
@@ -265,7 +263,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              This URL will automatically sync new sessions to your calendar
+              {t('calendarFeed.autoSync', { defaultValue: 'Este URL sincroniza automaticamente novas sessões com o seu calendário' })}
             </p>
           </div>
         )}
@@ -281,7 +279,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
               className="gap-2"
             >
               <Download className="h-3.5 w-3.5" />
-              Download .ics file
+              {t('calendarFeed.downloadIcs', { defaultValue: 'Descarregar .ics' })}
             </Button>
             <Button
               variant="ghost"
@@ -291,7 +289,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
               className="gap-2 text-muted-foreground"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              Regenerate token
+              {t('calendarFeed.regenerate', { defaultValue: 'Regenerar token' })}
             </Button>
           </div>
         )}
@@ -302,7 +300,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
                 <ChevronDown className={`h-3 w-3 transition-transform ${showInstructions ? 'rotate-180' : ''}`} />
-                How to subscribe in your calendar app
+                {t('calendarFeed.howToSubscribe', { defaultValue: 'Como subscrever na sua aplicação de calendário' })}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">
@@ -313,10 +311,10 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                     <span className="text-[#0078D4]">📬</span> Outlook
                   </h4>
                   <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
-                    <li>Open Outlook → Calendar</li>
-                    <li>Click "Add calendar" → "Subscribe from web"</li>
-                    <li>Paste the calendar URL above</li>
-                    <li>Name it "Startup Leiria Sessions" and click Import</li>
+                    <li>{t('calendarFeed.outlook1', { defaultValue: 'Abrir Outlook → Calendário' })}</li>
+                    <li>{t('calendarFeed.outlook2', { defaultValue: 'Clicar "Adicionar calendário" → "Subscrever da web"' })}</li>
+                    <li>{t('calendarFeed.outlook3', { defaultValue: 'Colar o URL do calendário acima' })}</li>
+                    <li>{t('calendarFeed.outlook4', { defaultValue: 'Nomear "Sessões Startup Leiria" e clicar Importar' })}</li>
                   </ol>
                 </div>
 
@@ -326,9 +324,9 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                     <span className="text-[#4285F4]">📅</span> Google Calendar
                   </h4>
                   <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
-                    <li>Open Google Calendar → Settings</li>
-                    <li>Click "Add calendar" → "From URL"</li>
-                    <li>Paste the calendar URL and click "Add calendar"</li>
+                    <li>{t('calendarFeed.google1', { defaultValue: 'Abrir Google Calendar → Definições' })}</li>
+                    <li>{t('calendarFeed.google2', { defaultValue: 'Clicar "Adicionar calendário" → "A partir de URL"' })}</li>
+                    <li>{t('calendarFeed.google3', { defaultValue: 'Colar o URL do calendário e clicar "Adicionar calendário"' })}</li>
                   </ol>
                 </div>
 
@@ -338,18 +336,17 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
                     <span>🍎</span> Apple Calendar
                   </h4>
                   <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
-                    <li>Open Calendar app → File → New Calendar Subscription</li>
-                    <li>Paste the calendar URL</li>
-                    <li>Configure refresh frequency and click Subscribe</li>
+                    <li>{t('calendarFeed.apple1', { defaultValue: 'Abrir Calendário → Ficheiro → Nova Subscrição de Calendário' })}</li>
+                    <li>{t('calendarFeed.apple2', { defaultValue: 'Colar o URL do calendário' })}</li>
+                    <li>{t('calendarFeed.apple3', { defaultValue: 'Configurar frequência de atualização e clicar Subscrever' })}</li>
                   </ol>
                 </div>
 
                 <Alert>
                   <RefreshCw className="h-4 w-4" />
-                  <AlertTitle className="text-xs">Auto-refresh</AlertTitle>
+                  <AlertTitle className="text-xs">{t('calendarFeed.autoRefreshTitle', { defaultValue: 'Atualização automática' })}</AlertTitle>
                   <AlertDescription className="text-xs">
-                    Most calendar apps check for updates every 15-60 minutes. 
-                    Changes to sessions will appear automatically.
+                    {t('calendarFeed.autoRefreshDesc', { defaultValue: 'A maioria das aplicações verifica atualizações a cada 15-60 minutos. Alterações às sessões aparecem automaticamente.' })}
                   </AlertDescription>
                 </Alert>
               </div>
