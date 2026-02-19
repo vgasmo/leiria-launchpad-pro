@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { 
   Search, Rocket, Users, FileText, BookOpen, GraduationCap, 
-  ExternalLink, Star, StarOff, ArrowRight, Lightbulb, X
+  ExternalLink, Star, StarOff, ArrowRight, Lightbulb, X, HelpCircle
 } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import {
@@ -21,6 +22,7 @@ import {
   toggleFavorite,
   addRecent,
 } from '@/lib/resourcesCatalog';
+import { FAQ_ITEMS } from '@/lib/faqCatalog';
 
 // ── Helpers ──
 function useLabel(item: { pt: string; en: string }) {
@@ -114,8 +116,22 @@ export default function Resources() {
     return items;
   }, [query, filterType, filterCategory, filterStage]);
 
-  // Search results grouped
   const isSearching = query.trim().length > 0;
+
+  // FAQ search results
+  const filteredFaqs = useMemo(() => {
+    if (!isSearching) return [];
+    const q = query.toLowerCase();
+    return FAQ_ITEMS.filter(f =>
+      f.q_pt.toLowerCase().includes(q) ||
+      f.q_en.toLowerCase().includes(q) ||
+      f.a_pt.toLowerCase().includes(q) ||
+      f.a_en.toLowerCase().includes(q) ||
+      f.tags.some(tag => tag.toLowerCase().includes(q))
+    );
+  }, [isSearching, query]);
+
+  // Search results grouped
   const searchGroups = useMemo(() => {
     if (!isSearching) return null;
     const groups: Record<string, CatalogResource[]> = {};
@@ -210,7 +226,8 @@ export default function Resources() {
           {/* Search results */}
           {isSearching ? (
             <div className="space-y-6">
-              {searchGroups && Object.keys(searchGroups).length > 0 ? (
+              {/* Resource results */}
+              {searchGroups && Object.keys(searchGroups).length > 0 && (
                 Object.entries(searchGroups).map(([group, items]) => (
                   <div key={group}>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-3">{group}</h3>
@@ -219,7 +236,34 @@ export default function Resources() {
                     </div>
                   </div>
                 ))
-              ) : (
+              )}
+              {/* FAQ results */}
+              {filteredFaqs.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
+                    <HelpCircle className="h-3.5 w-3.5" /> FAQ
+                  </h3>
+                  <Accordion type="multiple" className="max-w-3xl space-y-2">
+                    {filteredFaqs.slice(0, 5).map(f => (
+                      <AccordionItem key={f.id} value={f.id} className="border rounded-lg px-4">
+                        <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                          {lang === 'pt' ? f.q_pt : f.q_en}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                          {lang === 'pt' ? f.a_pt : f.a_en}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                  {filteredFaqs.length > 5 && (
+                    <Button variant="link" size="sm" className="mt-2" asChild>
+                      <Link to="/help">{t('common.viewAll', { defaultValue: 'Ver todas' })} ({filteredFaqs.length})</Link>
+                    </Button>
+                  )}
+                </div>
+              )}
+              {/* Empty state */}
+              {(!searchGroups || Object.keys(searchGroups).length === 0) && filteredFaqs.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
               )}
             </div>
@@ -341,6 +385,26 @@ export default function Resources() {
                 title={t('resources.sections.learn', { defaultValue: 'Aprender' })}
                 desc={t('resources.sections.learnDesc', { defaultValue: 'Glossário, FAQs e recursos externos essenciais para crescer.' })}
               >
+                {/* Top FAQs */}
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <HelpCircle className="h-3.5 w-3.5 text-primary" />
+                    {lang === 'pt' ? 'Perguntas frequentes' : 'Frequently asked questions'}
+                  </h3>
+                  <Accordion type="multiple" className="space-y-1.5">
+                    {FAQ_ITEMS.slice(0, 4).map(f => (
+                      <AccordionItem key={f.id} value={f.id} className="border rounded-lg px-4">
+                        <AccordionTrigger className="text-sm font-medium hover:no-underline py-2.5">
+                          {lang === 'pt' ? f.q_pt : f.q_en}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                          {lang === 'pt' ? f.a_pt : f.a_en}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+                {/* External resources */}
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {RESOURCES_CATALOG.filter(r => r.type === 'external').slice(0, 3).map(r => (
                     <ResourceCard key={r.id} r={r} favs={favs} onToggleFav={handleToggleFav} lang={lang} />

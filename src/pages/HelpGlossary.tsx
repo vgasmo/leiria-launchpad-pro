@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useState, useMemo } from 'react';
 import { Search, BookOpen, TrendingUp, PiggyBank, Target, Lightbulb, HelpCircle, Mail, Clock, MessageCircle } from 'lucide-react';
 import type { GlossaryTerm } from '@/components/ui/GlossaryTooltip';
+import { FAQ_ITEMS } from '@/lib/faqCatalog';
 
 // Categories for organizing terms
 const TERM_CATEGORIES: Record<string, { icon: typeof TrendingUp; terms: GlossaryTerm[] }> = {
@@ -30,13 +31,14 @@ const TERM_CATEGORIES: Record<string, { icon: typeof TrendingUp; terms: Glossary
 };
 
 export default function HelpGlossary() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const [searchQuery, setSearchQuery] = useState('');
+  const [faqSearch, setFaqSearch] = useState('');
 
   // Flatten all terms with their translations
   const allTerms = useMemo(() => {
     const terms: { term: GlossaryTerm; title: string; description: string; category: string }[] = [];
-    
     Object.entries(TERM_CATEGORIES).forEach(([category, { terms: categoryTerms }]) => {
       categoryTerms.forEach(term => {
         terms.push({
@@ -47,18 +49,16 @@ export default function HelpGlossary() {
         });
       });
     });
-    
     return terms;
   }, [t]);
 
   // Filter terms based on search
   const filteredTerms = useMemo(() => {
     if (!searchQuery.trim()) return allTerms;
-    
     const query = searchQuery.toLowerCase();
     return allTerms.filter(
-      item => 
-        item.title.toLowerCase().includes(query) || 
+      item =>
+        item.title.toLowerCase().includes(query) ||
         item.description.toLowerCase().includes(query)
     );
   }, [allTerms, searchQuery]);
@@ -66,14 +66,10 @@ export default function HelpGlossary() {
   // Group filtered terms by category
   const groupedTerms = useMemo(() => {
     const groups: Record<string, typeof filteredTerms> = {};
-    
     filteredTerms.forEach(item => {
-      if (!groups[item.category]) {
-        groups[item.category] = [];
-      }
+      if (!groups[item.category]) groups[item.category] = [];
       groups[item.category].push(item);
     });
-    
     return groups;
   }, [filteredTerms]);
 
@@ -84,25 +80,25 @@ export default function HelpGlossary() {
     funding: t('glossary.categoryFunding', { defaultValue: 'Financiamento' }),
   };
 
-  // FAQ items
-  const faqItems = [
-    { q: t('faq.q1', { defaultValue: 'Como peço um mentor?' }), a: t('faq.a1', { defaultValue: 'Na página "Mentores & Recursos", veja a lista de mentores disponíveis e clique em "Manifestar Interesse". Pode selecionar até 3 mentores e incluir uma mensagem. O seu consultor será notificado e fará a ligação.' }) },
-    { q: t('faq.q2', { defaultValue: 'Como marco uma sessão?' }), a: t('faq.a2', { defaultValue: 'Dentro do espaço de trabalho da sua startup, vá ao separador "Sessões & Mentoria". O seu consultor agendará sessões consigo. Também pode pedir sessões ao seu mentor através da plataforma.' }) },
-    { q: t('faq.q3', { defaultValue: 'Como submeto um documento?' }), a: t('faq.a3', { defaultValue: 'No separador "Documentos" do seu espaço de trabalho, clique em "Novo Documento" e carregue o ficheiro com a categoria correta (ex: Pitch Deck, Modelo Financeiro). Pode pedir feedback diretamente ao consultor.' }) },
-    { q: t('faq.q4', { defaultValue: 'O que são KPIs e como os atualizo?' }), a: t('faq.a4', { defaultValue: 'KPIs (Key Performance Indicators) são métricas que medem o progresso da startup (ex: MRR, utilizadores ativos). Vá ao separador "Objetivos & KPIs" e atualize os valores mensalmente para acompanhar tendências.' }) },
-    { q: t('faq.q5', { defaultValue: 'Para que servem os Playbooks?' }), a: t('faq.a5', { defaultValue: 'Playbooks são guias estruturados com milestones e ações recomendadas para a sua fase de desenvolvimento. O consultor pode ativar playbooks para criar automaticamente marcos e tarefas no seu plano.' }) },
-    { q: t('faq.q6', { defaultValue: 'Como uso os Templates?' }), a: t('faq.a6', { defaultValue: 'Templates são formulários pré-definidos (ex: Business Model Canvas, Proposta de Valor). No separador "Templates", selecione um template, preencha e submeta para revisão do consultor.' }) },
-    { q: t('faq.q7', { defaultValue: 'O que acontece quando submeto um template?' }), a: t('faq.a7', { defaultValue: 'O template fica "Em Revisão". O consultor receberá uma notificação e poderá aprovar, pedir alterações ou deixar notas. Poderá ver o estado atualizado a qualquer momento.' }) },
-    { q: t('faq.q8', { defaultValue: 'Como vejo o meu progresso geral?' }), a: t('faq.a8', { defaultValue: 'O painel "Início" mostra uma visão geral com ações pendentes, próximas sessões e alertas. Dentro do espaço de trabalho, o separador "Visão Geral" mostra o estado atual da startup.' }) },
-    { q: t('faq.q9', { defaultValue: 'Posso convidar membros da minha equipa?' }), a: t('faq.a9', { defaultValue: 'Sim! No separador "Equipa" (dentro de Mais Detalhes), pode adicionar membros da equipa com os respetivos cargos e contactos.' }) },
-    { q: t('faq.q10', { defaultValue: 'Tenho um problema técnico. O que faço?' }), a: t('faq.a10', { defaultValue: 'Contacte a equipa de suporte através do email abaixo. Inclua uma descrição do problema e, se possível, capturas de ecrã.' }) },
-    { q: t('faq.q11', { defaultValue: 'O que é o Dataroom?' }), a: t('faq.a11', { defaultValue: 'O Dataroom é um espaço seguro para partilhar documentos com investidores. Pode criar links de partilha com prazo de validade e controlar o acesso.' }) },
-    { q: t('faq.q12', { defaultValue: 'Como funciona a preparação para investidores?' }), a: t('faq.a12', { defaultValue: 'No separador "Governança", encontra um checklist de preparação para investidores com itens organizados por categoria. Complete os itens para aumentar a sua prontidão.' }) },
-  ];
+  // FAQ from catalog, filtered
+  const faqItems = useMemo(() => {
+    let items = FAQ_ITEMS;
+    if (faqSearch.trim()) {
+      const q = faqSearch.toLowerCase();
+      items = items.filter(f =>
+        f.q_pt.toLowerCase().includes(q) ||
+        f.q_en.toLowerCase().includes(q) ||
+        f.a_pt.toLowerCase().includes(q) ||
+        f.a_en.toLowerCase().includes(q) ||
+        f.tags.some(tag => tag.toLowerCase().includes(q))
+      );
+    }
+    return items;
+  }, [faqSearch]);
 
   return (
-    <AppLayout 
-      title={t('help.pageTitle', { defaultValue: 'Glossário & FAQ' })} 
+    <AppLayout
+      title={t('help.pageTitle', { defaultValue: 'Glossário & FAQ' })}
       subtitle={t('help.pageSubtitle', { defaultValue: 'Conceitos, perguntas frequentes e suporte' })}
     >
       <div className="space-y-6 p-6">
@@ -120,19 +116,36 @@ export default function HelpGlossary() {
 
           {/* FAQ Tab */}
           <TabsContent value="faq" className="space-y-6">
-            <div className="max-w-3xl">
-              <Accordion type="multiple" className="space-y-2">
-                {faqItems.map((item, i) => (
-                  <AccordionItem key={i} value={`faq-${i}`} className="border rounded-lg px-4">
-                    <AccordionTrigger className="text-sm font-medium hover:no-underline">
-                      {item.q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                      {item.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+            <div className="max-w-3xl space-y-4">
+              {/* FAQ Search */}
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={t('help.faqSearchPlaceholder', { defaultValue: 'Pesquisar perguntas…' })}
+                  value={faqSearch}
+                  onChange={e => setFaqSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {faqItems.length > 0 ? (
+                <Accordion type="multiple" className="space-y-2">
+                  {faqItems.map(item => (
+                    <AccordionItem key={item.id} value={item.id} className="border rounded-lg px-4">
+                      <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                        {lang === 'pt' ? item.q_pt : item.q_en}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                        {lang === 'pt' ? item.a_pt : item.a_en}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  {t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}
+                </p>
+              )}
             </div>
 
             {/* Support Contact */}
