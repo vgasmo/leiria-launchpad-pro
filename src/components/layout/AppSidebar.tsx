@@ -98,12 +98,6 @@ export function AppSidebar() {
         name: t('nav.founder.myStartup', { defaultValue: 'A Minha Startup' }), 
         href: `/workspace/${firstWorkspaceId}`, 
         icon: Building2,
-        children: [
-          { name: t('nav.founder.goalsKpis', { defaultValue: 'Objetivos & KPIs' }), href: `/workspace/${firstWorkspaceId}?tab=kpis`, icon: Target },
-          { name: t('nav.founder.sessionsMentoring', { defaultValue: 'Sessões & Mentoria' }), href: `/workspace/${firstWorkspaceId}?tab=sessions`, icon: Calendar },
-          { name: t('nav.founder.actionsPlan', { defaultValue: 'Ações & Plano' }), href: `/workspace/${firstWorkspaceId}?tab=actions`, icon: CheckSquare },
-          { name: t('nav.founder.documents', { defaultValue: 'Documentos' }), href: `/workspace/${firstWorkspaceId}?tab=documents`, icon: FolderOpen },
-        ],
       },
     ] : []),
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/resources', icon: Network },
