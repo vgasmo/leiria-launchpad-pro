@@ -206,7 +206,7 @@ export function DataroomTab({ workspaceId, canWrite = false, isStaff = false, is
           </TabsTrigger>
           <TabsTrigger value="templates" className="gap-2">
             <BookTemplate className="h-4 w-4" />
-            {t('investorUpdates.templates')}
+            {t('investorUpdates.templateLibraryTitle', { defaultValue: 'Documentos adicionais para investidores' })}
           </TabsTrigger>
         </TabsList>
         {canWrite && (
