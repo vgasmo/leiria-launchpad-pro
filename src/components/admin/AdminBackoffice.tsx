@@ -28,11 +28,8 @@ import type { StartupStage, WorkspacePriority } from '@/types/database';
 // Backoffice sub-tab components
 import { BackofficeDashboard } from '@/components/backoffice/BackofficeDashboard';
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
-import { BackofficeSpacesTab } from '@/components/backoffice/BackofficeSpacesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
-import { BackofficeBuildingsTab } from '@/components/backoffice/BackofficeBuildingsTab';
-import { RoomMappingTab } from '@/components/backoffice/RoomMappingTab';
-import { SpaceWaitingListTab } from '@/components/backoffice/SpaceWaitingListTab';
+import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
@@ -368,22 +365,10 @@ export function AdminBackoffice() {
           {/* Separador visual */}
           <div className="w-px h-6 bg-border mx-1 self-center" />
 
-          {/* Grupo 3: Infraestrutura & Ocupação */}
-          <TabsTrigger value="buildings" className="gap-1.5">
+          {/* Grupo 3: Infraestrutura & Ocupação (consolidado) */}
+          <TabsTrigger value="infrastructure" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.buildings', { defaultValue: 'Edifícios' })}
-          </TabsTrigger>
-          <TabsTrigger value="spaces" className="gap-1.5">
-            <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.spaces', { defaultValue: 'Espaços' })}
-          </TabsTrigger>
-          <TabsTrigger value="rooms" className="gap-1.5">
-            <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.roomMapping', { defaultValue: 'Mapa de Salas' })}
-          </TabsTrigger>
-          <TabsTrigger value="waiting-list" className="gap-1.5">
-            <Clock className="h-4 w-4" />
-            {t('admin.backoffice.waitingList', { defaultValue: 'Lista de Espera' })}
+            {t('admin.backoffice.infrastructure', { defaultValue: 'Infraestrutura' })}
           </TabsTrigger>
         </TabsList>
 
@@ -777,29 +762,9 @@ export function AdminBackoffice() {
           <BackofficeContractsTab />
         </TabsContent>
 
-        {/* Spaces Tab */}
-        <TabsContent value="spaces">
-          <BackofficeSpacesTab />
-        </TabsContent>
-
-        {/* Room Mapping Tab */}
-        <TabsContent value="rooms">
-          <RoomMappingTab />
-        </TabsContent>
-
-        {/* Waiting List Tab */}
-        <TabsContent value="waiting-list">
-          <SpaceWaitingListTab />
-        </TabsContent>
-
-        {/* Incubation Types Tab */}
-        <TabsContent value="incubation">
-          <BackofficeIncubationTypesTab />
-        </TabsContent>
-
-        {/* Buildings Tab */}
-        <TabsContent value="buildings">
-          <BackofficeBuildingsTab />
+        {/* Infrastructure Tab (consolidated: buildings, spaces, rooms, maps, waitlist) */}
+        <TabsContent value="infrastructure">
+          <InfrastructureTab />
         </TabsContent>
       </Tabs>
     </div>
