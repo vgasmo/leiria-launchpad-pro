@@ -210,7 +210,7 @@
     "unknown": "Unknown",
     "approved": "Approved",
     "draft": "Draft",
-    "moreDetails": "More details",
+    "moreDetails": "More",
     "lessDetails": "Less details",
     "copy": "Copy",
     "accessDenied": "Access Denied",
@@ -1585,6 +1585,7 @@
     "hasAccount": "Already have an account?"
   },
   "workspace": {
+    "tabs": "Workspace sections",
     "overview": "Overview",
     "sessions": "Sessions",
     "actions": "Actions",
