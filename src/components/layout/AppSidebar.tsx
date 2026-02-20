@@ -99,6 +99,11 @@ export function AppSidebar() {
         href: `/workspace/${firstWorkspaceId}`, 
         icon: Building2,
       },
+      { 
+        name: t('nav.founder.documents', { defaultValue: 'Documentos' }), 
+        href: `/workspace/${firstWorkspaceId}?tab=documents`, 
+        icon: FolderOpen,
+      },
     ] : []),
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/resources', icon: Network },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
