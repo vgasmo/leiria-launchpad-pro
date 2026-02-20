@@ -145,7 +145,8 @@
     "accessDenied": "Acesso Negado",
     "go": "Ir",
     "unnamed": "Sem Nome",
-    "processing": "A processar..."
+    "processing": "A processar...",
+    "updated": "Atualizado"
   },
   "filters": {
     "overdueActions": "Ações Atrasadas",
@@ -4771,5 +4772,12 @@
       "openPlaybooks": "Abrir playbooks",
       "openGlossary": "Abrir Glossário & FAQ"
     }
+  },
+  "progressTimeline": {
+    "title": "Linha do Tempo",
+    "stageTransition": "Transição de fase",
+    "start": "Início",
+    "noEvents": "Sem eventos de progresso ainda",
+    "noEventsDescription": "Mudanças de fase e marcos concluídos aparecerão aqui"
   }
 }

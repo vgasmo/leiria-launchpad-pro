@@ -66,7 +66,7 @@ interface HealthModel {
 const DEFAULT_WEIGHTS = { actions: 30, sessions: 20, kpis: 30, checkins: 20 };
 
 export function HealthScoreCard({ workspaceId, programId, canManage = false }: HealthScoreCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { roles } = useAuth();
   const isStaff = roles.includes('admin') || roles.includes('consultor');
   const { data: health, isLoading } = useWorkspaceHealth(workspaceId);
@@ -101,7 +101,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Health Score
+            {t('health.title', { defaultValue: 'Health Score' })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -143,7 +143,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Health Score
+              {t('health.title', { defaultValue: 'Health Score' })}
               <HealthScoreTooltip components={components} numericScore={numericScore} />
             </CardTitle>
             <div className="flex items-center gap-1">
@@ -161,7 +161,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
                         <RefreshCw className={`h-4 w-4 ${recompute.isPending ? 'animate-spin' : ''}`} />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Recalcular scores</TooltipContent>
+                    <TooltipContent>{t('health.recalculate', { defaultValue: 'Recalcular scores' })}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -300,7 +300,7 @@ export function HealthScoreCard({ workspaceId, programId, canManage = false }: H
           {/* Last updated */}
           {health?.health_score_updated_at && (
             <p className="text-xs text-muted-foreground text-right">
-              {t('common.updated')}: {new Date(health.health_score_updated_at).toLocaleDateString('en-US', {
+              {t('common.updated', { defaultValue: 'Atualizado' })}: {new Date(health.health_score_updated_at).toLocaleDateString(i18n.language === 'pt' ? 'pt-PT' : 'en-US', {
                 day: 'numeric',
                 month: 'short',
                 hour: '2-digit',

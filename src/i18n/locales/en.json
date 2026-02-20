@@ -4647,5 +4647,12 @@
       "openPlaybooks": "Open playbooks",
       "openGlossary": "Open Glossary & FAQ"
     }
+  },
+  "progressTimeline": {
+    "title": "Progress Timeline",
+    "stageTransition": "Stage transition",
+    "start": "Start",
+    "noEvents": "No progress events yet",
+    "noEventsDescription": "Stage changes and completed milestones will appear here"
   }
 }

@@ -154,9 +154,6 @@ export default function WorkspaceDetail() {
       />
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-        {/* Hide TabsList for founders - they navigate via sidebar dropdown */}
-        {/* Staff/mentors still see tabs for full workspace navigation */}
-        {!isFounder && (
         <TabsList className="bg-muted/30 h-auto gap-0.5 p-1 flex flex-wrap">
           {/* Core tabs - always visible (extended to include Playbooks & Templates) */}
           <TabsTrigger value="overview" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.overview')}</TabsTrigger>
@@ -229,7 +226,6 @@ export default function WorkspaceDetail() {
             </DropdownMenuContent>
           </DropdownMenu>
         </TabsList>
-        )}
 
         <div className="animate-fade-in">
         <TabsContent value="overview">
