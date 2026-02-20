@@ -1,18 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Check, X, Upload, FileText, TrendingUp,
   Users, DollarSign, Lightbulb, BarChart3,
-  Sparkles, Eye, MessageSquare, BookOpen,
+  Eye, BookOpen, Loader2,
 } from 'lucide-react';
-import { useDocuments } from '@/hooks/useDocuments';
+import { useDocuments, useUploadDocument } from '@/hooks/useDocuments';
 import { useDocumentReviews } from '@/hooks/useDocumentReviews';
 import { useSearchParams } from 'react-router-dom';
 import { PitchDeckReviewPanel } from './PitchDeckReviewPanel';
+import { toast } from 'sonner';
 
 interface DataroomChecklistProps {
   workspaceId: string;
@@ -27,9 +28,7 @@ interface ChecklistItem {
   icon: typeof FileText;
   categoryKey: string;
   required: boolean;
-  /** ID of the template in the templates table, if one exists */
   templateId?: string;
-  /** Name of the template to search for in the templates sub-tab */
   templateName?: string;
 }
 
@@ -44,11 +43,13 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
 
 export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: DataroomChecklistProps) {
   const { t } = useTranslation();
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: documents } = useDocuments(workspaceId);
+  const uploadMutation = useUploadDocument();
   const [reviewDocId, setReviewDocId] = useState<string | null>(null);
+  const [uploadItem, setUploadItem] = useState<ChecklistItem | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Find matching document for each checklist item
   const getDocForCategory = (categoryKey: string) => {
     return documents?.find(
       d => d.category === categoryKey ||
@@ -57,12 +58,31 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
     );
   };
 
-  const handleUpload = (categoryKey: string) => {
-    setSearchParams({ tab: 'documents', sub: 'all', upload: categoryKey }, { replace: true });
+  const handleUpload = (item: ChecklistItem) => {
+    setUploadItem(item);
+  };
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadItem) return;
+
+    try {
+      await uploadMutation.mutateAsync({
+        workspaceId,
+        file,
+        category: uploadItem.categoryKey,
+        description: t(uploadItem.labelKey, { defaultValue: uploadItem.id }),
+      });
+      toast.success(t('documents.uploadSuccess', { defaultValue: 'Document uploaded successfully' }));
+      setUploadItem(null);
+    } catch {
+      toast.error(t('documents.uploadFailed', { defaultValue: 'Upload failed' }));
+    }
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleOpenTemplate = (item: ChecklistItem) => {
-    // Navigate to the tools sub-tab with the specific template ID
     const params: Record<string, string> = { tab: 'documents', sub: 'tools' };
     if (item.templateId) {
       params.openTemplate = item.templateId;
@@ -94,7 +114,6 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
               {completedCount}/{CHECKLIST_ITEMS.length}
             </Badge>
           </div>
-          {/* Progress bar */}
           <div className="w-full bg-muted rounded-full h-2 mt-2">
             <div
               className="bg-primary rounded-full h-2 transition-all"
@@ -114,14 +133,12 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
                   key={item.id}
                   className="flex items-center gap-3 p-3 rounded-lg border transition-colors hover:bg-muted/30"
                 >
-                  {/* Status icon */}
                   <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ${
                     hasDoc ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
                   }`}>
                     {hasDoc ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
                   </div>
 
-                  {/* Icon + label */}
                   <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -139,7 +156,6 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="flex items-center gap-1 shrink-0">
                     {hasDoc && item.id === 'pitch_deck' && (
                       <>
@@ -170,7 +186,7 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleUpload(item.categoryKey)}
+                          onClick={() => handleUpload(item)}
                         >
                           <Upload className="h-3.5 w-3.5 mr-1.5" />
                           {t('common.upload', { defaultValue: 'Upload' })}
@@ -184,6 +200,50 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
           </div>
         </CardContent>
       </Card>
+
+      {/* Inline upload dialog - stays in dataroom context */}
+      <Dialog open={!!uploadItem} onOpenChange={(open) => !open && setUploadItem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
+              {uploadItem && t(uploadItem.labelKey, { defaultValue: uploadItem.id })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.ppt,.pptx,.key,.xls,.xlsx,.xlsm,.csv,.doc,.docx"
+              onChange={handleFileSelected}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-colors"
+            >
+              {uploadMutation.isPending ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">
+                    {t('common.uploading', { defaultValue: 'A enviar...' })}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm font-medium">
+                    {t('documents.clickToUpload', { defaultValue: 'Click to select a file' })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF, PPT, PPTX, XLS, XLSX, DOC, DOCX
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Review panel for pitch deck */}
       {reviewDocId && (

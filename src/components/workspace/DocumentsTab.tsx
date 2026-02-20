@@ -62,11 +62,14 @@ interface DocumentsTabProps {
 
 const CATEGORY_KEYS = [
   { key: 'pitch_deck', labelKey: 'documents.categoryPitchDeck' },
+  { key: 'one_pager', labelKey: 'documents.categoryOnePager' },
   { key: 'financial_model', labelKey: 'documents.categoryFinancialModel' },
+  { key: 'team', labelKey: 'documents.categoryTeam' },
+  { key: 'traction', labelKey: 'documents.categoryTraction' },
+  { key: 'market', labelKey: 'documents.categoryMarket' },
   { key: 'legal', labelKey: 'documents.categoryLegal' },
   { key: 'marketing', labelKey: 'documents.categoryMarketing' },
   { key: 'product', labelKey: 'documents.categoryProduct' },
-  { key: 'team', labelKey: 'documents.categoryTeam' },
   { key: 'other', labelKey: 'documents.categoryOther' },
 ];
 
@@ -149,10 +152,13 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
         'pitchdeck': 'pitch_deck',
         'financial_model': 'financial_model',
         'financial-model': 'financial_model',
+        'one_pager': 'one_pager',
+        'traction': 'traction',
+        'market': 'market',
+        'team': 'team',
         'legal': 'legal',
         'marketing': 'marketing',
         'product': 'product',
-        'team': 'team',
         'other': 'other',
       };
       const mappedCategoryKey = categoryKeyMap[uploadCategory.toLowerCase()] || 'other';
@@ -163,8 +169,9 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
       }
       setUploadOpen(true);
       
-      searchParams.delete('upload');
-      setSearchParams(searchParams, { replace: true });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('upload');
+      setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams, canWrite]);
 
