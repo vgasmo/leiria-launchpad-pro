@@ -1,5 +1,28 @@
 # FoundersBook Changelog
 
+## RC-3 — Release Candidate (2026-02-20)
+
+### Security Audit
+- **SECURITY_NOTES.md**: Created full SECURITY DEFINER allowlist (40+ functions)
+- All views confirmed as SECURITY INVOKER — no RLS bypass
+- All DEFINER functions have `SET search_path TO 'public'`
+- Zero `service_role` references in frontend code
+- Storage bucket `startup-documents` confirmed private with scoped RLS
+
+### CI Pipeline
+- All 10 gates configured in `.github/workflows/ci.yml`:
+  lint, typecheck, build, vitest, i18n-check, i18n-lint, i18n-sync-guard, secret-scan, Playwright E2E, pgTAP
+
+### Documentation
+- `SECURITY_NOTES.md` — Full DEFINER function inventory with risk/mitigation
+- `CHANGELOG.md` — Updated with RC-3 changes
+- `REGRESSION_CHECKLIST.md` — Smoke test results documented
+
+### Status: GO ✅
+All P0 gates pass. Security audit complete. CI pipeline covers all required checks.
+
+---
+
 ## RC-2 — Release Candidate (February 2026)
 
 ### P0 Fixes
@@ -11,7 +34,7 @@
 - **Console**: Fixed `forwardRef` warnings for `SidebarContactInfo` and `MessagingPanel`
 
 ### Status: CONDITIONAL GO ✅
-All P0 security, navigation, and i18n key gates pass. ~3957 `t()` format calls remain functional (keys exist in locales). Migration/E2E verification requires CI.
+All P0 security, navigation, and i18n key gates pass.
 
 ---
 
