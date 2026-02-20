@@ -2618,7 +2618,19 @@
         "startupsOver3Years": "startups over 3 years",
         "reviewRecommended": "Review recommended for price adjustment or graduation",
         "months": "months"
-      }
+      },
+      "spaceTypes": {
+        "desk": "Desk",
+        "privateOffice": "Private Office",
+        "meetingRoom": "Meeting Room",
+        "hotDesk": "Hot Desk"
+      },
+      "floorLabel": "Floor",
+      "perMonth": "/month",
+      "monthsLabel": "months",
+      "officeIncluded": "Office included",
+      "mentoringLabel": "mentoring",
+      "equityLabel": "equity"
     },
     "backofficeExtended": {
       "officeSpaces": "Office Spaces",

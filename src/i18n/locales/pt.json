@@ -111,7 +111,6 @@
     "close": "Fechar",
     "submit": "Submeter",
     "add": "Adicionar",
-    "remove": "Remover",
     "confirm": "Confirmar",
     "selectAll": "Selecionar tudo",
     "clearAll": "Limpar tudo",
@@ -4444,7 +4443,19 @@
         "startupsOver3Years": "startups com mais de 3 anos",
         "reviewRecommended": "Revisão recomendada para ajuste de preço ou graduação",
         "months": "meses"
-      }
+      },
+      "spaceTypes": {
+        "desk": "Secretária",
+        "privateOffice": "Gabinete Privado",
+        "meetingRoom": "Sala de Reuniões",
+        "hotDesk": "Hot Desk"
+      },
+      "floorLabel": "Piso",
+      "perMonth": "/mês",
+      "monthsLabel": "meses",
+      "officeIncluded": "Escritório incluído",
+      "mentoringLabel": "mentoria",
+      "equityLabel": "equity"
     },
     "announcements": {
       "tab": "Anúncios",
