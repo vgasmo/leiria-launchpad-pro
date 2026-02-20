@@ -12,6 +12,7 @@ import {
   endOfWeek,
   parseISO,
 } from 'date-fns';
+import { pt, enUS } from 'date-fns/locale';
 import {
   ChevronLeft,
   ChevronRight,
@@ -75,7 +76,8 @@ interface CalendarTabProps {
 }
 
 export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === 'pt' ? pt : enUS;
   const { data: sessions = [], isLoading } = useCalendarSessions(workspaceId);
   const { data: workspaceMembers = [] } = useWorkspaceMembers(workspaceId);
   const { data: sessionTemplates } = useSessionTemplates();
@@ -191,11 +193,11 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
 
       if (error) throw error;
 
-      toast.success(`Calendar invites sent to ${emails.length} recipient(s)`);
+      toast.success(t('sessions.invitesSent', { defaultValue: 'Convites de calendário enviados para {{count}} destinatário(s)', count: emails.length }));
       return data;
     } catch (error) {
       console.error('Error sending session invite:', error);
-      toast.error('Failed to send calendar invites');
+      toast.error(t('sessions.inviteSendError', { defaultValue: 'Erro ao enviar convites de calendário' }));
       throw error;
     } finally {
       setIsSendingInvite(false);
@@ -325,7 +327,90 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
   // Get sessions for selected date
   const selectedDaySessions = selectedDate ? getSessionsForDay(selectedDate) : [];
 
-  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Localized weekday names
+  const weekDays = [
+    t('calendar.mon', { defaultValue: 'Seg' }),
+    t('calendar.tue', { defaultValue: 'Ter' }),
+    t('calendar.wed', { defaultValue: 'Qua' }),
+    t('calendar.thu', { defaultValue: 'Qui' }),
+    t('calendar.fri', { defaultValue: 'Sex' }),
+    t('calendar.sat', { defaultValue: 'Sáb' }),
+    t('calendar.sun', { defaultValue: 'Dom' }),
+  ];
+
+  // Shared invite recipients UI
+  const renderInviteRecipients = (
+    emailsValue: string,
+    setEmails: (val: string) => void,
+    inputId: string
+  ) => (
+    <div className="grid gap-2">
+      <Label htmlFor={inputId}>{t('sessions.recipientEmails', { defaultValue: 'Emails dos destinatários' })}</Label>
+      
+      {/* Quick add workspace members */}
+      {memberEmails.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Users className="h-3 w-3" />
+            <span>{t('sessions.quickAddMembers', { defaultValue: 'Adicionar membros rapidamente:' })}</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => {
+                const allEmails = memberEmails.map(m => m.email).join(', ');
+                setEmails(emailsValue ? `${emailsValue}, ${allEmails}` : allEmails);
+              }}
+            >
+              <Users className="h-3 w-3 mr-1" />
+              {t('sessions.addAll', { defaultValue: 'Adicionar todos ({{count}})', count: memberEmails.length })}
+            </Button>
+            {memberEmails.slice(0, 5).map((member) => (
+              <Button
+                key={member.email}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => {
+                  const currentEmails = emailsValue
+                    .split(/[,;\n]/)
+                    .map(e => e.trim())
+                    .filter(Boolean);
+                  
+                  if (!currentEmails.includes(member.email)) {
+                    setEmails(emailsValue ? `${emailsValue}, ${member.email}` : member.email);
+                  }
+                }}
+              >
+                <Avatar className="h-4 w-4">
+                  <AvatarImage src={member.avatar || undefined} />
+                  <AvatarFallback className="text-[8px]">
+                    {member.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {member.name.split(' ')[0]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Textarea
+        id={inputId}
+        value={emailsValue}
+        onChange={(e) => setEmails(e.target.value)}
+        placeholder={t('sessions.enterEmails', { defaultValue: 'Introduza emails (separados por vírgulas ou linhas)' })}
+        rows={2}
+      />
+      <p className="text-xs text-muted-foreground">
+        {t('sessions.icsNote', { defaultValue: 'Os destinatários receberão um email com um anexo .ics para o calendário' })}
+      </p>
+    </div>
+  );
 
   // Form fields JSX
   const renderSessionFormFields = (isEdit: boolean) => (
@@ -333,10 +418,10 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       {/* Session Template Selector - only for new sessions */}
       {!isEdit && sessionTemplates && sessionTemplates.length > 0 && (
         <div className="grid gap-2">
-          <Label>Use Template (optional)</Label>
+          <Label>{t('sessions.useTemplate', { defaultValue: 'Usar template (opcional)' })}</Label>
           <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a template..." />
+              <SelectValue placeholder={t('sessions.selectTemplate', { defaultValue: 'Selecionar template...' })} />
             </SelectTrigger>
             <SelectContent>
               {sessionTemplates.map(template => (
@@ -350,27 +435,27 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       )}
       
       <div className="grid gap-2">
-        <Label htmlFor={isEdit ? "edit-title" : "title"}>Title *</Label>
+        <Label htmlFor={isEdit ? "edit-title" : "title"}>{t('sessions.titleLabel', { defaultValue: 'Título' })} *</Label>
         <Input
           id={isEdit ? "edit-title" : "title"}
           value={formData.title}
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-          placeholder="Session title"
+          placeholder={t('sessions.titlePlaceholder', { defaultValue: 'Título da sessão' })}
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor={isEdit ? "edit-agenda" : "agenda"}>Agenda</Label>
+        <Label htmlFor={isEdit ? "edit-agenda" : "agenda"}>{t('sessions.agendaLabel', { defaultValue: 'Agenda' })}</Label>
         <Textarea
           id={isEdit ? "edit-agenda" : "agenda"}
           value={formData.agenda}
           onChange={(e) => setFormData((prev) => ({ ...prev, agenda: e.target.value }))}
-          placeholder="Topics to discuss"
+          placeholder={t('sessions.agendaPlaceholder', { defaultValue: 'Temas a discutir' })}
           rows={2}
         />
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="grid gap-2">
-          <Label htmlFor={isEdit ? "edit-date" : "date"}>Date *</Label>
+          <Label htmlFor={isEdit ? "edit-date" : "date"}>{t('sessions.dateLabel', { defaultValue: 'Data' })} *</Label>
           <Input
             id={isEdit ? "edit-date" : "date"}
             type="date"
@@ -379,7 +464,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={isEdit ? "edit-startTime" : "startTime"}>Start *</Label>
+          <Label htmlFor={isEdit ? "edit-startTime" : "startTime"}>{t('sessions.startLabel', { defaultValue: 'Início' })} *</Label>
           <Input
             id={isEdit ? "edit-startTime" : "startTime"}
             type="time"
@@ -388,7 +473,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={isEdit ? "edit-duration" : "duration"}>Duration</Label>
+          <Label htmlFor={isEdit ? "edit-duration" : "duration"}>{t('sessions.durationLabel', { defaultValue: 'Duração' })}</Label>
           <Select value={formData.duration} onValueChange={(v) => setFormData((prev) => ({ ...prev, duration: v }))}>
             <SelectTrigger>
               <SelectValue />
@@ -405,16 +490,16 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor={isEdit ? "edit-location" : "location"}>Location</Label>
+        <Label htmlFor={isEdit ? "edit-location" : "location"}>{t('sessions.locationLabel', { defaultValue: 'Local' })}</Label>
         <Input
           id={isEdit ? "edit-location" : "location"}
           value={formData.location}
           onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
-          placeholder="Meeting room or address"
+          placeholder={t('sessions.locationPlaceholder', { defaultValue: 'Sala de reunião ou endereço' })}
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor={isEdit ? "edit-joinUrl" : "joinUrl"}>Meeting Link</Label>
+        <Label htmlFor={isEdit ? "edit-joinUrl" : "joinUrl"}>{t('sessions.meetingLinkLabel', { defaultValue: 'Link da reunião' })}</Label>
         <Input
           id={isEdit ? "edit-joinUrl" : "joinUrl"}
           value={formData.joinUrl}
@@ -434,87 +519,14 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             />
             <Label htmlFor="sendInvites" className="flex items-center gap-2 cursor-pointer">
               <Mail className="h-4 w-4" />
-              Send calendar invites via email
+              {t('sessions.sendCalendarInvites', { defaultValue: 'Enviar convites de calendário por email' })}
             </Label>
           </div>
           
-          {formData.sendInvites && (
-            <div className="grid gap-2">
-              <Label htmlFor="inviteEmails">Recipient Emails</Label>
-              
-              {/* Quick add workspace members */}
-              {memberEmails.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Users className="h-3 w-3" />
-                    <span>Quick add team members:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => {
-                        const allEmails = memberEmails.map(m => m.email).join(', ');
-                        setFormData((prev) => ({
-                          ...prev,
-                          inviteEmails: prev.inviteEmails 
-                            ? `${prev.inviteEmails}, ${allEmails}` 
-                            : allEmails
-                        }));
-                      }}
-                    >
-                      <Users className="h-3 w-3 mr-1" />
-                      Add all ({memberEmails.length})
-                    </Button>
-                    {memberEmails.slice(0, 5).map((member) => (
-                      <Button
-                        key={member.email}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs gap-1"
-                        onClick={() => {
-                          const currentEmails = formData.inviteEmails
-                            .split(/[,;\n]/)
-                            .map(e => e.trim())
-                            .filter(Boolean);
-                          
-                          if (!currentEmails.includes(member.email)) {
-                            setFormData((prev) => ({
-                              ...prev,
-                              inviteEmails: prev.inviteEmails 
-                                ? `${prev.inviteEmails}, ${member.email}` 
-                                : member.email
-                            }));
-                          }
-                        }}
-                      >
-                        <Avatar className="h-4 w-4">
-                          <AvatarImage src={member.avatar || undefined} />
-                          <AvatarFallback className="text-[8px]">
-                            {member.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {member.name.split(' ')[0]}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <Textarea
-                id="inviteEmails"
-                value={formData.inviteEmails}
-                onChange={(e) => setFormData((prev) => ({ ...prev, inviteEmails: e.target.value }))}
-                placeholder="Enter email addresses (separated by commas or new lines)"
-                rows={2}
-              />
-              <p className="text-xs text-muted-foreground">
-                Recipients will receive an email with an .ics calendar attachment
-              </p>
-            </div>
+          {formData.sendInvites && renderInviteRecipients(
+            formData.inviteEmails,
+            (val) => setFormData((prev) => ({ ...prev, inviteEmails: val })),
+            'inviteEmails'
           )}
         </div>
       )}
@@ -527,8 +539,8 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <Card className="lg:col-span-2">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-4">
-            <CardTitle className="text-lg font-semibold">
-              {format(currentMonth, 'MMMM yyyy')}
+            <CardTitle className="text-lg font-semibold capitalize">
+              {format(currentMonth, 'MMMM yyyy', { locale: dateFnsLocale })}
             </CardTitle>
             <div className="flex items-center gap-1">
               <Button
@@ -545,7 +557,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                 className="h-8"
                 onClick={() => setCurrentMonth(new Date())}
               >
-                Today
+                {t('calendar.today', { defaultValue: 'Hoje' })}
               </Button>
               <Button
                 variant="ghost"
@@ -662,8 +674,8 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       {/* Selected Day Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">
-            {selectedDate ? format(selectedDate, 'EEEE, MMMM d') : t('sessions.selectDate')}
+          <CardTitle className="text-lg capitalize">
+            {selectedDate ? format(selectedDate, 'EEEE, d MMMM', { locale: dateFnsLocale }) : t('sessions.selectDate')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -686,7 +698,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
-                                title="Send calendar invite"
+                                title={t('sessions.sendCalendarInvite', { defaultValue: 'Enviar convite de calendário' })}
                                 onClick={() => {
                                   setSendInviteSession(session);
                                   if (!quickInviteEmails.trim()) {
@@ -804,18 +816,18 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Session</AlertDialogTitle>
+            <AlertDialogTitle>{t('sessions.deleteSession', { defaultValue: 'Eliminar sessão' })}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this session? This action cannot be undone.
+              {t('sessions.deleteConfirm', { defaultValue: 'Tem a certeza que quer eliminar esta sessão? Esta ação não pode ser revertida.' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteConfirmId && handleDeleteSession(deleteConfirmId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('common.delete', { defaultValue: 'Eliminar' })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -825,82 +837,21 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       <Dialog open={!!sendInviteSession} onOpenChange={(open) => { if (!open) { setSendInviteSession(null); setQuickInviteEmails(''); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Calendar Invite</DialogTitle>
+            <DialogTitle>{t('sessions.sendCalendarInvite', { defaultValue: 'Enviar convite de calendário' })}</DialogTitle>
             <DialogDescription>
-              Send a calendar invite (.ics) to participants for "{sendInviteSession?.title}"
+              {t('sessions.sendInviteDescription', { defaultValue: 'Enviar convite (.ics) para participantes de "{{title}}"', title: sendInviteSession?.title })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="quickEmails">Recipient Emails</Label>
-              
-              {/* Quick add workspace members */}
-              {memberEmails.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Users className="h-3 w-3" />
-                    <span>Quick add team members:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => {
-                        const allEmails = memberEmails.map(m => m.email).join(', ');
-                        setQuickInviteEmails((prev) => prev ? `${prev}, ${allEmails}` : allEmails);
-                      }}
-                    >
-                      <Users className="h-3 w-3 mr-1" />
-                      Add all ({memberEmails.length})
-                    </Button>
-                    {memberEmails.slice(0, 5).map((member) => (
-                      <Button
-                        key={member.email}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs gap-1"
-                        onClick={() => {
-                          const currentEmails = quickInviteEmails
-                            .split(/[,;\n]/)
-                            .map(e => e.trim())
-                            .filter(Boolean);
-                          
-                          if (!currentEmails.includes(member.email)) {
-                            setQuickInviteEmails((prev) => prev ? `${prev}, ${member.email}` : member.email);
-                          }
-                        }}
-                      >
-                        <Avatar className="h-4 w-4">
-                          <AvatarImage src={member.avatar || undefined} />
-                          <AvatarFallback className="text-[8px]">
-                            {member.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {member.name.split(' ')[0]}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <Textarea
-                id="quickEmails"
-                value={quickInviteEmails}
-                onChange={(e) => setQuickInviteEmails(e.target.value)}
-                placeholder="Enter email addresses (separated by commas or new lines)"
-                rows={3}
-              />
-              <p className="text-xs text-muted-foreground">
-                Recipients will receive an email with an .ics calendar attachment they can add to their calendar
-              </p>
-            </div>
+            {renderInviteRecipients(
+              quickInviteEmails,
+              setQuickInviteEmails,
+              'quickEmails'
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setSendInviteSession(null); setQuickInviteEmails(''); }}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={async () => {
@@ -915,7 +866,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                   setSendInviteSession(null);
                   setQuickInviteEmails('');
                 } else {
-                  toast.error('Please enter at least one valid email address');
+                  toast.error(t('sessions.enterValidEmail', { defaultValue: 'Introduza pelo menos um email válido' }));
                 }
               }}
               disabled={isSendingInvite || !quickInviteEmails.trim()}
@@ -923,12 +874,12 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
               {isSendingInvite ? (
                 <>
                   <Send className="h-4 w-4 mr-2 animate-pulse" />
-                  Sending...
+                  {t('sessions.sending', { defaultValue: 'A enviar...' })}
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Send Invite
+                  {t('sessions.sendInviteBtn', { defaultValue: 'Enviar convite' })}
                 </>
               )}
             </Button>

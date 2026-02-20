@@ -4787,5 +4787,15 @@
     "viewToggle": "Toggle agenda view",
     "listView": "List",
     "calendarView": "Calendar"
+  },
+  "calendar": {
+    "today": "Today",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
   }
 }
