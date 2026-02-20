@@ -4897,5 +4897,10 @@
     "start": "Início",
     "noEvents": "Sem eventos de progresso ainda",
     "noEventsDescription": "Mudanças de fase e marcos concluídos aparecerão aqui"
+  },
+  "agenda": {
+    "viewToggle": "Alternar vista da agenda",
+    "listView": "Lista",
+    "calendarView": "Calendário"
   }
 }

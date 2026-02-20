@@ -4782,5 +4782,10 @@
     "start": "Start",
     "noEvents": "No progress events yet",
     "noEventsDescription": "Stage changes and completed milestones will appear here"
+  },
+  "agenda": {
+    "viewToggle": "Toggle agenda view",
+    "listView": "List",
+    "calendarView": "Calendar"
   }
 }
