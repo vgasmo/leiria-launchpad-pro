@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair, TrendingUp, DollarSign, Rocket, BarChart3, Map } from 'lucide-react';
+import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair, TrendingUp, DollarSign, Rocket, BarChart3, Map, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ import { TemplateCoachPanel } from './TemplateCoachPanel';
 import { CanvasTemplate, CanvasType, getCanvasType } from './CanvasTemplate';
 import { getLocalizedTemplateMeta, getLocalizedCategoryLabel } from '@/lib/templateCatalogI18n';
 import { toast } from 'sonner';
+import { useDocuments, useUploadDocument } from '@/hooks/useDocuments';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
@@ -500,12 +501,20 @@ function TemplateEditorDialog({
   const completeInstance = useCompleteTemplateInstance(workspaceId);
   const submitForReview = useSubmitForReview(workspaceId);
   const reviewInstance = useReviewTemplateInstance(workspaceId);
+  const uploadDocument = useUploadDocument();
+  const { data: documents } = useDocuments(workspaceId);
   
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
   
   const canReview = roles.includes('admin') || roles.includes('consultor') || roles.includes('mentor_externo');
+
+  // Check if this is the Pitch Deck Checklist template
+  const isPitchDeckTemplate = template?.name === 'Pitch Deck Checklist';
+  const existingPitchDeck = isPitchDeckTemplate
+    ? documents?.find(d => d.category === 'pitch_deck')
+    : null;
 
   // Initialize form data when template/instance changes
   useEffect(() => {
@@ -627,6 +636,79 @@ function TemplateEditorDialog({
         
         <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-6 py-4">
+            {/* Pitch Deck Upload Section */}
+            {isPitchDeckTemplate && (
+              <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 space-y-3">
+                <div>
+                  <h3 className="font-medium text-sm flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    {t('dataroomChecklist.uploadPitchDeck', { defaultValue: 'Upload do Pitch Deck' })}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('dataroomChecklist.uploadPitchDeckDesc', { defaultValue: 'Faça upload do seu ficheiro de apresentação (PDF, PPT, PPTX). A checklist abaixo serve como guia dos slides que deve incluir.' })}
+                  </p>
+                </div>
+                {existingPitchDeck ? (
+                  <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
+                    <FileText className="h-5 w-5 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{existingPitchDeck.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('dataroomChecklist.pitchDeckUploaded', { defaultValue: 'Pitch Deck carregado' })}
+                      </p>
+                    </div>
+                    {canWrite && (
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.ppt,.pptx,.key"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              await uploadDocument.mutateAsync({
+                                workspaceId,
+                                file,
+                                category: 'pitch_deck',
+                                description: 'Pitch Deck',
+                              });
+                            } catch { /* handled by hook */ }
+                          }}
+                        />
+                        <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                          {t('common.replace', { defaultValue: 'Substituir' })}
+                        </Badge>
+                      </label>
+                    )}
+                  </div>
+                ) : canWrite ? (
+                  <label className="cursor-pointer flex items-center justify-center gap-2 p-4 rounded-md border border-dashed border-primary/30 hover:bg-primary/5 transition-colors">
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.ppt,.pptx,.key"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          await uploadDocument.mutateAsync({
+                            workspaceId,
+                            file,
+                            category: 'pitch_deck',
+                            description: 'Pitch Deck',
+                          });
+                        } catch { /* handled by hook */ }
+                      }}
+                    />
+                    <Upload className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">
+                      {t('dataroomChecklist.selectFile', { defaultValue: 'Selecionar ficheiro' })}
+                    </span>
+                  </label>
+                ) : null}
+              </div>
+            )}
             {schema.sections.map((section, sIdx) => (
               <div key={sIdx} className="space-y-4">
                 <div>
