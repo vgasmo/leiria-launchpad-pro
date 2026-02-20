@@ -88,7 +88,6 @@ export function DataroomTab({ workspaceId, canWrite = false, isStaff = false, is
     setIsGenerating(true);
     try {
       const result = await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
-      toast.success(t('investorUpdates.updateGenerated'));
       setGenerateUpdateOpen(false);
       
       // Auto-add to dataroom if we have one
@@ -96,14 +95,27 @@ export function DataroomTab({ workspaceId, canWrite = false, isStaff = false, is
         await createItem.mutateAsync({
           dataroom_id: dataroom.id,
           type: 'investor_update',
-          title: `Investor Update - ${format(new Date(selectedMonth), 'MMM yyyy')}`,
+          title: `Investor Update - ${format(new Date(selectedMonth + '-01'), 'MMM yyyy')}`,
           investor_update_id: result.id,
           visibility: 'investors',
         });
-        toast.success(t('dataroom.autoAddedToDataroom'));
       }
+      
+      toast.success(
+        t('investorUpdates.updateGenerated', { defaultValue: '✅ Atualização gerada com sucesso!' }),
+        {
+          description: t('investorUpdates.updateGeneratedDesc', { defaultValue: 'A atualização foi adicionada ao Data Room automaticamente.' }),
+          duration: 5000,
+        }
+      );
     } catch (error: any) {
-      toast.error(error?.message || t('investorUpdates.failedToGenerate'));
+      toast.error(
+        t('investorUpdates.failedToGenerate', { defaultValue: 'Falha ao gerar atualização' }),
+        {
+          description: error?.message || t('common.tryAgain', { defaultValue: 'Por favor tente novamente.' }),
+          duration: 5000,
+        }
+      );
     } finally {
       setIsGenerating(false);
     }

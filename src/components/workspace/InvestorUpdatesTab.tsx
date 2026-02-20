@@ -97,11 +97,17 @@ export function InvestorUpdatesTab({ workspaceId, canWrite }: InvestorUpdatesTab
     setIsGenerating(true);
     try {
       await generateInvestorUpdate.mutateAsync({ workspaceId, month: selectedMonth });
-      toast.success(t('investorUpdates.updateGenerated'));
       setShowGenerateDialog(false);
+      toast.success(
+        t('investorUpdates.updateGenerated', { defaultValue: '✅ Atualização gerada com sucesso!' }),
+        {
+          description: t('investorUpdates.updateGeneratedDesc', { defaultValue: 'A atualização foi adicionada ao Data Room automaticamente.' }),
+          duration: 5000,
+        }
+      );
     } catch (error: any) {
-      const message = error?.message || t('investorUpdates.failedToGenerate');
-      toast.error(message);
+      const message = error?.message || t('investorUpdates.failedToGenerate', { defaultValue: 'Falha ao gerar atualização' });
+      toast.error(message, { duration: 5000 });
     } finally {
       setIsGenerating(false);
     }

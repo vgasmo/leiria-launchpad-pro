@@ -179,12 +179,24 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
     const file = e.target.files?.[0];
     if (!file) return;
 
-    await uploadMutation.mutateAsync({
-      workspaceId,
-      file,
-      category: selectedCategory || undefined,
-      description: description || undefined,
-    });
+    try {
+      await uploadMutation.mutateAsync({
+        workspaceId,
+        file,
+        category: selectedCategory || undefined,
+        description: description || undefined,
+      });
+
+      toast.success(
+        t('documents.uploadSuccess', { defaultValue: '✅ Documento enviado com sucesso!' }),
+        { duration: 4000 }
+      );
+    } catch {
+      toast.error(
+        t('documents.uploadFailed', { defaultValue: 'Falha ao enviar documento' }),
+        { duration: 4000 }
+      );
+    }
 
     setUploadOpen(false);
     setSelectedCategory('');
