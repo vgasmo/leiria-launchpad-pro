@@ -4902,5 +4902,15 @@
     "viewToggle": "Alternar vista da agenda",
     "listView": "Lista",
     "calendarView": "Calendário"
+  },
+  "calendar": {
+    "today": "Hoje",
+    "mon": "Seg",
+    "tue": "Ter",
+    "wed": "Qua",
+    "thu": "Qui",
+    "fri": "Sex",
+    "sat": "Sáb",
+    "sun": "Dom"
   }
 }
