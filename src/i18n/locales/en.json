@@ -520,7 +520,13 @@
     "teamsDesc": "Connect your Teams meetings",
     "prep": "Prep",
     "detailsNotes": "Details & Notes",
-    "ai": "AI",
+    "ai": {
+      "label": "AI",
+      "teamsNotReady": "Teams meeting not available",
+      "importTeams": "Import Teams transcript",
+      "fetchTeams": "Fetch from Teams",
+      "teamsTranscriptHint": "Add a Teams meeting link to the session to auto-import the transcript."
+    },
     "calendarInvites": "Calendar Invites",
     "workspaceMembers": "workspace members",
     "resendInvites": "Resend Invites",
@@ -4216,6 +4222,15 @@
     "recapGenerated": "Recap generated",
     "activityAdded": "Activity added",
     "recentInteractions": "Recent Interactions",
+    "leadScore": {
+      "title": "Lead Score",
+      "hot": "Hot Lead",
+      "hotDesc": "High engagement, ready to progress",
+      "warm": "Warm Lead",
+      "warmDesc": "Good potential, needs nurturing",
+      "cold": "Cold Lead",
+      "coldDesc": "Needs re-engagement or qualification"
+    },
     "viewAll": "View All",
     "activityType": {
       "email": "Email",
