@@ -4,14 +4,16 @@
  * - Detect duplicate top-level keys (JSON overwrites) in locale files.
  * - Ensure critical namespaces exist in both locales.
  * - Scan TSX files for t('...') usages and verify keys exist in both locales.
+ * - Export COMPLETE missing keys as JSON when --json flag is used.
  *
- * Usage: node scripts/i18n-lint.mjs
+ * Usage: node scripts/i18n-lint.mjs [--json]
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = process.cwd();
+const JSON_FLAG = process.argv.includes('--json');
 const LOCALES = [
   { code: 'en', file: path.join(ROOT, 'src/i18n/locales/en.json') },
   { code: 'pt', file: path.join(ROOT, 'src/i18n/locales/pt.json') },
@@ -198,33 +200,50 @@ function main() {
     }
   }
   
-  const MAX_MISSING_TO_SHOW = 20;
+  // Export full JSON report when --json flag is used
+  if (JSON_FLAG) {
+    const report = {
+      missingInEn: Object.fromEntries(missingInEn),
+      missingInPt: Object.fromEntries(missingInPt),
+      missingInEnCount: missingInEn.size,
+      missingInPtCount: missingInPt.size,
+      duplicates: [],
+      englishInPt: [],
+    };
+    
+    for (const loc of LOCALES) {
+      const text = readText(loc.file);
+      const occurrences = findTopLevelKeyOccurrences(text);
+      const dups = [...occurrences.entries()].filter(([, n]) => n > 1);
+      if (dups.length) {
+        report.duplicates.push({ locale: loc.code, keys: dups.map(([k, n]) => ({ key: k, count: n })) });
+      }
+    }
+    
+    const reportPath = path.join(ROOT, 'scripts/i18n-lint-report.json');
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
+    console.log(`📋 Full report exported to ${reportPath}`);
+  }
   
-  // Missing keys are now ERRORS (not warnings)
+  // Missing keys are ERRORS
   if (missingInEn.size > 0) {
-    const keys = [...missingInEn.keys()].slice(0, MAX_MISSING_TO_SHOW);
+    const keys = [...missingInEn.keys()];
     for (const key of keys) {
       const files = missingInEn.get(key).slice(0, 2).join(', ');
       problems.push(`[en] Missing key: "${key}" (used in: ${files})`);
     }
-    if (missingInEn.size > MAX_MISSING_TO_SHOW) {
-      problems.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
-    }
   }
   
   if (missingInPt.size > 0) {
-    const keys = [...missingInPt.keys()].slice(0, MAX_MISSING_TO_SHOW);
+    const keys = [...missingInPt.keys()];
     for (const key of keys) {
       const files = missingInPt.get(key).slice(0, 2).join(', ');
       problems.push(`[pt] Missing key: "${key}" (used in: ${files})`);
     }
-    if (missingInPt.size > MAX_MISSING_TO_SHOW) {
-      problems.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
-    }
   }
 
   if (problems.length) {
-    console.error('❌ i18n:lint FAILED');
+    console.error(`❌ i18n:lint FAILED (${problems.length} problems)`);
     for (const p of problems) console.error(' ✗ ' + p);
     process.exit(1);
   }
