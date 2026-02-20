@@ -1138,7 +1138,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
               {isStaff && (
                 <TabsTrigger value="ai" className="gap-2">
                   <Sparkles className="h-4 w-4" />
-                  {t('sessions.ai', 'AI')}
+                  {t('sessions.ai.label', 'AI')}
                 </TabsTrigger>
               )}
             </TabsList>
