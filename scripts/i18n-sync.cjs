@@ -166,21 +166,29 @@ function findTsxFiles(dir) {
 
 function extractTranslationKeysWithDefaults(content) {
   const results = new Map();
-  
-  // t('key', 'default')
-  const p1 = /\bt\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]*)['"]\s*\)/g;
   let m;
+  
+  // t('key', 'default') — positional string default
+  const p1 = /\bt\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]*)['"]\s*\)/g;
   while ((m = p1.exec(content)) !== null) {
     if (!results.has(m[1]) || m[2]) results.set(m[1], m[2] || null);
   }
   
-  // t('key', { defaultValue: 'text' })
+  // t('key', { defaultValue: 'text' }) — object default
   const p2 = /\bt\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*defaultValue:\s*['"]([^'"]*)['"]/g;
   while ((m = p2.exec(content)) !== null) {
     if (!results.has(m[1]) || m[2]) results.set(m[1], m[2] || null);
   }
   
-  // t('key') without default
+  // i18n.t('key', { ... }) — direct i18n.t calls (e.g. dateUtils)
+  const p2b = /\bi18n\.t\(\s*['"]([^'"]+)['"]\s*[,)]/g;
+  while ((m = p2b.exec(content)) !== null) {
+    const key = m[1];
+    if (key.includes('${') || key.includes('{{')) continue;
+    if (!results.has(key)) results.set(key, null);
+  }
+  
+  // t('key') or t('key', ...) — generic catch-all
   const p3 = /\bt\(\s*['"]([^'"]+)['"]\s*[,)]/g;
   while ((m = p3.exec(content)) !== null) {
     const key = m[1];
