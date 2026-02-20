@@ -511,9 +511,17 @@ function TemplateEditorDialog({
   const canReview = roles.includes('admin') || roles.includes('consultor') || roles.includes('mentor_externo');
 
   // Check if this is the Pitch Deck Checklist template
-  const isPitchDeckTemplate = template?.name === 'Pitch Deck Checklist';
-  const existingPitchDeck = isPitchDeckTemplate
-    ? documents?.find(d => d.category === 'pitch_deck')
+  // Map templates to their dataroom document categories for upload support
+  const TEMPLATE_CATEGORY_MAP: Record<string, { category: string; labelKey: string; defaultLabel: string }> = {
+    'Pitch Deck Checklist': { category: 'pitch_deck', labelKey: 'dataroomChecklist.uploadPitchDeck', defaultLabel: 'Upload do Pitch Deck' },
+    'One-Pager Checklist': { category: 'one_pager', labelKey: 'dataroomChecklist.uploadOnePager', defaultLabel: 'Upload do One-Pager' },
+    'Modelo Financeiro Checklist': { category: 'financial_model', labelKey: 'dataroomChecklist.uploadFinancialModel', defaultLabel: 'Upload do Modelo Financeiro' },
+    'Apresentação da Equipa Checklist': { category: 'team', labelKey: 'dataroomChecklist.uploadTeamDeck', defaultLabel: 'Upload da Apresentação da Equipa' },
+    'Relatório de Tração Checklist': { category: 'traction', labelKey: 'dataroomChecklist.uploadTractionReport', defaultLabel: 'Upload do Relatório de Tração' },
+  };
+  const templateUploadConfig = template?.name ? TEMPLATE_CATEGORY_MAP[template.name] : null;
+  const existingUploadDoc = templateUploadConfig
+    ? documents?.find(d => d.category === templateUploadConfig.category)
     : null;
 
   // Initialize form data when template/instance changes
@@ -636,25 +644,25 @@ function TemplateEditorDialog({
         
         <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-6 py-4">
-            {/* Pitch Deck Upload Section */}
-            {isPitchDeckTemplate && (
+            {/* Document Upload Section (for dataroom-linked templates) */}
+            {templateUploadConfig && (
               <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 space-y-3">
                 <div>
                   <h3 className="font-medium text-sm flex items-center gap-2">
                     <Upload className="h-4 w-4" />
-                    {t('dataroomChecklist.uploadPitchDeck', { defaultValue: 'Upload do Pitch Deck' })}
+                    {t(templateUploadConfig.labelKey, { defaultValue: templateUploadConfig.defaultLabel })}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('dataroomChecklist.uploadPitchDeckDesc', { defaultValue: 'Faça upload do seu ficheiro de apresentação (PDF, PPT, PPTX). A checklist abaixo serve como guia dos slides que deve incluir.' })}
+                    {t('dataroomChecklist.uploadDesc', { defaultValue: 'Faça upload do seu ficheiro. A checklist abaixo serve como guia do conteúdo que deve incluir.' })}
                   </p>
                 </div>
-                {existingPitchDeck ? (
+                {existingUploadDoc ? (
                   <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
                     <FileText className="h-5 w-5 text-primary shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{existingPitchDeck.name}</p>
+                      <p className="text-sm font-medium truncate">{existingUploadDoc.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {t('dataroomChecklist.pitchDeckUploaded', { defaultValue: 'Pitch Deck carregado' })}
+                        {t('dataroomChecklist.docUploaded', { defaultValue: 'Documento carregado' })}
                       </p>
                     </div>
                     {canWrite && (
@@ -662,7 +670,7 @@ function TemplateEditorDialog({
                         <input
                           type="file"
                           className="hidden"
-                          accept=".pdf,.ppt,.pptx,.key"
+                          accept=".pdf,.ppt,.pptx,.key,.doc,.docx,.xls,.xlsx"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
@@ -670,8 +678,7 @@ function TemplateEditorDialog({
                               await uploadDocument.mutateAsync({
                                 workspaceId,
                                 file,
-                                category: 'pitch_deck',
-                                description: 'Pitch Deck',
+                                category: templateUploadConfig.category,
                               });
                             } catch { /* handled by hook */ }
                           }}
@@ -687,7 +694,7 @@ function TemplateEditorDialog({
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.ppt,.pptx,.key"
+                      accept=".pdf,.ppt,.pptx,.key,.doc,.docx,.xls,.xlsx"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
@@ -695,8 +702,7 @@ function TemplateEditorDialog({
                           await uploadDocument.mutateAsync({
                             workspaceId,
                             file,
-                            category: 'pitch_deck',
-                            description: 'Pitch Deck',
+                            category: templateUploadConfig.category,
                           });
                         } catch { /* handled by hook */ }
                       }}

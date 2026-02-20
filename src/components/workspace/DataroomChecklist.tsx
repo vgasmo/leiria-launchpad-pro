@@ -35,10 +35,10 @@ interface ChecklistItem {
 
 const CHECKLIST_ITEMS: ChecklistItem[] = [
   { id: 'pitch_deck', labelKey: 'dataroomChecklist.pitchDeck', icon: Lightbulb, categoryKey: 'pitch_deck', required: true, templateId: '479fa1ff-066f-409f-bd03-9a9242d559bf', templateName: 'Pitch Deck Checklist' },
-  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true },
-  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true },
-  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false },
-  { id: 'traction', labelKey: 'dataroomChecklist.tractionReport', icon: TrendingUp, categoryKey: 'traction', required: false },
+  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true, templateId: 'a1b2c3d4-1111-4aaa-bbbb-000000000001', templateName: 'One-Pager Checklist' },
+  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true, templateId: 'a1b2c3d4-2222-4aaa-bbbb-000000000002', templateName: 'Modelo Financeiro Checklist' },
+  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false, templateId: 'a1b2c3d4-3333-4aaa-bbbb-000000000003', templateName: 'Apresentação da Equipa Checklist' },
+  { id: 'traction', labelKey: 'dataroomChecklist.tractionReport', icon: TrendingUp, categoryKey: 'traction', required: false, templateId: 'a1b2c3d4-4444-4aaa-bbbb-000000000004', templateName: 'Relatório de Tração Checklist' },
   { id: 'market', labelKey: 'dataroomChecklist.marketAnalysis', icon: BarChart3, categoryKey: 'market', required: false, templateId: 'c9cca57a-bbde-4a4a-a136-efbd1c858e66', templateName: 'Competitor Analysis' },
 ];
 
