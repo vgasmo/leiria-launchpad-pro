@@ -35,9 +35,9 @@ interface ChecklistItem {
 
 const CHECKLIST_ITEMS: ChecklistItem[] = [
   { id: 'pitch_deck', labelKey: 'dataroomChecklist.pitchDeck', icon: Lightbulb, categoryKey: 'pitch_deck', required: true, templateId: '479fa1ff-066f-409f-bd03-9a9242d559bf', templateName: 'Pitch Deck Checklist' },
-  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true, templateId: '633a9b38-93d9-4a5f-a478-264bce866676', templateName: 'Value Proposition Canvas' },
-  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true, templateId: '8c7e8080-6d4b-4b99-96b3-340d1e7e37eb', templateName: 'Unit Economics' },
-  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false, templateId: 'd4a3a07b-7974-4a2c-a325-2f7cf3422cb9', templateName: 'Hiring Plan' },
+  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true },
+  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true },
+  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false },
   { id: 'traction', labelKey: 'dataroomChecklist.tractionReport', icon: TrendingUp, categoryKey: 'traction', required: false },
   { id: 'market', labelKey: 'dataroomChecklist.marketAnalysis', icon: BarChart3, categoryKey: 'market', required: false, templateId: 'c9cca57a-bbde-4a4a-a136-efbd1c858e66', templateName: 'Competitor Analysis' },
 ];
