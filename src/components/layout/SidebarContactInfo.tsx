@@ -1,3 +1,4 @@
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, User, GraduationCap } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,7 +17,7 @@ interface SidebarContactInfoProps {
   collapsed: boolean;
 }
 
-export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInfoProps) {
+export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContactInfoProps>(function SidebarContactInfo({ workspaceId, collapsed }, ref) {
   const { t } = useTranslation();
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
 
@@ -45,7 +46,7 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
       <div className="mx-3 mb-3 rounded-lg p-3 bg-muted/30 border border-dashed border-muted-foreground/20">
         <div className="flex items-center gap-2 text-muted-foreground">
           <User className="h-4 w-4" />
-          <span className="text-xs">{t('workspace.noTeamAssigned', 'Team not assigned yet')}</span>
+          <span className="text-xs">{t('workspace.noTeamAssigned', { defaultValue: 'Team not assigned yet' })}</span>
         </div>
       </div>
     );
@@ -69,8 +70,8 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
     
     const Icon = type === 'consultant' ? User : GraduationCap;
     const label = type === 'consultant' 
-      ? t('workspace.yourConsultant', 'Your Consultant')
-      : t('workspace.yourMentor', 'Your Mentor');
+      ? t('workspace.yourConsultant', { defaultValue: 'Your Consultant' })
+      : t('workspace.yourMentor', { defaultValue: 'Your Mentor' });
     
     const bgColor = type === 'consultant' ? 'bg-primary/10' : 'bg-accent/20';
     const textColor = type === 'consultant' ? 'text-primary' : 'text-accent-foreground';
@@ -140,7 +141,7 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
                   </a>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">{t('common.sendEmail', 'Send email')}</TooltipContent>
+              <TooltipContent side="right">{t('common.sendEmail', { defaultValue: 'Send email' })}</TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -149,7 +150,7 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
   };
 
   return (
-    <div className={cn(
+    <div ref={ref} className={cn(
       "mx-3 mb-3 space-y-2",
       collapsed && "flex flex-col items-center gap-2"
     )}>
@@ -157,4 +158,4 @@ export function SidebarContactInfo({ workspaceId, collapsed }: SidebarContactInf
       {mentor && <ContactItem profile={mentor.profile} type="mentor" />}
     </div>
   );
-}
+});

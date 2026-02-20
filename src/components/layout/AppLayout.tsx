@@ -104,7 +104,7 @@ function MobileBottomNav() {
   const { t } = useTranslation();
   
   const navItems = [
-    { href: '/my-workspaces', icon: Building2, label: t('nav.home', 'Home') },
+    { href: '/my-workspaces', icon: Building2, label: t('nav.home', { defaultValue: 'Home' }) },
     { href: '/mentors', icon: Users, label: t('nav.mentors') },
     { href: '/settings', icon: Settings, label: t('nav.settings') },
   ];
