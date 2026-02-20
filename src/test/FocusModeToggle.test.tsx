@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 
 // Mock Radix tooltip as passthrough so tests don't need TooltipProvider
 vi.mock('@radix-ui/react-tooltip', () => ({
@@ -61,9 +61,13 @@ describe('FocusModeToggle', () => {
       </Wrapper>
     );
     expect(getByTestId('focus-state').textContent).toBe('focused');
-    getByTestId('focus-mode-toggle').click();
+    act(() => {
+      getByTestId('focus-mode-toggle').click();
+    });
     expect(getByTestId('focus-state').textContent).toBe('full');
-    getByTestId('focus-mode-toggle').click();
+    act(() => {
+      getByTestId('focus-mode-toggle').click();
+    });
     expect(getByTestId('focus-state').textContent).toBe('focused');
   });
 
