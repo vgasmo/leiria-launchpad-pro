@@ -714,11 +714,11 @@
       "Product Roadmap": "Roadmap de Produto",
       "Weekly Progress Report": "Relatório Semanal de Progresso",
       "Sales Pipeline Review": "Revisão do Pipeline de Vendas",
-      "Business Model Canvas": "Business Model Canvas",
+      "Business Model Canvas": "Canvas de Modelo de Negócio",
       "Competitor Analysis": "Análise da Concorrência",
       "Lean Canvas": "Lean Canvas",
       "SWOT Analysis": "Análise SWOT",
-      "Value Proposition Canvas": "Value Proposition Canvas",
+      "Value Proposition Canvas": "Canvas de Proposta de Valor",
       "Hiring Plan": "Plano de Contratação",
       "Team Retrospective": "Retrospetiva de Equipa",
       "Customer Persona": "Persona de Cliente",
@@ -746,7 +746,7 @@
       "Product Roadmap": "Template de planeamento trimestral de roadmap de produto",
       "Weekly Progress Report": "Template para atualizações semanais de progresso da startup",
       "Sales Pipeline Review": "Template para rever e gerir o pipeline de vendas",
-      "Business Model Canvas": "Visão geral do modelo de negócio",
+      "Canvas de Modelo de Negócio": "Visão geral do modelo de negócio",
       "Competitor Analysis": "Framework para analisar concorrentes diretos e indiretos",
       "Lean Canvas": "Modelo de negócio de uma página para startups",
       "SWOT Analysis": "Analise forças, fraquezas, oportunidades e ameaças da sua startup",
@@ -869,7 +869,7 @@
         "desc": "Template de planeamento trimestral de roadmap de produto"
       },
       "business_model_canvas": {
-        "title": "Business Model Canvas",
+        "title": "Canvas de Modelo de Negócio",
         "desc": "Visão geral do modelo de negócio"
       },
       "lean_canvas": {
@@ -881,7 +881,7 @@
         "desc": "Analise forças, fraquezas, oportunidades e ameaças da sua startup"
       },
       "value_proposition_canvas": {
-        "title": "Value Proposition Canvas",
+        "title": "Canvas de Proposta de Valor",
         "desc": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços"
       },
       "empathy_map": {
@@ -958,7 +958,7 @@
     },
     "canvas": {
       "bmc": {
-        "title": "Business Model Canvas",
+        "title": "Canvas de Modelo de Negócio",
         "key_partners": "Parceiros Chave",
         "key_partners_placeholder": "Quem são os seus parceiros e fornecedores chave?",
         "key_activities": "Atividades Chave",
@@ -1412,7 +1412,14 @@
     "title": "Notificações",
     "markAllRead": "Marcar todas como lidas",
     "noNotifications": "Sem notificações",
-    "settings": "Definições de Notificações"
+    "settings": "Definições de Notificações",
+    "taskDue": "Tarefa a Vencer",
+    "taskOverdue": "Tarefa Em Atraso",
+    "nextActionDue": "Ação a Vencer",
+    "nextActionOverdue": "Ação Em Atraso",
+    "recapReady": "Resumo Pronto",
+    "emailSyncDone": "Emails Sincronizados",
+    "overdueEscalated": "Urgente: Escalonamento de Atraso"
   },
   "settings": {
     "account": "Conta",
@@ -1452,7 +1459,21 @@
     "validation": "Validação",
     "mvp": "MVP",
     "growth": "Crescimento",
-    "scale": "Escala"
+    "scale": "Escala",
+    "new": "Novo",
+    "first_contact_booked": "Reunião Agendada",
+    "met": "Reunião Realizada",
+    "qualified": "Qualificado",
+    "proposal_sent": "Proposta Enviada",
+    "negotiating": "Em Negociação",
+    "contracted": "Contratado",
+    "incubating": "Em Incubação",
+    "accelerating": "Em Aceleração",
+    "rejected": "Rejeitado",
+    "archived": "Arquivado",
+    "traction": "Tração",
+    "scaling": "Escala",
+    "graduated": "Graduado"
   },
   "health": {
     "critical": "Crítico",
@@ -2883,6 +2904,9 @@
     "searching": "A pesquisar...",
     "noResultsFor": "Sem resultados para \"{{query}}\"",
     "viewAllResults": "Ver todos os resultados",
+    "saveSearch": "Guardar Pesquisa",
+    "searchName": "Nome da Pesquisa",
+    "searchNamePlaceholder": "A minha pesquisa...",
     "types": {
       "sessions": "Sessões",
       "actions": "Ações",
@@ -3358,19 +3382,6 @@
     "noKpis": "Sem KPIs definidos",
     "defineFirst": "Defina os primeiros KPIs"
   },
-  "notifications": {
-    "title": "Notificações",
-    "markAllRead": "Marcar tudo como lido",
-    "noNotifications": "Sem notificações",
-    "settings": "Definições de Notificações",
-    "taskDue": "Tarefa a Vencer",
-    "taskOverdue": "Tarefa Em Atraso",
-    "nextActionDue": "Ação a Vencer",
-    "nextActionOverdue": "Ação Em Atraso",
-    "recapReady": "Resumo Pronto",
-    "emailSyncDone": "Emails Sincronizados",
-    "overdueEscalated": "Urgente: Escalonamento de Atraso"
-  },
   "dataQuality": {
     "title": "Qualidade dos Dados",
     "description": "Monitorize e melhore a qualidade dos dados do ecossistema.",
@@ -3483,33 +3494,10 @@
     "stepMeeting": "Reunião",
     "stepDone": "Concluído"
   },
-  "search": {
-    "saveSearch": "Guardar Pesquisa",
-    "searchName": "Nome da Pesquisa",
-    "searchNamePlaceholder": "A minha pesquisa..."
-  },
   "notFound": {
     "title": "Página não encontrada",
     "backHome": "Voltar ao início",
     "description": "A página que procura não existe ou foi movida."
-  },
-  "stages": {
-    "new": "Novo",
-    "first_contact_booked": "Reunião Agendada",
-    "met": "Reunião Realizada",
-    "qualified": "Qualificado",
-    "proposal_sent": "Proposta Enviada",
-    "negotiating": "Em Negociação",
-    "contracted": "Contratado",
-    "incubating": "Em Incubação",
-    "accelerating": "Em Aceleração",
-    "rejected": "Rejeitado",
-    "archived": "Arquivado",
-    "ideation": "Ideação",
-    "validation": "Validação",
-    "traction": "Tração",
-    "scaling": "Escala",
-    "graduated": "Graduado"
   },
   "activityTypes": {
     "note": "Nota",
@@ -4526,13 +4514,6 @@
     "rejected": "Rejeitado",
     "conditions": "Condições",
     "conditionsPlaceholder": "Especifique as condições para aprovação..."
-  },
-  "stages": {
-    "ideation": "Ideação",
-    "validation": "Validação",
-    "mvp": "MVP",
-    "growth": "Crescimento",
-    "scale": "Escala"
   },
   "ui": {
     "theme": {

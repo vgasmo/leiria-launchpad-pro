@@ -1402,7 +1402,14 @@
     "title": "Notifications",
     "markAllRead": "Mark all read",
     "noNotifications": "No notifications yet",
-    "settings": "Notification Settings"
+    "settings": "Notification Settings",
+    "taskDue": "Task Due Soon",
+    "taskOverdue": "Task Overdue",
+    "nextActionDue": "Action Due Soon",
+    "nextActionOverdue": "Action Overdue",
+    "recapReady": "Recap Ready",
+    "emailSyncDone": "Emails Synced",
+    "overdueEscalated": "Urgent: Overdue Escalation"
   },
   "settings": {
     "account": "Account",
@@ -1504,7 +1511,21 @@
     "validation": "Validation",
     "mvp": "MVP",
     "growth": "Growth",
-    "scale": "Scale"
+    "scale": "Scale",
+    "new": "New",
+    "first_contact_booked": "Meeting Booked",
+    "met": "Meeting Done",
+    "qualified": "Qualified",
+    "proposal_sent": "Proposal Sent",
+    "negotiating": "Negotiating",
+    "contracted": "Contracted",
+    "incubating": "Incubating",
+    "accelerating": "Accelerating",
+    "rejected": "Rejected",
+    "archived": "Archived",
+    "traction": "Traction",
+    "scaling": "Scaling",
+    "graduated": "Graduated"
   },
   "health": {
     "critical": "Critical",
@@ -3765,6 +3786,9 @@
     "searching": "Searching...",
     "noResultsFor": "No results for \"{{query}}\"",
     "viewAllResults": "View all results",
+    "saveSearch": "Save Search",
+    "searchName": "Search Name",
+    "searchNamePlaceholder": "My search...",
     "types": {
       "sessions": "Sessions",
       "actions": "Actions",
@@ -4198,19 +4222,6 @@
     "namePlaceholder": "e.g. My active leads",
     "setAsDefault": "Set as default view"
   },
-  "notifications": {
-    "title": "Notifications",
-    "markAllRead": "Mark all read",
-    "noNotifications": "No notifications",
-    "settings": "Notification Settings",
-    "taskDue": "Task Due Soon",
-    "taskOverdue": "Task Overdue",
-    "nextActionDue": "Action Due Soon",
-    "nextActionOverdue": "Action Overdue",
-    "recapReady": "Recap Ready",
-    "emailSyncDone": "Emails Synced",
-    "overdueEscalated": "Urgent: Overdue Escalation"
-  },
   "dataQuality": {
     "title": "Data Quality Dashboard",
     "description": "Monitor and improve your ecosystem data quality.",
@@ -4245,11 +4256,6 @@
     "noMilestonesYet": "No milestones yet",
     "addFirstAction": "Add first action",
     "addFirstMilestone": "Add first milestone"
-  },
-  "search": {
-    "saveSearch": "Save Search",
-    "searchName": "Search Name",
-    "searchNamePlaceholder": "My search..."
   },
   "notFound": {
     "title": "Page not found",
@@ -4384,13 +4390,6 @@
     "rejected": "Rejected",
     "conditions": "Conditions",
     "conditionsPlaceholder": "Specify conditions for approval..."
-  },
-  "stages": {
-    "ideation": "Ideation",
-    "validation": "Validation",
-    "mvp": "MVP",
-    "growth": "Growth",
-    "scale": "Scale"
   },
   "ui": {
     "theme": {

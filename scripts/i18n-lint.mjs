@@ -111,14 +111,14 @@ function main() {
   const problems = [];
   const warnings = [];
 
-  // Duplicate top-level keys
+  // Duplicate top-level keys — FAIL (not warn)
   for (const loc of LOCALES) {
     const text = readText(loc.file);
     const occurrences = findTopLevelKeyOccurrences(text);
     const dups = [...occurrences.entries()].filter(([, n]) => n > 1);
     if (dups.length) {
-      warnings.push(
-        `[${loc.code}] Duplicate top-level keys (last wins): ` + dups.map(([k, n]) => `${k}(${n})`).join(', ')
+      problems.push(
+        `[${loc.code}] Duplicate top-level keys (last wins, causes data loss): ` + dups.map(([k, n]) => `${k}(${n})`).join(', ')
       );
     }
   }
@@ -145,19 +145,29 @@ function main() {
     if (!(k in (pt.templates || {}))) problems.push(`[pt] Missing templates.${k}`);
   }
 
-  // Check for English text in PT templates catalog (blacklist scan)
+  // Check for English text in PT locale — FAIL (not warn)
   const englishBlacklist = [
-    'Fundraising Readiness', 'Business Model Canvas', 'Value Proposition',
+    'Fundraising Readiness', 'Business Model Canvas', 'Value Proposition Canvas',
     'Growth Loops', 'Sales Pipeline', 'Customer Segments',
   ];
   
-  const ptCatalog = pt.templates?.catalog || {};
-  const ptCatalogStr = JSON.stringify(ptCatalog);
-  for (const phrase of englishBlacklist) {
-    if (ptCatalogStr.includes(`"title":"${phrase}"`) || ptCatalogStr.includes(`"desc":"${phrase}"`)) {
-      problems.push(`[pt] English phrase found in templates.catalog: "${phrase}"`);
+  // Deep scan: check ALL string values in PT for blacklisted EN phrases
+  function scanForEnglish(obj, path = '') {
+    if (typeof obj === 'string') {
+      for (const phrase of englishBlacklist) {
+        if (obj === phrase) {
+          problems.push(`[pt] English phrase "${phrase}" found at key: ${path}`);
+        }
+      }
+      return;
+    }
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      for (const [k, v] of Object.entries(obj)) {
+        scanForEnglish(v, path ? `${path}.${k}` : k);
+      }
     }
   }
+  scanForEnglish(pt);
 
   // Scan TSX files for missing translation keys
   const srcDir = path.join(ROOT, 'src');
@@ -190,14 +200,15 @@ function main() {
   
   const MAX_MISSING_TO_SHOW = 20;
   
+  // Missing keys are now ERRORS (not warnings)
   if (missingInEn.size > 0) {
     const keys = [...missingInEn.keys()].slice(0, MAX_MISSING_TO_SHOW);
     for (const key of keys) {
       const files = missingInEn.get(key).slice(0, 2).join(', ');
-      warnings.push(`[en] Missing key: "${key}" (used in: ${files})`);
+      problems.push(`[en] Missing key: "${key}" (used in: ${files})`);
     }
     if (missingInEn.size > MAX_MISSING_TO_SHOW) {
-      warnings.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
+      problems.push(`[en] ... and ${missingInEn.size - MAX_MISSING_TO_SHOW} more missing keys`);
     }
   }
   
@@ -205,27 +216,20 @@ function main() {
     const keys = [...missingInPt.keys()].slice(0, MAX_MISSING_TO_SHOW);
     for (const key of keys) {
       const files = missingInPt.get(key).slice(0, 2).join(', ');
-      warnings.push(`[pt] Missing key: "${key}" (used in: ${files})`);
+      problems.push(`[pt] Missing key: "${key}" (used in: ${files})`);
     }
     if (missingInPt.size > MAX_MISSING_TO_SHOW) {
-      warnings.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
+      problems.push(`[pt] ... and ${missingInPt.size - MAX_MISSING_TO_SHOW} more missing keys`);
     }
-  }
-
-  // Print warnings (non-fatal)
-  if (warnings.length) {
-    console.warn('i18n:lint WARNINGS');
-    for (const w of warnings) console.warn(' ⚠ ' + w);
-    console.warn('');
   }
 
   if (problems.length) {
-    console.error('i18n:lint FAILED');
-    for (const p of problems) console.error(' - ' + p);
+    console.error('❌ i18n:lint FAILED');
+    for (const p of problems) console.error(' ✗ ' + p);
     process.exit(1);
   }
 
-  console.log(`i18n:lint OK (scanned ${tsxFiles.length} files, ${warnings.length} warnings)`);
+  console.log(`✅ i18n:lint OK (scanned ${tsxFiles.length} files, 0 problems)`);
 }
 
 main();
