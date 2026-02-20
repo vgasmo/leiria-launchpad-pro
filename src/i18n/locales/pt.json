@@ -99,7 +99,7 @@
     "unknown": "Desconhecido",
     "approved": "Aprovado",
     "draft": "Rascunho",
-    "moreDetails": "Mais detalhes",
+    "moreDetails": "Mais",
     "lessDetails": "Menos detalhes",
     "back": "Voltar",
     "copyLink": "Copiar Link",
@@ -1511,6 +1511,7 @@
     "team_member": "Membro da Equipa"
   },
   "workspace": {
+    "tabs": "Secções do workspace",
     "overview": "Visão Geral",
     "sessions": "Sessões",
     "actions": "Ações",

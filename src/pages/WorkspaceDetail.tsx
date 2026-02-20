@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, KeyboardEvent } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings, Copy, DollarSign, StickyNote, Users, Clock, BookOpen, Shield, FolderLock, MoreHorizontal, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Copy, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -36,6 +35,7 @@ import { useWorkspace } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { getVisibleTabs, type WorkspaceTab } from '@/lib/workspaceTabs';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -44,23 +44,65 @@ export default function WorkspaceDetail() {
   const { data: workspace, isLoading, error } = useWorkspace(id);
   const { isAdmin, isConsultor, isMentor, isFounder } = useAuth();
   
-  // Handle onboarding wizard auto-open for invited founders
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
-
-  // Determine if user can write to this workspace
-  // Admins, consultors, mentors, AND founders can write
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
   
-  // Auto-open onboarding wizard when redirected from invite acceptance
   useEffect(() => {
     if (shouldShowOnboarding && workspace && isFounder) {
       setShowOnboardingWizard(true);
-      // Remove the query param after reading it
       searchParams.delete('onboarding');
       setSearchParams(searchParams, { replace: true });
     }
   }, [shouldShowOnboarding, workspace, isFounder, searchParams, setSearchParams]);
+
+  // Extract startup/program early for tab computation
+  const startup = workspace?.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null; nif: string | null; main_contact_name: string | null; main_contact_email: string | null; main_contact_phone: string | null; has_startup_portugal_status: boolean | null; startup_portugal_document_path: string | null } | null ?? null;
+  const program = workspace ? (workspace.program as { name: string } | null) : null;
+
+  // Compute visible tabs
+  const { primaryTabs, overflowTabs } = useMemo(
+    () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder }, !!startup),
+    [isAdmin, isConsultor, isMentor, isFounder, !!startup]
+  );
+  const allVisibleIds = useMemo(
+    () => new Set([...primaryTabs, ...overflowTabs].map(t => t.id)),
+    [primaryTabs, overflowTabs]
+  );
+
+  // URL-synced tab state
+  const currentTab = searchParams.get('tab') || 'overview';
+  const activeTab = allVisibleIds.has(currentTab) ? currentTab : 'overview';
+  
+  const handleTabChange = useCallback((value: string) => {
+    setSearchParams({ tab: value }, { replace: false });
+  }, [setSearchParams]);
+
+  // Keyboard navigation for tabs (WAI-ARIA)
+  const handleTabKeyDown = useCallback((e: KeyboardEvent<HTMLButtonElement>, tabs: WorkspaceTab[]) => {
+    const currentIndex = tabs.findIndex(t => t.id === activeTab);
+    if (currentIndex === -1) return;
+    
+    let nextIndex = -1;
+    if (e.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1) % tabs.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    } else if (e.key === 'Home') {
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      nextIndex = tabs.length - 1;
+    }
+    
+    if (nextIndex >= 0) {
+      e.preventDefault();
+      handleTabChange(tabs[nextIndex].id);
+      // Focus the next tab button
+      const tablist = (e.currentTarget as HTMLElement).closest('[role="tablist"]');
+      const buttons = tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+      buttons?.[nextIndex]?.focus();
+    }
+  }, [activeTab, handleTabChange]);
 
   if (isLoading) {
     return (
@@ -76,7 +118,6 @@ export default function WorkspaceDetail() {
     );
   }
 
-  // Handle access denied or workspace not found
   if (!workspace || error) {
     return (
       <AppLayout title="Workspace">
@@ -88,15 +129,10 @@ export default function WorkspaceDetail() {
     );
   }
 
-  const startup = workspace.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null; nif: string | null; main_contact_name: string | null; main_contact_email: string | null; main_contact_phone: string | null; has_startup_portugal_status: boolean | null; startup_portugal_document_path: string | null } | null;
-  const program = workspace.program as { name: string } | null;
   const workspaceStatus = (workspace as any).status as string | undefined;
-  
-  // Check if workspace is pending and user is founder (not staff)
   const isPendingWorkspace = workspaceStatus === 'pending';
   const isStaff = isAdmin || isConsultor;
   
-  // If workspace is pending and user is founder (not staff), show restricted view
   if (isPendingWorkspace && !isStaff && isFounder) {
     return (
       <AppLayout title={startup?.name || 'Workspace'}>
@@ -112,18 +148,13 @@ export default function WorkspaceDetail() {
       </AppLayout>
     );
   }
-  
-  // Get the current tab from URL params
-  const currentTab = searchParams.get('tab') || 'overview';
-  
-  const handleTabChange = (value: string) => {
-    setSearchParams({ tab: value });
-  };
 
   const copyWorkspaceLink = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success(t('common.linkCopied'));
   };
+
+  const isOverflowTabActive = overflowTabs.some(tab => tab.id === activeTab);
 
   return (
     <AppLayout
@@ -152,175 +183,193 @@ export default function WorkspaceDetail() {
           { label: startup?.name || 'Workspace' },
         ]}
       />
-      {/* Tabs */}
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="bg-muted/30 h-auto gap-0.5 p-1 flex flex-wrap">
-          {/* Core tabs - always visible (extended to include Playbooks & Templates) */}
-          <TabsTrigger value="overview" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.overview')}</TabsTrigger>
-          <TabsTrigger value="milestones" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.milestones')}</TabsTrigger>
-          <TabsTrigger value="actions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.actions')}</TabsTrigger>
-          <TabsTrigger value="kpis" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.kpis')}</TabsTrigger>
-          <TabsTrigger value="sessions" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.sessions')}</TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.documents')}</TabsTrigger>
-          <TabsTrigger value="playbooks" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.playbooks')}</TabsTrigger>
-          <TabsTrigger value="templates" className="text-xs sm:text-sm px-2.5 sm:px-3">{t('workspace.templates')}</TabsTrigger>
-          
-          {/* "More" dropdown for secondary tabs */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn(
-                  "h-8 gap-1 text-xs sm:text-sm px-2.5 rounded-md",
-                  ['calendar', 'team', 'dataroom', 'funding', 'notes', 'time', 'governance', 'settings'].includes(currentTab) 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('common.moreDetails')}</span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleTabChange('calendar')} className={currentTab === 'calendar' ? 'bg-accent' : ''}>
-                {t('workspace.calendar')}
-              </DropdownMenuItem>
-              {isFounder && startup && (
-                <DropdownMenuItem onClick={() => handleTabChange('team')} className={currentTab === 'team' ? 'bg-accent' : ''}>
-                  <Users className="h-4 w-4 mr-2" />
-                  {t('workspace.team')}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => handleTabChange('dataroom')} className={currentTab === 'dataroom' ? 'bg-accent' : ''}>
-                <FolderLock className="h-4 w-4 mr-2" />
-                {t('dataroom.title')}
-              </DropdownMenuItem>
-              {isFounder && (
-                <DropdownMenuItem onClick={() => handleTabChange('funding')} className={currentTab === 'funding' ? 'bg-accent' : ''}>
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  {t('workspace.funding')}
-                </DropdownMenuItem>
-              )}
-              {(isAdmin || isConsultor || isMentor) && (
-                <DropdownMenuItem onClick={() => handleTabChange('notes')} className={currentTab === 'notes' ? 'bg-accent' : ''}>
-                  <StickyNote className="h-4 w-4 mr-2" />
-                  {t('workspace.notesAndTasks')}
-                </DropdownMenuItem>
-              )}
-              {(isAdmin || isConsultor) && (
-                <DropdownMenuItem onClick={() => handleTabChange('time')} className={currentTab === 'time' ? 'bg-accent' : ''}>
-                  <Clock className="h-4 w-4 mr-2" />
-                  {t('workspace.time')}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => handleTabChange('governance')} className={currentTab === 'governance' ? 'bg-accent' : ''}>
-                <Shield className="h-4 w-4 mr-2" />
-                {t('workspace.governance')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleTabChange('settings')} className={currentTab === 'settings' ? 'bg-accent' : ''}>
-                <Settings className="h-4 w-4 mr-2" />
-                {t('workspace.settings')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </TabsList>
 
-        <div className="animate-fade-in">
-        <TabsContent value="overview">
-          <WorkspaceOverview 
-            workspace={{
-              id: workspace.id,
-              startup_id: workspace.startup_id,
-              program_id: workspace.program_id,
-              stage: workspace.stage,
-              stage_id: workspace.stage_id || null,
-              health_score: workspace.health_score,
-              health_score_override: workspace.health_score_override,
-              health_status: workspace.health_status || null,
-              health_notes: workspace.health_notes,
-              startup: startup,
-              program: program,
-            }}
-            canWrite={canWrite}
-          />
-        </TabsContent>
+      {/* ── WAI-ARIA Tablist ── */}
+      <div className="space-y-6">
+        <div 
+          role="tablist" 
+          aria-label={t('workspace.tabs', { defaultValue: 'Workspace sections' })}
+          className="bg-muted/30 h-auto gap-0.5 p-1 flex items-center rounded-md overflow-x-auto scrollbar-thin"
+        >
+          {/* Primary tabs */}
+          {primaryTabs.map(tab => (
+            <button
+              key={tab.id}
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={activeTab === tab.id}
+              aria-controls={`tabpanel-${tab.id}`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              onClick={() => handleTabChange(tab.id)}
+              onKeyDown={(e) => handleTabKeyDown(e, primaryTabs)}
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:pointer-events-none disabled:opacity-50",
+                activeTab === tab.id
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              {t(tab.labelKey)}
+            </button>
+          ))}
 
-        <TabsContent value="milestones">
-          <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        <TabsContent value="actions">
-          <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        <TabsContent value="sessions">
-          <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        <TabsContent value="kpis">
-          <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        <TabsContent value="playbooks">
-          <PlaybooksTab 
-            workspaceId={workspace.id} 
-            programId={workspace.program_id} 
-            currentStage={workspace.stage} 
-            canWrite={canWrite} 
-          />
-        </TabsContent>
-        <TabsContent value="templates">
-          <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
-        </TabsContent>
-        <TabsContent value="calendar">
-          <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
-        </TabsContent>
-        <TabsContent value="documents">
-          <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        {isFounder && startup && (
-          <TabsContent value="team">
-            <TeamTab startupId={startup.id} canEdit={canWrite} />
-          </TabsContent>
-        )}
-        <TabsContent value="dataroom">
-          <DataroomTab workspaceId={workspace.id} canWrite={canWrite} />
-        </TabsContent>
-        {isFounder && startup && (
-          <TabsContent value="funding">
-            <FundingTrackerTab startupId={startup.id} />
-          </TabsContent>
-        )}
-        {(isAdmin || isConsultor || isMentor) && (
-          <TabsContent value="notes">
-            <NotesAndTasksTab workspaceId={workspace.id} startupId={startup?.id} />
-          </TabsContent>
-        )}
-        {(isAdmin || isConsultor) && (
-          <TabsContent value="time">
-            <TimeTrackingTab workspaceId={workspace.id} />
-          </TabsContent>
-        )}
-        <TabsContent value="governance">
-          <GovernanceTab 
-            workspaceId={workspace.id} 
-            programId={workspace.program_id}
-            currentStage={workspace.stage}
-            canWrite={canWrite}
-          />
-        </TabsContent>
-        <TabsContent value="settings">
-          {startup && (
-            <StartupSettingsTab
-              workspaceId={workspace.id}
-              startupId={workspace.startup_id}
-              startup={startup}
-              canEdit={canWrite}
-            />
+          {/* Overflow "More" dropdown - only if there are overflow tabs */}
+          {overflowTabs.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 py-1.5 text-xs sm:text-sm font-medium gap-1 transition-all",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    isOverflowTabActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  )}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {isOverflowTabActive 
+                      ? t(overflowTabs.find(t => t.id === activeTab)?.labelKey || 'common.moreDetails')
+                      : t('common.moreDetails', { defaultValue: 'Mais' })
+                    }
+                  </span>
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {overflowTabs.map(tab => (
+                  <DropdownMenuItem 
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)} 
+                    className={activeTab === tab.id ? 'bg-accent' : ''}
+                  >
+                    <tab.icon className="h-4 w-4 mr-2" />
+                    {t(tab.labelKey)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-        </TabsContent>
         </div>
-      </Tabs>
+
+        {/* ── Tab Panels ── */}
+        <div className="animate-fade-in">
+          {activeTab === 'overview' && (
+            <div role="tabpanel" id="tabpanel-overview" aria-labelledby="tab-overview">
+              <WorkspaceOverview 
+                workspace={{
+                  id: workspace.id,
+                  startup_id: workspace.startup_id,
+                  program_id: workspace.program_id,
+                  stage: workspace.stage,
+                  stage_id: workspace.stage_id || null,
+                  health_score: workspace.health_score,
+                  health_score_override: workspace.health_score_override,
+                  health_status: workspace.health_status || null,
+                  health_notes: workspace.health_notes,
+                  startup: startup,
+                  program: program,
+                }}
+                canWrite={canWrite}
+              />
+            </div>
+          )}
+          {activeTab === 'actions' && (
+            <div role="tabpanel" id="tabpanel-actions" aria-labelledby="tab-actions">
+              <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'sessions' && (
+            <div role="tabpanel" id="tabpanel-sessions" aria-labelledby="tab-sessions">
+              <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'documents' && (
+            <div role="tabpanel" id="tabpanel-documents" aria-labelledby="tab-documents">
+              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'kpis' && (
+            <div role="tabpanel" id="tabpanel-kpis" aria-labelledby="tab-kpis">
+              <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'milestones' && (
+            <div role="tabpanel" id="tabpanel-milestones" aria-labelledby="tab-milestones">
+              <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'playbooks' && (
+            <div role="tabpanel" id="tabpanel-playbooks" aria-labelledby="tab-playbooks">
+              <PlaybooksTab 
+                workspaceId={workspace.id} 
+                programId={workspace.program_id} 
+                currentStage={workspace.stage} 
+                canWrite={canWrite} 
+              />
+            </div>
+          )}
+          {activeTab === 'templates' && (
+            <div role="tabpanel" id="tabpanel-templates" aria-labelledby="tab-templates">
+              <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
+            </div>
+          )}
+          {activeTab === 'calendar' && (
+            <div role="tabpanel" id="tabpanel-calendar" aria-labelledby="tab-calendar">
+              <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
+            </div>
+          )}
+          {activeTab === 'dataroom' && (
+            <div role="tabpanel" id="tabpanel-dataroom" aria-labelledby="tab-dataroom">
+              <DataroomTab workspaceId={workspace.id} canWrite={canWrite} />
+            </div>
+          )}
+          {activeTab === 'governance' && (
+            <div role="tabpanel" id="tabpanel-governance" aria-labelledby="tab-governance">
+              <GovernanceTab 
+                workspaceId={workspace.id} 
+                programId={workspace.program_id}
+                currentStage={workspace.stage}
+                canWrite={canWrite}
+              />
+            </div>
+          )}
+          {activeTab === 'team' && isFounder && startup && (
+            <div role="tabpanel" id="tabpanel-team" aria-labelledby="tab-team">
+              <TeamTab startupId={startup.id} canEdit={canWrite} />
+            </div>
+          )}
+          {activeTab === 'funding' && isFounder && startup && (
+            <div role="tabpanel" id="tabpanel-funding" aria-labelledby="tab-funding">
+              <FundingTrackerTab startupId={startup.id} />
+            </div>
+          )}
+          {activeTab === 'notes' && (isAdmin || isConsultor || isMentor) && (
+            <div role="tabpanel" id="tabpanel-notes" aria-labelledby="tab-notes">
+              <NotesAndTasksTab workspaceId={workspace.id} startupId={startup?.id} />
+            </div>
+          )}
+          {activeTab === 'time' && (isAdmin || isConsultor) && (
+            <div role="tabpanel" id="tabpanel-time" aria-labelledby="tab-time">
+              <TimeTrackingTab workspaceId={workspace.id} />
+            </div>
+          )}
+          {activeTab === 'settings' && startup && (
+            <div role="tabpanel" id="tabpanel-settings" aria-labelledby="tab-settings">
+              <StartupSettingsTab
+                workspaceId={workspace.id}
+                startupId={workspace.startup_id}
+                startup={startup}
+                canEdit={canWrite}
+              />
+            </div>
+          )}
+        </div>
+      </div>
       
-      {/* Founder Onboarding Wizard - auto-opens after invite acceptance */}
+      {/* Founder Onboarding Wizard */}
       {startup && (
         <WorkspaceOnboardingWizard
           open={showOnboardingWizard}
