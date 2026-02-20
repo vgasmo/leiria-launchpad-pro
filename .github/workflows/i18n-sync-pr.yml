@@ -1,0 +1,42 @@
+name: "i18n Sync Bot PR"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  i18n-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run i18n-sync
+        run: node scripts/i18n-sync.cjs
+
+      - name: Run i18n-check (parity)
+        run: node scripts/i18n-check.cjs
+
+      - name: Run i18n-lint (strict)
+        run: node scripts/i18n-lint.mjs
+
+      - name: Create PR if locales changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(i18n): auto-sync missing keys"
+          title: "chore(i18n): auto-sync missing keys"
+          body: |
+            Automated PR from `i18n-sync-pr` workflow.
+            - Ran `i18n-sync.cjs` to populate missing keys
+            - Verified with `i18n-check.cjs` and `i18n-lint.mjs`
+          branch: chore/i18n-sync-bot
+          delete-branch: true
