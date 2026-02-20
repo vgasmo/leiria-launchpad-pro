@@ -23,14 +23,16 @@ export interface WorkspaceTab {
  */
 export const WORKSPACE_TABS: WorkspaceTab[] = [
   // ── Primary tabs (visible in tab bar) ──
+  // Order: Overview → Milestones → Actions → KPIs → Sessions
+  // Milestones first execution tab (per role-emphasis strategy)
   { id: 'overview',   labelKey: 'workspace.overview',   icon: LayoutDashboard, primary: true,  visibleTo: ['all'] },
+  { id: 'milestones', labelKey: 'workspace.milestones',  icon: Flag,            primary: true,  visibleTo: ['all'] },
   { id: 'actions',    labelKey: 'workspace.actions',     icon: CheckSquare,     primary: true,  visibleTo: ['all'] },
-  { id: 'sessions',   labelKey: 'workspace.sessions',    icon: Calendar,        primary: true,  visibleTo: ['all'] },
-  { id: 'documents',  labelKey: 'workspace.documents',   icon: FileText,        primary: true,  visibleTo: ['all'] },
   { id: 'kpis',       labelKey: 'workspace.kpis',        icon: BarChart3,       primary: true,  visibleTo: ['all'] },
+  { id: 'sessions',   labelKey: 'workspace.sessions',    icon: Calendar,        primary: true,  visibleTo: ['all'] },
 
   // ── Overflow tabs (inside "More" dropdown) ──
-  { id: 'milestones', labelKey: 'workspace.milestones',  icon: Flag,            primary: false, visibleTo: ['all'] },
+  { id: 'documents',  labelKey: 'workspace.documents',   icon: FileText,        primary: false, visibleTo: ['all'] },
   { id: 'playbooks',  labelKey: 'workspace.playbooks',   icon: BookOpen,        primary: false, visibleTo: ['all'] },
   { id: 'templates',  labelKey: 'workspace.templates',   icon: FileCode,        primary: false, visibleTo: ['all'] },
   { id: 'calendar',   labelKey: 'workspace.calendar',    icon: CalendarDays,    primary: false, visibleTo: ['all'] },
