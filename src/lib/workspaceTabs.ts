@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, CheckSquare, Calendar, FileText, BarChart3, 
-  Flag, BookOpen, FileCode, CalendarDays, Users, FolderLock, 
+  Flag, BookOpen, CalendarDays, Users, FolderLock, 
   DollarSign, StickyNote, Clock, Shield, Settings, LucideIcon 
 } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   // ── Overflow tabs (inside "More" dropdown) ──
   { id: 'documents',  labelKey: 'workspace.documents',   icon: FileText,        primary: false, visibleTo: ['all'] },
   { id: 'playbooks',  labelKey: 'workspace.playbooks',   icon: BookOpen,        primary: false, visibleTo: ['all'] },
-  { id: 'templates',  labelKey: 'workspace.templates',   icon: FileCode,        primary: false, visibleTo: ['all'] },
+  // templates absorbed into documents tab as "Ferramentas para Empreendedores" sub-tab
   { id: 'calendar',   labelKey: 'workspace.calendar',    icon: CalendarDays,    primary: false, visibleTo: ['all'] },
   { id: 'dataroom',   labelKey: 'dataroom.title',        icon: FolderLock,      primary: false, visibleTo: ['all'] },
   { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'] },

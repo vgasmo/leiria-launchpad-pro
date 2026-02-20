@@ -600,7 +600,7 @@ function KpiCard({
             {isFromFinancialModel && currentValue && (
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                  From Financial Model
+                  {t('financialPanel.fromFinancialModel', { defaultValue: 'From Financial Model' })}
                 </Badge>
                 {isLocked && canEdit && onUnlock && (
                   <Button 
@@ -686,7 +686,7 @@ function KpiCard({
         {isLocked && canEdit && (
           <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Lock className="h-3 w-3" />
-            Locked from Financial Model sync. Unlock to edit manually.
+            {t('financialPanel.lockedFromSync', { defaultValue: 'Locked from Financial Model sync. Unlock to edit manually.' })}
           </div>
         )}
 
