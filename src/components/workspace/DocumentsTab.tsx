@@ -30,6 +30,7 @@ import {
   MessageSquare,
   Calculator,
   Wrench,
+  FolderLock,
 } from 'lucide-react';
 import { DocumentFeedbackButton } from './DocumentFeedbackButton';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
@@ -47,6 +48,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { FinancialModelPanel } from './FinancialModelPanel';
 import { TemplatesTab } from './TemplatesTab';
+import { DataroomTab } from './DataroomTab';
 import { useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -66,12 +68,13 @@ const CATEGORY_KEYS = [
   { key: 'other', labelKey: 'documents.categoryOther' },
 ];
 
-type DocumentSubTab = 'all' | 'financial' | 'tools';
+type DocumentSubTab = 'all' | 'financial' | 'tools' | 'dataroom';
 
 const SUB_TABS: { id: DocumentSubTab; labelKey: string; icon: typeof FileText }[] = [
   { id: 'all', labelKey: 'documents.subTabs.all', icon: FileText },
   { id: 'financial', labelKey: 'documents.subTabs.financial', icon: Calculator },
   { id: 'tools', labelKey: 'documents.subTabs.tools', icon: Wrench },
+  { id: 'dataroom', labelKey: 'documents.subTabs.dataroom', icon: FolderLock },
 ];
 
 function getFileIcon(documentType: string) {
@@ -98,7 +101,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false }: Docum
   // Sub-tab state from URL
   const subParam = (searchParams.get('sub') as DocumentSubTab) || 'all';
   const [activeSubTab, setActiveSubTab] = useState<DocumentSubTab>(
-    ['all', 'financial', 'tools'].includes(subParam) ? subParam : 'all'
+    ['all', 'financial', 'tools', 'dataroom'].includes(subParam) ? subParam : 'all'
   );
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -127,7 +130,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false }: Docum
   // Sync from URL changes
   useEffect(() => {
     const sub = searchParams.get('sub') as DocumentSubTab;
-    if (sub && ['all', 'financial', 'tools'].includes(sub)) {
+    if (sub && ['all', 'financial', 'tools', 'dataroom'].includes(sub)) {
       setActiveSubTab(sub);
     } else if (!sub) {
       setActiveSubTab('all');
@@ -333,6 +336,12 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false }: Docum
       {activeSubTab === 'tools' && (
         <div role="tabpanel" id="doc-panel-tools" aria-labelledby="doc-tab-tools">
           <TemplatesTab workspaceId={workspaceId} canWrite={canWrite} isFounder={isFounder} />
+        </div>
+      )}
+
+      {activeSubTab === 'dataroom' && (
+        <div role="tabpanel" id="doc-panel-dataroom" aria-labelledby="doc-tab-dataroom">
+          <DataroomTab workspaceId={workspaceId} canWrite={canWrite} />
         </div>
       )}
 
