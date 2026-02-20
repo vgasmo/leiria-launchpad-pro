@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { Rocket, Flag, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,17 +22,20 @@ const stageColors: Record<string, string> = {
   scale: 'bg-amber-500/10 text-amber-600 border-amber-300',
 };
 
-const stageLabels: Record<string, string> = {
-  ideation: 'Ideation',
-  validation: 'Validation',
-  mvp: 'MVP',
-  growth: 'Growth',
-  scale: 'Scale',
-};
-
 export function ProgressTimeline({ workspaceId, className }: ProgressTimelineProps) {
+  const { t, i18n } = useTranslation();
   const { data: stageHistory, isLoading: stageLoading } = useStageHistory(workspaceId);
   const { data: milestoneHistory, isLoading: milestoneLoading } = useMilestoneHistory(workspaceId);
+
+  const stageLabels: Record<string, string> = useMemo(() => ({
+    ideation: t('stages.ideation', { defaultValue: 'Ideação' }),
+    validation: t('stages.validation', { defaultValue: 'Validação' }),
+    mvp: t('stages.mvp', { defaultValue: 'MVP' }),
+    growth: t('stages.growth', { defaultValue: 'Crescimento' }),
+    scale: t('stages.scale', { defaultValue: 'Escala' }),
+  }), [t]);
+
+  const dateLocale = i18n.language === 'pt' ? pt : undefined;
 
   // Combine and sort timeline events
   const timelineEvents = useMemo(() => {
@@ -49,8 +54,8 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
       events.push({
         id: `stage-${sh.id}`,
         type: 'stage',
-        title: `Stage transition`,
-        description: `${stageLabels[sh.from_stage || ''] || 'Start'} → ${stageLabels[sh.to_stage] || sh.to_stage}`,
+        title: t('progressTimeline.stageTransition', { defaultValue: 'Transição de fase' }),
+        description: `${stageLabels[sh.from_stage || ''] || t('progressTimeline.start', { defaultValue: 'Início' })} → ${stageLabels[sh.to_stage] || sh.to_stage}`,
         date: new Date(sh.changed_at),
         fromStage: sh.from_stage || undefined,
         toStage: sh.to_stage,
@@ -72,7 +77,7 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
 
     // Sort by date descending
     return events.sort((a, b) => b.date.getTime() - a.date.getTime());
-  }, [stageHistory, milestoneHistory]);
+  }, [stageHistory, milestoneHistory, stageLabels, t]);
 
   const isLoading = stageLoading || milestoneLoading;
 
@@ -82,7 +87,7 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            Progress Timeline
+            {t('progressTimeline.title', { defaultValue: 'Linha do Tempo' })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -101,16 +106,18 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          Progress Timeline
+          {t('progressTimeline.title', { defaultValue: 'Linha do Tempo' })}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {timelineEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <Rocket className="h-8 w-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-muted-foreground">No progress events yet</p>
+            <p className="text-sm text-muted-foreground">
+              {t('progressTimeline.noEvents', { defaultValue: 'Sem eventos de progresso ainda' })}
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Stage changes and completed milestones will appear here
+              {t('progressTimeline.noEventsDescription', { defaultValue: 'Mudanças de fase e marcos concluídos aparecerão aqui' })}
             </p>
           </div>
         ) : (
@@ -119,7 +126,7 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
             
             <div className="space-y-4">
-              {timelineEvents.slice(0, 10).map((event, index) => (
+              {timelineEvents.slice(0, 10).map((event) => (
                 <div key={event.id} className="relative flex items-start gap-4 pl-10">
                   {/* Timeline dot */}
                   <div className={cn(
@@ -141,7 +148,7 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
                             variant="outline" 
                             className={cn("text-xs", stageColors[event.fromStage || ''] || 'bg-muted')}
                           >
-                            {stageLabels[event.fromStage || ''] || 'Start'}
+                            {stageLabels[event.fromStage || ''] || t('progressTimeline.start', { defaultValue: 'Início' })}
                           </Badge>
                           <ArrowRight className="h-3 w-3 text-muted-foreground" />
                           <Badge 
@@ -164,7 +171,7 @@ export function ProgressTimeline({ workspaceId, className }: ProgressTimelinePro
                       </p>
                     )}
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      {format(event.date, 'MMM d, yyyy • h:mm a')}
+                      {format(event.date, "d 'de' MMM yyyy • HH:mm", { locale: dateLocale })}
                     </p>
                   </div>
                 </div>
