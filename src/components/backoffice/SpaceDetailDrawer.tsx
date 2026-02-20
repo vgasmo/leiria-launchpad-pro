@@ -19,6 +19,8 @@ import {
   useEndRoomAllocation,
   useCreateRoomAllocation,
   useUpdateRoom,
+  useSpaceWaitingList,
+  useFulfillWaitingListRequest,
 } from '@/hooks/useBackoffice';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +48,9 @@ export function SpaceDetailDrawer({ open, onOpenChange, room, buildingName }: Sp
   const endAllocation = useEndRoomAllocation();
   const createAllocation = useCreateRoomAllocation();
   const updateRoom = useUpdateRoom();
+  const fulfillWaitlist = useFulfillWaitingListRequest();
   const { data: workspaces } = useWorkspaces();
+  const { data: waitingList } = useSpaceWaitingList({ status: 'pending' });
 
   if (!room) return null;
 
@@ -243,6 +247,56 @@ export function SpaceDetailDrawer({ open, onOpenChange, room, buildingName }: Sp
 
             {/* Allocation History */}
             <RoomAllocationHistory roomId={room.id} roomName={room.name} />
+
+            {/* Waitlist Suggestions (only when space is available) */}
+            {!isOccupied && room.status === 'available' && waitingList && waitingList.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    {t('admin.backoffice.waitlistSuggestions', { defaultValue: 'Sugestões da Lista de Espera' })}
+                  </h3>
+                  <div className="space-y-2">
+                    {waitingList.slice(0, 3).map(item => {
+                      const name = item.workspace?.startup?.name ||
+                        item.funnel_item?.organization_name ||
+                        item.funnel_item?.contact_name || '—';
+                      return (
+                        <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm">
+                          <div>
+                            <span className="font-medium">{name}</span>
+                            {item.preferred_capacity && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                {item.preferred_capacity} {t('admin.backoffice.people', { defaultValue: 'pessoas' })}
+                              </span>
+                            )}
+                          </div>
+                          {item.workspace_id && user && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs"
+                              onClick={() => {
+                                fulfillWaitlist.mutate({
+                                  requestId: item.id,
+                                  roomId: room.id,
+                                  startDate: new Date().toISOString().split('T')[0],
+                                  userId: user.id,
+                                });
+                              }}
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              {t('admin.backoffice.assignQuick', { defaultValue: 'Atribuir' })}
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>

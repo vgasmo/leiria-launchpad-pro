@@ -762,6 +762,11 @@ export function AdminBackoffice() {
           <BackofficeContractsTab />
         </TabsContent>
 
+        {/* Incubation Types Tab */}
+        <TabsContent value="incubation">
+          <BackofficeIncubationTypesTab />
+        </TabsContent>
+
         {/* Infrastructure Tab (consolidated: buildings, spaces, rooms, maps, waitlist) */}
         <TabsContent value="infrastructure">
           <InfrastructureTab />

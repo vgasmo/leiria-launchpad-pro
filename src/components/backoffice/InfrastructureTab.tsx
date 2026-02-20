@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Building2, MapPin, Users, DoorOpen, Search, Map as MapIcon, List, 
   Wrench, Clock, Image, Upload, Plus, Eye, Edit2, UserCheck, Loader2,
-  ListOrdered
+  ListOrdered, BarChart3
 } from 'lucide-react';
 import { BuildingSelectorCards } from './BuildingSelectorCards';
 import { SpaceOccupancyChart } from './SpaceOccupancyChart';
@@ -20,6 +20,7 @@ import { SpaceDetailDrawer } from './SpaceDetailDrawer';
 import { BackofficeBuildingsTab } from './BackofficeBuildingsTab';
 import { BackofficeSpacesTab } from './BackofficeSpacesTab';
 import { SpaceWaitingListTab } from './SpaceWaitingListTab';
+import { OccupancyDashboard } from './OccupancyDashboard';
 import { RoomShapeEditor } from './RoomShapeEditor';
 import {
   useRoomsWithAllocations,
@@ -53,7 +54,7 @@ const STATUS_COLORS: Record<string, string> = {
 export function InfrastructureTab() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [subView, setSubView] = useState<'map' | 'list' | 'buildings' | 'waitlist'>('map');
+  const [subView, setSubView] = useState<'dashboard' | 'map' | 'list' | 'buildings' | 'waitlist'>('dashboard');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>('all');
   const [selectedFloorMapId, setSelectedFloorMapId] = useState<string>('');
   const [roomSearch, setRoomSearch] = useState('');
@@ -280,6 +281,10 @@ export function InfrastructureTab() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <Tabs value={subView} onValueChange={(v) => setSubView(v as any)}>
           <TabsList>
+            <TabsTrigger value="dashboard" className="gap-1.5">
+              <BarChart3 className="h-4 w-4" />
+              {t('admin.backoffice.occupancyDashboard.title', { defaultValue: 'Painel' })}
+            </TabsTrigger>
             <TabsTrigger value="map" className="gap-1.5">
               <MapIcon className="h-4 w-4" />
               {t('admin.backoffice.mapView', { defaultValue: 'Mapa' })}
@@ -299,6 +304,9 @@ export function InfrastructureTab() {
           </TabsList>
         </Tabs>
       </div>
+
+      {/* ══════════════ DASHBOARD VIEW ══════════════ */}
+      {subView === 'dashboard' && <OccupancyDashboard />}
 
       {/* Building Selector (shown in map/list views) */}
       {(subView === 'map' || subView === 'list') && buildingCardsData.length > 0 && (
