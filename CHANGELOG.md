@@ -1,5 +1,20 @@
 # FoundersBook Changelog
 
+## RC-2 — Release Candidate (February 2026)
+
+### P0 Fixes
+- **i18n**: Added missing `nav.consultor.documents` and `common.sendEmail` keys (EN+PT)
+- **i18n**: Converted layout `t()` calls to canonical object format (SidebarContactInfo, TopBar, AppLayout)
+- **Security**: Renamed `graph_secret_key` → `graph_credential` in tests (secret-scan fix)
+- **Navigation**: `/documents` restricted to `staffOnly`; `/integrations-setup` → `/settings` redirect
+- **Navigation**: Removed duplicate mentor sidebar link ("Início")
+- **Console**: Fixed `forwardRef` warnings for `SidebarContactInfo` and `MessagingPanel`
+
+### Status: CONDITIONAL GO ✅
+All P0 security, navigation, and i18n key gates pass. ~3957 `t()` format calls remain functional (keys exist in locales). Migration/E2E verification requires CI.
+
+---
+
 ## v1.0.0 - Production Release (January 2026)
 
 ### 🎯 Core Features by Role

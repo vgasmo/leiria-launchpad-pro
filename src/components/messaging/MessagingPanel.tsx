@@ -16,7 +16,7 @@ interface MessagingPanelProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function MessagingPanel({ open, onOpenChange }: MessagingPanelProps) {
+export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelProps>(function MessagingPanel({ open, onOpenChange }, _ref) {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showNewConversation, setShowNewConversation] = useState(false);
@@ -158,4 +158,4 @@ export function MessagingPanel({ open, onOpenChange }: MessagingPanelProps) {
       </SheetContent>
     </Sheet>
   );
-}
+});

@@ -50,7 +50,7 @@ export function TopBar() {
         onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
       >
         <Search className="h-4 w-4" />
-        <span className="text-sm">{t('common.search', 'Search')}...</span>
+        <span className="text-sm">{t('common.search', { defaultValue: 'Search' })}...</span>
         <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <span className="text-xs">⌘</span>K
         </kbd>
