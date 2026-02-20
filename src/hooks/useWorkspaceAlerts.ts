@@ -258,7 +258,7 @@ export function useRecomputeAlerts() {
 export function getAlertCTA(ruleType: string, workspaceId: string): { label: string; href: string } | null {
   switch (ruleType) {
     case 'no_session_days':
-      return { label: 'Schedule session', href: `/workspace/${workspaceId}?tab=sessions` };
+      return { label: 'Schedule session', href: `/workspace/${workspaceId}?tab=agenda` };
     case 'overdue_actions_count':
       return { label: 'View actions', href: `/workspace/${workspaceId}?tab=actions` };
     case 'missing_kpis_current_month':

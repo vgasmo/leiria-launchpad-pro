@@ -72,7 +72,7 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
 
   const handleScheduleSession = () => {
     setOpenProfile(null);
-    navigate(`/workspace/${workspaceId}?tab=sessions`);
+    navigate(`/workspace/${workspaceId}?tab=agenda`);
   };
 
   const handleSendMessage = () => {

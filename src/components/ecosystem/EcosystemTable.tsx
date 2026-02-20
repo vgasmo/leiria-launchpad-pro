@@ -110,7 +110,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={(e) => { 
                           e.stopPropagation(); 
-                          navigate(`/workspace/${item.workspace_id}?tab=sessions`);
+                          navigate(`/workspace/${item.workspace_id}?tab=agenda`);
                         }}>
                           <Calendar className="h-4 w-4 mr-2" />
                           {t('ecosystem.scheduleSession', 'Schedule Session')}

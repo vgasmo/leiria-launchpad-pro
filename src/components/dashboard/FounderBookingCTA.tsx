@@ -27,7 +27,7 @@ export function FounderBookingCTA({ workspaceId, className }: FounderBookingCTAP
   const nextSession = sessions?.[0];
 
   const handleBookSession = () => {
-    navigate(`/workspace/${workspaceId}?tab=sessions`);
+    navigate(`/workspace/${workspaceId}?tab=agenda`);
   };
 
   const formatSessionDate = (dateStr: string) => {

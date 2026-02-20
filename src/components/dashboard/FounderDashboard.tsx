@@ -187,7 +187,7 @@ export function FounderDashboard({
   // FAB handlers
   const handleUpdateKpis = () => navigate(`/workspace/${workspace.id}?tab=kpis`);
   const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=actions`);
-  const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=sessions`);
+  const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=agenda`);
 
   return (
     <div className="space-y-6 max-w-5xl">

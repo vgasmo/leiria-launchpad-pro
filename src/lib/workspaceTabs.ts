@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, CheckSquare, Calendar, FileText, BarChart3, 
-  Flag, BookOpen, CalendarDays, Users, 
+  Flag, BookOpen, Users, 
   DollarSign, StickyNote, Clock, Shield, Settings, LucideIcon 
 } from 'lucide-react';
 
@@ -29,13 +29,12 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   { id: 'milestones', labelKey: 'workspace.milestones',  icon: Flag,            primary: true,  visibleTo: ['all'] },
   { id: 'actions',    labelKey: 'workspace.actions',     icon: CheckSquare,     primary: true,  visibleTo: ['all'] },
   { id: 'kpis',       labelKey: 'workspace.kpis',        icon: BarChart3,       primary: true,  visibleTo: ['all'] },
-  { id: 'sessions',   labelKey: 'workspace.sessions',    icon: Calendar,        primary: true,  visibleTo: ['all'] },
+  { id: 'agenda',     labelKey: 'workspace.agenda',      icon: Calendar,        primary: true,  visibleTo: ['all'] },
 
   // ── Overflow tabs (inside "More" dropdown) ──
   { id: 'documents',  labelKey: 'workspace.documents',   icon: FileText,        primary: false, visibleTo: ['all'] },
   { id: 'playbooks',  labelKey: 'workspace.playbooks',   icon: BookOpen,        primary: false, visibleTo: ['all'] },
   // templates absorbed into documents tab as "Ferramentas para Empreendedores" sub-tab
-  { id: 'calendar',   labelKey: 'workspace.calendar',    icon: CalendarDays,    primary: false, visibleTo: ['all'] },
   // dataroom absorbed into documents tab as sub-tab
   { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'] },
   { id: 'team',       labelKey: 'workspace.team',         icon: Users,           primary: false, visibleTo: ['founder'], requiresStartup: true },

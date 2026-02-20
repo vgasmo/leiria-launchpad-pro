@@ -506,7 +506,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                   <div
                     key={w.id}
                     className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/workspace/${w.id}?tab=sessions`)}
+                    onClick={() => navigate(`/workspace/${w.id}?tab=agenda`)}
                   >
                     <Avatar className="h-7 w-7 rounded">
                       <AvatarImage src={w.startup?.logo_url || undefined} alt={w.startup?.name || 'Startup logo'} />

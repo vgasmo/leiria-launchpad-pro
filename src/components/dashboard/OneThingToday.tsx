@@ -98,7 +98,7 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
           type: 'session_prep',
           title: t('oneThingToday.prepSession'),
           why: t('oneThingToday.sessionPrepWhy'),
-          link: `/workspace/${workspace.id}?tab=sessions`,
+          link: `/workspace/${workspace.id}?tab=agenda`,
           priority: 50,
           icon: FileText,
           variant: 'default',

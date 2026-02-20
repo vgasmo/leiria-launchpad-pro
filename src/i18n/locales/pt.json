@@ -1630,12 +1630,12 @@
   "workspace": {
     "tabs": "Secções do workspace",
     "overview": "Visão Geral",
+    "agenda": "Agenda",
     "sessions": "Sessões",
     "actions": "Ações",
     "milestones": "Marcos",
     "kpis": "KPIs",
     "templates": "Templates",
-    "calendar": "Calendário",
     "documents": "Documentos",
     "team": "Co-fundadores",
     "okrs": "OKRs",

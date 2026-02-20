@@ -64,7 +64,7 @@ export function MobileQuickActions({
         if (onRequestSession) {
           onRequestSession();
         } else {
-          setSearchParams({ tab: 'calendar' });
+          setSearchParams({ tab: 'agenda' });
         }
         setIsOpen(false);
       },

@@ -195,7 +195,7 @@ export function useCreateSession(workspaceId: string) {
               { name: 'Date', value: new Date(data.scheduled_at).toLocaleDateString() },
               { name: 'Duration', value: `${data.duration || 60} min` },
             ],
-            link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+            link: `${getAppUrl()}/workspace/${workspaceId}?tab=agenda`,
             linkText: 'View Session',
           },
         }).catch(() => {}); // Silent fail - non-blocking
@@ -277,7 +277,7 @@ export function useUpdateSession(workspaceId: string) {
                 ...(ownerName ? [{ name: 'Owner', value: ownerName }] : []),
                 { name: 'New Date', value: new Date(result.session.scheduled_at).toLocaleDateString() },
               ],
-              link: `${getAppUrl()}/workspace/${workspaceId}?tab=sessions`,
+              link: `${getAppUrl()}/workspace/${workspaceId}?tab=agenda`,
               linkText: 'View Session',
             },
           }).catch(() => {});

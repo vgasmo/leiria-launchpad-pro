@@ -116,7 +116,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
           description: t('nextBestAction.sessionOn', { title: nextSession.title, date: format(sessionDate, 'EEE, dd MMM', { locale: dateLocale }) }),
           icon: <Calendar className="h-5 w-5" />,
           variant: 'default',
-          action: () => setSearchParams({ tab: 'sessions' }),
+          action: () => setSearchParams({ tab: 'agenda' }),
           actionLabel: t('nextBestAction.viewSession'),
         });
       }

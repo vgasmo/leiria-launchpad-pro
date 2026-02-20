@@ -25,7 +25,7 @@ export function useMentionNotifications() {
         type: 'mention',
         title: `${profile?.full_name || 'Someone'} mentioned you`,
         message: `You were mentioned in ${params.entityType}: "${params.entityTitle}"`,
-        link: `/workspace/${params.workspaceId}?tab=sessions`,
+        link: `/workspace/${params.workspaceId}?tab=agenda`,
         metadata: {
           entity_type: params.entityType,
           entity_id: params.entityId,

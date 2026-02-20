@@ -62,7 +62,7 @@ export function CommandPalette() {
     quickActions.push(
       { id: 'kpis', label: t('quickActions.updateKpis'), icon: <BarChart3 className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=kpis` },
       { id: 'action', label: t('quickActions.newAction'), icon: <CheckSquare className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=actions` },
-      { id: 'session', label: t('quickActions.scheduleSession'), icon: <Calendar className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=sessions` },
+      { id: 'session', label: t('quickActions.scheduleSession'), icon: <Calendar className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=agenda` },
       { id: 'document', label: t('quickActions.uploadDocument'), icon: <FileText className="h-4 w-4" />, path: `/workspace/${currentWorkspaceId}?tab=documents` },
     );
   }
