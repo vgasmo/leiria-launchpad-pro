@@ -249,7 +249,7 @@ export function InvestorTemplateLibrary({ onSelectTemplate }: InvestorTemplateLi
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                {t('investorUpdates.templateLibrary')}
+                {t('investorUpdates.templateLibraryTitle', { defaultValue: 'Documentos adicionais para investidores' })}
               </CardTitle>
               <CardDescription>{t('investorUpdates.templateLibraryDesc')}</CardDescription>
             </div>
