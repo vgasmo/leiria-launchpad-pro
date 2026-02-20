@@ -18,7 +18,7 @@ import { SessionsTab } from '@/components/workspace/SessionsTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
-import { TemplatesTab } from '@/components/workspace/TemplatesTab';
+// TemplatesTab now rendered inside DocumentsTab as sub-tab
 import { CalendarTab } from '@/components/workspace/CalendarTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
@@ -288,7 +288,7 @@ export default function WorkspaceDetail() {
           )}
           {activeTab === 'documents' && (
             <div role="tabpanel" id="tabpanel-documents" aria-labelledby="tab-documents">
-              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} />
+              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
             </div>
           )}
           {activeTab === 'kpis' && (
@@ -311,11 +311,7 @@ export default function WorkspaceDetail() {
               />
             </div>
           )}
-          {activeTab === 'templates' && (
-            <div role="tabpanel" id="tabpanel-templates" aria-labelledby="tab-templates">
-              <TemplatesTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
-            </div>
-          )}
+          {/* templates tab absorbed into documents sub-tabs */}
           {activeTab === 'calendar' && (
             <div role="tabpanel" id="tabpanel-calendar" aria-labelledby="tab-calendar">
               <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />

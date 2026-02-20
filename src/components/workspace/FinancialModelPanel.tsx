@@ -73,7 +73,7 @@ function MetricCard({
            unit === 'ratio' ? `${value.toFixed(1)}x` :
            `${value}`}
         </span>
-        {unit === 'months' && <span className="text-xs text-muted-foreground">months</span>}
+        {unit === 'months' && <span className="text-xs text-muted-foreground">meses</span>}
       </div>
       {TrendIcon && (
         <div className={`flex items-center gap-1 text-xs mt-1 ${trendColor}`}>
@@ -87,7 +87,7 @@ function MetricCard({
   );
 }
 
-function InsightCard({ insight, onCreateAction }: { insight: FinancialInsight; onCreateAction?: () => void }) {
+function InsightCard({ insight, onCreateAction, createActionLabel }: { insight: FinancialInsight; onCreateAction?: () => void; createActionLabel?: string }) {
   const severityConfig = {
     critical: { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', icon: XCircle, color: 'text-red-600' },
     warning: { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', icon: AlertTriangle, color: 'text-amber-600' },
@@ -107,7 +107,7 @@ function InsightCard({ insight, onCreateAction }: { insight: FinancialInsight; o
           {insight.suggested_action && onCreateAction && (
             <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={onCreateAction}>
               <ArrowRight className="h-3 w-3 mr-1" />
-              Create Action
+              {createActionLabel || 'Create Action'}
             </Button>
           )}
         </div>
@@ -288,35 +288,35 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
           <div>
             <CardTitle className="flex items-center gap-2">
               <Calculator className="h-5 w-5 text-primary" />
-              Financial Model
+              {t('financialPanel.title', { defaultValue: 'Financial Model' })}
             </CardTitle>
             <CardDescription>
-              Upload, parse, and analyze your financial projections
+              {t('financialPanel.description', { defaultValue: 'Upload, parse, and analyze your financial projections' })}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
               <FileDown className="h-4 w-4 mr-2" />
-              Download Template
+              {t('financialPanel.downloadTemplate', { defaultValue: 'Download Template' })}
             </Button>
             {canWrite && (
               <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Upload className="h-4 w-4 mr-2" />
-                    {versions?.length ? 'New Version' : 'Upload Model'}
+                    {versions?.length ? t('financialPanel.newVersion', { defaultValue: 'New Version' }) : t('financialPanel.uploadModel', { defaultValue: 'Upload Model' })}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Upload Financial Model</DialogTitle>
+                    <DialogTitle>{t('financialPanel.uploadTitle', { defaultValue: 'Upload Financial Model' })}</DialogTitle>
                     <DialogDescription>
-                      Supports Excel (.xlsx, .xlsm, .xls) and CSV files
+                      {t('financialPanel.uploadDesc', { defaultValue: 'Supports Excel (.xlsx, .xlsm, .xls) and CSV files' })}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div>
-                      <Label>Scenario</Label>
+                      <Label>{t('financialPanel.scenario', { defaultValue: 'Scenario' })}</Label>
                       <Select value={scenarioName} onValueChange={setScenarioName}>
                         <SelectTrigger>
                           <SelectValue />
@@ -329,7 +329,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                       </Select>
                     </div>
                     <div>
-                      <Label>File</Label>
+                      <Label>{t('financialPanel.file', { defaultValue: 'File' })}</Label>
                       <Input
                         ref={fileInputRef}
                         type="file"
@@ -350,9 +350,9 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
         {!versions?.length ? (
           <div className="text-center py-8 border-2 border-dashed rounded-lg">
             <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground mb-2">No financial model uploaded yet</p>
+            <p className="text-muted-foreground mb-2">{t('financialPanel.noModelYet', { defaultValue: 'No financial model uploaded yet' })}</p>
             <p className="text-sm text-muted-foreground">
-              Upload your Excel model to track KPIs, get insights, and AI recommendations
+              {t('financialPanel.noModelDesc', { defaultValue: 'Upload your Excel model to track KPIs, get insights, and AI recommendations' })}
             </p>
           </div>
         ) : (
@@ -360,7 +360,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
             {/* Version Selector */}
             {versions.length > 1 && (
               <div className="flex items-center gap-2">
-                <Label className="text-xs">Version:</Label>
+                <Label className="text-xs">{t('financialPanel.version', { defaultValue: 'Version:' })}</Label>
                 <Select 
                   value={activeVersion?.id || ''} 
                   onValueChange={(id) => setSelectedVersion(versions.find(v => v.id === id) || null)}
@@ -387,7 +387,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                     <FileSpreadsheet className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{activeVersion.document?.name || 'Financial Model'}</p>
+                    <p className="font-medium text-sm">{activeVersion.document?.name || t('financialPanel.title', { defaultValue: 'Financial Model' })}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="outline" className="text-xs h-5">
                         {activeVersion.scenario_name}
@@ -413,13 +413,13 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                   {activeVersion.status === 'uploaded' && canWrite && (
                     <Button size="sm" onClick={handleParse} disabled={parseModel.isPending}>
                       {parseModel.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
-                      Parse
+                      {t('financialPanel.parse', { defaultValue: 'Parse' })}
                     </Button>
                   )}
                   {activeVersion.status === 'failed' && canWrite && (
                     <Button size="sm" variant="outline" onClick={handleParse} disabled={parseModel.isPending}>
                       <RefreshCw className="h-4 w-4 mr-1" />
-                      Retry
+                      {t('financialPanel.retry', { defaultValue: 'Retry' })}
                     </Button>
                   )}
                 </div>
@@ -432,7 +432,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-4 w-4 text-destructive mt-0.5" />
                   <div>
-                    <p className="font-medium text-destructive">Parse Error</p>
+                    <p className="font-medium text-destructive">{t('financialPanel.parseError', { defaultValue: 'Parse Error' })}</p>
                     <p className="text-muted-foreground">{activeVersion.parse_error}</p>
                   </div>
                 </div>
@@ -443,37 +443,37 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
             {activeVersion?.status === 'parsed' && metrics && (
               <Tabs defaultValue="metrics" className="space-y-4">
                 <TabsList>
-                  <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
+                  <TabsTrigger value="metrics">{t('financialPanel.keyMetrics', { defaultValue: 'Key Metrics' })}</TabsTrigger>
                   <TabsTrigger value="insights">
-                    Insights
+                    {t('financialPanel.insights', { defaultValue: 'Insights' })}
                     {insights.filter(i => i.severity !== 'info').length > 0 && (
                       <Badge variant="secondary" className="ml-1.5 h-5 text-xs">
                         {insights.filter(i => i.severity !== 'info').length}
                       </Badge>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="ai">AI Review</TabsTrigger>
+                  <TabsTrigger value="ai">{t('financialPanel.aiReview', { defaultValue: 'AI Review' })}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="metrics" className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <MetricCard label="Runway" value={metrics.runway_months} unit="months" />
-                    <MetricCard label="Monthly Burn" value={metrics.burn_rate_monthly} unit="€" />
-                    <MetricCard label="Gross Margin" value={metrics.gross_margin_pct} unit="%" />
-                    <MetricCard label="Cash Balance" value={metrics.cash_end} unit="€" />
-                    <MetricCard label="CAC" value={metrics.cac} unit="€" />
-                    <MetricCard label="LTV" value={metrics.ltv} unit="€" />
-                    <MetricCard label="LTV/CAC" value={metrics.ltv_cac} unit="ratio" />
-                    <MetricCard label="Payback" value={metrics.payback_months} unit="months" />
-                    <MetricCard label="Churn" value={metrics.churn_monthly_pct} unit="%" />
-                    <MetricCard label="Treasury Need" value={metrics.treasury_need} unit="€" />
+                    <MetricCard label={t('financialPanel.runway', { defaultValue: 'Runway' })} value={metrics.runway_months} unit="months" />
+                    <MetricCard label={t('financialPanel.monthlyBurn', { defaultValue: 'Monthly Burn' })} value={metrics.burn_rate_monthly} unit="€" />
+                    <MetricCard label={t('financialPanel.grossMargin', { defaultValue: 'Gross Margin' })} value={metrics.gross_margin_pct} unit="%" />
+                    <MetricCard label={t('financialPanel.cashBalance', { defaultValue: 'Cash Balance' })} value={metrics.cash_end} unit="€" />
+                    <MetricCard label={t('financialPanel.cac', { defaultValue: 'CAC' })} value={metrics.cac} unit="€" />
+                    <MetricCard label={t('financialPanel.ltv', { defaultValue: 'LTV' })} value={metrics.ltv} unit="€" />
+                    <MetricCard label={t('financialPanel.ltvCac', { defaultValue: 'LTV/CAC' })} value={metrics.ltv_cac} unit="ratio" />
+                    <MetricCard label={t('financialPanel.payback', { defaultValue: 'Payback' })} value={metrics.payback_months} unit="months" />
+                    <MetricCard label={t('financialPanel.churn', { defaultValue: 'Churn' })} value={metrics.churn_monthly_pct} unit="%" />
+                    <MetricCard label={t('financialPanel.treasuryNeed', { defaultValue: 'Treasury Need' })} value={metrics.treasury_need} unit="€" />
                   </div>
 
                   {canWrite && (
                     <div className="flex justify-end">
                       <Button size="sm" onClick={handleSyncKpis} disabled={syncKpis.isPending}>
                         {syncKpis.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Target className="h-4 w-4 mr-1" />}
-                        Sync to KPIs
+                        {t('financialPanel.syncToKpis', { defaultValue: 'Sync to KPIs' })}
                       </Button>
                     </div>
                   )}
@@ -482,7 +482,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                 <TabsContent value="insights" className="space-y-4">
                   {insights.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      Not enough data to generate insights
+                      {t('financialPanel.notEnoughData', { defaultValue: 'Not enough data to generate insights' })}
                     </p>
                   ) : (
                     <>
@@ -508,9 +508,9 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                             {createActionsFromInsights.isPending ? (
                               <Loader2 className="h-4 w-4 animate-spin mr-1" />
                             ) : (
-                              <ListChecks className="h-4 w-4 mr-1" />
-                            )}
-                            Create All Actions
+                             <ListChecks className="h-4 w-4 mr-1" />
+                           )}
+                           {t('financialPanel.createAllActions', { defaultValue: 'Create All Actions' })}
                           </Button>
                         </div>
                       )}
@@ -523,10 +523,10 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                     <div className="text-center py-6 space-y-4">
                       <Sparkles className="h-8 w-8 mx-auto text-primary/50" />
                       <div>
-                        <p className="font-medium">AI Financial Review</p>
-                        <p className="text-sm text-muted-foreground">
-                          Get AI-powered analysis with actionable recommendations
-                        </p>
+                       <p className="font-medium">{t('financialPanel.aiFinancialReview', { defaultValue: 'AI Financial Review' })}</p>
+                       <p className="text-sm text-muted-foreground">
+                         {t('financialPanel.aiReviewDesc', { defaultValue: 'Get AI-powered analysis with actionable recommendations' })}
+                       </p>
                       </div>
                       {canWrite && (
                         <div className="flex items-center justify-center gap-2">
@@ -535,9 +535,9 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="full">Full Review</SelectItem>
-                              <SelectItem value="investor">Investor Focus</SelectItem>
-                              <SelectItem value="mentor_prep">Mentor Prep</SelectItem>
+                              <SelectItem value="full">{t('financialPanel.fullReview', { defaultValue: 'Full Review' })}</SelectItem>
+                              <SelectItem value="investor">{t('financialPanel.investorFocus', { defaultValue: 'Investor Focus' })}</SelectItem>
+                              <SelectItem value="mentor_prep">{t('financialPanel.mentorPrep', { defaultValue: 'Mentor Prep' })}</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button onClick={handleGenerateAIReview} disabled={generateReview.isPending}>
@@ -545,8 +545,8 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                               <Loader2 className="h-4 w-4 animate-spin mr-1" />
                             ) : (
                               <Sparkles className="h-4 w-4 mr-1" />
-                            )}
-                            Generate Review
+                             )}
+                             {t('financialPanel.generateReview', { defaultValue: 'Generate Review' })}
                           </Button>
                         </div>
                       )}
@@ -571,7 +571,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                             onClick={() => toggleSection('questions')}
                           >
                             {expandedSections.has('questions') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            <span className="font-medium text-sm">Questions to Explore ({aiReview.questions.length})</span>
+                            <span className="font-medium text-sm">{t('financialPanel.questionsToExplore', { defaultValue: 'Questions to Explore' })} ({aiReview.questions.length})</span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-2 pt-2">
                             {aiReview.questions.map((q, idx) => (
@@ -592,7 +592,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                             onClick={() => toggleSection('risks')}
                           >
                             {expandedSections.has('risks') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            <span className="font-medium text-sm">Risks ({aiReview.risks.length})</span>
+                            <span className="font-medium text-sm">{t('financialPanel.risks', { defaultValue: 'Risks' })} ({aiReview.risks.length})</span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-2 pt-2">
                             {aiReview.risks.map((r, idx) => (
@@ -618,7 +618,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                             onClick={() => toggleSection('actions')}
                           >
                             {expandedSections.has('actions') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            <span className="font-medium text-sm">Recommended Actions ({aiReview.recommended_actions.length})</span>
+                            <span className="font-medium text-sm">{t('financialPanel.recommendedActions', { defaultValue: 'Recommended Actions' })} ({aiReview.recommended_actions.length})</span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-2 pt-2">
                             {aiReview.recommended_actions.map((a, idx) => (
@@ -644,8 +644,8 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                                   <Loader2 className="h-4 w-4 animate-spin mr-1" />
                                 ) : (
                                   <ListChecks className="h-4 w-4 mr-1" />
-                                )}
-                                Create All Actions
+                                 )}
+                                 {t('financialPanel.createAllActions', { defaultValue: 'Create All Actions' })}
                               </Button>
                             )}
                           </CollapsibleContent>
@@ -660,7 +660,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                             onClick={() => toggleSection('agenda')}
                           >
                             {expandedSections.has('agenda') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            <span className="font-medium text-sm">Suggested Agenda ({aiReview.next_session_agenda.length})</span>
+                            <span className="font-medium text-sm">{t('financialPanel.suggestedAgenda', { defaultValue: 'Suggested Agenda' })} ({aiReview.next_session_agenda.length})</span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pt-2">
                             <ul className="list-disc list-inside space-y-1 text-sm">
@@ -676,10 +676,10 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                       {aiReview.investor_narrative && (
                         <div className="p-3 rounded-lg border bg-muted/30">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-medium text-muted-foreground">Investor Update Snippet</span>
-                            <Button variant="ghost" size="sm" className="h-6" onClick={copyInvestorNarrative}>
-                              <Copy className="h-3 w-3 mr-1" />
-                              Copy
+                             <span className="text-xs font-medium text-muted-foreground">{t('financialPanel.investorSnippet', { defaultValue: 'Investor Update Snippet' })}</span>
+                             <Button variant="ghost" size="sm" className="h-6" onClick={copyInvestorNarrative}>
+                               <Copy className="h-3 w-3 mr-1" />
+                               {t('financialPanel.copy', { defaultValue: 'Copy' })}
                             </Button>
                           </div>
                           <p className="text-sm italic">{aiReview.investor_narrative}</p>
@@ -694,14 +694,14 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="full">Full Review</SelectItem>
-                              <SelectItem value="investor">Investor Focus</SelectItem>
-                              <SelectItem value="mentor_prep">Mentor Prep</SelectItem>
+                               <SelectItem value="full">{t('financialPanel.fullReview', { defaultValue: 'Full Review' })}</SelectItem>
+                               <SelectItem value="investor">{t('financialPanel.investorFocus', { defaultValue: 'Investor Focus' })}</SelectItem>
+                               <SelectItem value="mentor_prep">{t('financialPanel.mentorPrep', { defaultValue: 'Mentor Prep' })}</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button size="sm" variant="outline" onClick={handleGenerateAIReview} disabled={generateReview.isPending}>
-                            {generateReview.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
-                            Regenerate
+                             {generateReview.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+                             {t('financialPanel.regenerate', { defaultValue: 'Regenerate' })}
                           </Button>
                         </div>
                       )}
