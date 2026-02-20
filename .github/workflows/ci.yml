@@ -90,6 +90,48 @@ jobs:
         run: node scripts/i18n-check.cjs
 
   # ──────────────────────────────────────────────
+  # Gate: i18n lint (duplicates, EN-in-PT, missing keys)
+  # ──────────────────────────────────────────────
+  i18n-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: i18n lint (strict)
+        run: node scripts/i18n-lint.mjs
+
+  # ──────────────────────────────────────────────
+  # Gate: i18n sync must be committed (no drift)
+  # ──────────────────────────────────────────────
+  i18n-sync-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run i18n sync
+        run: node scripts/i18n-sync.cjs
+
+      - name: Verify no changes after sync
+        run: |
+          if ! git diff --exit-code src/i18n/locales; then
+            echo "❌ i18n locales changed after sync — commit the sync output first!"
+            exit 1
+          fi
+          echo "✅ i18n locales are in sync"
+
+  # ──────────────────────────────────────────────
   # Gate: Secret leak scan
   # ──────────────────────────────────────────────
   secret-scan:
