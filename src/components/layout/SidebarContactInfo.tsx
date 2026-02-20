@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, User, GraduationCap, Linkedin, X } from 'lucide-react';
+import { Mail, User, GraduationCap, Linkedin, CalendarPlus, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,12 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarContactInfoProps {
   workspaceId: string;
   collapsed: boolean;
+  onOpenMessaging?: () => void;
 }
 
 interface ContactProfile {
@@ -32,8 +34,9 @@ interface ContactProfile {
   linkedin_url?: string | null;
 }
 
-export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContactInfoProps>(function SidebarContactInfo({ workspaceId, collapsed }, ref) {
+export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContactInfoProps>(function SidebarContactInfo({ workspaceId, collapsed, onOpenMessaging }, ref) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
   const [openProfile, setOpenProfile] = useState<{ profile: ContactProfile; type: 'consultant' | 'mentor' } | null>(null);
 
@@ -66,6 +69,16 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
       </div>
     );
   }
+
+  const handleScheduleSession = () => {
+    setOpenProfile(null);
+    navigate(`/workspace/${workspaceId}?tab=sessions`);
+  };
+
+  const handleSendMessage = () => {
+    setOpenProfile(null);
+    onOpenMessaging?.();
+  };
 
   const ContactItem = ({ 
     profile, 
@@ -201,17 +214,37 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
               </div>
             )}
 
-            <div className="flex gap-2 mt-2">
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={handleScheduleSession}
+              >
+                <CalendarPlus className="h-4 w-4 mr-2" />
+                {t('workspace.scheduleSession', { defaultValue: 'Schedule Session' })}
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleSendMessage}
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                {t('common.sendMessage', { defaultValue: 'Send Message' })}
+              </Button>
+
               {profile.email && (
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="w-full" asChild>
                   <a href={`mailto:${profile.email}`}>
                     <Mail className="h-4 w-4 mr-2" />
-                    {t('common.sendEmail', { defaultValue: 'Send email' })}
+                    {profile.email}
                   </a>
                 </Button>
               )}
+
               {profile.linkedin_url && (
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="w-full" asChild>
                   <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-4 w-4 mr-2" />
                     LinkedIn

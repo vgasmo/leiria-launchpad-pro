@@ -408,7 +408,7 @@ export function AppSidebar() {
 
         {/* Contact Info - Consultant/Mentor for founders */}
         {isFounder && founderWorkspaceId && (
-          <SidebarContactInfo workspaceId={founderWorkspaceId} collapsed={collapsed} />
+          <SidebarContactInfo workspaceId={founderWorkspaceId} collapsed={collapsed} onOpenMessaging={() => setMessagingOpen(true)} />
         )}
 
         {/* Messaging button */}
