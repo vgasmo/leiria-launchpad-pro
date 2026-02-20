@@ -25,7 +25,7 @@ import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
 import { NotesAndTasksTab } from '@/components/workspace/NotesAndTasksTab';
 import { TeamTab } from '@/components/workspace/TeamTab';
-import { DataroomTab } from '@/components/workspace/DataroomTab';
+// DataroomTab now rendered inside DocumentsTab as sub-tab
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
@@ -72,6 +72,14 @@ export default function WorkspaceDetail() {
 
   // URL-synced tab state
   const currentTab = searchParams.get('tab') || 'overview';
+  
+  // Redirect legacy dataroom tab to documents sub-tab
+  useEffect(() => {
+    if (currentTab === 'dataroom') {
+      setSearchParams({ tab: 'documents', sub: 'dataroom' }, { replace: true });
+    }
+  }, [currentTab, setSearchParams]);
+  
   const activeTab = allVisibleIds.has(currentTab) ? currentTab : 'overview';
   
   const handleTabChange = useCallback((value: string) => {
@@ -317,11 +325,7 @@ export default function WorkspaceDetail() {
               <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
             </div>
           )}
-          {activeTab === 'dataroom' && (
-            <div role="tabpanel" id="tabpanel-dataroom" aria-labelledby="tab-dataroom">
-              <DataroomTab workspaceId={workspace.id} canWrite={canWrite} />
-            </div>
-          )}
+          {/* dataroom absorbed into documents sub-tabs */}
           {activeTab === 'governance' && (
             <div role="tabpanel" id="tabpanel-governance" aria-labelledby="tab-governance">
               <GovernanceTab 

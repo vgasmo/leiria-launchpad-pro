@@ -1775,7 +1775,8 @@
       "label": "Document sections",
       "all": "All Documents",
       "financial": "Financial Model",
-      "tools": "Entrepreneur Tools"
+      "tools": "Entrepreneur Tools",
+      "dataroom": "Data Room"
     },
     "deleteTitle": "Delete document?",
     "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
