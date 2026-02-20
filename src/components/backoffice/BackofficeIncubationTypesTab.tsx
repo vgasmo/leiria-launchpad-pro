@@ -271,7 +271,7 @@ export function BackofficeIncubationTypesTab() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">€{type.base_monthly_fee}</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/{t('admin.backoffice.perMonth', { defaultValue: 'mês' })}</span>
                 </div>
 
                 {type.contract_type && (
@@ -284,25 +284,25 @@ export function BackofficeIncubationTypesTab() {
                   {type.duration_months && (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {type.duration_months} months
+                      {type.duration_months} {t('admin.backoffice.monthsLabel', { defaultValue: 'meses' })}
                     </div>
                   )}
                   {type.includes_office_space && (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Building2 className="h-3 w-3" />
-                      Office included
+                      {t('admin.backoffice.officeIncluded', { defaultValue: 'Escritório incluído' })}
                     </div>
                   )}
                   {type.includes_mentoring_hours > 0 && (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Users className="h-3 w-3" />
-                      {type.includes_mentoring_hours}h mentoring
+                      {type.includes_mentoring_hours}h {t('admin.backoffice.mentoringLabel', { defaultValue: 'mentoria' })}
                     </div>
                   )}
                   {type.equity_percentage && type.equity_percentage > 0 && (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Percent className="h-3 w-3" />
-                      {type.equity_percentage}% equity
+                      {type.equity_percentage}% {t('admin.backoffice.equityLabel', { defaultValue: 'equity' })}
                     </div>
                   )}
                   {type.price_per_sqm && type.price_per_sqm > 0 && (

@@ -23,11 +23,19 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
-const TYPE_CONFIG: Record<string, { label: string; icon: typeof Armchair }> = {
-  desk: { label: 'Desk', icon: Monitor },
-  private_office: { label: 'Private Office', icon: Building2 },
-  meeting_room: { label: 'Meeting Room', icon: Users },
-  hot_desk: { label: 'Hot Desk', icon: Armchair },
+// Labels resolved via i18n in render
+const TYPE_ICONS: Record<string, typeof Armchair> = {
+  desk: Monitor,
+  private_office: Building2,
+  meeting_room: Users,
+  hot_desk: Armchair,
+};
+
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  desk: 'admin.backoffice.spaceTypes.desk',
+  private_office: 'admin.backoffice.spaceTypes.privateOffice',
+  meeting_room: 'admin.backoffice.spaceTypes.meetingRoom',
+  hot_desk: 'admin.backoffice.spaceTypes.hotDesk',
 };
 
 export function BackofficeSpacesTab() {
@@ -91,6 +99,8 @@ export function BackofficeSpacesTab() {
     setSelectedSpaceForAllocation(null);
   };
 
+  const typeKeys = Object.keys(TYPE_ICONS);
+
   // Group by type
   const groupedSpaces = spaces?.reduce((acc, space) => {
     if (!acc[space.type]) acc[space.type] = [];
@@ -145,8 +155,8 @@ export function BackofficeSpacesTab() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(TYPE_CONFIG).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                      {typeKeys.map((key) => (
+                        <SelectItem key={key} value={key}>{t(TYPE_LABEL_KEYS[key], { defaultValue: key })}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -213,17 +223,17 @@ export function BackofficeSpacesTab() {
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
       ) : (
-        Object.entries(TYPE_CONFIG).map(([typeKey, typeConfig]) => {
+        typeKeys.map((typeKey) => {
           const spacesOfType = groupedSpaces?.[typeKey] || [];
           if (spacesOfType.length === 0) return null;
 
-          const TypeIcon = typeConfig.icon;
+          const TypeIcon = TYPE_ICONS[typeKey];
 
           return (
             <div key={typeKey} className="space-y-3">
               <h3 className="font-medium flex items-center gap-2">
                 <TypeIcon className="h-4 w-4 text-muted-foreground" />
-                {typeConfig.label}
+                {t(TYPE_LABEL_KEYS[typeKey], { defaultValue: typeKey })}
                 <Badge variant="secondary">{spacesOfType.length}</Badge>
               </h3>
 
@@ -248,8 +258,8 @@ export function BackofficeSpacesTab() {
                             <CardTitle className="text-base">{space.name}</CardTitle>
                             {space.floor && (
                               <CardDescription className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" /> Floor {space.floor}
-                              </CardDescription>
+                              <MapPin className="h-3 w-3" /> {t('admin.backoffice.floorLabel', { defaultValue: 'Piso' })} {space.floor}
+                            </CardDescription>
                             )}
                           </div>
                           <Badge variant={isOccupied ? 'default' : 'outline'}>

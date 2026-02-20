@@ -339,40 +339,51 @@ export function AdminBackoffice() {
 
   return (
     <div className="space-y-6">
-      {/* Sub-tabs for different backoffice sections */}
+      {/* Sub-tabs for different backoffice sections — 3 logical groups */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+          {/* Grupo 1: Painel & Startups */}
           <TabsTrigger value="dashboard" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.dashboard')}
+            {t('admin.backoffice.dashboard', { defaultValue: 'Painel' })}
           </TabsTrigger>
           <TabsTrigger value="overview" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.overview')}
+            {t('admin.backoffice.overview', { defaultValue: 'Startups' })}
           </TabsTrigger>
+
+          {/* Separador visual */}
+          <div className="w-px h-6 bg-border mx-1 self-center" />
+
+          {/* Grupo 2: Contratos & Tipos */}
           <TabsTrigger value="contracts" className="gap-1.5">
             <FileText className="h-4 w-4" />
-            {t('admin.backoffice.contracts')}
-          </TabsTrigger>
-          <TabsTrigger value="spaces" className="gap-1.5">
-            <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.spaces')}
-          </TabsTrigger>
-          <TabsTrigger value="rooms" className="gap-1.5">
-            <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.roomMapping')}
-          </TabsTrigger>
-          <TabsTrigger value="waiting-list" className="gap-1.5">
-            <Clock className="h-4 w-4" />
-            {t('admin.backoffice.waitingList')}
+            {t('admin.backoffice.contracts', { defaultValue: 'Contratos' })}
           </TabsTrigger>
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
-            {t('admin.backoffice.incubationTypes')}
+            {t('admin.backoffice.incubationTypes', { defaultValue: 'Tipos de Incubação' })}
           </TabsTrigger>
+
+          {/* Separador visual */}
+          <div className="w-px h-6 bg-border mx-1 self-center" />
+
+          {/* Grupo 3: Infraestrutura & Ocupação */}
           <TabsTrigger value="buildings" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {t('admin.backoffice.buildings', { defaultValue: 'Edifícios' })}
+          </TabsTrigger>
+          <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.buildings')}
+            {t('admin.backoffice.spaces', { defaultValue: 'Espaços' })}
+          </TabsTrigger>
+          <TabsTrigger value="rooms" className="gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {t('admin.backoffice.roomMapping', { defaultValue: 'Mapa de Salas' })}
+          </TabsTrigger>
+          <TabsTrigger value="waiting-list" className="gap-1.5">
+            <Clock className="h-4 w-4" />
+            {t('admin.backoffice.waitingList', { defaultValue: 'Lista de Espera' })}
           </TabsTrigger>
         </TabsList>
 
