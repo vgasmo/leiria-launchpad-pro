@@ -1799,7 +1799,14 @@
     "tractionReport": "Traction Report",
     "marketAnalysis": "Market Analysis",
     "noReview": "No review",
-    "viewReview": "View review"
+    "viewReview": "View review",
+    "useTemplate": "Use template",
+    "template": "Template",
+    "uploadPitchDeck": "Upload Pitch Deck",
+    "uploadOnePager": "Upload One-Pager",
+    "uploadFinancialModel": "Upload Financial Model",
+    "uploadTeamDeck": "Upload Team Presentation",
+    "uploadTractionReport": "Upload Traction Report"
   },
   "review": {
     "pitchDeckReview": "Pitch Deck Review",
