@@ -296,7 +296,7 @@ export default function WorkspaceDetail() {
           )}
           {activeTab === 'documents' && (
             <div role="tabpanel" id="tabpanel-documents" aria-labelledby="tab-documents">
-              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} />
+              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} isStaff={isStaff} isMentor={isMentor} />
             </div>
           )}
           {activeTab === 'kpis' && (

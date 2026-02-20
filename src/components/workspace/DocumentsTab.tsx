@@ -56,6 +56,8 @@ interface DocumentsTabProps {
   workspaceId: string;
   canWrite: boolean;
   isFounder?: boolean;
+  isStaff?: boolean;
+  isMentor?: boolean;
 }
 
 const CATEGORY_KEYS = [
@@ -88,7 +90,7 @@ function getFileIcon(documentType: string) {
   return File;
 }
 
-export function DocumentsTab({ workspaceId, canWrite, isFounder = false }: DocumentsTabProps) {
+export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff = false, isMentor = false }: DocumentsTabProps) {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: documents, isLoading } = useDocuments(workspaceId);
@@ -341,7 +343,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false }: Docum
 
       {activeSubTab === 'dataroom' && (
         <div role="tabpanel" id="doc-panel-dataroom" aria-labelledby="doc-tab-dataroom">
-          <DataroomTab workspaceId={workspaceId} canWrite={canWrite} />
+          <DataroomTab workspaceId={workspaceId} canWrite={canWrite} isStaff={isStaff} isMentor={isMentor} />
         </div>
       )}
 

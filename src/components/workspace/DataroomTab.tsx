@@ -33,13 +33,15 @@ import {
 import { useDocuments } from '@/hooks/useDocuments';
 import { useInvestorUpdates, useGenerateInvestorUpdate } from '@/hooks/useInvestorUpdates';
 import { InvestorTemplateLibrary } from './InvestorTemplateLibrary';
-
+import { DataroomChecklist } from './DataroomChecklist';
 interface DataroomTabProps {
   workspaceId: string;
   canWrite?: boolean;
+  isStaff?: boolean;
+  isMentor?: boolean;
 }
 
-export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps) {
+export function DataroomTab({ workspaceId, canWrite = false, isStaff = false, isMentor = false }: DataroomTabProps) {
   const { t } = useTranslation();
   const { data: dataroom, isLoading: loadingDataroom } = useDataroom(workspaceId);
   const { data: items, isLoading: loadingItems } = useDataroomItems(dataroom?.id);
@@ -228,6 +230,9 @@ export function DataroomTab({ workspaceId, canWrite = false }: DataroomTabProps)
       
       {/* Dataroom Tab */}
       <TabsContent value="dataroom" className="mt-6 space-y-6">
+      {/* Pitch Deck Checklist */}
+      <DataroomChecklist workspaceId={workspaceId} canWrite={canWrite} isStaff={isStaff} isMentor={isMentor} />
+      
       {/* Dataroom Items */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

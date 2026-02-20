@@ -1147,6 +1147,78 @@ export type Database = {
           },
         ]
       }
+      document_reviews: {
+        Row: {
+          ai_analysis_json: Json | null
+          ai_analyzed_at: string | null
+          approval_status: string
+          comments: string | null
+          created_at: string
+          document_id: string
+          id: string
+          reviewer_id: string
+          score_business_model: number | null
+          score_design_clarity: number | null
+          score_market: number | null
+          score_problem_solution: number | null
+          score_team: number | null
+          score_traction: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          ai_analysis_json?: Json | null
+          ai_analyzed_at?: string | null
+          approval_status?: string
+          comments?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          reviewer_id: string
+          score_business_model?: number | null
+          score_design_clarity?: number | null
+          score_market?: number | null
+          score_problem_solution?: number | null
+          score_team?: number | null
+          score_traction?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          ai_analysis_json?: Json | null
+          ai_analyzed_at?: string | null
+          approval_status?: string
+          comments?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          reviewer_id?: string
+          score_business_model?: number | null
+          score_design_clarity?: number | null
+          score_market?: number | null
+          score_problem_solution?: number | null
+          score_team?: number | null
+          score_traction?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_reviews_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: string | null
