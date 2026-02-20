@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, User, GraduationCap } from 'lucide-react';
+import { Mail, User, GraduationCap, Linkedin, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
 
@@ -17,9 +23,19 @@ interface SidebarContactInfoProps {
   collapsed: boolean;
 }
 
+interface ContactProfile {
+  full_name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
+  expertise_tags?: string[] | null;
+  linkedin_url?: string | null;
+}
+
 export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContactInfoProps>(function SidebarContactInfo({ workspaceId, collapsed }, ref) {
   const { t } = useTranslation();
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
+  const [openProfile, setOpenProfile] = useState<{ profile: ContactProfile; type: 'consultant' | 'mentor' } | null>(null);
 
   const consultant = members?.find(m => m.role === 'consultor');
   const mentor = members?.find(m => m.role === 'mentor_externo');
@@ -39,7 +55,6 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
     );
   }
 
-  // If no consultant and no mentor, show a placeholder for the founder to know this area exists
   if (!consultant && !mentor) {
     if (collapsed) return null;
     return (
@@ -56,7 +71,7 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
     profile, 
     type 
   }: { 
-    profile: { full_name?: string | null; email?: string | null; avatar_url?: string | null } | null;
+    profile: ContactProfile | null;
     type: 'consultant' | 'mentor';
   }) => {
     if (!profile) return null;
@@ -80,10 +95,10 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
       return (
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
-            <a 
-              href={profile.email ? `mailto:${profile.email}` : undefined}
+            <button 
+              onClick={() => setOpenProfile({ profile, type })}
               className={cn(
-                "flex items-center justify-center p-1.5 rounded-full transition-colors hover:bg-sidebar-accent",
+                "flex items-center justify-center p-1.5 rounded-full transition-colors hover:bg-sidebar-accent cursor-pointer",
                 bgColor
               )}
             >
@@ -93,7 +108,7 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
                   {initials}
                 </AvatarFallback>
               </Avatar>
-            </a>
+            </button>
           </TooltipTrigger>
           <TooltipContent side="right" className="max-w-xs">
             <div className="flex items-center gap-2">
@@ -101,16 +116,19 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
               <span className="text-xs text-muted-foreground">{label}</span>
             </div>
             <p className="font-medium">{profile.full_name || t('common.noName')}</p>
-            {profile.email && (
-              <p className="text-xs text-muted-foreground">{profile.email}</p>
-            )}
           </TooltipContent>
         </Tooltip>
       );
     }
 
     return (
-      <div className={cn("rounded-lg p-3", bgColor)}>
+      <button
+        onClick={() => setOpenProfile({ profile, type })}
+        className={cn(
+          "rounded-lg p-3 w-full text-left transition-colors hover:ring-1 hover:ring-primary/30 cursor-pointer",
+          bgColor
+        )}
+      >
         <div className="flex items-center gap-2 mb-2">
           <Icon className={cn("h-3.5 w-3.5", textColor)} />
           <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -127,35 +145,96 @@ export const SidebarContactInfo = React.forwardRef<HTMLDivElement, SidebarContac
               {profile.full_name || t('common.noName')}
             </p>
           </div>
-          {profile.email && (
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                  asChild
-                >
+        </div>
+      </button>
+    );
+  };
+
+  const ProfileDialog = () => {
+    if (!openProfile) return null;
+    const { profile, type } = openProfile;
+    const Icon = type === 'consultant' ? User : GraduationCap;
+    const label = type === 'consultant'
+      ? t('workspace.yourConsultant', { defaultValue: 'Your Consultant' })
+      : t('workspace.yourMentor', { defaultValue: 'Your Mentor' });
+    const textColor = type === 'consultant' ? 'text-primary' : 'text-accent-foreground';
+    const initials = profile.full_name
+      ?.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
+
+    return (
+      <Dialog open={!!openProfile} onOpenChange={(open) => !open && setOpenProfile(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon className={cn("h-4 w-4", textColor)} />
+              {label}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={profile.avatar_url || undefined} />
+              <AvatarFallback className={cn("text-xl font-semibold", textColor)}>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-semibold">{profile.full_name || t('common.noName')}</h3>
+              {profile.bio && (
+                <p className="text-sm text-muted-foreground max-w-sm">{profile.bio}</p>
+              )}
+            </div>
+
+            {profile.expertise_tags && profile.expertise_tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {profile.expertise_tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-2">
+              {profile.email && (
+                <Button variant="outline" size="sm" asChild>
                   <a href={`mailto:${profile.email}`}>
-                    <Mail className="h-3.5 w-3.5" />
+                    <Mail className="h-4 w-4 mr-2" />
+                    {t('common.sendEmail', { defaultValue: 'Send email' })}
                   </a>
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">{t('common.sendEmail', { defaultValue: 'Send email' })}</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </div>
+              )}
+              {profile.linkedin_url && (
+                <Button variant="outline" size="sm" asChild>
+                  <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                    <Linkedin className="h-4 w-4 mr-2" />
+                    LinkedIn
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
   return (
-    <div ref={ref} className={cn(
-      "mx-3 mb-3 space-y-2",
-      collapsed && "flex flex-col items-center gap-2"
-    )}>
-      {consultant && <ContactItem profile={consultant.profile} type="consultant" />}
-      {mentor && <ContactItem profile={mentor.profile} type="mentor" />}
-    </div>
+    <>
+      <div ref={ref} className={cn(
+        "mx-3 mb-3 space-y-2",
+        collapsed && "flex flex-col items-center gap-2"
+      )}>
+        {consultant && <ContactItem profile={consultant.profile} type="consultant" />}
+        {mentor && <ContactItem profile={mentor.profile} type="mentor" />}
+      </div>
+      <ProfileDialog />
+    </>
   );
 });
