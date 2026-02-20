@@ -61,9 +61,9 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
     setSearchParams({ tab: 'documents', sub: 'all', upload: categoryKey }, { replace: true });
   };
 
-  const handleOpenTemplate = (item: ChecklistItem) => {
-    // Navigate to the templates sub-tab (Ferramentas) in documents
-    setSearchParams({ tab: 'documents', sub: 'templates' }, { replace: true });
+  const handleOpenTemplate = (_item: ChecklistItem) => {
+    // Navigate to the Ferramentas/Tools sub-tab which contains workspace templates
+    setSearchParams({ tab: 'documents', sub: 'tools' }, { replace: true });
   };
 
   const completedCount = CHECKLIST_ITEMS.filter(item => getDocForCategory(item.categoryKey)).length;
