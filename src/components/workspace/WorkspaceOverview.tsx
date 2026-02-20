@@ -523,7 +523,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           workspaceId={workspace.id}
           programId={workspace.program_id}
           onAddAction={() => setSearchParams({ tab: 'actions' })}
-          onRequestSession={() => setSearchParams({ tab: 'calendar' })}
+          onRequestSession={() => setSearchParams({ tab: 'agenda' })}
           className="md:hidden"
         />
       )}

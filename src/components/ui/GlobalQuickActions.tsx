@@ -59,7 +59,7 @@ export function GlobalQuickActions() {
       description: t('quickActions.scheduleSessionDesc'),
       icon: <Calendar className="h-5 w-5" />,
       path: currentWorkspaceId ? `/workspace/${currentWorkspaceId}` : '/my-workspaces',
-      tab: 'sessions',
+      tab: 'agenda',
     },
     { 
       id: 'milestone', 

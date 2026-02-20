@@ -1588,12 +1588,12 @@
   "workspace": {
     "tabs": "Workspace sections",
     "overview": "Overview",
+    "agenda": "Agenda",
     "sessions": "Sessions",
     "actions": "Actions",
     "milestones": "Milestones",
     "kpis": "KPIs",
     "templates": "Templates",
-    "calendar": "Calendar",
     "documents": "Documents",
     "team": "Co-founders",
     "okrs": "OKRs",

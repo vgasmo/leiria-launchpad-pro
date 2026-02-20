@@ -137,7 +137,7 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
           <Button 
             variant={isUrgent ? 'default' : 'outline'} 
             size="sm"
-            onClick={() => navigate(`/workspace/${workspace.id}?tab=sessions`)}
+            onClick={() => navigate(`/workspace/${workspace.id}?tab=agenda`)}
             className={isUrgent ? 'shadow-md' : ''}
           >
             {t('sessionPrep.prepare', 'Prepare')}

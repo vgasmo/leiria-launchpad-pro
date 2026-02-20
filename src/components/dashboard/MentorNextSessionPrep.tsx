@@ -118,7 +118,7 @@ export function MentorNextSessionPrep({ workspaces }: MentorNextSessionPrepProps
             {/* CTA */}
             <Button 
               size="sm" 
-              onClick={() => navigate(`/workspace/${workspace.id}?tab=sessions`)}
+              onClick={() => navigate(`/workspace/${workspace.id}?tab=agenda`)}
               className="gap-1.5"
             >
               {t('mentor.prepareSession', 'Prepare')}

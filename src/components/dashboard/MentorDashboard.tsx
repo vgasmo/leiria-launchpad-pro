@@ -258,7 +258,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                             className="text-xs h-7"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/workspace/${workspace.id}?tab=sessions`);
+                              navigate(`/workspace/${workspace.id}?tab=agenda`);
                             }}
                           >
                             {t('mentor.scheduleSession', 'Agendar')}

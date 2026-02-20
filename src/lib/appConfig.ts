@@ -46,7 +46,7 @@ export const AppConfig = {
   
   // Build session link
   sessionLink(workspaceId: string, sessionId: string): string {
-    return this.buildLink(`/workspace/${workspaceId}?tab=sessions&session=${sessionId}`);
+    return this.buildLink(`/workspace/${workspaceId}?tab=agenda&session=${sessionId}`);
   },
   
   // Build action link  

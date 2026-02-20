@@ -14,12 +14,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
-import { SessionsTab } from '@/components/workspace/SessionsTab';
+import { AgendaTab } from '@/components/workspace/AgendaTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
 // TemplatesTab now rendered inside DocumentsTab as sub-tab
-import { CalendarTab } from '@/components/workspace/CalendarTab';
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
 import { FundingTrackerTab } from '@/components/workspace/FundingTrackerTab';
@@ -73,10 +72,12 @@ export default function WorkspaceDetail() {
   // URL-synced tab state
   const currentTab = searchParams.get('tab') || 'overview';
   
-  // Redirect legacy dataroom tab to documents sub-tab
+  // Redirect legacy tabs
   useEffect(() => {
     if (currentTab === 'dataroom') {
       setSearchParams({ tab: 'documents', sub: 'dataroom' }, { replace: true });
+    } else if (currentTab === 'sessions' || currentTab === 'calendar') {
+      setSearchParams({ tab: 'agenda' }, { replace: true });
     }
   }, [currentTab, setSearchParams]);
   
@@ -289,9 +290,9 @@ export default function WorkspaceDetail() {
               <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
             </div>
           )}
-          {activeTab === 'sessions' && (
-            <div role="tabpanel" id="tabpanel-sessions" aria-labelledby="tab-sessions">
-              <SessionsTab workspaceId={workspace.id} canWrite={canWrite} />
+          {activeTab === 'agenda' && (
+            <div role="tabpanel" id="tabpanel-agenda" aria-labelledby="tab-agenda">
+              <AgendaTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
             </div>
           )}
           {activeTab === 'documents' && (
@@ -320,11 +321,7 @@ export default function WorkspaceDetail() {
             </div>
           )}
           {/* templates tab absorbed into documents sub-tabs */}
-          {activeTab === 'calendar' && (
-            <div role="tabpanel" id="tabpanel-calendar" aria-labelledby="tab-calendar">
-              <CalendarTab workspaceId={workspace.id} canWrite={canWrite} startupName={startup?.name} />
-            </div>
-          )}
+          {/* calendar tab absorbed into agenda */}
           {/* dataroom absorbed into documents sub-tabs */}
           {activeTab === 'governance' && (
             <div role="tabpanel" id="tabpanel-governance" aria-labelledby="tab-governance">

@@ -152,7 +152,7 @@ export function EnhancedNextSteps({ workspaceId, programId, stage, canWrite }: E
           icon: <Calendar className="h-5 w-5" />,
           variant: 'default',
           actionLabel: t('nextSteps.prepare'),
-          onAction: () => setSearchParams({ tab: 'sessions' }),
+          onAction: () => setSearchParams({ tab: 'agenda' }),
         });
       }
     }

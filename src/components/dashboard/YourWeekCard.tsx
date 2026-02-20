@@ -94,7 +94,7 @@ export function YourWeekCard({ workspace, streakWeeks = 0 }: YourWeekCardProps) 
           icon: <Calendar className="h-4 w-4" />,
           urgency: daysUntil <= 1 ? 'high' : 'low',
           action: t('yourWeek.prepare'),
-          tab: 'sessions',
+          tab: 'agenda',
         });
       }
     }

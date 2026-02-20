@@ -93,7 +93,7 @@ export function useGlobalSearch(filters: SearchFilters) {
             title: s.title,
             snippet: s.notes?.slice(0, 150) || '',
             updated_at: s.updated_at,
-            url: `/workspace/${s.workspace_id}?tab=sessions`,
+            url: `/workspace/${s.workspace_id}?tab=agenda`,
             workspace_name: (s.workspaces as any)?.startup?.name,
           }));
 

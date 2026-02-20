@@ -162,7 +162,7 @@ export function JourneyHeader({
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => setSearchParams({ tab: 'sessions' })}
+                onClick={() => setSearchParams({ tab: 'agenda' })}
               >
                 <Video className="h-4 w-4 text-primary" />
                 <span className="hidden sm:inline">{t('journey.nextSession')}:</span>
@@ -175,7 +175,7 @@ export function JourneyHeader({
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => setSearchParams({ tab: 'calendar' })}
+                onClick={() => setSearchParams({ tab: 'agenda' })}
               >
                 <Calendar className="h-4 w-4" />
                 {t('journey.scheduleSession')}

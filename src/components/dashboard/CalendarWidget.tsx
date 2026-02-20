@@ -50,7 +50,7 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
   });
 
   const handleSessionClick = (session: any) => {
-    navigate(`/workspace/${session.workspace_id}?tab=sessions`);
+    navigate(`/workspace/${session.workspace_id}?tab=agenda`);
   };
 
   if (isLoading) {
