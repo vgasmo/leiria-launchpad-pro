@@ -1782,12 +1782,18 @@
     "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
     "documentDeleted": "Document deleted",
     "categoryPitchDeck": "Pitch Deck",
+    "categoryOnePager": "One-Pager",
     "categoryFinancialModel": "Financial Model",
+    "categoryTraction": "Traction Report",
+    "categoryMarket": "Market Analysis",
     "categoryLegal": "Legal",
     "categoryMarketing": "Marketing",
     "categoryProduct": "Product",
     "categoryTeam": "Team",
-    "categoryOther": "Other"
+    "categoryOther": "Other",
+    "uploadSuccess": "Document uploaded successfully",
+    "uploadFailed": "Upload failed",
+    "clickToUpload": "Click to select a file"
   },
   "dataroomChecklist": {
     "title": "Investor Documents",
