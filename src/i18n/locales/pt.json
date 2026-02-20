@@ -1001,7 +1001,7 @@
         "revenue_streams_placeholder": "Modelo de receita, lifetime value, etc."
       },
       "value_prop": {
-        "title": "Value Proposition Canvas",
+        "title": "Canvas de Proposta de Valor",
         "customer_jobs": "Tarefas do Cliente",
         "customer_jobs_placeholder": "Que tarefas tentam os seus clientes completar? Que problemas resolvem?",
         "pains": "Dores",
@@ -1064,7 +1064,7 @@
         "buying_behavior_placeholder": "Como pesquisam, compram, quem os influencia."
       },
       "pricing": {
-        "title": "Pricing & Packaging Canvas",
+        "title": "Canvas de Preços e Pacotes",
         "pricing_model": "Modelo de Preços",
         "pricing_model_placeholder": "Subscrição, uso, único, freemium?",
         "tiers": "Estrutura de Planos",
@@ -1075,7 +1075,7 @@
         "competition_placeholder": "Como cobram os concorrentes? Onde se posiciona?"
       },
       "growth_loops": {
-        "title": "Growth Loops Canvas",
+        "title": "Canvas de Loops de Crescimento",
         "trigger": "Gatilho do Loop",
         "trigger_placeholder": "Que ação inicia o loop? (registo, uso)",
         "value": "Criação de Valor",
@@ -1086,7 +1086,7 @@
         "retention_placeholder": "O que cria uso habitual?"
       },
       "okrs": {
-        "title": "OKRs & North Star Canvas",
+        "title": "Canvas de OKRs e North Star",
         "north_star": "Métrica North Star",
         "north_star_placeholder": "A métrica única que captura o valor que entrega.",
         "objective_1": "Objetivo 1",
@@ -1099,7 +1099,7 @@
         "key_results_2_placeholder": "Resultados mensuráveis para o Objetivo 2."
       },
       "fundraising": {
-        "title": "Fundraising Readiness Canvas",
+        "title": "Canvas de Preparação para Investimento",
         "round_target": "Objetivo da Ronda",
         "round_target_placeholder": "Montante a levantar e uso de fundos.",
         "metrics": "Métricas Chave",
@@ -1110,7 +1110,7 @@
         "investors_placeholder": "Top 20 investidores alvo com estado."
       },
       "sales_pipeline": {
-        "title": "Sales Pipeline Canvas",
+        "title": "Canvas de Pipeline de Vendas",
         "pipeline_overview": "Visão Geral do Pipeline",
         "pipeline_overview_placeholder": "Valor total, valor ponderado, dimensão média.",
         "stages": "Detalhe por Fase",
@@ -1119,7 +1119,7 @@
         "metrics_placeholder": "Tempo de ciclo, taxa de fecho, previsão."
       },
       "roadmap": {
-        "title": "Product Roadmap Canvas",
+        "title": "Canvas de Roadmap de Produto",
         "now": "Agora (Este Trimestre)",
         "now_placeholder": "Funcionalidades atualmente em desenvolvimento.",
         "next": "Próximo (Próximo Trimestre)",
