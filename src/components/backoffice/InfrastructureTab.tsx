@@ -72,6 +72,10 @@ export function InfrastructureTab() {
   const [signedUrl, setSignedUrl] = useState('');
   const imageRef = useRef<HTMLDivElement>(null);
 
+  // Pin placement state (edit mode)
+  const [pendingPinCoords, setPendingPinCoords] = useState<{ x: number; y: number } | null>(null);
+  const [pinSearchQuery, setPinSearchQuery] = useState('');
+
   // Upload dialog state
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [mapBuildingId, setMapBuildingId] = useState('');
@@ -176,6 +180,25 @@ export function InfrastructureTab() {
   const roomsWithShapes = roomsOnMap.filter(r => r.shape_type !== 'pin' && r.shape_json);
   const roomsWithPins = roomsOnMap.filter(r => r.shape_type === 'pin' || (!r.shape_json && r.pin_x != null));
 
+  // Unmapped rooms for this floor map (have floor_map_id but no coordinates)
+  const unmappedRooms = useMemo(() => {
+    if (!rooms || !activeFloorMap) return [];
+    return rooms.filter(r =>
+      r.floor_map_id === activeFloorMap.id &&
+      (r.pin_x == null || r.pin_y == null) &&
+      !r.shape_json
+    );
+  }, [rooms, activeFloorMap]);
+
+  const filteredUnmappedRooms = useMemo(() => {
+    if (!pinSearchQuery) return unmappedRooms;
+    const q = pinSearchQuery.toLowerCase();
+    return unmappedRooms.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      (r.room_number || '').toLowerCase().includes(q)
+    );
+  }, [unmappedRooms, pinSearchQuery]);
+
   // ── Filtered rooms for list view ──
   const buildingRooms = useMemo(() => {
     if (!rooms || !spaces) return [];
@@ -233,6 +256,33 @@ export function InfrastructureTab() {
       setDrawerRoom(room);
       setDrawerOpen(true);
     }
+  };
+
+  // Handle click on map background in edit mode to place a pin
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!editMode || !imageRef.current) return;
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setPendingPinCoords({ x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100 });
+    setPinSearchQuery('');
+  };
+
+  // Place pin for a room at the pending coordinates
+  const handlePlacePin = async (room: Room) => {
+    if (!pendingPinCoords) return;
+    try {
+      await updateRoom.mutateAsync({
+        id: room.id,
+        pin_x: pendingPinCoords.x,
+        pin_y: pendingPinCoords.y,
+        shape_type: 'pin',
+      });
+      toast.success(t('admin.backoffice.pinPlaced', { defaultValue: 'Pin colocado com sucesso' }));
+    } catch {
+      // error handled by mutation
+    }
+    setPendingPinCoords(null);
   };
 
   // ── Upload floor map ──
@@ -426,9 +476,11 @@ export function InfrastructureTab() {
                     </p>
                   </div>
                 ) : (
+                  <>
                   <div
                     ref={imageRef}
-                    className={cn('relative aspect-[16/10] bg-muted', editMode && 'cursor-pointer')}
+                    className={cn('relative aspect-[16/10] bg-muted', editMode && 'cursor-crosshair')}
+                    onClick={editMode ? handleMapClick : undefined}
                   >
                     <img
                       src={displayImageUrl}
@@ -538,6 +590,16 @@ export function InfrastructureTab() {
                       })}
                     </TooltipProvider>
 
+                    {/* Pending pin marker (edit mode - awaiting room selection) */}
+                    {pendingPinCoords && (
+                      <div
+                        className="absolute transform -translate-x-1/2 -translate-y-full z-20 pointer-events-none"
+                        style={{ left: `${pendingPinCoords.x}%`, top: `${pendingPinCoords.y}%` }}
+                      >
+                        <MapPin className="h-8 w-8 text-destructive fill-destructive/30 animate-bounce drop-shadow-lg" />
+                      </div>
+                    )}
+
                     {/* Legend */}
                     <div className="absolute bottom-2 left-2 flex items-center gap-4 bg-background/90 rounded-lg px-3 py-1.5 shadow-sm text-xs">
                       <div className="flex items-center gap-1"><div className="h-2.5 w-2.5 rounded-full bg-primary" />{t('admin.backoffice.occupied', { defaultValue: 'Ocupado' })}</div>
@@ -545,7 +607,66 @@ export function InfrastructureTab() {
                       <div className="flex items-center gap-1"><div className="h-2.5 w-2.5 rounded-full bg-yellow-500" />{t('admin.backoffice.maintenance', { defaultValue: 'Manutenção' })}</div>
                       <span className="text-muted-foreground ml-2">{roomsOnMap.length} {t('admin.backoffice.roomsPlaced', { defaultValue: 'salas mapeadas' })}</span>
                     </div>
+
+                    {/* Edit mode instructions */}
+                    {editMode && !pendingPinCoords && (
+                      <div className="absolute top-2 left-2 bg-background/95 border rounded-lg px-3 py-2 shadow-md text-xs text-muted-foreground z-10">
+                        <span className="font-medium text-foreground">{t('admin.backoffice.editModeHint', { defaultValue: 'Clique no mapa para colocar um pin' })}</span>
+                        <span className="ml-1">({unmappedRooms.length} {t('admin.backoffice.roomsPending', { defaultValue: 'salas por mapear' })})</span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Room picker popover (appears below map when pin is pending) */}
+                  {pendingPinCoords && (
+                    <div className="p-3 border-t bg-muted/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          {t('admin.backoffice.selectRoomForPin', { defaultValue: 'Selecione a sala para este pin:' })}
+                        </span>
+                        <Button variant="ghost" size="sm" onClick={() => setPendingPinCoords(null)}>
+                          {t('common.cancel', { defaultValue: 'Cancelar' })}
+                        </Button>
+                      </div>
+                      <div className="relative max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={pinSearchQuery}
+                          onChange={(e) => setPinSearchQuery(e.target.value)}
+                          placeholder={t('admin.backoffice.searchRoomCode', { defaultValue: 'Pesquisar por código (ex: S 1.11, SR2)...' })}
+                          className="pl-9 h-9"
+                          autoFocus
+                        />
+                      </div>
+                      <ScrollArea className="max-h-[200px]">
+                        <div className="space-y-1">
+                          {filteredUnmappedRooms.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                              {unmappedRooms.length === 0
+                                ? t('admin.backoffice.allRoomsMapped', { defaultValue: 'Todas as salas já estão mapeadas!' })
+                                : t('admin.backoffice.noMatchingRooms', { defaultValue: 'Nenhuma sala encontrada' })}
+                            </p>
+                          ) : (
+                            filteredUnmappedRooms.map(room => (
+                              <button
+                                key={room.id}
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 flex items-center justify-between transition-colors"
+                                onClick={() => handlePlacePin(room)}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm font-medium">{room.name}</span>
+                                  {room.room_number && <span className="text-xs text-muted-foreground">#{room.room_number}</span>}
+                                </div>
+                                <Plus className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
+                  </>
                 )}
 
                 {/* Search bar below map */}
