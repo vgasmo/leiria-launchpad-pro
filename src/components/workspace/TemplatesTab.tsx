@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { FileText, ChevronRight, Check, Save, FolderOpen, Calculator, Send, MessageSquare, CheckCircle2, Sparkles, LayoutGrid, Target, Users, Crosshair, TrendingUp, DollarSign, Rocket, BarChart3, Map } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import { CanvasTemplate, CanvasType, getCanvasType } from './CanvasTemplate';
 import { getLocalizedTemplateMeta, getLocalizedCategoryLabel } from '@/lib/templateCatalogI18n';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 interface TemplatesTabProps {
   workspaceId: string;
@@ -39,11 +40,13 @@ interface TemplatesTabProps {
 
 export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: TemplatesTabProps) {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: templates, isLoading: loadingTemplates } = useTemplates();
   const { data: instances, isLoading: loadingInstances } = useTemplateInstances(workspaceId);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [selectedInstance, setSelectedInstance] = useState<TemplateInstance | null>(null);
   const [activeTab, setActiveTab] = useState('templates');
+  const hasAutoOpened = useRef(false);
 
   // Group templates by category KEY (stable for grouping, then display localized label)
   const templatesByCategory = useMemo(() => {
@@ -64,6 +67,41 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
       return acc;
     }, {} as Record<string, TemplateInstance>);
   }, [instances]);
+
+  // Auto-open a specific template when navigated from DataroomChecklist
+  useEffect(() => {
+    if (hasAutoOpened.current || !templates?.length || loadingTemplates || loadingInstances) return;
+    const openTemplateId = searchParams.get('openTemplate');
+    if (!openTemplateId) return;
+
+    const template = templates.find(t => t.id === openTemplateId);
+    if (!template) return;
+
+    hasAutoOpened.current = true;
+
+    // Clean up the URL param
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('openTemplate');
+    setSearchParams(newParams, { replace: true });
+
+    // Check if it's the Unit Economics calculator
+    if (template.name === 'Unit Economics') {
+      setActiveTab('calculator');
+      return;
+    }
+
+    // Check if it's a canvas template
+    const canvasType = getCanvasType(template.name);
+    if (canvasType) {
+      setActiveTab(canvasType);
+      return;
+    }
+
+    // Regular template - open the editor dialog
+    const existingInstance = instancesByTemplateId[template.id];
+    setSelectedTemplate(template);
+    setSelectedInstance(existingInstance || null);
+  }, [templates, loadingTemplates, loadingInstances, searchParams, setSearchParams, instancesByTemplateId]);
 
   const handleOpenTemplate = (template: Template) => {
     // If it's a canvas template, switch to the appropriate tab instead of opening dialog
