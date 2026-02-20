@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   Check, X, Upload, FileText, TrendingUp,
   Users, DollarSign, Lightbulb, BarChart3,
-  Sparkles, Eye, MessageSquare,
+  Sparkles, Eye, MessageSquare, BookOpen,
 } from 'lucide-react';
 import { useDocuments } from '@/hooks/useDocuments';
 import { useDocumentReviews } from '@/hooks/useDocumentReviews';
@@ -27,15 +27,19 @@ interface ChecklistItem {
   icon: typeof FileText;
   categoryKey: string;
   required: boolean;
+  /** ID of the template in the templates table, if one exists */
+  templateId?: string;
+  /** Name of the template to search for in the templates sub-tab */
+  templateName?: string;
 }
 
 const CHECKLIST_ITEMS: ChecklistItem[] = [
-  { id: 'pitch_deck', labelKey: 'dataroomChecklist.pitchDeck', icon: Lightbulb, categoryKey: 'pitch_deck', required: true },
-  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true },
-  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true },
-  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false },
+  { id: 'pitch_deck', labelKey: 'dataroomChecklist.pitchDeck', icon: Lightbulb, categoryKey: 'pitch_deck', required: true, templateId: '479fa1ff-066f-409f-bd03-9a9242d559bf', templateName: 'Pitch Deck Checklist' },
+  { id: 'one_pager', labelKey: 'dataroomChecklist.onePager', icon: FileText, categoryKey: 'one_pager', required: true, templateId: '633a9b38-93d9-4a5f-a478-264bce866676', templateName: 'Value Proposition Canvas' },
+  { id: 'financial_model', labelKey: 'dataroomChecklist.financialModel', icon: DollarSign, categoryKey: 'financial_model', required: true, templateId: '8c7e8080-6d4b-4b99-96b3-340d1e7e37eb', templateName: 'Unit Economics' },
+  { id: 'team', labelKey: 'dataroomChecklist.teamDeck', icon: Users, categoryKey: 'team', required: false, templateId: 'd4a3a07b-7974-4a2c-a325-2f7cf3422cb9', templateName: 'Hiring Plan' },
   { id: 'traction', labelKey: 'dataroomChecklist.tractionReport', icon: TrendingUp, categoryKey: 'traction', required: false },
-  { id: 'market', labelKey: 'dataroomChecklist.marketAnalysis', icon: BarChart3, categoryKey: 'market', required: false },
+  { id: 'market', labelKey: 'dataroomChecklist.marketAnalysis', icon: BarChart3, categoryKey: 'market', required: false, templateId: 'c9cca57a-bbde-4a4a-a136-efbd1c858e66', templateName: 'Competitor Analysis' },
 ];
 
 export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: DataroomChecklistProps) {
@@ -54,8 +58,12 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
   };
 
   const handleUpload = (categoryKey: string) => {
-    // Navigate to all documents sub-tab with upload dialog pre-opened
     setSearchParams({ tab: 'documents', sub: 'all', upload: categoryKey }, { replace: true });
+  };
+
+  const handleOpenTemplate = (item: ChecklistItem) => {
+    // Navigate to the templates sub-tab (Ferramentas) in documents
+    setSearchParams({ tab: 'documents', sub: 'templates' }, { replace: true });
   };
 
   const completedCount = CHECKLIST_ITEMS.filter(item => getDocForCategory(item.categoryKey)).length;
@@ -143,14 +151,27 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
                       </>
                     )}
                     {!hasDoc && canWrite && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleUpload(item.categoryKey)}
-                      >
-                        <Upload className="h-3.5 w-3.5 mr-1.5" />
-                        {t('common.upload', { defaultValue: 'Upload' })}
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {item.templateId && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenTemplate(item)}
+                            title={t('dataroomChecklist.useTemplate', { defaultValue: 'Usar template' })}
+                          >
+                            <BookOpen className="h-3.5 w-3.5 mr-1.5" />
+                            {t('dataroomChecklist.template', { defaultValue: 'Template' })}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpload(item.categoryKey)}
+                        >
+                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          {t('common.upload', { defaultValue: 'Upload' })}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
