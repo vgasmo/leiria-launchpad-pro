@@ -1499,7 +1499,13 @@
       "title": "Portfolio Health Matrix"
     },
     "nudgeFounder": "Nudge",
-    "reviewMilestone": "Review"
+    "reviewMilestone": "Review",
+    "aiBriefing": {
+      "cta": "Briefing",
+      "title": "30-Day Briefing",
+      "error": "Could not generate briefing.",
+      "nextActions": "Next Actions"
+    }
   },
   "consultorTools": {
     "allContexts": "All contexts",
@@ -3094,7 +3100,11 @@
     "submit": "Submit Feedback",
     "title": "Post-Session Feedback",
     "whatBlocked": "What's blocked?",
-    "whatClarified": "What was clarified?"
+    "whatClarified": "What was clarified?",
+    "structureNotes": "Clean up & Structure",
+    "structureEmpty": "Write some notes first.",
+    "structured": "Notes structured. Please review before submitting.",
+    "structureError": "Could not structure notes. Try again."
   },
   "mentorNda": {
     "accepted": "Accepted",

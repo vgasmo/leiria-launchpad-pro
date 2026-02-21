@@ -8,7 +8,9 @@ import {
   CheckCircle,
   Loader2,
   Star,
+  Sparkles,
 } from 'lucide-react';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +53,36 @@ export function MentorPostSessionFeedback({
   const [nextSteps, setNextSteps] = useState('');
   const [rating, setRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [structuring, setStructuring] = useState(false);
+
+  /** Calls generate-session-summary to auto-structure raw notes */
+  const handleStructureNotes = async () => {
+    const rawText = [clarified, blocked, nextSteps].filter(Boolean).join('\n');
+    if (!rawText.trim()) {
+      toast.error(t('mentorFeedback.structureEmpty', { defaultValue: 'Write some notes first.' }));
+      return;
+    }
+    setStructuring(true);
+    try {
+      const { data, error } = await invokeWithAuth('generate-session-summary', {
+        body: { 
+          session_id: sessionId,
+          raw_notes: rawText,
+          language: t('common.langCode', { defaultValue: 'en' }) === 'pt' ? 'pt' : 'en',
+        },
+      });
+      if (error) throw error;
+      const result = data as any;
+      if (result?.summary) setClarified(result.summary);
+      if (result?.action_items) setNextSteps(Array.isArray(result.action_items) ? result.action_items.join('\n') : result.action_items);
+      if (result?.private_note) setBlocked(result.private_note);
+      toast.success(t('mentorFeedback.structured', { defaultValue: 'Notes structured. Please review before submitting.' }));
+    } catch {
+      toast.error(t('mentorFeedback.structureError', { defaultValue: 'Could not structure notes. Try again.' }));
+    } finally {
+      setStructuring(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -185,7 +217,17 @@ export function MentorPostSessionFeedback({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 mr-auto"
+            onClick={handleStructureNotes}
+            disabled={structuring || submitting}
+          >
+            {structuring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {t('mentorFeedback.structureNotes', { defaultValue: 'Clean up & Structure' })}
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             {t('common.cancel')}
           </Button>
