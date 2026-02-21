@@ -1497,7 +1497,9 @@
     },
     "healthMatrix": {
       "title": "Matriz de Saúde do Portfólio"
-    }
+    },
+    "nudgeFounder": "Contactar",
+    "reviewMilestone": "Rever"
   },
   "consultorTools": {
     "allContexts": "Todos contexts",
@@ -5325,6 +5327,11 @@
     "team": "Co-fundadores",
     "templates": "Templates",
     "time": "Tempo",
+    "aiDraftUpdate": {
+      "title": "Rascunho de Atualização Mensal com IA",
+      "description": "Sintetiza KPIs, marcos e sessões num resumo pronto a enviar.",
+      "cta": "Gerar Rascunho"
+    },
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor"
   },

@@ -321,10 +321,32 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                         <p className="text-xs text-muted-foreground">{item.reason}</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0 text-xs">
-                      {t('common.view')}
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </Button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs h-7 hidden sm:inline-flex"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/workspace/${item.workspace.id}?tab=milestones`);
+                        }}
+                      >
+                        <Target className="h-3 w-3 mr-1" />
+                        {t('consultor.reviewMilestone', { defaultValue: 'Review' })}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs h-7"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/workspace/${item.workspace.id}?tab=agenda`);
+                        }}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        {t('consultor.nudgeFounder', { defaultValue: 'Nudge' })}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );

@@ -61,8 +61,8 @@ export default function WorkspaceDetail() {
 
   // Compute visible tabs
   const { primaryTabs, overflowTabs } = useMemo(
-    () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder }, !!startup),
-    [isAdmin, isConsultor, isMentor, isFounder, !!startup]
+    () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder }, !!startup, workspace?.stage),
+    [isAdmin, isConsultor, isMentor, isFounder, !!startup, workspace?.stage]
   );
   const allVisibleIds = useMemo(
     () => new Set([...primaryTabs, ...overflowTabs].map(t => t.id)),

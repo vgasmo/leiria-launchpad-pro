@@ -164,6 +164,31 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         />
       )}
 
+      {/* AI Draft Monthly Update CTA - Founders only */}
+      {isFounder && canWrite && (
+        <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl">
+          <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{t('workspace.aiDraftUpdate.title', { defaultValue: 'Rascunho de Atualização Mensal com IA' })}</p>
+                <p className="text-xs text-muted-foreground">{t('workspace.aiDraftUpdate.description', { defaultValue: 'Sintetiza KPIs, marcos e sessões num resumo pronto a enviar.' })}</p>
+              </div>
+            </div>
+            <Button 
+              size="sm" 
+              className="gap-1.5 shrink-0"
+              onClick={() => setSearchParams({ tab: 'documents', sub: 'all' })}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {t('workspace.aiDraftUpdate.cta', { defaultValue: 'Gerar Rascunho' })}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Monthly Check-in Banner for Founders */}
       {isFounder && <MonthlyCheckinBanner workspaceId={workspace.id} />}
 
