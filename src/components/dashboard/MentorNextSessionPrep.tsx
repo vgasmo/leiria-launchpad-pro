@@ -59,12 +59,12 @@ export function MentorNextSessionPrep({ workspaces }: MentorNextSessionPrepProps
 
   const getTimeLabel = () => {
     if (isToday(meetingDate)) {
-      return `${t('common.today')} ${format(meetingDate, 'h:mm a')}`;
+      return `${t('common.today')} ${format(meetingDate, 'HH:mm')}`;
     }
     if (isTomorrow(meetingDate)) {
-      return `${t('common.tomorrow', 'Tomorrow')} ${format(meetingDate, 'h:mm a')}`;
+      return `${t('common.tomorrow', { defaultValue: 'Tomorrow' })} ${format(meetingDate, 'HH:mm')}`;
     }
-    return format(meetingDate, 'MMM d, h:mm a');
+    return format(meetingDate, 'dd MMM, HH:mm');
   };
 
   return (
