@@ -247,6 +247,9 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
 
   return (
     <div className="space-y-6 max-w-6xl">
+      {/* SECTION 0: Work Queue - ALWAYS VISIBLE for triage cockpit */}
+      <WorkQueuePanel compact={false} />
+
       {/* SECTION 1: HERO - "Risco e Prioridades de Hoje" */}
       <section>
         <div className="flex items-center justify-between mb-4">
@@ -382,12 +385,16 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         </Card>
       </section>
 
-      {/* Health Distribution - separate subtle row */}
+      {/* Health Matrix - Visual grid showing R/Y/G per startup */}
       <Card className="p-4 rounded-2xl border-border/60">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.healthDistribution')}</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('consultor.healthMatrix.title', { defaultValue: 'Portfolio Health Matrix' })}</p>
+          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => navigate('/my-workspaces')}>
+            {t('common.viewAll')}
+          </Button>
         </div>
-        <div className="flex gap-1 h-2.5 rounded-full overflow-hidden bg-muted/50">
+        {/* Distribution bar */}
+        <div className="flex gap-1 h-2.5 rounded-full overflow-hidden bg-muted/50 mb-4">
           {Object.entries(stats.healthCounts).map(([health, count]) => {
             if (count === 0) return null;
             const colors: Record<string, string> = {
@@ -408,6 +415,34 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                 </TooltipTrigger>
                 <TooltipContent>
                   <span>{t(`health.levels.${health}`)}: {count}</span>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+        {/* Startup tiles grid */}
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+          {workspaces.slice(0, 24).map(w => {
+            const health = (w.health_score_override || w.health_score || 'stable') as string;
+            const bgColors: Record<string, string> = {
+              critical: 'bg-health-critical',
+              at_risk: 'bg-health-at-risk',
+              stable: 'bg-health-stable',
+              healthy: 'bg-health-healthy',
+              thriving: 'bg-health-thriving',
+            };
+            return (
+              <Tooltip key={w.id}>
+                <TooltipTrigger asChild>
+                  <div 
+                    className={`h-8 rounded-md cursor-pointer transition-all hover:scale-110 hover:shadow-sm flex items-center justify-center text-[9px] font-bold text-white ${bgColors[health] || 'bg-muted'}`}
+                    onClick={() => navigate(`/workspace/${w.id}`)}
+                  >
+                    {w.startup?.name?.slice(0, 2).toUpperCase()}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{w.startup?.name} — {t(`health.levels.${health}`)}</span>
                 </TooltipContent>
               </Tooltip>
             );
@@ -582,9 +617,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
 
       {/* SECTION 4: Weekly Impact Summary - Hidden in Focus mode */}
       {!isFocused && (
-        <section className="grid gap-4 lg:grid-cols-2">
-          <WorkQueuePanel compact />
-          
+        <section>
           {/* Weekly Impact Card */}
           <Card>
             <CardHeader className="pb-3">
