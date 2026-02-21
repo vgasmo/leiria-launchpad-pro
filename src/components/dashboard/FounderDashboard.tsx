@@ -8,20 +8,22 @@ import {
   RotateCcw,
   BookOpenCheck,
   X,
+  Zap,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { FounderWelcomePanel } from '@/components/founder/FounderWelcomePanel';
 import { StreakHero } from '@/components/dashboard/StreakHero';
 import { FounderBookingCTA } from '@/components/dashboard/FounderBookingCTA';
 import { OneThingToday } from '@/components/dashboard/OneThingToday';
 import { StageProgressCard } from '@/components/dashboard/StageProgressCard';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
+import { NextBestAction } from '@/components/workspace/NextBestAction';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
@@ -53,25 +55,21 @@ export function FounderDashboard({
 
   const handleRestoreChecklist = () => {
     restoreChecklist();
-    toast.success(t('checklistRecovery.restored', 'Checklist restored'));
+    toast.success(t('checklistRecovery.restored', { defaultValue: 'Checklist restored' }));
   };
 
-  // Record activity on dashboard view
   useEffect(() => {
     recordActivity();
   }, []);
 
-  // Get the primary workspace (founders typically have 1)
   const workspace = workspaces[0];
   
-  // P0 FIX: Compute hasMentor from real workspace_users data (not hardcoded)
   const { data: workspaceMembers } = useWorkspaceMembers(workspace?.id);
   const hasMentor = useMemo(() => {
     if (!workspaceMembers) return false;
     return workspaceMembers.some(m => m.role === 'mentor_externo');
   }, [workspaceMembers]);
   
-  // Calculate checklist progress
   const hasProfile = Boolean(profile?.full_name);
   const hasStartup = Boolean(workspace);
   const hasKpis = Boolean(workspace?.hasCurrentMonthKpi);
@@ -79,18 +77,14 @@ export function FounderDashboard({
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex gap-4">
-              <Skeleton className="h-16 w-16 rounded-xl" />
-              <div className="flex-1">
-                <Skeleton className="h-6 w-48 mb-2" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-6 max-w-5xl">
+        {/* Structural skeleton matching dashboard layout */}
+        <ContentSkeleton type="stats" count={3} />
+        <ContentSkeleton type="list" count={3} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <ContentSkeleton type="chart" />
+          <ContentSkeleton type="list" count={4} />
+        </div>
       </div>
     );
   }
@@ -141,7 +135,7 @@ export function FounderDashboard({
     );
   }
 
-  // No workspace yet - show welcome panel with getting started
+  // No workspace yet
   if (!workspace) {
     return (
       <div className="space-y-6">
@@ -154,7 +148,6 @@ export function FounderDashboard({
           onCreateStartup={onCreateStartup}
         />
         
-        {/* Motivational empty state */}
         <Card className="relative overflow-hidden border-0 shadow-card">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
           <CardContent className="relative p-6 md:p-10 text-center">
@@ -183,15 +176,13 @@ export function FounderDashboard({
   }
 
   const health = workspace.health_score_override || workspace.health_score;
-
-  // FAB handlers
   const handleUpdateKpis = () => navigate(`/workspace/${workspace.id}?tab=kpis`);
   const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=actions`);
   const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=agenda`);
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* Welcome Panel with Checklist (dismissible) - only show if not complete */}
+      {/* Welcome Panel with Checklist (dismissible) */}
       <FounderWelcomePanel
         hasStartup={hasStartup}
         hasProfile={hasProfile}
@@ -202,8 +193,17 @@ export function FounderDashboard({
         workspaceId={workspace.id}
       />
 
-      {/* Quick Guide Banner for first-time founders */}
+      {/* Quick Guide Banner */}
       <QuickGuideBanner />
+
+      {/* ★ HERO: Next Best Actions — the FIRST thing founders see ★ */}
+      <NextBestAction
+        workspaceId={workspace.id}
+        programId={workspace.program_id}
+        stage={workspace.stage}
+        canWrite={true}
+      />
+
       <section className="space-y-4">
         {/* One Thing Today - Single focus action */}
         <OneThingToday workspace={workspace} />
@@ -212,8 +212,7 @@ export function FounderDashboard({
         <FounderBookingCTA workspaceId={workspace.id} />
       </section>
 
-      {/* MAIN BLOCK 1: Startup Card - Journey-first, Health secondary */}
-      {/* UX EMPHASIS: Founders see their journey/phase prominently, health is informational not alarming */}
+      {/* Startup Card - Journey-first */}
       <Card className="overflow-hidden border-border/60 rounded-2xl shadow-sm">
         <div className="bg-muted/40 p-4 sm:p-6">
           <div className="flex items-center gap-4">
@@ -227,13 +226,11 @@ export function FounderDashboard({
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-lg font-semibold truncate">{workspace.startup?.name}</h1>
               </div>
-              {/* UX: Stage badge is PRIMARY for founders - their journey position */}
               <div className="flex items-center gap-2">
                 <StageBadge stage={workspace.stage} size="sm" />
                 <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full border border-border/50">
                   {workspace.program?.name}
                 </Badge>
-                {/* Health badge is shown but secondary - not the focus */}
                 <HealthBadge score={health as HealthScore | null} size="sm" />
               </div>
             </div>
@@ -249,7 +246,7 @@ export function FounderDashboard({
         </div>
       </Card>
 
-      {/* MAIN BLOCKS 2 & 3: Progress + Calendar (max 3 visible) */}
+      {/* Progress + Calendar */}
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
           <StageProgressCard workspace={workspace} />
@@ -258,7 +255,7 @@ export function FounderDashboard({
         <CalendarWidget />
       </div>
 
-      {/* Streak (secondary - calm) */}
+      {/* Streak */}
       <StreakHero streakWeeks={streakWeeks} />
 
       {/* Checklist Recovery Footer */}
@@ -271,7 +268,7 @@ export function FounderDashboard({
             className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
           >
             <RotateCcw className="h-3 w-3" />
-            {t('checklistRecovery.restoreChecklist', 'Show onboarding checklist')}
+            {t('checklistRecovery.restoreChecklist', { defaultValue: 'Show onboarding checklist' })}
           </Button>
         </div>
       )}

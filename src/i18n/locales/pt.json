@@ -5320,6 +5320,16 @@
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor"
   },
+  "workspaceTable": {
+    "lastSession": "Última Sessão",
+    "nextMeeting": "Próxima Reunião",
+    "noSessions": "Sem sessões",
+    "noneScheduled": "Sem agendamento",
+    "openWorkspace": "Abrir workspace",
+    "overdue": "em atraso",
+    "priority": "Prioridade",
+    "today": "Hoje"
+  },
   "workspaceOverview": {
     "addKpiEntry": "Adicionar Registo de KPI",
     "addTags": "Adicionar etiquetas...",

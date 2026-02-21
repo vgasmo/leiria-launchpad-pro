@@ -117,10 +117,19 @@ export default function WorkspaceDetail() {
     return (
       <AppLayout title={t('common.loading')}>
         <div className="space-y-6">
-          <Skeleton className="h-32 w-full" />
+          {/* Structural skeleton matching workspace layout */}
+          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-32 w-full rounded-lg" />
           <div className="grid gap-6 md:grid-cols-2">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}
+            </div>
+            <div className="space-y-3">
+              <Skeleton className="h-24 rounded-lg" />
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 rounded-lg" />)}
+              </div>
+            </div>
           </div>
         </div>
       </AppLayout>

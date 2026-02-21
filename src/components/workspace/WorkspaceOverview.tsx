@@ -359,10 +359,16 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
               </div>
             ) : kpiData?.current.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>{t('workspaceOverview.noKpisRecorded')}</p>
-                <Button variant="link" size="sm" className="mt-2" onClick={() => setSearchParams({ tab: 'kpis' })}>
+              <div className="text-center py-8">
+                <div className="h-12 w-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+                <p className="font-medium text-sm text-foreground mb-1">{t('emptyStates.kpis.title')}</p>
+                <p className="text-xs text-muted-foreground max-w-xs mx-auto mb-3">
+                  {t('emptyStates.kpis.description')}
+                </p>
+                <Button size="sm" onClick={() => setSearchParams({ tab: 'kpis' })} className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
                   {t('workspaceOverview.addKpiEntry')}
                 </Button>
               </div>
@@ -394,9 +400,18 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             {milestonesLoading ? (
               <Skeleton className="h-24" />
             ) : milestones?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>{t('workspaceOverview.noMilestonesDefined')}</p>
+              <div className="text-center py-8">
+                <div className="h-12 w-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
+                <p className="font-medium text-sm text-foreground mb-1">{t('emptyStates.milestones.title')}</p>
+                <p className="text-xs text-muted-foreground max-w-xs mx-auto mb-3">
+                  {t('emptyStates.milestones.description')}
+                </p>
+                <Button size="sm" onClick={() => setSearchParams({ tab: 'milestones' })} className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
+                  {t('workspace.addFirstMilestone')}
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
