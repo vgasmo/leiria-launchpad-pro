@@ -14,6 +14,8 @@ export interface WorkspaceTab {
   visibleTo: ('all' | 'founder' | 'admin' | 'consultor' | 'mentor')[];
   /** If true, requires startup data to render */
   requiresStartup?: boolean;
+  /** Minimum stage required to show this tab (progressive disclosure) */
+  minStage?: string;
 }
 
 /**
@@ -36,24 +38,43 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   { id: 'playbooks',  labelKey: 'workspace.playbooks',   icon: BookOpen,        primary: false, visibleTo: ['all'] },
   // templates absorbed into documents tab as "Ferramentas para Empreendedores" sub-tab
   // dataroom absorbed into documents tab as sub-tab
-  { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'] },
+  { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'], minStage: 'validation' },
   { id: 'team',       labelKey: 'workspace.team',         icon: Users,           primary: false, visibleTo: ['founder'], requiresStartup: true },
-  { id: 'funding',    labelKey: 'workspace.funding',      icon: DollarSign,      primary: false, visibleTo: ['founder'], requiresStartup: true },
+  { id: 'funding',    labelKey: 'workspace.funding',      icon: DollarSign,      primary: false, visibleTo: ['founder'], requiresStartup: true, minStage: 'mvp' },
   { id: 'notes',      labelKey: 'workspace.notesAndTasks', icon: StickyNote,     primary: false, visibleTo: ['admin', 'consultor', 'mentor'] },
   { id: 'time',       labelKey: 'workspace.time',         icon: Clock,           primary: false, visibleTo: ['admin', 'consultor'] },
   { id: 'settings',   labelKey: 'workspace.settings',     icon: Settings,        primary: false, visibleTo: ['all'] },
 ];
 
 /**
- * Filter tabs based on user roles and available data.
+ * Stage progression order for progressive disclosure.
+ */
+const STAGE_ORDER = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
+
+function meetsStageRequirement(currentStage: string, minStage?: string): boolean {
+  if (!minStage) return true;
+  const currentIdx = STAGE_ORDER.indexOf(currentStage);
+  const minIdx = STAGE_ORDER.indexOf(minStage);
+  if (currentIdx === -1 || minIdx === -1) return true; // unknown stage → show
+  return currentIdx >= minIdx;
+}
+
+/**
+ * Filter tabs based on user roles, available data, and startup stage.
  */
 export function getVisibleTabs(
   roles: { isAdmin: boolean; isConsultor: boolean; isMentor: boolean; isFounder: boolean },
-  hasStartup: boolean
+  hasStartup: boolean,
+  currentStage?: string
 ): { primaryTabs: WorkspaceTab[]; overflowTabs: WorkspaceTab[] } {
   const visible = WORKSPACE_TABS.filter(tab => {
     // Check startup requirement
     if (tab.requiresStartup && !hasStartup) return false;
+    
+    // Progressive disclosure: hide advanced tabs for early-stage startups (founders only)
+    if (tab.minStage && roles.isFounder && !roles.isAdmin && !roles.isConsultor && currentStage) {
+      if (!meetsStageRequirement(currentStage, tab.minStage)) return false;
+    }
     
     // Check role visibility
     if (tab.visibleTo.includes('all')) return true;

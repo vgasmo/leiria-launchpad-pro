@@ -1497,7 +1497,9 @@
     },
     "healthMatrix": {
       "title": "Portfolio Health Matrix"
-    }
+    },
+    "nudgeFounder": "Nudge",
+    "reviewMilestone": "Review"
   },
   "consultorTools": {
     "allContexts": "All contexts",
@@ -5325,6 +5327,11 @@
     "team": "Co-founders",
     "templates": "Templates",
     "time": "Time",
+    "aiDraftUpdate": {
+      "title": "Draft Monthly Update with AI",
+      "description": "Synthesize KPIs, milestones, and sessions into a ready-to-send summary.",
+      "cta": "Generate Draft"
+    },
     "yourConsultant": "Your Consultant",
     "yourMentor": "Your Mentor"
   },
