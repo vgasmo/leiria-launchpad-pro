@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { useTranslation } from 'react-i18next';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,35 +11,39 @@ import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
+import { SkeletonDashboard } from "@/components/ui/skeleton";
+
+// Eager: lightweight / critical-path pages
 import Login from "./pages/Login";
-import MyWorkspaces from "./pages/MyWorkspaces";
-import WorkspaceDetail from "./pages/WorkspaceDetail";
-import Admin from "./pages/Admin";
-import AdminDatarooms from "./pages/AdminDatarooms";
-import ProgramSetupWizard from "./pages/ProgramSetupWizard";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import Mentors from "./pages/Mentors";
 import ResetPassword from "./pages/ResetPassword";
-import Search from "./pages/Search";
-import SharedWorkspace from "./pages/SharedWorkspace";
-import SharedDataroom from "./pages/SharedDataroom";
-import MentorNda from "./pages/MentorNda";
-import ConsultorTools from "./pages/ConsultorTools";
-import ValuePropWizardPage from "./pages/ValuePropWizardPage";
-import IntegrationsSetup from "./pages/IntegrationsSetup";
-import HelpGlossary from "./pages/HelpGlossary";
-import QuickGuide from "./pages/QuickGuide";
 import PendingApproval from "./pages/PendingApproval";
 import SuspendedAccount from "./pages/SuspendedAccount";
-import CRM from "./pages/CRM";
-import CrmDiagnostics from "./pages/CrmDiagnostics";
-import PublicBooking from "./pages/PublicBooking";
-import AdminDataImport from "./pages/AdminDataImport";
-import Ecosystem from "./pages/Ecosystem";
 import AcceptInvite from "./pages/AcceptInvite";
-import Documents from "./pages/Documents";
-import Resources from "./pages/Resources";
+
+// Lazy: heavy page modules — only loaded when navigated to
+const MyWorkspaces = lazy(() => import("./pages/MyWorkspaces"));
+const WorkspaceDetail = lazy(() => import("./pages/WorkspaceDetail"));
+const Admin = lazy(() => import("./pages/Admin"));
+const AdminDatarooms = lazy(() => import("./pages/AdminDatarooms"));
+const ProgramSetupWizard = lazy(() => import("./pages/ProgramSetupWizard"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Mentors = lazy(() => import("./pages/Mentors"));
+const Search = lazy(() => import("./pages/Search"));
+const SharedWorkspace = lazy(() => import("./pages/SharedWorkspace"));
+const SharedDataroom = lazy(() => import("./pages/SharedDataroom"));
+const MentorNda = lazy(() => import("./pages/MentorNda"));
+const ConsultorTools = lazy(() => import("./pages/ConsultorTools"));
+const ValuePropWizardPage = lazy(() => import("./pages/ValuePropWizardPage"));
+const HelpGlossary = lazy(() => import("./pages/HelpGlossary"));
+const QuickGuide = lazy(() => import("./pages/QuickGuide"));
+const CRM = lazy(() => import("./pages/CRM"));
+const CrmDiagnostics = lazy(() => import("./pages/CrmDiagnostics"));
+const PublicBooking = lazy(() => import("./pages/PublicBooking"));
+const AdminDataImport = lazy(() => import("./pages/AdminDataImport"));
+const Ecosystem = lazy(() => import("./pages/Ecosystem"));
+const Documents = lazy(() => import("./pages/Documents"));
+const Resources = lazy(() => import("./pages/Resources"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,43 +111,55 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   );
 }
 
+function SuspenseFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="w-full max-w-4xl">
+        <SkeletonDashboard />
+      </div>
+    </div>
+  );
+}
+
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/pending-approval" element={<PendingApproval />} />
-      <Route path="/suspended" element={<SuspendedAccount />} />
-      <Route path="/share/:token" element={<SharedWorkspace />} />
-      <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
-      <Route path="/book/:token" element={<PublicBooking />} />
-      <Route path="/accept-invite" element={<AcceptInvite />} />
-      <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
-      <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
-      <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
-      <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
-      <Route path="/consultor-tools" element={<ProtectedRoute><ConsultorTools /></ProtectedRoute>} />
-      <Route path="/workspace/:workspaceId/value-prop" element={<ProtectedRoute><ValuePropWizardPage /></ProtectedRoute>} />
-      <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
-      <Route path="/integrations-setup" element={<Navigate to="/settings" replace />} />
-      <Route path="/documents" element={<ProtectedRoute staffOnly><Documents /></ProtectedRoute>} />
-      <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
-      <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
-      <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
-      <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
-      <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
-      <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
-      <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
-      <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
-      <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
-      <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
-      <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
-      <Route path="/admin/programs/:id/setup/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <Suspense fallback={<SuspenseFallback />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/suspended" element={<SuspendedAccount />} />
+        <Route path="/share/:token" element={<SharedWorkspace />} />
+        <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
+        <Route path="/book/:token" element={<PublicBooking />} />
+        <Route path="/accept-invite" element={<AcceptInvite />} />
+        <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
+        <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
+        <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
+        <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
+        <Route path="/consultor-tools" element={<ProtectedRoute><ConsultorTools /></ProtectedRoute>} />
+        <Route path="/workspace/:workspaceId/value-prop" element={<ProtectedRoute><ValuePropWizardPage /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route path="/integrations-setup" element={<Navigate to="/settings" replace />} />
+        <Route path="/documents" element={<ProtectedRoute staffOnly><Documents /></ProtectedRoute>} />
+        <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+        <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
+        <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
+        <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
+        <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
+        <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
+        <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
+        <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
+        <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+        <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+        <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+        <Route path="/admin/programs/:id/setup/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 
