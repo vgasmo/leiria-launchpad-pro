@@ -23,8 +23,8 @@ interface MentorNextSessionPrepProps {
 }
 
 /**
- * Compact card showing the next upcoming session with prep context
- * Only shows when a session is within 24 hours
+ * Hero card showing the next upcoming session with prep context
+ * Shows when a session is within 48 hours (expanded from 24h)
  */
 export function MentorNextSessionPrep({ workspaces }: MentorNextSessionPrepProps) {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export function MentorNextSessionPrep({ workspaces }: MentorNextSessionPrepProps
         const meetingDate = new Date(workspace.nextMeetingDate);
         const hoursUntil = differenceInHours(meetingDate, now);
         
-        if (hoursUntil >= 0 && hoursUntil <= 24) {
+        if (hoursUntil >= 0 && hoursUntil <= 48) {
           return {
             workspace,
             meetingDate,

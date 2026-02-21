@@ -77,6 +77,18 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     };
   }, [workspaces]);
 
+  // Sessions completed recently (within 48h) that may need notes logged
+  const recentUnloggedSessions = useMemo(() => {
+    if (!workspaces) return [];
+    const now = new Date();
+    return workspaces.filter(w => {
+      if (!w.lastSession?.scheduled_at) return false;
+      const sessionDate = new Date(w.lastSession.scheduled_at);
+      const hoursSince = (now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60);
+      return hoursSince >= 0 && hoursSince <= 48;
+    }).slice(0, 3);
+  }, [workspaces]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -131,8 +143,39 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* P0 HERO: Next Session Prep - Only shows when session is within 24h */}
+      {/* P0 HERO: Next Session Prep - Shows when session is within 48h */}
       <MentorNextSessionPrep workspaces={workspaces} />
+
+      {/* Post-session feedback CTA: show if last session was within 24h and needs notes */}
+      {recentUnloggedSessions.length > 0 && (
+        <Card className="border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 rounded-2xl">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                <FileText className="h-4 w-4 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{t('mentor.postSession.title', { defaultValue: 'Log your session notes' })}</p>
+                <p className="text-xs text-muted-foreground">{t('mentor.postSession.subtitle', { defaultValue: 'You have recent sessions without notes — log them while fresh.' })}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {recentUnloggedSessions.map(w => (
+                <Button
+                  key={w.id}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => navigate(`/workspace/${w.id}?tab=agenda`)}
+                >
+                  {w.startup?.name?.slice(0, 12)}
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Stats - Mentor-focused, calmer design */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">

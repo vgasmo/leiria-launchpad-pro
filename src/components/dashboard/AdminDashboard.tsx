@@ -107,8 +107,49 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
     );
   }
 
+  // Exception alerts that need immediate action
+  const exceptionAlerts = signals.filter(s => typeof s.value === 'number' && s.value > 0 && s.variant !== 'default');
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* HERO: Exception-Based Alerts — actionable items FIRST */}
+      {exceptionAlerts.length > 0 && (
+        <Card className="rounded-2xl border-amber-300/50 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10">
+          <CardContent className="p-4">
+            <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-3">
+              {t('admin.exceptionsTitle', { defaultValue: 'Requires Your Attention' })}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {exceptionAlerts.map((alert) => {
+                const Icon = alert.icon;
+                return (
+                  <div
+                    key={alert.key}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-background/80 cursor-pointer hover:shadow-sm transition-shadow"
+                    onClick={() => navigate(alert.href)}
+                  >
+                    <div className={cn(
+                      'h-9 w-9 rounded-full flex items-center justify-center shrink-0',
+                      alert.variant === 'destructive' ? 'bg-destructive/10' : 'bg-amber-100 dark:bg-amber-900/30'
+                    )}>
+                      <Icon className={cn(
+                        'h-4 w-4',
+                        alert.variant === 'destructive' ? 'text-destructive' : 'text-amber-600 dark:text-amber-400'
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">{alert.value as number}</p>
+                      <p className="text-xs text-muted-foreground truncate">{alert.label}</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Switch to portfolio view */}
       <div className="flex items-center justify-between">
         <div>
