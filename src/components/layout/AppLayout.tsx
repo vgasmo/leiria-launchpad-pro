@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Building2, Users, Settings } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
+import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
@@ -94,6 +95,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
           {children}
         </div>
       </main>
+      <OfflineBadge />
     </div>
   );
 });
