@@ -14,7 +14,12 @@ import {
   BarChart3,
   Target,
   MessageSquare,
+  Sparkles,
+  Loader2,
+  X,
 } from 'lucide-react';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { toast } from 'sonner';
 import { isToday, isThisWeek, format, differenceInDays, isPast } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -562,7 +567,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                 {upcomingSessions.map(w => (
                   <div
                     key={w.id}
-                    className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+                    className="relative flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={() => navigate(`/workspace/${w.id}?tab=agenda`)}
                   >
                     <Avatar className="h-7 w-7 rounded">
@@ -577,6 +582,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                         {format(new Date(w.nextMeetingDate!), "EEE, d MMM 'às' HH:mm", { locale: pt })}
                       </p>
                     </div>
+                    <AiBriefingButton workspaceId={w.id} />
                     <Button variant="ghost" size="sm" className="text-xs h-7">
                       {t('consultor.agenda.prep')}
                     </Button>
@@ -714,5 +720,78 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         </section>
       )}
     </div>
+  );
+}
+
+/** Inline AI Briefing button — calls generate-relationship-recap for a workspace */
+function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
+  const { t, i18n } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [recap, setRecap] = useState<{ summary: string; key_points: string[]; next_best_actions: string[] } | null>(null);
+
+  const handleGenerate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      const { data, error } = await invokeWithAuth('generate-relationship-recap', {
+        body: { workspace_id: workspaceId, language: i18n.language === 'pt' ? 'pt' : 'en' },
+      });
+      if (error) throw error;
+      setRecap(data as any);
+    } catch {
+      toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Could not generate briefing.' }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (recap) {
+    return (
+      <div className="absolute inset-0 z-10 bg-background/95 backdrop-blur-sm rounded-md p-3 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold flex items-center gap-1">
+            <Sparkles className="h-3 w-3 text-primary" />
+            {t('consultor.aiBriefing.title', { defaultValue: '30-Day Briefing' })}
+          </span>
+          <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setRecap(null)}>
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-2">{recap.summary}</p>
+        {recap.key_points?.length > 0 && (
+          <ul className="text-xs space-y-1 mb-2">
+            {recap.key_points.slice(0, 3).map((p, i) => (
+              <li key={i} className="flex items-start gap-1.5">
+                <span className="text-primary mt-0.5">•</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {recap.next_best_actions?.length > 0 && (
+          <div className="border-t pt-1.5 mt-1.5">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase">{t('consultor.aiBriefing.nextActions', { defaultValue: 'Next Actions' })}</span>
+            <ul className="text-xs space-y-0.5 mt-0.5">
+              {recap.next_best_actions.slice(0, 2).map((a, i) => (
+                <li key={i} className="text-muted-foreground">→ {a}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="text-xs h-7 gap-1"
+      onClick={handleGenerate}
+      disabled={loading}
+    >
+      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+      {t('consultor.aiBriefing.cta', { defaultValue: 'Briefing' })}
+    </Button>
   );
 }

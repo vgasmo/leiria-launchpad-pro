@@ -1499,7 +1499,13 @@
       "title": "Matriz de Saúde do Portfólio"
     },
     "nudgeFounder": "Contactar",
-    "reviewMilestone": "Rever"
+    "reviewMilestone": "Rever",
+    "aiBriefing": {
+      "cta": "Briefing",
+      "title": "Briefing 30 Dias",
+      "error": "Não foi possível gerar o briefing.",
+      "nextActions": "Próximas Ações"
+    }
   },
   "consultorTools": {
     "allContexts": "Todos contexts",
@@ -3094,7 +3100,11 @@
     "submit": "Submeter Feedback",
     "title": "Feedback Pós-Sessão",
     "whatBlocked": "O que está bloqueado?",
-    "whatClarified": "O que foi esclarecido?"
+    "whatClarified": "O que foi esclarecido?",
+    "structureNotes": "Limpar e Estruturar",
+    "structureEmpty": "Escreva algumas notas primeiro.",
+    "structured": "Notas estruturadas. Reveja antes de submeter.",
+    "structureError": "Não foi possível estruturar as notas. Tente novamente."
   },
   "mentorNda": {
     "accepted": "Aceite",
