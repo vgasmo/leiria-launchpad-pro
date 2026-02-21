@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useAICooldown } from '@/hooks/useAICooldown';
+import { checkRateLimit } from '@/hooks/useRateLimiter';
 import { useTranslation } from 'react-i18next';
 import { 
   Sparkles, 
@@ -69,6 +71,14 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const applyActionsMutation = useApplyActionSuggestions(workspaceId);
   const saveTranscriptMutation = useUpdateSessionTranscript(workspaceId);
 
+  // AI cooldown: 60s after generation
+  const { isCoolingDown, remainingSeconds } = useAICooldown({
+    rateLimitKey: `session-ai-${sessionId}`,
+    cooldownMs: 60000,
+    maxRequests: 5,
+    windowMs: 300000,
+  });
+
   const hasAIOutputs = !!session.ai_summary || !!session.ai_generated_at;
   const actionSuggestions = session.ai_action_suggestions || [];
   const risks = session.ai_risks || [];
@@ -76,6 +86,11 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const decisions = session.ai_decisions || [];
 
   const handleGenerate = async () => {
+    if (isCoolingDown) return;
+    if (!checkRateLimit(`session-ai-${sessionId}`, 5, 300000)) {
+      toast.error('Rate limit reached. Please wait a few minutes.');
+      return;
+    }
     await generateMutation.mutateAsync({ 
       sessionId, 
       transcript: transcript.trim() || undefined,
@@ -248,12 +263,17 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
             <div className="flex flex-wrap gap-2">
               <Button
                 onClick={handleGenerate}
-                disabled={generateMutation.isPending}
+                disabled={generateMutation.isPending || isCoolingDown}
               >
                 {generateMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Generating...
+                  </>
+                ) : isCoolingDown ? (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2 opacity-50" />
+                    Wait {remainingSeconds}s
                   </>
                 ) : (
                   <>

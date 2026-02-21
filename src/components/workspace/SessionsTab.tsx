@@ -75,6 +75,7 @@ import {
 } from '@/components/ui/select';
 import { SessionFeedbackCard } from '@/components/sessions/SessionFeedbackCard';
 import { SessionAIPanel } from '@/components/sessions/SessionAIPanel';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { SessionPrepCard } from '@/components/sessions/SessionPrepCard';
 import { RoleSpecificPrepCard } from '@/components/sessions/RoleSpecificPrepCard';
 import { CollaborativeNotesEditor } from '@/components/sessions/CollaborativeNotesEditor';
@@ -1314,14 +1315,16 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
             {/* AI Tab - Staff only */}
             {isStaff && (
               <TabsContent value="ai" className="mt-4">
-                <SessionAIPanel 
-                  key={refreshKey}
-                  workspaceId={workspaceId}
-                  sessionId={session.id}
-                  session={session}
-                  canWrite={canWrite}
-                  onRefresh={handleRefreshAI}
-                />
+                <WidgetErrorBoundary name="Session AI">
+                  <SessionAIPanel 
+                    key={refreshKey}
+                    workspaceId={workspaceId}
+                    sessionId={session.id}
+                    session={session}
+                    canWrite={canWrite}
+                    onRefresh={handleRefreshAI}
+                  />
+                </WidgetErrorBoundary>
               </TabsContent>
             )}
           </Tabs>

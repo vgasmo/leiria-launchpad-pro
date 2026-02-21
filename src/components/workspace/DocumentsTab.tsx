@@ -48,6 +48,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { FinancialModelPanel } from './FinancialModelPanel';
 import { TemplatesTab } from './TemplatesTab';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { DataroomTab } from './DataroomTab';
 import { useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -350,7 +351,9 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
       {/* Sub-tab panels */}
       {activeSubTab === 'financial' && (
         <div role="tabpanel" id="doc-panel-financial" aria-labelledby="doc-tab-financial">
-          <FinancialModelPanel workspaceId={workspaceId} canWrite={canWrite} />
+          <WidgetErrorBoundary name="Financial Model">
+            <FinancialModelPanel workspaceId={workspaceId} canWrite={canWrite} />
+          </WidgetErrorBoundary>
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { triggerMilestoneCelebration } from '@/lib/confetti';
 
 type MilestoneStatus = Database['public']['Enums']['milestone_status'];
 
@@ -145,9 +146,14 @@ export function useUpdateMilestone(workspaceId: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
+      
+      // 🎉 Celebrate milestone completion
+      if (data.status === 'completed') {
+        triggerMilestoneCelebration();
+      }
     },
   });
 }
