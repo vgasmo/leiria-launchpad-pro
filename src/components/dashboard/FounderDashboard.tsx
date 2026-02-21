@@ -33,6 +33,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
 import { toast } from 'sonner';
+import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -190,6 +191,13 @@ export function FounderDashboard({
         hasMentor={hasMentor}
         hasDocuments={hasDocuments}
         onCreateStartup={onCreateStartup}
+        workspaceId={workspace.id}
+      />
+
+      {/* Smart Inbox */}
+      <UnifiedSmartInbox
+        overdueCount={workspace.overdueActionsCount}
+        missingKpiCount={hasKpis ? 0 : 1}
         workspaceId={workspace.id}
       />
 

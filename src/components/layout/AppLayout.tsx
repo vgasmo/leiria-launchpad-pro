@@ -5,6 +5,7 @@ import { Building2, Users, Settings } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
+import { GlobalEcosystemCopilot } from '@/components/ai/GlobalEcosystemCopilot';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
@@ -96,6 +97,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
         </div>
       </main>
       <OfflineBadge />
+      <GlobalEcosystemCopilot />
     </div>
   );
 });

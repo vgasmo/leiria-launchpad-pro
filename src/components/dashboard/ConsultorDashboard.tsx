@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
 import { toast } from 'sonner';
 import { isToday, isThisWeek, format, differenceInDays, isPast } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -252,6 +253,12 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
 
   return (
     <div className="space-y-6 max-w-6xl">
+      {/* Smart Inbox */}
+      <UnifiedSmartInbox
+        overdueCount={stats.overdueActionsCount}
+        missingKpiCount={stats.missingKpiCount}
+      />
+
       {/* SECTION 0: Work Queue - ALWAYS VISIBLE for triage cockpit */}
       <WorkQueuePanel compact={false} />
 
