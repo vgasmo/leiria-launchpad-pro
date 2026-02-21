@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from '@/components/ui/FocusModeToggle';
@@ -728,9 +728,25 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [recap, setRecap] = useState<{ summary: string; key_points: string[]; next_best_actions: string[] } | null>(null);
+  const [cooldownEnd, setCooldownEnd] = useState<number | null>(null);
+  const [cooldownSec, setCooldownSec] = useState(0);
+
+  // Cooldown ticker
+  useEffect(() => {
+    if (!cooldownEnd) { setCooldownSec(0); return; }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((cooldownEnd - Date.now()) / 1000));
+      setCooldownSec(left);
+      if (left <= 0) setCooldownEnd(null);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cooldownEnd]);
 
   const handleGenerate = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (cooldownSec > 0) return;
     setLoading(true);
     try {
       const { data, error } = await invokeWithAuth('generate-relationship-recap', {
@@ -738,6 +754,7 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
       });
       if (error) throw error;
       setRecap(data as any);
+      setCooldownEnd(Date.now() + 60000); // 60s cooldown
     } catch {
       toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Could not generate briefing.' }));
     } finally {
@@ -788,10 +805,12 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
       size="sm"
       className="text-xs h-7 gap-1"
       onClick={handleGenerate}
-      disabled={loading}
+      disabled={loading || cooldownSec > 0}
     >
       {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-      {t('consultor.aiBriefing.cta', { defaultValue: 'Briefing' })}
+      {cooldownSec > 0
+        ? `${cooldownSec}s`
+        : t('consultor.aiBriefing.cta', { defaultValue: 'Briefing' })}
     </Button>
   );
 }

@@ -18,6 +18,7 @@ import { AgendaTab } from '@/components/workspace/AgendaTab';
 import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
 import { MilestonesTab } from '@/components/workspace/MilestonesTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 // TemplatesTab now rendered inside DocumentsTab as sub-tab
 import { DocumentsTab } from '@/components/workspace/DocumentsTab';
 import { StartupSettingsTab } from '@/components/workspace/StartupSettingsTab';
@@ -296,7 +297,9 @@ export default function WorkspaceDetail() {
           )}
           {activeTab === 'actions' && (
             <div role="tabpanel" id="tabpanel-actions" aria-labelledby="tab-actions">
-              <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
+              <WidgetErrorBoundary name="Actions">
+                <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
+              </WidgetErrorBoundary>
             </div>
           )}
           {activeTab === 'agenda' && (
@@ -306,17 +309,23 @@ export default function WorkspaceDetail() {
           )}
           {activeTab === 'documents' && (
             <div role="tabpanel" id="tabpanel-documents" aria-labelledby="tab-documents">
-              <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} isStaff={isStaff} isMentor={isMentor} />
+              <WidgetErrorBoundary name="Documents">
+                <DocumentsTab workspaceId={workspace.id} canWrite={canWrite} isFounder={isFounder} isStaff={isStaff} isMentor={isMentor} />
+              </WidgetErrorBoundary>
             </div>
           )}
           {activeTab === 'kpis' && (
             <div role="tabpanel" id="tabpanel-kpis" aria-labelledby="tab-kpis">
-              <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
+              <WidgetErrorBoundary name="KPIs">
+                <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
+              </WidgetErrorBoundary>
             </div>
           )}
           {activeTab === 'milestones' && (
             <div role="tabpanel" id="tabpanel-milestones" aria-labelledby="tab-milestones">
-              <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
+              <WidgetErrorBoundary name="Milestones">
+                <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
+              </WidgetErrorBoundary>
             </div>
           )}
           {activeTab === 'playbooks' && (

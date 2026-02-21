@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 import { Json } from '@/integrations/supabase/types';
+import { triggerMiniCelebration } from '@/lib/confetti';
 
 type ActionStatus = Database['public']['Enums']['action_status'];
 
@@ -121,12 +122,45 @@ export function useUpdateActionItem(workspaceId: string) {
       const ownerAssigned = 'owner_user_id' in updates && updates.owner_user_id;
       return { data, ownerAssigned, title: data.title };
     },
+    // ── Optimistic Update ──
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ['action-items', workspaceId] });
+      const previousItems = queryClient.getQueryData<ActionItem[]>(['action-items', workspaceId]);
+
+      queryClient.setQueryData<ActionItem[]>(['action-items', workspaceId], (old) => {
+        if (!old) return old;
+        return old.map((item) =>
+          item.id === variables.id
+            ? {
+                ...item,
+                ...variables,
+                updated_at: new Date().toISOString(),
+                ...(variables.status === 'completed' ? { completed_at: new Date().toISOString() } : {}),
+                ...(variables.status && variables.status !== 'completed' ? { completed_at: null } : {}),
+              }
+            : item,
+        );
+      });
+
+      return { previousItems };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on failure
+      if (context?.previousItems) {
+        queryClient.setQueryData(['action-items', workspaceId], context.previousItems);
+      }
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
 
       // P1.2: Log activity
       logActivity('updated', 'action_item', result.data.id, workspaceId, { title: result.title });
+
+      // 🎉 Mini celebration when marking action as completed
+      if (result.data.status === 'completed') {
+        triggerMiniCelebration();
+      }
 
        // P0.1: Trigger Teams notification when action is assigned to someone
        if (result.ownerAssigned) {
