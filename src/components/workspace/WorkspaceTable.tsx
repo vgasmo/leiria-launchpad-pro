@@ -142,7 +142,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
                   <span className="sr-only">{t('common.select', { defaultValue: 'Select' })}</span>
                 </TableHead>
               )}
-              <TableHead className="w-[180px] sm:w-[200px]">Startup</TableHead>
+              <TableHead className="w-[180px] sm:w-[200px]">{t('workspaceTable.startup', { defaultValue: 'Startup' })}</TableHead>
               <TableHead className="hidden sm:table-cell">{t('workspace.program', { defaultValue: 'Program' })}</TableHead>
               <TableHead>{t('workspaceTable.priority', { defaultValue: 'Priority' })}</TableHead>
               <TableHead>{t('workspace.healthScore', { defaultValue: 'Health' })}</TableHead>

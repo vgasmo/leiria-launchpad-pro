@@ -42,7 +42,16 @@ export function TopBar() {
 
   return (
     <div className="flex items-center gap-1 sm:gap-2">
-      {/* Command Palette trigger */}
+      {/* Command Palette trigger – full on desktop, icon-only on mobile */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="sm:hidden h-10 w-10 text-muted-foreground"
+        onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+        aria-label={t('common.search', { defaultValue: 'Search' })}
+      >
+        <Search className="h-5 w-5" />
+      </Button>
       <Button
         variant="outline"
         size="sm"

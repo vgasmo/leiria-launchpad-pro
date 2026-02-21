@@ -5336,6 +5336,7 @@
     "openWorkspace": "Open workspace",
     "overdue": "overdue",
     "priority": "Priority",
+    "startup": "Startup",
     "today": "Today"
   },
   "workspaceOverview": {
