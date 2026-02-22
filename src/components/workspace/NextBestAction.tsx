@@ -9,13 +9,16 @@ import {
   Calendar, 
   AlertTriangle,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceNextSession } from '@/hooks/useWorkspaceData';
 import { usePendingCheckin } from '@/hooks/useCheckins';
+import { triggerMiniCelebration } from '@/lib/confetti';
 import { format, isThisMonth } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface NextBestActionProps {
   workspaceId: string;
@@ -49,7 +52,6 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
     const items: ActionItem[] = [];
     const today = new Date();
 
-    // Check for overdue actions (highest priority)
     const overdueActions = actions?.filter(a => 
       a.due_date && new Date(a.due_date) < today && a.status !== 'completed'
     ) || [];
@@ -68,7 +70,6 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       });
     }
 
-    // Check for pending check-in
     if (pendingCheckin) {
       items.push({
         id: 'pending-checkin',
@@ -83,7 +84,6 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       });
     }
 
-    // Check for missing KPIs this month
     const hasCurrentMonthKpis = kpiData?.current.some(k => 
       k.period_month && isThisMonth(new Date(k.period_month))
     );
@@ -102,7 +102,6 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       });
     }
 
-    // Check for upcoming session prep
     if (nextSession) {
       const sessionDate = new Date(nextSession.starts_at);
       const daysUntil = Math.ceil((sessionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -122,7 +121,6 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       }
     }
 
-    // Check for in-progress actions
     const inProgressActions = actions?.filter(a => a.status === 'in_progress') || [];
     if (inProgressActions.length > 0 && items.length < 3) {
       items.push({
@@ -138,22 +136,23 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       });
     }
 
-    // Sort by priority and return top 3
     return items.sort((a, b) => a.priority - b.priority).slice(0, 3);
   }, [actions, kpiData, nextSession, pendingCheckin, setSearchParams, t]);
 
   if (nextActions.length === 0) {
     return (
-      <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20">
-        <CardContent className="py-6">
+      <Card className="relative overflow-hidden border-green-200 dark:border-green-900 bg-gradient-to-r from-green-50/80 via-emerald-50/50 to-transparent dark:from-green-950/30 dark:via-emerald-950/20">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-400/10 to-transparent rounded-bl-full" />
+        <CardContent className="py-6 relative">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center ring-1 ring-green-500/20">
+              <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-green-900 dark:text-green-100">{t('nextBestAction.allCaughtUp')}</h3>
               <p className="text-sm text-green-700 dark:text-green-300">{t('nextBestAction.noUrgentActions')}</p>
             </div>
+            <Sparkles className="h-5 w-5 text-green-400/50" />
           </div>
         </CardContent>
       </Card>
@@ -161,33 +160,42 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="relative overflow-hidden">
+      {/* Subtle hero gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-accent/3 pointer-events-none" />
+      
+      <CardHeader className="pb-3 relative">
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Zap className="h-4 w-4 text-primary" />
+          </div>
           {t('nextBestAction.title')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {nextActions.map((item) => (
+      <CardContent className="space-y-2.5 relative">
+        {nextActions.map((item, index) => (
           <div 
             key={item.id}
-            className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+            className={cn(
+              'group flex items-center justify-between p-3 rounded-xl border transition-all duration-200',
+              'hover:shadow-sm hover:scale-[1.005]',
               item.variant === 'destructive' 
-                ? 'border-amber-300/40 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10' 
+                ? 'border-amber-300/40 bg-amber-50/40 dark:border-amber-700/30 dark:bg-amber-900/10 hover:border-amber-400/60' 
                 : item.variant === 'warning'
-                ? 'border-amber-200/50 bg-amber-50/30 dark:border-amber-800/30 dark:bg-amber-950/10'
-                : 'border-border bg-muted/30'
-            }`}
+                ? 'border-amber-200/50 bg-amber-50/30 dark:border-amber-800/30 dark:bg-amber-950/10 hover:border-amber-300/60'
+                : 'border-border bg-muted/30 hover:border-border/80 hover:bg-muted/50',
+              index === 0 && 'ring-1 ring-primary/10'
+            )}
           >
             <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+              <div className={cn(
+                'h-10 w-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105',
                 item.variant === 'destructive' 
                   ? 'bg-amber-100/80 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' 
                   : item.variant === 'warning'
                   ? 'bg-amber-50 text-amber-500 dark:bg-amber-900/30 dark:text-amber-400'
                   : 'bg-muted text-muted-foreground'
-              }`}>
+              )}>
                 {item.icon}
               </div>
               <div>
@@ -200,10 +208,10 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
                 variant="ghost" 
                 size="sm" 
                 onClick={item.action}
-                className="gap-1"
+                className="gap-1 opacity-70 group-hover:opacity-100 transition-opacity"
               >
                 {item.actionLabel}
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             )}
           </div>

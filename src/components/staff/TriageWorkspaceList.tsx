@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ChaseActionsButton } from './ChaseActionsButton';
-import { Calendar, MessageSquare, ExternalLink, AlertTriangle, Clock, TrendingDown } from 'lucide-react';
+import { Calendar, MessageSquare, ExternalLink, AlertTriangle, Clock, TrendingDown, BarChart3 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { HealthScore } from '@/types/database';
@@ -55,34 +55,23 @@ export function TriageWorkspaceList({
 
   const calculateUrgencyScore = (workspace: WorkspaceWithDetails): number => {
     let score = 0;
-    
-    // Overdue actions (weight: 3)
     score += (workspace.overdue_actions_count || 0) * 3;
-    
-    // Days since last session (weight: 2)
     if (workspace.last_session_date) {
       const daysSince = differenceInDays(new Date(), new Date(workspace.last_session_date));
       score += Math.min(daysSince, 30) * 2;
     } else {
-      score += 60; // No session ever = high urgency
+      score += 60;
     }
-    
-    // Missing KPIs (weight: 2)
     score += (workspace.missing_kpis_count || 0) * 2;
-    
-    // Health state (weight: 5)
     const healthLabel = workspace.health_label?.toLowerCase();
     if (healthLabel === 'critical') score += 25;
     else if (healthLabel === 'at_risk' || healthLabel === 'at risk') score += 15;
     else if (healthLabel === 'needs_attention' || healthLabel === 'needs attention') score += 8;
-    
     return score;
   };
 
   const filteredAndSortedWorkspaces = useMemo(() => {
     let filtered = [...workspaces];
-    
-    // Apply quick filters
     switch (quickFilter) {
       case 'no_activity_14d':
         filtered = filtered.filter(w => {
@@ -103,12 +92,9 @@ export function TriageWorkspaceList({
         });
         break;
     }
-    
-    // Sort by urgency if triage mode is on
     if (triageMode) {
       filtered.sort((a, b) => calculateUrgencyScore(b) - calculateUrgencyScore(a));
     }
-    
     return filtered;
   }, [workspaces, triageMode, quickFilter]);
 
@@ -122,19 +108,41 @@ export function TriageWorkspaceList({
     return differenceInDays(new Date(), new Date(dateStr));
   };
 
-  const filters: { key: QuickFilter; label: string; icon?: React.ReactNode }[] = [
+  // Count items per filter for badges
+  const filterCounts = useMemo(() => ({
+    no_activity_14d: workspaces.filter(w => !w.last_session_date || differenceInDays(new Date(), new Date(w.last_session_date)) >= 14).length,
+    missing_kpis: workspaces.filter(w => (w.missing_kpis_count || 0) > 0).length,
+    overdue_actions: workspaces.filter(w => (w.overdue_actions_count || 0) > 0).length,
+    at_risk: workspaces.filter(w => { const l = w.health_label?.toLowerCase(); return l === 'critical' || l === 'at_risk' || l === 'at risk'; }).length,
+  }), [workspaces]);
+
+  const filters: { key: QuickFilter; label: string; icon?: React.ReactNode; count?: number }[] = [
     { key: 'all', label: t('triage.filters.all', 'All') },
-    { key: 'no_activity_14d', label: t('triage.filters.noActivity', 'No activity 14d'), icon: <Clock className="h-3 w-3" /> },
-    { key: 'missing_kpis', label: t('triage.filters.missingKpis', 'Missing KPIs'), icon: <TrendingDown className="h-3 w-3" /> },
-    { key: 'overdue_actions', label: t('triage.filters.overdueActions', 'Overdue actions'), icon: <AlertTriangle className="h-3 w-3" /> },
-    { key: 'at_risk', label: t('triage.filters.atRisk', 'At risk'), icon: <AlertTriangle className="h-3 w-3" /> },
+    { key: 'no_activity_14d', label: t('triage.filters.noActivity', 'No activity 14d'), icon: <Clock className="h-3 w-3" />, count: filterCounts.no_activity_14d },
+    { key: 'missing_kpis', label: t('triage.filters.missingKpis', 'Missing KPIs'), icon: <TrendingDown className="h-3 w-3" />, count: filterCounts.missing_kpis },
+    { key: 'overdue_actions', label: t('triage.filters.overdueActions', 'Overdue actions'), icon: <AlertTriangle className="h-3 w-3" />, count: filterCounts.overdue_actions },
+    { key: 'at_risk', label: t('triage.filters.atRisk', 'At risk'), icon: <AlertTriangle className="h-3 w-3" />, count: filterCounts.at_risk },
   ];
+
+  const getHealthBadgeStyle = (label: HealthScore | null) => {
+    const l = label?.toLowerCase();
+    if (l === 'critical') return 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30 font-semibold';
+    if (l === 'at_risk' || l === 'at risk') return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 font-semibold';
+    if (l === 'healthy' || l === 'thriving') return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30';
+    return 'bg-muted text-muted-foreground border-border';
+  };
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <CardTitle className="text-lg">{t('triage.title', 'Workspace Triage')}</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            {t('triage.title', 'Workspace Triage')}
+            <Badge variant="secondary" className="text-xs ml-1">
+              {filteredAndSortedWorkspaces.length}
+            </Badge>
+          </CardTitle>
           <div className="flex items-center gap-2">
             <Switch
               id="triage-mode"
@@ -147,26 +155,35 @@ export function TriageWorkspaceList({
           </div>
         </div>
         
-        {/* Quick filters */}
         <div className="flex flex-wrap gap-2 pt-3">
           {filters.map((filter) => (
             <Badge
               key={filter.key}
               variant={quickFilter === filter.key ? 'default' : 'outline'}
               className={cn(
-                "cursor-pointer transition-colors",
-                quickFilter === filter.key && "bg-primary"
+                "cursor-pointer transition-all duration-200 gap-1",
+                quickFilter === filter.key && "bg-primary shadow-sm",
+                filter.key === 'overdue_actions' && (filter.count ?? 0) > 0 && quickFilter !== filter.key && 'border-red-300 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20',
+                filter.key === 'at_risk' && (filter.count ?? 0) > 0 && quickFilter !== filter.key && 'border-amber-300 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20',
               )}
               onClick={() => setQuickFilter(filter.key)}
             >
               {filter.icon}
-              <span className={filter.icon ? "ml-1" : ""}>{filter.label}</span>
+              <span>{filter.label}</span>
+              {filter.count !== undefined && filter.count > 0 && filter.key !== 'all' && (
+                <span className={cn(
+                  'ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full min-w-[16px] text-center',
+                  quickFilter === filter.key ? 'bg-primary-foreground/20' : 'bg-current/10',
+                )}>
+                  {filter.count}
+                </span>
+              )}
             </Badge>
           ))}
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-1.5">
         {filteredAndSortedWorkspaces.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             {t('triage.noWorkspaces', 'No workspaces match the current filter')}
@@ -175,19 +192,26 @@ export function TriageWorkspaceList({
           filteredAndSortedWorkspaces.map((workspace) => {
             const daysSince = getDaysSinceSession(workspace.last_session_date);
             const urgencyScore = triageMode ? calculateUrgencyScore(workspace) : null;
+            const hasOverdue = (workspace.overdue_actions_count || 0) > 0;
+            const hasMissingKpis = (workspace.missing_kpis_count || 0) > 0;
+            const isCritical = workspace.health_label?.toLowerCase() === 'critical';
             
             return (
               <div
                 key={workspace.id}
-                className="flex items-center gap-2 p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                className={cn(
+                  'group flex items-center gap-2 p-2.5 rounded-xl border transition-all duration-200 cursor-pointer',
+                  'hover:bg-accent/60 hover:shadow-sm hover:border-border/80',
+                  isCritical && 'border-red-200/60 dark:border-red-800/40 bg-red-50/30 dark:bg-red-950/10',
+                )}
                 onClick={() => navigate(`/workspace/${workspace.id}`)}
               >
-                {/* Urgency indicator - compact */}
+                {/* Urgency indicator */}
                 {triageMode && urgencyScore !== null && (
                   <div className={cn(
-                    "w-1.5 h-8 rounded-full flex-shrink-0",
-                    urgencyScore >= 50 ? "bg-destructive" :
-                    urgencyScore >= 30 ? "bg-warning" :
+                    "w-1.5 h-10 rounded-full flex-shrink-0 transition-all",
+                    urgencyScore >= 50 ? "bg-red-500 shadow-sm shadow-red-500/30" :
+                    urgencyScore >= 30 ? "bg-amber-500 shadow-sm shadow-amber-500/20" :
                     urgencyScore >= 15 ? "bg-yellow-500" :
                     "bg-green-500"
                   )} />
@@ -196,41 +220,46 @@ export function TriageWorkspaceList({
                 {/* Startup info + health inline */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{workspace.startup?.name || 'Unknown'}</p>
+                    <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{workspace.startup?.name || 'Unknown'}</p>
                     {workspace.program?.name && (
                       <p className="text-xs text-muted-foreground truncate">{workspace.program.name}</p>
                     )}
                   </div>
                   
-                  {/* Health badge inline */}
+                  {/* Health badge */}
                   <Badge 
-                    variant={
-                      workspace.health_label === 'critical' ? 'destructive' :
-                      workspace.health_label === 'at_risk' ? 'outline' :
-                      'secondary'
-                    }
-                    className="text-xs flex-shrink-0"
+                    variant="outline"
+                    className={cn("text-xs flex-shrink-0 border", getHealthBadgeStyle(workspace.health_label))}
                   >
                     {workspace.health_label || 'N/A'}
                   </Badge>
                 </div>
                 
-                {/* Compact stats */}
-                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
-                  {(workspace.overdue_actions_count || 0) > 0 && (
-                    <span className="flex items-center gap-1 text-destructive">
-                      <AlertTriangle className="h-3 w-3" />
+                {/* Risk indicators */}
+                <div className="flex items-center gap-2 text-xs flex-shrink-0">
+                  {hasOverdue && (
+                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0 gap-0.5 animate-pulse">
+                      <AlertTriangle className="h-2.5 w-2.5" />
                       {workspace.overdue_actions_count}
-                    </span>
+                    </Badge>
                   )}
-                  <span className="flex items-center gap-1">
+                  {hasMissingKpis && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 border-amber-400/50 text-amber-600 dark:text-amber-400">
+                      <TrendingDown className="h-2.5 w-2.5" />
+                      KPI
+                    </Badge>
+                  )}
+                  <span className={cn(
+                    "flex items-center gap-1 text-muted-foreground",
+                    daysSince !== null && daysSince >= 14 && 'text-amber-600 dark:text-amber-400 font-medium'
+                  )}>
                     <Clock className="h-3 w-3" />
                     {daysSince !== null ? `${daysSince}d` : '-'}
                   </span>
                 </div>
                 
-                {/* Compact action buttons */}
-                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                {/* Action buttons */}
+                <div className="flex items-center gap-1 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
                     size="icon"

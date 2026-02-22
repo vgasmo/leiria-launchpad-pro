@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Users,
   Sparkles,
+  BookOpen,
+  ListChecks,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,10 +34,6 @@ interface MentorSessionPrepCardProps {
   className?: string;
 }
 
-/**
- * Enhanced session prep card for mentors.
- * Shows comprehensive prep context when a session is approaching.
- */
 export function MentorSessionPrepCard({ workspace, meetingDate, className }: MentorSessionPrepCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -60,12 +58,21 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
     return format(meetingDate, 'MMM d, h:mm a');
   };
 
-  // Prep suggestions based on workspace state
-  const prepSuggestions = useMemo(() => {
-    const suggestions: { icon: typeof Target; text: string; priority: 'high' | 'medium' | 'low' }[] = [];
+  // Split suggestions into "read" and "do"
+  const { readItems, doItems } = useMemo(() => {
+    const read: { icon: typeof Target; text: string; priority: 'high' | 'medium' | 'low' }[] = [];
+    const doList: { icon: typeof Target; text: string; priority: 'high' | 'medium' | 'low' }[] = [];
+
+    if (workspace.lastSession) {
+      read.push({
+        icon: FileText,
+        text: t('sessionPrep.reviewLastSession', 'Review notes from last session'),
+        priority: 'low',
+      });
+    }
 
     if (workspace.overdueActionsCount > 0) {
-      suggestions.push({
+      read.push({
         icon: AlertCircle,
         text: t('sessionPrep.reviewOverdue', 'Review {{count}} overdue actions', { count: workspace.overdueActionsCount }),
         priority: 'high',
@@ -73,35 +80,27 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
     }
 
     if (!workspace.hasCurrentMonthKpi) {
-      suggestions.push({
+      doList.push({
         icon: TrendingUp,
         text: t('sessionPrep.askAboutKpis', 'Ask about this month\'s KPIs'),
         priority: 'medium',
       });
     }
 
-    if (workspace.lastSession) {
-      suggestions.push({
-        icon: FileText,
-        text: t('sessionPrep.reviewLastSession', 'Review notes from last session'),
-        priority: 'low',
-      });
-    }
-
     if (health === 'at_risk' || health === 'critical') {
-      suggestions.push({
+      doList.push({
         icon: MessageSquare,
         text: t('sessionPrep.discussChallenges', 'Discuss current challenges'),
         priority: 'high',
       });
     }
 
-    return suggestions.slice(0, 3);
+    return { readItems: read, doItems: doList };
   }, [workspace, health, t]);
 
   return (
     <Card className={cn(
-      'overflow-hidden transition-all',
+      'overflow-hidden transition-all duration-300 hover:shadow-md',
       isImminent 
         ? 'border-red-400/50 bg-gradient-to-br from-red-50/80 via-orange-50/50 to-transparent dark:from-red-950/30 dark:via-orange-950/20' 
         : isUrgent
@@ -113,7 +112,7 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={cn(
-              'h-10 w-10 rounded-full flex items-center justify-center',
+              'h-10 w-10 rounded-xl flex items-center justify-center',
               isImminent 
                 ? 'bg-red-500 text-white animate-pulse' 
                 : isUrgent
@@ -138,18 +137,18 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
             variant={isUrgent ? 'default' : 'outline'} 
             size="sm"
             onClick={() => navigate(`/workspace/${workspace.id}?tab=agenda`)}
-            className={isUrgent ? 'shadow-md' : ''}
+            className={cn(isUrgent && 'shadow-md', 'gap-1.5')}
           >
             {t('sessionPrep.prepare', 'Prepare')}
-            <ArrowRight className="h-4 w-4 ml-1" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Startup Info */}
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border">
-          <Avatar className="h-12 w-12 rounded-xl">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border">
+          <Avatar className="h-12 w-12 rounded-xl ring-1 ring-border/50">
             <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" />
             <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-semibold">
               {workspace.startup?.name?.slice(0, 2).toUpperCase()}
@@ -166,17 +165,17 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-xl bg-muted/50">
             <p className="text-lg font-bold">{workspace.pendingActionsCount}</p>
             <p className="text-xs text-muted-foreground">{t('sessionPrep.pending', 'Pending')}</p>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-xl bg-muted/50">
             <p className={cn('text-lg font-bold', workspace.overdueActionsCount > 0 && 'text-destructive')}>
               {workspace.overdueActionsCount}
             </p>
             <p className="text-xs text-muted-foreground">{t('common.overdue', 'Overdue')}</p>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-xl bg-muted/50">
             <p className="text-lg font-bold flex items-center justify-center gap-1">
               {workspace.hasCurrentMonthKpi ? (
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -188,34 +187,62 @@ export function MentorSessionPrepCard({ workspace, meetingDate, className }: Men
           </div>
         </div>
 
-        {/* Prep Suggestions */}
-        {prepSuggestions.length > 0 && (
+        {/* Prep: Read vs Do — clear delineation */}
+        {(readItems.length > 0 || doItems.length > 0) && (
           <>
             <Separator />
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5" />
-                {t('sessionPrep.suggestions', 'Prep suggestions')}
-              </div>
-              <ul className="space-y-1.5">
-                {prepSuggestions.map((suggestion, idx) => {
-                  const Icon = suggestion.icon;
-                  return (
-                    <li 
-                      key={idx}
-                      className={cn(
-                        'flex items-center gap-2 text-sm p-2 rounded-md',
-                        suggestion.priority === 'high' && 'bg-destructive/5 text-destructive',
-                        suggestion.priority === 'medium' && 'bg-amber-500/5 text-amber-700 dark:text-amber-400',
-                        suggestion.priority === 'low' && 'bg-muted/50 text-muted-foreground'
-                      )}
-                    >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{suggestion.text}</span>
-                    </li>
-                  );
-                })}
-              </ul>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* What to READ */}
+              {readItems.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    {t('sessionPrep.toRead', 'To Review')}
+                  </div>
+                  <ul className="space-y-1.5">
+                    {readItems.map((item, idx) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={idx} className={cn(
+                          'flex items-center gap-2 text-sm p-2 rounded-lg',
+                          item.priority === 'high' && 'bg-destructive/5 text-destructive',
+                          item.priority === 'medium' && 'bg-amber-500/5 text-amber-700 dark:text-amber-400',
+                          item.priority === 'low' && 'bg-muted/50 text-muted-foreground'
+                        )}>
+                          <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span className="text-xs">{item.text}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* What to DO */}
+              {doItems.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <ListChecks className="h-3.5 w-3.5" />
+                    {t('sessionPrep.toDo', 'To Discuss')}
+                  </div>
+                  <ul className="space-y-1.5">
+                    {doItems.map((item, idx) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={idx} className={cn(
+                          'flex items-center gap-2 text-sm p-2 rounded-lg',
+                          item.priority === 'high' && 'bg-destructive/5 text-destructive',
+                          item.priority === 'medium' && 'bg-amber-500/5 text-amber-700 dark:text-amber-400',
+                          item.priority === 'low' && 'bg-muted/50 text-muted-foreground'
+                        )}>
+                          <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span className="text-xs">{item.text}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
             </div>
           </>
         )}

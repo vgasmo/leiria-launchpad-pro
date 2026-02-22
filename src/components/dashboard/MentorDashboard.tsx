@@ -10,6 +10,9 @@ import {
   TrendingUp,
   ArrowRight,
   CheckCircle2,
+  Heart,
+  Sparkles,
+  Star,
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,21 +26,17 @@ import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { MentorNextSessionPrep } from '@/components/dashboard/MentorNextSessionPrep';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
+import { cn } from '@/lib/utils';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
   isLoading: boolean;
 }
 
-/**
- * Gold-Standard Mentor Dashboard - "Mentor Companion" OS
- * Focused on session prep, context, and impact - NO staff panels
- */
 export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // Sort by next meeting for relationship depth
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
     return [...workspaces].sort((a, b) => {
@@ -50,7 +49,6 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     });
   }, [workspaces]);
 
-  // Get upcoming meetings this week
   const upcomingMeetings = useMemo(() => {
     if (!workspaces) return [];
     return workspaces
@@ -61,15 +59,12 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
       .slice(0, 5);
   }, [workspaces]);
 
-  // Calculate mentor impact stats
   const impactStats = useMemo(() => {
     if (!workspaces) return { sessionsCompleted: 0, actionsCreated: 0, healthyCount: 0 };
-    
     const healthyCount = workspaces.filter(w => {
       const health = w.health_score_override || w.health_score;
       return health === 'healthy' || health === 'thriving';
     }).length;
-    
     return {
       sessionsCompleted: workspaces.filter(w => w.lastSession).length,
       actionsCreated: workspaces.reduce((sum, w) => sum + w.pendingActionsCount, 0),
@@ -77,7 +72,6 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     };
   }, [workspaces]);
 
-  // Sessions completed recently (within 48h) that may need notes logged
   const recentUnloggedSessions = useMemo(() => {
     if (!workspaces) return [];
     const now = new Date();
@@ -112,23 +106,29 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
     );
   }
 
-  // Empty state - guide to connection requests
+  // Enhanced empty state
   if (workspaces.length === 0) {
     return (
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+      <Card className="relative overflow-hidden border-0 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-accent/10 to-transparent rounded-tr-full" />
         <CardContent className="relative p-8 md:p-12 text-center">
-          <div className="h-20 w-20 mx-auto rounded-3xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-6">
-            <Briefcase className="h-10 w-10 text-primary" />
+          <div className="h-20 w-20 mx-auto rounded-3xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-6 ring-1 ring-primary/20 shadow-lg shadow-primary/10">
+            <Heart className="h-10 w-10 text-primary" />
           </div>
           <h3 className="font-heading text-xl md:text-2xl font-bold mb-3">
             {t('mentor.welcomeTitle', 'Bem-vindo ao Painel de Mentor')}
           </h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          <p className="text-muted-foreground mb-2 max-w-md mx-auto">
             {t('mentor.noStartupsAssignedDesc', 'Ainda não tens startups atribuídas. Verifica os pedidos de conexão ou aguarda que te sejam atribuídas startups.')}
           </p>
+          <p className="text-sm text-primary/70 mb-6 max-w-sm mx-auto flex items-center justify-center gap-1.5">
+            <Sparkles className="h-4 w-4" />
+            {t('mentor.thankYouMessage', 'O teu tempo e experiência fazem toda a diferença para estas startups.')}
+          </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button onClick={() => navigate('/mentors')} className="gap-2">
+            <Button onClick={() => navigate('/mentors')} className="gap-2 shadow-md">
               <Users className="h-4 w-4" />
               {t('mentor.viewConnectionRequests', 'Ver Pedidos de Conexão')}
             </Button>
@@ -143,19 +143,19 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* P0 HERO: Next Session Prep - Shows when session is within 48h */}
+      {/* P0 HERO: Next Session Prep */}
       <MentorNextSessionPrep workspaces={workspaces} />
 
-      {/* Post-session feedback CTA: show if last session was within 24h and needs notes */}
+      {/* Post-session feedback CTA */}
       {recentUnloggedSessions.length > 0 && (
-        <Card className="border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 rounded-2xl">
+        <Card className="border-amber-400/40 bg-gradient-to-r from-amber-50/50 via-yellow-50/30 to-transparent dark:from-amber-950/20 dark:via-yellow-950/10 rounded-2xl">
           <CardContent className="p-4">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-9 w-9 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+              <div className="h-9 w-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
                 <FileText className="h-4 w-4 text-amber-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium">{t('mentor.postSession.title', { defaultValue: 'Log your session notes' })}</p>
+                <p className="text-sm font-semibold">{t('mentor.postSession.title', { defaultValue: 'Log your session notes' })}</p>
                 <p className="text-xs text-muted-foreground">{t('mentor.postSession.subtitle', { defaultValue: 'You have recent sessions without notes — log them while fresh.' })}</p>
               </div>
             </div>
@@ -165,7 +165,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                   key={w.id}
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 text-xs"
+                  className="gap-1.5 text-xs hover:bg-amber-50 dark:hover:bg-amber-950/30"
                   onClick={() => navigate(`/workspace/${w.id}?tab=agenda`)}
                 >
                   {w.startup?.name?.slice(0, 12)}
@@ -177,57 +177,39 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
         </Card>
       )}
 
-      {/* Quick Stats - Mentor-focused, calmer design */}
+      {/* Quick Stats */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-        <Card className="p-4 rounded-2xl border-border/60">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.myStartups')}</p>
-              <p className="text-3xl font-semibold">{workspaces.length}</p>
-            </div>
-            <Briefcase className="h-5 w-5 text-muted-foreground/50" />
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl border-border/60">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.upcomingMeetings')}</p>
-              <p className="text-3xl font-semibold">{upcomingMeetings.length}</p>
-            </div>
-            <Calendar className="h-5 w-5 text-muted-foreground/50" />
-          </div>
-          {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length > 0 && (
-            <p className="text-xs text-primary mt-1">
-              {workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length} {t('common.today')}
-            </p>
-          )}
-        </Card>
-
-        <Card className="p-4 rounded-2xl border-border/60">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.startupsHealthy')}</p>
-              <p className="text-3xl font-semibold text-health-healthy">{impactStats.healthyCount}</p>
-            </div>
-            <TrendingUp className="h-5 w-5 text-health-healthy/50" />
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl border-border/60">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('mentor.pendingActions')}</p>
-              <p className="text-3xl font-semibold">{impactStats.actionsCreated}</p>
-            </div>
-            <CheckCircle2 className="h-5 w-5 text-muted-foreground/50" />
-          </div>
-        </Card>
+        {[
+          { label: t('mentor.myStartups'), value: workspaces.length, icon: Briefcase, accent: false },
+          { label: t('mentor.upcomingMeetings'), value: upcomingMeetings.length, icon: Calendar, accent: false, 
+            extra: workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length },
+          { label: t('mentor.startupsHealthy'), value: impactStats.healthyCount, icon: TrendingUp, accent: true },
+          { label: t('mentor.pendingActions'), value: impactStats.actionsCreated, icon: CheckCircle2, accent: false },
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={i} className="p-4 rounded-2xl border-border/60 transition-all duration-200 hover:shadow-sm hover:border-border/80">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+                  <p className={cn("text-3xl font-semibold", stat.accent && 'text-green-600 dark:text-green-400')}>{stat.value}</p>
+                </div>
+                <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
+                  <Icon className={cn("h-4 w-4", stat.accent ? 'text-green-500' : 'text-muted-foreground/50')} />
+                </div>
+              </div>
+              {stat.extra !== undefined && stat.extra > 0 && (
+                <p className="text-xs text-primary mt-1 font-medium">
+                  {stat.extra} {t('common.today')}
+                </p>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Two-column layout: Startups + Calendar */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Startup Cards - Main focus */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
@@ -237,7 +219,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
             </Button>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-2.5">
             {sortedWorkspaces.map((workspace) => {
               const health = workspace.health_score_override || workspace.health_score;
               const hasUpcomingMeeting = workspace.nextMeetingDate && isToday(new Date(workspace.nextMeetingDate));
@@ -245,25 +227,25 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
               return (
                 <Card 
                   key={workspace.id}
-                  className={`cursor-pointer transition-all hover:shadow-sm rounded-2xl border-border/60 ${
-                    hasUpcomingMeeting ? 'border-primary/30 bg-primary/5' : ''
-                  }`}
+                  className={cn(
+                    'group cursor-pointer transition-all duration-200 rounded-2xl border-border/60',
+                    'hover:shadow-md hover:border-border/80 hover:scale-[1.003]',
+                    hasUpcomingMeeting && 'border-primary/30 bg-primary/5 ring-1 ring-primary/10',
+                  )}
                   onClick={() => navigate(`/workspace/${workspace.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
-                      {/* Avatar */}
-                      <Avatar className="h-12 w-12 rounded-xl shrink-0">
+                      <Avatar className="h-12 w-12 rounded-xl shrink-0 ring-1 ring-border/50">
                         <AvatarImage src={workspace.startup?.logo_url || undefined} className="object-cover" alt={workspace.startup?.name || 'Startup logo'} />
                         <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-semibold">
                           {workspace.startup?.name?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
 
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold truncate">{workspace.startup?.name}</h3>
+                          <h3 className="font-semibold truncate group-hover:text-primary transition-colors">{workspace.startup?.name}</h3>
                           <HealthBadge score={health as HealthScore | null} size="sm" />
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -277,7 +259,6 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                         </div>
                       </div>
 
-                      {/* Next meeting indicator */}
                       <div className="text-right shrink-0">
                         {workspace.nextMeetingDate ? (
                           <div className={hasUpcomingMeeting ? 'text-primary' : 'text-muted-foreground'}>
@@ -298,7 +279,7 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-xs h-7"
+                            className="text-xs h-7 opacity-60 group-hover:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/workspace/${workspace.id}?tab=agenda`);
@@ -310,7 +291,6 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
                       </div>
                     </div>
 
-                    {/* Pending actions indicator */}
                     {workspace.pendingActionsCount > 0 && (
                       <div className="mt-3 pt-3 border-t flex items-center gap-2 text-xs">
                         <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -331,31 +311,31 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
           </div>
         </div>
 
-        {/* Calendar Widget - Compact */}
         <div className="space-y-4">
           <CalendarWidget />
           
-          {/* Your Impact Card */}
-          <Card>
+          {/* Your Impact Card - Enhanced */}
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
+                <Star className="h-4 w-4 text-primary" />
                 {t('mentor.yourImpact', 'O Teu Impacto')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-muted-foreground">{t('mentor.startupsSupported', 'Startups apoiadas')}</span>
-                  <span className="font-semibold">{workspaces.length}</span>
+                  <span className="font-bold text-lg">{workspaces.length}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-muted-foreground">{t('mentor.sessionsHeld', 'Sessões realizadas')}</span>
-                  <span className="font-semibold">{impactStats.sessionsCompleted}</span>
+                  <span className="font-bold text-lg">{impactStats.sessionsCompleted}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-muted-foreground">{t('mentor.healthyStartups', 'Startups saudáveis')}</span>
-                  <span className="font-semibold text-success">{impactStats.healthyCount}/{workspaces.length}</span>
+                  <span className="font-bold text-lg text-green-600 dark:text-green-400">{impactStats.healthyCount}/{workspaces.length}</span>
                 </div>
               </div>
             </CardContent>
