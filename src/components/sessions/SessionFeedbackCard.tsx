@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSessionFeedback, useMySessionFeedback, useSubmitFeedback } from '@/hooks/useSessionFeedback';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ interface SessionFeedbackProps {
 }
 
 export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedbackProps) {
+  const { t } = useTranslation();
   const { data: allFeedback } = useSessionFeedback(sessionId);
   const { data: myFeedback } = useMySessionFeedback(sessionId);
   const submitFeedback = useSubmitFeedback();
@@ -145,9 +147,9 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={submitFeedback.isPending}>Submit</Button>
+           <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel', { defaultValue: 'Cancelar' })}</Button>
+            <Button onClick={handleSubmit} disabled={submitFeedback.isPending}>{t('common.submit', { defaultValue: 'Submeter' })}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
