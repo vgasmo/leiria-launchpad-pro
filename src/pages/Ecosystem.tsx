@@ -6,10 +6,12 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EcosystemTable } from '@/components/ecosystem/EcosystemTable';
 import { EcosystemFilters, type EcosystemFiltersState } from '@/components/ecosystem/EcosystemFilters';
+import { CommunityFeed } from '@/components/ecosystem/CommunityFeed';
 import { useEcosystemItems } from '@/hooks/useEcosystemItems';
 import { AccessDenied } from '@/components/ui/AccessDenied';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
-import { Globe2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Globe2, Users, Building2 } from 'lucide-react';
 
 export default function Ecosystem() {
   const { t } = useTranslation();
@@ -49,20 +51,38 @@ export default function Ecosystem() {
           icon={<Globe2 className="h-6 w-6" />}
         />
 
-        <EcosystemFilters filters={filters} onChange={setFilters} />
+        <Tabs defaultValue="startups" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="startups" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              {t('ecosystem.startupsTab', 'Startups & Leads')}
+            </TabsTrigger>
+            <TabsTrigger value="community" className="gap-2">
+              <Users className="h-4 w-4" />
+              {t('ecosystem.communityTab', 'Comunidade')}
+            </TabsTrigger>
+          </TabsList>
 
-        {isLoading ? (
-          <ContentSkeleton type="list" count={10} />
-        ) : (
-          <EcosystemTable 
-            items={items || []} 
-            onOpenItem={(item) => {
-              if (item.item_type === 'workspace' && item.workspace_id) {
-                navigate(`/workspace/${item.workspace_id}`);
-              }
-            }}
-          />
-        )}
+          <TabsContent value="startups" className="space-y-6 mt-0">
+            <EcosystemFilters filters={filters} onChange={setFilters} />
+            {isLoading ? (
+              <ContentSkeleton type="list" count={10} />
+            ) : (
+              <EcosystemTable
+                items={items || []}
+                onOpenItem={(item) => {
+                  if (item.item_type === 'workspace' && item.workspace_id) {
+                    navigate(`/workspace/${item.workspace_id}`);
+                  }
+                }}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="community" className="mt-0">
+            <CommunityFeed />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
