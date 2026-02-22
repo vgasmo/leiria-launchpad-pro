@@ -469,7 +469,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
               <Tooltip key={w.id}>
                 <TooltipTrigger asChild>
                   <div 
-                    className={`h-8 rounded-md cursor-pointer transition-all hover:scale-110 hover:shadow-sm flex items-center justify-center text-[9px] font-bold text-white ${bgColors[health] || 'bg-muted'}`}
+                    className={`h-8 rounded-md cursor-pointer transition-all hover:scale-110 hover:shadow-sm flex items-center justify-center text-[9px] font-bold text-primary-foreground ${bgColors[health] || 'bg-muted'}`}
                     onClick={() => navigate(`/workspace/${w.id}`)}
                   >
                     {w.startup?.name?.slice(0, 2).toUpperCase()}
