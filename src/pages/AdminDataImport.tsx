@@ -1116,13 +1116,13 @@ export default function AdminDataImport() {
                                   </span>
                                 )}
                                 {row.owner_name && (
-                                  <span className={row.resolved_owner_id ? 'text-green-600' : 'text-amber-600'}>
+                                  <span className={row.resolved_owner_id ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
                                     👤 {row.owner_name}
                                     {row.resolved_owner_id ? ' ✓' : ' (não mapeado)'}
                                   </span>
                                 )}
                                 {row.deal_stage && (
-                                  <span className={row.resolved_stage ? 'text-green-600' : 'text-amber-600'}>
+                                  <span className={row.resolved_stage ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
                                     📊 {row.deal_stage}
                                     {row.resolved_stage ? ` → ${row.resolved_stage}` : ' (não mapeado)'}
                                   </span>
@@ -1130,7 +1130,7 @@ export default function AdminDataImport() {
                               </div>
                             )}
                             {!row.isValid && row.validationErrors.length > 0 && (
-                              <div className="text-xs text-red-600 mt-1">
+                              <div className="text-xs text-red-600 dark:text-red-400 mt-1">
                                 {row.validationErrors.join(', ')}
                               </div>
                             )}
@@ -1226,7 +1226,7 @@ export default function AdminDataImport() {
                       <p className="text-xs text-muted-foreground">
                         {t('dataImport.useFileOwnerDesc', 'Mapear "Proprietário do negócio" para consultor')}
                       </p>
-                      <p className="text-xs text-green-600 font-medium mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                         {stats.withOwner} de {stats.total} linhas com owner mapeado
                       </p>
                     </div>
@@ -1242,7 +1242,7 @@ export default function AdminDataImport() {
                       <p className="text-xs text-muted-foreground">
                         {t('dataImport.useFileStageDesc', 'Mapear "Etapa do negócio" (Tier A/B/C) para stage')}
                       </p>
-                      <p className="text-xs text-green-600 font-medium mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                         {stats.withStage} de {stats.total} linhas com stage mapeado
                       </p>
                     </div>
@@ -1289,7 +1289,7 @@ export default function AdminDataImport() {
                       <p className="text-xs text-muted-foreground">
                         {t('dataImport.createDraftContractsDesc', 'Criar contratos draft para leads que virem "contracted" com edifício/serviço')}
                       </p>
-                      <p className="text-xs text-green-600 font-medium mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                         {stats.withBuilding} com edifício, {stats.withService} com serviço mapeado
                       </p>
                     </div>
@@ -1339,19 +1339,19 @@ export default function AdminDataImport() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-4">
                   <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{dryRunResult.would_insert}</div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{dryRunResult.would_insert}</div>
                     <div className="text-sm text-muted-foreground">{t('dataImport.toInsert', 'To Insert')}</div>
                   </div>
                   <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{dryRunResult.would_update}</div>
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{dryRunResult.would_update}</div>
                     <div className="text-sm text-muted-foreground">{t('dataImport.toUpdate', 'To Update')}</div>
                   </div>
                   <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{dryRunResult.skipped_invalid}</div>
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">{dryRunResult.skipped_invalid}</div>
                     <div className="text-sm text-muted-foreground">{t('dataImport.skippedInvalid', 'Invalid')}</div>
                   </div>
                   <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">{dryRunResult.skipped_duplicate}</div>
+                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{dryRunResult.skipped_duplicate}</div>
                     <div className="text-sm text-muted-foreground">{t('dataImport.skippedDuplicate', 'Duplicates')}</div>
                   </div>
                 </div>
@@ -1497,7 +1497,7 @@ export default function AdminDataImport() {
               <Card className={cn(
                 importResult.errors.length > 0 
                   ? 'border-red-200 bg-red-50/50 dark:bg-red-900/10' 
-                  : 'border-gray-200'
+                  : 'border-border'
               )}>
                 <CardContent className="pt-6 text-center">
                   <div className={cn(

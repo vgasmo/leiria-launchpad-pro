@@ -90,9 +90,9 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 8) return 'text-green-600';
-    if (score >= 6) return 'text-amber-600';
-    return 'text-red-600';
+    if (score >= 8) return 'text-green-600 dark:text-green-400';
+    if (score >= 6) return 'text-amber-600 dark:text-amber-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   if (!analysis && !analyzing && !error) {
@@ -179,13 +179,13 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
             {analysis.strengths.length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3 text-green-600" />
+                  <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
                   {t('templates.strengths', 'Strengths')}
                 </h4>
                 <ul className="space-y-1">
                   {analysis.strengths.map((s, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <span className="text-green-600 mt-1">•</span>
+                      <span className="text-green-600 dark:text-green-400 mt-1">•</span>
                       {s}
                     </li>
                   ))}
@@ -197,13 +197,13 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
             {analysis.improvements.length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 text-amber-600" />
+                  <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                   {t('templates.improvements', 'Suggested Improvements')}
                 </h4>
                 <ul className="space-y-1">
                   {analysis.improvements.map((imp, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
+                      <span className="text-amber-600 dark:text-amber-400 mt-1">•</span>
                       {imp}
                     </li>
                   ))}

@@ -42,14 +42,14 @@ export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardPro
         {isNeutral ? (
           <Minus className="h-3 w-3 text-muted-foreground" />
         ) : isPositive ? (
-          <TrendingUp className="h-3 w-3 text-green-600" />
+          <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
         ) : (
           <TrendingDown className="h-3 w-3 text-destructive" />
         )}
         <span className={cn(
           "text-sm font-medium",
           isNeutral && "text-muted-foreground",
-          isPositive && "text-green-600",
+          isPositive && "text-green-600 dark:text-green-400",
           !isPositive && !isNeutral && "text-destructive"
         )}>
           {isPositive && '+'}{delta}
@@ -68,7 +68,7 @@ export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardPro
         key={key}
         className={cn(
           "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs",
-          isPositive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          isPositive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
         )}
       >
         {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -135,7 +135,7 @@ export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardPro
                 {factor.impact === 'negative' ? (
                   <AlertTriangle className="h-3 w-3 text-destructive mt-0.5" />
                 ) : factor.impact === 'positive' ? (
-                  <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                  <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400 mt-0.5" />
                 ) : (
                   <Minus className="h-3 w-3 text-muted-foreground mt-0.5" />
                 )}
