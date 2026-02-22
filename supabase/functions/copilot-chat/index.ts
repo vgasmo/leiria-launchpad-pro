@@ -20,13 +20,12 @@ serve(async (req: Request) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return corsJsonResponse({ error: "Invalid or expired token" }, req, 401);
     }
 
-    const userId = claimsData.claims.sub as string;
+    const userId = user.id;
 
     // ── Input validation ────────────────────────────────────────
     const body = await req.json();
