@@ -47,7 +47,7 @@ const priorities: { value: WorkspacePriority; label: string; description: string
     value: 'maintenance', 
     label: 'Maintenance', 
     description: 'Monthly check-in only',
-    icon: <Archive className="h-4 w-4 text-gray-400" />
+    icon: <Archive className="h-4 w-4 text-muted-foreground/60" />
   },
 ];
 
