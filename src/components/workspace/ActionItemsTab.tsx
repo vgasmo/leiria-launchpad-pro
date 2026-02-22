@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, parseISO } from 'date-fns';
@@ -116,16 +116,16 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     }
   };
 
-  const handleStatusChange = async (item: ActionItem, newStatus: ActionStatus) => {
+  const handleStatusChange = useCallback(async (item: ActionItem, newStatus: ActionStatus) => {
     if (!canWrite) return;
     try {
       await updateAction.mutateAsync({ id: item.id, status: newStatus });
     } catch {
       toast.error(t('actions.failedToUpdate'));
     }
-  };
+  }, [canWrite, updateAction, t]);
 
-  const handleDueDateChange = async (item: ActionItem, date: Date | undefined) => {
+  const handleDueDateChange = useCallback(async (item: ActionItem, date: Date | undefined) => {
     if (!canWrite) return;
     try {
       await updateAction.mutateAsync({ 
@@ -135,9 +135,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     } catch {
       toast.error(t('actions.failedToUpdate'));
     }
-  };
+  }, [canWrite, updateAction, t]);
 
-  const handleOwnerChange = async (item: ActionItem, ownerId: string) => {
+  const handleOwnerChange = useCallback(async (item: ActionItem, ownerId: string) => {
     if (!canWrite) return;
     try {
       await updateAction.mutateAsync({ 
@@ -147,9 +147,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     } catch {
       toast.error(t('actions.failedToUpdate'));
     }
-  };
+  }, [canWrite, updateAction, t]);
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget || !canWrite) return;
     try {
       await deleteAction.mutateAsync(deleteTarget.id);
@@ -158,7 +158,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     } catch {
       toast.error(t('actions.failedToDelete'));
     }
-  };
+  }, [deleteTarget, canWrite, deleteAction, t]);
 
   const handleCreate = async () => {
     if (!newAction.title.trim()) {
@@ -577,7 +577,7 @@ interface MilestoneActionGroupProps {
   onToggleSelect: (id: string) => void;
 }
 
-function MilestoneActionGroup({
+const MilestoneActionGroup = memo(function MilestoneActionGroup({
   milestone,
   actions,
   progress,
@@ -663,7 +663,7 @@ function MilestoneActionGroup({
       </Collapsible>
     </Card>
   );
-}
+});
 
 interface KanbanColumnProps {
   title: string;
@@ -678,7 +678,7 @@ interface KanbanColumnProps {
   onDelete: (item: ActionItem) => void;
 }
 
-function KanbanColumn({ 
+const KanbanColumn = memo(function KanbanColumn({ 
   title, 
   count, 
   items, 
@@ -727,7 +727,7 @@ function KanbanColumn({
       </CardContent>
     </Card>
   );
-}
+});
 
 interface ActionItemCardProps {
   item: ActionItem;
@@ -741,7 +741,7 @@ interface ActionItemCardProps {
   onToggleSelect?: (id: string) => void;
 }
 
-function ActionItemCard({ 
+const ActionItemCard = memo(function ActionItemCard({ 
   item, 
   canWrite,
   members,
@@ -876,4 +876,4 @@ function ActionItemCard({
       </div>
     </div>
   );
-}
+});

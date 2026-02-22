@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FocusModeProvider, FocusModeToggle, useFocusMode } from '@/components/ui/FocusModeToggle';
@@ -54,13 +54,14 @@ interface RiskItem {
   priority: 'critical' | 'high' | 'medium';
 }
 
-export function ConsultorDashboard({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
+export const ConsultorDashboard = memo(function ConsultorDashboard({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
   return (
     <FocusModeProvider defaultFocused={true}>
       <ConsultorDashboardInner workspaces={workspaces} isLoading={isLoading} programsCount={programsCount} />
     </FocusModeProvider>
   );
-}
+});
+
 
 function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: ConsultorDashboardProps) {
   const navigate = useNavigate();
