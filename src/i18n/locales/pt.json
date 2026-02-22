@@ -3936,13 +3936,22 @@
     "dismiss": "Entendido",
     "title": "Novo aqui? Consulta o Guia Rápido"
   },
+  "aiPulse": {
+    "title": "Sugestão IA"
+  },
   "quickKpi": {
     "allFilled": "Todos os KPIs estão atualizados!",
+    "allFilledDesc": "Volte no próximo mês.",
+    "complete": "Completo",
     "description": "Atualize as suas métricas chave para {{month}}",
     "enterAtLeastOne": "Por favor introduza pelo menos um valor",
+    "enterValue": "Introduza o valor...",
     "error": "Falha ao guardar KPIs",
+    "filled": "preenchidos",
+    "previousMonth": "Mês anterior:",
     "save": "Guardar KPIs",
     "saved": "KPIs guardados com sucesso",
+    "saving": "A guardar KPIs...",
     "title": "Entrada Rápida de KPI"
   },
   "quickWins": {
