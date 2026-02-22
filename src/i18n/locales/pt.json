@@ -2394,7 +2394,16 @@
     "timeout": "Tempo limite excedido. Tente novamente.",
     "tryAgain": "Tentar Novamente",
     "unauthorized": "Não tem autorização para esta ação.",
-    "validationError": "Verifique os dados introduzidos."
+    "validationError": "Verifique os dados introduzidos.",
+    "aiFailed": "O assistente de IA não está disponível",
+    "aiTryAgainLater": "Não foi possível processar o seu pedido. Tente novamente mais tarde.",
+    "aiProcessingError": "Erro ao processar com IA. Tente novamente.",
+    "aiGenerateFailed": "Falha ao gerar resumo com IA",
+    "aiFollowupFailed": "Falha ao enviar follow-up",
+    "aiApplyFailed": "Falha ao aplicar sugestões",
+    "aiTranscriptFailed": "Falha ao guardar transcrição",
+    "rateLimitReached": "Limite de pedidos atingido. Aguarde uns minutos.",
+    "sessionExpired": "Sessão expirada. Por favor, faça login novamente."
   },
   "fab": {
     "newAction": "Nova Ação",

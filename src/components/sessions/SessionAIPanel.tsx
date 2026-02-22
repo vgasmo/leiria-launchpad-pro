@@ -88,38 +88,57 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const handleGenerate = async () => {
     if (isCoolingDown) return;
     if (!checkRateLimit(`session-ai-${sessionId}`, 5, 300000)) {
-      toast.error('Rate limit reached. Please wait a few minutes.');
+      toast.error(t('errors.rateLimitReached'));
       return;
     }
-    await generateMutation.mutateAsync({ 
-      sessionId, 
-      transcript: transcript.trim() || undefined,
-    });
-    onRefresh?.();
+    try {
+      await generateMutation.mutateAsync({ 
+        sessionId, 
+        transcript: transcript.trim() || undefined,
+      });
+      onRefresh?.();
+    } catch {
+      // Error already handled by mutation onError
+    }
   };
 
   const handleApplySelected = async () => {
     const selected = selectedActions.map(i => actionSuggestions[i]);
     if (selected.length === 0) return;
-    
-    await applyActionsMutation.mutateAsync({ sessionId, suggestions: selected as any });
-    setSelectedActions([]);
-    onRefresh?.();
+    try {
+      await applyActionsMutation.mutateAsync({ sessionId, suggestions: selected as any });
+      setSelectedActions([]);
+      onRefresh?.();
+    } catch {
+      // Error already handled by mutation onError
+    }
   };
 
   const handleApplyAll = async () => {
     if (actionSuggestions.length === 0) return;
-    await applyActionsMutation.mutateAsync({ sessionId, suggestions: actionSuggestions as any });
-    onRefresh?.();
+    try {
+      await applyActionsMutation.mutateAsync({ sessionId, suggestions: actionSuggestions as any });
+      onRefresh?.();
+    } catch {
+      // Error already handled by mutation onError
+    }
   };
 
   const handleSendFollowup = async () => {
-    await sendFollowupMutation.mutateAsync({ sessionId });
+    try {
+      await sendFollowupMutation.mutateAsync({ sessionId });
+    } catch {
+      // Error already handled by mutation onError
+    }
   };
 
   const handleSaveTranscript = async () => {
     if (!transcript.trim()) return;
-    await saveTranscriptMutation.mutateAsync({ sessionId, transcript: transcript.trim() });
+    try {
+      await saveTranscriptMutation.mutateAsync({ sessionId, transcript: transcript.trim() });
+    } catch {
+      // Error already handled by mutation onError
+    }
   };
 
   const handleFetchFromTeams = async () => {
@@ -130,7 +149,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       });
 
       if (error) {
-        toast.error('Erro ao importar transcrição do Teams');
+        toast.error(t('errors.aiProcessingError'));
         console.error('Teams transcript import error:', error);
         return;
       }
@@ -152,7 +171,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       }
     } catch (err) {
       console.error('Teams transcript fetch error:', err);
-      toast.error('Erro ao comunicar com o servidor');
+      toast.error(t('errors.aiProcessingError'));
     } finally {
       setIsFetchingTeams(false);
     }

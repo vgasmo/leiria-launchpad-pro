@@ -63,7 +63,7 @@ export function GlobalEcosystemCopilot() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       const accessToken = session?.access_token;
       if (!accessToken) {
-        toast.error('Sessão expirada. Por favor, faça login novamente.');
+        toast.error(t('errors.sessionExpired', { defaultValue: 'Session expired. Please sign in again.' }));
         setIsThinking(false);
         return;
       }
@@ -85,18 +85,18 @@ export function GlobalEcosystemCopilot() {
         const errData = await resp.json().catch(() => ({}));
         const errMsg = errData.error || `Error ${resp.status}`;
         if (resp.status === 429) {
-          toast.error('Rate limit exceeded. Please wait a moment and try again.');
+          toast.error(t('errors.rateLimitReached', { defaultValue: 'Rate limit reached. Please wait a few minutes.' }));
         } else if (resp.status === 402) {
-          toast.error('AI credits exhausted. Please add credits in Settings.');
+          toast.error(t('errors.aiProcessingError', { defaultValue: 'Error processing with AI. Please try again.' }));
         } else {
-          toast.error(errMsg);
+          toast.error(t('errors.aiProcessingError', { defaultValue: 'Error processing with AI. Please try again.' }));
         }
         setIsThinking(false);
         return;
       }
 
       if (!resp.body) {
-        toast.error('No response stream received.');
+        toast.error(t('errors.aiTryAgainLater', { defaultValue: 'Could not process your request. Please try again later.' }));
         setIsThinking(false);
         return;
       }
@@ -184,7 +184,7 @@ export function GlobalEcosystemCopilot() {
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
       console.error('Copilot stream error:', err);
-      toast.error('Failed to reach the AI assistant. Please try again.');
+      toast.error(t('errors.aiTryAgainLater', { defaultValue: 'Could not process your request. Please try again later.' }));
     } finally {
       setIsThinking(false);
     }

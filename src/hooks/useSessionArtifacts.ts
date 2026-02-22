@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import i18n from '@/i18n';
 
 export interface SessionArtifacts {
   summary: string;
@@ -41,7 +42,7 @@ export function useGenerateSessionArtifacts() {
       toast.success(`Generated summary and ${data.actions_created.length} action items`);
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(i18n.t('errors.aiGenerateFailed'));
     },
   });
 }
@@ -92,7 +93,7 @@ export function useAddTranscript() {
       toast.success('Transcript added');
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(i18n.t('errors.aiTranscriptFailed'));
     },
   });
 }
