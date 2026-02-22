@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { format, startOfMonth, subMonths, addMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus, CheckCircle, Save, Plus, Trash2, Settings2, Sparkles, Download, Upload, Lock, Unlock, HelpCircle, Zap, LayoutGrid, List, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -41,10 +42,91 @@ import { QuickHelp } from '@/components/ui/GlossaryTooltip';
 import { Link, useSearchParams } from 'react-router-dom';
 import { KpiSparkline } from './KpiSparkline';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
+import { cn } from '@/lib/utils';
 
 interface KpisTabProps {
   workspaceId: string;
   canWrite: boolean;
+}
+
+// ── Autosave hook ──────────────────────────────────────────────
+function useAutosave(
+  editedValues: Record<string, { value: string; notes: string }>,
+  monthValues: Record<string, KpiValue>,
+  workspaceKpis: WorkspaceKpi[] | undefined,
+  selectedMonthStr: string,
+  upsertKpi: ReturnType<typeof useUpsertKpiValue>,
+  canEdit: boolean,
+) {
+  const [savedKpis, setSavedKpis] = useState<Set<string>>(new Set());
+  const [savingKpis, setSavingKpis] = useState<Set<string>>(new Set());
+  const timerRefs = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const saveKpi = useCallback(async (kpiId: string) => {
+    const edited = editedValues[kpiId];
+    if (!edited || !canEdit) return;
+
+    const existing = monthValues[kpiId];
+    const wk = workspaceKpis?.find(w => w.kpi_definition_id === kpiId);
+    if (!wk) return;
+
+    const valueStr = edited.value;
+    const notes = edited.notes;
+    const value = valueStr === '' ? null : parseFloat(valueStr);
+
+    if (valueStr !== '' && isNaN(value as number)) return;
+
+    setSavingKpis(prev => new Set(prev).add(kpiId));
+
+    try {
+      await upsertKpi.mutateAsync({
+        kpi_definition_id: kpiId,
+        period_month: selectedMonthStr,
+        value,
+        target_value: wk.target_value,
+        notes: notes || null,
+        existingId: existing?.id,
+      });
+
+      setSavedKpis(prev => new Set(prev).add(kpiId));
+      // Clear the "saved" indicator after 2s
+      setTimeout(() => {
+        setSavedKpis(prev => {
+          const next = new Set(prev);
+          next.delete(kpiId);
+          return next;
+        });
+      }, 2000);
+    } catch {
+      // Silent fail for autosave — user still has data in state
+    } finally {
+      setSavingKpis(prev => {
+        const next = new Set(prev);
+        next.delete(kpiId);
+        return next;
+      });
+    }
+  }, [editedValues, monthValues, workspaceKpis, selectedMonthStr, upsertKpi, canEdit]);
+
+  // Debounce: schedule save 1.5s after last edit
+  const scheduleAutosave = useCallback((kpiId: string) => {
+    if (timerRefs.current[kpiId]) {
+      clearTimeout(timerRefs.current[kpiId]);
+    }
+    timerRefs.current[kpiId] = setTimeout(() => {
+      saveKpi(kpiId);
+      delete timerRefs.current[kpiId];
+    }, 1500);
+  }, [saveKpi]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timerRefs.current).forEach(clearTimeout);
+    };
+  }, []);
+
+  return { savedKpis, savingKpis, scheduleAutosave, saveKpi };
 }
 
 export function KpisTab({ workspaceId }: KpisTabProps) {
@@ -77,29 +159,25 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   const [selectedMonth, setSelectedMonth] = useState(() => startOfMonth(new Date()));
   const [editedValues, setEditedValues] = useState<Record<string, { value: string; notes: string }>>({});
-  const [savingKpis, setSavingKpis] = useState<Set<string>>(new Set());
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [pendingTargets, setPendingTargets] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<'cards' | 'checkin'>('cards');
 
   // B2 Fix: Auto-open config dialog when navigating with ?openAddKpis=1
   useEffect(() => {
     if (searchParams.get('openAddKpis') === '1') {
       setShowConfigDialog(true);
-      // Clean up the URL param after opening
       searchParams.delete('openAddKpis');
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
-  // Check if user can edit KPIs (founder or admin)
   const canEditKpis = isAdmin || userRole === 'founder';
-  // Admins, consultors, mentors, and founders can configure which KPIs are tracked
   const canConfigureKpis = isAdmin || userRole === 'consultor' || userRole === 'mentor_externo' || userRole === 'founder';
 
   const selectedMonthStr = format(selectedMonth, 'yyyy-MM-dd');
 
-  // Get values for selected month
   const monthValues = useMemo(() => {
     if (!kpiValues) return {};
     return kpiValues
@@ -110,7 +188,30 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
       }, {} as Record<string, KpiValue>);
   }, [kpiValues, selectedMonthStr]);
 
-  // Get chart data for each KPI (last 12 months)
+  // ── Autosave integration ──
+  const { savedKpis, savingKpis, scheduleAutosave, saveKpi } = useAutosave(
+    editedValues,
+    monthValues,
+    workspaceKpis,
+    selectedMonthStr,
+    upsertKpi,
+    canEditKpis,
+  );
+
+  // ── Progress tracking ──
+  const progressInfo = useMemo(() => {
+    if (!workspaceKpis?.length) return { filled: 0, total: 0, percent: 0 };
+    const total = workspaceKpis.length;
+    const filled = workspaceKpis.filter(wk => {
+      const kpiId = wk.kpi_definition_id;
+      const edited = editedValues[kpiId];
+      const existing = monthValues[kpiId];
+      const val = edited?.value ?? existing?.value?.toString() ?? '';
+      return val !== '';
+    }).length;
+    return { filled, total, percent: total > 0 ? Math.round((filled / total) * 100) : 0 };
+  }, [workspaceKpis, editedValues, monthValues]);
+
   const chartDataByKpi = useMemo(() => {
     if (!kpiValues || !workspaceKpis) return {};
     
@@ -120,7 +221,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
       const kpiId = wk.kpi_definition_id;
       const values = kpiValues.filter(v => v.kpi_definition_id === kpiId);
       
-      // Generate last 12 months
       const months: { month: string; value: number | null; label: string }[] = [];
       for (let i = 11; i >= 0; i--) {
         const monthDate = startOfMonth(subMonths(new Date(), i));
@@ -156,6 +256,8 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         [field]: val,
       },
     }));
+    // Trigger autosave
+    scheduleAutosave(kpiId);
   };
 
   const handleSaveKpi = async (wk: WorkspaceKpi) => {
@@ -172,8 +274,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
       return;
     }
 
-    setSavingKpis(prev => new Set(prev).add(kpiId));
-    
     try {
       await upsertKpi.mutateAsync({
         kpi_definition_id: kpiId,
@@ -184,7 +284,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         existingId: existing?.id,
       });
       
-      // Clear edited state for this KPI
       setEditedValues(prev => {
         const newState = { ...prev };
         delete newState[kpiId];
@@ -194,19 +293,21 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
       toast.success(t('kpis.kpiSaved'));
     } catch {
       toast.error(t('kpis.failedToSave'));
-    } finally {
-      setSavingKpis(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(kpiId);
-        return newSet;
-      });
     }
   };
 
   const handleMarkCheckin = async () => {
+    // Save any pending edits first
+    const pendingKpiIds = Object.keys(editedValues);
+    for (const kpiId of pendingKpiIds) {
+      await saveKpi(kpiId);
+    }
+
     try {
       await markCheckin.mutateAsync();
       toast.success(t('kpis.checkinComplete'));
+      showQuickWin('monthly_wins_submitted');
+      setEditedValues({});
     } catch {
       toast.error(t('kpis.failedCheckin'));
     }
@@ -257,7 +358,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   const isLoading = loadingKpis || loadingValues;
 
-  // Get available KPIs (not yet added to workspace)
   const assignedKpiIds = new Set(workspaceKpis?.map(wk => wk.kpi_definition_id) || []);
   const availableKpis = allKpis?.filter(k => !assignedKpiIds.has(k.id)) || [];
 
@@ -282,7 +382,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
             {t('kpis.noKpisDesc')}
           </p>
           
-          {/* Educational hint */}
           <div className="mb-6 p-4 rounded-lg bg-muted/50 max-w-md mx-auto text-left">
             <p className="text-sm text-muted-foreground mb-2">
               <strong>{t('kpis.whatAreKpis', 'O que são KPIs?')}</strong>
@@ -322,7 +421,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                     {t('kpis.configureManually')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md" aria-describedby={undefined}>
                   <DialogHeader>
                     <DialogTitle>{t('kpis.addKpis')}</DialogTitle>
                   </DialogHeader>
@@ -370,7 +469,78 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header with month selector and help */}
+      {/* ── Progress Banner (visible when editing current month) ── */}
+      {isCurrentMonth && canEditKpis && (
+        <Card className={cn(
+          "border transition-colors duration-300",
+          progressInfo.percent === 100 
+            ? "border-green-300 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20" 
+            : "border-primary/20 bg-primary/5"
+        )}>
+          <CardContent className="py-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1 min-w-0 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {t('kpis.quickCheckin', 'Check-in Mensal')}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {progressInfo.filled}/{progressInfo.total}
+                  </span>
+                </div>
+                <Progress value={progressInfo.percent} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {progressInfo.percent === 100
+                    ? t('kpis.allFilled', '✓ Todos os KPIs preenchidos! Pode concluir o check-in.')
+                    : t('kpis.autosaveHint', 'Os valores são guardados automaticamente enquanto preenche.')}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {/* View mode toggle */}
+                <div className="flex items-center border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setViewMode('cards')}
+                    className={cn(
+                      "p-1.5 transition-colors",
+                      viewMode === 'cards' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'
+                    )}
+                    title={t('kpis.cardView', 'Vista em cartões')}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('checkin')}
+                    className={cn(
+                      "p-1.5 transition-colors",
+                      viewMode === 'checkin' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'
+                    )}
+                    title={t('kpis.checkinView', 'Vista rápida')}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleMarkCheckin}
+                  disabled={markCheckin.isPending || progressInfo.filled === 0}
+                  className={cn(
+                    "transition-all",
+                    progressInfo.percent === 100 && "bg-green-600 hover:bg-green-700 animate-pulse"
+                  )}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1.5" />
+                  {t('kpis.completeCheckin', 'Concluir')}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Header with month selector */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -393,7 +563,6 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
             </Button>
           </div>
           
-          {/* Quick glossary hints */}
           <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground border-l pl-3">
             <QuickHelp term="mrr" />
             <QuickHelp term="cac" />
@@ -424,7 +593,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
                   {t('kpis.configure')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md" aria-describedby={undefined}>
                 <DialogHeader>
                   <DialogTitle>{t('kpis.configureKpis')}</DialogTitle>
                 </DialogHeader>
@@ -476,7 +645,8 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
               </DialogContent>
             </Dialog>
           )}
-          {canEditKpis && (
+          {/* Legacy mark checkin button for non-current months */}
+          {canEditKpis && !isCurrentMonth && (
             <Button 
               variant="outline"
               size="sm"
@@ -489,26 +659,139 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {workspaceKpis.map(wk => (
-          <KpiCard
-            key={wk.id}
-            workspaceKpi={wk}
-            currentValue={monthValues[wk.kpi_definition_id]}
-            editedValue={editedValues[wk.kpi_definition_id]}
-            chartData={chartDataByKpi[wk.kpi_definition_id] || []}
-            canEdit={canEditKpis}
-            isSaving={savingKpis.has(wk.kpi_definition_id)}
-            onValueChange={(field, val) => handleValueChange(wk.kpi_definition_id, field, val)}
-            onSave={() => handleSaveKpi(wk)}
-            onUnlock={async (kpiValueId) => {
-              await unlockKpi.mutateAsync(kpiValueId);
-              toast.success('KPI unlocked for manual editing');
-            }}
-          />
-        ))}
-      </div>
+      {/* ── Quick Check-in Mode (streamlined list) ── */}
+      {viewMode === 'checkin' && canEditKpis ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              {t('kpis.quickCheckinMode', 'Modo Check-in Rápido')}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              {t('kpis.quickCheckinDesc', 'Preencha os valores abaixo. Cada campo é guardado automaticamente.')}
+            </p>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="divide-y divide-border">
+              {workspaceKpis.map((wk, idx) => {
+                const def = wk.definition;
+                if (!def) return null;
+
+                const kpiId = wk.kpi_definition_id;
+                const existing = monthValues[kpiId];
+                const edited = editedValues[kpiId];
+                const displayValue = edited?.value ?? existing?.value?.toString() ?? '';
+                const isLocked = existing?.locked_by_source ?? false;
+                const isSaving = savingKpis.has(kpiId);
+                const isSaved = savedKpis.has(kpiId);
+                const isFilled = displayValue !== '';
+
+                // Last month value for context
+                const lastMonthStr = format(subMonths(selectedMonth, 1), 'yyyy-MM-dd');
+                const lastMonthVal = kpiValues?.find(
+                  v => v.kpi_definition_id === kpiId && v.period_month === lastMonthStr
+                );
+
+                return (
+                  <div
+                    key={wk.id}
+                    className={cn(
+                      "py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 transition-colors",
+                      isSaved && "bg-green-50/50 dark:bg-green-950/10"
+                    )}
+                  >
+                    {/* KPI name + context */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
+                          isFilled
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                            : "bg-muted text-muted-foreground"
+                        )}>
+                          {isFilled ? <Check className="h-3 w-3" /> : idx + 1}
+                        </span>
+                        <span className="text-sm font-medium text-foreground truncate">
+                          {def.name}
+                        </span>
+                        {def.unit && (
+                          <Badge variant="outline" className="text-[10px] shrink-0">
+                            {def.unit}
+                          </Badge>
+                        )}
+                        {isLocked && <Lock className="h-3 w-3 text-amber-500 shrink-0" />}
+                      </div>
+                      {/* Historical context */}
+                      <div className="flex items-center gap-3 mt-0.5 ml-7">
+                        {lastMonthVal?.value != null && (
+                          <span className="text-[11px] text-muted-foreground">
+                            {t('kpis.lastMonth', 'Mês anterior')}: <strong>{lastMonthVal.value.toLocaleString()}</strong>
+                          </span>
+                        )}
+                        {wk.target_value != null && (
+                          <span className="text-[11px] text-muted-foreground">
+                            {t('kpis.target')}: <strong>{wk.target_value.toLocaleString()}</strong>
+                          </span>
+                        )}
+                        {/* Inline sparkline */}
+                        <div className="hidden sm:block">
+                          <KpiSparkline data={(chartDataByKpi[kpiId] || []).map(d => ({ value: d.value ?? null, label: d.label }))} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Input + status */}
+                    <div className="flex items-center gap-2 ml-7 sm:ml-0">
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        value={displayValue}
+                        onChange={(e) => handleValueChange(kpiId, 'value', e.target.value)}
+                        placeholder="—"
+                        disabled={isLocked}
+                        className="h-9 w-32 text-sm font-medium tabular-nums"
+                        data-testid={`kpi-input-${idx}`}
+                        autoFocus={idx === 0 && !displayValue}
+                      />
+                      {/* Save status indicator */}
+                      <div className="w-6 flex items-center justify-center">
+                        {isSaving && (
+                          <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        )}
+                        {isSaved && !isSaving && (
+                          <Check className="h-4 w-4 text-green-600 animate-in fade-in duration-200" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        /* ── Card View (original detailed view with autosave) ── */
+        <div className="grid gap-6 md:grid-cols-2">
+          {workspaceKpis.map(wk => (
+            <KpiCard
+              key={wk.id}
+              workspaceKpi={wk}
+              currentValue={monthValues[wk.kpi_definition_id]}
+              editedValue={editedValues[wk.kpi_definition_id]}
+              chartData={chartDataByKpi[wk.kpi_definition_id] || []}
+              canEdit={canEditKpis}
+              isSaving={savingKpis.has(wk.kpi_definition_id)}
+              isSaved={savedKpis.has(wk.kpi_definition_id)}
+              onValueChange={(field, val) => handleValueChange(wk.kpi_definition_id, field, val)}
+              onSave={() => handleSaveKpi(wk)}
+              onUnlock={async (kpiValueId) => {
+                await unlockKpi.mutateAsync(kpiValueId);
+                toast.success('KPI unlocked for manual editing');
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Import Dialog */}
       <KpiImportDialog
@@ -527,6 +810,7 @@ interface KpiCardProps {
   chartData: { month: string; value: number | null; label: string }[];
   canEdit: boolean;
   isSaving: boolean;
+  isSaved: boolean;
   onValueChange: (field: 'value' | 'notes', val: string) => void;
   onSave: () => void;
   onUnlock?: (kpiValueId: string) => void;
@@ -539,6 +823,7 @@ function KpiCard({
   chartData,
   canEdit,
   isSaving,
+  isSaved,
   onValueChange,
   onSave,
   onUnlock,
@@ -550,16 +835,13 @@ function KpiCard({
   const displayValue = editedValue?.value ?? currentValue?.value?.toString() ?? '';
   const displayNotes = editedValue?.notes ?? currentValue?.notes ?? '';
   
-  // Source tracking
   const isLocked = currentValue?.locked_by_source ?? false;
   const sourceType = currentValue?.source_type ?? 'manual';
   const isFromFinancialModel = sourceType === 'financial_model';
   const effectiveCanEdit = canEdit && !isLocked;
   
-  // Check if there are unsaved changes
   const hasChanges = editedValue !== undefined;
 
-  // Calculate trend from chart data
   const recentValues = chartData.filter(d => d.value !== null).slice(-2);
   let trend: 'up' | 'down' | 'flat' = 'flat';
   if (recentValues.length >= 2) {
@@ -573,14 +855,17 @@ function KpiCard({
     ? (trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-destructive' : 'text-muted-foreground')
     : (trend === 'down' ? 'text-green-600' : trend === 'up' ? 'text-destructive' : 'text-muted-foreground');
 
-  // Filter chart data to only include non-null values for the line
   const chartDataFiltered = chartData.map(d => ({
     ...d,
     value: d.value,
   }));
 
   return (
-    <Card className={isLocked ? 'border-amber-200 dark:border-amber-800' : ''}>
+    <Card className={cn(
+      "transition-colors duration-300",
+      isLocked && 'border-amber-200 dark:border-amber-800',
+      isSaved && 'border-green-300 dark:border-green-800',
+    )}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -596,7 +881,6 @@ function KpiCard({
             {def.description && (
               <p className="text-xs text-muted-foreground mt-0.5">{def.description}</p>
             )}
-            {/* Source indicator */}
             {isFromFinancialModel && currentValue && (
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
@@ -616,11 +900,19 @@ function KpiCard({
               </div>
             )}
           </div>
-          <TrendIcon className={`h-4 w-4 ${trendColor}`} />
+          <div className="flex items-center gap-1.5">
+            {/* Autosave status */}
+            {isSaving && (
+              <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            )}
+            {isSaved && !isSaving && (
+              <Check className="h-4 w-4 text-green-600 animate-in fade-in duration-200" />
+            )}
+            <TrendIcon className={`h-4 w-4 ${trendColor}`} />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Current value display/input */}
         <div className="flex items-end gap-4">
           <div className="flex-1">
             {effectiveCanEdit ? (
@@ -664,7 +956,6 @@ function KpiCard({
           )}
         </div>
 
-        {/* Notes */}
         {effectiveCanEdit ? (
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Notes (optional)</Label>
@@ -682,7 +973,6 @@ function KpiCard({
           </div>
         ) : null}
 
-        {/* Locked message */}
         {isLocked && canEdit && (
           <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Lock className="h-3 w-3" />
@@ -690,12 +980,11 @@ function KpiCard({
           </div>
         )}
 
-        {/* Save button */}
-        {effectiveCanEdit && hasChanges && (
-          <Button size="sm" onClick={onSave} disabled={isSaving} className="w-full">
-            <Save className="h-3.5 w-3.5 mr-1" />
-            Save
-          </Button>
+        {/* Autosave hint replaces old manual save button */}
+        {effectiveCanEdit && hasChanges && !isSaving && !isSaved && (
+          <p className="text-[11px] text-muted-foreground text-center animate-in fade-in">
+            {t('kpis.savingShortly', 'A guardar automaticamente...')}
+          </p>
         )}
 
         {/* Chart */}
