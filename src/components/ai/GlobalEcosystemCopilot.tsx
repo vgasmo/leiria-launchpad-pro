@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Bot, Send, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -21,12 +22,15 @@ const SUGGESTED_PROMPTS = [
   'How is my startup health?',
 ];
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/copilot-chat`;
+
 export function GlobalEcosystemCopilot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -34,26 +38,144 @@ export function GlobalEcosystemCopilot() {
     }
   }, [messages, isThinking]);
 
-  const handleSend = (text?: string) => {
+  const handleSend = useCallback(async (text?: string) => {
     const content = text || input.trim();
-    if (!content) return;
+    if (!content || isThinking) return;
 
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content };
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput('');
     setIsThinking(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const reply: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: getSimulatedResponse(content),
+    // Abort any in-flight request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    let assistantSoFar = '';
+
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
+        signal: controller.signal,
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        const errMsg = errData.error || `Error ${resp.status}`;
+        if (resp.status === 429) {
+          toast.error('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (resp.status === 402) {
+          toast.error('AI credits exhausted. Please add credits in Settings.');
+        } else {
+          toast.error(errMsg);
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      if (!resp.body) {
+        toast.error('No response stream received.');
+        setIsThinking(false);
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = '';
+      let streamDone = false;
+
+      const upsertAssistant = (nextChunk: string) => {
+        assistantSoFar += nextChunk;
+        const snapshot = assistantSoFar;
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.role === 'assistant') {
+            return prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content: snapshot } : m
+            );
+          }
+          return [...prev, { id: crypto.randomUUID(), role: 'assistant', content: snapshot }];
+        });
       };
-      setMessages(prev => [...prev, reply]);
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (delta) upsertAssistant(delta);
+          } catch {
+            textBuffer = line + '\n' + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Final flush
+      if (textBuffer.trim()) {
+        for (let raw of textBuffer.split('\n')) {
+          if (!raw) continue;
+          if (raw.endsWith('\r')) raw = raw.slice(0, -1);
+          if (raw.startsWith(':') || raw.trim() === '') continue;
+          if (!raw.startsWith('data: ')) continue;
+          const jsonStr = raw.slice(6).trim();
+          if (jsonStr === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (delta) upsertAssistant(delta);
+          } catch {
+            /* ignore partial leftovers */
+          }
+        }
+      }
+
+      // If we got no content at all, show a fallback
+      if (!assistantSoFar) {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: "I'm here to help! Could you rephrase your question?",
+          },
+        ]);
+      }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
+      console.error('Copilot stream error:', err);
+      toast.error('Failed to reach the AI assistant. Please try again.');
+    } finally {
       setIsThinking(false);
-    }, 1200 + Math.random() * 800);
-  };
+    }
+  }, [input, isThinking, messages]);
 
   return (
     <>
@@ -67,7 +189,6 @@ export function GlobalEcosystemCopilot() {
           'transition-all duration-300 hover:scale-110 hover:shadow-xl',
           'active:scale-95',
           'ring-2 ring-primary/20 ring-offset-2 ring-offset-background',
-          // Hide on mobile when bottom nav is visible
           'lg:bottom-6 bottom-24',
         )}
         aria-label="Open AI Copilot"
@@ -132,7 +253,7 @@ export function GlobalEcosystemCopilot() {
                   )}
                   <div
                     className={cn(
-                      'max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+                      'max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
                       msg.role === 'user'
                         ? 'bg-primary text-primary-foreground rounded-br-md'
                         : 'bg-muted/60 text-foreground rounded-bl-md'
@@ -143,7 +264,7 @@ export function GlobalEcosystemCopilot() {
                 </div>
               ))}
 
-              {isThinking && (
+              {isThinking && !messages.some(m => m.role === 'assistant' && m === messages[messages.length - 1]) && (
                 <div className="flex gap-2 justify-start">
                   <Avatar className="h-7 w-7 shrink-0 mt-0.5">
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
@@ -209,17 +330,4 @@ export function GlobalEcosystemCopilot() {
       </Sheet>
     </>
   );
-}
-
-function getSimulatedResponse(query: string): string {
-  const q = query.toLowerCase();
-  if (q.includes('overdue') || q.includes('task'))
-    return "You have action items that need attention. Head to your Actions tab to review and prioritize them. Focus on the highest-priority items first to keep your momentum going.";
-  if (q.includes('health'))
-    return "Your startup's health score reflects your KPI reporting, session activity, and milestone progress. Keep your metrics updated monthly and attend scheduled sessions to maintain a strong score.";
-  if (q.includes('next') || q.includes('action'))
-    return "Based on your current stage, I'd recommend updating your monthly KPIs and scheduling your next mentorship session. These two actions will have the biggest impact on your progress.";
-  if (q.includes('kpi') || q.includes('metric'))
-    return "Your KPIs are the pulse of your startup. Make sure to report them monthly — missing data lowers your health score and limits the insights your consultants can provide.";
-  return "I'm here to help you navigate your incubation journey. You can ask me about your tasks, KPIs, sessions, health score, or next best actions. What would you like to know?";
 }

@@ -216,3 +216,11 @@ verify_jwt = false
 # CRM Stage Email Automation
 [functions.send-crm-stage-transition-email]
 verify_jwt = false
+
+# ============================================
+# AI COPILOT (User-facing, streaming)
+# JWT disabled at gateway, validated at runtime
+# ============================================
+
+[functions.copilot-chat]
+verify_jwt = false

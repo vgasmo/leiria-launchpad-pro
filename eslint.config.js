@@ -31,6 +31,14 @@ export default [
       "prefer-const": "off",
       "no-case-declarations": "off",
       "@typescript-eslint/no-unused-vars": "off",
+      "no-restricted-imports": ["error", {
+        "patterns": [
+          {
+            "group": ["**/integrations/supabase/client", "**/integrations/supabase/client.ts"],
+            "message": "Use the secure wrapper from @/lib/supabaseClient instead. The auto-generated client lacks PKCE and detectSessionInUrl."
+          }
+        ]
+      }],
     },
   },
 
