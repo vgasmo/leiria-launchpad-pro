@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -25,13 +25,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   useDocumentReviews,
   useCreateReview,
-  useUpdateReview,
   useAnalyzePitchDeck,
 } from '@/hooks/useDocumentReviews';
 
-interface PitchDeckReviewPanelProps {
+interface DocumentReviewPanelProps {
   documentId: string;
   workspaceId: string;
+  documentName?: string;
   isStaff: boolean;
   isMentor: boolean;
   onClose: () => void;
@@ -53,12 +53,11 @@ const APPROVAL_OPTIONS = [
   { value: 'rejected', labelKey: 'review.rejected', defaultLabel: 'Rejeitado', icon: XCircle, color: 'text-destructive' },
 ];
 
-export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMentor, onClose }: PitchDeckReviewPanelProps) {
+export function DocumentReviewPanel({ documentId, workspaceId, documentName, isStaff, isMentor, onClose }: DocumentReviewPanelProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: reviews, isLoading } = useDocumentReviews(documentId);
   const createReview = useCreateReview();
-  const updateReview = useUpdateReview();
   const analyzeMutation = useAnalyzePitchDeck();
 
   const canReview = isStaff || isMentor;
@@ -72,10 +71,8 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
   const handleAnalyzeWithAI = async () => {
     try {
       const analysis = await analyzeMutation.mutateAsync({ documentId, workspaceId });
-
       if (!user) return;
 
-      // Create a review with AI scores
       await createReview.mutateAsync({
         document_id: documentId,
         workspace_id: workspaceId,
@@ -91,7 +88,6 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
         ai_analyzed_at: new Date().toISOString(),
         approval_status: 'pending',
       });
-
       toast.success(t('review.aiAnalysisComplete', { defaultValue: 'Análise IA concluída!' }));
     } catch (error: any) {
       if (error?.message?.includes('Rate limit')) {
@@ -130,9 +126,9 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
     }
   };
 
-  // Find AI review (most recent with ai_analysis_json)
   const aiReview = reviews?.find(r => r.ai_analysis_json);
   const humanReviews = reviews?.filter(r => !r.ai_analysis_json) || [];
+  const displayName = documentName || t('review.document', { defaultValue: 'Documento' });
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -140,10 +136,13 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            {t('review.pitchDeckReview', { defaultValue: 'Avaliação do Pitch Deck' })}
+            {t('review.documentReview', { defaultValue: 'Avaliação de Entregável' })}
           </DialogTitle>
           <DialogDescription>
-            {t('review.panelDescription', { defaultValue: 'Avaliações humanas e IA do pitch deck.' })}
+            {t('review.panelDescriptionGeneric', {
+              defaultValue: 'Avaliações humanas e IA de "{{name}}".',
+              name: displayName,
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -154,20 +153,16 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
           </div>
         ) : (
           <div className="space-y-6">
-            {/* AI Analysis Section */}
+            {/* AI Analysis */}
             <Card className="border-primary/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-medium flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
                     {t('review.aiAnalysis', { defaultValue: 'Análise IA' })}
-                  </CardTitle>
+                  </h3>
                   {canReview && !aiReview && (
-                    <Button
-                      size="sm"
-                      onClick={handleAnalyzeWithAI}
-                      disabled={analyzeMutation.isPending}
-                    >
+                    <Button size="sm" onClick={handleAnalyzeWithAI} disabled={analyzeMutation.isPending}>
                       {analyzeMutation.isPending ? (
                         <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                       ) : (
@@ -180,11 +175,9 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                     </Button>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent>
+
                 {aiReview ? (
                   <div className="space-y-4">
-                    {/* Score bars */}
                     <div className="grid grid-cols-2 gap-3">
                       {SCORE_DIMENSIONS.map(dim => {
                         const score = aiReview[dim.key as keyof typeof aiReview] as number | null;
@@ -195,47 +188,31 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                               <span className="font-medium">{score || '-'}/5</span>
                             </div>
                             <div className="w-full bg-muted rounded-full h-1.5">
-                              <div
-                                className="bg-primary rounded-full h-1.5 transition-all"
-                                style={{ width: `${((score || 0) / 5) * 100}%` }}
-                              />
+                              <div className="bg-primary rounded-full h-1.5 transition-all" style={{ width: `${((score || 0) / 5) * 100}%` }} />
                             </div>
                           </div>
                         );
                       })}
                     </div>
 
-                    {/* Summary */}
-                    {aiReview.comments && (
-                      <p className="text-sm text-muted-foreground">{aiReview.comments}</p>
-                    )}
+                    {aiReview.comments && <p className="text-sm text-muted-foreground">{aiReview.comments}</p>}
 
-                    {/* Detailed AI recommendations (expandable) */}
                     {aiReview.ai_analysis_json && (
                       <div>
-                        <button
-                          onClick={() => setShowAiDetails(!showAiDetails)}
-                          className="flex items-center gap-1 text-sm text-primary hover:underline"
-                        >
+                        <button onClick={() => setShowAiDetails(!showAiDetails)} className="flex items-center gap-1 text-sm text-primary hover:underline">
                           {showAiDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                           {t('review.detailedRecommendations', { defaultValue: 'Recomendações detalhadas' })}
                         </button>
                         {showAiDetails && (
                           <div className="mt-3 space-y-3">
-                            {/* Top priorities */}
                             {aiReview.ai_analysis_json.top_priorities?.length > 0 && (
                               <div>
-                                <h4 className="text-sm font-medium mb-1">
-                                  {t('review.topPriorities', { defaultValue: 'Prioridades principais' })}
-                                </h4>
+                                <h4 className="text-sm font-medium mb-1">{t('review.topPriorities', { defaultValue: 'Prioridades principais' })}</h4>
                                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                  {aiReview.ai_analysis_json.top_priorities.map((p: string, i: number) => (
-                                    <li key={i}>{p}</li>
-                                  ))}
+                                  {aiReview.ai_analysis_json.top_priorities.map((p: string, i: number) => <li key={i}>{p}</li>)}
                                 </ul>
                               </div>
                             )}
-                            {/* Per-dimension recommendations */}
                             {aiReview.ai_analysis_json.recommendations?.map((rec: any, i: number) => (
                               <div key={i} className="p-3 rounded-lg bg-muted/50 text-sm">
                                 <div className="flex items-center justify-between mb-1">
@@ -245,9 +222,7 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                                 <p className="text-muted-foreground mb-2">{rec.feedback}</p>
                                 {rec.action_items?.length > 0 && (
                                   <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
-                                    {rec.action_items.map((a: string, j: number) => (
-                                      <li key={j}>{a}</li>
-                                    ))}
+                                    {rec.action_items.map((a: string, j: number) => <li key={j}>{a}</li>)}
                                   </ul>
                                 )}
                               </div>
@@ -259,9 +234,7 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
 
                     <p className="text-xs text-muted-foreground">
                       {t('review.analyzedAt', { defaultValue: 'Analisado em' })}{' '}
-                      {aiReview.ai_analyzed_at
-                        ? format(new Date(aiReview.ai_analyzed_at), "dd MMM yyyy 'às' HH:mm", { locale: pt })
-                        : '-'}
+                      {aiReview.ai_analyzed_at ? format(new Date(aiReview.ai_analyzed_at), "dd MMM yyyy 'às' HH:mm", { locale: pt }) : '-'}
                     </p>
                   </div>
                 ) : (
@@ -280,9 +253,7 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   {t('review.humanReviews', { defaultValue: 'Avaliações Humanas' })}
-                  {humanReviews.length > 0 && (
-                    <Badge variant="secondary">{humanReviews.length}</Badge>
-                  )}
+                  {humanReviews.length > 0 && <Badge variant="secondary">{humanReviews.length}</Badge>}
                 </h3>
                 {canReview && (
                   <Button size="sm" variant="outline" onClick={() => setShowForm(!showForm)}>
@@ -292,11 +263,9 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                 )}
               </div>
 
-              {/* New review form */}
               {showForm && canReview && (
                 <Card className="mb-4">
                   <CardContent className="pt-4 space-y-4">
-                    {/* Scoring */}
                     <div className="grid grid-cols-2 gap-3">
                       {SCORE_DIMENSIONS.map(dim => (
                         <div key={dim.key} className="space-y-1">
@@ -320,24 +289,20 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                       ))}
                     </div>
 
-                    {/* Comments */}
                     <div>
                       <Label className="text-xs">{t('review.comments', { defaultValue: 'Comentários' })}</Label>
                       <Textarea
                         value={comments}
                         onChange={(e) => setComments(e.target.value)}
-                        placeholder={t('review.commentsPlaceholder', { defaultValue: 'Feedback detalhado sobre o pitch deck...' })}
+                        placeholder={t('review.commentsPlaceholderGeneric', { defaultValue: 'Feedback detalhado sobre este entregável...' })}
                         rows={3}
                       />
                     </div>
 
-                    {/* Approval */}
                     <div>
                       <Label className="text-xs">{t('review.approvalStatus', { defaultValue: 'Estado de Aprovação' })}</Label>
                       <Select value={approvalStatus} onValueChange={setApprovalStatus}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {APPROVAL_OPTIONS.map(opt => (
                             <SelectItem key={opt.value} value={opt.value}>
@@ -361,7 +326,6 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                 </Card>
               )}
 
-              {/* Existing human reviews */}
               {humanReviews.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   {t('review.noHumanReviews', { defaultValue: 'Ainda sem avaliações humanas.' })}
@@ -371,19 +335,14 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                   {humanReviews.map(review => (
                     <Card key={review.id}>
                       <CardContent className="pt-4">
-                        {/* Reviewer info + status */}
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={review.reviewer?.avatar_url || undefined} />
-                              <AvatarFallback className="text-[10px]">
-                                {review.reviewer?.full_name?.charAt(0) || '?'}
-                              </AvatarFallback>
+                              <AvatarFallback className="text-[10px]">{review.reviewer?.full_name?.charAt(0) || '?'}</AvatarFallback>
                             </Avatar>
                             <span className="text-sm font-medium">{review.reviewer?.full_name || 'Reviewer'}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(review.created_at), "dd MMM yyyy", { locale: pt })}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(review.created_at), "dd MMM yyyy", { locale: pt })}</span>
                           </div>
                           <Badge variant={
                             review.approval_status === 'approved' ? 'default' :
@@ -393,14 +352,13 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                           </Badge>
                         </div>
 
-                        {/* Scores */}
                         <div className="grid grid-cols-3 gap-2 mb-3">
                           {SCORE_DIMENSIONS.map(dim => {
                             const score = review[dim.key as keyof typeof review] as number | null;
                             if (!score) return null;
                             return (
                               <div key={dim.key} className="flex items-center gap-1 text-xs">
-                                <Star className="h-3 w-3 text-amber-500" />
+                                <Star className="h-3 w-3 text-primary" />
                                 <span className="text-muted-foreground">{t(dim.labelKey, { defaultValue: dim.defaultLabel })}:</span>
                                 <span className="font-medium">{score}/5</span>
                               </div>
@@ -408,10 +366,7 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
                           })}
                         </div>
 
-                        {/* Comments */}
-                        {review.comments && (
-                          <p className="text-sm text-muted-foreground">{review.comments}</p>
-                        )}
+                        {review.comments && <p className="text-sm text-muted-foreground">{review.comments}</p>}
                       </CardContent>
                     </Card>
                   ))}
@@ -422,5 +377,35 @@ export function PitchDeckReviewPanel({ documentId, workspaceId, isStaff, isMento
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Badge showing review status for any document */
+export function DocumentReviewBadge({ documentId }: { documentId: string }) {
+  const { t } = useTranslation();
+  const { data: reviews } = useDocumentReviews(documentId);
+
+  if (!reviews?.length) {
+    return (
+      <Badge variant="outline" className="text-xs text-muted-foreground">
+        {t('dataroomChecklist.noReview', { defaultValue: 'Sem avaliação' })}
+      </Badge>
+    );
+  }
+
+  const latestReview = reviews[0];
+  const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    approved: { label: t('review.approved', { defaultValue: 'Aprovado' }), variant: 'default' },
+    needs_revision: { label: t('review.needsRevision', { defaultValue: 'Precisa revisão' }), variant: 'secondary' },
+    rejected: { label: t('review.rejected', { defaultValue: 'Rejeitado' }), variant: 'destructive' },
+    pending: { label: t('review.pending', { defaultValue: 'Pendente' }), variant: 'outline' },
+  };
+
+  const status = statusMap[latestReview.approval_status] || statusMap.pending;
+
+  return (
+    <Badge variant={status.variant} className="text-xs">
+      {status.label}
+    </Badge>
   );
 }

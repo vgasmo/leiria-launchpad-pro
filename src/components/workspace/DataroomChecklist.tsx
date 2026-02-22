@@ -10,9 +10,8 @@ import {
   Eye, BookOpen, Loader2,
 } from 'lucide-react';
 import { useDocuments, useUploadDocument } from '@/hooks/useDocuments';
-import { useDocumentReviews } from '@/hooks/useDocumentReviews';
 import { useSearchParams } from 'react-router-dom';
-import { PitchDeckReviewPanel } from './PitchDeckReviewPanel';
+import { DocumentReviewPanel, DocumentReviewBadge } from './DocumentReviewPanel';
 import { toast } from 'sonner';
 
 interface DataroomChecklistProps {
@@ -46,9 +45,11 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: documents } = useDocuments(workspaceId);
   const uploadMutation = useUploadDocument();
-  const [reviewDocId, setReviewDocId] = useState<string | null>(null);
+  const [reviewDoc, setReviewDoc] = useState<{ id: string; name: string } | null>(null);
   const [uploadItem, setUploadItem] = useState<ChecklistItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const canReview = isStaff || isMentor;
 
   const getDocForCategory = (categoryKey: string) => {
     return documents?.find(
@@ -78,7 +79,6 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
     } catch {
       toast.error(t('documents.uploadFailed', { defaultValue: 'Upload failed' }));
     }
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -157,18 +157,23 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
-                    {hasDoc && item.id === 'pitch_deck' && (
+                    {/* Review badge and button for ALL deliverables with uploaded docs */}
+                    {hasDoc && canReview && (
                       <>
-                        <PitchDeckReviewBadge documentId={doc.id} />
+                        <DocumentReviewBadge documentId={doc.id} />
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setReviewDocId(doc.id)}
+                          onClick={() => setReviewDoc({ id: doc.id, name: doc.name || t(item.labelKey, { defaultValue: item.id }) })}
                           title={t('dataroomChecklist.viewReview', { defaultValue: 'Ver avaliação' })}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </>
+                    )}
+                    {/* Founders can see badge (read-only) */}
+                    {hasDoc && !canReview && (
+                      <DocumentReviewBadge documentId={doc.id} />
                     )}
                     {!hasDoc && canWrite && (
                       <div className="flex items-center gap-1">
@@ -201,7 +206,7 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
         </CardContent>
       </Card>
 
-      {/* Inline upload dialog - stays in dataroom context */}
+      {/* Inline upload dialog */}
       <Dialog open={!!uploadItem} onOpenChange={(open) => !open && setUploadItem(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -245,46 +250,17 @@ export function DataroomChecklist({ workspaceId, canWrite, isStaff, isMentor }: 
         </DialogContent>
       </Dialog>
 
-      {/* Review panel for pitch deck */}
-      {reviewDocId && (
-        <PitchDeckReviewPanel
-          documentId={reviewDocId}
+      {/* Review panel for ANY deliverable */}
+      {reviewDoc && (
+        <DocumentReviewPanel
+          documentId={reviewDoc.id}
+          documentName={reviewDoc.name}
           workspaceId={workspaceId}
           isStaff={isStaff}
           isMentor={isMentor}
-          onClose={() => setReviewDocId(null)}
+          onClose={() => setReviewDoc(null)}
         />
       )}
     </>
-  );
-}
-
-/** Small badge showing review status for a document */
-function PitchDeckReviewBadge({ documentId }: { documentId: string }) {
-  const { t } = useTranslation();
-  const { data: reviews } = useDocumentReviews(documentId);
-
-  if (!reviews?.length) {
-    return (
-      <Badge variant="outline" className="text-xs text-muted-foreground">
-        {t('dataroomChecklist.noReview', { defaultValue: 'Sem avaliação' })}
-      </Badge>
-    );
-  }
-
-  const latestReview = reviews[0];
-  const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-    approved: { label: t('review.approved', { defaultValue: 'Aprovado' }), variant: 'default' },
-    needs_revision: { label: t('review.needsRevision', { defaultValue: 'Precisa revisão' }), variant: 'secondary' },
-    rejected: { label: t('review.rejected', { defaultValue: 'Rejeitado' }), variant: 'destructive' },
-    pending: { label: t('review.pending', { defaultValue: 'Pendente' }), variant: 'outline' },
-  };
-
-  const status = statusMap[latestReview.approval_status] || statusMap.pending;
-
-  return (
-    <Badge variant={status.variant} className="text-xs">
-      {status.label}
-    </Badge>
   );
 }
