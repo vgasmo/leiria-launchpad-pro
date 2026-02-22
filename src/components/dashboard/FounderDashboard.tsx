@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
 import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -217,7 +218,11 @@ export function FounderDashboard({
       />
 
       {/* ★ Smart Nudges — passive AI suggestions ★ */}
-      {nudges.length > 0 && <SmartNudgeCard nudges={nudges} />}
+      {nudges.length > 0 && (
+        <WidgetErrorBoundary name="SmartNudges">
+          <SmartNudgeCard nudges={nudges} />
+        </WidgetErrorBoundary>
+      )}
 
       {/* Welcome Panel with Checklist (dismissible) */}
       <FounderWelcomePanel
