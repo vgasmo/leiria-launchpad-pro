@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabaseClient } from '@/lib/supabaseClient';
 
 interface Message {
   id: string;
@@ -56,11 +57,21 @@ export function GlobalEcosystemCopilot() {
     let assistantSoFar = '';
 
     try {
+      // Get the user's actual session token
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) {
+        toast.error('Sessão expirada. Por favor, faça login novamente.');
+        setIsThinking(false);
+        return;
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({
           messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
