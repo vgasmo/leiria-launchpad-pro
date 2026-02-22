@@ -114,6 +114,8 @@ verify_jwt = false
 [functions.analyze-contract]
 verify_jwt = false
 
+[functions.analyze-contract-document]
+verify_jwt = false
 
 [functions.graph-config-status]
 verify_jwt = false

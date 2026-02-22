@@ -1637,14 +1637,46 @@
     "aiAnalysis": "AI Analysis",
     "aiInsights": "AI Contract Insights",
     "analyze": "Analyze",
+    "bulk": {
+      "archiveSelected": "Archive Selected",
+      "archiveSuccess": "{{count}} contracts archived",
+      "selected": "{{count}} selected"
+    },
     "confirmAnalysis": "Confirm AI Analysis",
     "confirmAnalysisDesc": "AI will analyze contract details and flag key dates, missing info, and risks. No changes will be made automatically.",
+    "filters": {
+      "dateRange": "Date Range"
+    },
     "keyDates": "Key Dates",
     "missingInfo": "Missing Information",
     "recommendedActions": "Recommended Actions",
     "rerunAnalysis": "Run again",
+    "review": {
+      "aiDesc": "AI extracted these fields from the PDF. Review and edit before saving.",
+      "aiPopulated": "AI Populated",
+      "manualDesc": "Fill in the contract details manually.",
+      "saveContract": "Save Contract to Database",
+      "title": "Review Contract Details"
+    },
     "risk": {
       "label": "risk"
+    },
+    "upload": {
+      "aiFailed": "AI could not read the PDF. Please enter details manually.",
+      "aiSuccess": "AI extracted contract data. Please review before saving.",
+      "analyzing": "Analyzing with AI...",
+      "dropzoneSubtitle": "or click to browse · PDF only · Max 10MB",
+      "dropzoneTitle": "Drop your contract PDF here",
+      "error": "Upload failed. Please try again.",
+      "howItWorks": "How it works",
+      "invalidType": "Only PDF files are accepted.",
+      "manualEntry": "Skip AI & Enter Data Manually",
+      "step1": "Upload a contract PDF or enter data manually",
+      "step2": "AI extracts key dates, fees, and parties",
+      "step3": "Review and edit the extracted data",
+      "step4": "Save the contract to the database",
+      "tooLarge": "File must be under 10MB.",
+      "uploading": "Uploading document..."
     }
   },
   "createStartup": {

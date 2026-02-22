@@ -1634,17 +1634,49 @@
     }
   },
   "contracts": {
-    "aiAnalysis": "AI Analysis",
-    "aiInsights": "AI Contrato Insights",
+    "aiAnalysis": "Análise IA",
+    "aiInsights": "Insights de Contrato IA",
     "analyze": "Analisar",
-    "confirmAnalysis": "Confirmar AI Analysis",
-    "confirmAnalysisDesc": "AI will Analisar Contrato Detalhes e flag key dates, missing Info, e risks. No changes will be made automatically.",
-    "keyDates": "Key Dates",
-    "missingInfo": "Missing Information",
-    "recommendedActions": "Recommended Ações",
-    "rerunAnalysis": "Executar again",
+    "bulk": {
+      "archiveSelected": "Arquivar Selecionados",
+      "archiveSuccess": "{{count}} contratos arquivados",
+      "selected": "{{count}} selecionados"
+    },
+    "confirmAnalysis": "Confirmar Análise IA",
+    "confirmAnalysisDesc": "A IA irá analisar os detalhes do contrato e sinalizar datas-chave, informação em falta e riscos. Nenhuma alteração será feita automaticamente.",
+    "filters": {
+      "dateRange": "Intervalo de Datas"
+    },
+    "keyDates": "Datas-Chave",
+    "missingInfo": "Informação em Falta",
+    "recommendedActions": "Ações Recomendadas",
+    "rerunAnalysis": "Executar novamente",
+    "review": {
+      "aiDesc": "A IA extraiu estes campos do PDF. Reveja e edite antes de guardar.",
+      "aiPopulated": "Preenchido por IA",
+      "manualDesc": "Preencha os detalhes do contrato manualmente.",
+      "saveContract": "Guardar Contrato na Base de Dados",
+      "title": "Rever Detalhes do Contrato"
+    },
     "risk": {
-      "label": "risk"
+      "label": "risco"
+    },
+    "upload": {
+      "aiFailed": "A IA não conseguiu ler o PDF. Por favor insira os dados manualmente.",
+      "aiSuccess": "A IA extraiu dados do contrato. Reveja antes de guardar.",
+      "analyzing": "A analisar com IA...",
+      "dropzoneSubtitle": "ou clique para navegar · Apenas PDF · Máx 10MB",
+      "dropzoneTitle": "Arraste o PDF do contrato para aqui",
+      "error": "Falha no upload. Tente novamente.",
+      "howItWorks": "Como funciona",
+      "invalidType": "Apenas ficheiros PDF são aceites.",
+      "manualEntry": "Saltar IA e Inserir Dados Manualmente",
+      "step1": "Carregue um PDF de contrato ou insira dados manualmente",
+      "step2": "A IA extrai datas-chave, valores e partes",
+      "step3": "Reveja e edite os dados extraídos",
+      "step4": "Guarde o contrato na base de dados",
+      "tooLarge": "O ficheiro deve ter menos de 10MB.",
+      "uploading": "A carregar documento..."
     }
   },
   "createStartup": {
