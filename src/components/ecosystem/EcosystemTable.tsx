@@ -1,6 +1,7 @@
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { MoreHorizontal, Building2, Users, ExternalLink, Calendar, AlertTriangle } from 'lucide-react';
+import { MoreHorizontal, Building2, Users, ExternalLink, Calendar, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { EcosystemItem } from '@/hooks/useEcosystemItems';
 import { formatDistanceToNow } from 'date-fns';
+
+const PAGE_SIZE_OPTIONS = [25, 50, 100];
 
 interface Props {
   items: EcosystemItem[];
@@ -20,6 +30,28 @@ interface Props {
 export function EcosystemTable({ items, onOpenItem }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const paginatedItems = useMemo(
+    () => items.slice(page * pageSize, (page + 1) * pageSize),
+    [items, page, pageSize],
+  );
+
+  // Reset page when pageSize changes
+  const safeSetPageSize = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
+
+  // Reset page when items change significantly
+  const safePage = Math.min(page, totalPages - 1);
+  if (safePage !== page) setPage(safePage);
+
+  const from = items.length > 0 ? page * pageSize + 1 : 0;
+  const to = Math.min((page + 1) * pageSize, items.length);
 
   if (items.length === 0) {
     return (
@@ -31,11 +63,51 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
     );
   }
 
+  const PaginationControls = () => (
+    <div className="flex items-center justify-between px-4 py-3 border-t">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span>{t('common.rowsPerPage', { defaultValue: 'Rows per page' })}</span>
+        <Select value={String(pageSize)} onValueChange={(v) => safeSetPageSize(Number(v))}>
+          <SelectTrigger className="h-8 w-[70px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <SelectItem key={size} value={String(size)}>
+                {size}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="text-sm text-muted-foreground mr-2">
+          {t('common.showingResults', { from, to, total: items.length, defaultValue: `Showing ${from}-${to} of ${items.length}` })}
+        </span>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 0} onClick={() => setPage(0)} aria-label={t('common.first', { defaultValue: 'First' })}>
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 0} onClick={() => setPage(p => p - 1)} aria-label={t('common.previousPage', { defaultValue: 'Previous page' })}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm text-muted-foreground px-2">
+          {page + 1} / {totalPages}
+        </span>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} aria-label={t('common.nextPage', { defaultValue: 'Next page' })}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)} aria-label={t('common.lastPage', { defaultValue: 'Last page' })}>
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <>
       {/* ── Mobile: stacked cards ── */}
       <div className="flex flex-col gap-3 md:hidden">
-        {items.map(item => (
+        {paginatedItems.map(item => (
           <Card
             key={item.id}
             className="cursor-pointer hover:shadow-md transition-shadow"
@@ -81,6 +153,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
             </CardContent>
           </Card>
         ))}
+        {items.length > pageSize && <PaginationControls />}
       </div>
 
       {/* ── Desktop: standard table ── */}
@@ -99,7 +172,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map(item => (
+            {paginatedItems.map(item => (
               <TableRow 
                 key={item.id} 
                 className="cursor-pointer hover:bg-muted/50"
@@ -184,6 +257,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
             ))}
           </TableBody>
         </Table>
+        {items.length > pageSize && <PaginationControls />}
       </div>
     </>
   );

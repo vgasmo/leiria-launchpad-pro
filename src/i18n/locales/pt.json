@@ -1428,7 +1428,15 @@
     "upload": "Carregar",
     "uploading": "A carregar...",
     "view": "Ver",
-    "viewAll": "Ver todas"
+    "viewAll": "Ver todas",
+    "page": "Página",
+    "of": "de",
+    "rowsPerPage": "Linhas por página",
+    "showingResults": "A mostrar {{from}}-{{to}} de {{total}}",
+    "first": "Primeira",
+    "previousPage": "Página anterior",
+    "nextPage": "Página seguinte",
+    "lastPage": "Última página"
   },
   "cockpit": {
     "actionTitle": "Título da Ação",
