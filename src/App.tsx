@@ -3,9 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -59,12 +57,54 @@ const queryClient = new QueryClient({
   },
 });
 
-const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage,
-  key: 'sl-query-cache',
-  // Only persist queries that have been successful (no errors/loading states)
-  throttleTime: 1000,
-});
+// Simple localStorage-based query cache persistence for offline resilience
+const CACHE_KEY = 'sl-query-cache';
+const CACHE_MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
+
+// Restore cache on startup
+try {
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    const { timestamp, data } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_MAX_AGE && data) {
+      // Hydrate each cached query into the query client
+      for (const entry of data) {
+        if (entry.queryKey && entry.state?.data !== undefined) {
+          queryClient.setQueryData(entry.queryKey, entry.state.data);
+        }
+      }
+    } else {
+      localStorage.removeItem(CACHE_KEY);
+    }
+  }
+} catch {
+  // Ignore corrupt cache
+  localStorage.removeItem(CACHE_KEY);
+}
+
+// Persist cache periodically
+let persistTimer: ReturnType<typeof setTimeout>;
+const persistCache = () => {
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    try {
+      const cache = queryClient.getQueryCache().getAll();
+      const data = cache
+        .filter(q => {
+          const key = q.queryKey[0];
+          // Skip auth/session queries for security
+          if (typeof key === 'string' && ['auth', 'session', 'profile'].includes(key)) return false;
+          return q.state.status === 'success' && q.state.data !== undefined;
+        })
+        .map(q => ({ queryKey: q.queryKey, state: { data: q.state.data } }));
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+    } catch {
+      // Storage full or error — silently ignore
+    }
+  }, 2000);
+};
+
+queryClient.getQueryCache().subscribe(persistCache);
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
@@ -176,24 +216,7 @@ function AppRoutes() {
 
 const App = () => (
   <ErrorBoundary>
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{
-        persister: localStoragePersister,
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours
-        // Don't persist auth-related or mutation queries
-        dehydrateOptions: {
-          shouldDehydrateQuery: (query) => {
-            const key = query.queryKey[0];
-            // Skip persisting auth/session queries for security
-            if (typeof key === 'string' && ['auth', 'session', 'profile'].includes(key)) {
-              return false;
-            }
-            return query.state.status === 'success';
-          },
-        },
-      }}
-    >
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
@@ -207,7 +230,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
-    </PersistQueryClientProvider>
+    </QueryClientProvider>
   </ErrorBoundary>
 );
 
