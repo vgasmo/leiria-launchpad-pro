@@ -10,13 +10,16 @@ import {
   AlertTriangle,
   ChevronRight,
   Sparkles,
+  MessageSquareText,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceNextSession } from '@/hooks/useWorkspaceData';
 import { usePendingCheckin } from '@/hooks/useCheckins';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 import { triggerMiniCelebration } from '@/lib/confetti';
-import { format, isThisMonth } from 'date-fns';
+import { format, isThisMonth, subDays } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +32,7 @@ interface NextBestActionProps {
 
 interface ActionItem {
   id: string;
-  type: 'kpi' | 'action' | 'checkin' | 'session' | 'stage_gate';
+  type: 'kpi' | 'action' | 'checkin' | 'session' | 'stage_gate' | 'mentor_feedback';
   priority: number;
   title: string;
   description: string;
@@ -47,6 +50,25 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
   const { data: nextSession } = useWorkspaceNextSession(workspaceId);
   const { data: pendingCheckin } = usePendingCheckin(workspaceId);
+
+  // Fetch recent shared consultant/mentor notes (last 7 days)
+  const { data: recentFeedback } = useQuery({
+    queryKey: ['mentor-feedback-nudge', workspaceId],
+    queryFn: async () => {
+      const since = subDays(new Date(), 7).toISOString();
+      const { data, error } = await supabase
+        .from('consultant_notes')
+        .select('id, content, created_at')
+        .eq('workspace_id', workspaceId)
+        .eq('visibility', 'shared_with_founder')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!workspaceId,
+  });
 
   const nextActions = useMemo<ActionItem[]>(() => {
     const items: ActionItem[] = [];
@@ -121,6 +143,22 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
       }
     }
 
+    // Mentor/consultant feedback nudge
+    if (recentFeedback && recentFeedback.length > 0) {
+      const preview = recentFeedback[0].content.slice(0, 60);
+      items.push({
+        id: 'mentor-feedback',
+        type: 'mentor_feedback',
+        priority: 2.5,
+        title: t('nextBestAction.mentorFeedbackReceived', { count: recentFeedback.length }),
+        description: preview + (recentFeedback[0].content.length > 60 ? '…' : ''),
+        icon: <MessageSquareText className="h-5 w-5" />,
+        variant: 'default',
+        action: () => setSearchParams({ tab: 'interactions' }),
+        actionLabel: t('nextBestAction.viewFeedback'),
+      });
+    }
+
     const inProgressActions = actions?.filter(a => a.status === 'in_progress') || [];
     if (inProgressActions.length > 0 && items.length < 3) {
       items.push({
@@ -137,7 +175,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
     }
 
     return items.sort((a, b) => a.priority - b.priority).slice(0, 3);
-  }, [actions, kpiData, nextSession, pendingCheckin, setSearchParams, t]);
+  }, [actions, kpiData, nextSession, pendingCheckin, recentFeedback, setSearchParams, t]);
 
   if (nextActions.length === 0) {
     return (
