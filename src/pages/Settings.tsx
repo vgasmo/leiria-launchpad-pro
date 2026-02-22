@@ -287,7 +287,7 @@ export default function Settings() {
                       )}
                     </div>
                     <div className="space-y-2 flex-1">
-                      <Label>Profile Photo</Label>
+                      <Label>{t('settingsPage.profilePhoto', 'Foto de Perfil')}</Label>
                       <div className="flex gap-2">
                         <Button
                           type="button"
@@ -297,7 +297,7 @@ export default function Settings() {
                           disabled={isUploadingAvatar}
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          Upload Photo
+                          {t('settingsPage.uploadPhoto', 'Carregar Foto')}
                         </Button>
                         <input
                           ref={fileInputRef}
@@ -308,7 +308,7 @@ export default function Settings() {
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        JPG, PNG or GIF. Max 5MB.
+                        {t('settingsPage.photoHint', 'JPG, PNG ou GIF. Máx 5MB.')}
                       </p>
                     </div>
                   </div>
@@ -317,18 +317,18 @@ export default function Settings() {
 
                   {/* Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="full_name">Full Name</Label>
+                    <Label htmlFor="full_name">{t('settingsPage.fullName', 'Nome Completo')}</Label>
                     <Input
                       id="full_name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Your full name"
+                      placeholder={t('settingsPage.fullNamePlaceholder', 'O seu nome completo')}
                     />
                   </div>
 
                   {/* Phone */}
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">{t('settingsPage.phone', 'Telefone')}</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -343,7 +343,7 @@ export default function Settings() {
 
                   {/* LinkedIn */}
                   <div className="space-y-2">
-                    <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                    <Label htmlFor="linkedin">{t('settingsPage.linkedinProfile', 'Perfil LinkedIn')}</Label>
                     <div className="relative">
                       <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -356,68 +356,64 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* Bio - only show for mentors */}
-                  {isMentor && (
-                    <>
-                      <Separator />
-                      <div className="space-y-2">
-                        <Label htmlFor="bio">Bio / Experience</Label>
-                        <Textarea
-                          id="bio"
-                          value={bio}
-                          onChange={(e) => setBio(e.target.value)}
-                          placeholder="Tell founders about your experience and background..."
-                          rows={4}
+                  {/* Bio & Expertise - all roles */}
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">{t('settingsPage.bioLabel', 'Bio / Experiência')}</Label>
+                    <Textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder={t('settingsPage.bioPlaceholder', 'Descreva a sua experiência e percurso...')}
+                      rows={4}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t('settingsPage.bioHint', 'Visível para outros membros do ecossistema')}
+                    </p>
+                  </div>
+
+                  {/* Expertise tags */}
+                  <div className="space-y-2">
+                    <Label htmlFor="expertise">{t('settingsPage.expertiseLabel', 'Áreas de Especialidade')}</Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="expertise"
+                          value={expertiseInput}
+                          onChange={(e) => setExpertiseInput(e.target.value)}
+                          onKeyDown={handleExpertiseKeyDown}
+                          placeholder={t('settingsPage.expertisePlaceholder', 'ex: Marketing, Fundraising, Produto...')}
+                          className="pl-9"
                         />
-                        <p className="text-xs text-muted-foreground">
-                          This will be visible to founders looking for mentors
-                        </p>
                       </div>
-
-                      {/* Expertise tags */}
-                      <div className="space-y-2">
-                        <Label htmlFor="expertise">Areas of Expertise</Label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              id="expertise"
-                              value={expertiseInput}
-                              onChange={(e) => setExpertiseInput(e.target.value)}
-                              onKeyDown={handleExpertiseKeyDown}
-                              placeholder="e.g. Marketing, Fundraising, Product..."
-                              className="pl-9"
-                            />
-                          </div>
-                          <Button type="button" variant="outline" onClick={handleAddExpertise}>
-                            Add
-                          </Button>
-                        </div>
-                        {expertise.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {expertise.map((item) => (
-                              <Badge key={item} variant="secondary" className="gap-1">
-                                {item}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveExpertise(item)}
-                                  className="ml-1 hover:text-destructive"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          Add tags for your areas of expertise to help founders find you
-                        </p>
+                      <Button type="button" variant="outline" onClick={handleAddExpertise}>
+                        {t('common.add', 'Adicionar')}
+                      </Button>
+                    </div>
+                    {expertise.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {expertise.map((item) => (
+                          <Badge key={item} variant="secondary" className="gap-1">
+                            {item}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveExpertise(item)}
+                              className="ml-1 hover:text-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
                       </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {t('settingsPage.expertiseHint', 'Adicione tags para as suas áreas de especialidade')}
+                    </p>
+                  </div>
 
-                      {/* NDA Status */}
-                      <MentorNdaStatus />
-                    </>
-                  )}
+                  {/* NDA Status - mentors only */}
+                  {isMentor && <MentorNdaStatus />}
 
                   <Separator />
 
@@ -431,7 +427,7 @@ export default function Settings() {
                       className="bg-muted"
                     />
                     <p className="text-xs text-muted-foreground">
-                      To change your email, use the Email tab
+                      {t('settingsPage.emailChangeHint', 'Para alterar o email, use o separador Email')}
                     </p>
                   </div>
 
@@ -439,12 +435,12 @@ export default function Settings() {
                     {isUpdatingProfile ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
+                        {t('common.saving', 'A guardar...')}
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Save Changes
+                        {t('common.saveChanges', 'Guardar Alterações')}
                       </>
                     )}
                   </Button>
