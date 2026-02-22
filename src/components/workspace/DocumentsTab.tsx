@@ -33,6 +33,7 @@ import {
   FolderLock,
 } from 'lucide-react';
 import { DocumentFeedbackButton } from './DocumentFeedbackButton';
+import { DocumentReviewPanel, DocumentReviewBadge } from './DocumentReviewPanel';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import { format } from 'date-fns';
 import { 
@@ -120,6 +121,9 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   
   const [externalLinkConfirmOpen, setExternalLinkConfirmOpen] = useState(false);
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+  const [reviewDoc, setReviewDoc] = useState<{ id: string; name: string } | null>(null);
+
+  const canReview = isStaff || isMentor;
 
   // Sync sub-tab to URL
   const handleSubTabChange = (sub: DocumentSubTab) => {
@@ -558,7 +562,22 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                  {(doc.category === 'Pitch Deck' || doc.name.toLowerCase().includes('pitch')) && (
+                                  {/* Review badge + button for staff/mentors on all docs */}
+                                  {canReview && (
+                                    <>
+                                      <DocumentReviewBadge documentId={doc.id} />
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setReviewDoc({ id: doc.id, name: doc.name })}
+                                        title={t('review.viewReview', { defaultValue: 'Avaliar entregável' })}
+                                      >
+                                        <MessageSquare className="h-4 w-4" />
+                                      </Button>
+                                    </>
+                                  )}
+                                  {/* Founders can request feedback */}
+                                  {!canReview && (
                                     <DocumentFeedbackButton documentId={doc.id} documentName={doc.name} workspaceId={workspaceId} />
                                   )}
                                   <Button
@@ -600,6 +619,18 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
     </div>
     
     <ConfirmDialog {...dialogProps} />
+
+    {/* Review panel for any document (staff/mentor) */}
+    {reviewDoc && (
+      <DocumentReviewPanel
+        documentId={reviewDoc.id}
+        documentName={reviewDoc.name}
+        workspaceId={workspaceId}
+        isStaff={isStaff}
+        isMentor={isMentor}
+        onClose={() => setReviewDoc(null)}
+      />
+    )}
     </>
   );
 }
