@@ -5583,5 +5583,9 @@
     "subjectPlaceholder": "Assunto do email",
     "subjectRequired": "Assunto é obrigatório",
     "timeline": "Linha do Tempo de Comunicações"
+  },
+  "offline": {
+    "youAreOffline": "Está offline. Os dados em cache continuam disponíveis.",
+    "backOnline": "De volta online! A sincronizar os seus dados..."
   }
 }

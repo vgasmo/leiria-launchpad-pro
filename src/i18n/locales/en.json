@@ -5583,5 +5583,9 @@
     "subjectPlaceholder": "Email subject",
     "subjectRequired": "Subject is required",
     "timeline": "Communications Timeline"
+  },
+  "offline": {
+    "youAreOffline": "You are offline. Cached data is still available.",
+    "backOnline": "Back online! Syncing your data..."
   }
 }

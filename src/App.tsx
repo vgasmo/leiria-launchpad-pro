@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -51,8 +53,17 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 30 * 1000, // 30 seconds
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours – keeps cached data available for offline use
+      networkMode: 'offlineFirst', // serve cache instantly, revalidate in background
     },
   },
+});
+
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: 'sl-query-cache',
+  // Only persist queries that have been successful (no errors/loading states)
+  throttleTime: 1000,
 });
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
@@ -165,7 +176,24 @@ function AppRoutes() {
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: localStoragePersister,
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        // Don't persist auth-related or mutation queries
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) => {
+            const key = query.queryKey[0];
+            // Skip persisting auth/session queries for security
+            if (typeof key === 'string' && ['auth', 'session', 'profile'].includes(key)) {
+              return false;
+            }
+            return query.state.status === 'success';
+          },
+        },
+      }}
+    >
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
@@ -179,7 +207,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </ErrorBoundary>
 );
 
