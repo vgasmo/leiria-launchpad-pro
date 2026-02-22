@@ -453,7 +453,7 @@ export function AdminStartupsManager() {
                         
                         {formData.startup_portugal_document_path ? (
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-green-600 border-green-600">
+                            <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-400">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {t('admin.startupsManager.documentAttached')}
                             </Badge>
@@ -611,7 +611,7 @@ export function AdminStartupsManager() {
                         <span className="font-medium">{startup.name}</span>
                         {startup.has_startup_portugal_status && (
                           <Badge variant="outline" className="text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
+                            <CheckCircle className="h-3 w-3 mr-1 text-green-600 dark:text-green-400" />
                             {t('admin.startupsManager.startupPortugal')}
                           </Badge>
                         )}

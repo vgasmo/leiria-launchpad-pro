@@ -408,7 +408,7 @@ export function AdminAnnouncementsManager() {
                     </TableCell>
                     <TableCell>
                       {ann.is_read ? (
-                        <Badge variant="outline" className="text-green-600 border-green-600">
+                        <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-400">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           {t('admin.announcements.read')}
                         </Badge>

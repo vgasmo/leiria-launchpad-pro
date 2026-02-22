@@ -308,12 +308,12 @@ export default function AdminDatarooms() {
                         </TableCell>
                         <TableCell>
                           {mentor.nda_accepted ? (
-                            <Badge variant="default" className="bg-green-500/10 text-green-600 border-green-500/20">
+                            <Badge variant="default" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {t('admin.ndaAccepted')}
                             </Badge>
                           ) : (
-                            <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                            <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20">
                               <XCircle className="h-3 w-3 mr-1" />
                               {t('admin.ndaPending')}
                             </Badge>

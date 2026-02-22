@@ -205,7 +205,7 @@ export function GlobalGraphApiCard() {
           </div>
 
           <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-            <Shield className="h-4 w-4 text-amber-600" />
+            <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
               <strong>Client Secret</strong> is configured server-side as the <code className="bg-muted px-1 rounded">MS_GRAPH_CLIENT_SECRET</code> environment variable and is never stored in the database.
             </AlertDescription>
@@ -299,7 +299,7 @@ export function GlobalGraphApiCard() {
         {/* Teams Application Access Policy Guide */}
         <Collapsible open={showPolicyGuide} onOpenChange={setShowPolicyGuide}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto text-amber-600">
+            <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto text-amber-600 dark:text-amber-400">
               <ChevronDown className={`h-3 w-3 transition-transform ${showPolicyGuide ? 'rotate-180' : ''}`} />
               Teams Application Access Policy (required for transcripts)
             </Button>

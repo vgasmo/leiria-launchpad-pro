@@ -269,7 +269,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
                           {item.due_at && (
                             <span className={`text-xs ${
                               isOverdue ? 'text-destructive font-medium' : 
-                              isDueToday ? 'text-amber-600 font-medium' : 
+                              isDueToday ? 'text-amber-600 dark:text-amber-400 font-medium' : 
                               'text-muted-foreground'
                             }`}>
                               {isOverdue ? `${t('workQueue.overdueLabel')}: ` : isDueToday ? t('common.today') : ''}

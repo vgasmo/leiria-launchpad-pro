@@ -15,11 +15,11 @@ interface ProgressTimelineProps {
 }
 
 const stageColors: Record<string, string> = {
-  ideation: 'bg-purple-500/10 text-purple-600 border-purple-300',
-  validation: 'bg-blue-500/10 text-blue-600 border-blue-300',
-  mvp: 'bg-cyan-500/10 text-cyan-600 border-cyan-300',
-  growth: 'bg-green-500/10 text-green-600 border-green-300',
-  scale: 'bg-amber-500/10 text-amber-600 border-amber-300',
+  ideation: 'bg-purple-500/10 text-purple-600 border-purple-300 dark:text-purple-400 dark:border-purple-700',
+  validation: 'bg-blue-500/10 text-blue-600 border-blue-300 dark:text-blue-400 dark:border-blue-700',
+  mvp: 'bg-cyan-500/10 text-cyan-600 border-cyan-300 dark:text-cyan-400 dark:border-cyan-700',
+  growth: 'bg-green-500/10 text-green-600 border-green-300 dark:text-green-400 dark:border-green-700',
+  scale: 'bg-amber-500/10 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700',
 };
 
 export function ProgressTimeline({ workspaceId, className }: ProgressTimelineProps) {

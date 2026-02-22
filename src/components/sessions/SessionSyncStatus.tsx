@@ -72,7 +72,7 @@ export function SessionSyncStatus({
   const getStatusIcon = () => {
     switch (syncStatus) {
       case 'synced':
-        return <Check className="h-3.5 w-3.5 text-green-600" />;
+        return <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
       case 'error':
         return <AlertCircle className="h-3.5 w-3.5 text-destructive" />;
       case 'pending':

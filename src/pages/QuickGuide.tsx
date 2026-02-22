@@ -140,7 +140,7 @@ const ROLE_GUIDES: RoleGuide[] = [
     id: 'admin',
     title: 'Ops & Compliance',
     tagline: 'Para Administradores',
-    color: 'text-amber-600',
+    color: 'text-amber-600 dark:text-amber-400',
     icon: Shield,
     mission: 'Garante a operação do ecossistema. Gere utilizadores, programas e configurações.',
     quickStart: [
