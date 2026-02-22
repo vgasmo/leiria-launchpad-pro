@@ -26,6 +26,8 @@ import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { NextBestAction } from '@/components/workspace/NextBestAction';
 import { InvestorReadinessWidget } from '@/components/workspace/InvestorReadinessWidget';
 import { QuickActionsFab } from '@/components/workspace/QuickActionsFab';
+import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
+import { AiPulseCard } from '@/components/dashboard/AiPulseCard';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
 import { HealthScore } from '@/types/database';
@@ -53,6 +55,8 @@ export function FounderDashboard({
   const { profile } = useAuth();
   const { streakWeeks, recordActivity } = useProgressStreak();
   const { canRestore, restoreChecklist } = useChecklistRecovery();
+  // Quick KPI modal auto-trigger state
+  const [showQuickKpi, setShowQuickKpi] = useState(false);
 
   const handleRestoreChecklist = () => {
     restoreChecklist();
@@ -75,6 +79,19 @@ export function FounderDashboard({
   const hasStartup = Boolean(workspace);
   const hasKpis = Boolean(workspace?.hasCurrentMonthKpi);
   const hasDocuments = Boolean(workspace?.lastSession);
+
+  // Auto-trigger QuickKpiModal on 1st-5th of month if KPIs are missing
+  useEffect(() => {
+    if (!workspace || hasKpis) return;
+    const day = new Date().getDate();
+    if (day >= 1 && day <= 5) {
+      const dismissKey = `quickkpi-dismissed-${workspace.id}-${new Date().getFullYear()}-${new Date().getMonth()}`;
+      if (!sessionStorage.getItem(dismissKey)) {
+        const timer = setTimeout(() => setShowQuickKpi(true), 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [workspace, hasKpis]);
 
   if (isLoading) {
     return (
@@ -194,6 +211,13 @@ export function FounderDashboard({
         workspaceId={workspace.id}
       />
 
+      {/* Proactive AI Pulse */}
+      <AiPulseCard
+        workspaceId={workspace.id}
+        healthScore={health as string | null}
+        overdueCount={workspace.overdueActionsCount}
+      />
+
       {/* Smart Inbox */}
       <UnifiedSmartInbox
         overdueCount={workspace.overdueActionsCount}
@@ -287,6 +311,22 @@ export function FounderDashboard({
         onAddAction={handleAddAction}
         onScheduleSession={handleScheduleSession}
       />
+
+      {/* Quick KPI Modal (auto-triggered) */}
+      {workspace && (
+        <QuickKpiModal
+          open={showQuickKpi}
+          onOpenChange={(open) => {
+            setShowQuickKpi(open);
+            if (!open) {
+              const dismissKey = `quickkpi-dismissed-${workspace.id}-${new Date().getFullYear()}-${new Date().getMonth()}`;
+              sessionStorage.setItem(dismissKey, 'true');
+            }
+          }}
+          workspaceId={workspace.id}
+          programId={workspace.program_id}
+        />
+      )}
     </div>
   );
 }

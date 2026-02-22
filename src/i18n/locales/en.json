@@ -3936,13 +3936,22 @@
     "dismiss": "Got it",
     "title": "New here? Check the Quick Guide"
   },
+  "aiPulse": {
+    "title": "AI Suggestion"
+  },
   "quickKpi": {
     "allFilled": "All KPIs are up to date!",
+    "allFilledDesc": "Come back next month.",
+    "complete": "Complete",
     "description": "Update your key metrics for {{month}}",
     "enterAtLeastOne": "Please enter at least one value",
+    "enterValue": "Enter value...",
     "error": "Failed to save KPIs",
+    "filled": "filled",
+    "previousMonth": "Previous month:",
     "save": "Save KPIs",
     "saved": "KPIs saved successfully",
+    "saving": "Saving KPIs...",
     "title": "Quick KPI Entry"
   },
   "quickWins": {
