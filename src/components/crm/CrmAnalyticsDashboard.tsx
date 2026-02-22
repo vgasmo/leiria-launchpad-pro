@@ -180,14 +180,14 @@ export function CrmAnalyticsDashboard({
           label={t('crm.analyticsDashboard.dueToday')}
           value={analytics.dueToday}
           subtext={t('crm.analyticsDashboard.dueTodayDesc')}
-          color="text-amber-600"
+          color="text-amber-600 dark:text-amber-400"
         />
         <MetricCard
           icon={CheckCircle2}
           label={t('crm.analyticsDashboard.converted30d')}
           value={analytics.contractedThisMonth}
           subtext={t('crm.analyticsDashboard.converted30dDesc')}
-          color="text-green-600"
+          color="text-green-600 dark:text-green-400"
         />
       </div>
 
@@ -257,8 +257,8 @@ export function CrmAnalyticsDashboard({
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <span className={cn(
                             'text-xs font-medium',
-                            metric.conversionRate >= 50 ? 'text-green-600' : 
-                            metric.conversionRate >= 25 ? 'text-amber-600' : 'text-muted-foreground'
+                            metric.conversionRate >= 50 ? 'text-green-600 dark:text-green-400' : 
+                            metric.conversionRate >= 25 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
                           )}>
                             {metric.conversionRate}%
                           </span>
