@@ -1,8 +1,8 @@
-import { memo } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isToday } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
-import { Calendar, FileText, ExternalLink } from 'lucide-react';
+import { Calendar, FileText, ExternalLink, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
+
+const PAGE_SIZE_OPTIONS = [25, 50, 100];
 
 interface WorkspaceTableProps {
   workspaces: WorkspaceWithDetails[];
@@ -43,6 +52,21 @@ export const WorkspaceTable = memo(function WorkspaceTable({
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language.startsWith('pt') ? ptLocale : enUS;
 
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+
+  const totalPages = Math.max(1, Math.ceil(workspaces.length / pageSize));
+  const paginatedWorkspaces = useMemo(
+    () => workspaces.slice(page * pageSize, (page + 1) * pageSize),
+    [workspaces, page, pageSize],
+  );
+
+  // Reset page when data changes
+  const safeSetPageSize = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
+
   const formatMeetingDate = (dateStr: string | null) => {
     if (!dateStr) return <span className="text-muted-foreground">{t('workspaceTable.noneScheduled', { defaultValue: 'None scheduled' })}</span>;
     try {
@@ -61,11 +85,54 @@ export const WorkspaceTable = memo(function WorkspaceTable({
     return notes.length > maxLength ? notes.slice(0, maxLength) + '...' : notes;
   };
 
+  const from = workspaces.length > 0 ? page * pageSize + 1 : 0;
+  const to = Math.min((page + 1) * pageSize, workspaces.length);
+
+  const PaginationControls = () => (
+    <div className="flex items-center justify-between px-4 py-3 border-t">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span>{t('common.rowsPerPage', { defaultValue: 'Rows per page' })}</span>
+        <Select value={String(pageSize)} onValueChange={(v) => safeSetPageSize(Number(v))}>
+          <SelectTrigger className="h-8 w-[70px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <SelectItem key={size} value={String(size)}>
+                {size}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="text-sm text-muted-foreground mr-2">
+          {t('common.showingResults', { from, to, total: workspaces.length, defaultValue: `Showing ${from}-${to} of ${workspaces.length}` })}
+        </span>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 0} onClick={() => setPage(0)} aria-label={t('common.first', { defaultValue: 'First' })}>
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 0} onClick={() => setPage(p => p - 1)} aria-label={t('common.previousPage', { defaultValue: 'Previous page' })}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm text-muted-foreground px-2">
+          {page + 1} / {totalPages}
+        </span>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} aria-label={t('common.nextPage', { defaultValue: 'Next page' })}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-8 w-8" disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)} aria-label={t('common.lastPage', { defaultValue: 'Last page' })}>
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <>
       {/* ── Mobile: stacked cards ── */}
       <div className="flex flex-col gap-3 md:hidden p-4">
-        {workspaces.map((workspace) => {
+        {paginatedWorkspaces.map((workspace) => {
           const effectiveHealth = workspace.health_score_override || workspace.health_score;
           return (
             <Card
@@ -130,6 +197,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
             </Card>
           );
         })}
+        {workspaces.length > pageSize && <PaginationControls />}
       </div>
 
       {/* ── Desktop: standard table ── */}
@@ -152,7 +220,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {workspaces.map((workspace) => {
+            {paginatedWorkspaces.map((workspace) => {
               const effectiveHealth = workspace.health_score_override || workspace.health_score;
               const isSelected = selectedIds.has(workspace.id);
 
@@ -258,6 +326,7 @@ export const WorkspaceTable = memo(function WorkspaceTable({
             })}
           </TableBody>
         </Table>
+        {workspaces.length > pageSize && <PaginationControls />}
       </div>
     </>
   );

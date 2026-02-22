@@ -146,6 +146,33 @@ export function useUpdateMilestone(workspaceId: string) {
       if (error) throw error;
       return data;
     },
+    // ── Optimistic Update ──
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ['milestones', workspaceId] });
+      const previousMilestones = queryClient.getQueryData<Milestone[]>(['milestones', workspaceId]);
+
+      queryClient.setQueryData<Milestone[]>(['milestones', workspaceId], (old) => {
+        if (!old) return old;
+        return old.map((m) =>
+          m.id === variables.id
+            ? {
+                ...m,
+                ...variables,
+                updated_at: new Date().toISOString(),
+                ...(variables.status === 'completed' ? { completed_at: new Date().toISOString() } : {}),
+                ...(variables.status && variables.status !== 'completed' ? { completed_at: null } : {}),
+              }
+            : m,
+        );
+      });
+
+      return { previousMilestones };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousMilestones) {
+        queryClient.setQueryData(['milestones', workspaceId], context.previousMilestones);
+      }
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });

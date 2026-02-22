@@ -1428,7 +1428,15 @@
     "upload": "Upload",
     "uploading": "Uploading...",
     "view": "View",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "page": "Page",
+    "of": "of",
+    "rowsPerPage": "Rows per page",
+    "showingResults": "Showing {{from}}-{{to}} of {{total}}",
+    "first": "First",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page"
   },
   "cockpit": {
     "actionTitle": "Action Title",
