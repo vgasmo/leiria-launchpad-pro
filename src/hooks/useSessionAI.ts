@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import i18n from '@/i18n';
 
 interface ActionSuggestion {
   title: string;
@@ -56,10 +57,10 @@ export function useGenerateSessionSummary(workspaceId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
-      toast.success('AI summary generated successfully');
+      toast.success(i18n.t('feedback.saved'));
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to generate AI summary');
+      toast.error(i18n.t('errors.aiGenerateFailed'));
     },
   });
 }
@@ -96,10 +97,10 @@ export function useSendSessionFollowup(workspaceId: string) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['activity-log', workspaceId] });
-      toast.success(`Follow-up sent to ${data.sent} recipient(s)`);
+      toast.success(i18n.t('feedback.saved'));
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to send follow-up');
+      toast.error(i18n.t('errors.aiFollowupFailed'));
     },
   });
 }
@@ -152,10 +153,10 @@ export function useApplyActionSuggestions(workspaceId: string) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
-      toast.success(`Created ${data.length} action item(s)`);
+      toast.success(i18n.t('feedback.saved'));
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to apply suggestions');
+      toast.error(i18n.t('errors.aiApplyFailed'));
     },
   });
 }
@@ -179,10 +180,10 @@ export function useUpdateSessionTranscript(workspaceId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', workspaceId] });
-      toast.success('Transcript saved');
+      toast.success(i18n.t('feedback.saved'));
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error(i18n.t('errors.aiTranscriptFailed'));
     },
   });
 }

@@ -52,13 +52,20 @@ export function useAICooldown({
 
   /**
    * Wraps an async action with rate-limit check + post-success cooldown.
-   * Returns false if rate-limited, otherwise calls `fn` and starts cooldown.
+   * Returns false if rate-limited (and shows a toast), otherwise calls `fn` and starts cooldown.
    */
   const trigger = useCallback(
     async <T>(fn: () => Promise<T>): Promise<T | false> => {
-      if (isCoolingDown) return false;
+      if (isCoolingDown) {
+        // Import dynamically to avoid hook rules - toast is not a hook
+        const { toast } = await import('sonner');
+        toast.info(`Please wait ${remainingSeconds}s before trying again.`);
+        return false;
+      }
 
       if (!checkRateLimit(rateLimitKey, maxRequests, windowMs)) {
+        const { toast } = await import('sonner');
+        toast.error('Rate limit reached. Please wait a few minutes.');
         return false;
       }
 
@@ -66,7 +73,7 @@ export function useAICooldown({
       setCooldownEnd(Date.now() + cooldownMs);
       return result;
     },
-    [isCoolingDown, rateLimitKey, maxRequests, windowMs, cooldownMs],
+    [isCoolingDown, remainingSeconds, rateLimitKey, maxRequests, windowMs, cooldownMs],
   );
 
   return {

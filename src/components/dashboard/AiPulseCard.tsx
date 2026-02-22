@@ -75,7 +75,10 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
           }
         );
 
-        if (!resp.ok || !resp.body) return;
+        if (!resp.ok || !resp.body) {
+          setSuggestion(null);
+          return;
+        }
 
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
@@ -108,6 +111,8 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
         }
       } catch (err) {
         console.error('AI Pulse error:', err);
+        // Silently fail - don't show error for proactive suggestion
+        setSuggestion(null);
       } finally {
         setLoading(false);
       }

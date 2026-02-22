@@ -2394,7 +2394,16 @@
     "timeout": "Tempo limite excedido. Tente novamente.",
     "tryAgain": "Tentar Novamente",
     "unauthorized": "Não tem autorização para esta ação.",
-    "validationError": "Verifique os dados introduzidos."
+    "validationError": "Verifique os dados introduzidos.",
+    "aiFailed": "AI assistant is unavailable",
+    "aiTryAgainLater": "Could not process your request. Please try again later.",
+    "aiProcessingError": "Error processing with AI. Please try again.",
+    "aiGenerateFailed": "Failed to generate AI summary",
+    "aiFollowupFailed": "Failed to send follow-up",
+    "aiApplyFailed": "Failed to apply suggestions",
+    "aiTranscriptFailed": "Failed to save transcript",
+    "rateLimitReached": "Rate limit reached. Please wait a few minutes.",
+    "sessionExpired": "Session expired. Please sign in again."
   },
   "fab": {
     "newAction": "New Action",
