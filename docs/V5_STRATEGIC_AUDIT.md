@@ -1,0 +1,206 @@
+# V5 Strategic Audit — Startup Leiria Ecosystem OS
+
+> **Date:** 2026-02-22  
+> **Authors:** CTO · Lead UX · Head of Product · CISO · Lead QA  
+> **Scope:** Full-stack holistic review after V4 "Magic" upgrade
+
+---
+
+## Executive Summary
+
+The platform has matured significantly: code splitting, error boundaries, optimistic updates, skeleton loading, offline resilience, and a global AI copilot are all in place. However, several structural and experiential gaps remain that will become critical as the ecosystem scales from ~50 to 500+ startups. This document identifies those gaps across five pillars and proposes a concrete V5 roadmap.
+
+---
+
+## 1. 🎨 UX & User Journey
+
+### State of the Union ✅
+
+- **Role-aware navigation** is well-implemented — founders, consultors, mentors, and backoffice each get tailored sidebar items and tab visibility via `getVisibleTabs()`.
+- **Progressive disclosure** hides advanced tabs (Funding, Governance) until the startup reaches the relevant stage — reducing cognitive overload for early-stage founders.
+- **Mobile bottom nav** exists in `AppLayout`, and heavy tables (WorkspaceTable, EcosystemTable) flip to card layouts on small viewports.
+- **Onboarding** includes a `FounderWelcomePanel` checklist, `WorkspaceOnboardingWizard`, and `QuickGuideBanner`.
+- **Unified Smart Inbox** centralises pending actions, mentorship approvals, and system insights.
+
+### Critical Vulnerabilities / Friction ⚠️
+
+| Issue | Severity | Detail |
+|-------|----------|--------|
+| **Mobile bottom nav is too sparse** | High | Only 3 items (Home, Mentors, Settings). Founders cannot reach Documents, Actions, or KPIs without first opening a workspace. This adds 2+ taps to every critical flow. |
+| **No global "back" affordance on mobile** | Medium | Deep pages (Workspace → KPIs → Inline edit) have no swipe-back or sticky breadcrumb on mobile. Users feel trapped. |
+| **Founder dashboard information density** | Medium | The dashboard stacks 8+ cards vertically (`NextBestAction`, `OneThingToday`, `BookingCTA`, `SmartInbox`, `StreakHero`, `StageProgress`, `Calendar`, `InvestorReadiness`). On a 375px screen this requires 6+ scrolls before seeing KPIs. |
+| **Tab overflow on workspace** | Medium | The "More" dropdown hides important tabs. On tablet (768–1024px), some primary tabs wrap to a second line, breaking the tablist visual. |
+| **DataRoom & CRM on mobile** | High | While tables flip to cards, the CRM pipeline (Kanban board) and DataRoom share-link management have no responsive treatment — they overflow horizontally. |
+| **No empty state for mentor dashboard** | Low | `MentorDashboard` shows a prep card but no "inbox zero" encouragement when all sessions are done. |
+| **Copilot FAB overlaps QuickActionsFab** | Medium | Both are `fixed bottom-right`. On mobile, the Copilot (`bottom-24`) and QuickActionsFab compete for the same corner. |
+
+### V5 Vision 🚀
+
+1. **Context-aware mobile nav** — Dynamically add a 4th bottom-nav item based on the user's most-used feature (ML or simple frequency counter).
+2. **Sticky mobile breadcrumb** — A minimal `< Back` pill that floats at the top when scrolling deep pages.
+3. **Dashboard compaction** — Collapse `OneThingToday`, `BookingCTA`, and `StreakHero` into a single `DailyFocusCard` with an expandable detail section.
+4. **Responsive CRM Kanban** — On mobile, switch from horizontal columns to a vertical stage-selector + card list (similar to Trello mobile).
+5. **FAB coordination** — Merge the Copilot FAB and QuickActionsFab into a single expandable SpeedDial component.
+
+---
+
+## 2. 🤖 AI & "Magic" Experience
+
+### State of the Union ✅
+
+- **GlobalEcosystemCopilot** provides an omnipresent AI chat via a Sheet panel with suggested prompts and a thinking skeleton.
+- **Session AI** (`useSessionAI`) generates session summaries, suggestions, and artifacts.
+- **Template AI** (`useTemplateAI`, `TemplateCoachPanel`) coaches founders on proposal quality.
+- **Pitch Deck Analysis** (`analyze-pitch-deck`) provides structured scoring.
+- **Financial Model Coach** (`generate-financial-model-coach`) reviews uploaded spreadsheets.
+- **AI rate limiting** is enforced both client-side (`useAICooldown`) and server-side (`check_ai_rate_limit` DB function + `ai_rate_limits` table).
+
+### Critical Vulnerabilities / Friction ⚠️
+
+| Issue | Severity | Detail |
+|-------|----------|--------|
+| **Copilot is purely simulated** | Critical | `GlobalEcosystemCopilot` uses hardcoded `getSimulatedResponse()` with string matching. It has zero real AI integration — no edge function call, no context fetching. Users will immediately notice it is fake. |
+| **No context injection** | High | Even when connected to a real LLM, the copilot has no access to the user's workspace data (actions, KPIs, health score). It cannot answer "How many overdue tasks do I have?" with real data. |
+| **AI is reactive, never proactive** | Medium | No push notifications or inbox items are generated by AI. The system waits for users to ask. Opportunities like "Your MRR dropped 15% — schedule a session?" are missed. |
+| **No conversation persistence** | Medium | Copilot messages reset on every mount. Users lose context between pages. |
+| **Prompt injection risk** | Medium | If connected to a real LLM, user input goes directly to the model without sanitisation or system-prompt guardrails. |
+
+### V5 Vision 🚀
+
+1. **Wire the Copilot to a real edge function** — Create `copilot-chat` edge function that receives messages, injects workspace context (overdue actions, health score, recent sessions) as system context, and calls Lovable AI (`google/gemini-2.5-flash`).
+2. **Proactive AI nudges** — A scheduled edge function (`generate-ai-nudges`) that runs daily, checks for anomalies (KPI drops, overdue milestones, stale workspaces), and inserts items into the Smart Inbox.
+3. **Agentic actions** — Allow the copilot to execute simple mutations: "Mark task X as done", "Schedule a session for next Tuesday". Use a tool-calling pattern with confirmation prompts.
+4. **Conversation persistence** — Store copilot threads in a `copilot_conversations` table scoped to `user_id + workspace_id`.
+5. **Guardrails** — System prompt with role boundaries, output validation, and PII redaction before rendering.
+
+---
+
+## 3. 🔌 Integrations & Ecosystem
+
+### State of the Union ✅
+
+- **Microsoft Graph** integration covers Outlook calendar sync, Teams notifications, email history sync, and consultant availability checking.
+- **Graph config status** is dynamically checked via `graph-config-status` edge function before enabling UI options.
+- **Resend** powers transactional emails (session invites, announcements, digests, CRM stage transitions).
+- **Calendar feeds** are exported via ICS with SHA-256 hashed tokens and 90-day expiry.
+- **Webhook ingestion** (`webhook-meeting-ingest`, `inbound-email-webhook`) allows external systems to push data.
+
+### Critical Vulnerabilities / Friction ⚠️
+
+| Issue | Severity | Detail |
+|-------|----------|--------|
+| **Graph token expiry is not gracefully handled** | High | `useOutlookCalendar` and `useConsultantCalendar` call Graph endpoints but have no retry-with-refresh logic. If the application-level token expires mid-session, calls silently fail with 401. There is no user-facing "re-authenticate" prompt. |
+| **External API rate limits are not handled** | Medium | Graph API has throttling limits (10,000 requests per 10 minutes per tenant). None of the edge functions implement exponential backoff or `Retry-After` header parsing. |
+| **Data flow is mostly unidirectional** | Medium | Calendar sync pushes *from* Outlook *to* the platform, but changes made in the platform (e.g., rescheduling a session) do not push back to Outlook. This creates data drift. |
+| **No integration health dashboard** | Low | Admins have no visibility into integration failures. `useIntegrationErrors` exists as a hook but has no corresponding admin UI panel. |
+| **Webhook security is minimal** | Medium | `webhook-meeting-ingest` validates `WEBHOOK_SECRET` but does not verify request signatures or implement replay protection (timestamp validation). |
+
+### V5 Vision 🚀
+
+1. **Token refresh middleware** — Wrap Graph API calls in a retry helper that detects 401, refreshes the client credentials token, and retries once.
+2. **Exponential backoff utility** — Create `_shared/retry.ts` with configurable backoff for all external API calls.
+3. **Bidirectional calendar sync** — When a session is rescheduled in-app, push the change to the linked Outlook event via Graph API.
+4. **Integration Health panel** — Surface integration error counts, last success timestamp, and token expiry status in the Admin dashboard.
+5. **Webhook signature verification** — Implement HMAC-SHA256 signature validation and a 5-minute timestamp window for all inbound webhooks.
+
+---
+
+## 4. 🏗️ Architecture & Scalability
+
+### State of the Union ✅
+
+- **React Query** is used consistently for server state — mutations include optimistic updates with rollback.
+- **Code splitting** via `React.lazy()` on route-level pages keeps the initial bundle lean.
+- **Feature-sliced directory structure** — hooks, components, and pages are organised by domain (workspace, crm, mentors, etc.).
+- **Two Supabase clients** exist: the auto-generated one (`integrations/supabase/client.ts`) and a production-hardened wrapper (`lib/supabaseClient.ts`) with PKCE flow and `detectSessionInUrl`.
+
+### Critical Vulnerabilities / Friction ⚠️
+
+| Issue | Severity | Detail |
+|-------|----------|--------|
+| **Dual Supabase client risk** | High | `supabaseClient.ts` re-exports as `supabase`, same name as the auto-generated client. Any import of `@/integrations/supabase/client` bypasses PKCE and `detectSessionInUrl`. A single wrong import breaks OAuth. No linting rule enforces the correct import. |
+| **WorkspaceDetail is a God Component** | High | At ~405 lines, it renders 14 different tab panels inline, each with their own error boundaries. This file will grow with every new tab. Each tab should be lazy-loaded. |
+| **`getWorkspaceStats` is an N+1 risk** | High | The DB function accepts an array of workspace IDs and runs `has_workspace_access` per ID. At 500 workspaces, this executes 500+ subqueries per dashboard load. |
+| **No query key factory** | Medium | Query keys are scattered strings across 90+ hooks. Inconsistent keys lead to cache misses and stale data after mutations. |
+| **No pagination on ecosystem views** | Medium | `useEcosystemItems` and `useWorkspaces` appear to fetch all records. At 500 startups with joined data, this will exceed Supabase's 1000-row default limit and cause silent data truncation. |
+| **AuthContext re-renders** | Medium | Every auth state change triggers `setIsAuthReady(false)` → `setTimeout` → `fetchUserData` → `setIsAuthReady(true)`, causing the entire app tree to unmount and remount (flash of loading). |
+| **No service worker for offline** | Low | `OfflineBadge` detects offline state but the app has no service worker. Navigating to a new route while offline shows a browser error. `vite-plugin-pwa` is installed but not configured. |
+
+### V5 Vision 🚀
+
+1. **Ban the auto-generated client** — Add an ESLint rule (`no-restricted-imports`) to prevent importing from `@/integrations/supabase/client`.
+2. **Lazy tab panels** — Wrap each workspace tab in `React.lazy()` with a per-tab skeleton fallback.
+3. **Optimise `getWorkspaceStats`** — Rewrite to use a single JOIN-based access check instead of per-row function calls.
+4. **Query key factory** — Create `src/lib/queryKeys.ts` with a structured factory pattern: `queryKeys.workspaces.detail(id)`, `queryKeys.actions.list(workspaceId)`, etc.
+5. **Cursor-based pagination** — Implement on ecosystem table and CRM pipeline for datasets > 100 rows.
+6. **Auth context stabilisation** — Use `useRef` for intermediate loading states to avoid full-tree re-renders. Split profile/roles into a separate context or use React Query for user data.
+7. **PWA activation** — Configure `vite-plugin-pwa` with a precache manifest and offline fallback page.
+
+---
+
+## 5. 🛡️ Security, Privacy & Quality
+
+### State of the Union ✅
+
+- **RLS is comprehensive** — 40+ tables have RLS enabled with policies using `has_workspace_access`, `has_active_workspace_access`, `is_staff()`, and `is_admin()`.
+- **Security definer governance** is documented in `SECURITY_NOTES.md`.
+- **PII masking** is enforced via `profiles_safe`, `team_members_safe`, and `startups_safe` views with `security_barrier`.
+- **Edge function security** uses dual-layer auth (JWT verification + cron secrets) with origin-validated CORS.
+- **Token hashing** — Share link tokens are stored as SHA-256 hashes.
+- **Financial data isolation** — Mentors are explicitly denied access to financial models even with workspace access.
+- **Account status gating** — `has_active_workspace_access` requires approved account + active workspace.
+
+### Critical Vulnerabilities / Friction ⚠️
+
+| Issue | Severity | Detail |
+|-------|----------|--------|
+| **Tenant bleed via frontend routing** | Medium | `WorkspaceDetail` fetches workspace by `id` from URL params. If `useWorkspace(id)` returns data (because the user has *any* role), the frontend renders all tabs. The RLS protects individual table queries, but the workspace metadata itself may leak (name, stage, program) to users with expired or revoked access if `workspace_users.active` was set to `false` but the workspace query doesn't filter it. |
+| **No CSRF protection on mutations** | Medium | Supabase JS client uses Bearer tokens, which are not CSRF-vulnerable. However, the `public-book-first-contact` and `calendar-feed` endpoints accept unauthenticated requests. If these write data, they need CSRF tokens or CAPTCHA. |
+| **Edge function input validation gaps** | Medium | Several edge functions (e.g., `generate-session-summary`, `generate-investor-update`) parse `body.workspaceId` without schema validation. Malformed UUIDs could cause unhandled exceptions. |
+| **Client-side rate limiter is bypassable** | Low | `useRateLimiter.ts` is purely in-memory. A page refresh resets all counters. It is defence-in-depth only — the real gate is the DB-level `check_ai_rate_limit` function. This is acceptable but should be documented. |
+| **No automated test coverage** | High | Despite having Vitest and Testing Library installed, there are no test files in `src/`. Zero unit tests, zero integration tests. Any refactoring is a regression risk. |
+| **No E2E test suite** | High | Playwright is installed (`@playwright/test`, `@axe-core/playwright`) but no test files exist. Critical flows (signup → onboarding → KPI entry → session booking) are untested. |
+| **No CSP headers** | Low | The application does not set Content Security Policy headers, allowing potential XSS via injected scripts. Should be configured at the hosting level. |
+
+### V5 Vision 🚀
+
+1. **Input validation layer** — Create `_shared/validate.ts` using Zod schemas for all edge function inputs. Reject malformed requests with 400 before any business logic.
+2. **Test foundation** — Write 20 critical-path unit tests covering: `AuthContext`, `useActionItems` optimistic updates, `getVisibleTabs`, `checkRateLimit`, and `invokeWithAuth`. This establishes a safety net for refactoring.
+3. **E2E smoke suite** — Create 5 Playwright tests: login flow, workspace creation, KPI entry, session scheduling, and document upload. Run on CI.
+4. **Workspace access audit query** — Add a periodic check (edge function or DB function) that identifies `workspace_users` entries where `active = true` but the user's `account_status ≠ 'approved'`, flagging potential access leaks.
+5. **Rate limiter documentation** — Add inline comments clarifying that `useRateLimiter` is UX-only and the authoritative gate is server-side.
+6. **CSP headers** — Configure via `vercel.json` or Lovable Cloud hosting config: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';`.
+
+---
+
+## 6. 📊 Priority Matrix
+
+| Initiative | Impact | Effort | Priority |
+|-----------|--------|--------|----------|
+| Wire Copilot to real AI | 🔴 Critical | Medium | **P0** |
+| Ban auto-generated Supabase client | 🔴 Critical | Low | **P0** |
+| Edge function input validation (Zod) | 🔴 Critical | Medium | **P0** |
+| Test foundation (20 unit tests) | 🔴 Critical | Medium | **P0** |
+| Lazy workspace tab panels | 🟡 High | Low | **P1** |
+| Query key factory | 🟡 High | Low | **P1** |
+| Graph token refresh middleware | 🟡 High | Medium | **P1** |
+| Optimise `getWorkspaceStats` | 🟡 High | Medium | **P1** |
+| Auth context stabilisation | 🟡 High | Medium | **P1** |
+| Mobile nav improvements | 🟠 Medium | Low | **P2** |
+| FAB coordination (SpeedDial) | 🟠 Medium | Low | **P2** |
+| Proactive AI nudges | 🟠 Medium | High | **P2** |
+| Bidirectional calendar sync | 🟠 Medium | High | **P2** |
+| Cursor-based pagination | 🟠 Medium | Medium | **P2** |
+| E2E smoke suite (Playwright) | 🟠 Medium | High | **P2** |
+| PWA activation | 🟢 Low | Low | **P3** |
+| CSP headers | 🟢 Low | Low | **P3** |
+| Integration health dashboard | 🟢 Low | Medium | **P3** |
+
+---
+
+## Conclusion
+
+The Ecosystem OS is architecturally sound and security-conscious. The biggest risks are **the fake Copilot being shipped to users**, **the dual Supabase client creating OAuth bugs**, and **zero test coverage making refactoring dangerous**. Addressing these P0 items before any new feature work will protect the platform's credibility and stability as it scales.
+
+> *"Ship less, but ship what matters. The next sprint should be about depth, not breadth."*
+> — V5 Audit Team
