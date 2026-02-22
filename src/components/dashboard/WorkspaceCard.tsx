@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Calendar, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +20,7 @@ interface WorkspaceCardProps {
 }
 
 export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, kpiTrend }: WorkspaceCardProps) {
+  const { t } = useTranslation();
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   const hasOverdue = workspace.overdueActionsCount > 0;
 
@@ -63,16 +65,16 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-muted/50 rounded-lg p-2.5">
-            <p className="text-xs text-muted-foreground mb-1">Stage</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('workspaceCard.stage')}</p>
             <StageBadge stage={workspace.stage} size="sm" />
           </div>
           <div className="bg-muted/50 rounded-lg p-2.5">
-            <p className="text-xs text-muted-foreground mb-1">Actions</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('workspaceCard.actions')}</p>
             <div className="flex items-center gap-1.5">
               <span className="font-semibold">{workspace.pendingActionsCount}</span>
               {hasOverdue && (
                 <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                  {workspace.overdueActionsCount} overdue
+                  {workspace.overdueActionsCount} {t('workspaceCard.overdue')}
                 </Badge>
               )}
             </div>
@@ -83,7 +85,7 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
         {kpiTrend && kpiTrend.length >= 2 && (
           <div className="bg-muted/30 rounded-lg p-2.5 mb-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">KPI Trend</p>
+              <p className="text-xs text-muted-foreground">{t('workspaceCard.kpiTrend')}</p>
               <Sparkline data={kpiTrend} width={80} height={24} />
             </div>
           </div>
@@ -97,7 +99,7 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
               <span>{format(new Date(workspace.nextMeetingDate), 'MMM d')}</span>
             </div>
           ) : (
-            <span className="text-muted-foreground/60">No meetings</span>
+            <span className="text-muted-foreground/60">{t('workspaceCard.noMeetings')}</span>
           )}
           {workspace.lastSession ? (
             <div className="flex items-center gap-1 max-w-[120px]">
@@ -105,7 +107,7 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
               <span className="truncate">{workspace.lastSession.title}</span>
             </div>
           ) : (
-            <span className="text-muted-foreground/60">No sessions</span>
+            <span className="text-muted-foreground/60">{t('workspaceCard.noSessions')}</span>
           )}
         </div>
       </CardContent>

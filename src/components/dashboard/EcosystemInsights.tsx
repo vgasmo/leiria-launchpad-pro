@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -56,6 +57,7 @@ const severityConfig: Record<InsightSeverity, {
 
 export const EcosystemInsights = React.forwardRef<HTMLDivElement, EcosystemInsightsProps>(
   function EcosystemInsights({ insights, className }, ref) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     if (insights.length === 0) return null;
@@ -64,7 +66,7 @@ export const EcosystemInsights = React.forwardRef<HTMLDivElement, EcosystemInsig
       <div ref={ref} className={cn('space-y-2', className)}>
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
           <Lightbulb className="h-4 w-4" />
-          <span>Insights</span>
+          <span>{t('dashboard.insights')}</span>
         </div>
         {insights.map((insight) => {
           const config = severityConfig[insight.severity];

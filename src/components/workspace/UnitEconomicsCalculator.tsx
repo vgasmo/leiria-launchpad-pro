@@ -137,6 +137,7 @@ interface UnitEconomicsCalculatorProps {
 }
 
 export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculatorProps) {
+  const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()));
   const [hasChanges, setHasChanges] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -254,13 +255,13 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
         }
       });
       setValidationErrors(errors);
-      toast.error('Please fix validation errors');
+      toast.error(t('unitEconomics.fixValidationErrors'));
       return;
     }
 
     try {
       await saveUnitEconomics.mutateAsync(formData);
-      toast.success('Unit economics saved');
+      toast.success(t('unitEconomics.savedSuccess'));
       setHasChanges(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to save');
@@ -302,17 +303,17 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            <CardTitle>Unit Economics Calculator</CardTitle>
+            <CardTitle>{t('unitEconomics.title')}</CardTitle>
           </div>
           {history && history.length > 0 && (
             <Badge variant="outline" className="gap-1">
               <History className="h-3 w-3" />
-              {history.length} months
+              {history.length} {t('unitEconomics.months')}
             </Badge>
           )}
         </div>
         <CardDescription>
-          Calculate your key SaaS metrics: CAC, LTV, LTV/CAC ratio, and payback period
+          {t('unitEconomics.description')}
         </CardDescription>
         
         {/* Month Selector */}
@@ -324,7 +325,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
             <div className="text-center min-w-[120px]">
               <span className="font-medium">{format(selectedMonth, 'MMMM yyyy')}</span>
               {selectedMonthData && (
-                <p className="text-xs text-muted-foreground">Saved</p>
+                <p className="text-xs text-muted-foreground">{t('unitEconomics.saved')}</p>
               )}
             </div>
             <Button 
@@ -338,7 +339,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
           </div>
           {!isCurrentMonth && (
             <Button variant="ghost" size="sm" onClick={goToCurrentMonth}>
-              Go to Current Month
+              {t('unitEconomics.goToCurrentMonth')}
             </Button>
           )}
         </div>
@@ -348,31 +349,31 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-              Customer Acquisition
+              {t('unitEconomics.customerAcquisition')}
             </h4>
             <MetricInput
-              label="Marketing Costs (monthly)"
+              label={t('unitEconomics.marketingCosts')}
               value={marketingCosts}
               onChange={(v) => handleInputChange(setMarketingCosts, v)}
               prefix="€"
-              tooltip="Total monthly spend on marketing: ads, content, events, etc."
+              tooltip={t('unitEconomics.marketingCostsTooltip')}
               error={validationErrors.marketing_costs}
               disabled={!isCurrentMonth}
             />
             <MetricInput
-              label="Sales Costs (monthly)"
+              label={t('unitEconomics.salesCosts')}
               value={salesCosts}
               onChange={(v) => handleInputChange(setSalesCosts, v)}
               prefix="€"
-              tooltip="Total monthly sales costs: salaries, commissions, tools"
+              tooltip={t('unitEconomics.salesCostsTooltip')}
               error={validationErrors.sales_costs}
               disabled={!isCurrentMonth}
             />
             <MetricInput
-              label="New Customers (monthly)"
+              label={t('unitEconomics.newCustomers')}
               value={newCustomers}
               onChange={(v) => handleInputChange(setNewCustomers, Math.floor(v))}
-              tooltip="Number of new paying customers acquired this month"
+              tooltip={t('unitEconomics.newCustomersTooltip')}
               error={validationErrors.new_customers}
               disabled={!isCurrentMonth}
             />
@@ -380,32 +381,32 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
 
           <div className="space-y-4">
             <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-              Revenue & Retention
+              {t('unitEconomics.revenueRetention')}
             </h4>
             <MetricInput
-              label="ARPU (monthly)"
+              label={t('unitEconomics.arpu')}
               value={arpu}
               onChange={(v) => handleInputChange(setArpu, v)}
               prefix="€"
-              tooltip="Average Revenue Per User per month"
+              tooltip={t('unitEconomics.arpuTooltip')}
               error={validationErrors.arpu}
               disabled={!isCurrentMonth}
             />
             <MetricInput
-              label="Gross Margin"
+              label={t('unitEconomics.grossMargin')}
               value={grossMargin}
               onChange={(v) => handleInputChange(setGrossMargin, v)}
               suffix="%"
-              tooltip="Revenue minus cost of goods sold (typically 70-90% for SaaS)"
+              tooltip={t('unitEconomics.grossMarginTooltip')}
               error={validationErrors.gross_margin}
               disabled={!isCurrentMonth}
             />
             <MetricInput
-              label="Monthly Churn Rate"
+              label={t('unitEconomics.monthlyChurnRate')}
               value={monthlyChurnRate}
               onChange={(v) => handleInputChange(setMonthlyChurnRate, v)}
               suffix="%"
-              tooltip="Percentage of customers who cancel each month"
+              tooltip={t('unitEconomics.monthlyChurnRateTooltip')}
               error={validationErrors.monthly_churn_rate}
               disabled={!isCurrentMonth}
             />
@@ -422,12 +423,12 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
               {saveUnitEconomics.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  {t('common.saving')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save
+                  {t('common.save')}
                 </>
               )}
             </Button>
@@ -439,7 +440,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
         {/* Results Section */}
         <div className="space-y-4">
           <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-            Calculated Metrics
+            {t('unitEconomics.calculatedMetrics')}
           </h4>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -447,27 +448,27 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
               label="CAC"
               value={metrics.cac > 0 ? formatCurrency(metrics.cac) : '-'}
               status="neutral"
-              description="Cost to acquire one customer"
+              description={t('unitEconomics.cacDescription')}
               previousValue={previousMonthData?.cac}
             />
             <ResultCard
               label="LTV"
               value={metrics.ltv > 0 ? formatCurrency(metrics.ltv) : '-'}
               status="neutral"
-              description="Lifetime value per customer"
+              description={t('unitEconomics.ltvDescription')}
               previousValue={previousMonthData?.ltv}
             />
             <ResultCard
               label="LTV:CAC Ratio"
               value={metrics.ltvCacRatio > 0 ? `${metrics.ltvCacRatio.toFixed(1)}x` : '-'}
               status={getLtvCacStatus(metrics.ltvCacRatio)}
-              description={metrics.ltvCacRatio >= 3 ? 'Healthy ratio (≥3x)' : metrics.ltvCacRatio >= 1 ? 'Needs improvement' : 'Below target'}
+              description={metrics.ltvCacRatio >= 3 ? t('unitEconomics.healthyRatio') : metrics.ltvCacRatio >= 1 ? t('unitEconomics.needsImprovement') : t('unitEconomics.belowTarget')}
             />
             <ResultCard
               label="Payback Period"
               value={metrics.paybackPeriod > 0 ? `${metrics.paybackPeriod.toFixed(1)} mo` : '-'}
               status={getPaybackStatus(metrics.paybackPeriod)}
-              description={metrics.paybackPeriod <= 12 ? 'Good (≤12 months)' : 'Consider reducing CAC'}
+              description={metrics.paybackPeriod <= 12 ? t('unitEconomics.goodPayback') : t('unitEconomics.considerReducingCac')}
             />
           </div>
 
@@ -475,7 +476,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
           <div className="p-4 rounded-lg bg-muted/30">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Average Customer Lifetime</p>
+                <p className="text-sm text-muted-foreground">{t('unitEconomics.avgCustomerLifetime')}</p>
                 <p className="text-lg font-semibold">
                   {metrics.customerLifetimeMonths > 0 
                     ? `${metrics.customerLifetimeMonths.toFixed(1)} months`
@@ -483,7 +484,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
                 </p>
               </div>
               <Badge variant="outline">
-                Based on {monthlyChurnRate}% monthly churn
+                {t('unitEconomics.basedOnChurn', { rate: monthlyChurnRate })}
               </Badge>
             </div>
           </div>
@@ -494,7 +495,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-start gap-2 text-sm">
               <BookOpen className="h-4 w-4" />
-              O que significam estas métricas?
+              {t('unitEconomics.whatDoTheseMetricsMean')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
@@ -505,7 +506,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
                     <span className="cursor-help underline decoration-dotted">CAC</span>
                   </GlossaryTooltip>
                 </div>
-                <p className="text-xs text-muted-foreground">Custo para adquirir um cliente. Divida os custos de marketing e vendas pelo número de novos clientes.</p>
+                <p className="text-xs text-muted-foreground">{t('unitEconomics.cacExplanation')}</p>
               </div>
               <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                 <div className="font-medium flex items-center gap-2">
@@ -513,7 +514,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
                     <span className="cursor-help underline decoration-dotted">LTV</span>
                   </GlossaryTooltip>
                 </div>
-                <p className="text-xs text-muted-foreground">Valor total que um cliente gera durante toda a relação. Quanto maior, melhor.</p>
+                <p className="text-xs text-muted-foreground">{t('unitEconomics.ltvExplanation')}</p>
               </div>
               <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                 <div className="font-medium flex items-center gap-2">
@@ -521,7 +522,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
                     <span className="cursor-help underline decoration-dotted">Rácio LTV:CAC</span>
                   </GlossaryTooltip>
                 </div>
-                <p className="text-xs text-muted-foreground">Deve ser ≥3x para um negócio saudável. Abaixo de 1x significa que está a perder dinheiro por cliente.</p>
+                <p className="text-xs text-muted-foreground">{t('unitEconomics.ltvCacExplanation')}</p>
               </div>
               <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                 <div className="font-medium flex items-center gap-2">
@@ -529,16 +530,16 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
                     <span className="cursor-help underline decoration-dotted">Payback</span>
                   </GlossaryTooltip>
                 </div>
-                <p className="text-xs text-muted-foreground">Meses para recuperar o CAC. Idealmente ≤12 meses para startups early-stage.</p>
+                <p className="text-xs text-muted-foreground">{t('unitEconomics.paybackExplanation')}</p>
               </div>
             </div>
             
             <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
-              <p className="text-sm font-medium text-primary mb-2">💡 Dicas para founders:</p>
+              <p className="text-sm font-medium text-primary mb-2">💡 {t('unitEconomics.tipsTitle')}</p>
               <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Churn de 5%/mês significa perder metade dos clientes em ~14 meses</li>
-                <li>Margem bruta típica para SaaS é 70-90%</li>
-                <li>Foque em reduzir CAC ou aumentar LTV antes de escalar</li>
+                <li>{t('unitEconomics.tip1')}</li>
+                <li>{t('unitEconomics.tip2')}</li>
+                <li>{t('unitEconomics.tip3')}</li>
               </ul>
             </div>
           </CollapsibleContent>

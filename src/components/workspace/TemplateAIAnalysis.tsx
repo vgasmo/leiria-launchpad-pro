@@ -81,11 +81,11 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
     
     switch (analysis.recommendation) {
       case 'approve':
-        return <Badge className="bg-green-100 text-green-700"><ThumbsUp className="h-3 w-3 mr-1" /> Recommend Approve</Badge>;
+        return <Badge className="bg-green-100 text-green-700"><ThumbsUp className="h-3 w-3 mr-1" /> {t('templates.recommendApprove')}</Badge>;
       case 'needs_changes':
-        return <Badge className="bg-amber-100 text-amber-700"><ThumbsDown className="h-3 w-3 mr-1" /> Needs Changes</Badge>;
+        return <Badge className="bg-amber-100 text-amber-700"><ThumbsDown className="h-3 w-3 mr-1" /> {t('templates.needsChanges')}</Badge>;
       case 'needs_discussion':
-        return <Badge className="bg-blue-100 text-blue-700"><MessageSquare className="h-3 w-3 mr-1" /> Needs Discussion</Badge>;
+        return <Badge className="bg-blue-100 text-blue-700"><MessageSquare className="h-3 w-3 mr-1" /> {t('templates.needsDiscussion')}</Badge>;
     }
   };
 

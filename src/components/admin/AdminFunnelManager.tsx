@@ -85,8 +85,8 @@ export function AdminFunnelManager() {
     <Tabs defaultValue="funnel" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Funnel & Intake</h2>
-          <p className="text-muted-foreground">Track leads from first contact to conversion</p>
+          <h2 className="text-2xl font-bold">{t('admin.funnel.title')}</h2>
+          <p className="text-muted-foreground">{t('admin.funnel.subtitle')}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -95,22 +95,22 @@ export function AdminFunnelManager() {
               checked={showMineOnly}
               onCheckedChange={setShowMineOnly}
             />
-            <Label htmlFor="show-mine" className="text-sm cursor-pointer">My deals only</Label>
+            <Label htmlFor="show-mine" className="text-sm cursor-pointer">{t('admin.funnel.myDealsOnly')}</Label>
           </div>
           <TabsList>
-            <TabsTrigger value="funnel">Pipeline</TabsTrigger>
+            <TabsTrigger value="funnel">{t('admin.funnel.pipeline')}</TabsTrigger>
             <TabsTrigger value="routing" className="gap-1">
               <Settings className="h-3 w-3" />
-              Intake Routing
+              {t('admin.funnel.intakeRouting')}
             </TabsTrigger>
           </TabsList>
           <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
             <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-2" />Add Lead</Button>
+              <Button><Plus className="h-4 w-4 mr-2" />{t('admin.funnel.addLead')}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Lead</DialogTitle>
+                <DialogTitle>{t('admin.funnel.addNewLead')}</DialogTitle>
               </DialogHeader>
               <NewLeadForm 
                 programs={programs || []}
@@ -245,7 +245,7 @@ function FunnelCard({
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between">
           <div className="min-w-0">
-            <p className="font-medium truncate">{item.organization_name || item.contact_name || 'Unnamed'}</p>
+            <p className="font-medium truncate">{item.organization_name || item.contact_name || t('common.unnamed')}</p>
             {item.contact_email && (
               <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
                 <Mail className="h-3 w-3" />{item.contact_email}
@@ -343,7 +343,7 @@ function FunnelCard({
           
           {canConvert && (
             <Button size="sm" variant="default" className="h-7 text-xs" onClick={onConvert}>
-              <Rocket className="h-3 w-3 mr-1" />Convert
+              <Rocket className="h-3 w-3 mr-1" />{t('admin.funnel.convert')}
             </Button>
           )}
         </div>
@@ -361,6 +361,7 @@ function NewLeadForm({
   consultors: { id: string; full_name: string | null }[];
   onSubmit: (data: Partial<FunnelItem>) => void;
 }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     contact_name: '',
     contact_email: '',
@@ -375,40 +376,40 @@ function NewLeadForm({
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Contact Name</Label>
+          <Label>{t('admin.funnel.contactName')}</Label>
           <Input value={formData.contact_name} onChange={e => setFormData({...formData, contact_name: e.target.value})} />
         </div>
         <div className="space-y-2">
-          <Label>Email</Label>
+          <Label>{t('common.email')}</Label>
           <Input type="email" value={formData.contact_email} onChange={e => setFormData({...formData, contact_email: e.target.value})} />
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Organization</Label>
+        <Label>{t('admin.funnel.organization')}</Label>
         <Input value={formData.organization_name} onChange={e => setFormData({...formData, organization_name: e.target.value})} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Source</Label>
-          <Input placeholder="e.g., Website, Referral" value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})} />
+          <Label>{t('admin.funnel.source')}</Label>
+          <Input placeholder={t('admin.funnel.sourcePlaceholder')} value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})} />
         </div>
         <div className="space-y-2">
-          <Label>Assign to</Label>
+          <Label>{t('admin.funnel.assignTo')}</Label>
           <Select value={formData.owner_consultant_id} onValueChange={v => setFormData({...formData, owner_consultant_id: v})}>
-            <SelectTrigger><SelectValue placeholder="Select consultant" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder={t('admin.funnel.selectConsultant')} /></SelectTrigger>
             <SelectContent>
               {consultors.filter(c => c.id).map(c => (
-                <SelectItem key={c.id} value={c.id}>{c.full_name || 'Unnamed'}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>{c.full_name || t('common.unnamed')}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Notes</Label>
+        <Label>{t('common.notes')}</Label>
         <Textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
       </div>
-      <Button type="submit" className="w-full">Create Lead</Button>
+      <Button type="submit" className="w-full">{t('admin.funnel.createLead')}</Button>
     </form>
   );
 }

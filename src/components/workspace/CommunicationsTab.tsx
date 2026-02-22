@@ -52,7 +52,7 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
   const handleCopyAlias = () => {
     if (emailAlias?.alias) {
       navigator.clipboard.writeText(`${emailAlias.alias}@yourdomain.com`);
-      toast.success('Email alias copied to clipboard');
+      toast.success(t('communications.aliasCopied'));
     }
   };
 
@@ -62,7 +62,7 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
 
   const handleAddCommunication = async () => {
     if (!newComm.subject.trim()) {
-      toast.error('Subject is required');
+      toast.error(t('communications.subjectRequired'));
       return;
     }
     
@@ -94,10 +94,10 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Mail className="h-5 w-5" />
-            Email Capture
+            {t('communications.emailCapture')}
           </CardTitle>
           <CardDescription>
-            Forward emails to automatically capture communications for this workspace
+            {t('communications.emailCaptureDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,11 +113,11 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
           ) : (
             <Button onClick={handleCreateAlias} disabled={createAlias.isPending}>
               <Plus className="h-4 w-4 mr-2" />
-              Generate Email Alias
+              {t('communications.generateAlias')}
             </Button>
           )}
           <p className="text-xs text-muted-foreground mt-3">
-            Forward emails to this address and they'll appear in the timeline below
+            {t('communications.forwardEmailsHint')}
           </p>
         </CardContent>
       </Card>
@@ -126,39 +126,39 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Communications Timeline</CardTitle>
+            <CardTitle className="text-lg">{t('communications.timeline')}</CardTitle>
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Log Communication
+                  {t('communications.logCommunication')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Log Communication</DialogTitle>
+                  <DialogTitle>{t('communications.logCommunication')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">From</label>
+                    <label className="text-sm font-medium">{t('communications.from')}</label>
                     <Input
                       placeholder="email@example.com"
                       value={newComm.from_address}
                       onChange={(e) => setNewComm({ ...newComm, from_address: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Subject *</label>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">{t('communications.subject')} *</label>
                     <Input
-                      placeholder="Email subject"
+                      placeholder={t('communications.subjectPlaceholder')}
                       value={newComm.subject}
                       onChange={(e) => setNewComm({ ...newComm, subject: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Content</label>
+                     <label className="text-sm font-medium">{t('communications.content')}</label>
                     <Textarea
-                      placeholder="Email content or summary..."
+                      placeholder={t('communications.contentPlaceholder')}
                       value={newComm.body}
                       onChange={(e) => setNewComm({ ...newComm, body: e.target.value })}
                       rows={4}
@@ -169,7 +169,7 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
                     className="w-full"
                     disabled={addCommunication.isPending}
                   >
-                    Save Communication
+                    {t('communications.saveCommunication')}
                   </Button>
                 </div>
               </DialogContent>
@@ -181,10 +181,10 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
             <div className="text-center py-8">
               <Mail className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-sm text-muted-foreground">
-                No communications logged yet
+                {t('communications.noCommLogged')}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Forward emails or manually log communications to build a timeline
+                {t('communications.noCommHint')}
               </p>
             </div>
           ) : (
@@ -215,7 +215,7 @@ export function CommunicationsTab({ workspaceId }: CommunicationsTabProps) {
                       </div>
                     </div>
                     
-                    <h4 className="font-medium">{comm.subject || 'No subject'}</h4>
+                    <h4 className="font-medium">{comm.subject || t('communications.noSubject')}</h4>
                     
                     {comm.body && (
                       <p className="text-sm text-muted-foreground line-clamp-3">
