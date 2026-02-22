@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Calendar,
   ArrowRight,
-  Lightbulb
+  Lightbulb,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { useActionItems } from '@/hooks/useActionItems';
 import { usePendingCheckin } from '@/hooks/useCheckins';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { isPast, differenceInDays, startOfMonth, endOfMonth } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface OneThingTodayProps {
   workspace: WorkspaceWithDetails;
@@ -43,7 +45,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
   const recommendation = useMemo<RecommendedAction | null>(() => {
     const candidates: RecommendedAction[] = [];
 
-    // Check for overdue actions (highest priority but softer tone)
     const overdueActions = actions?.filter(
       a => a.status !== 'completed' && a.due_date && isPast(new Date(a.due_date))
     ) || [];
@@ -51,7 +52,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
     if (overdueActions.length > 0) {
       const oldest = overdueActions[0];
       const daysOverdue = differenceInDays(new Date(), new Date(oldest.due_date!));
-      // Only show as destructive if severely overdue (7+ days), else use warning
       const variant = daysOverdue >= 7 ? 'destructive' : 'warning';
       candidates.push({
         type: 'overdue_action',
@@ -64,7 +64,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       });
     }
 
-    // Check for pending check-in this month
     if (pendingCheckin) {
       candidates.push({
         type: 'checkin',
@@ -77,7 +76,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       });
     }
 
-    // Check if KPIs need update
     if (!workspace.hasCurrentMonthKpi) {
       candidates.push({
         type: 'kpi_update',
@@ -90,7 +88,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       });
     }
 
-    // Check for upcoming session needing prep
     if (workspace.nextMeetingDate) {
       const daysUntil = differenceInDays(new Date(workspace.nextMeetingDate), new Date());
       if (daysUntil <= 2 && daysUntil >= 0) {
@@ -106,7 +103,6 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       }
     }
 
-    // Check for pending actions (not overdue)
     const pendingActions = actions?.filter(
       a => a.status === 'pending' && (!a.due_date || !isPast(new Date(a.due_date)))
     ) || [];
@@ -124,27 +120,32 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
       });
     }
 
-    // Sort by priority and return the highest
     candidates.sort((a, b) => b.priority - a.priority);
     return candidates[0] || null;
   }, [actions, pendingCheckin, workspace, t]);
 
   if (!recommendation) {
     return (
-      <Card className={`bg-gradient-to-br from-green-500/5 to-emerald-500/5 border-green-500/20 ${className}`}>
-        <CardContent className="p-4">
+      <Card className={cn(
+        'relative overflow-hidden border-green-500/20',
+        'bg-gradient-to-r from-green-500/8 via-emerald-500/5 to-transparent',
+        className
+      )}>
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-400/10 to-transparent rounded-bl-full" />
+        <CardContent className="p-4 relative">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <div className="h-11 w-11 rounded-xl bg-green-500/10 flex items-center justify-center ring-1 ring-green-500/20">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-green-700 dark:text-green-400">
+              <p className="font-semibold text-green-700 dark:text-green-400">
                 {t('oneThingToday.allCaughtUp')}
               </p>
               <p className="text-sm text-muted-foreground">
                 {t('oneThingToday.keepMomentum')}
               </p>
             </div>
+            <Sparkles className="h-5 w-5 text-green-400/50" />
           </div>
         </CardContent>
       </Card>
@@ -152,46 +153,57 @@ export function OneThingToday({ workspace, className }: OneThingTodayProps) {
   }
 
   const Icon = recommendation.icon;
-  // Softer color scheme - use amber/warning instead of heavy red
-  const bgClass = recommendation.variant === 'destructive' 
-    ? 'from-red-500/5 to-orange-500/5 border-red-400/30'
-    : recommendation.variant === 'warning'
-    ? 'from-amber-500/5 to-yellow-500/5 border-amber-400/30'
-    : 'from-primary/5 to-accent/5 border-primary/20';
-  
-  const iconBgClass = recommendation.variant === 'destructive'
-    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-    : recommendation.variant === 'warning'
-    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-    : 'bg-primary/10 text-primary';
+  const isDestructive = recommendation.variant === 'destructive';
+  const isWarning = recommendation.variant === 'warning';
 
   return (
-    <Card className={`bg-gradient-to-br ${bgClass} ${className}`}>
-      <CardContent className="p-4">
+    <Card className={cn(
+      'relative overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.005]',
+      isDestructive && 'border-red-400/30 bg-gradient-to-r from-red-500/8 via-orange-500/5 to-transparent',
+      isWarning && 'border-amber-400/30 bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-transparent',
+      !isDestructive && !isWarning && 'border-primary/20 bg-gradient-to-r from-primary/8 via-accent/5 to-transparent',
+      className
+    )}>
+      {/* Subtle glow accent */}
+      <div className={cn(
+        'absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-40',
+        isDestructive && 'bg-gradient-to-bl from-red-400/15 to-transparent',
+        isWarning && 'bg-gradient-to-bl from-amber-400/15 to-transparent',
+        !isDestructive && !isWarning && 'bg-gradient-to-bl from-primary/10 to-transparent',
+      )} />
+      
+      <CardContent className="p-4 relative">
         <div className="flex items-start gap-3">
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${iconBgClass}`}>
-              <Icon className="h-5 w-5" />
-            </div>
+          <div className={cn(
+            'h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ring-1 transition-transform duration-300',
+            isDestructive && 'bg-red-500/10 text-red-600 dark:text-red-400 ring-red-500/20',
+            isWarning && 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20',
+            !isDestructive && !isWarning && 'bg-primary/10 text-primary ring-primary/20',
+          )}>
+            <Icon className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-xs flex items-center gap-1">
+              <Badge variant="outline" className={cn(
+                "text-xs flex items-center gap-1 font-medium",
+                isDestructive && 'border-red-300/50 text-red-700 dark:text-red-400',
+                isWarning && 'border-amber-300/50 text-amber-700 dark:text-amber-400',
+              )}>
                 <Lightbulb className="h-3 w-3" />
                 {t('oneThingToday.focusToday')}
               </Badge>
             </div>
-            <p className="font-medium truncate">{recommendation.title}</p>
+            <p className="font-semibold truncate">{recommendation.title}</p>
             <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{recommendation.why}</p>
           </div>
           <Button 
             size="sm" 
-            variant={recommendation.variant === 'destructive' ? 'destructive' : 'default'}
+            variant={isDestructive ? 'destructive' : 'default'}
             onClick={() => navigate(recommendation.link)}
-            className="flex-shrink-0"
+            className="flex-shrink-0 gap-1.5 shadow-sm"
           >
             {t('common.go')}
-            <ArrowRight className="h-4 w-4 ml-1" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>

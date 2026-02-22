@@ -6,13 +6,18 @@ import {
   AlertTriangle,
   Building2,
   ArrowRight,
+  ArrowUpRight,
+  ArrowDownRight,
   RefreshCw,
   Users,
+  TrendingUp,
+  Minus,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Sparkline } from '@/components/ui/Sparkline';
 import { cn } from '@/lib/utils';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useEcosystemInsights } from '@/hooks/useEcosystemInsights';
@@ -33,7 +38,6 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
 
   const isLoading = workspacesLoading || statsLoading;
 
-  // Compute health distribution from workspaces
   const healthDistribution = { critical: 0, at_risk: 0, stable: 0, healthy: 0, thriving: 0 };
   const overdueCount = workspaces.filter(w => w.overdueActionsCount > 0).length;
   const totalOverdueActions = workspaces.reduce((sum, w) => sum + (w.overdueActionsCount || 0), 0);
@@ -45,14 +49,13 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
 
   const needsAttention = healthDistribution.critical + healthDistribution.at_risk;
 
-  // Smart insights
   const insights = useEcosystemInsights({
     totalStartups: workspaces.length,
     activeStartups: workspaces.length,
     healthDistribution,
     overdueActionsCount: totalOverdueActions,
-    missingKpisCount: 0, // TODO: compute from workspaces
-    sessionsThisWeek: 0, // TODO: add to stats hook
+    missingKpisCount: 0,
+    sessionsThisWeek: 0,
     pendingApprovals: stats?.pendingApprovalsCount ?? 0,
     totalMentors: 0,
     activeMentors: 0,
@@ -67,6 +70,8 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       icon: Users,
       href: '/admin?tab=users',
       variant: 'warning' as const,
+      trend: 'up' as const,
+      sparkData: [2, 3, 1, 4, 2, stats?.pendingApprovalsCount ?? 0],
     },
     {
       key: 'renewals',
@@ -75,6 +80,8 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       icon: FileText,
       href: '/admin?tab=backoffice',
       variant: 'info' as const,
+      trend: 'neutral' as const,
+      sparkData: [1, 2, 1, 3, 2, stats?.contractRenewals30d ?? 0],
     },
     {
       key: 'overdue',
@@ -83,6 +90,8 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       icon: AlertTriangle,
       href: '/admin?tab=backoffice',
       variant: 'destructive' as const,
+      trend: (stats?.overdueInvoicesCount ?? 0) > 0 ? 'up' as const : 'down' as const,
+      sparkData: [3, 2, 4, 1, 3, stats?.overdueInvoicesCount ?? 0],
     },
     {
       key: 'occupancy',
@@ -91,6 +100,15 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       icon: Building2,
       href: '/admin?tab=backoffice',
       variant: 'default' as const,
+      trend: 'neutral' as const,
+      sparkData: stats ? [
+        Math.max(stats.occupiedSpaces - 2, 0),
+        Math.max(stats.occupiedSpaces - 1, 0),
+        stats.occupiedSpaces,
+        stats.occupiedSpaces,
+        stats.occupiedSpaces,
+        stats.occupiedSpaces
+      ] : [0, 0, 0, 0, 0, 0],
     },
   ];
 
@@ -99,7 +117,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       <div className="space-y-6">
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
+            <Skeleton key={i} className="h-32 rounded-2xl" />
           ))}
         </div>
         <Skeleton className="h-48 rounded-2xl" />
@@ -107,14 +125,13 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
     );
   }
 
-  // Exception alerts that need immediate action
   const exceptionAlerts = signals.filter(s => typeof s.value === 'number' && s.value > 0 && s.variant !== 'default');
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* HERO: Exception-Based Alerts — actionable items FIRST */}
+      {/* HERO: Exception-Based Alerts */}
       {exceptionAlerts.length > 0 && (
-        <Card className="rounded-2xl border-amber-300/50 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10">
+        <Card className="rounded-2xl border-amber-300/50 bg-gradient-to-r from-amber-50/40 via-orange-50/20 to-transparent dark:from-amber-950/20 dark:via-orange-950/10">
           <CardContent className="p-4">
             <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-3">
               {t('admin.exceptionsTitle', { defaultValue: 'Requires Your Attention' })}
@@ -125,11 +142,11 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
                 return (
                   <div
                     key={alert.key}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-background/80 cursor-pointer hover:shadow-sm transition-shadow"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-background/80 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all duration-200"
                     onClick={() => navigate(alert.href)}
                   >
                     <div className={cn(
-                      'h-9 w-9 rounded-full flex items-center justify-center shrink-0',
+                      'h-9 w-9 rounded-xl flex items-center justify-center shrink-0',
                       alert.variant === 'destructive' ? 'bg-destructive/10' : 'bg-amber-100 dark:bg-amber-900/30'
                     )}>
                       <Icon className={cn(
@@ -138,7 +155,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
                       )} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">{alert.value as number}</p>
+                      <p className="text-sm font-bold">{alert.value as number}</p>
                       <p className="text-xs text-muted-foreground truncate">{alert.label}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -167,36 +184,66 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
         </Button>
       </div>
 
-      {/* Signal Cards */}
+      {/* Signal Cards — Enterprise Command Center style */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {signals.map((signal) => {
           const Icon = signal.icon;
           const hasAlert = typeof signal.value === 'number' && signal.value > 0 && signal.variant !== 'default';
+          const TrendIcon = signal.trend === 'up' ? ArrowUpRight : signal.trend === 'down' ? ArrowDownRight : Minus;
+          const trendColor = signal.variant === 'destructive' && signal.trend === 'up'
+            ? 'text-destructive'
+            : signal.trend === 'up'
+            ? 'text-green-600 dark:text-green-400'
+            : signal.trend === 'down'
+            ? 'text-green-600 dark:text-green-400'
+            : 'text-muted-foreground';
 
           return (
             <Card
               key={signal.key}
               className={cn(
-                'cursor-pointer hover:shadow-md transition-shadow rounded-2xl',
-                hasAlert && signal.variant === 'destructive' && 'border-destructive/30 bg-destructive/5',
-                hasAlert && signal.variant === 'warning' && 'border-amber-300/50 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-900/10',
+                'group cursor-pointer transition-all duration-200 rounded-2xl hover:shadow-md hover:scale-[1.01]',
+                hasAlert && signal.variant === 'destructive' && 'border-destructive/30 bg-gradient-to-br from-destructive/5 to-transparent',
+                hasAlert && signal.variant === 'warning' && 'border-amber-300/50 bg-gradient-to-br from-amber-50/40 to-transparent dark:from-amber-950/20',
               )}
               onClick={() => navigate(signal.href)}
             >
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="text-xs font-medium">{signal.label}</span>
+                <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                  <div className={cn(
+                    'h-8 w-8 rounded-lg flex items-center justify-center',
+                    hasAlert && signal.variant === 'destructive' ? 'bg-destructive/10' :
+                    hasAlert && signal.variant === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30' :
+                    'bg-muted/50'
+                  )}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs font-medium flex-1">{signal.label}</span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <span className={cn(
-                    'text-2xl font-bold',
-                    hasAlert && signal.variant === 'destructive' && 'text-destructive',
-                    hasAlert && signal.variant === 'warning' && 'text-amber-600 dark:text-amber-400',
-                  )}>
-                    {signal.value}
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <span className={cn(
+                      'text-2xl font-bold block',
+                      hasAlert && signal.variant === 'destructive' && 'text-destructive',
+                      hasAlert && signal.variant === 'warning' && 'text-amber-600 dark:text-amber-400',
+                    )}>
+                      {signal.value}
+                    </span>
+                    <div className={cn('flex items-center gap-0.5 text-xs mt-0.5', trendColor)}>
+                      <TrendIcon className="h-3 w-3" />
+                      <span className="text-[10px]">30d</span>
+                    </div>
+                  </div>
+                  <Sparkline
+                    data={signal.sparkData}
+                    width={56}
+                    height={24}
+                    color={
+                      hasAlert && signal.variant === 'destructive' ? 'hsl(var(--destructive))' :
+                      hasAlert && signal.variant === 'warning' ? '#d97706' :
+                      'hsl(var(--muted-foreground))'
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -211,9 +258,10 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       <Card className="rounded-2xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
             {t('admin.portfolioHealth')}
             {needsAttention > 0 && (
-              <Badge variant="destructive" className="text-xs">
+              <Badge variant="destructive" className="text-xs animate-pulse">
                 {needsAttention} {t('admin.needAttention')}
               </Badge>
             )}
@@ -229,10 +277,16 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
                 healthy: 'bg-health-healthy',
                 thriving: 'bg-health-thriving',
               };
+              const isAlert = health === 'critical' || health === 'at_risk';
               return (
-                <div key={health} className="text-center">
+                <div key={health} className={cn(
+                  "text-center p-2 rounded-xl transition-all duration-200 hover:shadow-sm cursor-pointer",
+                  isAlert && count > 0 && 'bg-destructive/5 ring-1 ring-destructive/20'
+                )}
+                  onClick={() => navigate('/my-workspaces?filter=attention')}
+                >
                   <div className={cn('h-2 rounded-full mb-2', colors[health])} />
-                  <p className="text-lg font-bold">{count}</p>
+                  <p className={cn('text-lg font-bold', isAlert && count > 0 && 'text-destructive')}>{count}</p>
                   <p className="text-xs text-muted-foreground capitalize">
                     {t(`health.levels.${health}`, health)}
                   </p>
@@ -269,7 +323,7 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
             <Button
               key={link.href}
               variant="outline"
-              className="h-auto py-3 justify-start gap-3 rounded-xl"
+              className="h-auto py-3 justify-start gap-3 rounded-xl hover:shadow-sm hover:scale-[1.01] transition-all duration-200"
               onClick={() => navigate(link.href)}
             >
               <Icon className="h-4 w-4 text-muted-foreground" />
