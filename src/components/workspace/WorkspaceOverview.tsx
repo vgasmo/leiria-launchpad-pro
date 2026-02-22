@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceNextSession, useWorkspaceSessions, useStages } from '@/hooks/useWorkspaceData';
 import { HealthScorePanel } from '@/components/workspace/HealthScorePanel';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { ProgressTimeline } from '@/components/workspace/ProgressTimeline';
 import { ProgressReportView } from '@/components/workspace/ProgressReportView';
@@ -384,19 +385,17 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
               </div>
             ) : kpiData?.current.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="h-12 w-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium text-sm text-foreground mb-1">{t('emptyStates.kpis.title')}</p>
-                <p className="text-xs text-muted-foreground max-w-xs mx-auto mb-3">
-                  {t('emptyStates.kpis.description')}
-                </p>
-                <Button size="sm" onClick={() => setSearchParams({ tab: 'kpis' })} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" />
-                  {t('workspaceOverview.addKpiEntry')}
-                </Button>
-              </div>
+              <EmptyState
+                illustration="chart"
+                title={t('emptyStates.kpis.title')}
+                description={t('emptyStates.kpis.description')}
+                value={getKpiStageSuggestion(workspace.stage, t)}
+                action={{
+                  label: t('workspaceOverview.addKpiEntry'),
+                  onClick: () => setSearchParams({ tab: 'kpis' }),
+                  icon: Plus,
+                }}
+              />
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {kpiData?.current.slice(0, 6).map(kpi => (
@@ -425,19 +424,17 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
             {milestonesLoading ? (
               <Skeleton className="h-24" />
             ) : milestones?.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="h-12 w-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium text-sm text-foreground mb-1">{t('emptyStates.milestones.title')}</p>
-                <p className="text-xs text-muted-foreground max-w-xs mx-auto mb-3">
-                  {t('emptyStates.milestones.description')}
-                </p>
-                <Button size="sm" onClick={() => setSearchParams({ tab: 'milestones' })} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" />
-                  {t('workspace.addFirstMilestone')}
-                </Button>
-              </div>
+              <EmptyState
+                illustration="rocket"
+                title={t('emptyStates.milestones.title')}
+                description={t('emptyStates.milestones.description')}
+                value={getMilestoneStageSuggestion(workspace.stage, t)}
+                action={{
+                  label: t('workspace.addFirstMilestone'),
+                  onClick: () => setSearchParams({ tab: 'milestones' }),
+                  icon: Plus,
+                }}
+              />
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <MilestoneCount label={t('workspaceOverview.planned')} count={milestoneCounts.planned} color="bg-muted" />
@@ -686,4 +683,26 @@ function SessionItem({ session }: { session: any }) {
       )}
     </div>
   );
+}
+
+function getKpiStageSuggestion(stage: string, t: any): string {
+  const suggestions: Record<string, string> = {
+    ideation: t('emptyStates.kpis.stageIdeation', { defaultValue: '💡 Sugestão: Comece com "Entrevistas realizadas" e "Hipóteses validadas"' }),
+    validation: t('emptyStates.kpis.stageValidation', { defaultValue: '🧪 Sugestão: Acompanhe "Utilizadores piloto" e "NPS"' }),
+    mvp: t('emptyStates.kpis.stageMvp', { defaultValue: '🚀 Sugestão: Meça "MRR", "Churn" e "CAC"' }),
+    growth: t('emptyStates.kpis.stageGrowth', { defaultValue: '📈 Sugestão: Foque em "MRR", "LTV/CAC" e "Burn Rate"' }),
+    scale: t('emptyStates.kpis.stageScale', { defaultValue: '🏆 Sugestão: Monitorize "ARR", "Margem Bruta" e "NDR"' }),
+  };
+  return suggestions[stage] || suggestions.ideation;
+}
+
+function getMilestoneStageSuggestion(stage: string, t: any): string {
+  const suggestions: Record<string, string> = {
+    ideation: t('emptyStates.milestones.stageIdeation', { defaultValue: '💡 Comece com: "Completar 10 entrevistas de descoberta"' }),
+    validation: t('emptyStates.milestones.stageValidation', { defaultValue: '🧪 Comece com: "Lançar piloto com 20 utilizadores"' }),
+    mvp: t('emptyStates.milestones.stageMvp', { defaultValue: '🚀 Comece com: "Atingir 50 clientes pagantes"' }),
+    growth: t('emptyStates.milestones.stageGrowth', { defaultValue: '📈 Comece com: "Atingir 10K€ MRR"' }),
+    scale: t('emptyStates.milestones.stageScale', { defaultValue: '🏆 Comece com: "Fechar ronda Series A"' }),
+  };
+  return suggestions[stage] || suggestions.ideation;
 }

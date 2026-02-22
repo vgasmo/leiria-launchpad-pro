@@ -2344,7 +2344,12 @@
     "getStarted": "Comece agora",
     "kpis": {
       "description": "KPIs ajudam a medir o progresso e contar a história de crescimento aos investidores. Comece com 3-5 métricas chave.",
-      "title": "Acompanhe o que importa"
+      "title": "Acompanhe o que importa",
+      "stageIdeation": "💡 Sugestão: Comece com \"Entrevistas realizadas\" e \"Hipóteses validadas\"",
+      "stageValidation": "🧪 Sugestão: Acompanhe \"Utilizadores piloto\" e \"NPS\"",
+      "stageMvp": "🚀 Sugestão: Meça \"MRR\", \"Churn\" e \"CAC\"",
+      "stageGrowth": "📈 Sugestão: Foque em \"MRR\", \"LTV/CAC\" e \"Burn Rate\"",
+      "stageScale": "🏆 Sugestão: Monitorize \"ARR\", \"Margem Bruta\" e \"NDR\""
     },
     "mentors": {
       "description": "Peça um mentor para ajudar a navegar desafios e acelerar o seu crescimento.",
@@ -2352,7 +2357,12 @@
     },
     "milestones": {
       "description": "Marcos ajudam a dividir a jornada em objetivos alcançáveis. Comece com os seus próximos objetivos de 2 semanas.",
-      "title": "Transforme o caos em progresso"
+      "title": "Transforme o caos em progresso",
+      "stageIdeation": "💡 Comece com: \"Completar 10 entrevistas de descoberta\"",
+      "stageValidation": "🧪 Comece com: \"Lançar piloto com 20 utilizadores\"",
+      "stageMvp": "🚀 Comece com: \"Atingir 50 clientes pagantes\"",
+      "stageGrowth": "📈 Comece com: \"Atingir 10K€ MRR\"",
+      "stageScale": "🏆 Comece com: \"Fechar ronda Series A\""
     },
     "noData": "Sem dados disponíveis",
     "noDataDesc": "Comece a adicionar dados para ver aqui.",
@@ -2535,6 +2545,7 @@
     "responseTime": "Normalmente respondemos em 2-3 dias úteis",
     "startYourJourney": "Inicie a Sua Jornada Startup",
     "startYourJourneyDesc": "Registe a sua startup para aceder a mentoria, acompanhar o progresso e preparar a próxima ronda de financiamento.",
+    "startYourJourneyValue": "Obtém orientação de mentores e acompanha os teus KPIs num único lugar.",
     "updateKpis": "Atualizar KPIs",
     "viewActions": "Ver Ações"
   },
@@ -3475,7 +3486,10 @@
     "viewActions": "Ver Ações",
     "viewSession": "Ver Sessão",
     "weeklyCheckinPending": "Check-in mensal pendente",
-    "weeklyWins": "Monthly Wins"
+    "weeklyWins": "Monthly Wins",
+    "mentorFeedbackReceived": "{{count}} feedback do mentor",
+    "mentorFeedbackReceived_plural": "{{count}} feedbacks do mentor",
+    "viewFeedback": "Ver Feedback"
   },
   "nextSteps": {
     "addNow": "Adicionar",

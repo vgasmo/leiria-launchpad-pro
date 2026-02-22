@@ -2344,7 +2344,12 @@
     "getStarted": "Comece agora",
     "kpis": {
       "description": "KPIs help you measure progress and tell your growth story to investors. Start with 3-5 key metrics.",
-      "title": "Track what matters"
+      "title": "Track what matters",
+      "stageIdeation": "💡 Tip: Start with \"Interviews completed\" and \"Hypotheses validated\"",
+      "stageValidation": "🧪 Tip: Track \"Pilot users\" and \"NPS\"",
+      "stageMvp": "🚀 Tip: Measure \"MRR\", \"Churn\" and \"CAC\"",
+      "stageGrowth": "📈 Tip: Focus on \"MRR\", \"LTV/CAC\" and \"Burn Rate\"",
+      "stageScale": "🏆 Tip: Monitor \"ARR\", \"Gross Margin\" and \"NDR\""
     },
     "mentors": {
       "description": "Request a mentor to help navigate challenges and accelerate your growth.",
@@ -2352,7 +2357,12 @@
     },
     "milestones": {
       "description": "Milestones help you break your journey into achievable goals. Start with your next 2-week objectives.",
-      "title": "Turn chaos into progress"
+      "title": "Turn chaos into progress",
+      "stageIdeation": "💡 Start with: \"Complete 10 discovery interviews\"",
+      "stageValidation": "🧪 Start with: \"Launch pilot with 20 users\"",
+      "stageMvp": "🚀 Start with: \"Reach 50 paying customers\"",
+      "stageGrowth": "📈 Start with: \"Reach €10K MRR\"",
+      "stageScale": "🏆 Start with: \"Close Series A round\""
     },
     "noData": "No data yet",
     "noDataDesc": "Start adding data to see it here.",
@@ -2535,6 +2545,7 @@
     "responseTime": "We typically respond within 2-3 business days",
     "startYourJourney": "Start Your Startup Journey",
     "startYourJourneyDesc": "Register your startup to access mentorship, track your progress, and prepare for your next funding round.",
+    "startYourJourneyValue": "Get mentor guidance and track your KPIs in one place.",
     "updateKpis": "Update KPIs",
     "viewActions": "View Actions"
   },
@@ -3475,7 +3486,10 @@
     "viewActions": "View Actions",
     "viewSession": "View Session",
     "weeklyCheckinPending": "Monthly check-in pending",
-    "weeklyWins": "Monthly Wins"
+    "weeklyWins": "Monthly Wins",
+    "mentorFeedbackReceived": "{{count}} mentor feedback",
+    "mentorFeedbackReceived_plural": "{{count}} mentor feedbacks",
+    "viewFeedback": "View Feedback"
   },
   "nextSteps": {
     "addNow": "Add Now",

@@ -9,7 +9,9 @@ import {
   BookOpenCheck,
   X,
   Zap,
+  Sparkles,
 } from 'lucide-react';
+import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -167,19 +169,22 @@ export function FounderDashboard({
         />
         
         <Card className="relative overflow-hidden border-0 shadow-card">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <CardContent className="relative p-6 md:p-10 text-center">
-            <div className="h-16 w-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
-              <Rocket className="h-8 w-8 text-primary" />
-            </div>
+            <EmptyStateIllustration type="rocket" size="lg" className="mx-auto mb-4" />
             <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
               {t('founder.startYourJourney')}
             </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
+            <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
               {t('founder.startYourJourneyDesc')}
             </p>
+            <p className="text-sm text-primary/80 font-medium max-w-sm mx-auto mb-6 flex items-center justify-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t('founder.startYourJourneyValue')}
+            </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-              <Button size="default" onClick={onCreateStartup} className="gap-2">
+              <Button size="default" onClick={onCreateStartup} className="gap-2 shadow-lg">
                 <Plus className="h-4 w-4" />
                 {t('founder.createYourStartup')}
               </Button>
@@ -200,6 +205,14 @@ export function FounderDashboard({
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* ★ HERO: Next Best Actions — the ABSOLUTE FIRST thing founders see ★ */}
+      <NextBestAction
+        workspaceId={workspace.id}
+        programId={workspace.program_id}
+        stage={workspace.stage}
+        canWrite={true}
+      />
+
       {/* Welcome Panel with Checklist (dismissible) */}
       <FounderWelcomePanel
         hasStartup={hasStartup}
@@ -211,31 +224,6 @@ export function FounderDashboard({
         workspaceId={workspace.id}
       />
 
-      {/* Proactive AI Pulse */}
-      <AiPulseCard
-        workspaceId={workspace.id}
-        healthScore={health as string | null}
-        overdueCount={workspace.overdueActionsCount}
-      />
-
-      {/* Smart Inbox */}
-      <UnifiedSmartInbox
-        overdueCount={workspace.overdueActionsCount}
-        missingKpiCount={hasKpis ? 0 : 1}
-        workspaceId={workspace.id}
-      />
-
-      {/* Quick Guide Banner */}
-      <QuickGuideBanner />
-
-      {/* ★ HERO: Next Best Actions — the FIRST thing founders see ★ */}
-      <NextBestAction
-        workspaceId={workspace.id}
-        programId={workspace.program_id}
-        stage={workspace.stage}
-        canWrite={true}
-      />
-
       <section className="space-y-4">
         {/* One Thing Today - Single focus action */}
         <OneThingToday workspace={workspace} />
@@ -243,6 +231,9 @@ export function FounderDashboard({
         {/* PRIMARY BOOKING CTA */}
         <FounderBookingCTA workspaceId={workspace.id} />
       </section>
+
+      {/* Quick Guide Banner */}
+      <QuickGuideBanner />
 
       {/* Startup Card - Journey-first */}
       <Card className="overflow-hidden border-border/60 rounded-2xl shadow-sm">
