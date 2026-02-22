@@ -314,7 +314,7 @@ export function ContractLifecycleHub() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-600">{stats.expiringIn30}</div>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.expiringIn30}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t('lifecycle.expiringIn90', { count: stats.expiringIn90 })}
               </p>

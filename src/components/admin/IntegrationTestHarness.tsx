@@ -398,7 +398,7 @@ export function IntegrationTestHarness() {
         {/* Error details */}
         {testResults.some((r) => r.status === 'fail' && r.error) && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-red-600">Errors</h4>
+            <h4 className="text-sm font-medium text-red-600 dark:text-red-400">Errors</h4>
             <ScrollArea className="h-32 rounded border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
               {testResults
                 .filter((r) => r.status === 'fail' && r.error)

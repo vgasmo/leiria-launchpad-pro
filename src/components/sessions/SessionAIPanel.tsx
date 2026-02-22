@@ -190,16 +190,16 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   };
 
   const priorityColors: Record<string, string> = {
-    low: 'bg-slate-100 text-slate-700',
-    medium: 'bg-blue-100 text-blue-700',
-    high: 'bg-amber-100 text-amber-700',
-    urgent: 'bg-red-100 text-red-700',
+    low: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    medium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    high: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   };
 
   const severityColors: Record<string, string> = {
-    low: 'bg-green-100 text-green-700',
-    medium: 'bg-amber-100 text-amber-700',
-    high: 'bg-red-100 text-red-700',
+    low: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    high: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   };
 
   return (
@@ -499,14 +499,14 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
           {/* KPI Prompts */}
           {kpiPrompts.length > 0 && (
             <Collapsible open={expandedSections.kpis} onOpenChange={() => toggleSection('kpis')}>
-              <Card className="border-amber-200 bg-amber-50/50">
+              <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/30">
                 <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-amber-100/50 transition-colors pb-3">
+                  <CardHeader className="cursor-pointer hover:bg-amber-100/50 dark:hover:bg-amber-900/30 transition-colors pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-amber-600" />
-                        <CardTitle className="text-sm text-amber-900">KPIs to Update</CardTitle>
-                        <Badge variant="outline" className="text-xs border-amber-300 text-amber-700">{kpiPrompts.length}</Badge>
+                        <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <CardTitle className="text-sm text-amber-900 dark:text-amber-200">KPIs to Update</CardTitle>
+                        <Badge variant="outline" className="text-xs border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">{kpiPrompts.length}</Badge>
                       </div>
                       {expandedSections.kpis ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </div>
