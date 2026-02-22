@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -33,7 +33,7 @@ interface MentorDashboardProps {
   isLoading: boolean;
 }
 
-export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps) {
+export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -344,4 +344,4 @@ export function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps)
       </div>
     </div>
   );
-}
+});

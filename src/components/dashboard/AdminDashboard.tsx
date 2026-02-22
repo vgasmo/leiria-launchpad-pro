@@ -31,23 +31,32 @@ interface AdminDashboardProps {
   onSwitchToPortfolio: () => void;
 }
 
-export function AdminDashboard({ workspaces, isLoading: workspacesLoading, programsCount, onSwitchToPortfolio }: AdminDashboardProps) {
+import { memo, useMemo } from 'react';
+
+export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoading: workspacesLoading, programsCount, onSwitchToPortfolio }: AdminDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useAdminDashboardStats();
 
   const isLoading = workspacesLoading || statsLoading;
 
-  const healthDistribution = { critical: 0, at_risk: 0, stable: 0, healthy: 0, thriving: 0 };
-  const overdueCount = workspaces.filter(w => w.overdueActionsCount > 0).length;
-  const totalOverdueActions = workspaces.reduce((sum, w) => sum + (w.overdueActionsCount || 0), 0);
-
-  workspaces.forEach(w => {
-    const h = (w.health_score_override || w.health_score || 'stable') as keyof typeof healthDistribution;
-    if (h in healthDistribution) healthDistribution[h]++;
-  });
-
-  const needsAttention = healthDistribution.critical + healthDistribution.at_risk;
+  const { healthDistribution, overdueCount, totalOverdueActions, needsAttention } = useMemo(() => {
+    const dist = { critical: 0, at_risk: 0, stable: 0, healthy: 0, thriving: 0 };
+    let totalOverdue = 0;
+    let wsOverdue = 0;
+    workspaces.forEach(w => {
+      const h = (w.health_score_override || w.health_score || 'stable') as keyof typeof dist;
+      if (h in dist) dist[h]++;
+      if (w.overdueActionsCount > 0) wsOverdue++;
+      totalOverdue += (w.overdueActionsCount || 0);
+    });
+    return {
+      healthDistribution: dist,
+      overdueCount: wsOverdue,
+      totalOverdueActions: totalOverdue,
+      needsAttention: dist.critical + dist.at_risk,
+    };
+  }, [workspaces]);
 
   const insights = useEcosystemInsights({
     totalStartups: workspaces.length,
@@ -334,4 +343,4 @@ export function AdminDashboard({ workspaces, isLoading: workspacesLoading, progr
       </div>
     </div>
   );
-}
+});
