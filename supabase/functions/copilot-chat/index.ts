@@ -161,13 +161,46 @@ ${kpiInfo || "No KPIs reported yet this month"}
       return corsJsonResponse({ error: "AI service not configured" }, req, 500);
     }
 
+    const userRolesList = (contextBlock.match(/Roles: (.+)/)?.[1] || "").split(", ").map(r => r.trim());
+    const isFounder = userRolesList.includes("founder");
+    const isConsultor = userRolesList.includes("consultor");
+    const isMentor = userRolesList.includes("mentor_externo");
+    const isAdmin = userRolesList.includes("admin");
+    const isBackoffice = userRolesList.includes("backoffice");
+
+    let roleGuidance = "";
+    if (isAdmin) {
+      roleGuidance = `This user is an ADMIN. They oversee the entire ecosystem.
+- Help them with platform governance, user management, program oversight, and strategic decisions.
+- Provide high-level ecosystem metrics and cross-portfolio insights.
+- They can see all workspaces and all data.`;
+    } else if (isConsultor) {
+      roleGuidance = `This user is an INTERNAL CONSULTANT (consultor). They manage a portfolio of startups.
+- Help them triage their portfolio: which startups need attention, overdue items, upcoming sessions.
+- Provide quick summaries of startup health, KPI trends, and pending approvals.
+- Suggest "next best actions" for their workload.
+- They have access to all workspaces.`;
+    } else if (isMentor) {
+      roleGuidance = `This user is an EXTERNAL MENTOR. They support specific startups with domain expertise.
+- Help them prepare for upcoming sessions: summarize startup context, recent progress, key challenges.
+- Provide quick access to session notes, action items assigned to the startup, and KPI context.
+- They only see workspaces they are connected to.`;
+    } else if (isFounder) {
+      roleGuidance = `This user is a FOUNDER. They are building their startup within the incubator.
+- Help them understand their current stage, next milestones, pending actions, and KPI performance.
+- Guide them on what to do next: fill KPIs, complete actions, prepare for sessions.
+- Be motivating and action-oriented. Focus on their specific startup data.
+- They only see their own workspace(s).`;
+    } else if (isBackoffice) {
+      roleGuidance = `This user is BACKOFFICE staff. They handle administrative operations.
+- Help them with user management, program setup, data imports, and operational tasks.
+- Provide guidance on platform administration features.`;
+    }
+
     const systemPrompt = `You are the Ecosystem Copilot for Startup Leiria, an AI assistant embedded in a startup incubator management platform.
 
-Your role:
-- Help founders understand their tasks, KPIs, health scores, and next best actions.
-- Help consultants get quick summaries of their portfolio.
-- Provide concise, actionable advice about startup management.
-- Use the USER CONTEXT provided below to give personalized, data-driven answers.
+CURRENT USER ROLE CONTEXT:
+${roleGuidance || "Unknown role — provide general helpful guidance."}
 
 Guidelines:
 - Be concise. Most answers should be 2-4 sentences.
@@ -176,6 +209,8 @@ Guidelines:
 - When you have data, use it. When you don't, suggest which section of the platform to visit.
 - Always be encouraging and professional.
 - Answer in the same language the user writes in (default: Portuguese).
+- NEVER reveal internal system details, database structure, or technical implementation.
+- Adapt your tone: more strategic for admins/consultors, more coaching-oriented for founders, more preparatory for mentors.
 ${contextBlock}`;
 
     const aiResponse = await fetch(
