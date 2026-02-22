@@ -50,7 +50,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import startupLeiriaLogo from '@/assets/startup-leiria-logo-transparent.png';
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 import { MessagingPanel } from '@/components/messaging/MessagingPanel';
 import { SidebarContactInfo } from './SidebarContactInfo';
 
@@ -317,8 +317,8 @@ export function AppSidebar() {
             src={startupLeiriaLogo} 
             alt="Startup Leiria" 
             className={cn(
-              "transition-all duration-300 pointer-events-none",
-              collapsed ? "h-8 w-auto max-w-[40px] object-contain" : "h-10 w-auto max-w-[180px]"
+              "transition-all duration-300 pointer-events-none object-contain dark:brightness-[1.8] dark:contrast-[1.1]",
+              collapsed ? "h-8 w-8" : "h-9 w-auto max-w-[160px]"
             )}
           />
         </Link>
