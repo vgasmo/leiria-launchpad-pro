@@ -239,7 +239,7 @@ export function CoachingToolkitTab() {
   const copyExamples = (technique: CoachingTechnique) => {
     const text = `# ${technique.name}\n\n${technique.examples.map((e) => `• ${e}`).join('\n')}`;
     navigator.clipboard.writeText(text);
-    toast.success('Examples copied to clipboard');
+    toast.success(t('consultorTools.copiedToClipboard', { defaultValue: 'Examples copied to clipboard' }));
   };
 
   return (
@@ -249,15 +249,15 @@ export function CoachingToolkitTab() {
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Wrench className="h-5 w-5 text-primary" />
-            Coaching Toolkit
+            {t('consultorTools.coachingToolkit', { defaultValue: 'Coaching Toolkit' })}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Proven techniques for effective startup coaching
+            {t('consultorTools.coachingToolkitDesc', { defaultValue: 'Proven techniques for effective startup coaching' })}
           </p>
         </div>
         <Badge variant="outline" className="gap-1">
           <Sparkles className="h-3 w-3" />
-          {COACHING_TECHNIQUES.length} techniques
+          {COACHING_TECHNIQUES.length} {t('consultorTools.techniques', { defaultValue: 'techniques' })}
         </Badge>
       </div>
 
@@ -265,7 +265,7 @@ export function CoachingToolkitTab() {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search techniques..."
+          placeholder={t('consultorTools.searchTechniques', { defaultValue: 'Search techniques...' })}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -295,7 +295,7 @@ export function CoachingToolkitTab() {
             {filteredTechniques.length === 0 ? (
               <Card className="bg-muted/50">
                 <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No techniques match your search</p>
+                  <p className="text-muted-foreground">{t('consultorTools.noTechniquesMatch', { defaultValue: 'No techniques match your search' })}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -328,7 +328,7 @@ export function CoachingToolkitTab() {
                                 }}
                               >
                                 <Copy className="h-3.5 w-3.5 mr-1" />
-                                Copy
+                                {t('consultorTools.copy', { defaultValue: 'Copy' })}
                               </Button>
                               {isExpanded ? (
                                 <ChevronUp className="h-5 w-5 text-muted-foreground" />
@@ -356,7 +356,7 @@ export function CoachingToolkitTab() {
                           <div>
                             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                               <Lightbulb className="h-3 w-3" />
-                              Example Phrases
+                              {t('consultorTools.examplePhrases', { defaultValue: 'Example Phrases' })}
                             </p>
                             <ul className="space-y-2">
                               {technique.examples.map((example, i) => (

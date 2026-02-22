@@ -78,10 +78,10 @@ export function SupportMaterialsTab() {
         </div>
         <Select value={typeFilter || 'all'} onValueChange={(v) => setTypeFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Startup type" />
+            <SelectValue placeholder={t('consultorTools.startupType', { defaultValue: 'Startup type' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="all">{t('consultorTools.allTypes', { defaultValue: 'All types' })}</SelectItem>
             {STARTUP_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
                 {type.replace('_', ' ').toUpperCase()}
@@ -91,10 +91,10 @@ export function SupportMaterialsTab() {
         </Select>
         <Select value={stageFilter || 'all'} onValueChange={(v) => setStageFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Stage" />
+            <SelectValue placeholder={t('consultorTools.stage', { defaultValue: 'Stage' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All stages</SelectItem>
+            <SelectItem value="all">{t('consultorTools.allStages', { defaultValue: 'All stages' })}</SelectItem>
             {STARTUP_STAGES.map((stage) => (
               <SelectItem key={stage} value={stage}>
                 {stage.replace('_', ' ')}
@@ -104,10 +104,10 @@ export function SupportMaterialsTab() {
         </Select>
         <Select value={categoryFilter || 'all'} onValueChange={(v) => setCategoryFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={t('consultorTools.category', { defaultValue: 'Category' })} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">{t('consultorTools.allCategories', { defaultValue: 'All' })}</SelectItem>
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat} value={cat}>
                 {cat}
@@ -129,10 +129,10 @@ export function SupportMaterialsTab() {
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
             <h3 className="font-heading text-lg font-semibold mb-2">
-              No materials found
+              {t('consultorTools.noMaterials', { defaultValue: 'No materials found' })}
             </h3>
             <p className="text-muted-foreground text-center max-w-sm">
-              {search ? 'Try adjusting your search or filters' : 'Support materials will appear here'}
+              {search ? t('consultorTools.tryAdjustingSearch', { defaultValue: 'Try adjusting your search or filters' }) : t('consultorTools.noMaterialsHint', { defaultValue: 'Support materials will appear here' })}
             </p>
           </CardContent>
         </Card>
@@ -221,6 +221,7 @@ function MaterialDetailDialog({
   onOpenChange: (open: boolean) => void;
   material: SupportMaterial;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
@@ -267,7 +268,7 @@ function MaterialDetailDialog({
             {/* External Links */}
             {material.external_links && material.external_links.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold mb-2">Resources</h3>
+                <h3 className="text-sm font-semibold mb-2">{t('consultorTools.resources', { defaultValue: 'Resources' })}</h3>
                 <div className="space-y-2">
                   {material.external_links.map((link, i) => (
                     <a
