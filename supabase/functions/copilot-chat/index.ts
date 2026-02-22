@@ -22,6 +22,7 @@ serve(async (req: Request) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      console.error("Auth error:", userError?.message);
       return corsJsonResponse({ error: "Invalid or expired token" }, req, 401);
     }
 
@@ -35,7 +36,6 @@ serve(async (req: Request) => {
       return corsJsonResponse({ error: "messages array is required" }, req, 400);
     }
 
-    // Validate each message shape
     for (const msg of messages) {
       if (
         typeof msg.role !== "string" ||
@@ -47,21 +47,111 @@ serve(async (req: Request) => {
       }
     }
 
-    // ── Rate limit check ────────────────────────────────────────
-    // Use existing DB function for rate limiting (20 requests/hour)
-    const { data: withinLimit } = await supabase.rpc("check_ai_rate_limit", {
-      _user_id: userId,
-      _workspace_id: userId, // Use userId as fallback workspace
-      _function_name: "copilot-chat",
-      _max_requests: 30,
-    });
+    // ── Rate limit check (soft-fail) ────────────────────────────
+    // Get user's first workspace for rate limiting (FK requires valid workspace_id)
+    let rateLimitOk = true;
+    try {
+      const { data: wsRow } = await supabase
+        .from("workspace_users")
+        .select("workspace_id")
+        .eq("user_id", userId)
+        .eq("active", true)
+        .limit(1)
+        .single();
 
-    if (withinLimit === false) {
+      if (wsRow?.workspace_id) {
+        const { data: withinLimit } = await supabase.rpc("check_ai_rate_limit", {
+          _user_id: userId,
+          _workspace_id: wsRow.workspace_id,
+          _function_name: "copilot-chat",
+          _max_requests: 30,
+        });
+        if (withinLimit === false) rateLimitOk = false;
+      }
+    } catch (e) {
+      console.warn("Rate limit check failed (non-blocking):", e);
+    }
+
+    if (!rateLimitOk) {
       return corsJsonResponse(
         { error: "Rate limit exceeded. Please try again later." },
         req,
         429
       );
+    }
+
+    // ── Fetch user context for richer answers ───────────────────
+    let contextBlock = "";
+    try {
+      // Get profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, account_status")
+        .eq("id", userId)
+        .single();
+
+      // Get roles
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+
+      // Get workspaces with startup info
+      const { data: workspaces } = await supabase
+        .from("workspace_users")
+        .select("workspace_id, role, workspaces(id, stage, status, startups(name), programs(name))")
+        .eq("user_id", userId)
+        .eq("active", true)
+        .limit(5);
+
+      // Get pending actions count
+      const { count: pendingActions } = await supabase
+        .from("action_items")
+        .select("id", { count: "exact", head: true })
+        .in("workspace_id", (workspaces || []).map((w: any) => w.workspace_id))
+        .in("status", ["pending", "in_progress"]);
+
+      // Get overdue actions count
+      const { count: overdueActions } = await supabase
+        .from("action_items")
+        .select("id", { count: "exact", head: true })
+        .in("workspace_id", (workspaces || []).map((w: any) => w.workspace_id))
+        .in("status", ["pending", "in_progress"])
+        .lt("due_date", new Date().toISOString().split("T")[0]);
+
+      // Get recent KPI values
+      const currentMonth = new Date().toISOString().slice(0, 7) + "-01";
+      const { data: recentKpis } = await supabase
+        .from("kpi_values")
+        .select("value, target_value, kpi_definitions(name, unit)")
+        .in("workspace_id", (workspaces || []).map((w: any) => w.workspace_id))
+        .eq("period_month", currentMonth)
+        .limit(10);
+
+      const userRoles = (roles || []).map((r: any) => r.role).join(", ");
+      const wsInfo = (workspaces || []).map((w: any) => {
+        const ws = w.workspaces;
+        return `- ${ws?.startups?.name || "Unknown"} (${ws?.programs?.name || "N/A"}, stage: ${ws?.stage || "N/A"}, status: ${ws?.status || "N/A"})`;
+      }).join("\n");
+
+      const kpiInfo = (recentKpis || []).map((k: any) => {
+        const def = k.kpi_definitions;
+        return `- ${def?.name}: ${k.value ?? "not reported"}${def?.unit ? ` ${def.unit}` : ""}${k.target_value ? ` (target: ${k.target_value})` : ""}`;
+      }).join("\n");
+
+      contextBlock = `
+--- USER CONTEXT ---
+Name: ${profile?.full_name || "Unknown"}
+Roles: ${userRoles || "none"}
+Workspaces:
+${wsInfo || "No workspaces"}
+Pending actions: ${pendingActions ?? 0}
+Overdue actions: ${overdueActions ?? 0}
+Current month KPIs:
+${kpiInfo || "No KPIs reported yet this month"}
+--- END CONTEXT ---`;
+    } catch (e) {
+      console.warn("Context fetch failed (non-blocking):", e);
     }
 
     // ── Call Lovable AI Gateway ──────────────────────────────────
@@ -77,13 +167,16 @@ Your role:
 - Help founders understand their tasks, KPIs, health scores, and next best actions.
 - Help consultants get quick summaries of their portfolio.
 - Provide concise, actionable advice about startup management.
+- Use the USER CONTEXT provided below to give personalized, data-driven answers.
 
 Guidelines:
 - Be concise. Most answers should be 2-4 sentences.
 - Use bullet points for lists.
-- When you don't have specific data, give general best-practice advice and suggest which section of the platform to visit.
+- Reference specific data from the context (e.g., actual KPI values, overdue counts, startup names).
+- When you have data, use it. When you don't, suggest which section of the platform to visit.
 - Always be encouraging and professional.
-- Answer in the same language the user writes in.`;
+- Answer in the same language the user writes in (default: Portuguese).
+${contextBlock}`;
 
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
