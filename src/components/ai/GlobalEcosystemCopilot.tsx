@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bot, Send, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,21 +18,22 @@ interface Message {
   content: string;
 }
 
-const SUGGESTED_PROMPTS = [
-  'Summarize my overdue tasks',
-  "What's my next best action?",
-  'How is my startup health?',
-];
-
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/copilot-chat`;
 
 export function GlobalEcosystemCopilot() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const suggestedPrompts = [
+    t('copilot.promptOverdue', { defaultValue: 'Resumir tarefas em atraso' }),
+    t('copilot.promptNextAction', { defaultValue: 'Qual é a minha melhor próxima ação?' }),
+    t('copilot.promptHealth', { defaultValue: 'Como está a saúde da minha startup?' }),
+  ];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -220,12 +222,12 @@ export function GlobalEcosystemCopilot() {
                 <Bot className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <SheetTitle className="text-sm font-semibold">Ecosystem Copilot</SheetTitle>
-                <p className="text-[11px] text-muted-foreground">AI-powered assistant</p>
+                <SheetTitle className="text-sm font-semibold">{t('copilot.title', { defaultValue: 'Copilot do Ecossistema' })}</SheetTitle>
+                <p className="text-[11px] text-muted-foreground">{t('copilot.subtitle', { defaultValue: 'Assistente com IA' })}</p>
               </div>
               <Badge variant="secondary" className="text-[10px] gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-health-healthy animate-pulse" />
-                Online
+                {t('copilot.online', { defaultValue: 'Online' })}
               </Badge>
             </div>
           </SheetHeader>
@@ -238,10 +240,10 @@ export function GlobalEcosystemCopilot() {
                   <Sparkles className="h-8 w-8 text-primary" />
                 </div>
                 <h4 className="text-sm font-semibold text-foreground mb-1">
-                  How can I help?
+                  {t('copilot.howCanIHelp', { defaultValue: 'Como posso ajudar?' })}
                 </h4>
                 <p className="text-xs text-muted-foreground max-w-[240px]">
-                  Ask me anything about your startup, tasks, KPIs, or ecosystem.
+                  {t('copilot.askAnything', { defaultValue: 'Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.' })}
                 </p>
               </div>
             )}
@@ -294,7 +296,7 @@ export function GlobalEcosystemCopilot() {
           {/* Suggested Prompts */}
           {messages.length === 0 && (
             <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
-              {SUGGESTED_PROMPTS.map(prompt => (
+              {suggestedPrompts.map(prompt => (
                 <button
                   key={prompt}
                   onClick={() => handleSend(prompt)}
@@ -323,7 +325,7 @@ export function GlobalEcosystemCopilot() {
               <Input
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="Ask anything..."
+                placeholder={t('copilot.inputPlaceholder', { defaultValue: 'Pergunte qualquer coisa...' })}
                 className="flex-1 h-9 text-sm rounded-xl bg-muted/40 border-border/40"
                 disabled={isThinking}
               />

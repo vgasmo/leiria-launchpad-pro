@@ -301,41 +301,42 @@ function QuickSessionDialog({
   isLoading: boolean;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Quick Schedule Session</DialogTitle>
+          <DialogTitle>{t('cockpit.quickScheduleSession', { defaultValue: 'Agendar Sessão Rápida' })}</DialogTitle>
           <DialogDescription>
-            Schedule a session for any startup in your portfolio
+            {t('cockpit.quickScheduleDesc', { defaultValue: 'Agendar uma sessão para qualquer startup do portfólio' })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label>Startup</Label>
+            <Label>{t('cockpit.startup', { defaultValue: 'Startup' })}</Label>
             <Select value={sessionWorkspaceId} onValueChange={setSessionWorkspaceId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select startup..." />
+                <SelectValue placeholder={t('cockpit.selectStartup', { defaultValue: 'Selecionar startup...' })} />
               </SelectTrigger>
               <SelectContent>
                 {workspaces.slice(0, 50).map(w => (
                   <SelectItem key={w.id} value={w.id}>
-                    {w.startup?.name || 'Unknown'}
+                    {w.startup?.name || t('common.unknown', { defaultValue: 'Desconhecido' })}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Session Title</Label>
+            <Label>{t('cockpit.sessionTitle', { defaultValue: 'Título da Sessão' })}</Label>
             <Input
-              placeholder="e.g., Monthly check-in"
+              placeholder={t('cockpit.sessionTitlePlaceholder', { defaultValue: 'ex., Check-in mensal' })}
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
             />
           </div>
           <div>
-            <Label>Date & Time</Label>
+            <Label>{t('cockpit.dateTime', { defaultValue: 'Data e Hora' })}</Label>
             <Input
               type="datetime-local"
               value={sessionDate}
@@ -344,9 +345,9 @@ function QuickSessionDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel', { defaultValue: 'Cancelar' })}</Button>
           <Button onClick={onSubmit} disabled={isLoading}>
-            {isLoading ? 'Creating...' : 'Schedule'}
+            {isLoading ? t('common.creating', { defaultValue: 'A criar...' }) : t('cockpit.schedule', { defaultValue: 'Agendar' })}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -379,41 +380,42 @@ function QuickActionDialog({
   isLoading: boolean;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Quick Add Action</DialogTitle>
+          <DialogTitle>{t('cockpit.quickAddAction', { defaultValue: 'Adicionar Ação Rápida' })}</DialogTitle>
           <DialogDescription>
-            Add an action item to any startup
+            {t('cockpit.quickAddActionDesc', { defaultValue: 'Adicionar uma ação a qualquer startup' })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label>Startup</Label>
+            <Label>{t('cockpit.startup', { defaultValue: 'Startup' })}</Label>
             <Select value={actionWorkspaceId} onValueChange={setActionWorkspaceId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select startup..." />
+                <SelectValue placeholder={t('cockpit.selectStartup', { defaultValue: 'Selecionar startup...' })} />
               </SelectTrigger>
               <SelectContent>
                 {workspaces.slice(0, 50).map(w => (
                   <SelectItem key={w.id} value={w.id}>
-                    {w.startup?.name || 'Unknown'}
+                    {w.startup?.name || t('common.unknown', { defaultValue: 'Desconhecido' })}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Action Title</Label>
+            <Label>{t('cockpit.actionTitle', { defaultValue: 'Título da Ação' })}</Label>
             <Input
-              placeholder="e.g., Submit financial projections"
+              placeholder={t('cockpit.actionTitlePlaceholder', { defaultValue: 'ex., Submeter projeções financeiras' })}
               value={actionTitle}
               onChange={(e) => setActionTitle(e.target.value)}
             />
           </div>
           <div>
-            <Label>Due Date (optional)</Label>
+            <Label>{t('cockpit.dueDateOptional', { defaultValue: 'Data Limite (opcional)' })}</Label>
             <Input
               type="date"
               value={actionDueDate}
@@ -422,9 +424,9 @@ function QuickActionDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel', { defaultValue: 'Cancelar' })}</Button>
           <Button onClick={onSubmit} disabled={isLoading}>
-            {isLoading ? 'Creating...' : 'Add Action'}
+            {isLoading ? t('common.creating', { defaultValue: 'A criar...' }) : t('actions.addAction', { defaultValue: 'Adicionar Ação' })}
           </Button>
         </DialogFooter>
       </DialogContent>

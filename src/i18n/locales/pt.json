@@ -1430,6 +1430,32 @@
     "view": "Ver",
     "viewAll": "Ver todas"
   },
+  "cockpit": {
+    "actionTitle": "Título da Ação",
+    "actionTitlePlaceholder": "ex., Submeter projeções financeiras",
+    "dateTime": "Data e Hora",
+    "dueDateOptional": "Data Limite (opcional)",
+    "quickAddAction": "Adicionar Ação Rápida",
+    "quickAddActionDesc": "Adicionar uma ação a qualquer startup",
+    "quickScheduleDesc": "Agendar uma sessão para qualquer startup do portfólio",
+    "quickScheduleSession": "Agendar Sessão Rápida",
+    "schedule": "Agendar",
+    "selectStartup": "Selecionar startup...",
+    "sessionTitle": "Título da Sessão",
+    "sessionTitlePlaceholder": "ex., Check-in mensal",
+    "startup": "Startup"
+  },
+  "copilot": {
+    "askAnything": "Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.",
+    "howCanIHelp": "Como posso ajudar?",
+    "inputPlaceholder": "Pergunte qualquer coisa...",
+    "online": "Online",
+    "promptHealth": "Como está a saúde da minha startup?",
+    "promptNextAction": "Qual é a minha melhor próxima ação?",
+    "promptOverdue": "Resumir tarefas em atraso",
+    "subtitle": "Assistente com IA",
+    "title": "Copilot do Ecossistema"
+  },
   "compliance": {
     "criticalHealth": "Saúde Crítica",
     "drillDown": "Clique nos workspaces para ver detalhes",
