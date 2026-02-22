@@ -38,6 +38,8 @@ import { useProgressStreak } from '@/hooks/useProgressStreak';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
 import { toast } from 'sonner';
 import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
+import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
+import { useSmartNudges } from '@/hooks/useSmartNudges';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -70,6 +72,7 @@ export function FounderDashboard({
   }, []);
 
   const workspace = workspaces[0];
+  const nudges = useSmartNudges(workspace?.id);
   
   const { data: workspaceMembers } = useWorkspaceMembers(workspace?.id);
   const hasMentor = useMemo(() => {
@@ -212,6 +215,9 @@ export function FounderDashboard({
         stage={workspace.stage}
         canWrite={true}
       />
+
+      {/* ★ Smart Nudges — passive AI suggestions ★ */}
+      {nudges.length > 0 && <SmartNudgeCard nudges={nudges} />}
 
       {/* Welcome Panel with Checklist (dismissible) */}
       <FounderWelcomePanel

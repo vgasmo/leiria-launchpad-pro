@@ -5587,5 +5587,16 @@
   "offline": {
     "youAreOffline": "You are offline. Cached data is still available.",
     "backOnline": "Back online! Syncing your data..."
+  },
+  "smartNudges": {
+    "title": "Smart Suggestions",
+    "kpiStale": "Your KPIs haven't been updated this month. Keep your data fresh!",
+    "updateKpis": "Update KPIs",
+    "actionsOverdue": "You have {{count}} overdue action(s). Tackle them to stay on track.",
+    "viewActions": "View Actions",
+    "noRecentSession": "No mentoring session in 30+ days. Regular sessions accelerate growth.",
+    "scheduleSession": "Schedule Session",
+    "checkinPending": "You have {{count}} pending check-in(s). Submit to keep your team informed.",
+    "completeCheckin": "Complete Check-in"
   }
 }

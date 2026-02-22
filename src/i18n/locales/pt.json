@@ -5587,5 +5587,16 @@
   "offline": {
     "youAreOffline": "Está offline. Os dados em cache continuam disponíveis.",
     "backOnline": "De volta online! A sincronizar os seus dados..."
+  },
+  "smartNudges": {
+    "title": "Sugestões Inteligentes",
+    "kpiStale": "Os seus KPIs não foram atualizados este mês. Mantenha os dados em dia!",
+    "updateKpis": "Atualizar KPIs",
+    "actionsOverdue": "Tem {{count}} ação(ões) em atraso. Resolva-as para manter o ritmo.",
+    "viewActions": "Ver Ações",
+    "noRecentSession": "Sem sessão de mentoria há mais de 30 dias. Sessões regulares aceleram o crescimento.",
+    "scheduleSession": "Agendar Sessão",
+    "checkinPending": "Tem {{count}} check-in(s) pendente(s). Submeta para manter a equipa informada.",
+    "completeCheckin": "Completar Check-in"
   }
 }
