@@ -106,9 +106,9 @@ export function PipelineHealthCard({ items }: PipelineHealthProps) {
   }, stageMetrics[0]);
 
   const getHealthColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-amber-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 60) return 'text-amber-600 dark:text-amber-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   return (
@@ -136,11 +136,11 @@ export function PipelineHealthCard({ items }: PipelineHealthProps) {
             <p className="text-xs text-muted-foreground">{t('crm.pipelineHealth.activeLeads', 'Active Leads')}</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-muted/50">
-            <div className="text-2xl font-bold text-green-600">{recentConversions}</div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{recentConversions}</div>
             <p className="text-xs text-muted-foreground">{t('crm.pipelineHealth.last30Days', 'Converted (30d)')}</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-muted/50">
-            <div className={cn('text-2xl font-bold', totalStale > 0 ? 'text-amber-600' : 'text-green-600')}>
+            <div className={cn('text-2xl font-bold', totalStale > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400')}>
               {totalStale}
             </div>
             <p className="text-xs text-muted-foreground">{t('crm.pipelineHealth.staleLeads', 'Stale Leads')}</p>
