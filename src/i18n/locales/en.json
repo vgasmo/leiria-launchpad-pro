@@ -276,6 +276,22 @@
         "waitingList": "Waiting List",
         "yearAnniversary": "Year {{year}} anniversary"
       },
+      "opsHub": {
+        "rooms": "rooms",
+        "pendingInvoices": "Pending Invoices",
+        "invoicesAwait": "awaiting payment",
+        "expiringContracts": "Expiring Contracts",
+        "next30Days": "next 30 days",
+        "availableRooms": "Available Rooms",
+        "inWaitlist": "in waitlist",
+        "floorMaps": "Floor Maps",
+        "noFloorMaps": "No floor maps uploaded yet",
+        "financialHealth": "Financial Health",
+        "recentInvoices": "Recent & Pending Invoices",
+        "allPaid": "All invoices paid",
+        "contractsAttention": "Contracts Requiring Attention",
+        "allContractsGood": "All contracts in good standing"
+      },
       "days": "days",
       "deallocate": "Deallocate",
       "description": "Description",

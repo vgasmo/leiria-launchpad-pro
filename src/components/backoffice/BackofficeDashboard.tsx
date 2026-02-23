@@ -1,19 +1,28 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Building2, FileText, Clock, AlertTriangle, CalendarClock, 
   TrendingUp, Users, ArrowRight, Cake, AlertCircle, CheckCircle2,
-  Timer, MapPin
+  Timer, MapPin, Receipt, DoorOpen, CreditCard, Map
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { format, differenceInMonths, differenceInDays, isBefore, addYears } from 'date-fns';
+import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
+import { BuildingOccupancyPanel } from './BuildingOccupancyPanel';
+import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
+import { SpaceDetailDrawer } from './SpaceDetailDrawer';
+import { useBuildings, useRoomsWithAllocations } from '@/hooks/useBackoffice';
+import type { Room, FloorMap } from '@/hooks/useBackoffice';
 
 interface ContractWithDetails {
   id: string;
@@ -22,6 +31,7 @@ interface ContractWithDetails {
   end_date: string | null;
   status: string;
   monthly_fee: number;
+  contract_number: string | null;
   incubation_type: { name: string; contract_type: string | null } | null;
   building: { name: string; city: string | null } | null;
   workspace: { id: string; startup: { name: string } | null } | null;
@@ -41,35 +51,71 @@ interface AnniversaryAlert {
 export function BackofficeDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [mapViewerOpen, setMapViewerOpen] = useState(false);
+  const [selectedFloorMap, setSelectedFloorMap] = useState<FloorMap | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const { data: buildings } = useBuildings();
+  const { data: allRooms } = useRoomsWithAllocations();
+
+  // Fetch floor maps for quick access
+  const { data: floorMaps } = useQuery({
+    queryKey: ['floor-maps-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('floor_maps')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data as FloorMap[];
+    },
+  });
 
   // Fetch comprehensive dashboard data
   const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ['backoffice-full-dashboard'],
+    queryKey: ['backoffice-command-center'],
     queryFn: async () => {
       const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
       
       // Fetch active contracts with all details
       const { data: contracts } = await supabase
         .from('startup_contracts')
         .select(`
-          id,
-          workspace_id,
-          start_date,
-          end_date,
-          status,
-          monthly_fee,
+          id, workspace_id, start_date, end_date, status, monthly_fee, contract_number,
           incubation_type:incubation_types(name, contract_type),
           building:buildings(name, city),
           workspace:workspaces(id, startup:startups(name))
         `)
         .eq('status', 'active') as { data: ContractWithDetails[] | null };
       
+      // Fetch ALL contracts for "requiring attention"
+      const { data: attentionContracts } = await supabase
+        .from('startup_contracts')
+        .select(`
+          id, workspace_id, start_date, end_date, status, monthly_fee, contract_number,
+          incubation_type:incubation_types(name, contract_type),
+          building:buildings(name, city),
+          workspace:workspaces(id, startup:startups(name))
+        `)
+        .in('status', ['draft', 'pending_signature', 'suspended']) as { data: ContractWithDetails[] | null };
+
       // Fetch room allocations for occupancy stats
       const { data: rooms } = await supabase
         .from('rooms')
         .select('id, status');
       
+      // Fetch pending/overdue invoices
+      const { data: pendingInvoices } = await supabase
+        .from('invoices')
+        .select(`
+          id, invoice_number, status, issue_date, due_date, total, currency,
+          workspace:workspaces(id, startup:startups(name))
+        `)
+        .in('status', ['sent', 'draft', 'overdue'])
+        .order('due_date', { ascending: true })
+        .limit(10);
+
       // Fetch waiting list
       const { data: waitingList } = await supabase
         .from('space_waiting_list')
@@ -79,11 +125,11 @@ export function BackofficeDashboard() {
       // Calculate anniversaries and alerts
       const alerts: AnniversaryAlert[] = [];
       const contractsByAge: Record<string, number> = {
-        'under1year': 0,
-        '1to2years': 0,
-        '2to3years': 0,
-        'over3years': 0,
+        'under1year': 0, '1to2years': 0, '2to3years': 0, 'over3years': 0,
       };
+
+      // Contracts expiring in 30 days
+      let expiringContractsCount = 0;
 
       contracts?.forEach(contract => {
         const startDate = new Date(contract.start_date);
@@ -91,124 +137,95 @@ export function BackofficeDashboard() {
         const monthsIncubated = differenceInMonths(today, startDate);
         const yearsIncubated = Math.floor(monthsIncubated / 12);
         
-        // Categorize by age
-        if (monthsIncubated < 12) {
-          contractsByAge['under1year']++;
-        } else if (monthsIncubated < 24) {
-          contractsByAge['1to2years']++;
-        } else if (monthsIncubated < 36) {
-          contractsByAge['2to3years']++;
-        } else {
-          contractsByAge['over3years']++;
-        }
+        if (monthsIncubated < 12) contractsByAge['under1year']++;
+        else if (monthsIncubated < 24) contractsByAge['1to2years']++;
+        else if (monthsIncubated < 36) contractsByAge['2to3years']++;
+        else contractsByAge['over3years']++;
         
-        // Calculate next anniversary
         const nextAnniversary = addYears(startDate, yearsIncubated + 1);
         const daysUntilAnniversary = differenceInDays(nextAnniversary, today);
         
-        // Year 3 alert (critical - price increase or exit)
         if (yearsIncubated === 2 && monthsIncubated >= 33) {
-          alerts.push({
-            id: contract.id,
-            startupName,
-            startDate: contract.start_date,
-            yearsIncubated: 3,
-            monthsIncubated,
-            daysUntilAnniversary: differenceInDays(addYears(startDate, 3), today),
-            alertType: 'year3',
-            severity: 'critical',
-          });
-        }
-        // Over 3 years - should have been addressed
-        else if (yearsIncubated >= 3) {
-          alerts.push({
-            id: contract.id,
-            startupName,
-            startDate: contract.start_date,
-            yearsIncubated,
-            monthsIncubated,
-            daysUntilAnniversary,
-            alertType: 'year3',
-            severity: 'critical',
-          });
-        }
-        // Upcoming anniversary within 30 days
-        else if (daysUntilAnniversary <= 30 && daysUntilAnniversary > 0) {
-          alerts.push({
-            id: contract.id,
-            startupName,
-            startDate: contract.start_date,
-            yearsIncubated: yearsIncubated + 1,
-            monthsIncubated,
-            daysUntilAnniversary,
-            alertType: 'anniversary',
-            severity: yearsIncubated >= 2 ? 'warning' : 'info',
-          });
+          alerts.push({ id: contract.id, startupName, startDate: contract.start_date, yearsIncubated: 3, monthsIncubated, daysUntilAnniversary: differenceInDays(addYears(startDate, 3), today), alertType: 'year3', severity: 'critical' });
+        } else if (yearsIncubated >= 3) {
+          alerts.push({ id: contract.id, startupName, startDate: contract.start_date, yearsIncubated, monthsIncubated, daysUntilAnniversary, alertType: 'year3', severity: 'critical' });
+        } else if (daysUntilAnniversary <= 30 && daysUntilAnniversary > 0) {
+          alerts.push({ id: contract.id, startupName, startDate: contract.start_date, yearsIncubated: yearsIncubated + 1, monthsIncubated, daysUntilAnniversary, alertType: 'anniversary', severity: yearsIncubated >= 2 ? 'warning' : 'info' });
         }
         
-        // Contract expiring soon
         if (contract.end_date) {
-          const endDate = new Date(contract.end_date);
-          const daysUntilExpiry = differenceInDays(endDate, today);
+          const daysUntilExpiry = differenceInDays(new Date(contract.end_date), today);
+          if (daysUntilExpiry <= 30 && daysUntilExpiry > 0) expiringContractsCount++;
           if (daysUntilExpiry <= 60 && daysUntilExpiry > 0) {
-            alerts.push({
-              id: contract.id,
-              startupName,
-              startDate: contract.start_date,
-              yearsIncubated,
-              monthsIncubated,
-              daysUntilAnniversary: daysUntilExpiry,
-              alertType: 'expiring',
-              severity: daysUntilExpiry <= 30 ? 'critical' : 'warning',
-            });
+            alerts.push({ id: contract.id, startupName, startDate: contract.start_date, yearsIncubated, monthsIncubated, daysUntilAnniversary: daysUntilExpiry, alertType: 'expiring', severity: daysUntilExpiry <= 30 ? 'critical' : 'warning' });
           }
         }
       });
 
-      // Sort alerts by severity and days
       alerts.sort((a, b) => {
         const severityOrder = { critical: 0, warning: 1, info: 2 };
-        if (severityOrder[a.severity] !== severityOrder[b.severity]) {
-          return severityOrder[a.severity] - severityOrder[b.severity];
-        }
-        return a.daysUntilAnniversary - b.daysUntilAnniversary;
+        return severityOrder[a.severity] !== severityOrder[b.severity]
+          ? severityOrder[a.severity] - severityOrder[b.severity]
+          : a.daysUntilAnniversary - b.daysUntilAnniversary;
       });
 
-      // Calculate total monthly revenue
       const totalMonthlyRevenue = contracts?.reduce((sum, c) => sum + (c.monthly_fee || 0), 0) || 0;
-
-      // Occupancy stats
       const occupiedRooms = rooms?.filter(r => r.status === 'occupied').length || 0;
+      const availableRooms = rooms?.filter(r => r.status === 'available').length || 0;
       const totalRooms = rooms?.length || 0;
       const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+      const pendingInvoicesValue = pendingInvoices
+        ?.filter(i => i.status === 'sent' || i.status === 'overdue')
+        .reduce((sum, i) => sum + (i.total || 0), 0) || 0;
 
       return {
         totalActiveContracts: contracts?.length || 0,
         totalMonthlyRevenue,
         contractsByAge,
-        alerts: alerts.slice(0, 10), // Top 10 alerts
+        alerts: alerts.slice(0, 10),
         criticalAlerts: alerts.filter(a => a.severity === 'critical').length,
         occupancyRate,
         occupiedRooms,
+        availableRooms,
         totalRooms,
         waitingListCount: waitingList?.length || 0,
         highPriorityWaiting: waitingList?.filter(w => w.priority >= 80).length || 0,
+        expiringContractsCount,
+        pendingInvoicesValue,
+        pendingInvoices: pendingInvoices || [],
+        attentionContracts: attentionContracts || [],
       };
     },
   });
+
+  const handleOpenMap = (fm: FloorMap) => {
+    setSelectedFloorMap(fm);
+    setMapViewerOpen(true);
+  };
+
+  const handleRoomClick = (room: Room) => {
+    setSelectedRoom(room);
+    setMapViewerOpen(false);
+    setDrawerOpen(true);
+  };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <Card key={i}>
-              <CardContent className="pt-4">
+            <Card key={i} className="rounded-2xl">
+              <CardContent className="pt-5">
                 <Skeleton className="h-8 w-20 mb-2" />
                 <Skeleton className="h-4 w-32" />
               </CardContent>
             </Card>
           ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[350px] rounded-2xl" />
+          <Skeleton className="h-[350px] rounded-2xl" />
         </div>
       </div>
     );
@@ -218,221 +235,402 @@ export function BackofficeDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics */}
+      {/* ═══════════════════ HERO METRICS ═══════════════════ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
+        {/* Occupancy Rate */}
+        <Card className={cn('rounded-2xl', data.occupancyRate < 70 && 'border-yellow-500/50')}>
+          <CardContent className="pt-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{data.totalActiveContracts}</div>
-                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboardPanel.activeContracts', { defaultValue: 'Active Contracts' })}</p>
-              </div>
-              <FileText className="h-8 w-8 text-primary/20" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold">€{data.totalMonthlyRevenue.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground">{t('admin.backoffice.dashboardPanel.monthlyRevenue', { defaultValue: 'Monthly Revenue' })}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-green-500/20" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={cn(data.occupancyRate < 70 && 'border-yellow-500/50')}>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold">{data.occupancyRate}%</div>
-                <p className="text-sm text-muted-foreground">
-                  {t('admin.backoffice.dashboardPanel.occupancy', { defaultValue: 'Occupancy' })} ({data.occupiedRooms}/{data.totalRooms})
+                <div className="text-3xl font-bold tracking-tight">{data.occupancyRate}%</div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {t('admin.backoffice.dashboardPanel.occupancy')}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {data.occupiedRooms}/{data.totalRooms} {t('admin.backoffice.opsHub.rooms', { defaultValue: 'rooms' })}
                 </p>
               </div>
-              <Building2 className="h-8 w-8 text-blue-500/20" />
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={cn(data.waitingListCount > 0 && 'border-orange-500/50')}>
-          <CardContent className="pt-4">
+        {/* Pending Invoices Value */}
+        <Card className={cn('rounded-2xl', data.pendingInvoicesValue > 0 && 'border-amber-500/50')}>
+          <CardContent className="pt-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{data.waitingListCount}</div>
-                <p className="text-sm text-muted-foreground">
-                  {t('admin.backoffice.dashboardPanel.waitingList', { defaultValue: 'Waiting List' })}
-                  {data.highPriorityWaiting > 0 && (
-                    <span className="text-orange-600 ml-1">({data.highPriorityWaiting} {t('admin.backoffice.dashboardPanel.urgent', { defaultValue: 'urgent' })})</span>
-                  )}
+                <div className="text-3xl font-bold tracking-tight">€{data.pendingInvoicesValue.toLocaleString()}</div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {t('admin.backoffice.opsHub.pendingInvoices', { defaultValue: 'Pending Invoices' })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {data.pendingInvoices.length} {t('admin.backoffice.opsHub.invoicesAwait', { defaultValue: 'awaiting payment' })}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-orange-500/20" />
+              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <Receipt className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Expiring Contracts (30 days) */}
+        <Card className={cn('rounded-2xl', data.expiringContractsCount > 0 && 'border-red-500/50')}>
+          <CardContent className="pt-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold tracking-tight">{data.expiringContractsCount}</div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {t('admin.backoffice.opsHub.expiringContracts', { defaultValue: 'Expiring Contracts' })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t('admin.backoffice.opsHub.next30Days', { defaultValue: 'next 30 days' })}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <CalendarClock className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Available Rooms */}
+        <Card className="rounded-2xl">
+          <CardContent className="pt-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-3xl font-bold tracking-tight">{data.availableRooms}</div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {t('admin.backoffice.opsHub.availableRooms', { defaultValue: 'Available Rooms' })}
+                </p>
+                {data.waitingListCount > 0 && (
+                  <p className="text-xs text-orange-600">
+                    {data.waitingListCount} {t('admin.backoffice.opsHub.inWaitlist', { defaultValue: 'in waitlist' })}
+                  </p>
+                )}
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center">
+                <DoorOpen className="h-6 w-6 text-accent-foreground" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Alerts & Incubation Tenure */}
+      {/* ═══════════════════ THE PHYSICAL WORLD ═══════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Critical Alerts */}
-        <Card className={cn(data.criticalAlerts > 0 && 'border-red-500/50')}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className={cn('h-5 w-5', data.criticalAlerts > 0 ? 'text-red-500' : 'text-muted-foreground')} />
-              {t('admin.backoffice.dashboardPanel.alerts', { defaultValue: 'Alerts & Anniversaries' })}
-              {data.criticalAlerts > 0 && (
-                <Badge variant="destructive" className="ml-2">{data.criticalAlerts} {t('admin.backoffice.dashboardPanel.critical', { defaultValue: 'critical' })}</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {t('admin.backoffice.dashboardPanel.alertsDesc', { defaultValue: 'Upcoming anniversaries, contract renewals, and 3-year milestones' })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.alerts.length === 0 ? (
-              <div className="flex items-center gap-2 text-muted-foreground py-4">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                {t('admin.backoffice.dashboardPanel.noAlerts', { defaultValue: 'No upcoming alerts' })}
-              </div>
-            ) : (
-              <ScrollArea className="h-[280px]">
-                <div className="space-y-3">
-                  {data.alerts.map((alert, idx) => (
-                    <div 
-                      key={`${alert.id}-${idx}`}
-                      className={cn(
-                        'p-3 rounded-lg border flex items-start gap-3',
-                        alert.severity === 'critical' && 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800',
-                        alert.severity === 'warning' && 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800',
-                        alert.severity === 'info' && 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800',
-                      )}
-                    >
-                      <div className={cn(
-                        'mt-0.5',
-                        alert.severity === 'critical' && 'text-red-600',
-                        alert.severity === 'warning' && 'text-yellow-600',
-                        alert.severity === 'info' && 'text-blue-600',
-                      )}>
-                        {alert.alertType === 'year3' ? (
-                          <AlertCircle className="h-5 w-5" />
-                        ) : alert.alertType === 'expiring' ? (
-                          <CalendarClock className="h-5 w-5" />
-                        ) : (
-                          <Cake className="h-5 w-5" />
+        {/* Building Occupancy Panel */}
+        <WidgetErrorBoundary name={t('admin.backoffice.buildingOccupancy', 'Building Occupancy')}>
+          <BuildingOccupancyPanel />
+        </WidgetErrorBoundary>
+
+        {/* Alerts & Quick Floor Map Access */}
+        <div className="space-y-4">
+          {/* Floor Map Quick Access */}
+          <Card className="rounded-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Map className="h-5 w-5" />
+                {t('admin.backoffice.opsHub.floorMaps', { defaultValue: 'Floor Maps' })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {floorMaps && floorMaps.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {floorMaps.slice(0, 4).map(fm => {
+                    const building = buildings?.find(b => {
+                      // Match via space_id -> building
+                      return true; // Show all maps
+                    });
+                    return (
+                      <Button
+                        key={fm.id}
+                        variant="outline"
+                        className="h-auto py-3 flex flex-col items-start gap-1 rounded-xl"
+                        onClick={() => handleOpenMap(fm)}
+                      >
+                        <span className="flex items-center gap-1.5 text-sm font-medium">
+                          <MapPin className="h-3.5 w-3.5 text-primary" />
+                          {fm.name}
+                        </span>
+                        {fm.floor && (
+                          <span className="text-xs text-muted-foreground">
+                            {t('admin.backoffice.floorLabel', 'Floor')} {fm.floor}
+                          </span>
                         )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{alert.startupName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {alert.alertType === 'year3' && (
-                            <>
-                              <span className="font-medium text-red-600">
-                                {alert.yearsIncubated >= 3 
-                                  ? t('admin.backoffice.dashboardPanel.over3Years', { defaultValue: '3+ years incubated' })
-                                  : t('admin.backoffice.dashboardPanel.approaching3Years', { defaultValue: 'Approaching 3-year mark' })}
-                              </span>
-                              {' — '}
-                              {t('admin.backoffice.dashboardPanel.priceIncreaseOrExit', { defaultValue: 'Review for price increase or graduation' })}
-                            </>
-                          )}
-                          {alert.alertType === 'anniversary' && (
-                            <>
-                              {t('admin.backoffice.dashboardPanel.yearAnniversary', { defaultValue: 'Year {{year}} anniversary', year: alert.yearsIncubated })}
-                              {' — '}
-                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboardPanel.daysAway', { defaultValue: 'days away' })}
-                            </>
-                          )}
-                          {alert.alertType === 'expiring' && (
-                            <>
-                              {t('admin.backoffice.dashboardPanel.contractExpiring', { defaultValue: 'Contract expiring' })}
-                              {' — '}
-                              {alert.daysUntilAnniversary} {t('admin.backoffice.dashboardPanel.daysRemaining', { defaultValue: 'days remaining' })}
-                            </>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {t('admin.backoffice.dashboardPanel.incubatedSince', { defaultValue: 'Incubated since' })} {format(new Date(alert.startDate), 'MMM yyyy')} 
-                          {' '}({alert.monthsIncubated} {t('admin.backoffice.dashboardPanel.months', { defaultValue: 'months' })})
-                        </div>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
+                      </Button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  {t('admin.backoffice.opsHub.noFloorMaps', { defaultValue: 'No floor maps uploaded yet' })}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Alerts (compact) */}
+          <Card className={cn('rounded-2xl', data.criticalAlerts > 0 && 'border-red-500/50')}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <AlertTriangle className={cn('h-5 w-5', data.criticalAlerts > 0 ? 'text-red-500' : 'text-muted-foreground')} />
+                {t('admin.backoffice.dashboardPanel.alerts')}
+                {data.criticalAlerts > 0 && (
+                  <Badge variant="destructive" className="ml-auto">{data.criticalAlerts}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.alerts.length === 0 ? (
+                <div className="flex items-center gap-2 text-muted-foreground py-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">{t('admin.backoffice.dashboardPanel.noAlerts')}</span>
+                </div>
+              ) : (
+                <ScrollArea className="h-[180px]">
+                  <div className="space-y-2">
+                    {data.alerts.slice(0, 5).map((alert, idx) => (
+                      <div 
+                        key={`${alert.id}-${idx}`}
+                        className={cn(
+                          'p-2.5 rounded-lg border flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 transition-colors',
+                          alert.severity === 'critical' && 'bg-red-50/50 border-red-200 dark:bg-red-950/10 dark:border-red-800/50',
+                          alert.severity === 'warning' && 'bg-yellow-50/50 border-yellow-200 dark:bg-yellow-950/10 dark:border-yellow-800/50',
+                          alert.severity === 'info' && 'bg-blue-50/50 border-blue-200 dark:bg-blue-950/10 dark:border-blue-800/50',
+                        )}
                         onClick={() => navigate(`/workspaces/${alert.id}`)}
                       >
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
+                        <div className={cn(
+                          alert.severity === 'critical' && 'text-red-600',
+                          alert.severity === 'warning' && 'text-yellow-600',
+                          alert.severity === 'info' && 'text-blue-600',
+                        )}>
+                          {alert.alertType === 'year3' ? <AlertCircle className="h-4 w-4" /> :
+                           alert.alertType === 'expiring' ? <CalendarClock className="h-4 w-4" /> :
+                           <Cake className="h-4 w-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium truncate block">{alert.startupName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {alert.alertType === 'year3' && t('admin.backoffice.dashboardPanel.over3Years')}
+                            {alert.alertType === 'anniversary' && `${t('admin.backoffice.dashboardPanel.yearAnniversary', { year: alert.yearsIncubated })} — ${alert.daysUntilAnniversary}d`}
+                            {alert.alertType === 'expiring' && `${t('admin.backoffice.dashboardPanel.contractExpiring')} — ${alert.daysUntilAnniversary}d`}
+                          </span>
+                        </div>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* ═══════════════════ FINANCIAL HEALTH ═══════════════════ */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold">
+            {t('admin.backoffice.opsHub.financialHealth', { defaultValue: 'Financial Health' })}
+          </h2>
+          <Separator className="flex-1" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent / Pending Invoices */}
+          <WidgetErrorBoundary name={t('admin.backoffice.opsHub.pendingInvoices', 'Pending Invoices')}>
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Receipt className="h-5 w-5" />
+                  {t('admin.backoffice.opsHub.recentInvoices', { defaultValue: 'Recent & Pending Invoices' })}
+                  <Badge variant="secondary" className="ml-auto">{data.pendingInvoices.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.pendingInvoices.length === 0 ? (
+                  <div className="flex items-center gap-2 text-muted-foreground py-6 justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">{t('admin.backoffice.opsHub.allPaid', { defaultValue: 'All invoices paid' })}</span>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[280px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">{t('admin.backoffice.startup')}</TableHead>
+                          <TableHead className="text-xs">{t('admin.backoffice.dueDate')}</TableHead>
+                          <TableHead className="text-xs text-right">{t('admin.backoffice.total')}</TableHead>
+                          <TableHead className="text-xs">{t('admin.backoffice.status')}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.pendingInvoices.map((invoice: any) => {
+                          const dueDate = new Date(invoice.due_date);
+                          const isOverdue = invoice.status === 'sent' && dueDate < new Date();
+                          const daysOverdue = isOverdue ? differenceInDays(new Date(), dueDate) : 0;
+                          return (
+                            <TableRow key={invoice.id} className={cn(isOverdue && 'bg-amber-50/30 dark:bg-amber-900/5')}>
+                              <TableCell className="text-sm font-medium truncate max-w-[140px]">
+                                {invoice.workspace?.startup?.name || '—'}
+                              </TableCell>
+                              <TableCell className={cn('text-xs', isOverdue && 'text-amber-600 font-medium')}>
+                                {format(dueDate, 'dd MMM')}
+                                {isOverdue && ` (+${daysOverdue}d)`}
+                              </TableCell>
+                              <TableCell className="text-sm font-medium text-right">
+                                €{invoice.total?.toFixed(0)}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={isOverdue ? 'destructive' : 'secondary'} className="text-[10px]">
+                                  {isOverdue ? 'Overdue' : invoice.status}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </WidgetErrorBoundary>
+
+          {/* Contracts Requiring Attention */}
+          <WidgetErrorBoundary name={t('admin.backoffice.opsHub.contractsAttention', 'Contracts Requiring Attention')}>
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="h-5 w-5" />
+                  {t('admin.backoffice.opsHub.contractsAttention', { defaultValue: 'Contracts Requiring Attention' })}
+                  <Badge variant="secondary" className="ml-auto">{data.attentionContracts.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.attentionContracts.length === 0 ? (
+                  <div className="flex items-center gap-2 text-muted-foreground py-6 justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">{t('admin.backoffice.opsHub.allContractsGood', { defaultValue: 'All contracts in good standing' })}</span>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[280px]">
+                    <div className="space-y-2">
+                      {data.attentionContracts.map((contract: ContractWithDetails) => {
+                        const statusColors: Record<string, string> = {
+                          draft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                          pending_signature: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                          suspended: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+                        };
+                        return (
+                          <div
+                            key={contract.id}
+                            className="p-3 rounded-xl border hover:bg-muted/30 transition-colors cursor-pointer"
+                            onClick={() => navigate(`/workspaces/${contract.workspace_id}`)}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium truncate">
+                                {contract.workspace?.startup?.name || '—'}
+                              </span>
+                              <Badge className={cn('text-[10px]', statusColors[contract.status] || '')}>
+                                {contract.status.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              {contract.contract_number && (
+                                <span className="font-mono">#{contract.contract_number}</span>
+                              )}
+                              {contract.incubation_type && (
+                                <span>{contract.incubation_type.name}</span>
+                              )}
+                              <span className="ml-auto">€{contract.monthly_fee?.toLocaleString()}/mo</span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </WidgetErrorBoundary>
+        </div>
+      </div>
+
+      {/* ═══════════════════ TENURE BREAKDOWN ═══════════════════ */}
+      <Card className="rounded-2xl">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Timer className="h-5 w-5" />
+            {t('admin.backoffice.dashboardPanel.tenureBreakdown')}
+          </CardTitle>
+          <CardDescription>{t('admin.backoffice.dashboardPanel.tenureDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { key: 'under1year', label: t('admin.backoffice.dashboardPanel.under1Year'), color: 'bg-green-500' },
+              { key: '1to2years', label: t('admin.backoffice.dashboardPanel.1to2Years'), color: 'bg-blue-500' },
+              { key: '2to3years', label: t('admin.backoffice.dashboardPanel.2to3Years'), color: 'bg-yellow-500' },
+              { key: 'over3years', label: t('admin.backoffice.dashboardPanel.over3Years'), color: 'bg-red-500' },
+            ].map(item => {
+              const count = data.contractsByAge[item.key] || 0;
+              const percentage = data.totalActiveContracts > 0
+                ? Math.round((count / data.totalActiveContracts) * 100)
+                : 0;
+              return (
+                <div key={item.key} className="text-center p-3 rounded-xl border">
+                  <div className="text-2xl font-bold">{count}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{item.label}</div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className={cn('h-full rounded-full transition-all', item.color)} style={{ width: `${percentage}%` }} />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-1">{percentage}%</div>
                 </div>
-              </ScrollArea>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Incubation Tenure Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Timer className="h-5 w-5" />
-              {t('admin.backoffice.dashboardPanel.tenureBreakdown', { defaultValue: 'Incubation Tenure' })}
-            </CardTitle>
-            <CardDescription>
-              {t('admin.backoffice.dashboardPanel.tenureDesc', { defaultValue: 'Distribution of startups by time incubated' })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { key: 'under1year', label: t('admin.backoffice.dashboardPanel.under1Year', { defaultValue: '< 1 year' }), color: 'bg-green-500' },
-                { key: '1to2years', label: t('admin.backoffice.dashboardPanel.1to2Years', { defaultValue: '1-2 years' }), color: 'bg-blue-500' },
-                { key: '2to3years', label: t('admin.backoffice.dashboardPanel.2to3Years', { defaultValue: '2-3 years' }), color: 'bg-yellow-500' },
-                { key: 'over3years', label: t('admin.backoffice.dashboardPanel.over3Years', { defaultValue: '3+ years' }), color: 'bg-red-500' },
-              ].map(item => {
-                const count = data.contractsByAge[item.key] || 0;
-                const percentage = data.totalActiveContracts > 0 
-                  ? Math.round((count / data.totalActiveContracts) * 100) 
-                  : 0;
-                
-                return (
-                  <div key={item.key} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>{item.label}</span>
-                      <span className="font-medium">{count} ({percentage}%)</span>
-                    </div>
-                    <div className="h-3 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className={cn('h-full rounded-full transition-all', item.color)}
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {data.contractsByAge['over3years'] > 0 && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
-                  <div className="text-sm">
-                    <span className="font-medium text-red-700 dark:text-red-400">
-                      {data.contractsByAge['over3years']} {t('admin.backoffice.dashboardPanel.startupsOver3Years', { defaultValue: 'startups over 3 years' })}
-                    </span>
-                    <p className="text-muted-foreground mt-0.5">
-                      {t('admin.backoffice.dashboardPanel.reviewRecommended', { defaultValue: 'Review recommended for price adjustment or graduation' })}
-                    </p>
-                  </div>
+              );
+            })}
+          </div>
+          {data.contractsByAge['over3years'] > 0 && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                <div className="text-sm">
+                  <span className="font-medium text-red-700 dark:text-red-400">
+                    {data.contractsByAge['over3years']} {t('admin.backoffice.dashboardPanel.startupsOver3Years')}
+                  </span>
+                  <p className="text-muted-foreground mt-0.5">
+                    {t('admin.backoffice.dashboardPanel.reviewRecommended')}
+                  </p>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Interactive Floor Map Viewer (Dialog) */}
+      {selectedFloorMap && (
+        <InteractiveFloorMapViewer
+          open={mapViewerOpen}
+          onOpenChange={setMapViewerOpen}
+          floorMap={selectedFloorMap}
+          rooms={allRooms || []}
+          onRoomClick={handleRoomClick}
+        />
+      )}
+
+      {/* Space Detail Drawer */}
+      <SpaceDetailDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        room={selectedRoom}
+      />
     </div>
   );
 }
