@@ -5630,5 +5630,17 @@
     "scheduleSession": "Schedule Session",
     "checkinPending": "You have {{count}} pending check-in(s). Submit to keep your team informed.",
     "completeCheckin": "Complete Check-in"
+  },
+  "staffCockpit": {
+    "title": "Command Centre",
+    "greeting": "Hello, {{name}}",
+    "greetingGeneric": "Welcome to the Command Centre",
+    "triage": "Smart Triage & Intake",
+    "pendingApprovals": "Pending Approvals",
+    "intakeRouting": "Routing",
+    "dailyWork": "Today's Work",
+    "myTasks": "My Tasks",
+    "emptyTriage": "No pending items. All clear!",
+    "navLabel": "Command Centre"
   }
 }
