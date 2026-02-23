@@ -276,6 +276,22 @@
         "waitingList": "Lista de Espera",
         "yearAnniversary": "Aniversário de {{year}} ano(s)"
       },
+      "opsHub": {
+        "rooms": "salas",
+        "pendingInvoices": "Faturas Pendentes",
+        "invoicesAwait": "aguardam pagamento",
+        "expiringContracts": "Contratos a Expirar",
+        "next30Days": "próximos 30 dias",
+        "availableRooms": "Salas Disponíveis",
+        "inWaitlist": "em lista de espera",
+        "floorMaps": "Plantas dos Pisos",
+        "noFloorMaps": "Nenhuma planta carregada",
+        "financialHealth": "Saúde Financeira",
+        "recentInvoices": "Faturas Recentes e Pendentes",
+        "allPaid": "Todas as faturas pagas",
+        "contractsAttention": "Contratos que Requerem Atenção",
+        "allContractsGood": "Todos os contratos em boa situação"
+      },
       "days": "dias",
       "deallocate": "Desatribuir",
       "description": "Descrição",
