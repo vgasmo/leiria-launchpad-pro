@@ -133,13 +133,13 @@ export function AppSidebar() {
   // ADMIN Navigation (simplified)
   const adminNavigation: NavItem[] = [
     { name: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
-    { name: t('nav.admin.operations', { defaultValue: 'Operações' }), href: '/admin', icon: ClipboardList },
+    { name: t('ecosystemHub.navLabel', { defaultValue: 'Ecossistema & CRM' }), href: '/admin', icon: ClipboardList },
     { name: t('nav.admin.crm', { defaultValue: 'CRM' }), href: '/crm', icon: Contact },
     { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas & Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.admin.usersPermissions', { defaultValue: 'Utilizadores & Permissões' }), href: '/admin?tab=users', icon: Shield },
-    { name: t('nav.admin.systemConfig', { defaultValue: 'Configuração do Sistema' }), href: '/admin?tab=integrations', icon: Cog },
     { name: t('nav.admin.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
+    { name: t('systemSettings.navLabel', { defaultValue: 'Definições do Sistema' }), href: '/system-settings', icon: Cog },
   ];
 
   // Determine which navigation to show based on role priority

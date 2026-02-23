@@ -5642,5 +5642,22 @@
     "myTasks": "As Minhas Tarefas",
     "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
     "navLabel": "Centro de Comando"
+  },
+  "ecosystemHub": {
+    "title": "Diretório do Ecossistema & CRM",
+    "subtitle": "Gerir startups, mentores, programas e fluxos operacionais",
+    "navLabel": "Ecossistema & CRM"
+  },
+  "systemSettings": {
+    "title": "Preferências do Sistema & IT",
+    "subtitle": "Configurações técnicas, integrações e diagnósticos do sistema",
+    "navLabel": "Definições do Sistema",
+    "warningBanner": "Área de Super-Admin — Alterações aqui afetam toda a plataforma.",
+    "tabs": {
+      "integrations": "Integrações",
+      "featureFlags": "Feature Flags",
+      "workflows": "Regras de Workflow",
+      "auditLog": "Registo de Auditoria"
+    }
   }
 }
