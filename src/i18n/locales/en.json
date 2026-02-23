@@ -5642,5 +5642,22 @@
     "myTasks": "My Tasks",
     "emptyTriage": "No pending items. All clear!",
     "navLabel": "Command Centre"
+  },
+  "ecosystemHub": {
+    "title": "Ecosystem Directory & CRM",
+    "subtitle": "Manage startups, mentors, programs and operational workflows",
+    "navLabel": "Ecosystem & CRM"
+  },
+  "systemSettings": {
+    "title": "System Preferences & IT",
+    "subtitle": "Technical configurations, integrations and system diagnostics",
+    "navLabel": "System Settings",
+    "warningBanner": "Super-Admin Area — Changes here affect the entire platform.",
+    "tabs": {
+      "integrations": "Integrations",
+      "featureFlags": "Feature Flags",
+      "workflows": "Workflow Rules",
+      "auditLog": "Audit Log"
+    }
   }
 }

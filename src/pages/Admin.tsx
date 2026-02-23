@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
-  Users, Building2, FileText, BarChart3, Clock, Activity, TrendingUp, 
-  Heart, ShieldCheck, Users2, Plug, BookOpen, ClipboardList, Bell, Flag, Filter,
-  ChevronDown, Stethoscope, Database, Tag, GitBranch
+  Users, Building2, FileText, BarChart3, Clock, TrendingUp, 
+  Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
+  ChevronDown, Database, Tag, GitBranch
 } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,39 +21,30 @@ import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
 import { AdminBackoffice } from '@/components/admin/AdminBackoffice';
 import { AdminAnnouncementsManager } from '@/components/admin/AdminAnnouncementsManager';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
-import { ActivityLogViewerEnhanced } from '@/components/admin/ActivityLogViewerEnhanced';
 import { ComplianceDashboard } from '@/components/admin/ComplianceDashboard';
 import { CohortAnalytics } from '@/components/analytics/CohortAnalytics';
 import { BulkReportGenerator } from '@/components/analytics/BulkReportGenerator';
 import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
-import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
-import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
-import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
-import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsManager';
-import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 
-// Tab group definitions - SIMPLIFIED P1 IA
-// Groups: Operações | CRM | Programas & Cohorts | Relatórios | Utilizadores & Permissões | Sistema
+// Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
   crm: ['funnel'],
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
-  reports: ['activity', 'analytics', 'health'],
+  reports: ['analytics', 'health'],
   users: ['users', 'mentors'],
-  system: ['integrations', 'crm-diagnostics', 'data-import', 'flags'],
 };
 
 export default function Admin() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const validTabs = useMemo(() => {
@@ -107,13 +98,8 @@ export default function Admin() {
       'support-materials': <BookOpen className="h-4 w-4" />,
       surveys: <ClipboardList className="h-4 w-4" />,
       tags: <Tag className="h-4 w-4" />,
-      activity: <Activity className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
-      integrations: <Plug className="h-4 w-4" />,
-      'crm-diagnostics': <Stethoscope className="h-4 w-4" />,
-      'data-import': <Database className="h-4 w-4" />,
-      flags: <Flag className="h-4 w-4" />,
       funnel: <Filter className="h-4 w-4" />,
     };
     return icons[tab];
@@ -135,13 +121,8 @@ export default function Admin() {
       'support-materials': t('admin.supportMaterials.title'),
       surveys: t('admin.surveys.title'),
       tags: t('admin.tags.title'),
-      activity: t('admin.activityLog'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
-      integrations: t('admin.integrations'),
-      'crm-diagnostics': t('admin.crmDiagnostics'),
-      'data-import': t('admin.dataImport.tab'),
-      flags: t('admin.featureFlags.tab'),
       funnel: t('admin.funnel.tab'),
     };
     return labels[tab] || tab;
@@ -154,7 +135,6 @@ export default function Admin() {
       programs: t('admin.groups.programs'),
       reports: t('admin.groups.reports'),
       users: t('admin.groups.users'),
-      system: t('admin.groups.system'),
     };
     return labels[group] || group;
   };
@@ -167,7 +147,7 @@ export default function Admin() {
   };
 
   return (
-    <AppLayout title={t('admin.title')} subtitle={t('admin.subtitle')}>
+    <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Ecosystem Directory & CRM' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Manage startups, mentors, programs and operational workflows' })}>
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
         {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
@@ -187,15 +167,7 @@ export default function Admin() {
                 {tabs.map((tab) => (
                   <DropdownMenuItem 
                     key={tab}
-                    onClick={() => {
-                      if (tab === 'crm-diagnostics') {
-                        navigate('/admin/crm-diagnostics');
-                      } else if (tab === 'data-import') {
-                        navigate('/admin/data-import');
-                      } else {
-                         setActiveTabAndUrl(tab);
-                      }
-                    }}
+                    onClick={() => setActiveTabAndUrl(tab)}
                     className={activeTab === tab ? 'bg-accent' : ''}
                   >
                     <span className="flex items-center gap-2">
@@ -263,10 +235,6 @@ export default function Admin() {
           <AdminSupportMaterialsManager />
         </TabsContent>
 
-        <TabsContent value="activity">
-          <ActivityLogViewerEnhanced maxHeight="600px" />
-        </TabsContent>
-
         <TabsContent value="analytics">
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
@@ -284,19 +252,6 @@ export default function Admin() {
 
         <TabsContent value="surveys">
           <AdminSurveysManager />
-        </TabsContent>
-
-        <TabsContent value="integrations">
-          <div className="space-y-6">
-            <IntegrationTestHarness />
-            <AdminTeamsTestPanel />
-            <IntegrationErrorsPanel maxHeight="400px" />
-            <WorkflowIntegrations />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="flags">
-          <AdminFeatureFlagsManager />
         </TabsContent>
 
         <TabsContent value="funnel">
