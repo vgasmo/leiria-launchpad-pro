@@ -44,6 +44,7 @@ const AdminDataImport = lazy(() => import("./pages/AdminDataImport"));
 const Ecosystem = lazy(() => import("./pages/Ecosystem"));
 const Documents = lazy(() => import("./pages/Documents"));
 const Resources = lazy(() => import("./pages/Resources"));
+const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -201,6 +202,7 @@ function AppRoutes() {
         <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
         <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
         <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
+        <Route path="/staff-cockpit" element={<ProtectedRoute staffOnly><StaffCockpit /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
         <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
         <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />

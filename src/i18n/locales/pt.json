@@ -5630,5 +5630,17 @@
     "scheduleSession": "Agendar Sessão",
     "checkinPending": "Tem {{count}} check-in(s) pendente(s). Submeta para manter a equipa informada.",
     "completeCheckin": "Completar Check-in"
+  },
+  "staffCockpit": {
+    "title": "Centro de Comando",
+    "greeting": "Olá, {{name}}",
+    "greetingGeneric": "Bem-vindo ao Centro de Comando",
+    "triage": "Triagem & Intake",
+    "pendingApprovals": "Aprovações Pendentes",
+    "intakeRouting": "Encaminhamento",
+    "dailyWork": "Trabalho do Dia",
+    "myTasks": "As Minhas Tarefas",
+    "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
+    "navLabel": "Centro de Comando"
   }
 }
