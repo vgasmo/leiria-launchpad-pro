@@ -183,6 +183,8 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
           setSessionTitle={setSessionTitle}
           sessionDate={sessionDate}
           setSessionDate={setSessionDate}
+          sessionType={sessionType}
+          setSessionType={setSessionType}
           isLoading={isLoading}
           onSubmit={handleCreateQuickSession}
         />
