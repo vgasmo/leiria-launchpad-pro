@@ -221,6 +221,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         decisions: null,
         location: formData.location || null,
         join_url: formData.joinUrl || null,
+        session_type: formData.sessionType || 'general',
       });
 
       // Send invites if checkbox is checked and emails are provided
