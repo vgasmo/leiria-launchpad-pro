@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
-import { LayoutDashboard, Inbox, ListTodo, Zap } from 'lucide-react';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2 } from 'lucide-react';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
