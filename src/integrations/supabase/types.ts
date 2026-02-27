@@ -4222,6 +4222,7 @@ export type Database = {
           raw_transcript: string | null
           scheduled_at: string
           search_vector: unknown
+          session_type: string | null
           source: string | null
           teams_meeting_url: string | null
           title: string
@@ -4253,6 +4254,7 @@ export type Database = {
           raw_transcript?: string | null
           scheduled_at: string
           search_vector?: unknown
+          session_type?: string | null
           source?: string | null
           teams_meeting_url?: string | null
           title: string
@@ -4284,6 +4286,7 @@ export type Database = {
           raw_transcript?: string | null
           scheduled_at?: string
           search_vector?: unknown
+          session_type?: string | null
           source?: string | null
           teams_meeting_url?: string | null
           title?: string
