@@ -126,6 +126,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     joinUrl: '',
     sendInvites: true,
     inviteEmails: '',
+    sessionType: 'general',
   });
 
   const resetForm = () => {
@@ -139,6 +140,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       joinUrl: '',
       sendInvites: true,
       inviteEmails: '',
+      sessionType: 'general',
     });
     setSelectedTemplate('');
   };
@@ -220,6 +222,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         decisions: null,
         location: formData.location || null,
         join_url: formData.joinUrl || null,
+        session_type: formData.sessionType || 'general',
       });
 
       // Send invites if checkbox is checked and emails are provided
@@ -298,6 +301,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       joinUrl: session.join_url || '',
       sendInvites: false,
       inviteEmails: '',
+      sessionType: (session as any).session_type || 'general',
     });
     setEditingSession(session);
     setIsEditDialogOpen(true);
@@ -442,6 +446,24 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           placeholder={t('sessions.titlePlaceholder', { defaultValue: 'Título da sessão' })}
         />
+      </div>
+      <div className="grid gap-2">
+        <Label>{t('sessions.sessionTypeLabel', { defaultValue: 'Tipo de Sessão' })}</Label>
+        <Select value={formData.sessionType} onValueChange={(v) => setFormData((prev) => ({ ...prev, sessionType: v }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">{t('sessions.types.general', { defaultValue: 'Geral' })}</SelectItem>
+            <SelectItem value="discovery">{t('sessions.types.discovery', { defaultValue: 'Discovery' })}</SelectItem>
+            <SelectItem value="problem_solving">{t('sessions.types.problemSolving', { defaultValue: 'Problem-Solving' })}</SelectItem>
+            <SelectItem value="mentoring">{t('sessions.types.mentoring', { defaultValue: 'Mentoria' })}</SelectItem>
+            <SelectItem value="check_in">{t('sessions.types.checkIn', { defaultValue: 'Check-in' })}</SelectItem>
+            <SelectItem value="pitch_practice">{t('sessions.types.pitchPractice', { defaultValue: 'Pitch Practice' })}</SelectItem>
+            <SelectItem value="workshop">{t('sessions.types.workshop', { defaultValue: 'Workshop' })}</SelectItem>
+            <SelectItem value="follow_up">{t('sessions.types.followUp', { defaultValue: 'Follow-up' })}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid gap-2">
         <Label htmlFor={isEdit ? "edit-agenda" : "agenda"}>{t('sessions.agendaLabel', { defaultValue: 'Agenda' })}</Label>

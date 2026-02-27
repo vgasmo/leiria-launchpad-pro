@@ -64,6 +64,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
   const [sessionWorkspaceId, setSessionWorkspaceId] = useState('');
   const [sessionTitle, setSessionTitle] = useState('');
   const [sessionDate, setSessionDate] = useState('');
+  const [sessionType, setSessionType] = useState('general');
 
   // Quick action form state
   const [actionWorkspaceId, setActionWorkspaceId] = useState('');
@@ -87,6 +88,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
           scheduled_at: new Date(sessionDate).toISOString(),
           duration: 60,
           created_by: user?.id,
+          session_type: sessionType,
         });
 
       if (error) throw error;
@@ -135,6 +137,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
     setSessionWorkspaceId('');
     setSessionTitle('');
     setSessionDate('');
+    setSessionType('general');
   };
 
   const resetActionForm = () => {
@@ -180,6 +183,8 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
           setSessionTitle={setSessionTitle}
           sessionDate={sessionDate}
           setSessionDate={setSessionDate}
+          sessionType={sessionType}
+          setSessionType={setSessionType}
           isLoading={isLoading}
           onSubmit={handleCreateQuickSession}
         />
@@ -255,6 +260,8 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
         setSessionTitle={setSessionTitle}
         sessionDate={sessionDate}
         setSessionDate={setSessionDate}
+        sessionType={sessionType}
+        setSessionType={setSessionType}
         isLoading={isLoading}
         onSubmit={handleCreateQuickSession}
       />
@@ -286,6 +293,8 @@ function QuickSessionDialog({
   setSessionTitle,
   sessionDate,
   setSessionDate,
+  sessionType,
+  setSessionType,
   isLoading,
   onSubmit,
 }: {
@@ -298,10 +307,24 @@ function QuickSessionDialog({
   setSessionTitle: (v: string) => void;
   sessionDate: string;
   setSessionDate: (v: string) => void;
+  sessionType: string;
+  setSessionType: (v: string) => void;
   isLoading: boolean;
   onSubmit: () => void;
 }) {
   const { t } = useTranslation();
+
+  const SESSION_TYPES = [
+    { value: 'general', label: t('sessions.types.general', { defaultValue: 'Geral' }) },
+    { value: 'discovery', label: t('sessions.types.discovery', { defaultValue: 'Discovery' }) },
+    { value: 'problem_solving', label: t('sessions.types.problemSolving', { defaultValue: 'Problem-Solving' }) },
+    { value: 'mentoring', label: t('sessions.types.mentoring', { defaultValue: 'Mentoria' }) },
+    { value: 'check_in', label: t('sessions.types.checkIn', { defaultValue: 'Check-in' }) },
+    { value: 'pitch_practice', label: t('sessions.types.pitchPractice', { defaultValue: 'Pitch Practice' }) },
+    { value: 'workshop', label: t('sessions.types.workshop', { defaultValue: 'Workshop' }) },
+    { value: 'follow_up', label: t('sessions.types.followUp', { defaultValue: 'Follow-up' }) },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -322,6 +345,21 @@ function QuickSessionDialog({
                 {workspaces.slice(0, 50).map(w => (
                   <SelectItem key={w.id} value={w.id}>
                     {w.startup?.name || t('common.unknown', { defaultValue: 'Desconhecido' })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>{t('cockpit.sessionType', { defaultValue: 'Tipo de Sessão' })}</Label>
+            <Select value={sessionType} onValueChange={setSessionType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SESSION_TYPES.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
                   </SelectItem>
                 ))}
               </SelectContent>

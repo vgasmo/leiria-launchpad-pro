@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
+import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
-import { LayoutDashboard, Inbox, ListTodo, Zap } from 'lucide-react';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2 } from 'lucide-react';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
@@ -28,6 +29,9 @@ export default function StaffCockpit() {
       <div className="space-y-6">
         {/* Quick Actions Bar */}
         <CockpitQuickActions workspaces={workspaces} compact={false} />
+
+        {/* Portfolio Overview */}
+        <CockpitPortfolioOverview workspaces={workspaces} />
 
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">
