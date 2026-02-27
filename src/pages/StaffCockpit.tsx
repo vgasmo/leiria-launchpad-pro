@@ -30,6 +30,9 @@ export default function StaffCockpit() {
         {/* Quick Actions Bar */}
         <CockpitQuickActions workspaces={workspaces} compact={false} />
 
+        {/* Portfolio Overview */}
+        <CockpitPortfolioOverview workspaces={workspaces} />
+
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* LEFT: Smart Triage & Intake */}
