@@ -137,6 +137,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
     setSessionWorkspaceId('');
     setSessionTitle('');
     setSessionDate('');
+    setSessionType('general');
   };
 
   const resetActionForm = () => {
