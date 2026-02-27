@@ -126,6 +126,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     joinUrl: '',
     sendInvites: true,
     inviteEmails: '',
+    sessionType: 'general',
   });
 
   const resetForm = () => {
