@@ -64,6 +64,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
   const [sessionWorkspaceId, setSessionWorkspaceId] = useState('');
   const [sessionTitle, setSessionTitle] = useState('');
   const [sessionDate, setSessionDate] = useState('');
+  const [sessionType, setSessionType] = useState('general');
 
   // Quick action form state
   const [actionWorkspaceId, setActionWorkspaceId] = useState('');
