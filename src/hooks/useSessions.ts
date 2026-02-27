@@ -58,6 +58,7 @@ export interface SessionFormData {
   decisions: string | null;
   location?: string | null;
   join_url?: string | null;
+  session_type?: string | null;
 }
 
 export function useSessions(workspaceId: string | undefined) {

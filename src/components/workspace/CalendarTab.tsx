@@ -301,6 +301,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       joinUrl: session.join_url || '',
       sendInvites: false,
       inviteEmails: '',
+      sessionType: (session as any).session_type || 'general',
     });
     setEditingSession(session);
     setIsEditDialogOpen(true);
