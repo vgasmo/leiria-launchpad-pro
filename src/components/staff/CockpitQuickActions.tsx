@@ -88,6 +88,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
           scheduled_at: new Date(sessionDate).toISOString(),
           duration: 60,
           created_by: user?.id,
+          session_type: sessionType,
         });
 
       if (error) throw error;
