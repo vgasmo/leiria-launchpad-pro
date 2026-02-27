@@ -448,6 +448,24 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
         />
       </div>
       <div className="grid gap-2">
+        <Label>{t('sessions.sessionTypeLabel', { defaultValue: 'Tipo de Sessão' })}</Label>
+        <Select value={formData.sessionType} onValueChange={(v) => setFormData((prev) => ({ ...prev, sessionType: v }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">{t('sessions.types.general', { defaultValue: 'Geral' })}</SelectItem>
+            <SelectItem value="discovery">{t('sessions.types.discovery', { defaultValue: 'Discovery' })}</SelectItem>
+            <SelectItem value="problem_solving">{t('sessions.types.problemSolving', { defaultValue: 'Problem-Solving' })}</SelectItem>
+            <SelectItem value="mentoring">{t('sessions.types.mentoring', { defaultValue: 'Mentoria' })}</SelectItem>
+            <SelectItem value="check_in">{t('sessions.types.checkIn', { defaultValue: 'Check-in' })}</SelectItem>
+            <SelectItem value="pitch_practice">{t('sessions.types.pitchPractice', { defaultValue: 'Pitch Practice' })}</SelectItem>
+            <SelectItem value="workshop">{t('sessions.types.workshop', { defaultValue: 'Workshop' })}</SelectItem>
+            <SelectItem value="follow_up">{t('sessions.types.followUp', { defaultValue: 'Follow-up' })}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid gap-2">
         <Label htmlFor={isEdit ? "edit-agenda" : "agenda"}>{t('sessions.agendaLabel', { defaultValue: 'Agenda' })}</Label>
         <Textarea
           id={isEdit ? "edit-agenda" : "agenda"}
