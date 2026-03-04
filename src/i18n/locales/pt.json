@@ -5657,7 +5657,27 @@
     "dailyWork": "Trabalho do Dia",
     "myTasks": "As Minhas Tarefas",
     "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
-    "navLabel": "Centro de Comando"
+    "navLabel": "Centro de Comando",
+    "claimRequests": "Associações"
+  },
+  "claimStartup": {
+    "title": "Reclamar a sua Startup",
+    "subtitle": "Estamos a verificar se existe uma startup associada ao seu email.",
+    "searching": "A procurar a sua startup...",
+    "found": "Startup encontrada!",
+    "redirecting": "A redirecionar para o seu workspace...",
+    "claimedTitle": "Startup Encontrada!",
+    "claimedDesc": "A sua startup foi associada automaticamente.",
+    "pendingTitle": "Pedido de Acesso Enviado",
+    "pendingDesc": "Não encontrámos uma startup associada ao seu email. A sua equipa irá revê-lo e associá-lo manualmente.",
+    "error": "Ocorreu um erro. Por favor tente novamente.",
+    "noRequests": "Sem pedidos de associação pendentes.",
+    "selectStartup": "Selecionar startup...",
+    "manualRequest": "Pedido Manual",
+    "approved": "Pedido aprovado",
+    "approvedDesc": "O founder foi associado ao workspace.",
+    "approveFailed": "Falha ao aprovar pedido.",
+    "rejected": "Pedido rejeitado"
   },
   "ecosystemHub": {
     "title": "Diretório do Ecossistema & CRM",

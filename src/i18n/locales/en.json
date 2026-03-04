@@ -5657,7 +5657,27 @@
     "dailyWork": "Today's Work",
     "myTasks": "My Tasks",
     "emptyTriage": "No pending items. All clear!",
-    "navLabel": "Command Centre"
+    "navLabel": "Command Centre",
+    "claimRequests": "Claim Requests"
+  },
+  "claimStartup": {
+    "title": "Claim your Startup",
+    "subtitle": "We're checking if there's a startup linked to your email.",
+    "searching": "Searching for your startup...",
+    "found": "Startup found!",
+    "redirecting": "Redirecting to your workspace...",
+    "claimedTitle": "Startup Found!",
+    "claimedDesc": "Your startup was automatically linked.",
+    "pendingTitle": "Access Request Submitted",
+    "pendingDesc": "We couldn't find a startup linked to your email. Our team will review and link you manually.",
+    "error": "An error occurred. Please try again.",
+    "noRequests": "No pending claim requests.",
+    "selectStartup": "Select startup...",
+    "manualRequest": "Manual Request",
+    "approved": "Request approved",
+    "approvedDesc": "The founder has been linked to the workspace.",
+    "approveFailed": "Failed to approve request.",
+    "rejected": "Request rejected"
   },
   "ecosystemHub": {
     "title": "Ecosystem Directory & CRM",

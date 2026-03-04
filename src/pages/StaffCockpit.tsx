@@ -64,6 +64,9 @@ export default function StaffCockpit() {
                     <TabsContent value="approvals" className="mt-0">
                       <PendingApprovalsManager />
                     </TabsContent>
+                    <TabsContent value="claims" className="mt-0">
+                      <ClaimRequestsQueue />
+                    </TabsContent>
                     <TabsContent value="routing" className="mt-0">
                       <IntakeRoutingManager />
                     </TabsContent>

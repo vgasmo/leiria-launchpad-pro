@@ -80,7 +80,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: bool
           startup:startups(id, name, description, logo_url),
           program:programs(id, name)
         `)
-        .eq('status', 'active') // Only show active workspaces
+        .in('status', ['active', 'claimed']) // Show active and claimed workspaces
         .order('updated_at', { ascending: false });
 
       // If assignedOnly, filter by assigned workspace IDs
