@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(23);
 
 -- ============================================================
 -- Gate 1: RLS must be enabled on all critical tables
