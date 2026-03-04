@@ -4,6 +4,7 @@ import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users, Ca
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -106,6 +107,28 @@ export default function Login() {
     }
 
     setIsSubmitting(true);
+
+    // Prelaunch gate: check if email is allowed to sign up
+    try {
+      const { data: allowed, error: rpcError } = await supabase.rpc('check_signup_allowed', { p_email: email });
+      if (rpcError) {
+        console.error('[Login] check_signup_allowed error:', rpcError);
+        setError(t('login.signupCheckError', 'Unable to verify signup eligibility. Please try again.'));
+        setIsSubmitting(false);
+        return;
+      }
+      if (!allowed) {
+        setError(t('login.inviteOnly', 'Registration is currently invite-only. Contact staff if you believe this is an error.'));
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err) {
+      console.error('[Login] Allowlist check failed:', err);
+      setError(t('login.signupCheckError', 'Unable to verify signup eligibility. Please try again.'));
+      setIsSubmitting(false);
+      return;
+    }
+
     // Only pass role if not a consultor email (consultor role is auto-assigned by the database)
     const roleToAssign = isConsultorEmail ? undefined : selectedRole;
     const { error } = await signUp(email, password, fullName, roleToAssign);

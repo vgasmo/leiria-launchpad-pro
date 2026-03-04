@@ -8,7 +8,8 @@ export type FeatureFlagKey =
   | 'founder_gamification'
   | 'traction_stage'
   | 'crm_graph_email_sync'
-  | 'crm_ai_recap';
+  | 'crm_ai_recap'
+  | 'open_registration';
 
 interface FeatureFlag {
   id: string;
