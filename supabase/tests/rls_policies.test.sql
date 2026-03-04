@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(23);
 
 -- ============================================================
 -- Gate 1: RLS must be enabled on all critical tables
@@ -61,6 +61,13 @@ SELECT row_eq(
   'RLS is enabled on office_spaces'
 );
 
+SELECT has_table('public', 'startup_claim_requests', 'startup_claim_requests table exists');
+SELECT row_eq(
+  $$SELECT relrowsecurity FROM pg_class WHERE relname = 'startup_claim_requests'$$,
+  ROW(true),
+  'RLS is enabled on startup_claim_requests'
+);
+
 -- ============================================================
 -- Gate 2: Key security-definer functions exist
 -- ============================================================
@@ -70,6 +77,12 @@ SELECT has_function(
   'has_active_workspace_access',
   ARRAY['uuid'],
   'has_active_workspace_access function exists'
+);
+
+SELECT has_function(
+  'public',
+  'claim_startup',
+  'claim_startup function exists'
 );
 
 -- ============================================================

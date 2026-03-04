@@ -260,6 +260,7 @@ jobs:
   # ──────────────────────────────────────────────
   db-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: ${{ vars.ENABLE_DB_TESTS == 'true' || github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
@@ -272,6 +273,12 @@ jobs:
 
       - name: Start local Supabase (applies all migrations)
         run: supabase start
+
+      - name: Verify migrations applied
+        run: supabase migration list
+
+      - name: Lint database schema
+        run: supabase db lint
 
       - name: Run pgTAP tests
         run: supabase test db
