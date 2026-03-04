@@ -25,7 +25,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { AccessDenied } from '@/components/ui/AccessDenied';
 

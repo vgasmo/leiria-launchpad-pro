@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useIntakeRouting, useUpsertIntakeRoute, useConsultants, type IntakeRoute } from '@/hooks/useIntakeRouting';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 

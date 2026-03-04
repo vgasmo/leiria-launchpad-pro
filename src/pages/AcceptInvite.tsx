@@ -5,7 +5,7 @@ import { Loader2, CheckCircle, XCircle, Mail, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
 type InviteStatus = 'loading' | 'needs_login' | 'processing' | 'success' | 'error';

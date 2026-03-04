@@ -44,7 +44,7 @@ import {
   useGetDocumentUrl,
   Document 
 } from '@/hooks/useDocuments';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { FinancialModelPanel } from './FinancialModelPanel';

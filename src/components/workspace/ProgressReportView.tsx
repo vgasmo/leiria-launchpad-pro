@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorkspaceSessions } from '@/hooks/useWorkspaceData';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { HealthScore, StartupStage } from '@/types/database';
 
