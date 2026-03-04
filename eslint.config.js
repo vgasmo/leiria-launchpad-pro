@@ -5,8 +5,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default [
-  // ignore build output
-  { ignores: ["dist"] },
+  // ignore build output and Node.js scripts from TS/React linting
+  { ignores: ["dist", "scripts/**", "e2e/**/*.cjs"] },
 
   // base recommended configs
   js.configs.recommended,
