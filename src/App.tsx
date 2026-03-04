@@ -46,6 +46,7 @@ const Documents = lazy(() => import("./pages/Documents"));
 const Resources = lazy(() => import("./pages/Resources"));
 const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
+const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
