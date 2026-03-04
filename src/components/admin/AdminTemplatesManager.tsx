@@ -22,7 +22,7 @@ import {
 } from '@/hooks/useTemplates';
 import { INITIAL_TEMPLATES } from '@/data/initialTemplates';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 
 const FINANCIAL_MODEL_TEMPLATE_PATH = 'templates/Template_Avaliacao_Startup_Ecossistema.xlsm';

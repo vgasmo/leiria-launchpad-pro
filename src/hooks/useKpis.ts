@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { startOfMonth, subMonths, format } from 'date-fns';
 import type { Database } from '@/integrations/supabase/types';
 
