@@ -10,7 +10,8 @@ import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
-import { LayoutDashboard, Inbox, ListTodo, Zap, Building2 } from 'lucide-react';
+import { ClaimRequestsQueue } from '@/components/admin/ClaimRequestsQueue';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck } from 'lucide-react';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
