@@ -4353,6 +4353,30 @@ export type Database = {
           },
         ]
       }
+      signup_allowlist: {
+        Row: {
+          added_by: string | null
+          created_at: string | null
+          domain: string | null
+          email: string | null
+          id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       space_allocations: {
         Row: {
           allocated_by: string | null
@@ -6955,6 +6979,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_signup_allowed: { Args: { p_email: string }; Returns: boolean }
       claim_startup: { Args: never; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: number }
       create_conversation: {
