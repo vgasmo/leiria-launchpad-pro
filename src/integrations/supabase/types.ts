@@ -4902,6 +4902,73 @@ export type Database = {
           },
         ]
       }
+      startup_claim_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          match_method: string | null
+          notes: string | null
+          requested_at: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          startup_id: string | null
+          status: string
+          user_email: string | null
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          match_method?: string | null
+          notes?: string | null
+          requested_at?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          startup_id?: string | null
+          status?: string
+          user_email?: string | null
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          match_method?: string | null
+          notes?: string | null
+          requested_at?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          startup_id?: string | null
+          status?: string
+          user_email?: string | null
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_claim_requests_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_claim_requests_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_claim_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       startup_contracts: {
         Row: {
           billing_day: number | null
@@ -6854,6 +6921,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_startup_claim: {
+        Args: { p_claim_id: string; p_workspace_id: string }
+        Returns: undefined
+      }
       approve_user_account: { Args: { p_user_id: string }; Returns: undefined }
       block_workspace: {
         Args: { _reason?: string; _workspace_id: string }
@@ -6884,6 +6955,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      claim_startup: { Args: never; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: number }
       create_conversation: {
         Args: {
@@ -7005,6 +7077,10 @@ export type Database = {
       is_team_member_of_startup: {
         Args: { _startup_id: string }
         Returns: boolean
+      }
+      reject_startup_claim: {
+        Args: { p_claim_id: string; p_reason?: string }
+        Returns: undefined
       }
       sha256_token: { Args: { token: string }; Returns: string }
       shares_workspace_with: {
