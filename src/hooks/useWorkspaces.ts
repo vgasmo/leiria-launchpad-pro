@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 
-export type WorkspaceStatus = 'pending' | 'active' | 'rejected' | 'archived';
+export type WorkspaceStatus = 'imported_unclaimed' | 'claimed' | 'pending' | 'active' | 'rejected' | 'archived';
 export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name' | 'priority';
 
 export interface WorkspaceFilters {
@@ -80,7 +80,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: bool
           startup:startups(id, name, description, logo_url),
           program:programs(id, name)
         `)
-        .eq('status', 'active') // Only show active workspaces
+        .in('status', ['active', 'claimed']) // Show active and claimed workspaces
         .order('updated_at', { ascending: false });
 
       // If assignedOnly, filter by assigned workspace IDs

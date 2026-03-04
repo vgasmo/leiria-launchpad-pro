@@ -46,6 +46,7 @@ const Documents = lazy(() => import("./pages/Documents"));
 const Resources = lazy(() => import("./pages/Resources"));
 const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
+const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -187,6 +188,7 @@ function AppRoutes() {
         <Route path="/book/:token" element={<PublicBooking />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
+        <Route path="/claim-startup" element={<ProtectedRoute><ClaimStartup /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
         <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
         <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />

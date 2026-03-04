@@ -10,7 +10,8 @@ import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
-import { LayoutDashboard, Inbox, ListTodo, Zap, Building2 } from 'lucide-react';
+import { ClaimRequestsQueue } from '@/components/admin/ClaimRequestsQueue';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck } from 'lucide-react';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
@@ -47,9 +48,12 @@ export default function StaffCockpit() {
               <CardContent className="p-0">
                 <Tabs defaultValue="approvals" className="w-full">
                   <div className="px-6">
-                    <TabsList className="w-full grid grid-cols-2">
+                    <TabsList className="w-full grid grid-cols-3">
                       <TabsTrigger value="approvals" className="text-xs">
                         {t('staffCockpit.pendingApprovals', { defaultValue: 'Aprovações Pendentes' })}
+                      </TabsTrigger>
+                      <TabsTrigger value="claims" className="text-xs">
+                        {t('staffCockpit.claimRequests', { defaultValue: 'Associações' })}
                       </TabsTrigger>
                       <TabsTrigger value="routing" className="text-xs">
                         {t('staffCockpit.intakeRouting', { defaultValue: 'Encaminhamento' })}
@@ -59,6 +63,9 @@ export default function StaffCockpit() {
                   <div className="px-6 pb-6 pt-4 max-h-[600px] overflow-y-auto">
                     <TabsContent value="approvals" className="mt-0">
                       <PendingApprovalsManager />
+                    </TabsContent>
+                    <TabsContent value="claims" className="mt-0">
+                      <ClaimRequestsQueue />
                     </TabsContent>
                     <TabsContent value="routing" className="mt-0">
                       <IntakeRoutingManager />
