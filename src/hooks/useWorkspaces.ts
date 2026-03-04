@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 
 export type WorkspaceStatus = 'imported_unclaimed' | 'claimed' | 'pending' | 'active' | 'rejected' | 'archived';

@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Edit2, Eye, X, Building2, Users, Check, Trash2, Square, Pentagon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Room, type FloorMap, type RoomShapeRect, type RoomShapePolygon, useUpdateRoom } from '@/hooks/useBackoffice';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { renderPdfToImage, isPdfFile } from '@/lib/pdfRenderer';

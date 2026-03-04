@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { PIPELINE_STAGES, type FunnelStage } from '@/constants/funnelStages';
 import type { CrmInboxItem } from './useCrmInbox';
 
