@@ -4,6 +4,7 @@ import { Mail, Lock, User, AlertCircle, Eye, EyeOff, Sparkles, Rocket, Users, Ca
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
