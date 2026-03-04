@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { HealthScore, StartupStage } from '@/types/database';
 
 interface SharedData {

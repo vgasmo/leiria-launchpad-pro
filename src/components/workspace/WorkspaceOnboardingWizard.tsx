@@ -34,7 +34,7 @@ import { useApplyStageDefaults } from '@/hooks/useKpis';
 import { useCreateMilestone } from '@/hooks/useMilestones';
 import { useCreateActionItemFull } from '@/hooks/useActionItems';
 import { useCreateSession } from '@/hooks/useSessions';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { CompanyDetailsStep } from './CompanyDetailsStep';
 import type { StartupStage } from '@/types/database';

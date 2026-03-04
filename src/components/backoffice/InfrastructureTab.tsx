@@ -37,7 +37,7 @@ import {
   type RoomShapePolygon,
 } from '@/hooks/useBackoffice';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';

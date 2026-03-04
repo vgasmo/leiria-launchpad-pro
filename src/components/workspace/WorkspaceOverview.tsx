@@ -55,7 +55,7 @@ import { InteractionsCard } from '@/components/workspace/InteractionsCard';
 import { LocationContractCard } from '@/components/workspace/LocationContractCard';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';

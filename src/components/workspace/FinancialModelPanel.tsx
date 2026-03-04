@@ -20,7 +20,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useUploadDocument, useGetDocumentUrl, Document } from '@/hooks/useDocuments';
 import {
   useFinancialModelVersions,

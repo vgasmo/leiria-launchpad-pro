@@ -62,7 +62,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useSessionActionItems, useCreateActionItem, useWorkspaceMembers } from '@/hooks/useSessions';
 import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useExportSessions, exportSessionsToCsv } from '@/hooks/useExportData';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConsultantAvailability, useValidateBookingSlot } from '@/hooks/useConsultantCalendar';

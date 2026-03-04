@@ -44,7 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 
 interface CockpitQuickActionsProps {

@@ -21,7 +21,7 @@ import {
   Building2,
   Info
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 // Microsoft Teams icon component

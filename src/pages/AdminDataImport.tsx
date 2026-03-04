@@ -22,7 +22,7 @@ import {
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 

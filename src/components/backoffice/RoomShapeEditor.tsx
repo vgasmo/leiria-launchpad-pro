@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Square, Pentagon, MapPin, Undo, Save, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Room, type RoomShapeRect, type RoomShapePolygon, type RoomShapeType, useUpdateRoom } from '@/hooks/useBackoffice';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
 interface RoomShapeEditorProps {

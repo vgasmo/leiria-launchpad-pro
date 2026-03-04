@@ -65,7 +65,7 @@ import { cn } from '@/lib/utils';
 import { useCalendarSessions, useCreateSession, useUpdateSession, useDeleteSession, useWorkspaceMembers, Session } from '@/hooks/useSessions';
 import { useSessionTemplates } from '@/hooks/useSessionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 

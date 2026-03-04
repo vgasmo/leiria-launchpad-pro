@@ -37,7 +37,7 @@ import { RecordDrawer } from '@/components/crm/RecordDrawer';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import { SavedViewsDropdown } from '@/components/crm/SavedViewsDropdown';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';

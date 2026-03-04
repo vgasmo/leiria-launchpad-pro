@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Upload, FileText, Loader2, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 

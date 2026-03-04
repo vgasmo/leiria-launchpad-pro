@@ -3,7 +3,7 @@
  * Split from useBackoffice.ts for maintainability
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { IncubationType } from './useIncubationTypes';
 import type { Building } from './useBuildings';

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useOutlookSettings, useUpdateOutlookSettings } from '@/hooks/useOutlookCalendar';
 import { useGlobalGraphSettings } from '@/hooks/useGlobalIntegrations';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 
 interface WorkspaceCalendarCardProps {
   workspaceId: string;

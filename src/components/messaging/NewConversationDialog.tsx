@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateConversation, Conversation } from '@/hooks/useMessaging';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';

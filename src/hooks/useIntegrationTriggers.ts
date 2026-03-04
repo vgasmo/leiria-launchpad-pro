@@ -7,7 +7,7 @@
  * 2. Fallback to global settings if no workspace row exists
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useLogActivity } from '@/hooks/useActivityLog';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
