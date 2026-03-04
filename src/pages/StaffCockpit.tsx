@@ -48,9 +48,12 @@ export default function StaffCockpit() {
               <CardContent className="p-0">
                 <Tabs defaultValue="approvals" className="w-full">
                   <div className="px-6">
-                    <TabsList className="w-full grid grid-cols-2">
+                    <TabsList className="w-full grid grid-cols-3">
                       <TabsTrigger value="approvals" className="text-xs">
                         {t('staffCockpit.pendingApprovals', { defaultValue: 'Aprovações Pendentes' })}
+                      </TabsTrigger>
+                      <TabsTrigger value="claims" className="text-xs">
+                        {t('staffCockpit.claimRequests', { defaultValue: 'Associações' })}
                       </TabsTrigger>
                       <TabsTrigger value="routing" className="text-xs">
                         {t('staffCockpit.intakeRouting', { defaultValue: 'Encaminhamento' })}
