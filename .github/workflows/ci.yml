@@ -113,6 +113,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: i18n sync (populate missing keys)
+        run: node scripts/i18n-sync.cjs
+
       - name: i18n lint (strict)
         run: node scripts/i18n-lint.mjs
 
