@@ -41,9 +41,15 @@ interface RecordDrawerHeaderProps {
 
 export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDrawerHeaderProps) {
   const { t } = useTranslation();
+  const [localStage, setLocalStage] = useState<FunnelStage>(item.stage);
+
+  // Sync local state when the prop item changes (e.g. different record opened)
+  useEffect(() => {
+    setLocalStage(item.stage);
+  }, [item.id, item.stage]);
   
-  const stageColor = STAGE_COLORS[item.stage];
-  const stageLabel = getFunnelStageLabel(t, item.stage);
+  const stageColor = STAGE_COLORS[localStage];
+  const stageLabel = getFunnelStageLabel(t, localStage);
   const nextActionAt = (item as any).next_action_at as string | null;
   const lastActivityAt = (item as any).last_activity_at as string | null;
   
