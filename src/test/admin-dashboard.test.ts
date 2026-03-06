@@ -4,7 +4,8 @@ describe('AdminDashboard module', () => {
   it('should import AdminDashboard without error', async () => {
     const mod = await import('@/components/dashboard/AdminDashboard');
     expect(mod.AdminDashboard).toBeDefined();
-    expect(typeof mod.AdminDashboard).toBe('function');
+    // React.memo() returns an exotic object, not a plain function
+    expect(typeof mod.AdminDashboard).toMatch(/function|object/);
   });
 
   it('should import useAdminDashboardStats without error', async () => {
