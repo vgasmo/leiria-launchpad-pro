@@ -169,9 +169,17 @@ describe('useUpdateActionItem – optimistic rollback', () => {
           }),
         };
       }
-      // action_items
+      // action_items — provide both update (for mutation) and select (for refetch after invalidation)
       return {
         update: mockUpdate,
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: [], error: null }),
+            // Direct resolve for simple selects
+            then: (cb: any) => Promise.resolve({ data: [], error: null }).then(cb),
+          }),
+          order: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
       };
     });
 
