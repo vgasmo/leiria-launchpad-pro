@@ -190,13 +190,20 @@ describe('useUpdateActionItem – optimistic rollback', () => {
       { wrapper: createWrapper(queryClient) },
     );
 
-    act(() => {
+    await act(async () => {
       result.current.mutate({ id: 'action-1', status: 'completed' });
     });
 
     await vi.waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
+      expect(result.current.isSuccess || result.current.isError).toBe(true);
+    }, { timeout: 5000 });
+
+    // If mutation errored unexpectedly, fail with details
+    if (result.current.isError) {
+      throw new Error(`Mutation failed: ${(result.current.error as Error)?.message}`);
+    }
+
+    expect(result.current.isSuccess).toBe(true);
 
     // Cache should reflect the completed state (via invalidation or optimistic)
     // The optimistic update set it to completed, and success triggers invalidation

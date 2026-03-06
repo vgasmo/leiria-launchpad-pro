@@ -43,8 +43,9 @@ async function loginAndSave(
     await emailInput.waitFor({ state: 'visible', timeout: 10_000 });
     await emailInput.fill(creds.email);
 
-    // Fill password (PT label is "Palavra-passe")
-    const passwordInput = page.getByLabel(/password|senha|palavra/i);
+    // Fill password — use the input directly by id to avoid matching the toggle button
+    const passwordInput = page.locator('input[type="password"]');
+    await passwordInput.waitFor({ state: 'visible', timeout: 10_000 });
     await passwordInput.fill(creds.password);
 
     // Submit
