@@ -344,7 +344,7 @@ jobs:
         run: supabase start
 
       - name: Verify migrations applied
-        run: supabase migration list
+        run: supabase migration list --local
 
       - name: Lint database schema
         run: supabase db lint
