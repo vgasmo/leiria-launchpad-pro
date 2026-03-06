@@ -214,12 +214,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
         next_action_description: data.description,
       });
       
-      // Optimistically update the local item so the drawer reflects the change immediately
-      Object.assign(item, {
-        next_action_at: data.date,
-        next_action_description: data.description,
-      });
-      
+      // Optimistic local state update so drawer reflects change immediately
+      setLocalNextAction({ at: data.date, desc: data.description });
       setNextActionDialog(false);
     } catch (err) {
       // Error toast is already handled by the mutation's onError
@@ -230,10 +226,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
     if (!item) return;
     try {
       await clearNextAction.mutateAsync(item.id);
-      Object.assign(item, {
-        next_action_at: null,
-        next_action_description: null,
-      });
+      setLocalNextAction({ at: null, desc: null });
     } catch (err) {
       // Error toast is already handled by the mutation's onError
     }
@@ -241,8 +234,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   if (!item) return null;
 
-  const nextActionAt = item.next_action_at ?? null;
-  const nextActionDescription = item.next_action_description ?? null;
+  const nextActionAt = localNextAction !== null ? localNextAction.at : (item.next_action_at ?? null);
+  const nextActionDescription = localNextAction !== null ? localNextAction.desc : (item.next_action_description ?? null);
   const lastActivityAt = item.last_activity_at ?? null;
 
   return (
