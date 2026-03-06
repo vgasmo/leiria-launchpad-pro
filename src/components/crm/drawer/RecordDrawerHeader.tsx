@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Activity } from 'lucide-react';
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
