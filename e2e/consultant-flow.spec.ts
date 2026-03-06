@@ -16,11 +16,8 @@ test.describe('Consultant E2E Flow', () => {
       throw new Error('Pre-requisite failed: No CRM records found. Please seed the database with at least one lead.');
     }
 
-    // Capture initial state
-    const firstRecord = page.locator(recordSelector).first();
-    const initialStage = await firstRecord.locator('.badge').first().textContent();
-
     // Click first CRM record to open drawer
+    const firstRecord = page.locator(recordSelector).first();
     await firstRecord.click();
 
     // Wait for drawer/dialog to appear
