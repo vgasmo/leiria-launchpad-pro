@@ -479,8 +479,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                         onCancel={() => cancelTask.mutate(task.id)}
                         onUpdate={(updates) => updateTask.mutate({ id: task.id, ...updates })}
                         hasWorkspace={!!item.linked_workspace_id}
-                        nextActionAt={(item as any).next_action_at}
-                        nextActionDescription={(item as any).next_action_description}
+                        nextActionAt={nextActionAt}
+                        nextActionDescription={nextActionDescription}
                       />
                     ))}
                   </div>
