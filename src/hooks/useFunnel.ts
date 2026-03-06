@@ -136,7 +136,6 @@ export function useUpdateFunnelItem() {
         });
 
         // Trigger CRM stage transition email (fire-and-forget)
-        // Edge function handles idempotency and rule matching
         supabase.functions.invoke('send-crm-stage-transition-email', {
           body: {
             funnel_item_id: id,
@@ -150,13 +149,49 @@ export function useUpdateFunnelItem() {
 
       return data;
     },
+    onMutate: async ({ id, ...updates }) => {
+      // Optimistic update: immediately reflect stage change in cache
+      await queryClient.cancelQueries({ queryKey: ['funnel-items'] });
+      await queryClient.cancelQueries({ queryKey: ['crm-pipeline'] });
+
+      const previousFunnelItems = queryClient.getQueryData(['funnel-items']);
+      const previousPipeline = queryClient.getQueryData(['crm-pipeline']);
+
+      // Patch funnel-items cache
+      queryClient.setQueriesData<FunnelItem[]>({ queryKey: ['funnel-items'] }, (old) => {
+        if (!old) return old;
+        return old.map((item) => (item.id === id ? { ...item, ...updates } : item));
+      });
+
+      // Patch crm-pipeline cache (array of arrays or flat)
+      queryClient.setQueriesData<any>({ queryKey: ['crm-pipeline'] }, (old) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) => (item?.id === id ? { ...item, ...updates } : item));
+        }
+        return old;
+      });
+
+      return { previousFunnelItems, previousPipeline };
+    },
+    onError: (e: Error, _vars, context) => {
+      // Rollback on error
+      if (context?.previousFunnelItems) {
+        queryClient.setQueryData(['funnel-items'], context.previousFunnelItems);
+      }
+      if (context?.previousPipeline) {
+        queryClient.setQueryData(['crm-pipeline'], context.previousPipeline);
+      }
+      toast.error(e.message);
+    },
     onSuccess: () => {
+      toast.success('Updated');
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
       queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
       queryClient.invalidateQueries({ queryKey: ['crm-inbox'] });
-      toast.success('Updated');
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 }
 
