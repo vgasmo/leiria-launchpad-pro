@@ -149,12 +149,12 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
 
   // Staff-only routes (admin, consultor, backoffice)
   if (staffOnly && !isStaff) {
-    return <Navigate to="/my-workspaces" replace />;
+    return <AccessDenied />;
   }
 
   // Admin-only routes (strictly admin role)
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/my-workspaces" replace />;
+    return <AccessDenied />;
   }
 
   return (
