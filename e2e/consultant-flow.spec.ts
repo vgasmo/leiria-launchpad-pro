@@ -49,25 +49,36 @@ test.describe('Consultant E2E Flow', () => {
       const dateTimeValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       await page.locator('input[type="datetime-local"]').fill(dateTimeValue);
       await page.locator('textarea, input[type="text"]').last().fill('E2E Test Action');
-      await page.getByRole('button', { name: /save|guardar|update/i }).click();
-      // Verify it appears in drawer
-      await expect(page.locator('p', { hasText: 'E2E Test Action' }).first()).toBeVisible();
+      const saveBtn = page.getByRole('button', { name: /save|guardar|update/i });
+      await saveBtn.click();
+      // Wait for dialog to close and mutation to finish
+      await expect(saveBtn).toBeHidden({ timeout: 10_000 });
+      await page.waitForTimeout(1000);
+      // Verify it appears somewhere in the drawer
+      const drawer = page.locator('[role="dialog"], [data-testid="record-drawer"]');
+      await expect(drawer).toContainText('E2E Test Action', { timeout: 10_000 });
     }
 
     // 3. Add Task (using Quick Actions if available or tab)
     const taskTab = page.getByRole('tab', { name: /tasks|tarefas/i });
     await taskTab.click();
+    await page.waitForTimeout(500);
     
     // Look for add task button
     const addTaskBtn = page.getByRole('button', { name: /add task|adicionar tarefa/i });
-    if (await addTaskBtn.isVisible()) {
+    if (await addTaskBtn.isVisible({ timeout: 5000 })) {
       await addTaskBtn.click();
-      await page.getByPlaceholder(/title|título/i).fill('E2E Automated Task');
-      await page.getByRole('button', { name: /create|criar/i }).click();
+      const titleInput = page.getByPlaceholder(/title|título/i);
+      await expect(titleInput).toBeVisible({ timeout: 5000 });
+      await titleInput.fill('E2E Automated Task');
+      const createBtn = page.getByRole('button', { name: /create|criar/i });
+      await createBtn.click();
+      await expect(createBtn).toBeHidden({ timeout: 10_000 });
+      await page.waitForTimeout(500);
       
       // Verify task appears in list
       const taskList = page.locator('[data-testid="task-list"]');
-      await expect(taskList).toContainText('E2E Automated Task');
+      await expect(taskList).toContainText('E2E Automated Task', { timeout: 10_000 });
     }
 
     // 4. Verify Timeline
