@@ -25,6 +25,9 @@ export interface FunnelItem {
   first_contact_at: string | null;
   qualified_at: string | null;
   converted_at: string | null;
+  next_action_at: string | null;
+  next_action_description: string | null;
+  last_activity_at: string | null;
   created_at: string;
   updated_at: string;
   owner?: { id: string; full_name: string | null; email: string } | null;
