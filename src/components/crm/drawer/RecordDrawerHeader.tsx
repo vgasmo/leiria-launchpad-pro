@@ -51,8 +51,8 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
   
   const stageColor = STAGE_COLORS[localStage];
   const stageLabel = getFunnelStageLabel(t, localStage);
-  const nextActionAt = (item as any).next_action_at as string | null;
-  const lastActivityAt = (item as any).last_activity_at as string | null;
+  const nextActionAt = item.next_action_at ?? null;
+  const lastActivityAt = item.last_activity_at ?? null;
   
   const relationshipStatus = getRelationshipStatus({
     next_action_at: nextActionAt,

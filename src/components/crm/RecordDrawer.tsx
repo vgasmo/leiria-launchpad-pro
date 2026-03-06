@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
@@ -65,6 +65,14 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const [addTaskDialog, setAddTaskDialog] = useState(false);
   const [nextActionDialog, setNextActionDialog] = useState(false);
   const [taskStatusFilter, setTaskStatusFilter] = useState<TaskStatusFilter>('open');
+  
+  // Local overrides for optimistic updates on next action
+  const [localNextAction, setLocalNextAction] = useState<{ at: string | null; desc: string | null } | null>(null);
+  
+  // Reset local overrides when item changes
+  useEffect(() => {
+    setLocalNextAction(null);
+  }, [item?.id]);
   
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
@@ -199,25 +207,36 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const handleUpdateNextAction = async (data: { date: string; description: string }) => {
     if (!item) return;
     
-    await updateNextAction.mutateAsync({
-      funnelItemId: item.id,
-      next_action_at: data.date,
-      next_action_description: data.description,
-    });
-    
-    setNextActionDialog(false);
+    try {
+      await updateNextAction.mutateAsync({
+        funnelItemId: item.id,
+        next_action_at: data.date,
+        next_action_description: data.description,
+      });
+      
+      // Optimistic local state update so drawer reflects change immediately
+      setLocalNextAction({ at: data.date, desc: data.description });
+      setNextActionDialog(false);
+    } catch (err) {
+      // Error toast is already handled by the mutation's onError
+    }
   };
 
   const handleClearNextAction = async () => {
     if (!item) return;
-    await clearNextAction.mutateAsync(item.id);
+    try {
+      await clearNextAction.mutateAsync(item.id);
+      setLocalNextAction({ at: null, desc: null });
+    } catch (err) {
+      // Error toast is already handled by the mutation's onError
+    }
   };
 
   if (!item) return null;
 
-  const nextActionAt = (item as any).next_action_at as string | null;
-  const nextActionDescription = (item as any).next_action_description as string | null;
-  const lastActivityAt = (item as any).last_activity_at as string | null;
+  const nextActionAt = localNextAction !== null ? localNextAction.at : (item.next_action_at ?? null);
+  const nextActionDescription = localNextAction !== null ? localNextAction.desc : (item.next_action_description ?? null);
+  const lastActivityAt = item.last_activity_at ?? null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -460,8 +479,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                         onCancel={() => cancelTask.mutate(task.id)}
                         onUpdate={(updates) => updateTask.mutate({ id: task.id, ...updates })}
                         hasWorkspace={!!item.linked_workspace_id}
-                        nextActionAt={(item as any).next_action_at}
-                        nextActionDescription={(item as any).next_action_description}
+                        nextActionAt={nextActionAt}
+                        nextActionDescription={nextActionDescription}
                       />
                     ))}
                   </div>
