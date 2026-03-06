@@ -11,12 +11,23 @@ Deno.serve(async (req: Request) => {
   const log = createLogger(FUNCTION_NAME, requestId);
 
   try {
-    const { userId } = await requireUser(req);
+    // Create a Supabase client scoped to the caller's JWT
+    const supabaseAnonClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: req.headers.get('Authorization') || '' } } }
+    );
+
+    const authResult = await requireUser(req, supabaseAnonClient);
+    if ('error' in authResult) return authResult.error;
+    const { user } = authResult;
+    const userId = user.id;
+
     log.info('Contract analysis requested', { userId });
 
     const { contractId } = await req.json();
     if (!contractId) {
-      return corsJsonResponse(req, { error: 'contractId is required' }, 400);
+      return corsJsonResponse({ error: 'contractId is required' }, req, 400);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -31,7 +42,7 @@ Deno.serve(async (req: Request) => {
 
     const isStaff = roles?.some(r => ['admin', 'consultor', 'backoffice'].includes(r.role));
     if (!isStaff) {
-      return corsJsonResponse(req, { error: 'Forbidden' }, 403);
+      return corsJsonResponse({ error: 'Forbidden' }, req, 403);
     }
 
     // Fetch contract details
@@ -49,13 +60,13 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (contractError || !contract) {
-      return corsJsonResponse(req, { error: 'Contract not found' }, 404);
+      return corsJsonResponse({ error: 'Contract not found' }, req, 404);
     }
 
     // Call Lovable AI to analyze the contract
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      return corsJsonResponse(req, { error: 'AI not configured' }, 500);
+      return corsJsonResponse({ error: 'AI not configured' }, req, 500);
     }
 
     const prompt = `Analyze this startup incubation/acceleration contract and extract key information.
@@ -156,14 +167,14 @@ Respond in JSON format with keys: key_dates, missing_info, recommended_actions, 
     if (!aiResponse.ok) {
       const status = aiResponse.status;
       if (status === 429) {
-        return corsJsonResponse(req, { error: 'Rate limit exceeded. Please try again later.' }, 429);
+        return corsJsonResponse({ error: 'Rate limit exceeded. Please try again later.' }, req, 429);
       }
       if (status === 402) {
-        return corsJsonResponse(req, { error: 'AI credits exhausted. Please add credits.' }, 402);
+        return corsJsonResponse({ error: 'AI credits exhausted. Please add credits.' }, req, 402);
       }
       const errText = await aiResponse.text();
       log.error('AI gateway error', { status, errText });
-      return corsJsonResponse(req, { error: 'AI analysis failed' }, 500);
+      return corsJsonResponse({ error: 'AI analysis failed' }, req, 500);
     }
 
     const aiData = await aiResponse.json();
@@ -197,7 +208,7 @@ Respond in JSON format with keys: key_dates, missing_info, recommended_actions, 
       metadata: { risk_level: analysis.risk_level },
     });
 
-    return corsJsonResponse(req, {
+    return corsJsonResponse({
       analysis,
       contract_summary: {
         startup_name: contract.workspace?.startup?.name,
@@ -206,9 +217,9 @@ Respond in JSON format with keys: key_dates, missing_info, recommended_actions, 
         start_date: contract.start_date,
         end_date: contract.end_date,
       },
-    });
+    }, req);
   } catch (error) {
     log.error('Failed to analyze contract', { error: error instanceof Error ? error.message : String(error) });
-    return corsJsonResponse(req, { error: 'Internal server error' }, 500);
+    return corsJsonResponse({ error: 'Internal server error' }, req, 500);
   }
 });

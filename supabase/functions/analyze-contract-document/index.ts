@@ -11,12 +11,23 @@ Deno.serve(async (req: Request) => {
   const log = createLogger(FUNCTION_NAME, requestId);
 
   try {
-    const { userId } = await requireUser(req);
+    // Create a Supabase client scoped to the caller's JWT
+    const supabaseAnonClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: req.headers.get('Authorization') || '' } } }
+    );
+
+    const authResult = await requireUser(req, supabaseAnonClient);
+    if ('error' in authResult) return authResult.error;
+    const { user } = authResult;
+    const userId = user.id;
+
     log.info('Contract document analysis requested', { userId });
 
     const { filePath, workspaceId } = await req.json();
     if (!filePath || typeof filePath !== 'string') {
-      return corsJsonResponse(req, { error: 'filePath is required' }, 400);
+      return corsJsonResponse({ error: 'filePath is required' }, req, 400);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -31,7 +42,7 @@ Deno.serve(async (req: Request) => {
 
     const isStaff = roles?.some((r: { role: string }) => ['admin', 'consultor', 'backoffice'].includes(r.role));
     if (!isStaff) {
-      return corsJsonResponse(req, { error: 'Forbidden' }, 403);
+      return corsJsonResponse({ error: 'Forbidden' }, req, 403);
     }
 
     // Download the PDF from storage
@@ -41,7 +52,7 @@ Deno.serve(async (req: Request) => {
 
     if (downloadError || !fileData) {
       log.error('Failed to download file', { error: downloadError?.message });
-      return corsJsonResponse(req, { error: 'Could not download file' }, 404);
+      return corsJsonResponse({ error: 'Could not download file' }, req, 404);
     }
 
     // Convert PDF to base64 for AI analysis
@@ -50,7 +61,7 @@ Deno.serve(async (req: Request) => {
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      return corsJsonResponse(req, { error: 'AI not configured' }, 500);
+      return corsJsonResponse({ error: 'AI not configured' }, req, 500);
     }
 
     const prompt = `Analyze this contract PDF document and extract structured data.
@@ -150,7 +161,7 @@ Return ONLY valid JSON matching the schema.`;
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
       log.error('AI gateway error', { status: aiResponse.status, errText });
-      return corsJsonResponse(req, { extraction: null, error: 'AI analysis failed' }, 200);
+      return corsJsonResponse({ extraction: null, error: 'AI analysis failed' }, req, 200);
     }
 
     const aiData = await aiResponse.json();
@@ -184,9 +195,9 @@ Return ONLY valid JSON matching the schema.`;
       metadata: { risk_level: extraction?.risk_level, has_extraction: !!extraction },
     });
 
-    return corsJsonResponse(req, { extraction });
+    return corsJsonResponse({ extraction }, req);
   } catch (error) {
     log.error('Failed to analyze contract document', { error: error instanceof Error ? error.message : String(error) });
-    return corsJsonResponse(req, { error: 'Internal server error' }, 500);
+    return corsJsonResponse({ error: 'Internal server error' }, req, 500);
   }
 });
