@@ -12,6 +12,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
+import { AccessDenied } from "@/components/ui/AccessDenied";
 
 // Eager: lightweight / critical-path pages
 import Login from "./pages/Login";
@@ -148,12 +149,12 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
 
   // Staff-only routes (admin, consultor, backoffice)
   if (staffOnly && !isStaff) {
-    return <Navigate to="/my-workspaces" replace />;
+    return <AccessDenied />;
   }
 
   // Admin-only routes (strictly admin role)
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/my-workspaces" replace />;
+    return <AccessDenied />;
   }
 
   return (
@@ -214,6 +215,7 @@ function AppRoutes() {
         <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/:id/setup/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
+        <Route path="/admin/*" element={<ProtectedRoute staffOnly><NotFound /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
