@@ -51,7 +51,7 @@ test.describe('Consultant E2E Flow', () => {
       await page.locator('textarea, input[type="text"]').last().fill('E2E Test Action');
       await page.getByRole('button', { name: /save|guardar|update/i }).click();
       // Verify it appears in drawer
-      await expect(page.locator('text=E2E Test Action')).toBeVisible();
+      await expect(page.locator('p', { hasText: 'E2E Test Action' }).first()).toBeVisible();
     }
 
     // 3. Add Task (using Quick Actions if available or tab)
