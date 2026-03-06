@@ -66,6 +66,14 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const [nextActionDialog, setNextActionDialog] = useState(false);
   const [taskStatusFilter, setTaskStatusFilter] = useState<TaskStatusFilter>('open');
   
+  // Local overrides for optimistic updates on next action
+  const [localNextAction, setLocalNextAction] = useState<{ at: string | null; desc: string | null } | null>(null);
+  
+  // Reset local overrides when item changes
+  useEffect(() => {
+    setLocalNextAction(null);
+  }, [item?.id]);
+  
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
   
