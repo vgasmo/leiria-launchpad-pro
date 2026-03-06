@@ -155,31 +155,28 @@ describe('useUpdateActionItem – optimistic rollback', () => {
       error: null,
     });
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } });
-    // Mock activity_log insert
+    // Build a catch-all chain that handles any supabase query pattern
+    const buildSelectChain = () => {
+      const chain: Record<string, any> = {};
+      const self = () => chain;
+      chain.eq = vi.fn().mockReturnValue(chain);
+      chain.in = vi.fn().mockReturnValue(chain);
+      chain.order = vi.fn().mockReturnValue(chain);
+      chain.single = vi.fn().mockResolvedValue({ data: null, error: null });
+      chain.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+      chain.then = (cb: any) => Promise.resolve({ data: [], error: null }).then(cb);
+      chain.catch = (cb: any) => Promise.resolve({ data: [], error: null }).catch(cb);
+      return chain;
+    };
+
     mockFrom.mockImplementation((table: string) => {
       if (table === 'activity_log') {
         return { insert: vi.fn().mockResolvedValue({ data: null, error: null }) };
       }
-      if (table === 'workspaces') {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        };
-      }
-      // action_items — provide both update (for mutation) and select (for refetch after invalidation)
       return {
         update: mockUpdate,
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            order: vi.fn().mockResolvedValue({ data: [], error: null }),
-            // Direct resolve for simple selects
-            then: (cb: any) => Promise.resolve({ data: [], error: null }).then(cb),
-          }),
-          order: vi.fn().mockResolvedValue({ data: [], error: null }),
-        }),
+        insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+        select: vi.fn().mockReturnValue(buildSelectChain()),
       };
     });
 
