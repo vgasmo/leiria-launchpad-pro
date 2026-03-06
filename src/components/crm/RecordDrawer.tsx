@@ -199,25 +199,43 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const handleUpdateNextAction = async (data: { date: string; description: string }) => {
     if (!item) return;
     
-    await updateNextAction.mutateAsync({
-      funnelItemId: item.id,
-      next_action_at: data.date,
-      next_action_description: data.description,
-    });
-    
-    setNextActionDialog(false);
+    try {
+      await updateNextAction.mutateAsync({
+        funnelItemId: item.id,
+        next_action_at: data.date,
+        next_action_description: data.description,
+      });
+      
+      // Optimistically update the local item so the drawer reflects the change immediately
+      Object.assign(item, {
+        next_action_at: data.date,
+        next_action_description: data.description,
+      });
+      
+      setNextActionDialog(false);
+    } catch (err) {
+      // Error toast is already handled by the mutation's onError
+    }
   };
 
   const handleClearNextAction = async () => {
     if (!item) return;
-    await clearNextAction.mutateAsync(item.id);
+    try {
+      await clearNextAction.mutateAsync(item.id);
+      Object.assign(item, {
+        next_action_at: null,
+        next_action_description: null,
+      });
+    } catch (err) {
+      // Error toast is already handled by the mutation's onError
+    }
   };
 
   if (!item) return null;
 
-  const nextActionAt = (item as any).next_action_at as string | null;
-  const nextActionDescription = (item as any).next_action_description as string | null;
-  const lastActivityAt = (item as any).last_activity_at as string | null;
+  const nextActionAt = item.next_action_at ?? null;
+  const nextActionDescription = item.next_action_description ?? null;
+  const lastActivityAt = item.last_activity_at ?? null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
