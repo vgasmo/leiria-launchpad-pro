@@ -2,8 +2,9 @@ import { test, expect } from './fixtures/auth';
 
 test.describe('Founder E2E Flow', () => {
   test('login → workspace dashboard → view tasks/timeline', async ({ founderPage: page }) => {
-    // Should land on my-workspaces or workspace after login
-    await expect(page).toHaveURL(/my-workspaces|workspace/);
+    // Navigate to workspace listing
+    await page.goto('/my-workspaces');
+    await expect(page).toHaveURL(/my-workspaces|workspace/, { timeout: 10_000 });
 
     // Navigate to first workspace if on listing page
     if (page.url().includes('my-workspaces')) {

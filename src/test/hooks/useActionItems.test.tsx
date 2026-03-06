@@ -28,14 +28,17 @@ function buildChain() {
   });
 }
 
-vi.mock('@/integrations/supabase/client', () => ({
+const supabaseMock = {
   supabase: {
     from: (...args: unknown[]) => mockFrom(...args),
     auth: {
       getUser: () => mockGetUser(),
     },
   },
-}));
+};
+
+vi.mock('@/integrations/supabase/client', () => supabaseMock);
+vi.mock('@/lib/supabaseClient', () => supabaseMock);
 
 vi.mock('@/hooks/useIntegrationTriggers', () => ({
   sendTeamsNotification: vi.fn().mockResolvedValue(undefined),

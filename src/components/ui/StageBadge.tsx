@@ -25,6 +25,18 @@ const sizeStyles = {
 export function StageBadge({ stage, size = 'md', className }: StageBadgeProps) {
   const { t } = useTranslation();
   const config = stageConfig[stage];
+
+  if (!config) {
+    return (
+      <span className={cn(
+        "inline-flex items-center rounded-full font-medium border bg-muted text-muted-foreground border-border",
+        sizeStyles[size],
+        className
+      )}>
+        {stage ?? '—'}
+      </span>
+    );
+  }
   
   return (
     <span className={cn(
