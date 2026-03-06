@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Activity } from 'lucide-react';
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -41,9 +42,15 @@ interface RecordDrawerHeaderProps {
 
 export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDrawerHeaderProps) {
   const { t } = useTranslation();
+  const [localStage, setLocalStage] = useState<FunnelStage>(item.stage);
+
+  // Sync local state when the prop item changes (e.g. different record opened)
+  useEffect(() => {
+    setLocalStage(item.stage);
+  }, [item.id, item.stage]);
   
-  const stageColor = STAGE_COLORS[item.stage];
-  const stageLabel = getFunnelStageLabel(t, item.stage);
+  const stageColor = STAGE_COLORS[localStage];
+  const stageLabel = getFunnelStageLabel(t, localStage);
   const nextActionAt = (item as any).next_action_at as string | null;
   const lastActivityAt = (item as any).last_activity_at as string | null;
   
@@ -74,8 +81,12 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
           )}
         </div>
         <Select
-          value={item.stage}
-          onValueChange={(value) => onStageChange(value as FunnelStage)}
+          value={localStage}
+          onValueChange={(value) => {
+            const newStage = value as FunnelStage;
+            setLocalStage(newStage);
+            onStageChange(newStage);
+          }}
           disabled={isUpdating}
         >
           <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageColor, 'text-white border-0 hover:opacity-90')} data-testid="stage-select">
