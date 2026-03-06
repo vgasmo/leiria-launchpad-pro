@@ -81,8 +81,12 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
           )}
         </div>
         <Select
-          value={item.stage}
-          onValueChange={(value) => onStageChange(value as FunnelStage)}
+          value={localStage}
+          onValueChange={(value) => {
+            const newStage = value as FunnelStage;
+            setLocalStage(newStage);
+            onStageChange(newStage);
+          }}
           disabled={isUpdating}
         >
           <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageColor, 'text-white border-0 hover:opacity-90')} data-testid="stage-select">
