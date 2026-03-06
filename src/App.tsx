@@ -12,6 +12,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
+import { AccessDenied } from "@/components/ui/AccessDenied";
 
 // Eager: lightweight / critical-path pages
 import Login from "./pages/Login";
