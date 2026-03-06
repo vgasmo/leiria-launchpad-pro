@@ -45,7 +45,9 @@ test.describe('Consultant E2E Flow', () => {
     if (await nextActionBtn.isVisible()) {
       await nextActionBtn.click();
       // Fill dialog
-      await page.locator('input[type="date"], [aria-label="Date"]').fill(new Date().toISOString().split('T')[0]); // Today
+      const now = new Date();
+      const dateTimeValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      await page.locator('input[type="datetime-local"]').fill(dateTimeValue);
       await page.locator('textarea, input[type="text"]').last().fill('E2E Test Action');
       await page.getByRole('button', { name: /save|guardar|update/i }).click();
       // Verify it appears in drawer
