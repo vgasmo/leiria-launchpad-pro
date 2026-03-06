@@ -43,8 +43,8 @@ async function loginAndSave(
     await emailInput.waitFor({ state: 'visible', timeout: 10_000 });
     await emailInput.fill(creds.email);
 
-    // Fill password
-    const passwordInput = page.getByLabel(/password|senha/i);
+    // Fill password (PT label is "Palavra-passe")
+    const passwordInput = page.getByLabel(/password|senha|palavra/i);
     await passwordInput.fill(creds.password);
 
     // Submit
