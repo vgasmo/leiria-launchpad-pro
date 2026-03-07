@@ -7,12 +7,15 @@
 
 ## What Changed
 
-### P0.1 — Claim-First Founder Onboarding
-- **FounderDashboard** empty state now directs founders to `/claim-startup` as primary CTA ("Verificar a Minha Startup")
-- "Create Startup" is demoted to a small secondary link below the fold
-- **MyWorkspaces** header button for founders with no workspace now navigates to `/claim-startup` instead of opening CreateStartupDialog
-- **WorkspaceEmptyState** (list view fallback) now shows "Verificar a Minha Startup" instead of "Criar a Tua Startup"
-- All copy communicates invite-only platform and claim-first expectations
+### P0.1 — Claim-First Founder Onboarding (Route-Level Enforcement)
+- **`useFounderOnboardingState` hook** — single read-only source of truth for founder status (`has_active_workspace`, `has_pending_claim`, `has_pending_workspace`, `needs_claim_verification`, `staff_exempt`)
+- **`ProtectedRoute`** now enforces claim-first at route level: founders without an active workspace are redirected to `/claim-startup` (exempt: `/settings`, staff, mentors)
+- **`ClaimStartup` page** redesigned with explicit state machine: `idle` → `ready_to_verify` → `verifying` → `auto_claimed` / `pending_review` / `error`. No longer auto-calls `claim_startup()` RPC on mount — verification is user-initiated.
+- **FounderDashboard** shows persistent pending-claim state (via hook) even after page reload
+- "Create Startup" completely removed from primary surfaces — verification is the only default path
+- **WorkspaceEmptyState** simplified: founder variant shows only claim-first CTA
+- All founder copy unified across signup, login, claim, dashboard, and empty states
+- Copy language changed from "Reclamar" to "Verificar" across PT/EN i18n
 
 ### P0.2 — Cache/Session Hygiene
 - `signOut()` now explicitly clears `sl-query-cache` and `sl-cache-uid` from localStorage
