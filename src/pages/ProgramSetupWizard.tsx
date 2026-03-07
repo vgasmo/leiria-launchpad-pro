@@ -128,7 +128,7 @@ export default function ProgramSetupWizard() {
   const handleSaveAndContinue = async () => {
     // Auto-save happens via step components
     handleNext();
-    toast.success('Progress saved');
+    toast.success(t('programSetup.progressSaved'));
   };
 
   const handleUpdateDraft = async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
