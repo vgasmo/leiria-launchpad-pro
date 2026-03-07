@@ -36,7 +36,7 @@ import {
   type Room,
   type FloorMap
 } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { useFunnelItems } from '@/hooks/useFunnel';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';

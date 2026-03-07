@@ -18,7 +18,7 @@ import {
   useCreateSpaceAllocation,
   type OfficeSpace 
 } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';

@@ -22,7 +22,7 @@ import {
   useSpaceWaitingList,
   useFulfillWaitingListRequest,
 } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { RoomAllocationHistory } from './RoomAllocationHistory';

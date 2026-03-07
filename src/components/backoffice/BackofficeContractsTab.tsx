@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, FileText, Search, Clock, AlertTriangle, Cake, Zap, Building2 } from 'lucide-react';
 import { useContracts, useIncubationTypes, useBuildings, useCreateContract, useUpdateContract, type StartupContract, type IncubationType } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { format, differenceInMonths, addYears, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
