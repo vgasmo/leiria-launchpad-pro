@@ -148,7 +148,7 @@ export default function ProgramSetupWizard() {
       publishedRef.current = true;
       triggerConfetti();
       await publishDraft.mutateAsync(activeDraftId);
-      toast.success('🎉 Program published successfully!');
+      toast.success(t('programSetup.publishSuccess'));
       setTimeout(() => navigate('/admin'), 1500);
     } catch (error) {
       publishedRef.current = false;
