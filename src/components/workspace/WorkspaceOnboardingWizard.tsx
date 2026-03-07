@@ -663,8 +663,8 @@ export function WorkspaceOnboardingWizard({
                           }}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{m.title}</p>
-                          <p className="text-xs text-muted-foreground">{m.description}</p>
+                          <p className="font-medium text-sm">{pickLang(m.title, lang)}</p>
+                          <p className="text-xs text-muted-foreground">{pickLang(m.description, lang)}</p>
                           <Badge variant="outline" className="mt-1 text-xs">
                             {t('onboardingWizard.weeks', { defaultValue: '~{{count}} weeks', count: m.weeksOut })}
                           </Badge>
