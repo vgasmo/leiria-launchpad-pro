@@ -304,7 +304,8 @@ export function WorkspaceOnboardingWizard({
 }: WorkspaceOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('welcome');
   const [prevStep, setPrevStep] = useState<WizardStep>('welcome');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language === 'pt' ? 'pt' : 'en';
   const [isProcessing, setIsProcessing] = useState(false);
   const confettiTriggered = useRef(false);
   
