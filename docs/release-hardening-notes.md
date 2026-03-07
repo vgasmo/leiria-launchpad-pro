@@ -7,12 +7,15 @@
 
 ## What Changed
 
-### P0.1 — Claim-First Founder Onboarding
-- **FounderDashboard** empty state now directs founders to `/claim-startup` as primary CTA ("Verificar a Minha Startup")
-- "Create Startup" is demoted to a small secondary link below the fold
-- **MyWorkspaces** header button for founders with no workspace now navigates to `/claim-startup` instead of opening CreateStartupDialog
-- **WorkspaceEmptyState** (list view fallback) now shows "Verificar a Minha Startup" instead of "Criar a Tua Startup"
-- All copy communicates invite-only platform and claim-first expectations
+### P0.1 — Claim-First Founder Onboarding (Route-Level Enforcement)
+- **`useFounderOnboardingState` hook** — single read-only source of truth for founder status (`has_active_workspace`, `has_pending_claim`, `has_pending_workspace`, `needs_claim_verification`, `staff_exempt`)
+- **`ProtectedRoute`** now enforces claim-first at route level: founders without an active workspace are redirected to `/claim-startup` (exempt: `/settings`, staff, mentors)
+- **`ClaimStartup` page** redesigned with explicit state machine: `idle` → `ready_to_verify` → `verifying` → `auto_claimed` / `pending_review` / `error`. No longer auto-calls `claim_startup()` RPC on mount — verification is user-initiated.
+- **FounderDashboard** shows persistent pending-claim state (via hook) even after page reload
+- "Create Startup" completely removed from primary surfaces — verification is the only default path
+- **WorkspaceEmptyState** simplified: founder variant shows only claim-first CTA
+- All founder copy unified across signup, login, claim, dashboard, and empty states
+- Copy language changed from "Reclamar" to "Verificar" across PT/EN i18n
 
 ### P0.2 — Cache/Session Hygiene
 - `signOut()` now explicitly clears `sl-query-cache` and `sl-cache-uid` from localStorage
@@ -55,14 +58,18 @@
 - Sentry/structured logging integration
 - CRM list view pagination (already paginated but uses broad queries)
 - Full audit of all `select('*')` across all hooks (only highest-impact fixed)
-- Auto-redirect from `/my-workspaces` to `/claim-startup` for founders (currently handled by FounderDashboard UX, not a hard redirect)
+- Staff-side claim review UX improvements (matching hints, auto-suggest workspace)
 
 ## Manual Validation Checklist
-- [ ] Sign up as new founder (allowlisted) → should see "Verificar a Minha Startup" as primary CTA
+- [ ] Sign up as new founder (allowlisted) → should be redirected to `/claim-startup` automatically
+- [ ] On `/claim-startup`: see "Verificar Agora" CTA (not auto-triggered)
 - [ ] Click verify → claim flow runs, shows correct status (auto_claimed / pending / error)
-- [ ] "Create new startup" link visible but secondary (below fold)
+- [ ] After pending claim: revisit `/my-workspaces` → auto-redirected back to `/claim-startup` with pending state
+- [ ] "Create new startup" is NOT visible on any primary founder surface
 - [ ] Log out → check localStorage: `sl-query-cache` should be cleared
 - [ ] Log in as different user → verify no stale data from previous user
+- [ ] Staff/admin users are NOT affected by claim-first redirect
+- [ ] Mentor users are NOT affected by claim-first redirect
 - [ ] Workspace list loads correctly with explicit column select
 - [ ] Workspace detail page loads all tabs correctly
 - [ ] CI remains green
@@ -70,6 +77,7 @@
 
 ## What to Monitor First Week
 - Claim success rate vs pending rate (check `startup_claim_requests` table)
-- Any founder complaints about "can't find my startup"
+- Any founder complaints about "can't find my startup" or redirect loops
 - Edge function invocation errors in logs
 - React Query cache size in production (should be smaller with 4h TTL)
+- `useFounderOnboardingState` query performance (should be lightweight, 30s stale time)

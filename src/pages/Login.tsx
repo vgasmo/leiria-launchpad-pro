@@ -118,7 +118,7 @@ export default function Login() {
         return;
       }
       if (!allowed) {
-        setError(t('login.inviteOnly', 'Registration is currently invite-only. Contact staff if you believe this is an error.'));
+        setError(t('login.inviteOnly', 'O registo está atualmente limitado a convites. Se acredita que deveria ter acesso, contacte a equipa Startup Leiria.'));
         setIsSubmitting(false);
         return;
       }

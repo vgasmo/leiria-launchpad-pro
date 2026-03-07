@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Rocket,
-  Plus,
   Clock,
   RotateCcw,
   BookOpenCheck,
   X,
-  Zap,
-  Sparkles,
+  Shield,
 } from 'lucide-react';
 import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,6 +30,7 @@ import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { AiPulseCard } from '@/components/dashboard/AiPulseCard';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
+import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
@@ -113,7 +112,9 @@ export function FounderDashboard({
     );
   }
 
-  // Pending state
+  // Pending state — use the onboarding state hook for a durable pending experience
+  const founderState = useFounderOnboardingState();
+
   if (pendingWorkspaces.length > 0 && workspaces.length === 0) {
     return (
       <div className="space-y-6">
@@ -159,7 +160,39 @@ export function FounderDashboard({
     );
   }
 
-  // No workspace yet → Claim-first flow (P0.1)
+  // Persistent pending claim state (P0.2) — visible even after page reload
+  if (!workspace && founderState.status === 'has_pending_claim') {
+    return (
+      <div className="space-y-6">
+        <Card className="relative overflow-hidden border-0 shadow-card">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <CardContent className="relative p-6 md:p-10 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+              <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
+              {t('claimStartup.pendingTitle', { defaultValue: 'Pedido em Análise' })}
+            </h3>
+            <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
+              {t('claimStartup.pendingDesc', { defaultValue: 'Não encontrámos uma correspondência automática, mas a sua equipa irá analisar e associá-lo manualmente. Isto é normal no modelo por convite.' })}
+            </p>
+            {founderState.pendingClaimEmail && (
+              <p className="text-xs text-muted-foreground bg-muted/50 inline-block rounded-lg px-3 py-1.5 mt-2">
+                {founderState.pendingClaimEmail}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-3">
+              {t('claimStartup.pendingTiming', { defaultValue: 'Este processo é geralmente concluído em poucos dias úteis.' })}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // No workspace yet — claim-first flow. 
+  // Note: ProtectedRoute should normally redirect to /claim-startup before reaching here,
+  // but this serves as a fallback safety net.
   if (!workspace) {
     return (
       <div className="space-y-6">
@@ -174,26 +207,14 @@ export function FounderDashboard({
             <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
               {t('founder.claimFirst.desc', { defaultValue: 'Esta plataforma é apenas por convite. A sua startup pode já estar preparada no sistema. Vamos verificar e associá-la à sua conta.' })}
             </p>
-            <p className="text-sm text-primary/80 font-medium max-w-sm mx-auto mb-6 flex items-center justify-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              {t('founder.claimFirst.value', { defaultValue: 'A sua startup pode já estar à sua espera.' })}
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-              <Button size="default" onClick={() => navigate('/claim-startup')} className="gap-2 shadow-lg">
-                <Rocket className="h-4 w-4" />
-                {t('founder.claimFirst.cta', { defaultValue: 'Verificar a Minha Startup' })}
-              </Button>
+            <div className="flex items-center justify-center gap-2 text-sm text-primary/80 font-medium max-w-sm mx-auto mb-6">
+              <Shield className="h-4 w-4 shrink-0" />
+              {t('claimStartup.inviteOnlyNote', { defaultValue: 'Plataforma apenas por convite. A verificação é rápida e segura.' })}
             </div>
-            {/* Demoted: create-new as secondary exception path */}
-            <div className="mt-6 pt-4 border-t border-border/50">
-              <p className="text-xs text-muted-foreground mb-2">
-                {t('founder.claimFirst.noMatch', { defaultValue: 'A sua startup não foi pré-registada? Pode solicitar a criação de um novo registo.' })}
-              </p>
-              <Button variant="ghost" size="sm" onClick={onCreateStartup} className="text-xs text-muted-foreground hover:text-foreground gap-1">
-                <Plus className="h-3 w-3" />
-                {t('founder.claimFirst.createNew', { defaultValue: 'Registar nova startup' })}
-              </Button>
-            </div>
+            <Button size="default" onClick={() => navigate('/claim-startup')} className="gap-2 shadow-lg">
+              <Rocket className="h-4 w-4" />
+              {t('founder.claimFirst.cta', { defaultValue: 'Verificar a Minha Startup' })}
+            </Button>
           </CardContent>
         </Card>
       </div>

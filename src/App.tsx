@@ -11,6 +11,7 @@ import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
+import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
 import { AccessDenied } from "@/components/ui/AccessDenied";
 
@@ -120,8 +121,9 @@ queryClient.getQueryCache().subscribe(persistCache);
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
-  const { user, isLoading, isAuthReady, isAdmin, isStaff, isFounder, isConsultor, isAccountPending, isAccountSuspended, roles } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isStaff, isAccountPending, isAccountSuspended } = useAuth();
   const { needsNda, isLoading: ndaLoading } = useMentorNdaStatus();
+  const founderState = useFounderOnboardingState();
   const location = useLocation();
 
   // Wait for both auth check AND profile/roles to be fully loaded
@@ -155,17 +157,17 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
     return <Navigate to="/mentor-nda" replace />;
   }
 
-  // P0.1 Claim-first gate: founders with no workspace should be sent to /claim-startup
-  // Skip if already on claim page, or if user is also staff/mentor
+  // P0.1 Claim-first gate: founders without an active workspace are redirected to /claim-startup
+  // Exempt routes: /claim-startup itself, /settings, sign-out flows
+  const claimExemptPaths = ['/claim-startup', '/settings'];
   if (
-    isFounder &&
-    !isStaff &&
-    !roles.includes('mentor_externo') &&
-    location.pathname !== '/claim-startup' &&
-    location.pathname !== '/settings'
+    !founderState.isLoading &&
+    founderState.status !== 'not_founder' &&
+    founderState.status !== 'staff_exempt' &&
+    founderState.status !== 'has_active_workspace' &&
+    !claimExemptPaths.includes(location.pathname)
   ) {
-    // We use a lightweight check via a dedicated hook rendered inside ProtectedRoute
-    // Instead, we let the FounderDashboard handle claim-first routing (see below)
+    return <Navigate to="/claim-startup" replace />;
   }
 
   // Staff-only routes (admin, consultor, backoffice)
