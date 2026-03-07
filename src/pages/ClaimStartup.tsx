@@ -47,7 +47,7 @@ export default function ClaimStartup() {
     try {
       const { data, error } = await supabase.rpc('claim_startup');
       if (error) {
-        console.error('[ClaimStartup] RPC error:', error);
+        logger.error('claim_rpc_failed', { userId: user.id.slice(0, 8) }, error);
         setPageState('error');
         return;
       }
