@@ -43,9 +43,9 @@ export default function ClaimStartup() {
   // P0.1 Safety: non-founders should never see the claim UI
   // Strict profile-role guard: only 'founder' role may access this page
   useEffect(() => {
-    if (!profile) return; // still loading
-    const role = profile.role;
-    if (role !== 'founder') {
+    if (!profile || roles.length === 0) return; // still loading
+    const isFounder = roles.includes('founder');
+    if (!isFounder) {
       navigate('/', { replace: true });
       return;
     }
