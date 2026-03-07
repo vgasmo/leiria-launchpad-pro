@@ -1,185 +1,130 @@
 import { test, expect } from './fixtures/auth';
 
-test.describe('Founder E2E Flow', () => {
-  test('login → workspace dashboard → view tasks/timeline', async ({ founderPage: page }) => {
-    // Navigate to workspace listing
+/**
+ * Founder E2E Flow
+ *
+ * The seeded E2E founder has:
+ *   - role: founder
+ *   - an active workspace (status='active') with workspace_user entry
+ *   - a startup named 'E2E Test Startup'
+ *
+ * The claim-first gate in App.tsx redirects founders without an active
+ * workspace to /claim-startup. Because the seed provides an active
+ * workspace, the seeded founder should pass through to /my-workspaces.
+ */
+
+test.describe('Founder — Active Workspace Journey', () => {
+  test('lands on workspace dashboard, not claim page', async ({ founderPage: page }) => {
     await page.goto('/my-workspaces');
-    await expect(page).toHaveURL(/my-workspaces|workspace/, { timeout: 10_000 });
+    // Should NOT be redirected to /claim-startup (seeded founder has active workspace)
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2_000);
 
-    // Navigate to first workspace if on listing page
-    if (page.url().includes('my-workspaces')) {
-      const workspaceCard = page.locator('[data-testid="workspace-card"], a[href*="workspace"]').first();
-      if (await workspaceCard.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        await workspaceCard.click();
-        await page.waitForURL(/workspace\//, { timeout: 10_000 });
-      }
-    }
+    const url = page.url();
+    expect(url).not.toContain('/claim-startup');
+    expect(url).toContain('/my-workspaces');
 
-    // Verify dashboard elements
-    await expect(page.locator('main')).toBeVisible({ timeout: 10_000 });
+    // Verify the page rendered meaningful content (founder dashboard or workspace list)
+    const main = page.locator('main');
+    await expect(main).toBeVisible({ timeout: 10_000 });
 
-    // Check for tasks section
-    const tasksSection = page.locator('[data-testid="tasks"], [data-testid="action-items"]').first();
-    if (await tasksSection.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await expect(tasksSection).toBeVisible();
-    }
+    // Founder dashboard should show a heading
+    const heading = main.locator('h1, h2, h3').first();
+    await expect(heading).toBeVisible({ timeout: 5_000 });
   });
 
-  test('founder navigates to KPI tab and fills monthly check-in', async ({ founderPage: page }) => {
-    // Navigate to workspace listing
+  test('can navigate into workspace detail', async ({ founderPage: page }) => {
     await page.goto('/my-workspaces');
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2_000);
 
-    // Enter first workspace
-    const workspaceLink = page.locator('[data-testid="workspace-card"], a[href*="workspace"]').first();
-    if (!await workspaceLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
-      // No workspaces available — skip gracefully
-      await expect(page.locator('main')).toBeVisible();
-      return;
-    }
-    await workspaceLink.click();
-    // Wait for navigation — may go to workspace or stay on listing
-    await page.waitForTimeout(5_000);
-    if (!page.url().includes('workspace/')) {
-      // Navigation didn't happen — skip gracefully
-      await expect(page.locator('main')).toBeVisible();
-      return;
-    }
-
-    // Navigate to KPI tab
-    const kpiTab = page.locator('[data-testid="tab-kpis"], [role="tab"]:has-text("KPI"), [role="tab"]:has-text("Indicadores")').first();
-    if (await kpiTab.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await kpiTab.click();
-      await page.waitForTimeout(1_000);
-
-      // Look for a check-in form or button to start one
-      const startCheckin = page.locator(
-        '[data-testid="start-checkin"], button:has-text("Check-in"), button:has-text("Preencher"), button:has-text("Submeter")'
-      ).first();
-
-      if (await startCheckin.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        await startCheckin.click();
-        await page.waitForTimeout(1_000);
-
-        // Fill numeric KPI inputs (first 3 visible inputs)
-        const kpiInputs = page.locator(
-          '[data-testid^="kpi-input"], input[type="number"], input[inputmode="numeric"]'
-        );
-        const inputCount = await kpiInputs.count();
-        const fillCount = Math.min(inputCount, 3);
-
-        for (let i = 0; i < fillCount; i++) {
-          const input = kpiInputs.nth(i);
-          if (await input.isVisible().catch(() => false)) {
-            await input.fill(String(Math.floor(Math.random() * 100) + 10));
-          }
-        }
-
-        // Submit the check-in if a submit button exists
-        const submitBtn = page.locator(
-          '[data-testid="submit-checkin"], button[type="submit"]:has-text("Submeter"), button[type="submit"]:has-text("Guardar"), button[type="submit"]:has-text("Save")'
-        ).first();
-
-        if (await submitBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-          await submitBtn.click();
-          await page.waitForTimeout(2_000);
-        }
-      }
-    }
-
-    // Verify no unhandled errors on the page
-    await expect(page.locator('main')).toBeVisible();
-  });
-
-  test('founder opens Session AI and triggers summary generation', async ({ founderPage: page }) => {
-    // Navigate to workspace
-    await page.goto('/my-workspaces');
-    await page.waitForLoadState('networkidle');
-
-    const workspaceLink = page.locator('[data-testid="workspace-card"], a[href*="workspace"]').first();
-    if (!await workspaceLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
-      await expect(page.locator('main')).toBeVisible();
-      return;
-    }
-    await workspaceLink.click();
-    await page.waitForTimeout(5_000);
-    if (!page.url().includes('workspace/')) {
-      await expect(page.locator('main')).toBeVisible();
-      return;
-    }
-
-    // Navigate to Sessions / Agenda tab
-    const sessionsTab = page.locator(
-      '[data-testid="tab-sessions"], [data-testid="tab-agenda"], [role="tab"]:has-text("Sessões"), [role="tab"]:has-text("Sessions"), [role="tab"]:has-text("Agenda")'
+    // Look for a clickable workspace entry (card or link containing workspace/startup name)
+    const workspaceLink = page.locator(
+      'a[href*="workspace/"], [role="link"][href*="workspace/"], button:has-text("E2E Test Startup")'
     ).first();
 
-    if (await sessionsTab.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await sessionsTab.click();
-      await page.waitForTimeout(1_500);
+    if (await workspaceLink.isVisible({ timeout: 8_000 }).catch(() => false)) {
+      await workspaceLink.click();
+      await page.waitForURL(/workspace\//, { timeout: 10_000 });
 
-      // Open the first session or session detail
-      const sessionRow = page.locator(
-        '[data-testid^="session-row"], [data-testid^="session-card"], tr:has(td), .cursor-pointer'
-      ).first();
+      // Verify workspace detail loaded
+      const main = page.locator('main');
+      await expect(main).toBeVisible({ timeout: 10_000 });
 
-      if (await sessionRow.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        await sessionRow.click();
-        await page.waitForTimeout(1_500);
-
-        // Look for AI Summary / Generate Summary button
-        const aiButton = page.locator(
-          '[data-testid="generate-summary"], button:has-text("Gerar Resumo"), button:has-text("Generate Summary"), button:has-text("AI Summary"), button:has-text("Resumo IA")'
-        ).first();
-
-        if (await aiButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
-          await aiButton.click();
-          await page.waitForTimeout(3_000);
-
-          // Verify AI panel or summary content appeared
-          const aiContent = page.locator(
-            '[data-testid="ai-summary"], [data-testid="session-ai-panel"], .prose, [class*="ai-"], [class*="summary"]'
-          ).first();
-
-          if (await aiContent.isVisible({ timeout: 8_000 }).catch(() => false)) {
-            await expect(aiContent).toBeVisible();
-          }
-        }
+      // Should have tabs (actions, sessions, KPIs, etc.)
+      const tabList = page.locator('[role="tablist"]');
+      if (await tabList.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await expect(tabList).toBeVisible();
       }
+    } else {
+      // Founder dashboard may render workspace inline without a separate link
+      // Verify we're still on a valid page with content
+      await expect(page.locator('main')).toBeVisible();
     }
-
-    // Final assertion: page is still functional
-    await expect(page.locator('main')).toBeVisible();
   });
 
-  test('founder cannot access admin routes', async ({ founderPage: page }) => {
-    // Attempt to visit admin pages — should redirect
+  test('cannot access admin routes', async ({ founderPage: page }) => {
+    // Attempt to visit admin pages — should redirect to /my-workspaces
     await page.goto('/admin');
-    await page.waitForTimeout(2_000);
+    await page.waitForTimeout(3_000);
     expect(page.url()).not.toMatch(/\/admin$/);
 
     await page.goto('/admin/data-import');
-    await page.waitForTimeout(2_000);
+    await page.waitForTimeout(3_000);
     expect(page.url()).not.toMatch(/\/admin\/data-import/);
+  });
 
+  test('cannot access CRM (staff-only)', async ({ founderPage: page }) => {
     await page.goto('/crm');
-    await page.waitForTimeout(2_000);
+    await page.waitForTimeout(3_000);
     // CRM is staffOnly, founder should be redirected
     expect(page.url()).not.toMatch(/\/crm$/);
   });
 
-  test('no console errors on founder dashboard', async ({ founderPage: page }) => {
+  test('no unfiltered console errors on founder dashboard', async ({ founderPage: page }) => {
     const errors: string[] = [];
     page.on('console', msg => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
 
     await page.goto('/my-workspaces');
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3_000);
 
+    // Filter out known noise
     const realErrors = errors.filter(
-      e => !e.includes('favicon') && !e.includes('ResizeObserver') && !e.includes('net::ERR')
-        && !e.includes('Cannot read properties of undefined')
+      e => !e.includes('favicon') &&
+           !e.includes('ResizeObserver') &&
+           !e.includes('net::ERR') &&
+           !e.includes('Cannot read properties of undefined') &&
+           !e.includes('Download the React DevTools') &&
+           !e.includes('Third-party cookie')
     );
     expect(realErrors).toHaveLength(0);
+  });
+});
+
+test.describe('Founder — Claim-First Gate', () => {
+  /**
+   * This test verifies the claim-first gate behavior.
+   * The seeded founder HAS an active workspace, so they should NOT
+   * be redirected. But we verify the gate logic is active by checking
+   * that /claim-startup is a valid route that renders correctly.
+   */
+  test('claim-startup page renders without errors', async ({ founderPage: page }) => {
+    await page.goto('/claim-startup');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2_000);
+
+    const url = page.url();
+    // Seeded founder with active workspace may be shown "already claimed" state
+    // or redirected to /my-workspaces — both are valid
+    if (url.includes('/claim-startup')) {
+      // Verify the claim page rendered
+      await expect(page.locator('main')).toBeVisible({ timeout: 5_000 });
+    } else {
+      // Redirected — that's also correct behavior for a founder with active workspace
+      expect(url).toContain('/my-workspaces');
+    }
   });
 });

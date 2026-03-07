@@ -15,7 +15,7 @@ test.describe('Accessibility Smoke — Consultant', () => {
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
-      .disableRules(['color-contrast', 'button-name']) // button-name flags icon-only shadcn/radix buttons
+      .disableRules(['color-contrast', 'button-name']) // button-name flags icon-only shadcn/radix buttons; aria-command-name addressed by adding aria-labels
       .analyze();
 
     const critical = results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');

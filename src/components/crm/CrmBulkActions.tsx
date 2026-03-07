@@ -300,7 +300,7 @@ export function CrmBulkActions({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8" disabled={isProcessing}>
+                  <Button variant="outline" size="sm" className="h-8" disabled={isProcessing} aria-label={t('common.moreActions', { defaultValue: 'More actions' })}>
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
