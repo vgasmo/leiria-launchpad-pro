@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Rocket,
-  Clock,
   RotateCcw,
   BookOpenCheck,
   X,
-  Shield,
 } from 'lucide-react';
-import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,13 +27,11 @@ import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { AiPulseCard } from '@/components/dashboard/AiPulseCard';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
-import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
 import { toast } from 'sonner';
-import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
 import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
