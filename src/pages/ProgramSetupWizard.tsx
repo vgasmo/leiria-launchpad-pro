@@ -352,8 +352,7 @@ export default function ProgramSetupWizard() {
             {currentStep !== 'review' ? (
               <Button type="button" onClick={handleSaveAndContinue} disabled={updateDraft.isPending}>
                 <Save className="h-4 w-4 mr-1" />
-                Save & Continue
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t('programSetup.saveAndContinue')}
               </Button>
             ) : (
               <Button
