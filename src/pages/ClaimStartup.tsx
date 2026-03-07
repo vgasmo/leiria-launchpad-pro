@@ -80,7 +80,7 @@ export default function ClaimStartup() {
         queryClient.invalidateQueries({ queryKey: ['founder-onboarding-state'] });
       }
     } catch (err) {
-      console.error('[ClaimStartup] Unexpected error:', err);
+      logger.error('claim_unexpected_error', { userId: user?.id?.slice(0, 8) }, err);
       setPageState('error');
     }
   }, [user, navigate, t, queryClient]);
