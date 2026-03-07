@@ -430,8 +430,8 @@ export function WorkspaceOnboardingWizard({
         const m = milestonesToCreate[i];
         // Create the milestone first
         const createdMilestone = await createMilestone.mutateAsync({
-          title: m.title,
-          description: m.description,
+          title: pickLang(m.title, lang),
+          description: pickLang(m.description, lang),
           target_date: format(addWeeks(new Date(), m.weeksOut), 'yyyy-MM-dd'),
           position: i,
         });
