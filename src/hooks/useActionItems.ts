@@ -55,7 +55,7 @@ export function useActionItems(workspaceId: string | undefined) {
       
       const { data, error } = await supabase
         .from('action_items')
-        .select('*')
+        .select('id, title, description, status, priority, due_date, owner_user_id, session_id, milestone_id, workspace_id, created_at, updated_at, completed_at, created_by, planner_sync_status')
         .eq('workspace_id', workspaceId)
         .order('due_date', { ascending: true, nullsFirst: false });
 

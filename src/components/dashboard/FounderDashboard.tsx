@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Rocket,
-  Clock,
   RotateCcw,
   BookOpenCheck,
   X,
-  Shield,
 } from 'lucide-react';
-import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,13 +27,11 @@ import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { AiPulseCard } from '@/components/dashboard/AiPulseCard';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
-import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
 import { toast } from 'sonner';
-import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
 import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
@@ -112,111 +107,13 @@ export function FounderDashboard({
     );
   }
 
-  // Pending state — use the onboarding state hook for a durable pending experience
-  const founderState = useFounderOnboardingState();
-
-  if (pendingWorkspaces.length > 0 && workspaces.length === 0) {
-    return (
-      <div className="space-y-6">
-        <Card className="border-warning/30 bg-warning/5">
-          <CardContent className="p-5">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
-                <Clock className="h-5 w-5 text-warning" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground mb-1">
-                  {t('founder.applicationUnderReview')}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {t('founder.applicationBeingReviewed')}
-                </p>
-                
-                <div className="space-y-2">
-                  {pendingWorkspaces.map(pw => (
-                    <div key={pw.id} className="flex items-center gap-3 p-2.5 bg-muted/50 rounded-md">
-                      <Rocket className="h-4 w-4 text-warning" />
-                      <div className="flex-1">
-                        <span className="font-medium text-sm">{pw.startup?.name}</span>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{pw.program?.name}</Badge>
-                          <span>•</span>
-                          <StageBadge stage={pw.stage} size="sm" />
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">{t('founder.pending')}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="text-center text-muted-foreground">
-          <p>{t('founder.responseTime')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Persistent pending claim state (P0.2) — visible even after page reload
-  if (!workspace && founderState.status === 'has_pending_claim') {
-    return (
-      <div className="space-y-6">
-        <Card className="relative overflow-hidden border-0 shadow-card">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <CardContent className="relative p-6 md:p-10 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-              <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-            </div>
-            <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
-              {t('claimStartup.pendingTitle', { defaultValue: 'Pedido em Análise' })}
-            </h3>
-            <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
-              {t('claimStartup.pendingDesc', { defaultValue: 'Não encontrámos uma correspondência automática, mas a sua equipa irá analisar e associá-lo manualmente. Isto é normal no modelo por convite.' })}
-            </p>
-            {founderState.pendingClaimEmail && (
-              <p className="text-xs text-muted-foreground bg-muted/50 inline-block rounded-lg px-3 py-1.5 mt-2">
-                {founderState.pendingClaimEmail}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground mt-3">
-              {t('claimStartup.pendingTiming', { defaultValue: 'Este processo é geralmente concluído em poucos dias úteis.' })}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // No workspace yet — claim-first flow. 
-  // Note: ProtectedRoute should normally redirect to /claim-startup before reaching here,
-  // but this serves as a fallback safety net.
+  // ProtectedRoute enforces claim-first gate — founders without an active workspace
+  // are redirected to /claim-startup before reaching this component.
+  // This fallback handles the brief render before redirect completes.
   if (!workspace) {
     return (
-      <div className="space-y-6">
-        <Card className="relative overflow-hidden border-0 shadow-card">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <CardContent className="relative p-6 md:p-10 text-center">
-            <EmptyStateIllustration type="rocket" size="lg" className="mx-auto mb-4" />
-            <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
-              {t('founder.claimFirst.title', { defaultValue: 'Bem-vindo à plataforma' })}
-            </h3>
-            <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
-              {t('founder.claimFirst.desc', { defaultValue: 'Esta plataforma é apenas por convite. A sua startup pode já estar preparada no sistema. Vamos verificar e associá-la à sua conta.' })}
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-primary/80 font-medium max-w-sm mx-auto mb-6">
-              <Shield className="h-4 w-4 shrink-0" />
-              {t('claimStartup.inviteOnlyNote', { defaultValue: 'Plataforma apenas por convite. A verificação é rápida e segura.' })}
-            </div>
-            <Button size="default" onClick={() => navigate('/claim-startup')} className="gap-2 shadow-lg">
-              <Rocket className="h-4 w-4" />
-              {t('founder.claimFirst.cta', { defaultValue: 'Verificar a Minha Startup' })}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="space-y-6 max-w-5xl">
+        <ContentSkeleton type="stats" count={3} />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,7 +47,7 @@ export default function ClaimStartup() {
     try {
       const { data, error } = await supabase.rpc('claim_startup');
       if (error) {
-        console.error('[ClaimStartup] RPC error:', error);
+        logger.error('claim_rpc_failed', { userId: user.id.slice(0, 8) }, error);
         setPageState('error');
         return;
       }
@@ -79,7 +80,7 @@ export default function ClaimStartup() {
         queryClient.invalidateQueries({ queryKey: ['founder-onboarding-state'] });
       }
     } catch (err) {
-      console.error('[ClaimStartup] Unexpected error:', err);
+      logger.error('claim_unexpected_error', { userId: user?.id?.slice(0, 8) }, err);
       setPageState('error');
     }
   }, [user, navigate, t, queryClient]);
