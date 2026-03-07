@@ -72,11 +72,13 @@ export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: bool
         }
       }
       
-      // Fetch workspaces with joined data
+      // P0.3: Fetch workspaces with only needed columns
       let query = supabase
         .from('workspaces')
         .select(`
-          *,
+          id, startup_id, program_id, stage, status, 
+          health_score, health_score_override, health_notes,
+          priority_level, priority_notes, created_at, updated_at,
           startup:startups(id, name, description, logo_url),
           program:programs(id, name)
         `)
