@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Rocket,
-  Plus,
   Clock,
   RotateCcw,
   BookOpenCheck,
   X,
-  Zap,
-  Sparkles,
+  Shield,
 } from 'lucide-react';
 import { EmptyStateIllustration } from '@/components/ui/EmptyStateIllustration';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,6 +30,7 @@ import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { AiPulseCard } from '@/components/dashboard/AiPulseCard';
 import { WorkspaceWithDetails, PendingWorkspace } from '@/hooks/useWorkspaces';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
+import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { HealthScore } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgressStreak } from '@/hooks/useProgressStreak';
