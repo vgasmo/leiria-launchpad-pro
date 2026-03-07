@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 
 export interface AggregatedDocument {
   id: string;
