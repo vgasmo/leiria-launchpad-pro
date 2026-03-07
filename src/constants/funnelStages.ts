@@ -54,7 +54,7 @@ export const STAGE_LABEL_KEYS: Record<FunnelStage, string> = {
   archived: 'pipeline.stages.archived',
 };
 
-/** @deprecated Use STAGE_LABEL_KEYS with t() instead */
+/** @deprecated Use STAGE_LABEL_KEYS with t() instead — kept only for non-i18n fallback contexts */
 export const STAGE_LABELS: Record<FunnelStage, string> = {
   new: 'New',
   first_contact_booked: 'Meeting Booked',
@@ -69,13 +69,18 @@ export const STAGE_LABELS: Record<FunnelStage, string> = {
   archived: 'Archived',
 };
 
-/** Stage options for dropdowns */
+/**
+ * @deprecated Use getFunnelStageOptions(t, FUNNEL_STAGES) from stageLabels.ts instead.
+ * These static options do not support i18n and render English labels in PT UI.
+ */
 export const STAGE_OPTIONS: { value: FunnelStage; label: string }[] = FUNNEL_STAGES.map((s) => ({
   value: s,
   label: STAGE_LABELS[s],
 }));
 
-/** Pipeline stage options (excludes incubating/accelerating) */
+/**
+ * @deprecated Use getFunnelStageOptions(t, PIPELINE_STAGES) from stageLabels.ts instead.
+ */
 export const PIPELINE_STAGE_OPTIONS = PIPELINE_STAGES.map((s) => ({
   value: s,
   label: STAGE_LABELS[s],
