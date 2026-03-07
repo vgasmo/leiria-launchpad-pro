@@ -298,11 +298,11 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                   </SelectTrigger>
                   <SelectContent>
                     {(stages && stages.length > 0 ? stages : [
-                      { stage_key: 'ideation', name: 'Ideation' },
-                      { stage_key: 'validation', name: 'Validation' },
-                      { stage_key: 'mvp', name: 'MVP' },
-                      { stage_key: 'growth', name: 'Growth' },
-                      { stage_key: 'scale', name: 'Scale' },
+                      { stage_key: 'ideation', name: t('stages.ideation', { defaultValue: 'Ideation' }) },
+                      { stage_key: 'validation', name: t('stages.validation', { defaultValue: 'Validation' }) },
+                      { stage_key: 'mvp', name: t('stages.mvp', { defaultValue: 'MVP' }) },
+                      { stage_key: 'growth', name: t('stages.growth', { defaultValue: 'Growth' }) },
+                      { stage_key: 'scale', name: t('stages.scale', { defaultValue: 'Scale' }) },
                     ]).map(stage => (
                       <SelectItem key={stage.stage_key} value={stage.stage_key}>
                         {stage.name}

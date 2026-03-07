@@ -1360,6 +1360,7 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -1405,35 +1406,35 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Action Item</DialogTitle>
+          <DialogTitle>{t('actions.addAction', { defaultValue: 'Adicionar Ação' })}</DialogTitle>
           <DialogDescription>
-            Create an action item from this session
+            {t('actions.addActionFromSession', { defaultValue: 'Criar uma ação a partir desta sessão' })}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="action-title">Title *</Label>
+            <Label htmlFor="action-title">{t('actions.title', { defaultValue: 'Título' })} *</Label>
             <Input
               id="action-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="What needs to be done?"
+              placeholder={t('actions.titlePlaceholder', { defaultValue: 'O que precisa ser feito?' })}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="action-description">Description</Label>
+            <Label htmlFor="action-description">{t('actions.description', { defaultValue: 'Descrição' })}</Label>
             <Textarea
               id="action-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Additional details..."
+              placeholder={t('actions.descriptionPlaceholder', { defaultValue: 'Detalhes adicionais...' })}
               rows={2}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="action-due-date">Due Date</Label>
+              <Label htmlFor="action-due-date">{t('actions.dueDate', { defaultValue: 'Data Limite' })}</Label>
               <Input
                 id="action-due-date"
                 type="date"
@@ -1442,28 +1443,28 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="action-priority">Priority</Label>
+              <Label htmlFor="action-priority">{t('actions.priority', { defaultValue: 'Prioridade' })}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t('actions.priorityLow', { defaultValue: 'Baixa' })}</SelectItem>
+                  <SelectItem value="medium">{t('actions.priorityMedium', { defaultValue: 'Média' })}</SelectItem>
+                  <SelectItem value="high">{t('actions.priorityHigh', { defaultValue: 'Alta' })}</SelectItem>
+                  <SelectItem value="urgent">{t('actions.priorityUrgent', { defaultValue: 'Urgente' })}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="action-owner">Assign to</Label>
+            <Label htmlFor="action-owner">{t('actions.assignTo', { defaultValue: 'Atribuir a' })}</Label>
             <Select value={ownerId} onValueChange={(val) => setOwnerId(val === 'unassigned' ? '' : val)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder={t('actions.selectMember', { defaultValue: 'Selecionar membro' })} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="unassigned">{t('actions.unassigned', { defaultValue: 'Não atribuído' })}</SelectItem>
                 {members?.filter(m => m.user_id).map(member => (
                   <SelectItem key={member.user_id} value={member.user_id}>
                     {member.profile?.full_name || member.profile?.email || 'Unknown'}
@@ -1474,10 +1475,10 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel', { defaultValue: 'Cancelar' })}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create Action Item'}
+              {createMutation.isPending ? t('common.creating', { defaultValue: 'A criar...' }) : t('actions.createAction', { defaultValue: 'Criar Ação' })}
             </Button>
           </DialogFooter>
         </form>

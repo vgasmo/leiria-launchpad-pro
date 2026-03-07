@@ -3921,7 +3921,14 @@
     "undoDismiss": "Restore"
   },
   "priorities": {
-    "star": "Estrela"
+    "star": "Star",
+    "high": "High",
+    "standard": "Standard",
+    "maintenance": "Maintenance",
+    "starDesc": "Top performer, high potential",
+    "highDesc": "Promising, needs attention",
+    "standardDesc": "Normal cadence",
+    "maintenanceDesc": "Monthly check-in only"
   },
   "priority": {
     "high": "High",

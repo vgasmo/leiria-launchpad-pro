@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Star, ArrowUp, Minus, Archive } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type WorkspacePriority = 'star' | 'high' | 'standard' | 'maintenance';
 
@@ -11,33 +12,35 @@ interface PriorityBadgeProps {
 }
 
 const priorityConfig: Record<WorkspacePriority, { 
-  label: string; 
+  labelKey: string; 
   icon: React.ReactNode;
   className: string;
 }> = {
   star: { 
-    label: 'Star', 
+    labelKey: 'priorities.star', 
     icon: <Star className="h-3 w-3 fill-current" />,
     className: 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700' 
   },
   high: { 
-    label: 'High', 
+    labelKey: 'priorities.high', 
     icon: <ArrowUp className="h-3 w-3" />,
     className: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700' 
   },
   standard: { 
-    label: 'Standard', 
+    labelKey: 'priorities.standard', 
     icon: <Minus className="h-3 w-3" />,
     className: 'bg-muted text-muted-foreground border-border' 
   },
   maintenance: { 
-    label: 'Maintenance', 
+    labelKey: 'priorities.maintenance', 
     icon: <Archive className="h-3 w-3" />,
     className: 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-600' 
   },
 };
 
 export function PriorityBadge({ priority, size = 'md', showLabel = true, className }: PriorityBadgeProps) {
+  const { t } = useTranslation();
+  
   const sizeClasses = {
     sm: 'text-xs px-1.5 py-0.5 gap-1',
     md: 'text-xs px-2 py-1 gap-1.5',
@@ -55,13 +58,14 @@ export function PriorityBadge({ priority, size = 'md', showLabel = true, classNa
       className
     )}>
       {config.icon}
-      {showLabel && <span>{config.label}</span>}
+      {showLabel && <span>{t(config.labelKey)}</span>}
     </span>
   );
 }
 
 export function getPriorityLabel(priority: WorkspacePriority | null | undefined): string {
-  return priorityConfig[priority || 'standard'].label;
+  // Fallback for non-component contexts — returns EN key fallback
+  return priorityConfig[priority || 'standard'].labelKey;
 }
 
 export function getPriorityOrder(priority: WorkspacePriority | null | undefined): number {
