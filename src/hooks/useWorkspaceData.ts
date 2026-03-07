@@ -171,27 +171,22 @@ export function useStages(programId: string | undefined) {
         .eq('is_active', true)
         .order('order_index', { ascending: true });
 
+      // Default fallback stages use stage_key for i18n resolution (via stages.{key})
+      const DEFAULT_STAGES = [
+        { id: '1', stage_key: 'ideation', name: 'ideation', order_index: 0 },
+        { id: '2', stage_key: 'validation', name: 'validation', order_index: 1 },
+        { id: '3', stage_key: 'mvp', name: 'mvp', order_index: 2 },
+        { id: '4', stage_key: 'growth', name: 'growth', order_index: 3 },
+        { id: '5', stage_key: 'scale', name: 'scale', order_index: 4 },
+      ];
+
       if (error) {
         console.error('[useStages] Error:', error);
-        // Fallback to default stages if table doesn't exist or error
-        return [
-          { id: '1', stage_key: 'ideation', name: 'Ideation', order_index: 0 },
-          { id: '2', stage_key: 'validation', name: 'Validation', order_index: 1 },
-          { id: '3', stage_key: 'mvp', name: 'MVP', order_index: 2 },
-          { id: '4', stage_key: 'growth', name: 'Growth', order_index: 3 },
-          { id: '5', stage_key: 'scale', name: 'Scale', order_index: 4 },
-        ];
+        return DEFAULT_STAGES;
       }
       
-      // If no stages exist for this program, return defaults
       if (!data || data.length === 0) {
-        return [
-          { id: '1', stage_key: 'ideation', name: 'Ideation', order_index: 0 },
-          { id: '2', stage_key: 'validation', name: 'Validation', order_index: 1 },
-          { id: '3', stage_key: 'mvp', name: 'MVP', order_index: 2 },
-          { id: '4', stage_key: 'growth', name: 'Growth', order_index: 3 },
-          { id: '5', stage_key: 'scale', name: 'Scale', order_index: 4 },
-        ];
+        return DEFAULT_STAGES;
       }
       
       return data;

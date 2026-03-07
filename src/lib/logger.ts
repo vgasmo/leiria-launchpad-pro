@@ -31,9 +31,19 @@ function formatError(err: unknown): Record<string, unknown> | undefined {
   return { raw: String(err) };
 }
 
+// In-memory buffer for error events (last 50) — accessible via logger.getRecentErrors()
+const errorBuffer: LogEntry[] = [];
+const MAX_ERROR_BUFFER = 50;
+
 function emit(entry: LogEntry) {
   const { level, event, context, error } = entry;
   const tag = `${LOG_PREFIX} ${event}`;
+
+  // Buffer errors for diagnostics
+  if (level === 'error' || level === 'warn') {
+    errorBuffer.push(entry);
+    if (errorBuffer.length > MAX_ERROR_BUFFER) errorBuffer.shift();
+  }
 
   // Future: send to Sentry/external here
   // if (window.__SENTRY__) Sentry.captureMessage(...)
@@ -68,5 +78,13 @@ export const logger = {
   },
   error(event: string, context?: Record<string, unknown>, error?: unknown) {
     emit({ level: 'error', event, context, error, timestamp: new Date().toISOString() });
+  },
+  /** Get recent error/warn entries for diagnostics (max 50) */
+  getRecentErrors(): ReadonlyArray<LogEntry> {
+    return [...errorBuffer];
+  },
+  /** Flush the error buffer (e.g., after sending to external service) */
+  flushErrors() {
+    errorBuffer.length = 0;
   },
 };
