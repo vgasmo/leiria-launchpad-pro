@@ -41,12 +41,14 @@ export default function ClaimStartup() {
   const displayState = getDisplayState();
 
   // P0.1 Safety: non-founders should never see the claim UI
-  if (
-    !founderState.isLoading &&
-    (founderState.status === 'not_founder' || founderState.status === 'staff_exempt')
-  ) {
-    return <Navigate to="/my-workspaces" replace />;
-  }
+  useEffect(() => {
+    if (
+      !founderState.isLoading &&
+      (founderState.status === 'not_founder' || founderState.status === 'staff_exempt')
+    ) {
+      navigate('/my-workspaces', { replace: true });
+    }
+  }, [founderState.isLoading, founderState.status, navigate]);
 
   const handleVerify = useCallback(async () => {
     if (!user) return;
