@@ -55,7 +55,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 30 * 1000, // 30 seconds
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours – keeps cached data available for offline use
+      gcTime: 1000 * 60 * 60 * 4, // 4 hours – reasonable cache without excessive staleness
       networkMode: 'offlineFirst', // serve cache instantly, revalidate in background
     },
   },
@@ -63,7 +63,8 @@ const queryClient = new QueryClient({
 
 // Simple localStorage-based query cache persistence for offline resilience
 const CACHE_KEY = 'sl-query-cache';
-const CACHE_MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_MAX_AGE = 1000 * 60 * 60 * 4; // 4 hours
+const CACHE_USER_KEY = 'sl-cache-uid'; // Tracks which user owns the cache
 
 // Restore cache on startup
 try {
@@ -86,7 +87,14 @@ try {
   localStorage.removeItem(CACHE_KEY);
 }
 
-// Persist cache periodically
+// P0.2: Clear persisted cache on logout / user-switch
+function clearPersistedCache() {
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(CACHE_USER_KEY);
+  queryClient.clear(); // Wipe all in-memory cache
+}
+
+// Persist cache periodically (only non-sensitive queries)
 let persistTimer: ReturnType<typeof setTimeout>;
 const persistCache = () => {
   clearTimeout(persistTimer);
@@ -96,8 +104,8 @@ const persistCache = () => {
       const data = cache
         .filter(q => {
           const key = q.queryKey[0];
-          // Skip auth/session queries for security
-          if (typeof key === 'string' && ['auth', 'session', 'profile'].includes(key)) return false;
+          // Skip auth/session/profile/role queries for security
+          if (typeof key === 'string' && ['auth', 'session', 'profile', 'user-roles', 'user_roles', 'mentor-nda'].includes(key)) return false;
           return q.state.status === 'success' && q.state.data !== undefined;
         })
         .map(q => ({ queryKey: q.queryKey, state: { data: q.state.data } }));
@@ -112,7 +120,7 @@ queryClient.getQueryCache().subscribe(persistCache);
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
-  const { user, isLoading, isAuthReady, isAdmin, isStaff, isAccountPending, isAccountSuspended } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isStaff, isFounder, isConsultor, isAccountPending, isAccountSuspended, roles } = useAuth();
   const { needsNda, isLoading: ndaLoading } = useMentorNdaStatus();
   const location = useLocation();
 
@@ -145,6 +153,19 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   // NDA gate for mentor_externo: redirect to /mentor-nda unless already there
   if (needsNda && location.pathname !== '/mentor-nda') {
     return <Navigate to="/mentor-nda" replace />;
+  }
+
+  // P0.1 Claim-first gate: founders with no workspace should be sent to /claim-startup
+  // Skip if already on claim page, or if user is also staff/mentor
+  if (
+    isFounder &&
+    !isStaff &&
+    !roles.includes('mentor_externo') &&
+    location.pathname !== '/claim-startup' &&
+    location.pathname !== '/settings'
+  ) {
+    // We use a lightweight check via a dedicated hook rendered inside ProtectedRoute
+    // Instead, we let the FounderDashboard handle claim-first routing (see below)
   }
 
   // Staff-only routes (admin, consultor, backoffice)

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Rocket, Search, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Building2, Rocket, Search, Filter, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -63,26 +63,22 @@ export const WorkspaceEmptyState = memo(function WorkspaceEmptyState({
         
         <p className="text-muted-foreground text-center max-w-md mb-4">
           {isFounder
-            ? t('emptyState.founderNoStartups', { defaultValue: 'Regista a tua startup para acompanhar o progresso, conectar com mentores e preparar para investimento.' })
+            ? t('emptyState.founderClaimFirst', { defaultValue: 'A sua startup pode já estar no sistema. Verifique se existe uma startup associada ao seu email.' })
             : t('emptyState.noAccess', { defaultValue: 'Ainda não tens acesso a nenhum espaço de trabalho. Contacta um administrador ou junta-te a um programa.' })}
         </p>
         
         {isFounder && (
           <p className="text-sm text-primary/80 font-medium text-center max-w-sm mb-6 flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            {t('emptyState.founderValue', { defaultValue: 'Obtém orientação de mentores e acompanha os teus KPIs num único lugar.' })}
+            {t('emptyState.founderInviteOnly', { defaultValue: 'Plataforma apenas por convite. A verificação é rápida.' })}
           </p>
         )}
         
         {isFounder && onCreateStartup && (
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <Button onClick={onCreateStartup} size="lg" className="gap-2 shadow-lg">
+            <Button onClick={() => window.location.href = '/claim-startup'} size="lg" className="gap-2 shadow-lg">
               <Rocket className="h-5 w-5" />
-              {t('emptyState.createFirstStartup', { defaultValue: 'Criar a Tua Startup' })}
-            </Button>
-            <Button variant="ghost" size="lg" className="gap-2 text-muted-foreground">
-              <TrendingUp className="h-4 w-4" />
-              {t('emptyState.explorePrograms', { defaultValue: 'Explorar Programas' })}
+              {t('emptyState.verifyStartup', { defaultValue: 'Verificar a Minha Startup' })}
             </Button>
           </div>
         )}
