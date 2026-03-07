@@ -253,7 +253,7 @@ export default function ProgramSetupWizard() {
                     >
                       {isComplete ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                     </div>
-                    <span className="hidden sm:block">{step.label}</span>
+                    <span className="hidden sm:block">{t(step.labelKey)}</span>
                   </button>
                 );
               })}
