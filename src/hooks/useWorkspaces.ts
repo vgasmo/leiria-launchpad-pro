@@ -51,9 +51,15 @@ export interface WorkspaceWithDetails {
   } | null;
 }
 
-export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: boolean = false) {
+export function useWorkspaces(
+  filters: WorkspaceFilters = {},
+  assignedOnly: boolean = false,
+  /** Which workspace statuses to include. Defaults to ['active'] (operational only).
+   *  Founders should pass ['active', 'claimed'] to see freshly claimed workspaces. */
+  statuses: WorkspaceStatus[] = ['active'],
+) {
   return useQuery({
-    queryKey: ['workspaces', filters, assignedOnly],
+    queryKey: ['workspaces', filters, assignedOnly, statuses],
     queryFn: async (): Promise<WorkspaceWithDetails[]> => {
       // If assignedOnly, first get the user's assigned workspace IDs
       let assignedWorkspaceIds: string[] | null = null;
@@ -82,7 +88,7 @@ export function useWorkspaces(filters: WorkspaceFilters = {}, assignedOnly: bool
           startup:startups(id, name, description, logo_url),
           program:programs(id, name)
         `)
-        .in('status', ['active', 'claimed']) // Show active and claimed workspaces
+        .in('status', statuses) // Only include requested statuses
         .order('updated_at', { ascending: false });
 
       // If assignedOnly, filter by assigned workspace IDs
