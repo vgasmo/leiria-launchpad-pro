@@ -1413,12 +1413,12 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="action-title">Title *</Label>
+            <Label htmlFor="action-title">{t('actions.title', { defaultValue: 'Título' })} *</Label>
             <Input
               id="action-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="What needs to be done?"
+              placeholder={t('actions.titlePlaceholder', { defaultValue: 'O que precisa ser feito?' })}
               required
             />
           </div>
