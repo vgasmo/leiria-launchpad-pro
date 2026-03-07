@@ -14,6 +14,7 @@ import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
 import { AccessDenied } from "@/components/ui/AccessDenied";
+import { logger } from "@/lib/logger";
 
 // Eager: lightweight / critical-path pages
 import Login from "./pages/Login";
@@ -50,71 +51,98 @@ const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
 const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 
-const queryClient = new QueryClient({
+// --- QueryClient: shared across the app ---
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 30 * 1000, // 30 seconds
-      gcTime: 1000 * 60 * 60 * 4, // 4 hours – reasonable cache without excessive staleness
-      networkMode: 'offlineFirst', // serve cache instantly, revalidate in background
+      staleTime: 30 * 1000,
+      gcTime: 1000 * 60 * 60 * 4, // 4 hours
+      networkMode: 'offlineFirst',
     },
   },
 });
 
-// Simple localStorage-based query cache persistence for offline resilience
+// --- Persisted cache: ALLOWLIST strategy ---
+// Only these query key prefixes are persisted to localStorage.
+// Everything else is ephemeral (in-memory only).
+const PERSIST_ALLOWLIST: string[] = [
+  'programs',         // small, rarely changes
+  'feature-flags',    // small, rarely changes
+  'tags',             // small lookup
+];
+
 const CACHE_KEY = 'sl-query-cache';
 const CACHE_MAX_AGE = 1000 * 60 * 60 * 4; // 4 hours
-const CACHE_USER_KEY = 'sl-cache-uid'; // Tracks which user owns the cache
+const CACHE_USER_KEY = 'sl-cache-uid';
 
-// Restore cache on startup
-try {
-  const cached = localStorage.getItem(CACHE_KEY);
-  if (cached) {
-    const { timestamp, data } = JSON.parse(cached);
-    if (Date.now() - timestamp < CACHE_MAX_AGE && data) {
-      // Hydrate each cached query into the query client
-      for (const entry of data) {
-        if (entry.queryKey && entry.state?.data !== undefined) {
-          queryClient.setQueryData(entry.queryKey, entry.state.data);
-        }
-      }
-    } else {
+/**
+ * Deferred cache hydration — called ONLY after auth confirms user identity.
+ * Never hydrates on boot before auth is known.
+ */
+export function hydrateCache(userId: string) {
+  try {
+    // Ownership check: only hydrate if cache belongs to this user
+    const cachedUid = localStorage.getItem(CACHE_USER_KEY);
+    if (cachedUid && cachedUid !== userId) {
+      logger.warn('cache_hydration_blocked', { reason: 'owner_mismatch' });
       localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_USER_KEY);
+      return;
     }
+
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return;
+
+    const { timestamp, data } = JSON.parse(cached);
+    if (Date.now() - timestamp > CACHE_MAX_AGE || !data) {
+      localStorage.removeItem(CACHE_KEY);
+      return;
+    }
+
+    let hydrated = 0;
+    for (const entry of data) {
+      if (entry.queryKey && entry.state?.data !== undefined) {
+        queryClient.setQueryData(entry.queryKey, entry.state.data);
+        hydrated++;
+      }
+    }
+
+    localStorage.setItem(CACHE_USER_KEY, userId);
+    logger.debug('cache_hydrated', { entries: hydrated });
+  } catch {
+    localStorage.removeItem(CACHE_KEY);
   }
-} catch {
-  // Ignore corrupt cache
-  localStorage.removeItem(CACHE_KEY);
 }
 
-// P0.2: Clear persisted cache on logout / user-switch
-function clearPersistedCache() {
-  localStorage.removeItem(CACHE_KEY);
-  localStorage.removeItem(CACHE_USER_KEY);
-  queryClient.clear(); // Wipe all in-memory cache
-}
-
-// Persist cache periodically (only non-sensitive queries)
+// Persist allowlisted cache periodically
 let persistTimer: ReturnType<typeof setTimeout>;
 const persistCache = () => {
   clearTimeout(persistTimer);
   persistTimer = setTimeout(() => {
     try {
+      const userId = localStorage.getItem(CACHE_USER_KEY);
+      if (!userId) return; // Don't persist if no authenticated user
+
       const cache = queryClient.getQueryCache().getAll();
       const data = cache
         .filter(q => {
           const key = q.queryKey[0];
-          // Skip auth/session/profile/role queries for security
-          if (typeof key === 'string' && ['auth', 'session', 'profile', 'user-roles', 'user_roles', 'mentor-nda'].includes(key)) return false;
+          if (typeof key !== 'string') return false;
+          // ALLOWLIST: only persist explicitly safe queries
+          if (!PERSIST_ALLOWLIST.includes(key)) return false;
           return q.state.status === 'success' && q.state.data !== undefined;
         })
         .map(q => ({ queryKey: q.queryKey, state: { data: q.state.data } }));
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+
+      if (data.length > 0) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+      }
     } catch {
       // Storage full or error — silently ignore
     }
-  }, 2000);
+  }, 3000);
 };
 
 queryClient.getQueryCache().subscribe(persistCache);
@@ -142,23 +170,20 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
     return <Navigate to="/login" replace />;
   }
 
-  // Check if account is suspended (block all access, including admins)
   if (isAccountSuspended) {
     return <Navigate to="/suspended" replace />;
   }
 
-  // Check if account is pending approval (non-staff users)
   if (isAccountPending && !isStaff) {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // NDA gate for mentor_externo: redirect to /mentor-nda unless already there
+  // NDA gate for mentor_externo
   if (needsNda && location.pathname !== '/mentor-nda') {
     return <Navigate to="/mentor-nda" replace />;
   }
 
-  // P0.1 Claim-first gate: founders without an active workspace are redirected to /claim-startup
-  // Exempt routes: /claim-startup itself, /settings, sign-out flows
+  // Claim-first gate: founders without active workspace → /claim-startup
   const claimExemptPaths = ['/claim-startup', '/settings'];
   if (
     !founderState.isLoading &&
@@ -170,12 +195,10 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
     return <Navigate to="/claim-startup" replace />;
   }
 
-  // Staff-only routes (admin, consultor, backoffice)
   if (staffOnly && !isStaff) {
     return <Navigate to="/my-workspaces" replace />;
   }
 
-  // Admin-only routes (strictly admin role)
   if (adminOnly && !isAdmin) {
     return <Navigate to="/my-workspaces" replace />;
   }

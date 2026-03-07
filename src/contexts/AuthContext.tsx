@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { AppRole } from '@/types/database';
+import { resetSession, setCacheOwner } from '@/lib/sessionReset';
+import { hydrateCache, queryClient } from '@/App';
+import { logger } from '@/lib/logger';
 
 export type AccountStatus = 'pending' | 'approved' | 'suspended';
 
@@ -48,11 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserData = useCallback(async (userId: string): Promise<void> => {
     try {
-      // Fetch profile and roles in parallel
       const [profileResult, rolesResult] = await Promise.all([
         supabase
           .from('profiles')
-          .select('*')
+          .select('id, email, full_name, avatar_url, account_status, created_at, updated_at')
           .eq('id', userId)
           .maybeSingle(),
         supabase
@@ -62,14 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ]);
       
       if (profileResult.data) {
-        // Handle case where account_status column may not exist yet
         const profileData = profileResult.data as Record<string, unknown>;
         setProfile({
           id: profileData.id as string,
           email: profileData.email as string,
           full_name: profileData.full_name as string | null,
           avatar_url: profileData.avatar_url as string | null,
-          account_status: (profileData.account_status as AccountStatus) || 'approved', // Default to approved for existing users
+          account_status: (profileData.account_status as AccountStatus) || 'approved',
           created_at: profileData.created_at as string,
           updated_at: profileData.updated_at as string,
         });
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRoles(rolesResult.data.map(r => r.role as AppRole));
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      logger.error('fetch_user_data_failed', { userId: userId.slice(0, 8) }, error);
     }
   }, []);
 
@@ -88,7 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initializeAuth = async () => {
       try {
-        // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (!isMounted) return;
@@ -97,19 +97,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(initialSession?.user ?? null);
         
         if (initialSession?.user) {
+          // Hydrate cache ONLY after confirming user identity
+          hydrateCache(initialSession.user.id);
+          setCacheOwner(initialSession.user.id);
           await fetchUserData(initialSession.user.id);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        logger.error('auth_init_failed', {}, error);
       } finally {
         if (isMounted) {
           setIsLoading(false);
-          setIsAuthReady(true); // P1: Only set ready after everything is loaded
+          setIsAuthReady(true);
         }
       }
     };
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return;
@@ -118,23 +120,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newSession?.user ?? null);
         
         if (event === 'SIGNED_OUT') {
+          // Use centralized session reset
+          resetSession(queryClient, 'logout');
           setProfile(null);
           setRoles([]);
           setIsAuthReady(true);
         } else if (newSession?.user) {
-          // P0.2: Detect user switch — clear cache if different user logs in
+          // Detect user switch — clear previous user's cache
           const previousUid = localStorage.getItem('sl-cache-uid');
           if (previousUid && previousUid !== newSession.user.id) {
-            try {
-              localStorage.removeItem('sl-query-cache');
-            } catch { /* ignore */ }
+            resetSession(queryClient, 'user_switch');
           }
-          localStorage.setItem('sl-cache-uid', newSession.user.id);
+          setCacheOwner(newSession.user.id);
+          hydrateCache(newSession.user.id);
 
-          // P1: Set loading while fetching data to prevent flash of wrong content
           setIsAuthReady(false);
           
-          // Defer to avoid Supabase deadlock
           setTimeout(async () => {
             if (isMounted) {
               await fetchUserData(newSession.user.id);
@@ -158,10 +159,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUserData]);
 
   const signIn = async (email: string, password: string) => {
-    setIsAuthReady(false); // P1: Mark as loading during sign in
+    setIsAuthReady(false);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setIsAuthReady(true); // Restore ready state on error
+      logger.warn('sign_in_failed', { email: email.split('@')[1] });
+      setIsAuthReady(true);
     }
     return { error: error as Error | null };
   };
@@ -179,27 +181,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+    if (error) {
+      logger.warn('sign_up_failed', { domain: email.split('@')[1] });
+    }
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
     setIsAuthReady(false);
-    // P0.2: Clear persisted query cache to prevent cross-session data leakage
-    try {
-      localStorage.removeItem('sl-query-cache');
-      localStorage.removeItem('sl-cache-uid');
-      // Also clear founder-specific localStorage items
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('quickkpi-dismissed-') || key.startsWith('founder_'))) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
-    } catch {
-      // Ignore localStorage errors
-    }
+    // Centralized session reset — clears persisted cache, in-memory cache, and user storage
+    resetSession(queryClient, 'logout');
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
@@ -213,7 +204,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isMentor = roles.includes('mentor_externo') || isConsultor || isAdmin;
   const isFounder = roles.includes('founder');
   
-  // Account approval status
   const isAccountApproved = profile?.account_status === 'approved';
   const isAccountPending = profile?.account_status === 'pending';
   const isAccountSuspended = profile?.account_status === 'suspended';
