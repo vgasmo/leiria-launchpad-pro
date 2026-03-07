@@ -104,7 +104,7 @@ export default function ClaimStartup() {
   }, [user, navigate, t, queryClient]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+    <main data-testid="claim-startup-page" className="flex min-h-screen items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
@@ -243,6 +243,6 @@ export default function ClaimStartup() {
 
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

@@ -282,6 +282,7 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
             {...attributes}
             className="cursor-grab active:cursor-grabbing p-0.5 -ml-1 hover:bg-muted rounded shrink-0"
             onClick={(e) => e.stopPropagation()}
+            aria-label="Drag to reorder"
           >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>

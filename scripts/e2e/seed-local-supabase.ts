@@ -7,6 +7,11 @@
  *   npx tsx scripts/e2e/seed-local-supabase.ts
  *
  * Idempotent: uses stable UUIDs + ON CONFLICT DO NOTHING / upserts.
+ *
+ * IMPORTANT: Workspace is created as 'pending' first, then members are added,
+ * then workspace is activated. This respects the trg_validate_workspace_activation
+ * trigger which requires at least one active workspace_user before allowing
+ * status = 'active'.
  */
 import { createClient } from '@supabase/supabase-js';
 import { USERS, TEST_PASSWORD, SEED_IDS, CURRENT_NDA_VERSION } from './seed-constants';
@@ -121,21 +126,22 @@ async function seedData() {
   if (startupErr) console.warn('  ⚠ Startup:', startupErr.message);
   else console.log('  ✓ Startup');
 
-  // Workspace
+  // ─── Workspace creation: 3-step safe activation ───
+  // Step 1: Create/upsert workspace as 'pending' (safe for trigger)
   const { error: wsErr } = await supabase.from('workspaces').upsert({
     id: SEED_IDS.workspace,
     startup_id: SEED_IDS.startup,
     program_id: SEED_IDS.program,
     stage: 'ideation',
-    status: 'active',
+    status: 'pending',
     health_score: 'stable',
     priority_level: 'medium',
     assigned_consultor_id: consultantId,
   }, { onConflict: 'id' });
-  if (wsErr) console.warn('  ⚠ Workspace:', wsErr.message);
-  else console.log('  ✓ Workspace');
+  if (wsErr) console.warn('  ⚠ Workspace (pending):', wsErr.message);
+  else console.log('  ✓ Workspace (created as pending)');
 
-  // Workspace users
+  // Step 2: Add workspace users BEFORE activating
   const wsUsers = [
     { workspace_id: SEED_IDS.workspace, user_id: founderId, role: 'founder', active: true },
     { workspace_id: SEED_IDS.workspace, user_id: consultantId, role: 'consultor', active: true },
@@ -148,6 +154,14 @@ async function seedData() {
     if (error) console.warn(`  ⚠ workspace_user ${wu.role}: ${error.message}`);
     else console.log(`  ✓ workspace_user ${wu.role}`);
   }
+
+  // Step 3: NOW activate the workspace (trigger will find active members)
+  const { error: activateErr } = await supabase
+    .from('workspaces')
+    .update({ status: 'active' })
+    .eq('id', SEED_IDS.workspace);
+  if (activateErr) console.warn('  ⚠ Workspace activation:', activateErr.message);
+  else console.log('  ✓ Workspace activated (status → active)');
 
   // Building
   const { error: bldErr } = await supabase.from('buildings').upsert({
@@ -223,6 +237,10 @@ async function seedData() {
   }, { onConflict: 'user_id,nda_version' });
   if (ndaErr) console.warn('  ⚠ NDA acceptance:', ndaErr.message);
   else console.log('  ✓ NDA acceptance');
+
+  // NOTE: founder_unclaimed user intentionally has NO workspace or claim request.
+  // This ensures they always land in the claim-first onboarding gate.
+  console.log('  ✓ founder_unclaimed: no workspace seeded (claim-first persona)');
 }
 
 async function main() {
