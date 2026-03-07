@@ -55,7 +55,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 30 * 1000, // 30 seconds
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours – keeps cached data available for offline use
+      gcTime: 1000 * 60 * 60 * 4, // 4 hours – reasonable cache without excessive staleness
       networkMode: 'offlineFirst', // serve cache instantly, revalidate in background
     },
   },
