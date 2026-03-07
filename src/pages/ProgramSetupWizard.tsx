@@ -217,7 +217,7 @@ export default function ProgramSetupWizard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Rocket className="h-5 w-5 text-primary" />
-                <span className="font-medium">Setup Progress</span>
+                <span className="font-medium">{t('programSetup.setupProgress')}</span>
               </div>
               <Badge variant={draft?.status === 'draft' ? 'secondary' : 'default'}>
                 {draft?.status || 'draft'}
