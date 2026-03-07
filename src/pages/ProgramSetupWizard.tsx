@@ -390,7 +390,7 @@ export default function ProgramSetupWizard() {
               onClick={handleDiscard}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Discard
+              {t('programSetup.discard')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
