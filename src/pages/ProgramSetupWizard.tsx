@@ -193,7 +193,7 @@ export default function ProgramSetupWizard() {
 
   if (draftLoading || createDraft.isPending) {
     return (
-      <AppLayout title="Program Setup" subtitle="Loading...">
+      <AppLayout title={t('programSetup.newProgramSetup')} subtitle={t('programSetup.loading')}>
         <div className="space-y-4">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-96 w-full" />
