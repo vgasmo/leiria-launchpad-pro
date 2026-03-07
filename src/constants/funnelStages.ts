@@ -68,20 +68,3 @@ export const STAGE_LABELS: Record<FunnelStage, string> = {
   rejected: 'Rejected',
   archived: 'Archived',
 };
-
-/**
- * @deprecated Use getFunnelStageOptions(t, FUNNEL_STAGES) from stageLabels.ts instead.
- * These static options do not support i18n and render English labels in PT UI.
- */
-export const STAGE_OPTIONS: { value: FunnelStage; label: string }[] = FUNNEL_STAGES.map((s) => ({
-  value: s,
-  label: STAGE_LABELS[s],
-}));
-
-/**
- * @deprecated Use getFunnelStageOptions(t, PIPELINE_STAGES) from stageLabels.ts instead.
- */
-export const PIPELINE_STAGE_OPTIONS = PIPELINE_STAGES.map((s) => ({
-  value: s,
-  label: STAGE_LABELS[s],
-}));

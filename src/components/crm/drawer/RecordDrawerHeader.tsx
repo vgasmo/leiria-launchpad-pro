@@ -105,4 +105,4 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
   );
 }
 
-export { STAGE_COLORS, STAGE_OPTIONS };
+export { STAGE_COLORS };

@@ -1,4 +1,4 @@
-export { RecordDrawerHeader, STAGE_COLORS, STAGE_OPTIONS } from './RecordDrawerHeader';
+export { RecordDrawerHeader, STAGE_COLORS } from './RecordDrawerHeader';
 export { OverviewTab } from './OverviewTab';
 export { QuickActions } from './QuickActions';
 export { NextActionDialog } from './NextActionDialog';
