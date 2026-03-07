@@ -63,7 +63,8 @@ const queryClient = new QueryClient({
 
 // Simple localStorage-based query cache persistence for offline resilience
 const CACHE_KEY = 'sl-query-cache';
-const CACHE_MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_MAX_AGE = 1000 * 60 * 60 * 4; // 4 hours
+const CACHE_USER_KEY = 'sl-cache-uid'; // Tracks which user owns the cache
 
 // Restore cache on startup
 try {
@@ -86,7 +87,14 @@ try {
   localStorage.removeItem(CACHE_KEY);
 }
 
-// Persist cache periodically
+// P0.2: Clear persisted cache on logout / user-switch
+function clearPersistedCache() {
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(CACHE_USER_KEY);
+  queryClient.clear(); // Wipe all in-memory cache
+}
+
+// Persist cache periodically (only non-sensitive queries)
 let persistTimer: ReturnType<typeof setTimeout>;
 const persistCache = () => {
   clearTimeout(persistTimer);
@@ -96,8 +104,8 @@ const persistCache = () => {
       const data = cache
         .filter(q => {
           const key = q.queryKey[0];
-          // Skip auth/session queries for security
-          if (typeof key === 'string' && ['auth', 'session', 'profile'].includes(key)) return false;
+          // Skip auth/session/profile/role queries for security
+          if (typeof key === 'string' && ['auth', 'session', 'profile', 'user-roles', 'user_roles', 'mentor-nda'].includes(key)) return false;
           return q.state.status === 'success' && q.state.data !== undefined;
         })
         .map(q => ({ queryKey: q.queryKey, state: { data: q.state.data } }));
