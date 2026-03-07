@@ -297,7 +297,7 @@ export default function MyWorkspaces() {
               <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
           )}
-          {/* P0.1: Claim-first — show "Verify Startup" as primary CTA for founders with no workspaces */}
+          {/* P0.1: Claim-first — show "Verify Startup" for founders with no workspaces. Route gate handles redirect, this is a safety fallback. */}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (workspaces || []).length === 0 && (
             <Button onClick={() => navigate('/claim-startup')} className="gap-2" data-tour="create-workspace">
               <Rocket className="h-4 w-4" />
