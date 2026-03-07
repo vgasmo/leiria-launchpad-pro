@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Rocket, Search, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Building2, Rocket, Search, Filter, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 

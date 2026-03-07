@@ -246,12 +246,16 @@ export function useWorkspace(id: string | undefined) {
     queryFn: async () => {
       if (!id) return null;
       
+      // P0.3: Select only needed columns instead of *
       const { data, error } = await supabase
         .from('workspaces')
         .select(`
-          *,
-          startup:startups(*),
-          program:programs(*)
+          id, startup_id, program_id, stage, status,
+          health_score, health_score_override, health_notes,
+          priority_level, priority_notes, created_at, updated_at,
+          blocked_at, blocked_reason,
+          startup:startups(id, name, description, logo_url, website, nif, main_contact_name, main_contact_email, main_contact_phone, has_startup_portugal_status),
+          program:programs(id, name, description)
         `)
         .eq('id', id)
         .maybeSingle();
