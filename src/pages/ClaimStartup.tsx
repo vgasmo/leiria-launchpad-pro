@@ -17,7 +17,7 @@ export default function ClaimStartup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
+  const { user, profile, roles } = useAuth();
   const founderState = useFounderOnboardingState();
 
   const [pageState, setPageState] = useState<ClaimPageState>('idle');
