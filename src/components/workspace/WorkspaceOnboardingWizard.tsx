@@ -439,7 +439,7 @@ export function WorkspaceOnboardingWizard({
         // Create actions for this milestone
         for (const action of m.actions) {
           await createAction.mutateAsync({
-            title: action.title,
+            title: pickLang(action.title, lang),
             milestone_id: createdMilestone.id,
             due_date: format(addDays(new Date(), action.daysOffset), 'yyyy-MM-dd'),
             priority: 'medium',
