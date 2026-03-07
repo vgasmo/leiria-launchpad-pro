@@ -12,6 +12,7 @@ import {
   Users,
   ArrowRight,
   X,
+  Rocket,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { AppLayout } from '@/components/layout/AppLayout';
