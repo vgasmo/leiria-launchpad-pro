@@ -1423,12 +1423,12 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="action-description">Description</Label>
+            <Label htmlFor="action-description">{t('actions.description', { defaultValue: 'Descrição' })}</Label>
             <Textarea
               id="action-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Additional details..."
+              placeholder={t('actions.descriptionPlaceholder', { defaultValue: 'Detalhes adicionais...' })}
               rows={2}
             />
           </div>
