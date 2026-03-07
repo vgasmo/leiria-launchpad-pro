@@ -362,11 +362,11 @@ export default function ProgramSetupWizard() {
                 className="bg-green-600 hover:bg-green-700"
               >
                 {publishDraft.isPending || publishedRef.current ? (
-                  '🎉 Publishing...'
+                  t('programSetup.publishing')
                 ) : (
                   <>
                     <Rocket className="h-4 w-4 mr-2" />
-                    Publish Program
+                    {t('programSetup.publishProgram')}
                   </>
                 )}
               </Button>
