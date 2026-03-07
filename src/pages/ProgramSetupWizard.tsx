@@ -337,7 +337,7 @@ export default function ProgramSetupWizard() {
               className="text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Discard
+              {t('programSetup.discard')}
             </Button>
           </div>
 
