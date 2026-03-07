@@ -164,16 +164,16 @@ export default function ProgramSetupWizard() {
     const { basics, stages, coreKpis, alertRules, healthModel } = draft.draft_json;
     const programIsBasic = basics?.settings?.program_mode === 'basic';
 
-    if (!basics?.name?.trim()) errors.push('Program name is required');
+    if (!basics?.name?.trim()) errors.push(t('programSetup.validation.programNameRequired'));
     
     // Standard mode validations
     if (!programIsBasic) {
       const activeStages = stages?.filter((s) => s.is_active) || [];
-      if (activeStages.length === 0) errors.push('At least one stage must be active');
+      if (activeStages.length === 0) errors.push(t('programSetup.validation.atLeastOneStage'));
 
       const coreCount = coreKpis?.length || 0;
-      if (coreCount < 3) errors.push('At least 3 core KPIs required');
-      if (coreCount > 6) errors.push('Maximum 6 core KPIs allowed');
+      if (coreCount < 3) errors.push(t('programSetup.validation.minCoreKpis'));
+      if (coreCount > 6) errors.push(t('programSetup.validation.maxCoreKpis'));
 
       // Check alert thresholds
       for (const rule of alertRules || []) {
