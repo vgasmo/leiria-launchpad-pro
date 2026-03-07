@@ -17,14 +17,14 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { HealthBadge } from '@/components/ui/HealthBadge';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { useAllPendingCheckins } from '@/hooks/useCheckins';
 import { toast } from 'sonner';
 
 export function ComplianceDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: workspaces, isLoading } = useWorkspaces({});
+  const { data: workspaces, isLoading } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: pendingCheckins } = useAllPendingCheckins();
   const [expandedSection, setExpandedSection] = useState<string | null>('critical');
 

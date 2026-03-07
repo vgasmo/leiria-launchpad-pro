@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCohortAnalytics } from '@/hooks/useCohortAnalytics';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -26,7 +26,7 @@ export function CohortAnalytics() {
   const [selectedProgram, setSelectedProgram] = useState<string>('all');
   const { data: programs } = usePrograms();
   const { data: stats, isLoading } = useCohortAnalytics(selectedProgram === 'all' ? undefined : selectedProgram);
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
 
   const aggregateStats = stats?.reduce((acc, s) => ({
     totalStartups: acc.totalStartups + s.totalStartups,
