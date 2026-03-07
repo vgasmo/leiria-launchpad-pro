@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 export function ComplianceDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: workspaces, isLoading } = useWorkspaces({});
+  const { data: workspaces, isLoading } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: pendingCheckins } = useAllPendingCheckins();
   const [expandedSection, setExpandedSection] = useState<string | null>('critical');
 
