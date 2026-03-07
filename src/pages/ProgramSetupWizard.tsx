@@ -52,13 +52,13 @@ import { triggerConfetti } from '@/lib/confetti';
 
 type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
-const ALL_STEPS: { key: WizardStep; label: string; icon: React.ElementType; standardOnly?: boolean }[] = [
-  { key: 'basics', label: 'Basics', icon: Building2 },
-  { key: 'stages', label: 'Stages', icon: Layers, standardOnly: true },
-  { key: 'kpis', label: 'KPIs', icon: BarChart3, standardOnly: true },
-  { key: 'playbooks', label: 'Playbooks', icon: BookOpen, standardOnly: true },
-  { key: 'alerts', label: 'Alert Rules', icon: Bell, standardOnly: true },
-  { key: 'review', label: 'Review', icon: CheckCircle },
+const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType; standardOnly?: boolean }[] = [
+  { key: 'basics', labelKey: 'programSetup.steps.basics', icon: Building2 },
+  { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers, standardOnly: true },
+  { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3, standardOnly: true },
+  { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen, standardOnly: true },
+  { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell, standardOnly: true },
+  { key: 'review', labelKey: 'programSetup.steps.review', icon: CheckCircle },
 ];
 
 export default function ProgramSetupWizard() {
@@ -128,7 +128,7 @@ export default function ProgramSetupWizard() {
   const handleSaveAndContinue = async () => {
     // Auto-save happens via step components
     handleNext();
-    toast.success('Progress saved');
+    toast.success(t('programSetup.progressSaved'));
   };
 
   const handleUpdateDraft = async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
@@ -148,7 +148,7 @@ export default function ProgramSetupWizard() {
       publishedRef.current = true;
       triggerConfetti();
       await publishDraft.mutateAsync(activeDraftId);
-      toast.success('🎉 Program published successfully!');
+      toast.success(t('programSetup.publishSuccess'));
       setTimeout(() => navigate('/admin'), 1500);
     } catch (error) {
       publishedRef.current = false;
@@ -164,27 +164,27 @@ export default function ProgramSetupWizard() {
     const { basics, stages, coreKpis, alertRules, healthModel } = draft.draft_json;
     const programIsBasic = basics?.settings?.program_mode === 'basic';
 
-    if (!basics?.name?.trim()) errors.push('Program name is required');
+    if (!basics?.name?.trim()) errors.push(t('programSetup.validation.programNameRequired'));
     
     // Standard mode validations
     if (!programIsBasic) {
       const activeStages = stages?.filter((s) => s.is_active) || [];
-      if (activeStages.length === 0) errors.push('At least one stage must be active');
+      if (activeStages.length === 0) errors.push(t('programSetup.validation.atLeastOneStage'));
 
       const coreCount = coreKpis?.length || 0;
-      if (coreCount < 3) errors.push('At least 3 core KPIs required');
-      if (coreCount > 6) errors.push('Maximum 6 core KPIs allowed');
+      if (coreCount < 3) errors.push(t('programSetup.validation.minCoreKpis'));
+      if (coreCount > 6) errors.push(t('programSetup.validation.maxCoreKpis'));
 
       // Check alert thresholds
       for (const rule of alertRules || []) {
-        if (rule.threshold < 0) errors.push(`Alert rule "${rule.rule_type}" has negative threshold`);
+        if (rule.threshold < 0) errors.push(t('programSetup.validation.negativeThreshold', { ruleType: rule.rule_type }));
       }
 
       // Check health model weights
       if (healthModel?.is_enabled) {
         const weights = Object.values(healthModel.weights_json || {});
         const sum = weights.reduce((a, b) => a + b, 0);
-        if (Math.abs(sum - 100) > 0.1) errors.push(`Health weights must sum to 100 (current: ${sum})`);
+        if (Math.abs(sum - 100) > 0.1) errors.push(t('programSetup.validation.healthWeightsSum', { sum }));
       }
     }
 
@@ -193,7 +193,7 @@ export default function ProgramSetupWizard() {
 
   if (draftLoading || createDraft.isPending) {
     return (
-      <AppLayout title="Program Setup" subtitle="Loading...">
+      <AppLayout title={t('programSetup.newProgramSetup')} subtitle={t('programSetup.loading')}>
         <div className="space-y-4">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-96 w-full" />
@@ -203,12 +203,12 @@ export default function ProgramSetupWizard() {
   }
 
   const isEditing = !!id;
-  const title = isEditing ? `Edit Program: ${draft?.draft_json.basics?.name || 'Untitled'}` : 'New Program Setup';
+  const title = isEditing ? t('programSetup.editProgram', { name: draft?.draft_json.basics?.name || 'Untitled' }) : t('programSetup.newProgramSetup');
 
   return (
     <AppLayout 
       title={title} 
-      subtitle="Configure your program step by step"
+      subtitle={t('programSetup.configureStepByStep')}
     >
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Progress Header */}
@@ -217,7 +217,7 @@ export default function ProgramSetupWizard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Rocket className="h-5 w-5 text-primary" />
-                <span className="font-medium">Setup Progress</span>
+                <span className="font-medium">{t('programSetup.setupProgress')}</span>
               </div>
               <Badge variant={draft?.status === 'draft' ? 'secondary' : 'default'}>
                 {draft?.status || 'draft'}
@@ -253,7 +253,7 @@ export default function ProgramSetupWizard() {
                     >
                       {isComplete ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                     </div>
-                    <span className="hidden sm:block">{step.label}</span>
+                    <span className="hidden sm:block">{t(step.labelKey)}</span>
                   </button>
                 );
               })}
@@ -270,15 +270,10 @@ export default function ProgramSetupWizard() {
             />
             <div className="flex-1">
               <CardTitle className="flex items-center gap-2">
-                {STEPS[currentStepIndex].label}
+                {t(STEPS[currentStepIndex].labelKey)}
               </CardTitle>
               <CardDescription>
-                {currentStep === 'basics' && 'Enter the basic information about your program'}
-                {currentStep === 'stages' && 'Configure which stages are active and their order'}
-                {currentStep === 'kpis' && 'Review and customize KPIs for each stage'}
-                {currentStep === 'playbooks' && 'Set up playbooks with milestones and actions'}
-                {currentStep === 'alerts' && 'Configure alert rules and health scoring'}
-                {currentStep === 'review' && 'Review your configuration and publish'}
+                {t(`programSetup.stepDescriptions.${currentStep}`)}
               </CardDescription>
             </div>
           </CardHeader>
@@ -342,7 +337,7 @@ export default function ProgramSetupWizard() {
               className="text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Discard
+              {t('programSetup.discard')}
             </Button>
           </div>
 
@@ -350,15 +345,14 @@ export default function ProgramSetupWizard() {
             {currentStepIndex > 0 && (
               <Button type="button" variant="outline" onClick={handleBack}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
+                {t('programSetup.back')}
               </Button>
             )}
 
             {currentStep !== 'review' ? (
               <Button type="button" onClick={handleSaveAndContinue} disabled={updateDraft.isPending}>
                 <Save className="h-4 w-4 mr-1" />
-                Save & Continue
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t('programSetup.saveAndContinue')}
               </Button>
             ) : (
               <Button
@@ -368,11 +362,11 @@ export default function ProgramSetupWizard() {
                 className="bg-green-600 hover:bg-green-700"
               >
                 {publishDraft.isPending || publishedRef.current ? (
-                  '🎉 Publishing...'
+                  t('programSetup.publishing')
                 ) : (
                   <>
                     <Rocket className="h-4 w-4 mr-2" />
-                    Publish Program
+                    {t('programSetup.publishProgram')}
                   </>
                 )}
               </Button>
@@ -385,18 +379,18 @@ export default function ProgramSetupWizard() {
       <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard draft?</AlertDialogTitle>
+            <AlertDialogTitle>{t('programSetup.discardDraftTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete all your progress. This action cannot be undone.
+              {t('programSetup.discardDraftDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('programSetup.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDiscard}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Discard
+              {t('programSetup.discard')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
