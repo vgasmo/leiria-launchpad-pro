@@ -53,231 +53,239 @@ interface WorkspaceOnboardingWizardProps {
   isFounderOnboarding?: boolean;
 }
 
-// Default milestones by stage with suggested actions
-const STAGE_MILESTONES: Record<StartupStage, { 
-  title: string; 
-  description: string; 
+// Bilingual milestone/action templates — content is stored in the DB at creation time
+// so we pick the right language when the wizard runs.
+type MilestoneTemplate = {
+  title: { pt: string; en: string };
+  description: { pt: string; en: string };
   weeksOut: number;
-  actions: { title: string; daysOffset: number }[];
-}[]> = {
+  actions: { title: { pt: string; en: string }; daysOffset: number }[];
+};
+
+const STAGE_MILESTONES: Record<StartupStage, MilestoneTemplate[]> = {
   ideation: [
-    { 
-      title: 'Complete problem validation interviews', 
-      description: 'Conduct 10+ customer interviews to validate the problem', 
+    {
+      title: { en: 'Complete problem validation interviews', pt: 'Completar entrevistas de validação do problema' },
+      description: { en: 'Conduct 10+ customer interviews to validate the problem', pt: 'Realizar 10+ entrevistas com clientes para validar o problema' },
       weeksOut: 2,
       actions: [
-        { title: 'Create interview script with key questions', daysOffset: 2 },
-        { title: 'Identify and reach out to 15 potential interviewees', daysOffset: 4 },
-        { title: 'Conduct first 5 interviews', daysOffset: 8 },
-        { title: 'Synthesize findings and document patterns', daysOffset: 12 },
+        { title: { en: 'Create interview script with key questions', pt: 'Criar guião de entrevista com perguntas-chave' }, daysOffset: 2 },
+        { title: { en: 'Identify and reach out to 15 potential interviewees', pt: 'Identificar e contactar 15 potenciais entrevistados' }, daysOffset: 4 },
+        { title: { en: 'Conduct first 5 interviews', pt: 'Realizar as primeiras 5 entrevistas' }, daysOffset: 8 },
+        { title: { en: 'Synthesize findings and document patterns', pt: 'Sintetizar descobertas e documentar padrões' }, daysOffset: 12 },
       ]
     },
-    { 
-      title: 'Define value proposition', 
-      description: 'Document clear value proposition and unique selling points', 
+    {
+      title: { en: 'Define value proposition', pt: 'Definir proposta de valor' },
+      description: { en: 'Document clear value proposition and unique selling points', pt: 'Documentar proposta de valor clara e diferenciais' },
       weeksOut: 3,
       actions: [
-        { title: 'Analyze competitor positioning', daysOffset: 2 },
-        { title: 'Draft value proposition canvas', daysOffset: 5 },
-        { title: 'Test messaging with 5 potential customers', daysOffset: 10 },
+        { title: { en: 'Analyze competitor positioning', pt: 'Analisar posicionamento da concorrência' }, daysOffset: 2 },
+        { title: { en: 'Draft value proposition canvas', pt: 'Elaborar canvas de proposta de valor' }, daysOffset: 5 },
+        { title: { en: 'Test messaging with 5 potential customers', pt: 'Testar mensagem com 5 potenciais clientes' }, daysOffset: 10 },
       ]
     },
-    { 
-      title: 'Create initial business model canvas', 
-      description: 'Complete first iteration of BMC', 
+    {
+      title: { en: 'Create initial business model canvas', pt: 'Criar Canvas de Modelo de Negócio inicial' },
+      description: { en: 'Complete first iteration of BMC', pt: 'Completar a primeira iteração do BMC' },
       weeksOut: 4,
       actions: [
-        { title: 'Complete customer segments and channels sections', daysOffset: 5 },
-        { title: 'Define revenue streams and cost structure', daysOffset: 10 },
-        { title: 'Review BMC with mentor/advisor', daysOffset: 20 },
+        { title: { en: 'Complete customer segments and channels sections', pt: 'Completar secções de segmentos de clientes e canais' }, daysOffset: 5 },
+        { title: { en: 'Define revenue streams and cost structure', pt: 'Definir fontes de receita e estrutura de custos' }, daysOffset: 10 },
+        { title: { en: 'Review BMC with mentor/advisor', pt: 'Rever BMC com mentor/consultor' }, daysOffset: 20 },
       ]
     },
-    { 
-      title: 'Identify early adopters', 
-      description: 'Build list of 50+ potential early adopter contacts', 
+    {
+      title: { en: 'Identify early adopters', pt: 'Identificar early adopters' },
+      description: { en: 'Build list of 50+ potential early adopter contacts', pt: 'Construir lista de 50+ contactos de potenciais early adopters' },
       weeksOut: 6,
       actions: [
-        { title: 'Define early adopter profile and criteria', daysOffset: 3 },
-        { title: 'Research and list 20 potential early adopters', daysOffset: 14 },
-        { title: 'Reach out and qualify interest from 10 contacts', daysOffset: 28 },
+        { title: { en: 'Define early adopter profile and criteria', pt: 'Definir perfil e critérios de early adopter' }, daysOffset: 3 },
+        { title: { en: 'Research and list 20 potential early adopters', pt: 'Pesquisar e listar 20 potenciais early adopters' }, daysOffset: 14 },
+        { title: { en: 'Reach out and qualify interest from 10 contacts', pt: 'Contactar e qualificar interesse de 10 contactos' }, daysOffset: 28 },
       ]
     },
   ],
   validation: [
-    { 
-      title: 'Launch landing page', 
-      description: 'Create and deploy landing page with signup form', 
+    {
+      title: { en: 'Launch landing page', pt: 'Lançar landing page' },
+      description: { en: 'Create and deploy landing page with signup form', pt: 'Criar e publicar landing page com formulário de registo' },
       weeksOut: 2,
       actions: [
-        { title: 'Write compelling headline and copy', daysOffset: 2 },
-        { title: 'Design and build landing page', daysOffset: 7 },
-        { title: 'Set up analytics and email capture', daysOffset: 10 },
-        { title: 'Launch and share with initial contacts', daysOffset: 12 },
+        { title: { en: 'Write compelling headline and copy', pt: 'Escrever título e copy apelativos' }, daysOffset: 2 },
+        { title: { en: 'Design and build landing page', pt: 'Desenhar e construir a landing page' }, daysOffset: 7 },
+        { title: { en: 'Set up analytics and email capture', pt: 'Configurar analytics e captura de email' }, daysOffset: 10 },
+        { title: { en: 'Launch and share with initial contacts', pt: 'Lançar e partilhar com contactos iniciais' }, daysOffset: 12 },
       ]
     },
-    { 
-      title: 'Run first experiment', 
-      description: 'Design and execute first validation experiment', 
+    {
+      title: { en: 'Run first experiment', pt: 'Executar primeira experiência' },
+      description: { en: 'Design and execute first validation experiment', pt: 'Conceber e executar a primeira experiência de validação' },
       weeksOut: 3,
       actions: [
-        { title: 'Define hypothesis and success metrics', daysOffset: 2 },
-        { title: 'Design experiment methodology', daysOffset: 5 },
-        { title: 'Execute experiment', daysOffset: 14 },
-        { title: 'Analyze results and document learnings', daysOffset: 18 },
+        { title: { en: 'Define hypothesis and success metrics', pt: 'Definir hipótese e métricas de sucesso' }, daysOffset: 2 },
+        { title: { en: 'Design experiment methodology', pt: 'Desenhar metodologia da experiência' }, daysOffset: 5 },
+        { title: { en: 'Execute experiment', pt: 'Executar experiência' }, daysOffset: 14 },
+        { title: { en: 'Analyze results and document learnings', pt: 'Analisar resultados e documentar aprendizagens' }, daysOffset: 18 },
       ]
     },
-    { 
-      title: 'Collect 100+ signups', 
-      description: 'Achieve 100 email signups from landing page', 
+    {
+      title: { en: 'Collect 100+ signups', pt: 'Recolher 100+ registos' },
+      description: { en: 'Achieve 100 email signups from landing page', pt: 'Atingir 100 registos de email na landing page' },
       weeksOut: 5,
       actions: [
-        { title: 'Share landing page on social media', daysOffset: 3 },
-        { title: 'Reach out to communities and groups', daysOffset: 10 },
-        { title: 'Run small paid ad campaign', daysOffset: 20 },
+        { title: { en: 'Share landing page on social media', pt: 'Partilhar landing page nas redes sociais' }, daysOffset: 3 },
+        { title: { en: 'Reach out to communities and groups', pt: 'Contactar comunidades e grupos' }, daysOffset: 10 },
+        { title: { en: 'Run small paid ad campaign', pt: 'Lançar pequena campanha de anúncios pagos' }, daysOffset: 20 },
       ]
     },
-    { 
-      title: 'Complete solution interviews', 
-      description: 'Validate proposed solution with 20+ prospects', 
+    {
+      title: { en: 'Complete solution interviews', pt: 'Completar entrevistas de solução' },
+      description: { en: 'Validate proposed solution with 20+ prospects', pt: 'Validar solução proposta com 20+ prospects' },
       weeksOut: 6,
       actions: [
-        { title: 'Create solution mockups or prototype', daysOffset: 5 },
-        { title: 'Schedule interviews with signups', daysOffset: 10 },
-        { title: 'Conduct 10 solution interviews', daysOffset: 25 },
-        { title: 'Document feedback and iterate', daysOffset: 35 },
+        { title: { en: 'Create solution mockups or prototype', pt: 'Criar mockups ou protótipo da solução' }, daysOffset: 5 },
+        { title: { en: 'Schedule interviews with signups', pt: 'Agendar entrevistas com registados' }, daysOffset: 10 },
+        { title: { en: 'Conduct 10 solution interviews', pt: 'Realizar 10 entrevistas de solução' }, daysOffset: 25 },
+        { title: { en: 'Document feedback and iterate', pt: 'Documentar feedback e iterar' }, daysOffset: 35 },
       ]
     },
   ],
   mvp: [
-    { 
-      title: 'Define MVP scope', 
-      description: 'Document core MVP features and success criteria', 
+    {
+      title: { en: 'Define MVP scope', pt: 'Definir âmbito do MVP' },
+      description: { en: 'Document core MVP features and success criteria', pt: 'Documentar funcionalidades core e critérios de sucesso do MVP' },
       weeksOut: 1,
       actions: [
-        { title: 'List all potential features', daysOffset: 1 },
-        { title: 'Prioritize to core must-haves only', daysOffset: 3 },
-        { title: 'Define success metrics for MVP', daysOffset: 5 },
+        { title: { en: 'List all potential features', pt: 'Listar todas as funcionalidades potenciais' }, daysOffset: 1 },
+        { title: { en: 'Prioritize to core must-haves only', pt: 'Priorizar apenas funcionalidades essenciais' }, daysOffset: 3 },
+        { title: { en: 'Define success metrics for MVP', pt: 'Definir métricas de sucesso do MVP' }, daysOffset: 5 },
       ]
     },
-    { 
-      title: 'Complete MVP development', 
-      description: 'Build and deploy minimum viable product', 
+    {
+      title: { en: 'Complete MVP development', pt: 'Completar desenvolvimento do MVP' },
+      description: { en: 'Build and deploy minimum viable product', pt: 'Construir e publicar o produto mínimo viável' },
       weeksOut: 6,
       actions: [
-        { title: 'Set up development environment', daysOffset: 3 },
-        { title: 'Build core feature #1', daysOffset: 14 },
-        { title: 'Build core feature #2', daysOffset: 28 },
-        { title: 'Deploy and test MVP', daysOffset: 38 },
+        { title: { en: 'Set up development environment', pt: 'Configurar ambiente de desenvolvimento' }, daysOffset: 3 },
+        { title: { en: 'Build core feature #1', pt: 'Desenvolver funcionalidade core #1' }, daysOffset: 14 },
+        { title: { en: 'Build core feature #2', pt: 'Desenvolver funcionalidade core #2' }, daysOffset: 28 },
+        { title: { en: 'Deploy and test MVP', pt: 'Publicar e testar MVP' }, daysOffset: 38 },
       ]
     },
-    { 
-      title: 'Onboard first 10 users', 
-      description: 'Get first paying customers or active users', 
+    {
+      title: { en: 'Onboard first 10 users', pt: 'Integrar os primeiros 10 utilizadores' },
+      description: { en: 'Get first paying customers or active users', pt: 'Obter os primeiros clientes pagantes ou utilizadores ativos' },
       weeksOut: 8,
       actions: [
-        { title: 'Invite early adopters to try MVP', daysOffset: 5 },
-        { title: 'Provide hands-on onboarding support', daysOffset: 15 },
-        { title: 'Collect feedback and fix critical bugs', daysOffset: 40 },
+        { title: { en: 'Invite early adopters to try MVP', pt: 'Convidar early adopters a testar o MVP' }, daysOffset: 5 },
+        { title: { en: 'Provide hands-on onboarding support', pt: 'Fornecer apoio de onboarding personalizado' }, daysOffset: 15 },
+        { title: { en: 'Collect feedback and fix critical bugs', pt: 'Recolher feedback e corrigir bugs críticos' }, daysOffset: 40 },
       ]
     },
-    { 
-      title: 'Collect feedback and iterate', 
-      description: 'Document learnings and plan next iteration', 
+    {
+      title: { en: 'Collect feedback and iterate', pt: 'Recolher feedback e iterar' },
+      description: { en: 'Document learnings and plan next iteration', pt: 'Documentar aprendizagens e planear próxima iteração' },
       weeksOut: 10,
       actions: [
-        { title: 'Conduct user feedback sessions', daysOffset: 10 },
-        { title: 'Analyze usage data and patterns', daysOffset: 30 },
-        { title: 'Prioritize next iteration features', daysOffset: 50 },
+        { title: { en: 'Conduct user feedback sessions', pt: 'Realizar sessões de feedback com utilizadores' }, daysOffset: 10 },
+        { title: { en: 'Analyze usage data and patterns', pt: 'Analisar dados de utilização e padrões' }, daysOffset: 30 },
+        { title: { en: 'Prioritize next iteration features', pt: 'Priorizar funcionalidades da próxima iteração' }, daysOffset: 50 },
       ]
     },
   ],
   growth: [
-    { 
-      title: 'Define growth metrics', 
-      description: 'Establish key growth KPIs and targets', 
+    {
+      title: { en: 'Define growth metrics', pt: 'Definir métricas de crescimento' },
+      description: { en: 'Establish key growth KPIs and targets', pt: 'Estabelecer KPIs e metas de crescimento' },
       weeksOut: 1,
       actions: [
-        { title: 'Identify north star metric', daysOffset: 2 },
-        { title: 'Set up analytics dashboard', daysOffset: 4 },
-        { title: 'Define monthly growth targets', daysOffset: 6 },
+        { title: { en: 'Identify north star metric', pt: 'Identificar métrica norte' }, daysOffset: 2 },
+        { title: { en: 'Set up analytics dashboard', pt: 'Configurar dashboard de analytics' }, daysOffset: 4 },
+        { title: { en: 'Define monthly growth targets', pt: 'Definir metas mensais de crescimento' }, daysOffset: 6 },
       ]
     },
-    { 
-      title: 'Launch marketing campaigns', 
-      description: 'Execute first paid acquisition campaigns', 
+    {
+      title: { en: 'Launch marketing campaigns', pt: 'Lançar campanhas de marketing' },
+      description: { en: 'Execute first paid acquisition campaigns', pt: 'Executar primeiras campanhas de aquisição paga' },
       weeksOut: 3,
       actions: [
-        { title: 'Research target audience and channels', daysOffset: 3 },
-        { title: 'Create ad creatives and copy', daysOffset: 10 },
-        { title: 'Launch and monitor campaigns', daysOffset: 15 },
-        { title: 'Optimize based on performance', daysOffset: 18 },
+        { title: { en: 'Research target audience and channels', pt: 'Pesquisar público-alvo e canais' }, daysOffset: 3 },
+        { title: { en: 'Create ad creatives and copy', pt: 'Criar criativos e copy de anúncios' }, daysOffset: 10 },
+        { title: { en: 'Launch and monitor campaigns', pt: 'Lançar e monitorizar campanhas' }, daysOffset: 15 },
+        { title: { en: 'Optimize based on performance', pt: 'Otimizar com base no desempenho' }, daysOffset: 18 },
       ]
     },
-    { 
-      title: 'Achieve 100 active users', 
-      description: 'Reach 100 monthly active users milestone', 
+    {
+      title: { en: 'Achieve 100 active users', pt: 'Atingir 100 utilizadores ativos' },
+      description: { en: 'Reach 100 monthly active users milestone', pt: 'Atingir o marco de 100 utilizadores ativos mensais' },
       weeksOut: 8,
       actions: [
-        { title: 'Implement referral program', daysOffset: 10 },
-        { title: 'Launch content marketing strategy', daysOffset: 25 },
-        { title: 'Optimize onboarding for activation', daysOffset: 40 },
+        { title: { en: 'Implement referral program', pt: 'Implementar programa de referência' }, daysOffset: 10 },
+        { title: { en: 'Launch content marketing strategy', pt: 'Lançar estratégia de content marketing' }, daysOffset: 25 },
+        { title: { en: 'Optimize onboarding for activation', pt: 'Otimizar onboarding para ativação' }, daysOffset: 40 },
       ]
     },
-    { 
-      title: 'Optimize conversion funnel', 
-      description: 'Identify and fix key conversion bottlenecks', 
+    {
+      title: { en: 'Optimize conversion funnel', pt: 'Otimizar funil de conversão' },
+      description: { en: 'Identify and fix key conversion bottlenecks', pt: 'Identificar e corrigir bottlenecks de conversão' },
       weeksOut: 10,
       actions: [
-        { title: 'Map full user journey and funnel', daysOffset: 5 },
-        { title: 'Identify biggest drop-off points', daysOffset: 20 },
-        { title: 'Run A/B tests on key pages', daysOffset: 50 },
+        { title: { en: 'Map full user journey and funnel', pt: 'Mapear jornada completa e funil do utilizador' }, daysOffset: 5 },
+        { title: { en: 'Identify biggest drop-off points', pt: 'Identificar maiores pontos de desistência' }, daysOffset: 20 },
+        { title: { en: 'Run A/B tests on key pages', pt: 'Executar testes A/B em páginas-chave' }, daysOffset: 50 },
       ]
     },
   ],
   scale: [
-    { 
-      title: 'Hire key team members', 
-      description: 'Recruit for critical growth positions', 
+    {
+      title: { en: 'Hire key team members', pt: 'Contratar membros-chave da equipa' },
+      description: { en: 'Recruit for critical growth positions', pt: 'Recrutar para posições críticas de crescimento' },
       weeksOut: 4,
       actions: [
-        { title: 'Define roles and job descriptions', daysOffset: 3 },
-        { title: 'Post jobs and source candidates', daysOffset: 7 },
-        { title: 'Interview and select candidates', daysOffset: 21 },
+        { title: { en: 'Define roles and job descriptions', pt: 'Definir funções e descrições de cargo' }, daysOffset: 3 },
+        { title: { en: 'Post jobs and source candidates', pt: 'Publicar vagas e encontrar candidatos' }, daysOffset: 7 },
+        { title: { en: 'Interview and select candidates', pt: 'Entrevistar e selecionar candidatos' }, daysOffset: 21 },
       ]
     },
-    { 
-      title: 'Expand to new market/segment', 
-      description: 'Launch in second market or customer segment', 
+    {
+      title: { en: 'Expand to new market/segment', pt: 'Expandir para novo mercado/segmento' },
+      description: { en: 'Launch in second market or customer segment', pt: 'Lançar em segundo mercado ou segmento de clientes' },
       weeksOut: 8,
       actions: [
-        { title: 'Research new market opportunity', daysOffset: 10 },
-        { title: 'Adapt product for new segment', daysOffset: 35 },
-        { title: 'Launch and test in new market', daysOffset: 50 },
+        { title: { en: 'Research new market opportunity', pt: 'Pesquisar oportunidade no novo mercado' }, daysOffset: 10 },
+        { title: { en: 'Adapt product for new segment', pt: 'Adaptar produto para novo segmento' }, daysOffset: 35 },
+        { title: { en: 'Launch and test in new market', pt: 'Lançar e testar no novo mercado' }, daysOffset: 50 },
       ]
     },
-    { 
-      title: 'Implement automation', 
-      description: 'Automate key operational processes', 
+    {
+      title: { en: 'Implement automation', pt: 'Implementar automação' },
+      description: { en: 'Automate key operational processes', pt: 'Automatizar processos operacionais-chave' },
       weeksOut: 10,
       actions: [
-        { title: 'Audit current manual processes', daysOffset: 5 },
-        { title: 'Prioritize automation opportunities', daysOffset: 15 },
-        { title: 'Implement top 3 automations', daysOffset: 55 },
+        { title: { en: 'Audit current manual processes', pt: 'Auditar processos manuais atuais' }, daysOffset: 5 },
+        { title: { en: 'Prioritize automation opportunities', pt: 'Priorizar oportunidades de automação' }, daysOffset: 15 },
+        { title: { en: 'Implement top 3 automations', pt: 'Implementar as 3 principais automações' }, daysOffset: 55 },
       ]
     },
-    { 
-      title: 'Prepare for funding round', 
-      description: 'Complete materials for next funding round', 
+    {
+      title: { en: 'Prepare for funding round', pt: 'Preparar ronda de investimento' },
+      description: { en: 'Complete materials for next funding round', pt: 'Completar materiais para próxima ronda de investimento' },
       weeksOut: 12,
       actions: [
-        { title: 'Update pitch deck', daysOffset: 20 },
-        { title: 'Prepare financial projections', daysOffset: 40 },
-        { title: 'Build investor target list', daysOffset: 60 },
-        { title: 'Start investor outreach', daysOffset: 75 },
+        { title: { en: 'Update pitch deck', pt: 'Atualizar pitch deck' }, daysOffset: 20 },
+        { title: { en: 'Prepare financial projections', pt: 'Preparar projeções financeiras' }, daysOffset: 40 },
+        { title: { en: 'Build investor target list', pt: 'Construir lista de investidores-alvo' }, daysOffset: 60 },
+        { title: { en: 'Start investor outreach', pt: 'Iniciar contacto com investidores' }, daysOffset: 75 },
       ]
     },
   ],
 };
+
+// Helper to pick the right language string from a bilingual template
+function pickLang(bilingual: { pt: string; en: string }, lang: string): string {
+  return lang === 'pt' ? bilingual.pt : bilingual.en;
+}
 
 type WizardStep = 'welcome' | 'company' | 'kpis' | 'milestones' | 'meeting' | 'complete';
 
