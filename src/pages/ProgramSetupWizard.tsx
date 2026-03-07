@@ -52,13 +52,13 @@ import { triggerConfetti } from '@/lib/confetti';
 
 type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
-const ALL_STEPS: { key: WizardStep; label: string; icon: React.ElementType; standardOnly?: boolean }[] = [
-  { key: 'basics', label: 'Basics', icon: Building2 },
-  { key: 'stages', label: 'Stages', icon: Layers, standardOnly: true },
-  { key: 'kpis', label: 'KPIs', icon: BarChart3, standardOnly: true },
-  { key: 'playbooks', label: 'Playbooks', icon: BookOpen, standardOnly: true },
-  { key: 'alerts', label: 'Alert Rules', icon: Bell, standardOnly: true },
-  { key: 'review', label: 'Review', icon: CheckCircle },
+const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType; standardOnly?: boolean }[] = [
+  { key: 'basics', labelKey: 'programSetup.steps.basics', icon: Building2 },
+  { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers, standardOnly: true },
+  { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3, standardOnly: true },
+  { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen, standardOnly: true },
+  { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell, standardOnly: true },
+  { key: 'review', labelKey: 'programSetup.steps.review', icon: CheckCircle },
 ];
 
 export default function ProgramSetupWizard() {
