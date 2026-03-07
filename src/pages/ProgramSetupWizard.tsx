@@ -177,7 +177,7 @@ export default function ProgramSetupWizard() {
 
       // Check alert thresholds
       for (const rule of alertRules || []) {
-        if (rule.threshold < 0) errors.push(`Alert rule "${rule.rule_type}" has negative threshold`);
+        if (rule.threshold < 0) errors.push(t('programSetup.validation.negativeThreshold', { ruleType: rule.rule_type }));
       }
 
       // Check health model weights
