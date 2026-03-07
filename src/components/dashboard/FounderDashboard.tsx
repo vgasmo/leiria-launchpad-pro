@@ -159,41 +159,39 @@ export function FounderDashboard({
     );
   }
 
-  // No workspace yet
+  // No workspace yet → Claim-first flow (P0.1)
   if (!workspace) {
     return (
       <div className="space-y-6">
-        <FounderWelcomePanel
-          hasStartup={false}
-          hasProfile={hasProfile}
-          hasKpis={false}
-          hasMentor={false}
-          hasDocuments={false}
-          onCreateStartup={onCreateStartup}
-        />
-        
         <Card className="relative overflow-hidden border-0 shadow-card">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
           <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <CardContent className="relative p-6 md:p-10 text-center">
             <EmptyStateIllustration type="rocket" size="lg" className="mx-auto mb-4" />
             <h3 className="font-heading text-xl md:text-2xl font-semibold mb-2">
-              {t('founder.startYourJourney')}
+              {t('founder.claimFirst.title', { defaultValue: 'Bem-vindo à plataforma' })}
             </h3>
             <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
-              {t('founder.startYourJourneyDesc')}
+              {t('founder.claimFirst.desc', { defaultValue: 'Esta plataforma é apenas por convite. A sua startup pode já estar preparada no sistema. Vamos verificar e associá-la à sua conta.' })}
             </p>
             <p className="text-sm text-primary/80 font-medium max-w-sm mx-auto mb-6 flex items-center justify-center gap-2">
               <Sparkles className="h-4 w-4" />
-              {t('founder.startYourJourneyValue')}
+              {t('founder.claimFirst.value', { defaultValue: 'A sua startup pode já estar à sua espera.' })}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-              <Button size="default" onClick={onCreateStartup} className="gap-2 shadow-lg">
-                <Plus className="h-4 w-4" />
-                {t('founder.createYourStartup')}
+              <Button size="default" onClick={() => navigate('/claim-startup')} className="gap-2 shadow-lg">
+                <Rocket className="h-4 w-4" />
+                {t('founder.claimFirst.cta', { defaultValue: 'Verificar a Minha Startup' })}
               </Button>
-              <Button variant="ghost" size="default" onClick={() => navigate('/help')}>
-                {t('founder.learnMore')}
+            </div>
+            {/* Demoted: create-new as secondary exception path */}
+            <div className="mt-6 pt-4 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mb-2">
+                {t('founder.claimFirst.noMatch', { defaultValue: 'A sua startup não foi pré-registada? Pode solicitar a criação de um novo registo.' })}
+              </p>
+              <Button variant="ghost" size="sm" onClick={onCreateStartup} className="text-xs text-muted-foreground hover:text-foreground gap-1">
+                <Plus className="h-3 w-3" />
+                {t('founder.claimFirst.createNew', { defaultValue: 'Registar nova startup' })}
               </Button>
             </div>
           </CardContent>

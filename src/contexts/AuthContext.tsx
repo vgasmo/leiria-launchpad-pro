@@ -122,6 +122,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRoles([]);
           setIsAuthReady(true);
         } else if (newSession?.user) {
+          // P0.2: Detect user switch — clear cache if different user logs in
+          const previousUid = localStorage.getItem('sl-cache-uid');
+          if (previousUid && previousUid !== newSession.user.id) {
+            try {
+              localStorage.removeItem('sl-query-cache');
+            } catch { /* ignore */ }
+          }
+          localStorage.setItem('sl-cache-uid', newSession.user.id);
+
           // P1: Set loading while fetching data to prevent flash of wrong content
           setIsAuthReady(false);
           

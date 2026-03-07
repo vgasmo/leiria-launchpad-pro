@@ -296,12 +296,12 @@ export default function MyWorkspaces() {
               <span className="hidden sm:inline">{t('myWorkspaces.dashboard')}</span>
             </Button>
           )}
-          {/* Create startup button for founders with no workspaces */}
+          {/* P0.1: Claim-first — show "Verify Startup" as primary CTA for founders with no workspaces */}
           {isFounder && !showConsultorDashboard && !showMentorDashboard && (workspaces || []).length === 0 && (
-            <Button onClick={() => setShowCreateStartup(true)} className="gap-2" data-tour="create-workspace">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('myWorkspaces.createStartup')}</span>
-              <span className="sm:hidden">{t('common.new')}</span>
+            <Button onClick={() => navigate('/claim-startup')} className="gap-2" data-tour="create-workspace">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('founder.claimFirst.cta', { defaultValue: 'Verificar a Minha Startup' })}</span>
+              <span className="sm:hidden">{t('common.verify', { defaultValue: 'Verificar' })}</span>
             </Button>
           )}
         </div>
