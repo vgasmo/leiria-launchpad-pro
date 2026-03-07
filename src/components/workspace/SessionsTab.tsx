@@ -1464,7 +1464,7 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
                 <SelectValue placeholder={t('actions.selectMember', { defaultValue: 'Selecionar membro' })} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="unassigned">{t('actions.unassigned', { defaultValue: 'Não atribuído' })}</SelectItem>
                 {members?.filter(m => m.user_id).map(member => (
                   <SelectItem key={member.user_id} value={member.user_id}>
                     {member.profile?.full_name || member.profile?.email || 'Unknown'}
