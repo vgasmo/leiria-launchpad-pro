@@ -113,6 +113,11 @@ export default function MyWorkspaces() {
 
   const { data: programs } = usePrograms();
   
+  // Founders see active + claimed workspaces; staff sees only operationally active
+  const founderStatuses: ('active' | 'claimed')[] = ['active', 'claimed'];
+  const staffStatuses: ('active')[] = ['active'];
+  const workspaceStatuses = (isFounder && !isConsultor && !isAdmin) ? founderStatuses : staffStatuses;
+
   // Use assigned workspaces for consultors if showAssignedOnly is true
   const { data: workspaces, isLoading, error } = useWorkspaces({
     search,
@@ -123,7 +128,7 @@ export default function MyWorkspaces() {
     missingKpi,
     overdueActions,
     sortBy,
-  }, showAssignedOnly);
+  }, showAssignedOnly, workspaceStatuses);
   
   const { data: pendingWorkspaces } = useMyPendingWorkspaces();
 
