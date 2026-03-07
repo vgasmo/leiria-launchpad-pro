@@ -203,12 +203,12 @@ export default function ProgramSetupWizard() {
   }
 
   const isEditing = !!id;
-  const title = isEditing ? `Edit Program: ${draft?.draft_json.basics?.name || 'Untitled'}` : 'New Program Setup';
+  const title = isEditing ? t('programSetup.editProgram', { name: draft?.draft_json.basics?.name || 'Untitled' }) : t('programSetup.newProgramSetup');
 
   return (
     <AppLayout 
       title={title} 
-      subtitle="Configure your program step by step"
+      subtitle={t('programSetup.configureStepByStep')}
     >
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Progress Header */}
