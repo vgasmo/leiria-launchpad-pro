@@ -58,7 +58,7 @@
 - Sentry/structured logging integration
 - CRM list view pagination (already paginated but uses broad queries)
 - Full audit of all `select('*')` across all hooks (only highest-impact fixed)
-- Auto-redirect from `/my-workspaces` to `/claim-startup` for founders (currently handled by FounderDashboard UX, not a hard redirect)
+- Staff-side claim review UX improvements (matching hints, auto-suggest workspace)
 
 ## Manual Validation Checklist
 - [ ] Sign up as new founder (allowlisted) → should see "Verificar a Minha Startup" as primary CTA
