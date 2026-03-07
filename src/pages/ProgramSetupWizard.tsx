@@ -385,7 +385,7 @@ export default function ProgramSetupWizard() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('programSetup.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDiscard}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
