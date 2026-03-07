@@ -184,7 +184,7 @@ export default function ProgramSetupWizard() {
       if (healthModel?.is_enabled) {
         const weights = Object.values(healthModel.weights_json || {});
         const sum = weights.reduce((a, b) => a + b, 0);
-        if (Math.abs(sum - 100) > 0.1) errors.push(`Health weights must sum to 100 (current: ${sum})`);
+        if (Math.abs(sum - 100) > 0.1) errors.push(t('programSetup.validation.healthWeightsSum', { sum }));
       }
     }
 
