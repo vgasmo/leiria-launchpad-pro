@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useGlobalSearch, useTags, useSaveSearch, useSavedSearches, useDeleteSavedSearch, SearchResult, SearchFilters } from '@/hooks/useGlobalSearch';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 
 const RESULT_TYPES = [
@@ -44,7 +44,7 @@ export default function SearchPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
 
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: tags } = useTags();
   const { data: savedSearches } = useSavedSearches();
   const saveSearch = useSaveSearch();

@@ -36,7 +36,7 @@ import {
   type Room,
   type FloorMap
 } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { useFunnelItems } from '@/hooks/useFunnel';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -185,7 +185,7 @@ export function RoomMappingTab() {
   const { data: spaces } = useOfficeSpaces();
   const { data: rooms, isLoading } = useRoomsWithAllocations(selectedSpace === 'all' ? undefined : selectedSpace);
   const { data: floorMaps } = useFloorMaps(selectedSpace === 'all' ? undefined : selectedSpace);
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: funnelItems } = useFunnelItems();
 
   const createRoom = useCreateRoom();

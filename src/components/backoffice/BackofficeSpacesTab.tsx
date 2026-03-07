@@ -18,7 +18,7 @@ import {
   useCreateSpaceAllocation,
   type OfficeSpace 
 } from '@/hooks/useBackoffice';
-import { useWorkspaces } from '@/hooks/useWorkspaces';
+import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -48,7 +48,7 @@ export function BackofficeSpacesTab() {
 
   const { data: spaces, isLoading } = useOfficeSpaces();
   const { data: allocations } = useSpaceAllocations();
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const createSpace = useCreateOfficeSpace();
   const updateSpace = useUpdateOfficeSpace();
   const createAllocation = useCreateSpaceAllocation();
