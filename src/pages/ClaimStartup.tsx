@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -39,6 +39,16 @@ export default function ClaimStartup() {
   };
 
   const displayState = getDisplayState();
+
+  // P0.1 Safety: non-founders should never see the claim UI
+  useEffect(() => {
+    if (
+      !founderState.isLoading &&
+      (founderState.status === 'not_founder' || founderState.status === 'staff_exempt')
+    ) {
+      navigate('/my-workspaces', { replace: true });
+    }
+  }, [founderState.isLoading, founderState.status, navigate]);
 
   const handleVerify = useCallback(async () => {
     if (!user) return;
