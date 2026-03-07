@@ -1434,7 +1434,7 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="action-due-date">Due Date</Label>
+              <Label htmlFor="action-due-date">{t('actions.dueDate', { defaultValue: 'Data Limite' })}</Label>
               <Input
                 id="action-due-date"
                 type="date"
