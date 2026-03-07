@@ -60,7 +60,7 @@ export function SpaceWaitingListTab() {
   const { data: waitingList, isLoading } = useSpaceWaitingList({ status: statusFilter === 'all' ? undefined : statusFilter });
   const { data: spaces } = useOfficeSpaces();
   const { data: rooms } = useRoomsWithAllocations();
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: funnelItems } = useFunnelItems();
 
   const createRequest = useCreateWaitingListRequest();

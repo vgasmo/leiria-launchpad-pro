@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 
 export type WorkspaceStatus = 'imported_unclaimed' | 'claimed' | 'pending' | 'active' | 'rejected' | 'archived';
+/** All non-rejected statuses — use in admin/backoffice views that need full ecosystem visibility. */
+export const ALL_WORKSPACE_STATUSES: WorkspaceStatus[] = ['imported_unclaimed', 'claimed', 'pending', 'active', 'archived'];
 export type SortOption = 'updated' | 'urgency' | 'meeting' | 'name' | 'priority';
 
 export interface WorkspaceFilters {

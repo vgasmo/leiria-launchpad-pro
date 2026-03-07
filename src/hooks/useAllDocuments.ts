@@ -23,7 +23,7 @@ export interface AggregatedDocument {
 }
 
 export function useAllDocuments() {
-  const { data: workspaces = [] } = useWorkspaces();
+  const { data: workspaces = [] } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const workspaceIds = workspaces.map(w => w.id);
   const workspaceMap = Object.fromEntries(workspaces.map(w => [w.id, w.startup?.name || w.stage || 'Workspace']));
 

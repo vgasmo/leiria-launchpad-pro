@@ -44,7 +44,7 @@ export default function SearchPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
 
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: tags } = useTags();
   const { data: savedSearches } = useSavedSearches();
   const saveSearch = useSaveSearch();

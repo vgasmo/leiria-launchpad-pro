@@ -48,7 +48,7 @@ export function BackofficeSpacesTab() {
 
   const { data: spaces, isLoading } = useOfficeSpaces();
   const { data: allocations } = useSpaceAllocations();
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const createSpace = useCreateOfficeSpace();
   const updateSpace = useUpdateOfficeSpace();
   const createAllocation = useCreateSpaceAllocation();

@@ -95,7 +95,7 @@ export function BackofficeContractsTab() {
   );
   const { data: incubationTypes } = useIncubationTypes();
   const { data: buildings } = useBuildings();
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
 

@@ -185,7 +185,7 @@ export function RoomMappingTab() {
   const { data: spaces } = useOfficeSpaces();
   const { data: rooms, isLoading } = useRoomsWithAllocations(selectedSpace === 'all' ? undefined : selectedSpace);
   const { data: floorMaps } = useFloorMaps(selectedSpace === 'all' ? undefined : selectedSpace);
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
   const { data: funnelItems } = useFunnelItems();
 
   const createRoom = useCreateRoom();
