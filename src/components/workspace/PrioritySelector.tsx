@@ -1,52 +1,49 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabaseClient';
+import { Star, ArrowUp, Minus, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { PriorityBadge, WorkspacePriority } from '@/components/ui/PriorityBadge';
-import { Star, ArrowUp, Minus, Archive, Loader2 } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { PriorityBadge, type WorkspacePriority } from '@/components/ui/PriorityBadge';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface PrioritySelectorProps {
   workspaceId: string;
-  currentPriority: WorkspacePriority | null;
+  currentPriority: WorkspacePriority;
   currentNotes?: string | null;
-  onUpdate?: () => void;
-  disabled?: boolean;
 }
 
-const priorities: { value: WorkspacePriority; label: string; description: string; icon: React.ReactNode }[] = [
+const priorities: { value: WorkspacePriority; labelKey: string; descKey: string; icon: React.ReactNode }[] = [
   { 
     value: 'star', 
-    label: 'Star', 
-    description: 'Top performer, high potential',
+    labelKey: 'priorities.star', 
+    descKey: 'priorities.starDesc',
     icon: <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
   },
   { 
     value: 'high', 
-    label: 'High', 
-    description: 'Promising, needs attention',
+    labelKey: 'priorities.high', 
+    descKey: 'priorities.highDesc',
     icon: <ArrowUp className="h-4 w-4 text-blue-500" />
   },
   { 
     value: 'standard', 
-    label: 'Standard', 
-    description: 'Normal cadence',
+    labelKey: 'priorities.standard', 
+    descKey: 'priorities.standardDesc',
     icon: <Minus className="h-4 w-4 text-muted-foreground" />
   },
   { 
     value: 'maintenance', 
-    label: 'Maintenance', 
-    description: 'Monthly check-in only',
+    labelKey: 'priorities.maintenance', 
+    descKey: 'priorities.maintenanceDesc',
     icon: <Archive className="h-4 w-4 text-muted-foreground/60" />
   },
 ];
@@ -54,13 +51,9 @@ const priorities: { value: WorkspacePriority; label: string; description: string
 export function PrioritySelector({ 
   workspaceId, 
   currentPriority, 
-  currentNotes,
-  onUpdate,
-  disabled 
+  currentNotes 
 }: PrioritySelectorProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState<WorkspacePriority>(currentPriority || 'standard');
@@ -68,10 +61,11 @@ export function PrioritySelector({
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!user) return;
-    
     setIsSaving(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('workspaces')
         .update({
@@ -98,21 +92,14 @@ export function PrioritySelector({
         },
       });
 
-      toast({
-        title: t('priority.updated', 'Priority updated'),
-        description: t('priority.updatedDescription', 'Workspace priority has been updated'),
-      });
-
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      onUpdate?.();
+      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
+      
+      toast.success(t('priority.updated'));
       setIsOpen(false);
     } catch (error) {
       console.error('Failed to update priority:', error);
-      toast({
-        title: t('common.error', 'Error'),
-        description: t('priority.updateFailed', 'Failed to update priority'),
-        variant: 'destructive',
-      });
+      toast.error(t('priority.updateFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -121,73 +108,55 @@ export function PrioritySelector({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-auto p-0 hover:bg-transparent"
-          disabled={disabled}
-        >
-          <PriorityBadge priority={currentPriority} size="sm" />
-        </Button>
+        <button className="cursor-pointer hover:opacity-80 transition-opacity">
+          <PriorityBadge priority={currentPriority} size="md" />
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="start">
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium text-sm mb-2">
-              {t('priority.setLevel', 'Set Priority Level')}
-            </h4>
-            <div className="space-y-1">
-              {priorities.map((p) => (
-                <button
-                  key={p.value}
-                  onClick={() => setSelectedPriority(p.value)}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-2 rounded-md text-left transition-colors",
-                    selectedPriority === p.value 
-                      ? "bg-primary/10 border border-primary/30" 
-                      : "hover:bg-muted"
-                  )}
-                >
-                  {p.icon}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{p.label}</p>
-                    <p className="text-xs text-muted-foreground">{p.description}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <h4 className="font-medium text-sm">{t('priority.setLevel')}</h4>
           </div>
-
-          <div>
-            <Label htmlFor="priority-notes" className="text-sm">
-              {t('priority.notes', 'Notes (optional)')}
-            </Label>
+          
+          <div className="grid gap-2">
+            {priorities.map((p) => (
+              <button
+                key={p.value}
+                onClick={() => setSelectedPriority(p.value)}
+                className={cn(
+                  "flex items-center gap-3 p-2 rounded-lg border text-left transition-all",
+                  selectedPriority === p.value 
+                    ? "border-primary bg-primary/5" 
+                    : "border-transparent hover:bg-muted/50"
+                )}
+              >
+                {p.icon}
+                <div>
+                  <div className="text-sm font-medium">{t(p.labelKey)}</div>
+                  <div className="text-xs text-muted-foreground">{t(p.descKey)}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-xs">{t('priority.notes')}</Label>
             <Textarea
-              id="priority-notes"
-              placeholder={t('priority.notesPlaceholder', 'Why this priority level?')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="mt-1 h-20 text-sm"
+              placeholder={t('priority.notesPlaceholder')}
+              className="h-20 text-sm"
             />
           </div>
-
-          <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsOpen(false)}
-            >
-              {t('common.cancel', 'Cancel')}
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              {t('common.save', 'Save')}
-            </Button>
-          </div>
+          
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving}
+            className="w-full"
+            size="sm"
+          >
+            {isSaving ? t('common.saving', { defaultValue: 'A guardar...' }) : t('common.save', { defaultValue: 'Guardar' })}
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

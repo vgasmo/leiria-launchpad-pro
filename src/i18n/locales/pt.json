@@ -3921,7 +3921,14 @@
     "undoDismiss": "Restaurar"
   },
   "priorities": {
-    "star": "Estrela"
+    "star": "Estrela",
+    "high": "Alta",
+    "standard": "Normal",
+    "maintenance": "Manutenção",
+    "starDesc": "Alto desempenho, grande potencial",
+    "highDesc": "Promissor, requer atenção",
+    "standardDesc": "Cadência normal",
+    "maintenanceDesc": "Apenas check-in mensal"
   },
   "priority": {
     "high": "Alta",

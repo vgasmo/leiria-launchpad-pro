@@ -1442,16 +1442,16 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="action-priority">Priority</Label>
+              <Label htmlFor="action-priority">{t('actions.priority', { defaultValue: 'Prioridade' })}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t('actions.priorityLow', { defaultValue: 'Baixa' })}</SelectItem>
+                  <SelectItem value="medium">{t('actions.priorityMedium', { defaultValue: 'Média' })}</SelectItem>
+                  <SelectItem value="high">{t('actions.priorityHigh', { defaultValue: 'Alta' })}</SelectItem>
+                  <SelectItem value="urgent">{t('actions.priorityUrgent', { defaultValue: 'Urgente' })}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
