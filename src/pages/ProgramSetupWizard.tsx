@@ -379,9 +379,9 @@ export default function ProgramSetupWizard() {
       <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard draft?</AlertDialogTitle>
+            <AlertDialogTitle>{t('programSetup.discardDraftTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete all your progress. This action cannot be undone.
+              {t('programSetup.discardDraftDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
