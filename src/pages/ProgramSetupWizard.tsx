@@ -270,15 +270,10 @@ export default function ProgramSetupWizard() {
             />
             <div className="flex-1">
               <CardTitle className="flex items-center gap-2">
-                {STEPS[currentStepIndex].label}
+                {t(STEPS[currentStepIndex].labelKey)}
               </CardTitle>
               <CardDescription>
-                {currentStep === 'basics' && 'Enter the basic information about your program'}
-                {currentStep === 'stages' && 'Configure which stages are active and their order'}
-                {currentStep === 'kpis' && 'Review and customize KPIs for each stage'}
-                {currentStep === 'playbooks' && 'Set up playbooks with milestones and actions'}
-                {currentStep === 'alerts' && 'Configure alert rules and health scoring'}
-                {currentStep === 'review' && 'Review your configuration and publish'}
+                {t(`programSetup.stepDescriptions.${currentStep}`)}
               </CardDescription>
             </div>
           </CardHeader>
