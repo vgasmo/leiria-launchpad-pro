@@ -1458,10 +1458,10 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="action-owner">Assign to</Label>
+            <Label htmlFor="action-owner">{t('actions.assignTo', { defaultValue: 'Atribuir a' })}</Label>
             <Select value={ownerId} onValueChange={(val) => setOwnerId(val === 'unassigned' ? '' : val)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder={t('actions.selectMember', { defaultValue: 'Selecionar membro' })} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
