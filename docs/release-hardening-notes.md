@@ -61,11 +61,15 @@
 - Staff-side claim review UX improvements (matching hints, auto-suggest workspace)
 
 ## Manual Validation Checklist
-- [ ] Sign up as new founder (allowlisted) → should see "Verificar a Minha Startup" as primary CTA
+- [ ] Sign up as new founder (allowlisted) → should be redirected to `/claim-startup` automatically
+- [ ] On `/claim-startup`: see "Verificar Agora" CTA (not auto-triggered)
 - [ ] Click verify → claim flow runs, shows correct status (auto_claimed / pending / error)
-- [ ] "Create new startup" link visible but secondary (below fold)
+- [ ] After pending claim: revisit `/my-workspaces` → auto-redirected back to `/claim-startup` with pending state
+- [ ] "Create new startup" is NOT visible on any primary founder surface
 - [ ] Log out → check localStorage: `sl-query-cache` should be cleared
 - [ ] Log in as different user → verify no stale data from previous user
+- [ ] Staff/admin users are NOT affected by claim-first redirect
+- [ ] Mentor users are NOT affected by claim-first redirect
 - [ ] Workspace list loads correctly with explicit column select
 - [ ] Workspace detail page loads all tabs correctly
 - [ ] CI remains green
@@ -73,6 +77,7 @@
 
 ## What to Monitor First Week
 - Claim success rate vs pending rate (check `startup_claim_requests` table)
-- Any founder complaints about "can't find my startup"
+- Any founder complaints about "can't find my startup" or redirect loops
 - Edge function invocation errors in logs
 - React Query cache size in production (should be smaller with 4h TTL)
+- `useFounderOnboardingState` query performance (should be lightweight, 30s stale time)
