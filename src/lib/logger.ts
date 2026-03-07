@@ -79,4 +79,12 @@ export const logger = {
   error(event: string, context?: Record<string, unknown>, error?: unknown) {
     emit({ level: 'error', event, context, error, timestamp: new Date().toISOString() });
   },
+  /** Get recent error/warn entries for diagnostics (max 50) */
+  getRecentErrors(): ReadonlyArray<LogEntry> {
+    return [...errorBuffer];
+  },
+  /** Flush the error buffer (e.g., after sending to external service) */
+  flushErrors() {
+    errorBuffer.length = 0;
+  },
 };
