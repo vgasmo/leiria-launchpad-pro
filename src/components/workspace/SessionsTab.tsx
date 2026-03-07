@@ -1475,10 +1475,10 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel', { defaultValue: 'Cancelar' })}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create Action Item'}
+              {createMutation.isPending ? t('common.creating', { defaultValue: 'A criar...' }) : t('actions.createAction', { defaultValue: 'Criar Ação' })}
             </Button>
           </DialogFooter>
         </form>
