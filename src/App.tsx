@@ -112,7 +112,7 @@ queryClient.getQueryCache().subscribe(persistCache);
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
-  const { user, isLoading, isAuthReady, isAdmin, isStaff, isAccountPending, isAccountSuspended } = useAuth();
+  const { user, isLoading, isAuthReady, isAdmin, isStaff, isFounder, isConsultor, isAccountPending, isAccountSuspended, roles } = useAuth();
   const { needsNda, isLoading: ndaLoading } = useMentorNdaStatus();
   const location = useLocation();
 
@@ -145,6 +145,19 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   // NDA gate for mentor_externo: redirect to /mentor-nda unless already there
   if (needsNda && location.pathname !== '/mentor-nda') {
     return <Navigate to="/mentor-nda" replace />;
+  }
+
+  // P0.1 Claim-first gate: founders with no workspace should be sent to /claim-startup
+  // Skip if already on claim page, or if user is also staff/mentor
+  if (
+    isFounder &&
+    !isStaff &&
+    !roles.includes('mentor_externo') &&
+    location.pathname !== '/claim-startup' &&
+    location.pathname !== '/settings'
+  ) {
+    // We use a lightweight check via a dedicated hook rendered inside ProtectedRoute
+    // Instead, we let the FounderDashboard handle claim-first routing (see below)
   }
 
   // Staff-only routes (admin, consultor, backoffice)
