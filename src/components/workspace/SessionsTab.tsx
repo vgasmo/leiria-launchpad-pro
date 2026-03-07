@@ -1406,9 +1406,9 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Action Item</DialogTitle>
+          <DialogTitle>{t('actions.addAction', { defaultValue: 'Adicionar Ação' })}</DialogTitle>
           <DialogDescription>
-            Create an action item from this session
+            {t('actions.addActionFromSession', { defaultValue: 'Criar uma ação a partir desta sessão' })}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
