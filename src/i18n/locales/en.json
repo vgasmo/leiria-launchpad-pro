@@ -3972,7 +3972,46 @@
     "selectToClone": "Select a program to clone...",
     "standardMode": "Standard",
     "standardModeDesc": "Full features: KPIs, health scores, milestones, playbooks, and more.",
-    "startDate": "Start Date"
+    "startDate": "Start Date",
+    "steps": {
+      "basics": "Basics",
+      "stages": "Stages",
+      "kpis": "KPIs",
+      "playbooks": "Playbooks",
+      "alerts": "Alert Rules",
+      "review": "Review"
+    },
+    "stepDescriptions": {
+      "basics": "Enter the basic information about your program",
+      "stages": "Configure which stages are active and their order",
+      "kpis": "Review and customize KPIs for each stage",
+      "playbooks": "Set up playbooks with milestones and actions",
+      "alerts": "Configure alert rules and health scoring",
+      "review": "Review your configuration and publish"
+    },
+    "setupProgress": "Setup Progress",
+    "loading": "Loading...",
+    "newProgramSetup": "New Program Setup",
+    "editProgram": "Edit Program: {{name}}",
+    "configureStepByStep": "Configure your program step by step",
+    "progressSaved": "Progress saved",
+    "publishSuccess": "🎉 Program published successfully!",
+    "publishing": "🎉 Publishing...",
+    "publishProgram": "Publish Program",
+    "saveAndContinue": "Save & Continue",
+    "back": "Back",
+    "discard": "Discard",
+    "discardDraftTitle": "Discard draft?",
+    "discardDraftDescription": "This will permanently delete all your progress. This action cannot be undone.",
+    "cancel": "Cancel",
+    "validation": {
+      "programNameRequired": "Program name is required",
+      "atLeastOneStage": "At least one stage must be active",
+      "minCoreKpis": "At least 3 core KPIs required",
+      "maxCoreKpis": "Maximum 6 core KPIs allowed",
+      "negativeThreshold": "Alert rule \"{{ruleType}}\" has negative threshold",
+      "healthWeightsSum": "Health weights must sum to 100 (current: {{sum}})"
+    }
   },
   "progressReport": {
     "actions": "Actions",

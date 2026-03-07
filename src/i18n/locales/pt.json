@@ -3972,7 +3972,46 @@
     "selectToClone": "Selecione um programa para clonar...",
     "standardMode": "Standard",
     "standardModeDesc": "Funcionalidades completas: KPIs, health scores, milestones, playbooks e mais.",
-    "startDate": "Data de Início"
+    "startDate": "Data de Início",
+    "steps": {
+      "basics": "Básicos",
+      "stages": "Etapas",
+      "kpis": "KPIs",
+      "playbooks": "Playbooks",
+      "alerts": "Regras de Alerta",
+      "review": "Revisão"
+    },
+    "stepDescriptions": {
+      "basics": "Introduza as informações básicas do programa",
+      "stages": "Configure quais etapas estão ativas e a sua ordem",
+      "kpis": "Reveja e personalize os KPIs para cada etapa",
+      "playbooks": "Configure playbooks com marcos e ações",
+      "alerts": "Configure regras de alerta e pontuação de saúde",
+      "review": "Reveja a sua configuração e publique"
+    },
+    "setupProgress": "Progresso da Configuração",
+    "loading": "A carregar...",
+    "newProgramSetup": "Nova Configuração de Programa",
+    "editProgram": "Editar Programa: {{name}}",
+    "configureStepByStep": "Configure o seu programa passo a passo",
+    "progressSaved": "Progresso guardado",
+    "publishSuccess": "🎉 Programa publicado com sucesso!",
+    "publishing": "🎉 A publicar...",
+    "publishProgram": "Publicar Programa",
+    "saveAndContinue": "Guardar e Continuar",
+    "back": "Voltar",
+    "discard": "Descartar",
+    "discardDraftTitle": "Descartar rascunho?",
+    "discardDraftDescription": "Isto irá eliminar permanentemente todo o seu progresso. Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar",
+    "validation": {
+      "programNameRequired": "O nome do programa é obrigatório",
+      "atLeastOneStage": "Pelo menos uma etapa deve estar ativa",
+      "minCoreKpis": "São necessários pelo menos 3 KPIs principais",
+      "maxCoreKpis": "Máximo de 6 KPIs principais permitidos",
+      "negativeThreshold": "A regra de alerta \"{{ruleType}}\" tem limiar negativo",
+      "healthWeightsSum": "Os pesos de saúde devem somar 100 (atual: {{sum}})"
+    }
   },
   "progressReport": {
     "actions": "Ações",
