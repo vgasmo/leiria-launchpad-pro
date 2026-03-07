@@ -250,8 +250,8 @@ export function useWorkspace(id: string | undefined) {
       const { data, error } = await supabase
         .from('workspaces')
         .select(`
-          id, startup_id, program_id, stage, status,
-          health_score, health_score_override, health_notes,
+          id, startup_id, program_id, stage, stage_id, status,
+          health_score, health_score_override, health_status, health_notes,
           priority_level, priority_notes, created_at, updated_at,
           blocked_at, blocked_reason,
           startup:startups(id, name, description, logo_url, website, nif, main_contact_name, main_contact_email, main_contact_phone, has_startup_portugal_status),
