@@ -158,7 +158,7 @@ export function ActionComments({ actionId, canWrite }: ActionCommentsProps) {
                     {canWrite && comment.user_id === user?.id && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100">
+                          <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100" aria-label="Comment options">
                             <MoreVertical className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
