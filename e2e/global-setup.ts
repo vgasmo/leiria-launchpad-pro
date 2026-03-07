@@ -13,6 +13,7 @@ const DEFAULT_CREDENTIALS: Record<string, { email: string; password: string }> =
   backoffice: { email: 'e2e-backoffice@startup-leiria.test', password: 'Test1234!' },
   consultant: { email: 'e2e-consultant@startup-leiria.test', password: 'Test1234!' },
   founder: { email: 'e2e-founder@startup-leiria.test', password: 'Test1234!' },
+  founder_unclaimed: { email: 'e2e-founder-unclaimed@startup-leiria.test', password: 'Test1234!' },
   mentor: { email: 'e2e-mentor@startup-leiria.test', password: 'Test1234!' },
 };
 

@@ -243,6 +243,6 @@ export default function ClaimStartup() {
 
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

@@ -30,6 +30,13 @@ export const USERS = {
     role: 'founder' as const,
     fullName: 'E2E Founder',
   },
+  /** Founder with NO workspace — always lands in claim-first gate */
+  founder_unclaimed: {
+    email: 'e2e-founder-unclaimed@startup-leiria.test',
+    id: 'a0000000-0000-0000-0000-000000000006',
+    role: 'founder' as const,
+    fullName: 'E2E Founder Unclaimed',
+  },
   mentor: {
     email: 'e2e-mentor@startup-leiria.test',
     id: 'a0000000-0000-0000-0000-000000000005',
