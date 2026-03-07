@@ -345,7 +345,7 @@ export default function ProgramSetupWizard() {
             {currentStepIndex > 0 && (
               <Button type="button" variant="outline" onClick={handleBack}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
+                {t('programSetup.back')}
               </Button>
             )}
 
