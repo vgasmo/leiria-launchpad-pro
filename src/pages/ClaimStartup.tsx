@@ -40,6 +40,14 @@ export default function ClaimStartup() {
 
   const displayState = getDisplayState();
 
+  // P0.1 Safety: non-founders should never see the claim UI
+  if (
+    !founderState.isLoading &&
+    (founderState.status === 'not_founder' || founderState.status === 'staff_exempt')
+  ) {
+    return <Navigate to="/my-workspaces" replace />;
+  }
+
   const handleVerify = useCallback(async () => {
     if (!user) return;
     setPageState('verifying');
