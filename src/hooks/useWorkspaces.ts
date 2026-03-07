@@ -61,7 +61,7 @@ export function useWorkspaces(
   statuses: WorkspaceStatus[] = ['active'],
 ) {
   return useQuery({
-    queryKey: ['workspaces', filters, assignedOnly, statuses],
+    queryKey: ['workspaces', filters, assignedOnly, statuses.slice().sort().join(',')],
     queryFn: async (): Promise<WorkspaceWithDetails[]> => {
       // If assignedOnly, first get the user's assigned workspace IDs
       let assignedWorkspaceIds: string[] | null = null;

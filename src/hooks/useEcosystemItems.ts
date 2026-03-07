@@ -64,7 +64,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
           startup:startups(name),
           program:programs(name)
         `)
-        .eq('status', 'active');
+        .in('status', ['imported_unclaimed', 'claimed', 'pending', 'active', 'archived']);
 
       if (filters.programId && filters.programId !== 'all') {
         wsQuery = wsQuery.eq('program_id', filters.programId);

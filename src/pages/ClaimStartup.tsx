@@ -17,7 +17,7 @@ export default function ClaimStartup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
+  const { user, profile, roles } = useAuth();
   const founderState = useFounderOnboardingState();
 
   const [pageState, setPageState] = useState<ClaimPageState>('idle');
@@ -41,14 +41,22 @@ export default function ClaimStartup() {
   const displayState = getDisplayState();
 
   // P0.1 Safety: non-founders should never see the claim UI
+  // Strict profile-role guard: only 'founder' role may access this page
   useEffect(() => {
+    if (!profile || roles.length === 0) return; // still loading
+    const isFounder = roles.includes('founder');
+    if (!isFounder) {
+      navigate('/', { replace: true });
+      return;
+    }
+    // Secondary guard via founderState for founders who are also staff
     if (
       !founderState.isLoading &&
       (founderState.status === 'not_founder' || founderState.status === 'staff_exempt')
     ) {
       navigate('/my-workspaces', { replace: true });
     }
-  }, [founderState.isLoading, founderState.status, navigate]);
+  }, [profile, founderState.isLoading, founderState.status, navigate]);
 
   const handleVerify = useCallback(async () => {
     if (!user) return;
