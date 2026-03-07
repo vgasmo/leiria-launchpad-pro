@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { AppRole } from '@/types/database';
 import { resetSession, setCacheOwner } from '@/lib/sessionReset';
-import { hydrateCache, queryClient } from '@/App';
+import { hydrateCache, queryClient } from '@/lib/queryClient';
 import { logger } from '@/lib/logger';
 
 export type AccountStatus = 'pending' | 'approved' | 'suspended';
@@ -120,7 +120,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newSession?.user ?? null);
         
         if (event === 'SIGNED_OUT') {
-          // Use centralized session reset
           resetSession(queryClient, 'logout');
           setProfile(null);
           setRoles([]);
@@ -162,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthReady(false);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      logger.warn('sign_in_failed', { email: email.split('@')[1] });
+      logger.warn('sign_in_failed', { domain: email.split('@')[1] });
       setIsAuthReady(true);
     }
     return { error: error as Error | null };
@@ -189,7 +188,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     setIsAuthReady(false);
-    // Centralized session reset — clears persisted cache, in-memory cache, and user storage
     resetSession(queryClient, 'logout');
     await supabase.auth.signOut();
     setProfile(null);
