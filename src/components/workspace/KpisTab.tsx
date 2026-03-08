@@ -917,13 +917,13 @@ function KpiCard({
           <div className="flex-1">
             {effectiveCanEdit ? (
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Value</Label>
+                <Label className="text-xs text-muted-foreground">{t('kpis.value', 'Value')}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
                     value={displayValue}
                     onChange={e => onValueChange('value', e.target.value)}
-                    placeholder="Enter value"
+                    placeholder={t('kpis.enterValue', 'Enter value')}
                     className="h-9"
                   />
                   {def.unit && (
