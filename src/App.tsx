@@ -150,6 +150,7 @@ function AppRoutes() {
         <Route path="/integrations-setup" element={<Navigate to="/settings" replace />} />
         <Route path="/documents" element={<ProtectedRoute staffOnly><Documents /></ProtectedRoute>} />
         <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+        <Route path="/resources/guide/:id" element={<ProtectedRoute><ResourceGuide /></ProtectedRoute>} />
         <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
         <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
