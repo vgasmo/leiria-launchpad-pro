@@ -2796,6 +2796,8 @@
     "whyThisScore": "Porquê esta pontuação?"
   },
   "healthScore": {
+    "addContextPlaceholder": "Adicionar contexto sobre a pontuação de saúde (ex: motivos de alteração, plano de ação)...",
+    "addNote": "Adicionar nota",
     "breakdown": "Decomposição do Score",
     "contributing": "Fatores contribuintes",
     "whyThisScore": "Porquê este score?"

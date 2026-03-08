@@ -2796,6 +2796,8 @@
     "whyThisScore": "Why this score?"
   },
   "healthScore": {
+    "addContextPlaceholder": "Add context about the health score (e.g., reasons for override, action plan)...",
+    "addNote": "Add note",
     "breakdown": "Score Breakdown",
     "contributing": "Contributing factors",
     "whyThisScore": "Why this score?"
