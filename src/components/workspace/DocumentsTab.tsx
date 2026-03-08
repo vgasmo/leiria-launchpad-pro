@@ -298,7 +298,18 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   return (
     <>
     <div className="space-y-6">
-      {/* External Link Confirmation Dialog */}
+      {/* Section intro */}
+      <div>
+        <p className="text-sm text-muted-foreground">
+          {t('documents.sectionIntro', { defaultValue: 'Ficheiros e entregáveis específicos desta startup — pitch decks, modelos financeiros, contratos e outros documentos de trabalho.' })}
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          {t('documents.sectionIntroHint', { defaultValue: 'Para guias, templates e materiais de apoio do programa,' })}{' '}
+          <a href="/resources" className="text-primary hover:underline font-medium">
+            {t('documents.sectionIntroHintLink', { defaultValue: 'consulte os Recursos →' })}
+          </a>
+        </p>
+      </div>
       <AlertDialog open={externalLinkConfirmOpen} onOpenChange={setExternalLinkConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
