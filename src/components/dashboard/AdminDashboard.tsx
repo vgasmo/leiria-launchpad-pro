@@ -266,6 +266,10 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
       {/* Smart Insights */}
       <EcosystemInsights insights={insights} />
 
+      {/* Ecosystem Heatmap */}
+      <EcosystemHeatmap workspaces={workspaces} onExport={() => setShowExport(true)} />
+      <ExportAnalyticsModal open={showExport} onOpenChange={setShowExport} />
+
       {/* Portfolio Health Summary */}
       <Card className="rounded-2xl">
         <CardHeader className="pb-2">
