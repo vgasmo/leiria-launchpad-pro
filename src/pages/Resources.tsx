@@ -219,7 +219,7 @@ export default function Resources() {
             ))}
             {hasFilters && (
               <Button variant="ghost" size="sm" className="text-xs h-6" onClick={() => { setFilterType('all'); setFilterCategory(''); setFilterStage(''); }}>
-                {t('filters.clearAll', { defaultValue: 'Limpar' })}
+                {t('filters.clearAll', { defaultValue: 'Limpar Todos os Filtros' })}
               </Button>
             )}
           </div>
