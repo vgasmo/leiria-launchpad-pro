@@ -8,15 +8,20 @@ import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
+import { OnboardingPipelineCard } from '@/components/staff/OnboardingPipelineCard';
+import { AdminQuickAccessCard } from '@/components/staff/AdminQuickAccessCard';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
 import { ClaimRequestsQueue } from '@/components/admin/ClaimRequestsQueue';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck } from 'lucide-react';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { profile, roles } = useAuth();
   const { data: workspaces = [] } = useWorkspaces();
+
+  const isAdmin = roles?.includes('admin');
 
   const greeting = profile?.full_name
     ? t('staffCockpit.greeting', { defaultValue: 'Olá, {{name}}', name: profile.full_name.split(' ')[0] })
@@ -30,6 +35,18 @@ export default function StaffCockpit() {
       <div className="space-y-6">
         {/* Quick Actions Bar */}
         <CockpitQuickActions workspaces={workspaces} compact={false} />
+
+        {/* Admin-only: Onboarding Pipeline + Quick Access */}
+        {isAdmin && (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <WidgetErrorBoundary name="OnboardingPipeline">
+              <OnboardingPipelineCard />
+            </WidgetErrorBoundary>
+            <WidgetErrorBoundary name="AdminQuickAccess">
+              <AdminQuickAccessCard />
+            </WidgetErrorBoundary>
+          </div>
+        )}
 
         {/* Portfolio Overview */}
         <CockpitPortfolioOverview workspaces={workspaces} />
