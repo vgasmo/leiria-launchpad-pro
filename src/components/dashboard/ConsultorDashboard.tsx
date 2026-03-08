@@ -17,6 +17,7 @@ import {
   Sparkles,
   Loader2,
   X,
+  BookOpen,
 } from 'lucide-react';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
