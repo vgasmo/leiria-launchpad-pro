@@ -19,10 +19,10 @@ interface KpiImportDialogProps {
 }
 
 const STRIPE_METRICS = [
-  { key: 'mrr', label: 'Monthly Recurring Revenue', category: 'Financial' },
-  { key: 'active_customers', label: 'Active Customers', category: 'Customers' },
-  { key: 'total_customers', label: 'Total Customers', category: 'Customers' },
-  { key: 'monthly_revenue', label: 'Monthly Revenue', category: 'Financial' },
+  { key: 'mrr', labelKey: 'kpis.stripe.mrr', category: 'Financial' },
+  { key: 'active_customers', labelKey: 'kpis.stripe.activeCustomers', category: 'Customers' },
+  { key: 'total_customers', labelKey: 'kpis.stripe.totalCustomers', category: 'Customers' },
+  { key: 'monthly_revenue', labelKey: 'kpis.stripe.monthlyRevenue', category: 'Financial' },
 ];
 
 export function KpiImportDialog({ open, onOpenChange, workspaceId }: KpiImportDialogProps) {
