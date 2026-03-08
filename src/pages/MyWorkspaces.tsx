@@ -39,6 +39,7 @@ import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 
 const PAGE_SIZE = 15;
 
