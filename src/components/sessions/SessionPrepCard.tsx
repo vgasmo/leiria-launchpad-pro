@@ -21,6 +21,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useSessionPrep, SessionPrepData } from '@/hooks/useSessionPrep';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { SmartPrepButton, SmartPrepSheet } from '@/components/sessions/SmartPrepSheet';
 
 interface SessionPrepCardProps {
   sessionId: string;

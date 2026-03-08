@@ -129,75 +129,154 @@ export function CommandPalette() {
   };
 
   const hasSearchResults = searchResults && searchResults.length > 0;
-  const showQuickActions = !query && quickActions.length > 0;
-  const showNav = !query || query.length < 2;
+  const showQuickActions = !query && quickActions.length > 0 && !copilotMode;
+  const showNav = (!query || query.length < 2) && !copilotMode;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setQuery('');
+      setCopilotMode(false);
+      setCopilotAnswer(null);
+      setCopilotThinking(false);
+    }
+  };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
+    <CommandDialog open={open} onOpenChange={handleOpenChange}>
       <CommandInput
-        placeholder={t('commandPalette.placeholder')}
+        placeholder={copilotMode
+          ? t('commandPalette.copilotPlaceholder', { defaultValue: 'Ask the Ecosystem Copilot…' })
+          : t('commandPalette.placeholder')
+        }
         value={query}
         onValueChange={setQuery}
+        onKeyDown={(e) => {
+          if (copilotMode && e.key === 'Enter') {
+            e.preventDefault();
+            handleCopilotSubmit();
+          }
+        }}
       />
       <CommandList>
-        <CommandEmpty>
-          {query.length >= 2
-            ? t('search.noResultsFor', { query })
-            : t('commandPalette.typeToSearch')}
-        </CommandEmpty>
-
-        {/* Search Results */}
-        {hasSearchResults && Object.entries(groupedResults).map(([type, items]) => (
-          <CommandGroup key={type} heading={typeLabels[type] || type}>
-            {items.slice(0, 5).map(result => (
-              <CommandItem
-                key={result.id}
-                onSelect={() => runAction(result.url)}
-                className="flex items-center gap-3"
-              >
-                {typeIcons[result.type]}
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm truncate block">{result.title}</span>
-                  {result.snippet && (
-                    <span className="text-xs text-muted-foreground truncate block">{result.snippet.slice(0, 80)}</span>
-                  )}
+        {/* Copilot Mode */}
+        {copilotMode ? (
+          <div className="p-4 space-y-3">
+            {copilotThinking && (
+              <div className="space-y-3 animate-pulse">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                  <span>{t('commandPalette.copilotThinking', { defaultValue: 'Analyzing ecosystem data…' })}</span>
                 </div>
-                {result.workspace_name && (
-                  <Badge variant="outline" className="text-xs flex-shrink-0">{result.workspace_name}</Badge>
-                )}
-              </CommandItem>
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+                <Skeleton className="h-3 w-3/5" />
+              </div>
+            )}
+            {copilotAnswer && !copilotThinking && (
+              <div className="rounded-xl bg-muted/40 border border-border/50 p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-violet-500" />
+                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">Ecosystem Copilot</span>
+                </div>
+                <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{copilotAnswer}</p>
+              </div>
+            )}
+            {!copilotThinking && !copilotAnswer && (
+              <div className="text-center py-6 space-y-2">
+                <Bot className="h-8 w-8 text-muted-foreground/30 mx-auto" />
+                <p className="text-sm text-muted-foreground">{t('commandPalette.copilotHint', { defaultValue: 'Try: "Which startups are at risk?" or "KPI summary"' })}</p>
+              </div>
+            )}
+            <button
+              onClick={() => { setCopilotMode(false); setCopilotAnswer(null); setQuery(''); }}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← {t('commandPalette.backToSearch', { defaultValue: 'Back to search' })}
+            </button>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>
+              {query.length >= 2
+                ? t('search.noResultsFor', { query })
+                : t('commandPalette.typeToSearch')}
+            </CommandEmpty>
+
+            {/* AI Copilot Entry */}
+            {!query && (
+              <>
+                <CommandGroup heading={t('commandPalette.ai', { defaultValue: 'AI Assistant' })}>
+                  <CommandItem
+                    onSelect={() => setCopilotMode(true)}
+                    className="gap-3"
+                  >
+                    <Sparkles className="h-4 w-4 text-violet-500" />
+                    <div className="flex-1">
+                      <span className="text-sm">{t('commandPalette.askCopilot', { defaultValue: 'Ask Ecosystem Copilot' })}</span>
+                      <span className="text-xs text-muted-foreground block">{t('commandPalette.copilotDesc', { defaultValue: 'AI-powered insights about your portfolio' })}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px]">AI</Badge>
+                  </CommandItem>
+                </CommandGroup>
+                <CommandSeparator />
+              </>
+            )}
+
+            {/* Search Results */}
+            {hasSearchResults && !copilotMode && Object.entries(groupedResults).map(([type, items]) => (
+              <CommandGroup key={type} heading={typeLabels[type] || type}>
+                {items.slice(0, 5).map(result => (
+                  <CommandItem
+                    key={result.id}
+                    onSelect={() => runAction(result.url)}
+                    className="flex items-center gap-3"
+                  >
+                    {typeIcons[result.type]}
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm truncate block">{result.title}</span>
+                      {result.snippet && (
+                        <span className="text-xs text-muted-foreground truncate block">{result.snippet.slice(0, 80)}</span>
+                      )}
+                    </div>
+                    {result.workspace_name && (
+                      <Badge variant="outline" className="text-xs flex-shrink-0">{result.workspace_name}</Badge>
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             ))}
-          </CommandGroup>
-        ))}
 
-        {/* Quick Actions */}
-        {showQuickActions && (
-          <>
-            {hasSearchResults && <CommandSeparator />}
-            <CommandGroup heading={t('commandPalette.quickActions')}>
-              {quickActions.map(action => (
-                <CommandItem key={action.id} onSelect={() => runAction(action.path)} className="gap-3">
-                  {action.icon}
-                  <span>{action.label}</span>
-                  <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground" />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </>
-        )}
+            {/* Quick Actions */}
+            {showQuickActions && (
+              <>
+                {hasSearchResults && <CommandSeparator />}
+                <CommandGroup heading={t('commandPalette.quickActions')}>
+                  {quickActions.map(action => (
+                    <CommandItem key={action.id} onSelect={() => runAction(action.path)} className="gap-3">
+                      {action.icon}
+                      <span>{action.label}</span>
+                      <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
 
-        {/* Navigation */}
-        {showNav && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading={t('commandPalette.navigation')}>
-              {navItems.map(item => (
-                <CommandItem key={item.id} onSelect={() => runAction(item.path)} className="gap-3">
-                  {item.icon}
-                  <span>{item.label}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {/* Navigation */}
+            {showNav && (
+              <>
+                <CommandSeparator />
+                <CommandGroup heading={t('commandPalette.navigation')}>
+                  {navItems.map(item => (
+                    <CommandItem key={item.id} onSelect={() => runAction(item.path)} className="gap-3">
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
           </>
         )}
       </CommandList>
