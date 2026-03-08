@@ -120,7 +120,23 @@ export function FounderDashboard({
     );
   }
 
-  const health = workspace.health_score_override || workspace.health_score;
+  // LOCAL DETECTION: If the workspace exists but is not truly 'active',
+  // render the transitional dashboard instead of the full mature view.
+  // This is additive, read-only, does NOT change useWorkspaces or useFounderOnboardingState.
+  const wsStatus = (workspace as any).status as string | undefined;
+  const isTransitional = wsStatus && wsStatus !== 'active';
+
+  if (isTransitional) {
+    const transitionalStatus = (['claimed', 'pending', 'onboarding'].includes(wsStatus))
+      ? wsStatus as 'claimed' | 'pending' | 'onboarding'
+      : 'claimed'; // safe fallback for imported_unclaimed or other non-active states
+    return (
+      <TransitionalFounderDashboard
+        workspace={workspace}
+        workspaceStatus={transitionalStatus}
+      />
+    );
+  }
   const handleUpdateKpis = () => navigate(`/workspace/${workspace.id}?tab=kpis`);
   const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=actions`);
   const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=agenda`);
