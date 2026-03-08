@@ -17,6 +17,7 @@ import {
   Sparkles,
   Loader2,
   X,
+  BookOpen,
 } from 'lucide-react';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
@@ -41,6 +42,7 @@ import {
 
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
+import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 
 interface ConsultorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -68,6 +70,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
   const { t } = useTranslation();
   const { user } = useAuth();
   const { isFocused } = useFocusMode();
+  const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
 
   // Fetch CRM pipeline for snapshot
   const { data: pipeline } = useCrmPipeline({ 
@@ -335,6 +338,18 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs h-7 hidden sm:inline-flex"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPrepSheetWorkspaceId(item.workspace.id);
+                        }}
+                      >
+                        <BookOpen className="h-3 w-3 mr-1" />
+                        {t('consultor.prepSheet.button', { defaultValue: 'Preparar reunião' })}
+                      </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -726,6 +741,15 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         <section>
           <CalendarWidget />
         </section>
+      )}
+
+      {/* First Contact Prep Sheet */}
+      {prepSheetWorkspaceId && (
+        <FirstContactPrepSheet
+          open={!!prepSheetWorkspaceId}
+          onOpenChange={(open) => { if (!open) setPrepSheetWorkspaceId(null); }}
+          workspaceId={prepSheetWorkspaceId}
+        />
       )}
     </div>
   );

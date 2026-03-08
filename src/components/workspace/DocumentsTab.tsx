@@ -516,30 +516,36 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                     : category;
 
                   return (
-                    <Card key={category} className="mb-4">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <File className="h-5 w-5 text-muted-foreground" />
+                    <Card key={category} className="mb-4 rounded-xl border-border/60 overflow-hidden">
+                      <CardHeader className="pb-2 pt-4 px-5">
+                        <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <File className="h-4 w-4 text-primary" />
+                          </div>
                           {categoryLabel}
-                          <Badge variant="secondary" className="ml-2">{docs.length}</Badge>
+                          <Badge variant="secondary" className="ml-auto text-[10px] font-normal">{docs.length} {docs.length === 1 ? 'ficheiro' : 'ficheiros'}</Badge>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
+                      <CardContent className="px-5 pb-4">
+                        <div className="space-y-1.5">
                           {docs.map((doc) => {
                             const Icon = getFileIcon(doc.document_type);
+                            const isLink = doc.document_type === 'link';
                             return (
                               <div
                                 key={doc.id}
-                                className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                                className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-card hover:bg-accent/50 transition-colors group"
                               >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center shrink-0">
-                                    <Icon className="h-5 w-5 text-muted-foreground" />
+                                  <div className={cn(
+                                    "h-10 w-10 rounded-lg flex items-center justify-center shrink-0",
+                                    isLink ? "bg-blue-100 dark:bg-blue-900/30" : "bg-muted"
+                                  )}>
+                                    <Icon className={cn("h-5 w-5", isLink ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground")} />
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="font-medium truncate">{doc.name || t('documents.untitled', { defaultValue: 'Sem título' })}</p>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <p className="font-medium text-sm truncate">{doc.name || t('documents.untitled', { defaultValue: 'Sem título' })}</p>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                       {doc.uploader && (
                                         <div className="flex items-center gap-1">
                                           <Avatar className="h-4 w-4">
@@ -551,17 +557,23 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                           <span className="truncate max-w-[100px]">{doc.uploader.full_name}</span>
                                         </div>
                                       )}
-                                      <span>•</span>
+                                      <span className="text-muted-foreground/40">•</span>
                                       <span>{format(new Date(doc.created_at), 'dd MMM yyyy')}</span>
+                                      {isLink && (
+                                        <>
+                                          <span className="text-muted-foreground/40">•</span>
+                                          <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-normal">Link</Badge>
+                                        </>
+                                      )}
                                     </div>
                                     {doc.description && (
-                                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                                      <p className="text-xs text-muted-foreground/70 mt-1 truncate max-w-md">
                                         {doc.description}
                                       </p>
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-1 shrink-0">
+                                <div className="flex items-center gap-1 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
                                   {/* Review badge + button for staff/mentors on all docs */}
                                   {canReview && (
                                     <>
@@ -569,6 +581,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                       <Button
                                         variant="ghost"
                                         size="icon"
+                                        className="h-8 w-8"
                                         onClick={() => setReviewDoc({ id: doc.id, name: doc.name })}
                                         title={t('review.viewReview', { defaultValue: 'Avaliar entregável' })}
                                       >
@@ -583,6 +596,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    className="h-8 w-8"
                                     onClick={() => handleDownload(doc)}
                                     title={doc.external_url ? t('documents.openLink') : t('common.download', { defaultValue: 'Download' })}
                                   >
@@ -598,7 +612,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                       size="icon"
                                       onClick={() => handleDelete(doc)}
                                       disabled={deleteMutation.isPending}
-                                      className="text-destructive hover:text-destructive"
+                                      className="text-destructive hover:text-destructive h-8 w-8"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>

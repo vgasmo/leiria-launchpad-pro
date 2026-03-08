@@ -5765,5 +5765,29 @@
       "workflows": "Regras de Workflow",
       "auditLog": "Registo de Auditoria"
     }
+  },
+  "founder": {
+    "claimed": {
+      "pendingTitle": "Candidatura em análise",
+      "pendingDesc": "A sua candidatura está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
+      "pendingDescNamed": "A sua candidatura para \"{{name}}\" está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
+      "awaitingReview": "Aguarda aprovação",
+      "claimTitle": "Associação pendente",
+      "claimDesc": "O seu pedido de associação está a ser verificado pela equipa. Isto pode demorar 1-2 dias úteis.",
+      "awaitingVerification": "Em verificação",
+      "viewSettings": "Ver definições",
+      "getStartedTitle": "Bem-vindo à plataforma!",
+      "getStartedDesc": "Para aceder ao seu espaço de trabalho, associe-se a uma startup existente ou crie uma nova candidatura.",
+      "claimCta": "Associar startup",
+      "nextSteps": "Próximos passos",
+      "nextStepsDesc": "Enquanto aguarda, pode explorar a plataforma e preparar documentação.",
+      "contactSupport": "Contactar equipa"
+    }
+  },
+  "consultor": {
+    "prepSheet": {
+      "button": "Preparar reunião",
+      "title": "Preparação 1.ª Reunião"
+    }
   }
 }
