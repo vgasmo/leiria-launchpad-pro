@@ -135,7 +135,7 @@ async function seedData() {
     stage: 'ideation',
     status: 'pending',
     health_score: 'stable',
-    priority_level: 'medium',
+    priority_level: 'standard',
     assigned_consultor_id: consultantId,
   }, { onConflict: 'id' });
   if (wsErr) {
