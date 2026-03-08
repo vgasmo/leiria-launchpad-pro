@@ -54,6 +54,7 @@ import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleCon
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
 import { InteractionsCard } from '@/components/workspace/InteractionsCard';
 import { LocationContractCard } from '@/components/workspace/LocationContractCard';
+import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/lib/supabaseClient';
