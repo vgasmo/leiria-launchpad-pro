@@ -183,7 +183,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Pricing Frameworks (value-based)',
     desc_pt: 'Como definir preços: abordagem por valor percebido, benchmarks e testes iterativos.',
     desc_en: 'How to set prices: perceived value approach, benchmarks, and iterative testing.',
-    url: '/resources',
+    url: '/resources/guide/guide-pricing-frameworks',
     category: 'gtm',
     tags: ['pricing', 'packaging', 'value'],
     stages: ['pre_seed', 'seed', 'scale'],
