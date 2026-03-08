@@ -742,6 +742,15 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
           <CalendarWidget />
         </section>
       )}
+
+      {/* First Contact Prep Sheet */}
+      {prepSheetWorkspaceId && (
+        <FirstContactPrepSheet
+          open={!!prepSheetWorkspaceId}
+          onOpenChange={(open) => { if (!open) setPrepSheetWorkspaceId(null); }}
+          workspaceId={prepSheetWorkspaceId}
+        />
+      )}
     </div>
   );
 }
