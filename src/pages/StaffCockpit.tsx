@@ -56,11 +56,16 @@ export default function StaffCockpit() {
           {/* LEFT: Smart Triage & Intake */}
           <div className="space-y-0">
             <Card className="overflow-hidden">
-              <div className="flex items-center gap-2 px-6 pt-5 pb-3">
-                <Inbox className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold font-heading">
-                  {t('staffCockpit.triage', { defaultValue: 'Triagem & Intake' })}
-                </h2>
+              <div className="px-6 pt-5 pb-3">
+                <div className="flex items-center gap-2">
+                  <Inbox className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-semibold font-heading">
+                    {t('staffCockpit.triage', { defaultValue: 'Triagem & Intake' })}
+                  </h2>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 ml-7">
+                  {t('staffCockpit.triageDesc', { defaultValue: 'O que precisa de decisão agora: aprovações, associações e encaminhamento.' })}
+                </p>
               </div>
               <CardContent className="p-0">
                 <Tabs defaultValue="approvals" className="w-full">
