@@ -157,7 +157,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Market Sizing (TAM/SAM/SOM)',
     desc_pt: 'Guia e template para estimar o tamanho do mercado de forma credível e apresentável.',
     desc_en: 'Guide and template to estimate market size credibly and presentably.',
-    url: '/resources',
+    url: '/resources/guide/guide-tam-sam-som',
     category: 'market',
     tags: ['market-size', 'tam', 'strategy'],
     stages: ['ideation', 'pre_seed', 'seed'],
