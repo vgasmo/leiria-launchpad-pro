@@ -14,8 +14,7 @@ export type ResourceCategory =
   | 'ops'
   | 'team'
   | 'privacy'
-  | 'metrics'
-  | 'ideation';
+  | 'metrics';
 
 export type ResourceItem = {
   id: string;
@@ -107,7 +106,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     desc_pt: 'Ferramenta visual para mapear modelo de negócio: segmentos, proposta de valor, canais e receita.',
     desc_en: 'Visual tool to map business model: segments, value proposition, channels, and revenue.',
     url: 'https://www.strategyzer.com/library/the-business-model-canvas',
-    category: 'ideation',
+    category: 'product',
     tags: ['canvas', 'business-model', 'strategy'],
     stages: ['ideation', 'pre_seed'],
     roles: ['founder', 'mentor', 'staff'],
@@ -333,6 +332,46 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     stages: ['ideation', 'pre_seed', 'seed', 'scale'],
     roles: ['founder', 'staff'],
   },
+  // --- TEAM / EQUIPA ---
+  {
+    id: 'ext-team-hiring-guide',
+    type: 'external',
+    title_pt: 'Como contratar os primeiros colaboradores',
+    title_en: 'How to hire your first employees',
+    desc_pt: 'Guia prático para recrutamento em early-stage: perfis, cultura, compensação e erros comuns.',
+    desc_en: 'Practical guide to early-stage hiring: profiles, culture, compensation, and common mistakes.',
+    url: 'https://www.ycombinator.com/library/8h-how-to-hire',
+    category: 'team',
+    tags: ['hiring', 'team', 'culture', 'hr'],
+    stages: ['pre_seed', 'seed', 'scale'],
+    roles: ['founder', 'staff'],
+  },
+  {
+    id: 'ext-team-cofounder',
+    type: 'external',
+    title_pt: 'Escolher e gerir co-fundadores',
+    title_en: 'Choosing and managing co-founders',
+    desc_pt: 'Como alinhar expectativas, dividir responsabilidades e resolver conflitos entre fundadores.',
+    desc_en: 'How to align expectations, split responsibilities, and resolve founder conflicts.',
+    url: 'https://www.ycombinator.com/library/5z-co-founder-matching',
+    category: 'team',
+    tags: ['cofounder', 'team', 'leadership'],
+    stages: ['ideation', 'pre_seed', 'seed'],
+    roles: ['founder'],
+  },
+  {
+    id: 'ext-team-culture',
+    type: 'external',
+    title_pt: 'Construir cultura de equipa desde o dia 1',
+    title_en: 'Building team culture from day one',
+    desc_pt: 'Práticas para criar valores, rituais e comunicação eficaz em equipas pequenas.',
+    desc_en: 'Practices for creating values, rituals, and effective communication in small teams.',
+    url: 'https://review.firstround.com/how-to-build-culture',
+    category: 'team',
+    tags: ['culture', 'team', 'values', 'communication'],
+    stages: ['ideation', 'pre_seed', 'seed', 'scale'],
+    roles: ['founder', 'staff'],
+  },
 ];
 
 // ── Category labels (i18n) ──
@@ -347,7 +386,6 @@ export const CATEGORY_LABELS: Record<string, { pt: string; en: string }> = {
   team: { pt: 'Equipa', en: 'Team' },
   privacy: { pt: 'Privacidade', en: 'Privacy' },
   metrics: { pt: 'Métricas', en: 'Metrics' },
-  ideation: { pt: 'Ideação', en: 'Ideation' },
 };
 
 export const STAGE_LABELS: Record<string, { pt: string; en: string }> = {
