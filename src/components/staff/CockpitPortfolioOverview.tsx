@@ -58,6 +58,9 @@ export function CockpitPortfolioOverview({ workspaces }: CockpitPortfolioOvervie
             <ArrowRight className="h-3 w-3" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {t('staffCockpit.portfolioDesc', { defaultValue: 'Gestão aprofundada das startups que acompanha. Para triagem diária, use a Fila de Trabalho.' })}
+        </p>
         {(criticalCount > 0 || atRiskCount > 0 || overdueTotal > 0) && (
           <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
             {criticalCount > 0 && (
