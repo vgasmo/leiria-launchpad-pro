@@ -163,8 +163,16 @@ export default function Resources() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{t('resources.title', { defaultValue: 'Rede & Recursos' })}</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              {t('resources.subtitle', { defaultValue: 'Mentoria, templates e guias para avançar mais depressa — sem perder rigor.' })}
+              {t('resources.subtitle', { defaultValue: 'Guias, playbooks, mentoria e materiais de apoio para avançar mais depressa — sem perder rigor.' })}
             </p>
+            {firstWsId && (
+              <p className="text-xs text-muted-foreground/70 mt-1.5">
+                {t('resources.docsHint', { defaultValue: 'Procura os ficheiros da sua startup (pitch deck, modelo financeiro)?' })}{' '}
+                <Link to={`/workspace/${firstWsId}?tab=documents`} className="text-primary hover:underline font-medium">
+                  {t('resources.docsHintLink', { defaultValue: 'Abrir Documentos da Startup →' })}
+                </Link>
+              </p>
+            )}
           </div>
 
           {/* Search */}
