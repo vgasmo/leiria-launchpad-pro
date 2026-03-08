@@ -947,7 +947,7 @@ function KpiCard({
 
           {workspaceKpi.target_value !== null && (
             <div className="text-right">
-              <div className="text-xs text-muted-foreground">Target</div>
+              <div className="text-xs text-muted-foreground">{t('kpis.target')}</div>
               <div className="text-sm font-medium">
                 {workspaceKpi.target_value.toLocaleString()}
                 {def.unit && <span className="text-muted-foreground ml-0.5">{def.unit}</span>}
