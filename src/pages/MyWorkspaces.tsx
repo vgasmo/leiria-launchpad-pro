@@ -319,6 +319,13 @@ export default function MyWorkspaces() {
       <OnboardingTour />
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
 
+      {/* Claimed/Pending state banner for founders */}
+      {isFounder && !isConsultor && !isAdmin && founderState.status !== 'has_active_workspace' && founderState.status !== 'loading' && founderState.status !== 'not_founder' && founderState.status !== 'staff_exempt' && (
+        <div className="mb-4">
+          <ClaimedWorkspaceBanner founderState={founderState} />
+        </div>
+      )}
+
       {/* Role-Specific Dashboards */}
       {showAdminDashboard && (
         <AdminDashboard 
