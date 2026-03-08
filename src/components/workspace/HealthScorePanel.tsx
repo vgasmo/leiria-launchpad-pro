@@ -133,7 +133,7 @@ export function HealthScorePanel({
               <Textarea
                 value={editedNotes}
                 onChange={e => setEditedNotes(e.target.value)}
-                placeholder="Add context about the health score (e.g., reasons for override, action plan)..."
+                placeholder={t('healthScore.addContextPlaceholder', 'Add context about the health score (e.g., reasons for override, action plan)...')}
                 rows={3}
                 className="text-sm"
               />
