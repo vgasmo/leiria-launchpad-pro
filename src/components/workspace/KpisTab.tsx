@@ -786,7 +786,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
               onSave={() => handleSaveKpi(wk)}
               onUnlock={async (kpiValueId) => {
                 await unlockKpi.mutateAsync(kpiValueId);
-                toast.success('KPI unlocked for manual editing');
+                toast.success(t('kpis.unlocked', 'KPI unlocked for manual editing'));
               }}
             />
           ))}
