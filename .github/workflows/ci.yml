@@ -251,29 +251,29 @@ jobs:
           echo "✅ Supabase local: $API_URL"
 
       - name: Seed test data
-        run: npx tsx scripts/e2e/seed-local-supabase.ts
+        run: bunx tsx scripts/e2e/seed-local-supabase.ts
         env:
           SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.service_role_key }}
           SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.anon_key }}
 
       - name: Build app for E2E
-        run: npm run build
+        run: bun run build
         env:
           VITE_SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ steps.supabase.outputs.anon_key }}
           VITE_SUPABASE_PROJECT_ID: local
 
       - name: Start preview server
-        run: npx vite preview --port 5173 &
+        run: bunx vite preview --port 5173 &
         env:
           NODE_ENV: production
 
       - name: Wait for server
-        run: npx wait-on http://localhost:5173 --timeout 15000
+        run: bunx wait-on http://localhost:5173 --timeout 15000
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: bunx playwright test
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5173
 
