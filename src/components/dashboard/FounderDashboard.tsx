@@ -68,7 +68,9 @@ export function FounderDashboard({
     recordActivity();
   }, []);
 
-  const workspace = workspaces[0];
+  // Multi-workspace affordance: default to first but allow switching
+  const [selectedWorkspaceIdx, setSelectedWorkspaceIdx] = useState(0);
+  const workspace = workspaces[selectedWorkspaceIdx] || workspaces[0];
   const nudges = useSmartNudges(workspace?.id);
   
   const { data: workspaceMembers } = useWorkspaceMembers(workspace?.id);
