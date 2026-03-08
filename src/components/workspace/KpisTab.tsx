@@ -563,11 +563,11 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
             </Button>
           </div>
           
-          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground border-l pl-3">
-            <QuickHelp term="mrr" />
-            <QuickHelp term="cac" />
-            <QuickHelp term="ltv" />
-            <QuickHelp term="runway" />
+          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground border-l pl-3">
+            <GlossaryTooltip term="mrr" className="text-xs" />
+            <GlossaryTooltip term="cac" className="text-xs" />
+            <GlossaryTooltip term="ltv" className="text-xs" />
+            <GlossaryTooltip term="runway" className="text-xs" />
             <Link to="/help" className="ml-1 text-primary hover:underline text-xs">
               {t('kpis.viewGlossary', 'Ver glossário')}
             </Link>
