@@ -248,7 +248,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Dataroom Checklist',
     desc_pt: 'Lista de documentos essenciais para um dataroom de investimento: deck, financeiro, legal, métricas.',
     desc_en: 'Essential document list for an investment dataroom: deck, financials, legal, metrics.',
-    url: '/resources',
+    url: '/resources/guide/guide-dataroom-checklist',
     category: 'fundraising',
     tags: ['dataroom', 'due-diligence', 'checklist'],
     stages: ['seed', 'scale'],
