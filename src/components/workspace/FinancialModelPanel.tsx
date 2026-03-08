@@ -235,7 +235,11 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
 
   const handleGenerateAIReview = async () => {
     if (!activeVersion) return;
-    await generateReview.mutateAsync({ versionId: activeVersion.id, mode: aiReviewMode });
+    try {
+      await generateReview.mutateAsync({ versionId: activeVersion.id, mode: aiReviewMode });
+    } catch {
+      // mutation onError already toasts — no additional action needed
+    }
   };
 
   const handleCreateAllInsightActions = async () => {

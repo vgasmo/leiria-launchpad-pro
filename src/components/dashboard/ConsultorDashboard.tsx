@@ -776,6 +776,8 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
     return () => clearInterval(id);
   }, [cooldownEnd]);
 
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+
   const handleGenerate = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (cooldownSec > 0) return;
@@ -788,7 +790,8 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
       setRecap(data as any);
       setCooldownEnd(Date.now() + 60000); // 60s cooldown
     } catch {
-      toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Could not generate briefing.' }));
+      toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Briefing indisponível neste momento. Tente mais tarde.' }));
+      setAiUnavailable(true);
     } finally {
       setLoading(false);
     }
@@ -828,6 +831,21 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
           </div>
         )}
       </div>
+    );
+  }
+
+  if (aiUnavailable) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-xs h-7 gap-1 opacity-50"
+        onClick={handleGenerate}
+        title={t('consultor.aiBriefing.unavailableHint', { defaultValue: 'Briefing IA indisponível — clique para tentar novamente' })}
+      >
+        <Sparkles className="h-3 w-3" />
+        {t('consultor.aiBriefing.retry', { defaultValue: 'Tentar' })}
+      </Button>
     );
   }
 
