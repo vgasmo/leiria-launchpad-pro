@@ -59,7 +59,9 @@ export function AdminBackoffice() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeSubTab, setActiveSubTab] = useState('dashboard');
+  // Support deep-linking via ?tab= URL param
+  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  const [activeSubTab, setActiveSubTab] = useState(urlTab && ['dashboard','overview','contracts','incubation','operations','infrastructure'].includes(urlTab) ? urlTab : 'dashboard');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
