@@ -326,24 +326,68 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
         </CardContent>
       </Card>
 
+      {/* Onboarding Pipeline Summary */}
+      <Card className="rounded-2xl">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            {t('admin.onboardingPipeline', { defaultValue: 'Pipeline de Onboarding' })}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            {t('admin.onboardingPipelineDesc', { defaultValue: 'Distribuição atual de startups por estado de ativação.' })}
+          </p>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const statusCounts = { active: 0, claimed: 0, pending: 0, onboarding: 0, other: 0 };
+            workspaces.forEach(w => {
+              const s = (w as any).status as string || 'active';
+              if (s in statusCounts) (statusCounts as any)[s]++;
+              else statusCounts.other++;
+            });
+            const items = [
+              { key: 'active', label: t('admin.statusActive', { defaultValue: 'Ativas' }), count: statusCounts.active, color: 'bg-health-healthy' },
+              { key: 'claimed', label: t('admin.statusClaimed', { defaultValue: 'Claimed' }), count: statusCounts.claimed, color: 'bg-amber-400' },
+              { key: 'pending', label: t('admin.statusPending', { defaultValue: 'Pendentes' }), count: statusCounts.pending, color: 'bg-blue-400' },
+              { key: 'onboarding', label: t('admin.statusOnboarding', { defaultValue: 'Onboarding' }), count: statusCounts.onboarding, color: 'bg-primary' },
+            ];
+            return (
+              <div className="grid grid-cols-4 gap-3">
+                {items.map(item => (
+                  <div key={item.key} className="text-center p-3 rounded-xl bg-muted/30">
+                    <div className={cn('h-2 rounded-full mb-2 mx-auto w-8', item.color)} />
+                    <p className="text-xl font-bold">{item.count}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       {/* Quick Links */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
         {[
-          { label: t('admin.crmPipeline'), href: '/crm', icon: Users },
-          { label: t('admin.operations'), href: '/admin?tab=backoffice', icon: Building2 },
-          { label: t('admin.programs'), href: '/admin?tab=programs-setup', icon: FileText },
-          { label: t('admin.reports'), href: '/admin?tab=reports', icon: AlertTriangle },
+          { label: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: TrendingUp, desc: t('admin.commandCenterDesc', { defaultValue: 'Triage diária e visão operacional' }) },
+          { label: t('admin.crmPipeline'), href: '/crm', icon: Users, desc: t('admin.crmDesc', { defaultValue: 'Pipeline comercial' }) },
+          { label: t('admin.spaceOps', { defaultValue: 'Operações de Espaço' }), href: '/admin?tab=backoffice', icon: Building2, desc: t('admin.spaceOpsDesc', { defaultValue: 'Contratos, faturas e infra' }) },
+          { label: t('admin.programs'), href: '/admin?tab=programs-setup', icon: FileText, desc: t('admin.programsDesc', { defaultValue: 'Configuração de programas' }) },
+          { label: t('admin.reports'), href: '/admin?tab=analytics', icon: AlertTriangle, desc: t('admin.reportsDesc', { defaultValue: 'Relatórios e métricas' }) },
         ].map((link) => {
           const Icon = link.icon;
           return (
             <Button
               key={link.href}
               variant="outline"
-              className="h-auto py-3 justify-start gap-3 rounded-xl hover:shadow-sm hover:scale-[1.01] transition-all duration-200"
+              className="h-auto py-3 px-3 flex-col items-start gap-1 rounded-xl hover:shadow-sm hover:scale-[1.01] transition-all duration-200 text-left"
               onClick={() => navigate(link.href)}
             >
-              <Icon className="h-4 w-4 text-muted-foreground" />
-              {link.label}
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{link.label}</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-normal">{link.desc}</span>
             </Button>
           );
         })}

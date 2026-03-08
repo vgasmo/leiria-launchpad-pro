@@ -147,6 +147,40 @@ export function FounderDashboard({
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Multi-workspace notice */}
+      {workspaces.length > 1 && (
+        <Card className="border-primary/20 bg-primary/5 rounded-2xl">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                <Rocket className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  {t('founder.multiWorkspace.title', { defaultValue: 'Tem {{count}} startups associadas', count: workspaces.length })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t('founder.multiWorkspace.hint', { defaultValue: 'Está a ver "{{name}}". Selecione outra abaixo.', name: workspace?.startup?.name || '' })}
+                </p>
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                {workspaces.map((ws, idx) => (
+                  <Button
+                    key={ws.id}
+                    variant={idx === selectedWorkspaceIdx ? 'default' : 'outline'}
+                    size="sm"
+                    className="text-xs h-7 px-2.5"
+                    onClick={() => setSelectedWorkspaceIdx(idx)}
+                  >
+                    {ws.startup?.name?.slice(0, 12) || `Startup ${idx + 1}`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* ★ JOURNEY MAP — Gamified visual ★ */}
       <WidgetErrorBoundary name="JourneyMap">
         <FounderJourneyMap currentStage={workspace.stage} />

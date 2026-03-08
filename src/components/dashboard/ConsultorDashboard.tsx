@@ -503,10 +503,12 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         </div>
       </Card>
 
-      {/* SECTION 3: Main Grid - Pipeline (Primary) + Agenda + Actions */}
-      {/* UX EMPHASIS: CRM Pipeline is NOW FIRST for consultants - their main operational view */}
+      {/* SECTION 3: Portfolio Management — Deeper operational view */}
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
+        {t('consultor.portfolioSection', { defaultValue: 'Gestão de Portefólio' })}
+      </p>
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Pipeline Snapshot - NOW PRIMARY for Consultants */}
+        {/* Pipeline Snapshot */}
         <Card className="rounded-2xl border-primary/20 bg-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
