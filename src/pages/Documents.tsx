@@ -137,9 +137,15 @@ export default function Documents() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('documentsPage.title', { defaultValue: 'Repositório' })}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('documentsPage.title', { defaultValue: 'Repositório de Documentos' })}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {t('documentsPage.subtitle', { defaultValue: 'Documentos submetidos e templates disponíveis.' })}
+          {t('documentsPage.subtitle', { defaultValue: 'Vista agregada dos documentos submetidos pelas startups e templates disponíveis para o programa.' })}
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1.5">
+          {t('documentsPage.hint', { defaultValue: 'Procura guias, playbooks ou materiais de apoio?' })}{' '}
+          <Link to="/resources" className="text-primary hover:underline font-medium">
+            {t('documentsPage.hintLink', { defaultValue: 'Aceda aos Recursos →' })}
+          </Link>
         </p>
       </div>
 
