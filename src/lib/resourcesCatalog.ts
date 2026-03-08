@@ -287,7 +287,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Sales Pipeline Stages',
     desc_pt: 'Guia para definir fases de venda, métricas de conversão e gestão do funil comercial.',
     desc_en: 'Guide to define sales phases, conversion metrics, and commercial funnel management.',
-    url: '/resources',
+    url: '/resources/guide/guide-sales-pipeline',
     category: 'gtm',
     tags: ['sales', 'pipeline', 'conversion'],
     stages: ['pre_seed', 'seed', 'scale'],
