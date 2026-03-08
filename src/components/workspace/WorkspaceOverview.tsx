@@ -574,6 +574,15 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           className="md:hidden"
         />
       )}
+
+      {/* First Contact Prep Sheet — Consultant/Admin */}
+      {(isConsultor || isAdmin) && (
+        <FirstContactPrepSheet
+          open={showPrepSheet}
+          onOpenChange={setShowPrepSheet}
+          workspaceId={workspace.id}
+        />
+      )}
     </div>
   );
 }

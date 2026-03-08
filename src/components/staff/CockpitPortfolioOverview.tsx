@@ -108,6 +108,17 @@ export function CockpitPortfolioOverview({ workspaces }: CockpitPortfolioOvervie
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-0.5">
                     {ws.program && <span>{ws.program.name}</span>}
+                    {ws.lastSession?.scheduled_at ? (
+                      <span className="flex items-center gap-0.5" title={t('staffCockpit.lastSession', { defaultValue: 'Última sessão' })}>
+                        <Clock className="h-2.5 w-2.5" />
+                        {format(parseISO(ws.lastSession.scheduled_at), 'dd MMM', { locale: pt })}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-muted-foreground/50 italic">
+                        <Clock className="h-2.5 w-2.5" />
+                        {t('staffCockpit.noSessions', { defaultValue: 'Sem sessões' })}
+                      </span>
+                    )}
                     {ws.nextMeetingDate && (
                       <span className="flex items-center gap-0.5">
                         <Calendar className="h-2.5 w-2.5" />
