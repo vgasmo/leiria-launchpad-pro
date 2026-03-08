@@ -268,6 +268,21 @@ export default function Resources() {
                 <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
               )}
             </div>
+          ) : isFiltering ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {lang === 'pt'
+                  ? `${filtered.length} recurso${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}`
+                  : `${filtered.length} resource${filtered.length !== 1 ? 's' : ''} found`}
+              </p>
+              {filtered.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {filtered.map(r => <ResourceCard key={r.id} r={r} favs={favs} onToggleFav={handleToggleFav} lang={lang} />)}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
+              )}
+            </div>
           ) : (
             <div className="space-y-10">
               {/* Recommended for you */}
