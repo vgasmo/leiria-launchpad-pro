@@ -50,6 +50,7 @@ export default function MyWorkspaces() {
   const { isConsultor, isMentor, isAdmin, roles } = useAuth();
   const isFounder = roles.includes('founder');
   const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
+  const founderState = useFounderOnboardingState();
   
   // Consultant view mode - assigned only by default (not for admins)
   const [showAssignedOnly, setShowAssignedOnly] = useState(isConsultor && !isAdmin);
