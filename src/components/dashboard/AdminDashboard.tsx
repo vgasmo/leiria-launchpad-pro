@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useEcosystemInsights } from '@/hooks/useEcosystemInsights';
 import { EcosystemInsights } from '@/components/dashboard/EcosystemInsights';
+import { EcosystemHeatmap } from '@/components/admin/EcosystemHeatmap';
+import { ExportAnalyticsModal } from '@/components/admin/ExportAnalyticsModal';
 import type { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 
 interface AdminDashboardProps {
