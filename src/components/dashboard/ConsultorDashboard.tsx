@@ -70,6 +70,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
   const { t } = useTranslation();
   const { user } = useAuth();
   const { isFocused } = useFocusMode();
+  const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
 
   // Fetch CRM pipeline for snapshot
   const { data: pipeline } = useCrmPipeline({ 
