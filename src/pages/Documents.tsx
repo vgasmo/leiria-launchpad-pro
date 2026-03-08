@@ -137,9 +137,15 @@ export default function Documents() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('documentsPage.title', { defaultValue: 'Repositório' })}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('documentsPage.title', { defaultValue: 'Repositório de Documentos' })}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {t('documentsPage.subtitle', { defaultValue: 'Documentos submetidos e templates disponíveis.' })}
+          {t('documentsPage.subtitle', { defaultValue: 'Vista agregada dos documentos submetidos pelas startups e templates disponíveis para o programa.' })}
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1.5">
+          {t('documentsPage.hint', { defaultValue: 'Procura guias, playbooks ou materiais de apoio?' })}{' '}
+          <Link to="/resources" className="text-primary hover:underline font-medium">
+            {t('documentsPage.hintLink', { defaultValue: 'Aceda aos Recursos →' })}
+          </Link>
         </p>
       </div>
 
@@ -207,8 +213,9 @@ export default function Documents() {
           ) : grouped.length === 0 ? (
             <EmptyState
               icon={FolderOpen}
-              title={t('documentsPage.emptyTitle', { defaultValue: 'Sem documentos' })}
-              description={t('documentsPage.emptyDescription', { defaultValue: 'Os documentos submetidos nos espaços de trabalho aparecerão aqui.' })}
+              title={t('documentsPage.emptyTitle', { defaultValue: 'Nenhum documento submetido' })}
+              description={t('documentsPage.emptyDescription', { defaultValue: 'Aqui são agregados os ficheiros enviados pelas startups (pitch decks, modelos financeiros, contratos, etc.). Quando as equipas submeterem documentos nos seus espaços de trabalho, aparecerão nesta vista.' })}
+              value={t('documentsPage.emptyHint', { defaultValue: 'Para templates e materiais de apoio, consulte o separador "Templates" acima ou a página de Recursos.' })}
             />
           ) : (
             <div className="space-y-6">
@@ -298,7 +305,7 @@ export default function Documents() {
             <EmptyState
               icon={BookTemplate}
               title={t('documentsPage.noTemplates', { defaultValue: 'Sem templates disponíveis' })}
-              description={t('documentsPage.noTemplatesDesc', { defaultValue: 'Ainda não existem templates configurados.' })}
+              description={t('documentsPage.noTemplatesDesc', { defaultValue: 'Os templates são modelos reutilizáveis (canvas, checklists, pitch structures) configurados pela equipa do programa. Quando estiverem disponíveis, aparecerão aqui.' })}
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

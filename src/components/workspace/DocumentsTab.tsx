@@ -298,7 +298,18 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   return (
     <>
     <div className="space-y-6">
-      {/* External Link Confirmation Dialog */}
+      {/* Section intro */}
+      <div>
+        <p className="text-sm text-muted-foreground">
+          {t('documents.sectionIntro', { defaultValue: 'Ficheiros e entregáveis específicos desta startup — pitch decks, modelos financeiros, contratos e outros documentos de trabalho.' })}
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          {t('documents.sectionIntroHint', { defaultValue: 'Para guias, templates e materiais de apoio do programa,' })}{' '}
+          <a href="/resources" className="text-primary hover:underline font-medium">
+            {t('documents.sectionIntroHintLink', { defaultValue: 'consulte os Recursos →' })}
+          </a>
+        </p>
+      </div>
       <AlertDialog open={externalLinkConfirmOpen} onOpenChange={setExternalLinkConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -494,8 +505,9 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
             {sortedCategories.length === 0 ? (
               <EmptyState
                 icon={FileText}
-                title={t('emptyStates.documents.title')}
-                description={t('emptyStates.documents.description')}
+                title={t('emptyStates.documents.title', { defaultValue: 'Sem documentos nesta startup' })}
+                description={t('emptyStates.documents.description', { defaultValue: 'Aqui ficam os ficheiros e entregáveis da startup: pitch decks, modelos financeiros, one-pagers, documentos legais e outros. Carregue ficheiros ou adicione links para começar.' })}
+                value={t('emptyStates.documents.hint', { defaultValue: 'Utilize as sub-abas acima para aceder ao Modelo Financeiro, Ferramentas ou Data Room.' })}
                 action={canWrite ? {
                   label: t('documents.uploadFile'),
                   onClick: () => setUploadOpen(true),
