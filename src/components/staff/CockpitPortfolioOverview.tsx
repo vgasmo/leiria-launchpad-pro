@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Building2, AlertTriangle, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Building2, AlertTriangle, Calendar, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { format, parseISO, isAfter, subDays } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -58,6 +58,9 @@ export function CockpitPortfolioOverview({ workspaces }: CockpitPortfolioOvervie
             <ArrowRight className="h-3 w-3" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {t('staffCockpit.portfolioDesc', { defaultValue: 'Gestão aprofundada das startups que acompanha. Para triagem diária, use a Fila de Trabalho.' })}
+        </p>
         {(criticalCount > 0 || atRiskCount > 0 || overdueTotal > 0) && (
           <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
             {criticalCount > 0 && (
@@ -105,6 +108,17 @@ export function CockpitPortfolioOverview({ workspaces }: CockpitPortfolioOvervie
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-0.5">
                     {ws.program && <span>{ws.program.name}</span>}
+                    {ws.lastSession?.scheduled_at ? (
+                      <span className="flex items-center gap-0.5" title={t('staffCockpit.lastSession', { defaultValue: 'Última sessão' })}>
+                        <Clock className="h-2.5 w-2.5" />
+                        {format(parseISO(ws.lastSession.scheduled_at), 'dd MMM', { locale: pt })}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-muted-foreground/50 italic">
+                        <Clock className="h-2.5 w-2.5" />
+                        {t('staffCockpit.noSessions', { defaultValue: 'Sem sessões' })}
+                      </span>
+                    )}
                     {ws.nextMeetingDate && (
                       <span className="flex items-center gap-0.5">
                         <Calendar className="h-2.5 w-2.5" />

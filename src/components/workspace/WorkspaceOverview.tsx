@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
@@ -53,6 +54,7 @@ import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleCon
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
 import { InteractionsCard } from '@/components/workspace/InteractionsCard';
 import { LocationContractCard } from '@/components/workspace/LocationContractCard';
+import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/lib/supabaseClient';
@@ -101,6 +103,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
   const [activeSurveyId, setActiveSurveyId] = useState<string | null>(null);
+  const [showPrepSheet, setShowPrepSheet] = useState(false);
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   
   // Check if workspace is "empty" and should show onboarding prompt
@@ -286,6 +289,13 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* Prep Sheet Button — Consultant/Admin only */}
+              {(isConsultor || isAdmin) && (
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowPrepSheet(true)}>
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  {t('workspaceOverview.prepSheet', { defaultValue: 'Preparar Reunião' })}
+                </Button>
+              )}
               {/* Progress Report Button */}
               <ProgressReportView 
                 workspaceId={workspace.id} 
@@ -562,6 +572,15 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           onAddAction={() => setSearchParams({ tab: 'actions' })}
           onRequestSession={() => setSearchParams({ tab: 'agenda' })}
           className="md:hidden"
+        />
+      )}
+
+      {/* First Contact Prep Sheet — Consultant/Admin */}
+      {(isConsultor || isAdmin) && (
+        <FirstContactPrepSheet
+          open={showPrepSheet}
+          onOpenChange={setShowPrepSheet}
+          workspaceId={workspace.id}
         />
       )}
     </div>
