@@ -170,7 +170,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Go-to-Market Checklist',
     desc_pt: 'Passos essenciais para lançar produto: posicionamento, canais, pricing e primeiras métricas.',
     desc_en: 'Essential steps to launch: positioning, channels, pricing, and first metrics.',
-    url: '/resources',
+    url: '/resources/guide/guide-gtm-checklist',
     category: 'gtm',
     tags: ['gtm', 'launch', 'checklist'],
     stages: ['pre_seed', 'seed'],
