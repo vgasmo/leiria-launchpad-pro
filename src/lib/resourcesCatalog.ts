@@ -274,7 +274,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Experiment Design Template',
     desc_pt: 'Estrutura para validar hipóteses: definir teste, métricas de sucesso e critérios de decisão.',
     desc_en: 'Structure to validate hypotheses: define test, success metrics, and decision criteria.',
-    url: '/resources',
+    url: '/resources/guide/guide-experiment-design',
     category: 'product',
     tags: ['experiments', 'validation', 'lean'],
     stages: ['ideation', 'pre_seed', 'seed'],
