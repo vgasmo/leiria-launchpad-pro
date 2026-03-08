@@ -28,6 +28,7 @@ export function HealthScorePanel({
   healthNotes,
   canWrite,
 }: HealthScorePanelProps) {
+  const { t } = useTranslation();
   const recomputeHealth = useRecomputeHealth(workspaceId);
   const updateHealthNotes = useUpdateHealthNotes(workspaceId);
   
