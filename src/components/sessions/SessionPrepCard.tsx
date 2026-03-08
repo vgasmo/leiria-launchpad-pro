@@ -92,9 +92,9 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
       <SmartPrepSheet
         open={showPrepSheet}
         onOpenChange={setShowPrepSheet}
-        workspaceName={data.workspaceName}
-        stage={data.workspaceStage}
-        health={data.healthScore}
+        workspaceName={(data as any)?.workspaceName}
+        stage={(data as any)?.workspaceStage || (data as any)?.stage}
+        health={(data as any)?.healthScore || (data as any)?.health}
       />
       
       <CardContent className="space-y-4">
