@@ -96,6 +96,16 @@ export function ClaimedWorkspaceBanner({ founderState }: ClaimedWorkspaceBannerP
                 {t('founder.claimed.viewSettings', { defaultValue: 'Ver definições' })}
               </Button>
             </div>
+            {/* Next steps guidance */}
+            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800/50">
+              <p className="text-xs font-medium text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                {t('founder.claimed.nextSteps', { defaultValue: 'Próximos passos' })}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {t('founder.claimed.nextStepsDesc', { defaultValue: 'Enquanto aguarda, pode explorar a plataforma e preparar documentação.' })}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
