@@ -222,7 +222,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Cap Table Basics',
     desc_pt: 'Como estruturar a tabela de capitalização, vesting, diluição e impacto em rondas futuras.',
     desc_en: 'How to structure the cap table, vesting, dilution, and impact on future rounds.',
-    url: '/resources',
+    url: '/resources/guide/guide-cap-table',
     category: 'finance',
     tags: ['cap-table', 'equity', 'vesting'],
     stages: ['pre_seed', 'seed', 'scale'],
