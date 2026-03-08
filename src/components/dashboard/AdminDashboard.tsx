@@ -40,6 +40,7 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useAdminDashboardStats();
 
+  const [showExport, setShowExport] = useState(false);
   const isLoading = workspacesLoading || statsLoading;
 
   const { healthDistribution, overdueCount, totalOverdueActions, needsAttention } = useMemo(() => {
