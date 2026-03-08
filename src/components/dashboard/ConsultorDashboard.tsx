@@ -834,6 +834,21 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
     );
   }
 
+  if (aiUnavailable) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-xs h-7 gap-1 opacity-50"
+        onClick={handleGenerate}
+        title={t('consultor.aiBriefing.unavailableHint', { defaultValue: 'Briefing IA indisponível — clique para tentar novamente' })}
+      >
+        <Sparkles className="h-3 w-3" />
+        {t('consultor.aiBriefing.retry', { defaultValue: 'Tentar' })}
+      </Button>
+    );
+  }
+
   return (
     <Button
       variant="ghost"

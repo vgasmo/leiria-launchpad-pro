@@ -179,6 +179,16 @@ export function SessionArtifactsPanel({
           </Collapsible>
         </div>
 
+        {/* AI error fallback */}
+        {aiError && !generatedArtifacts && (
+          <div className="rounded-lg border border-border bg-muted/30 p-4 text-center space-y-2">
+            <AlertCircle className="h-5 w-5 mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              {t('sessions.aiUnavailable', { defaultValue: 'Análise IA indisponível neste momento. Pode adicionar notas manualmente e tentar novamente mais tarde.' })}
+            </p>
+          </div>
+        )}
+
         {/* Generate button */}
         <Button 
           onClick={handleGenerate} 
@@ -193,7 +203,9 @@ export function SessionArtifactsPanel({
           ) : (
             <>
               <Sparkles className="h-4 w-4 mr-2" />
-              {t('sessions.generateSummaryActions')}
+              {aiError
+                ? t('sessions.retryAnalysis', { defaultValue: 'Tentar novamente' })
+                : t('sessions.generateSummaryActions')}
             </>
           )}
         </Button>
