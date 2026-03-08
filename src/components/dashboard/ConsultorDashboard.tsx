@@ -344,6 +344,18 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
                         className="text-xs h-7 hidden sm:inline-flex"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setPrepSheetWorkspaceId(item.workspace.id);
+                        }}
+                      >
+                        <BookOpen className="h-3 w-3 mr-1" />
+                        {t('consultor.prepSheet.button', { defaultValue: 'Preparar reunião' })}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs h-7 hidden sm:inline-flex"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           navigate(`/workspace/${item.workspace.id}?tab=milestones`);
                         }}
                       >
