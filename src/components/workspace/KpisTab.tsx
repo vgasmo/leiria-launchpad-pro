@@ -38,7 +38,7 @@ import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { KpiImportDialog } from './KpiImportDialog';
-import { QuickHelp } from '@/components/ui/GlossaryTooltip';
+import { QuickHelp, GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { Link, useSearchParams } from 'react-router-dom';
 import { KpiSparkline } from './KpiSparkline';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
