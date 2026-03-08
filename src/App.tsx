@@ -50,6 +50,7 @@ const Resources = lazy(() => import("./pages/Resources"));
 const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
 const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
+const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
@@ -149,6 +150,7 @@ function AppRoutes() {
         <Route path="/integrations-setup" element={<Navigate to="/settings" replace />} />
         <Route path="/documents" element={<ProtectedRoute staffOnly><Documents /></ProtectedRoute>} />
         <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+        <Route path="/resources/guide/:id" element={<ProtectedRoute><ResourceGuide /></ProtectedRoute>} />
         <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
         <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
