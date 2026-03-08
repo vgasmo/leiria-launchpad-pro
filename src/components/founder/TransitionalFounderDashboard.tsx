@@ -34,6 +34,7 @@ interface TransitionalFounderDashboardProps {
     program?: { name: string } | null;
   };
   workspaceStatus: 'claimed' | 'pending' | 'onboarding' | 'imported_unclaimed';
+  contractStatus?: string | null;
 }
 
 const CHECKLIST_ITEMS = [
