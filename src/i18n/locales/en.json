@@ -3065,6 +3065,12 @@
     "required": "Required",
     "selectKpi": "Select KPI",
     "skipImport": "Skip",
+    "stripe": {
+      "activeCustomers": "Active Customers",
+      "monthlyRevenue": "Monthly Revenue",
+      "mrr": "Monthly Recurring Revenue",
+      "totalCustomers": "Total Customers"
+    },
     "target": "Target",
     "title": "KPIs",
     "trend": "Trend",
