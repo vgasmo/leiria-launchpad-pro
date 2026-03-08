@@ -894,7 +894,7 @@ function KpiCard({
                     onClick={() => onUnlock(currentValue.id)}
                   >
                     <Unlock className="h-3 w-3 mr-1" />
-                    Unlock
+                    {t('kpis.unlock', 'Unlock')}
                   </Button>
                 )}
               </div>
