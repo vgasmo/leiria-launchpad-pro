@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
+import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -125,6 +126,11 @@ export function FounderDashboard({
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* ★ JOURNEY MAP — Gamified visual ★ */}
+      <WidgetErrorBoundary name="JourneyMap">
+        <FounderJourneyMap currentStage={workspace.stage} />
+      </WidgetErrorBoundary>
+
       {/* ★ HERO: Next Best Actions — the ABSOLUTE FIRST thing founders see ★ */}
       <NextBestAction
         workspaceId={workspace.id}

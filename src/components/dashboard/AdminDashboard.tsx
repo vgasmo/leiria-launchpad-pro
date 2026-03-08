@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useEcosystemInsights } from '@/hooks/useEcosystemInsights';
 import { EcosystemInsights } from '@/components/dashboard/EcosystemInsights';
+import { EcosystemHeatmap } from '@/components/admin/EcosystemHeatmap';
+import { ExportAnalyticsModal } from '@/components/admin/ExportAnalyticsModal';
 import type { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 
 interface AdminDashboardProps {
@@ -31,13 +33,14 @@ interface AdminDashboardProps {
   onSwitchToPortfolio: () => void;
 }
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 
 export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoading: workspacesLoading, programsCount, onSwitchToPortfolio }: AdminDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useAdminDashboardStats();
 
+  const [showExport, setShowExport] = useState(false);
   const isLoading = workspacesLoading || statsLoading;
 
   const { healthDistribution, overdueCount, totalOverdueActions, needsAttention } = useMemo(() => {
@@ -262,6 +265,10 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
 
       {/* Smart Insights */}
       <EcosystemInsights insights={insights} />
+
+      {/* Ecosystem Heatmap */}
+      <EcosystemHeatmap workspaces={workspaces} onExport={() => setShowExport(true)} />
+      <ExportAnalyticsModal open={showExport} onOpenChange={setShowExport} />
 
       {/* Portfolio Health Summary */}
       <Card className="rounded-2xl">
