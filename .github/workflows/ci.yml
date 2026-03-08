@@ -20,19 +20,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: bun run lint
 
       - name: Type Check
-        run: npx tsc --noEmit -p tsconfig.typecheck.json
+        run: bunx tsc --noEmit -p tsconfig.typecheck.json
 
       - name: Build
-        run: npm run build
+        run: bun run build
         env:
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: dummy-key-for-build
@@ -60,13 +64,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Run Vitest unit tests
-        run: npx vitest run --reporter=verbose
+        run: bunx vitest run --reporter=verbose
         env:
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: dummy-key-for-build
@@ -144,6 +152,31 @@ jobs:
           echo "✅ i18n locales are in sync"
 
   # ──────────────────────────────────────────────
+  # Gate: .env leak guard
+  # ──────────────────────────────────────────────
+  env-leak-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if real .env is committed
+        run: |
+          if [ -f ".env" ]; then
+            echo "❌ SECURITY: .env file detected in repository!"
+            echo "Real environment files must never be committed."
+            exit 1
+          fi
+          # Check for other .env variants (but allow .env.example)
+          ENV_FILES=$(find . -maxdepth 1 -name '.env.*' ! -name '.env.example' -type f 2>/dev/null)
+          if [ -n "$ENV_FILES" ]; then
+            echo "❌ SECURITY: Environment files detected in repository:"
+            echo "$ENV_FILES"
+            exit 1
+          fi
+          echo "✅ No .env secrets in repository"
+
+  # ──────────────────────────────────────────────
   # Gate: Secret leak scan
   # ──────────────────────────────────────────────
   secret-scan:
@@ -176,13 +209,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -239,29 +276,29 @@ jobs:
           echo "✅ Supabase local: $API_URL"
 
       - name: Seed test data
-        run: npx tsx scripts/e2e/seed-local-supabase.ts
+        run: bunx tsx scripts/e2e/seed-local-supabase.ts
         env:
           SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.service_role_key }}
           SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.anon_key }}
 
       - name: Build app for E2E
-        run: npm run build
+        run: bun run build
         env:
           VITE_SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ steps.supabase.outputs.anon_key }}
           VITE_SUPABASE_PROJECT_ID: local
 
       - name: Start preview server
-        run: npx vite preview --port 5173 &
+        run: bunx vite preview --port 5173 &
         env:
           NODE_ENV: production
 
       - name: Wait for server
-        run: npx wait-on http://localhost:5173 --timeout 15000
+        run: bunx wait-on http://localhost:5173 --timeout 15000
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: bunx playwright test
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5173
 
