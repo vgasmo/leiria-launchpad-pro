@@ -33,7 +33,7 @@ interface AdminDashboardProps {
   onSwitchToPortfolio: () => void;
 }
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 
 export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoading: workspacesLoading, programsCount, onSwitchToPortfolio }: AdminDashboardProps) {
   const { t } = useTranslation();
