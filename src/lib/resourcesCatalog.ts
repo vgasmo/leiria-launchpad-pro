@@ -346,7 +346,6 @@ export const CATEGORY_LABELS: Record<string, { pt: string; en: string }> = {
   team: { pt: 'Equipa', en: 'Team' },
   privacy: { pt: 'Privacidade', en: 'Privacy' },
   metrics: { pt: 'Métricas', en: 'Metrics' },
-  ideation: { pt: 'Ideação', en: 'Ideation' },
 };
 
 export const STAGE_LABELS: Record<string, { pt: string; en: string }> = {
