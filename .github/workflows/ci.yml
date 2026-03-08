@@ -152,6 +152,31 @@ jobs:
           echo "✅ i18n locales are in sync"
 
   # ──────────────────────────────────────────────
+  # Gate: .env leak guard
+  # ──────────────────────────────────────────────
+  env-leak-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if real .env is committed
+        run: |
+          if [ -f ".env" ]; then
+            echo "❌ SECURITY: .env file detected in repository!"
+            echo "Real environment files must never be committed."
+            exit 1
+          fi
+          # Check for other .env variants (but allow .env.example)
+          ENV_FILES=$(find . -maxdepth 1 -name '.env.*' ! -name '.env.example' -type f 2>/dev/null)
+          if [ -n "$ENV_FILES" ]; then
+            echo "❌ SECURITY: Environment files detected in repository:"
+            echo "$ENV_FILES"
+            exit 1
+          fi
+          echo "✅ No .env secrets in repository"
+
+  # ──────────────────────────────────────────────
   # Gate: Secret leak scan
   # ──────────────────────────────────────────────
   secret-scan:
