@@ -92,6 +92,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       toast.error(t('errors.rateLimitReached'));
       return;
     }
+    setAiError(false);
     try {
       await generateMutation.mutateAsync({ 
         sessionId, 
@@ -99,7 +100,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       });
       onRefresh?.();
     } catch {
-      // Error already handled by mutation onError
+      setAiError(true);
     }
   };
 
