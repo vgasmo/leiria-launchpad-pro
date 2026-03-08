@@ -505,8 +505,9 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
             {sortedCategories.length === 0 ? (
               <EmptyState
                 icon={FileText}
-                title={t('emptyStates.documents.title')}
-                description={t('emptyStates.documents.description')}
+                title={t('emptyStates.documents.title', { defaultValue: 'Sem documentos nesta startup' })}
+                description={t('emptyStates.documents.description', { defaultValue: 'Aqui ficam os ficheiros e entregáveis da startup: pitch decks, modelos financeiros, one-pagers, documentos legais e outros. Carregue ficheiros ou adicione links para começar.' })}
+                value={t('emptyStates.documents.hint', { defaultValue: 'Utilize as sub-abas acima para aceder ao Modelo Financeiro, Ferramentas ou Data Room.' })}
                 action={canWrite ? {
                   label: t('documents.uploadFile'),
                   onClick: () => setUploadOpen(true),
