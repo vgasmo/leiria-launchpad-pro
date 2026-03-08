@@ -102,11 +102,16 @@ export default function StaffCockpit() {
           <div className="space-y-6">
             {/* Work Queue */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <ListTodo className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold font-heading">
-                  {t('staffCockpit.dailyWork', { defaultValue: 'Trabalho do Dia' })}
-                </h2>
+              <div className="mb-3">
+                <div className="flex items-center gap-2">
+                  <ListTodo className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-semibold font-heading">
+                    {t('staffCockpit.dailyWork', { defaultValue: 'Trabalho do Dia' })}
+                  </h2>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 ml-7">
+                  {t('staffCockpit.dailyWorkDesc', { defaultValue: 'Ações automáticas prioritárias baseadas no estado do portfólio.' })}
+                </p>
               </div>
               <WorkQueuePanel compact={false} />
             </div>
