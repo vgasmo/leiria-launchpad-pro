@@ -786,7 +786,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
               onSave={() => handleSaveKpi(wk)}
               onUnlock={async (kpiValueId) => {
                 await unlockKpi.mutateAsync(kpiValueId);
-                toast.success('KPI unlocked for manual editing');
+                toast.success(t('kpis.unlocked', 'KPI unlocked for manual editing'));
               }}
             />
           ))}
@@ -872,7 +872,7 @@ function KpiCard({
             <CardTitle className="text-base font-medium flex items-center gap-2">
               {def.name}
               {workspaceKpi.required && (
-                <Badge variant="outline" className="text-xs">Required</Badge>
+                <Badge variant="outline" className="text-xs">{t('kpis.required', 'Required')}</Badge>
               )}
               {isLocked && (
                 <Lock className="h-3.5 w-3.5 text-amber-600" />
@@ -894,7 +894,7 @@ function KpiCard({
                     onClick={() => onUnlock(currentValue.id)}
                   >
                     <Unlock className="h-3 w-3 mr-1" />
-                    Unlock
+                    {t('kpis.unlock', 'Unlock')}
                   </Button>
                 )}
               </div>
@@ -917,13 +917,13 @@ function KpiCard({
           <div className="flex-1">
             {effectiveCanEdit ? (
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Value</Label>
+                <Label className="text-xs text-muted-foreground">{t('kpis.value', 'Value')}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
                     value={displayValue}
                     onChange={e => onValueChange('value', e.target.value)}
-                    placeholder="Enter value"
+                    placeholder={t('kpis.enterValue', 'Enter value')}
                     className="h-9"
                   />
                   {def.unit && (
@@ -947,7 +947,7 @@ function KpiCard({
 
           {workspaceKpi.target_value !== null && (
             <div className="text-right">
-              <div className="text-xs text-muted-foreground">Target</div>
+              <div className="text-xs text-muted-foreground">{t('kpis.target')}</div>
               <div className="text-sm font-medium">
                 {workspaceKpi.target_value.toLocaleString()}
                 {def.unit && <span className="text-muted-foreground ml-0.5">{def.unit}</span>}
@@ -958,11 +958,11 @@ function KpiCard({
 
         {effectiveCanEdit ? (
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Notes (optional)</Label>
+            <Label className="text-xs text-muted-foreground">{t('kpis.notesOptional', 'Notes (optional)')}</Label>
             <Textarea
               value={displayNotes}
               onChange={e => onValueChange('notes', e.target.value)}
-              placeholder="Add context..."
+              placeholder={t('kpis.addContext', 'Add context...')}
               rows={2}
               className="text-sm"
             />

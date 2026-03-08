@@ -45,6 +45,18 @@ test.describe('Founder — Active Workspace (founderPage)', () => {
       // Verify workspace detail loaded with tabs
       const heading = page.locator('h1, h2, h3').first();
       await expect(heading).toBeVisible({ timeout: 10_000 });
+
+      // PT locale assertion: KPI tab should show localized label
+      const kpiTab = page.locator('[role="tab"], button, a').filter({ hasText: 'KPIs' });
+      if (await kpiTab.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await kpiTab.first().click();
+        await page.waitForTimeout(1_000);
+        // After clicking KPIs tab, verify PT chrome is present (not English "Required" badge or "Value" label)
+        const englishLeak = page.locator('text="Enter value"');
+        const leakCount = await englishLeak.count();
+        // "Enter value" should not appear — it should be "Introduzir valor" in PT
+        expect(leakCount).toBe(0);
+      }
     } else {
       // Inline dashboard without separate link — verify content exists
       const heading = page.locator('h1, h2, h3').first();

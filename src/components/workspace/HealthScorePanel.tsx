@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, MessageSquare, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export function HealthScorePanel({
   healthNotes,
   canWrite,
 }: HealthScorePanelProps) {
+  const { t } = useTranslation();
   const recomputeHealth = useRecomputeHealth(workspaceId);
   const updateHealthNotes = useUpdateHealthNotes(workspaceId);
   
@@ -123,7 +125,7 @@ export function HealthScorePanel({
                 className="h-6 text-xs"
               >
                 <MessageSquare className="h-3 w-3 mr-1" />
-                {healthNotes ? 'Edit' : 'Add note'}
+                {healthNotes ? t('common.edit', 'Edit') : t('healthScore.addNote', 'Add note')}
               </Button>
             )}
           </div>
@@ -133,7 +135,7 @@ export function HealthScorePanel({
               <Textarea
                 value={editedNotes}
                 onChange={e => setEditedNotes(e.target.value)}
-                placeholder="Add context about the health score (e.g., reasons for override, action plan)..."
+                placeholder={t('healthScore.addContextPlaceholder', 'Add context about the health score (e.g., reasons for override, action plan)...')}
                 rows={3}
                 className="text-sm"
               />

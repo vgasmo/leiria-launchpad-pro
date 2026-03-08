@@ -19,10 +19,10 @@ interface KpiImportDialogProps {
 }
 
 const STRIPE_METRICS = [
-  { key: 'mrr', label: 'Monthly Recurring Revenue', category: 'Financial' },
-  { key: 'active_customers', label: 'Active Customers', category: 'Customers' },
-  { key: 'total_customers', label: 'Total Customers', category: 'Customers' },
-  { key: 'monthly_revenue', label: 'Monthly Revenue', category: 'Financial' },
+  { key: 'mrr', labelKey: 'kpis.stripe.mrr', category: 'Financial' },
+  { key: 'active_customers', labelKey: 'kpis.stripe.activeCustomers', category: 'Customers' },
+  { key: 'total_customers', labelKey: 'kpis.stripe.totalCustomers', category: 'Customers' },
+  { key: 'monthly_revenue', labelKey: 'kpis.stripe.monthlyRevenue', category: 'Financial' },
 ];
 
 export function KpiImportDialog({ open, onOpenChange, workspaceId }: KpiImportDialogProps) {
@@ -194,7 +194,7 @@ export function KpiImportDialog({ open, onOpenChange, workspaceId }: KpiImportDi
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">
-                            {metricInfo?.label || item.metric}
+                            {metricInfo ? t(metricInfo.labelKey) : item.metric}
                           </p>
                           <p className="text-lg font-bold text-primary">
                             {typeof item.value === 'number' 
