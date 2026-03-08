@@ -347,8 +347,8 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
             });
             const items = [
               { key: 'active', label: t('admin.statusActive', { defaultValue: 'Ativas' }), count: statusCounts.active, color: 'bg-health-healthy' },
-              { key: 'claimed', label: t('admin.statusClaimed', { defaultValue: 'Claimed' }), count: statusCounts.claimed, color: 'bg-amber-400' },
-              { key: 'pending', label: t('admin.statusPending', { defaultValue: 'Pendentes' }), count: statusCounts.pending, color: 'bg-blue-400' },
+              { key: 'claimed', label: t('admin.statusClaimed', { defaultValue: 'Claimed' }), count: statusCounts.claimed, color: 'bg-health-at-risk' },
+              { key: 'pending', label: t('admin.statusPending', { defaultValue: 'Pendentes' }), count: statusCounts.pending, color: 'bg-health-stable' },
               { key: 'onboarding', label: t('admin.statusOnboarding', { defaultValue: 'Onboarding' }), count: statusCounts.onboarding, color: 'bg-primary' },
             ];
             return (
