@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, X, ArrowRight } from 'lucide-react';
+import { Sparkles, X, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,27 +17,49 @@ interface AiPulseCardProps {
 const PULSE_COOLDOWN_KEY = 'ai-pulse-last-fired';
 const PULSE_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 const PULSE_DISMISSED_KEY = 'ai-pulse-dismissed';
+const PULSE_TIMEOUT_MS = 15_000; // 15s max wait
+
+/** Static fallback tips when AI backend is unavailable */
+function getStaticTip(healthScore: string | null | undefined, overdueCount: number, t: (k: string, o?: any) => string): string {
+  if (overdueCount >= 2) {
+    return t('aiPulse.fallback.overdue', {
+      defaultValue: 'Tem {{count}} ações em atraso. Priorize as mais críticas e atualize o estado das concluídas.',
+      count: overdueCount,
+    });
+  }
+  if (healthScore === 'critical') {
+    return t('aiPulse.fallback.critical', {
+      defaultValue: 'A saúde da sua startup está em estado crítico. Reveja os KPIs pendentes e agende uma sessão com o seu consultor.',
+    });
+  }
+  if (healthScore === 'at_risk') {
+    return t('aiPulse.fallback.atRisk', {
+      defaultValue: 'A sua startup está em risco. Atualize os KPIs deste mês e verifique as ações pendentes.',
+    });
+  }
+  return t('aiPulse.fallback.generic', {
+    defaultValue: 'Mantenha os seus KPIs atualizados e reveja as ações pendentes regularmente.',
+  });
+}
 
 export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, className }: AiPulseCardProps) {
   const { t } = useTranslation();
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [isFallback, setIsFallback] = useState(false);
   const hasFired = useRef(false);
 
   const shouldTrigger = useCallback(() => {
-    // Only fire if health is dropping or there are overdue items
     const needsPulse = healthScore === 'at_risk' || healthScore === 'critical' || overdueCount >= 2;
     if (!needsPulse) return false;
 
-    // Check cooldown
     const lastFired = localStorage.getItem(`${PULSE_COOLDOWN_KEY}-${workspaceId}`);
     if (lastFired) {
       const elapsed = Date.now() - parseInt(lastFired, 10);
       if (elapsed < PULSE_COOLDOWN_MS) return false;
     }
 
-    // Check if dismissed this session
     const dismissedSession = sessionStorage.getItem(`${PULSE_DISMISSED_KEY}-${workspaceId}`);
     if (dismissedSession === 'true') return false;
 
@@ -49,10 +71,25 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
     hasFired.current = true;
 
     const fetchPulse = async () => {
+      // Pre-flight: if URL not configured, skip AI entirely
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        setSuggestion(getStaticTip(healthScore, overdueCount, t));
+        setIsFallback(true);
+        return;
+      }
+
       setLoading(true);
+      const abortController = new AbortController();
+      const timeout = setTimeout(() => abortController.abort(), PULSE_TIMEOUT_MS);
+
       try {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session?.access_token) return;
+        if (!session?.access_token) {
+          setSuggestion(getStaticTip(healthScore, overdueCount, t));
+          setIsFallback(true);
+          return;
+        }
 
         localStorage.setItem(`${PULSE_COOLDOWN_KEY}-${workspaceId}`, Date.now().toString());
 
@@ -61,7 +98,7 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
           : `My startup health is "${healthScore}". Give me 2-3 concise, actionable next steps to improve. Be direct, under 80 words.`;
 
         const resp = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/copilot-chat`,
+          `${supabaseUrl}/functions/v1/copilot-chat`,
           {
             method: 'POST',
             headers: {
@@ -72,11 +109,13 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
             body: JSON.stringify({
               messages: [{ role: 'user', content: prompt }],
             }),
+            signal: abortController.signal,
           }
         );
 
         if (!resp.ok || !resp.body) {
-          setSuggestion(null);
+          setSuggestion(getStaticTip(healthScore, overdueCount, t));
+          setIsFallback(true);
           return;
         }
 
@@ -108,20 +147,25 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
 
         if (result.trim()) {
           setSuggestion(result.trim());
+        } else {
+          setSuggestion(getStaticTip(healthScore, overdueCount, t));
+          setIsFallback(true);
         }
-      } catch (err) {
-        console.error('AI Pulse error:', err);
-        // Silently fail - don't show error for proactive suggestion
-        setSuggestion(null);
+      } catch (err: any) {
+        if (err?.name !== 'AbortError') {
+          console.warn('AI Pulse unavailable, using fallback.');
+        }
+        setSuggestion(getStaticTip(healthScore, overdueCount, t));
+        setIsFallback(true);
       } finally {
+        clearTimeout(timeout);
         setLoading(false);
       }
     };
 
-    // Debounce: 2 seconds after mount
     const timer = setTimeout(fetchPulse, 2000);
     return () => clearTimeout(timer);
-  }, [shouldTrigger, workspaceId, healthScore, overdueCount]);
+  }, [shouldTrigger, workspaceId, healthScore, overdueCount, t]);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -139,12 +183,18 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
       <CardContent className="relative p-4">
         <div className="flex items-start gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-            <Sparkles className="h-4 w-4 text-primary" />
+            {isFallback
+              ? <Lightbulb className="h-4 w-4 text-primary" />
+              : <Sparkles className="h-4 w-4 text-primary" />
+            }
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="text-xs font-semibold text-primary uppercase tracking-wide">
-                {t('aiPulse.title', { defaultValue: 'Sugestão IA' })}
+                {isFallback
+                  ? t('aiPulse.titleFallback', { defaultValue: 'Sugestão' })
+                  : t('aiPulse.title', { defaultValue: 'Sugestão IA' })
+                }
               </h4>
             </div>
             {loading ? (

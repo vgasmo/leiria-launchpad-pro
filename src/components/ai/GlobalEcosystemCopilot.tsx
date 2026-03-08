@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Send, Sparkles } from 'lucide-react';
+import { Bot, Send, Sparkles, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,6 +19,7 @@ interface Message {
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/copilot-chat`;
+const STREAM_TIMEOUT_MS = 20_000;
 
 export function GlobalEcosystemCopilot() {
   const { t } = useTranslation();
@@ -26,8 +27,12 @@ export function GlobalEcosystemCopilot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Pre-flight: check if backend URL is configured
+  const backendConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL);
 
   const suggestedPrompts = [
     t('copilot.promptOverdue', { defaultValue: 'Resumir tarefas em atraso' }),
@@ -51,15 +56,32 @@ export function GlobalEcosystemCopilot() {
     setInput('');
     setIsThinking(true);
 
-    // Abort any in-flight request
+    // If backend isn't configured, show a polished unavailable message
+    if (!backendConfigured) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: t('copilot.unavailable', {
+            defaultValue: 'O assistente IA não está disponível neste ambiente. Pode navegar pela plataforma usando o menu lateral e a barra de pesquisa.',
+          }),
+        },
+      ]);
+      setIsThinking(false);
+      setIsAvailable(false);
+      return;
+    }
+
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // Timeout race
+    const timeout = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
     let assistantSoFar = '';
 
     try {
-      // Get the user's actual session token
       const { data: { session } } = await supabaseClient.auth.getSession();
       const accessToken = session?.access_token;
       if (!accessToken) {
@@ -83,11 +105,8 @@ export function GlobalEcosystemCopilot() {
 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
-        const errMsg = errData.error || `Error ${resp.status}`;
         if (resp.status === 429) {
           toast.error(t('errors.rateLimitReached', { defaultValue: 'Rate limit reached. Please wait a few minutes.' }));
-        } else if (resp.status === 402) {
-          toast.error(t('errors.aiProcessingError', { defaultValue: 'Error processing with AI. Please try again.' }));
         } else {
           toast.error(t('errors.aiProcessingError', { defaultValue: 'Error processing with AI. Please try again.' }));
         }
@@ -164,31 +183,52 @@ export function GlobalEcosystemCopilot() {
             const parsed = JSON.parse(jsonStr);
             const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (delta) upsertAssistant(delta);
-          } catch {
-            /* ignore partial leftovers */
-          }
+          } catch { /* ignore */ }
         }
       }
 
-      // If we got no content at all, show a fallback
       if (!assistantSoFar) {
         setMessages(prev => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: "I'm here to help! Could you rephrase your question?",
+            content: t('copilot.emptyResponse', { defaultValue: 'Não consegui processar o pedido. Tente reformular a pergunta.' }),
           },
         ]);
       }
     } catch (err: any) {
-      if (err?.name === 'AbortError') return;
-      console.error('Copilot stream error:', err);
-      toast.error(t('errors.aiTryAgainLater', { defaultValue: 'Could not process your request. Please try again later.' }));
+      if (err?.name === 'AbortError') {
+        // Timeout or user abort
+        if (!assistantSoFar) {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: t('copilot.timeout', { defaultValue: 'O pedido excedeu o tempo limite. Tente novamente mais tarde.' }),
+            },
+          ]);
+        }
+        return;
+      }
+      console.warn('Copilot stream error:', err?.message);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: t('copilot.unavailable', {
+            defaultValue: 'O assistente IA não está disponível neste momento. Pode navegar pela plataforma usando o menu lateral e a barra de pesquisa.',
+          }),
+        },
+      ]);
+      setIsAvailable(false);
     } finally {
+      clearTimeout(timeout);
       setIsThinking(false);
     }
-  }, [input, isThinking, messages]);
+  }, [input, isThinking, messages, backendConfigured, t]);
 
   return (
     <>
@@ -225,9 +265,21 @@ export function GlobalEcosystemCopilot() {
                 <SheetTitle className="text-sm font-semibold">{t('copilot.title', { defaultValue: 'Copilot do Ecossistema' })}</SheetTitle>
                 <p className="text-[11px] text-muted-foreground">{t('copilot.subtitle', { defaultValue: 'Assistente com IA' })}</p>
               </div>
-              <Badge variant="secondary" className="text-[10px] gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-health-healthy animate-pulse" />
-                {t('copilot.online', { defaultValue: 'Online' })}
+              <Badge
+                variant="secondary"
+                className={cn('text-[10px] gap-1', !isAvailable && 'text-muted-foreground')}
+              >
+                {isAvailable ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-health-healthy animate-pulse" />
+                    {t('copilot.online', { defaultValue: 'Online' })}
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-2.5 w-2.5" />
+                    {t('copilot.offline', { defaultValue: 'Indisponível' })}
+                  </>
+                )}
               </Badge>
             </div>
           </SheetHeader>
@@ -243,7 +295,10 @@ export function GlobalEcosystemCopilot() {
                   {t('copilot.howCanIHelp', { defaultValue: 'Como posso ajudar?' })}
                 </h4>
                 <p className="text-xs text-muted-foreground max-w-[240px]">
-                  {t('copilot.askAnything', { defaultValue: 'Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.' })}
+                  {!isAvailable
+                    ? t('copilot.unavailableHint', { defaultValue: 'O assistente IA não está disponível neste ambiente.' })
+                    : t('copilot.askAnything', { defaultValue: 'Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.' })
+                  }
                 </p>
               </div>
             )}
@@ -300,11 +355,13 @@ export function GlobalEcosystemCopilot() {
                 <button
                   key={prompt}
                   onClick={() => handleSend(prompt)}
+                  disabled={!isAvailable}
                   className={cn(
                     'text-[11px] px-3 py-1.5 rounded-full border border-border/60',
                     'bg-card text-muted-foreground',
                     'hover:bg-primary/5 hover:text-foreground hover:border-primary/30',
-                    'transition-all duration-200'
+                    'transition-all duration-200',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
                   )}
                 >
                   {prompt}
@@ -325,14 +382,18 @@ export function GlobalEcosystemCopilot() {
               <Input
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder={t('copilot.inputPlaceholder', { defaultValue: 'Pergunte qualquer coisa...' })}
+                placeholder={
+                  isAvailable
+                    ? t('copilot.inputPlaceholder', { defaultValue: 'Pergunte qualquer coisa...' })
+                    : t('copilot.inputUnavailable', { defaultValue: 'Assistente indisponível' })
+                }
                 className="flex-1 h-9 text-sm rounded-xl bg-muted/40 border-border/40"
-                disabled={isThinking}
+                disabled={isThinking || !isAvailable}
               />
               <Button
                 type="submit"
                 size="sm"
-                disabled={!input.trim() || isThinking}
+                disabled={!input.trim() || isThinking || !isAvailable}
                 className="h-9 w-9 p-0 rounded-xl shrink-0"
               >
                 <Send className="h-4 w-4" />
