@@ -31,6 +31,7 @@ interface SessionPrepCardProps {
 export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps) {
   const { t } = useTranslation();
   const { data, isLoading } = useSessionPrep(sessionId, workspaceId);
+  const [showPrepSheet, setShowPrepSheet] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     kpis: true,
     actions: true,
