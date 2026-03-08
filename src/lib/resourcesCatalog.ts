@@ -300,7 +300,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Product Roadmap Template',
     desc_pt: 'Como priorizar funcionalidades, comunicar a visão e gerir expectativas internas e externas.',
     desc_en: 'How to prioritize features, communicate vision, and manage internal and external expectations.',
-    url: '/resources',
+    url: '/resources/guide/guide-product-roadmap',
     category: 'product',
     tags: ['roadmap', 'prioritization', 'planning'],
     stages: ['pre_seed', 'seed', 'scale'],
