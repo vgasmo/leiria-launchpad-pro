@@ -776,6 +776,8 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
     return () => clearInterval(id);
   }, [cooldownEnd]);
 
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+
   const handleGenerate = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (cooldownSec > 0) return;
@@ -788,7 +790,8 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
       setRecap(data as any);
       setCooldownEnd(Date.now() + 60000); // 60s cooldown
     } catch {
-      toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Could not generate briefing.' }));
+      toast.error(t('consultor.aiBriefing.error', { defaultValue: 'Briefing indisponível neste momento. Tente mais tarde.' }));
+      setAiUnavailable(true);
     } finally {
       setLoading(false);
     }

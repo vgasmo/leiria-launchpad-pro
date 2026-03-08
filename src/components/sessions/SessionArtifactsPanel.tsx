@@ -60,13 +60,16 @@ export function SessionArtifactsPanel({
 
   const hasContent = !!(sessionNotes || sessionAgenda || (transcripts && transcripts.length > 0));
 
+  const [aiError, setAiError] = useState(false);
+
   const handleGenerate = async () => {
+    setAiError(false);
     try {
       const result = await generateArtifacts.mutateAsync(sessionId);
       setGeneratedArtifacts(result.artifacts);
       setActionsCreated(result.actions_created);
-    } catch (error) {
-      // Error handled by mutation
+    } catch {
+      setAiError(true);
     }
   };
 
