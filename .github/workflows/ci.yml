@@ -258,6 +258,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ steps.supabase.outputs.api_url }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.service_role_key }}
+          SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.anon_key }}
 
       - name: Build app for E2E
         run: npm run build
