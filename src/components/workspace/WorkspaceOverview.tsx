@@ -103,6 +103,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
   const [activeSurveyId, setActiveSurveyId] = useState<string | null>(null);
+  const [showPrepSheet, setShowPrepSheet] = useState(false);
   const effectiveHealth = workspace.health_score_override || workspace.health_score;
   
   // Check if workspace is "empty" and should show onboarding prompt
