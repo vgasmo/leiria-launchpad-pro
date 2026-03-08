@@ -36,6 +36,7 @@ import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
+import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -116,6 +117,24 @@ export function FounderDashboard({
       <div className="space-y-6 max-w-5xl">
         <ContentSkeleton type="stats" count={3} />
       </div>
+    );
+  }
+
+  // LOCAL DETECTION: If the workspace exists but is not truly 'active',
+  // render the transitional dashboard instead of the full mature view.
+  // This is additive, read-only, does NOT change useWorkspaces or useFounderOnboardingState.
+  const wsStatus = (workspace as any).status as string | undefined;
+  const isTransitional = wsStatus && wsStatus !== 'active';
+
+  if (isTransitional) {
+    const transitionalStatus = (['claimed', 'pending', 'onboarding'].includes(wsStatus))
+      ? wsStatus as 'claimed' | 'pending' | 'onboarding'
+      : 'claimed'; // safe fallback for imported_unclaimed or other non-active states
+    return (
+      <TransitionalFounderDashboard
+        workspace={workspace}
+        workspaceStatus={transitionalStatus}
+      />
     );
   }
 
