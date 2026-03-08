@@ -213,8 +213,9 @@ export default function Documents() {
           ) : grouped.length === 0 ? (
             <EmptyState
               icon={FolderOpen}
-              title={t('documentsPage.emptyTitle', { defaultValue: 'Sem documentos' })}
-              description={t('documentsPage.emptyDescription', { defaultValue: 'Os documentos submetidos nos espaços de trabalho aparecerão aqui.' })}
+              title={t('documentsPage.emptyTitle', { defaultValue: 'Nenhum documento submetido' })}
+              description={t('documentsPage.emptyDescription', { defaultValue: 'Aqui são agregados os ficheiros enviados pelas startups (pitch decks, modelos financeiros, contratos, etc.). Quando as equipas submeterem documentos nos seus espaços de trabalho, aparecerão nesta vista.' })}
+              value={t('documentsPage.emptyHint', { defaultValue: 'Para templates e materiais de apoio, consulte o separador "Templates" acima ou a página de Recursos.' })}
             />
           ) : (
             <div className="space-y-6">
