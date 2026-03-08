@@ -106,7 +106,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     desc_pt: 'Ferramenta visual para mapear modelo de negócio: segmentos, proposta de valor, canais e receita.',
     desc_en: 'Visual tool to map business model: segments, value proposition, channels, and revenue.',
     url: 'https://www.strategyzer.com/library/the-business-model-canvas',
-    category: 'ideation',
+    category: 'product',
     tags: ['canvas', 'business-model', 'strategy'],
     stages: ['ideation', 'pre_seed'],
     roles: ['founder', 'mentor', 'staff'],
