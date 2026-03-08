@@ -67,6 +67,13 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
   }, [runTour, tourSteps]); // Re-check when tour starts
 
   useEffect(() => {
+    // Skip tour in E2E/test environments
+    const isE2E = typeof window !== 'undefined' && (
+      window.localStorage.getItem('e2e-test') === 'true' ||
+      new URLSearchParams(window.location.search).has('e2e')
+    );
+    if (isE2E) return;
+
     // Only run tour for logged-in users who haven't completed it
     if (user && run === undefined) {
       const hasCompletedTour = localStorage.getItem(`${TOUR_KEY}-${user.id}`);

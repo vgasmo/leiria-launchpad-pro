@@ -118,16 +118,26 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
       if (workspaceIds.length > 0) {
         const { data: wuData } = await supabase
           .from('workspace_users')
-          .select('workspace_id, user_id, profiles:user_id(full_name)')
+          .select('workspace_id, user_id')
           .in('workspace_id', workspaceIds)
           .eq('role', 'consultor')
           .eq('active', true);
 
+        // Fetch profile names separately since workspace_users has no FK to profiles
+        const consultorIds = [...new Set(wuData?.map(wu => wu.user_id) || [])];
+        let consultorNames: Record<string, string> = {};
+        if (consultorIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles_safe')
+            .select('id, full_name')
+            .in('id', consultorIds);
+          profiles?.forEach(p => { consultorNames[p.id] = p.full_name || 'Unknown'; });
+        }
+
         wuData?.forEach(wu => {
-          const profile = wu.profiles as unknown as { full_name: string | null };
           ownerMap[wu.workspace_id] = { 
             id: wu.user_id, 
-            name: profile?.full_name || 'Unknown' 
+            name: consultorNames[wu.user_id] || 'Unknown' 
           };
         });
       }
