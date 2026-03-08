@@ -178,8 +178,12 @@ export function CommandPalette() {
                 <div className="flex items-center gap-2">
                   <Bot className="h-4 w-4 text-violet-500" />
                   <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">Ecosystem Copilot</span>
+                  <Badge variant="outline" className="text-[9px] ml-auto">Preview</Badge>
                 </div>
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{copilotAnswer}</p>
+                <p className="text-[10px] text-muted-foreground italic">
+                  {t('commandPalette.copilotPreviewNote', { defaultValue: 'Modo informativo — dados ilustrativos.' })}
+                </p>
               </div>
             )}
             {!copilotThinking && !copilotAnswer && (
