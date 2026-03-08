@@ -1,0 +1,321 @@
+/**
+ * OpsActionPrompts — CRM-style suggested actions (read-only, no mutations).
+ * Computed from existing readable data. Local dismissal only.
+ */
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertTriangle, FileText, CheckCircle2, ArrowRight, Copy, X,
+  Send, ClipboardCheck, Link2Off, Zap, Eye, Building2, Package
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+
+interface ActionPrompt {
+  id: string;
+  type: 'missing_contract' | 'ready_activation' | 'review_addons' | 'missing_allocation_link' | 'pending_signature' | 'onboarding_no_contract';
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  description: string;
+  entityName: string;
+  workspaceId?: string;
+  contractId?: string;
+  actions: Array<{ label: string; icon: typeof FileText; onClick: () => void }>;
+}
+
+const DISMISSED_KEY = 'ops_dismissed_prompts';
+
+function getDismissed(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'));
+  } catch { return new Set(); }
+}
+
+function setDismissed(ids: Set<string>) {
+  localStorage.setItem(DISMISSED_KEY, JSON.stringify([...ids]));
+}
+
+const CONTRACT_EMAIL_TEMPLATE = `Assunto: Contrato de Incubação — Startup Leiria
+
+Estimado(a),
+
+Seguem em anexo os documentos relativos ao contrato de incubação.
+
+Por favor, reveja os termos e proceda à assinatura dentro de 5 dias úteis.
+
+Em caso de dúvidas, estamos disponíveis.
+
+Com os melhores cumprimentos,
+Equipa Startup Leiria`;
+
+const ACTIVATION_CHECKLIST = `✅ Checklist de Ativação:
+1. Contrato assinado e arquivado
+2. Espaço atribuído (sala/gabinete)
+3. Consultor designado
+4. Sessão de onboarding agendada
+5. Acesso à plataforma configurado
+6. Dados de faturação validados`;
+
+export function OpsActionPrompts() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [dismissed, setDismissedState] = useState<Set<string>>(getDismissed);
+
+  const { data: prompts, isLoading } = useQuery({
+    queryKey: ['ops-action-prompts'],
+    queryFn: async (): Promise<ActionPrompt[]> => {
+      const today = new Date().toISOString().split('T')[0];
+      const result: ActionPrompt[] = [];
+
+      // Fetch workspaces with status info
+      const { data: workspaces } = await supabase
+        .from('workspaces')
+        .select('id, status, startup_id, startups(name)')
+        .in('status', ['active', 'claimed', 'pending', 'onboarding']);
+
+      // Fetch all contracts
+      const { data: contracts } = await supabase
+        .from('startup_contracts')
+        .select('id, workspace_id, status, incubation_type:incubation_types(name)')
+        .in('status', ['active', 'draft', 'pending_signature']);
+
+      // Fetch allocations
+      const { data: allocations } = await supabase
+        .from('room_allocations')
+        .select('id, room_id, workspace_id')
+        .lte('start_date', today)
+        .or(`end_date.is.null,end_date.gte.${today}`);
+
+      const contractByWs = new Map<string, any>();
+      (contracts || []).forEach(c => {
+        if (c.workspace_id) contractByWs.set(c.workspace_id, c);
+      });
+
+      const allocByWs = new Map<string, any>();
+      (allocations || []).forEach(a => {
+        if (a.workspace_id) allocByWs.set(a.workspace_id, a);
+      });
+
+      (workspaces || []).forEach((ws: any) => {
+        const name = ws.startups?.name || 'Startup desconhecida';
+        const contract = contractByWs.get(ws.id);
+        const allocation = allocByWs.get(ws.id);
+
+        // Onboarding/pending without contract
+        if (['pending', 'onboarding'].includes(ws.status) && !contract) {
+          result.push({
+            id: `onboarding-no-contract-${ws.id}`,
+            type: 'onboarding_no_contract',
+            severity: 'warning',
+            title: 'Contrato por enviar',
+            description: `${name} está em ${ws.status === 'pending' ? 'estado pendente' : 'onboarding'} sem contrato registado.`,
+            entityName: name,
+            workspaceId: ws.id,
+            actions: [],
+          });
+        }
+
+        // Contract signed but workspace not active
+        if (contract?.status === 'active' && ws.status !== 'active') {
+          result.push({
+            id: `ready-activation-${ws.id}`,
+            type: 'ready_activation',
+            severity: 'info',
+            title: 'Pronto para ativação manual',
+            description: `${name} tem contrato ativo mas workspace em estado "${ws.status}".`,
+            entityName: name,
+            workspaceId: ws.id,
+            contractId: contract.id,
+            actions: [],
+          });
+        }
+
+        // Pending signature
+        if (contract?.status === 'pending_signature') {
+          result.push({
+            id: `pending-sig-${ws.id}`,
+            type: 'pending_signature',
+            severity: 'warning',
+            title: 'Aguarda assinatura',
+            description: `O contrato de ${name} está pendente de assinatura.`,
+            entityName: name,
+            workspaceId: ws.id,
+            contractId: contract.id,
+            actions: [],
+          });
+        }
+
+        // Active workspace without contract
+        if (ws.status === 'active' && !contract) {
+          result.push({
+            id: `active-no-contract-${ws.id}`,
+            type: 'missing_contract',
+            severity: 'critical',
+            title: 'Sem contrato',
+            description: `${name} tem workspace ativo sem contrato associado.`,
+            entityName: name,
+            workspaceId: ws.id,
+            actions: [],
+          });
+        }
+
+        // Allocation without clear workspace link
+        if (ws.status === 'active' && !allocation) {
+          result.push({
+            id: `no-allocation-${ws.id}`,
+            type: 'missing_allocation_link',
+            severity: 'info',
+            title: 'Sem espaço atribuído',
+            description: `${name} não tem sala/gabinete alocado.`,
+            entityName: name,
+            workspaceId: ws.id,
+            actions: [],
+          });
+        }
+      });
+
+      // Sort by severity
+      const order = { critical: 0, warning: 1, info: 2 };
+      result.sort((a, b) => order[a.severity] - order[b.severity]);
+
+      return result;
+    },
+    staleTime: 60_000,
+  });
+
+  const visiblePrompts = useMemo(() => {
+    if (!prompts) return [];
+    return prompts.filter(p => !dismissed.has(p.id));
+  }, [prompts, dismissed]);
+
+  const handleDismiss = (id: string) => {
+    const next = new Set(dismissed);
+    next.add(id);
+    setDismissedState(next);
+    setDismissed(next);
+  };
+
+  const handleCopyTemplate = () => {
+    navigator.clipboard.writeText(CONTRACT_EMAIL_TEMPLATE);
+    toast.success('Template de email copiado');
+  };
+
+  const handleCopyChecklist = () => {
+    navigator.clipboard.writeText(ACTIVATION_CHECKLIST);
+    toast.success('Checklist copiada');
+  };
+
+  if (isLoading) {
+    return <Skeleton className="h-[200px] rounded-xl" />;
+  }
+
+  if (visiblePrompts.length === 0) {
+    return (
+      <Card className="rounded-xl border-emerald-200 dark:border-emerald-900/40">
+        <CardContent className="py-6 flex items-center gap-3 justify-center">
+          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+          <span className="text-sm text-muted-foreground">
+            {t('ops.prompts.allClear', { defaultValue: 'Sem ações pendentes — tudo em ordem!' })}
+          </span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const severityColors = {
+    critical: 'border-red-300 bg-red-50/50 dark:border-red-900/50 dark:bg-red-950/20',
+    warning: 'border-amber-300 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20',
+    info: 'border-blue-200 bg-blue-50/30 dark:border-blue-900/50 dark:bg-blue-950/10',
+  };
+
+  const severityIcons = {
+    critical: <AlertTriangle className="h-4 w-4 text-red-500" />,
+    warning: <AlertTriangle className="h-4 w-4 text-amber-500" />,
+    info: <Zap className="h-4 w-4 text-blue-500" />,
+  };
+
+  return (
+    <Card className="rounded-xl">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Zap className="h-5 w-5 text-primary" />
+          {t('ops.prompts.title', { defaultValue: 'Ações Sugeridas' })}
+          <Badge variant="secondary" className="ml-auto">{visiblePrompts.length}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ScrollArea className="max-h-[400px]">
+          <div className="space-y-2 px-6 pb-4">
+            {visiblePrompts.map(prompt => (
+              <div
+                key={prompt.id}
+                className={cn(
+                  'rounded-lg border p-3 space-y-2 transition-colors',
+                  severityColors[prompt.severity]
+                )}
+              >
+                <div className="flex items-start gap-2">
+                  {severityIcons[prompt.severity]}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{prompt.title}</p>
+                    <p className="text-xs text-muted-foreground">{prompt.description}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 opacity-50 hover:opacity-100"
+                    onClick={() => handleDismiss(prompt.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {prompt.type === 'onboarding_no_contract' && (
+                    <>
+                      <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={handleCopyTemplate}>
+                        <Copy className="h-3 w-3" /> Copiar template email
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={handleCopyChecklist}>
+                        <ClipboardCheck className="h-3 w-3" /> Checklist contrato
+                      </Button>
+                    </>
+                  )}
+                  {prompt.type === 'ready_activation' && (
+                    <>
+                      <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={handleCopyChecklist}>
+                        <ClipboardCheck className="h-3 w-3" /> Checklist ativação
+                      </Button>
+                      {prompt.workspaceId && (
+                        <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={() => navigate(`/workspace/${prompt.workspaceId}`)}>
+                          <ArrowRight className="h-3 w-3" /> Abrir startup
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  {prompt.type === 'pending_signature' && (
+                    <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={handleCopyTemplate}>
+                      <Send className="h-3 w-3" /> Copiar lembrete
+                    </Button>
+                  )}
+                  {(prompt.type === 'missing_contract' || prompt.type === 'missing_allocation_link') && prompt.workspaceId && (
+                    <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={() => navigate(`/workspace/${prompt.workspaceId}`)}>
+                      <Eye className="h-3 w-3" /> Ver startup
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}

@@ -27,6 +27,7 @@ import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
 import { MentorDashboard } from '@/components/dashboard/MentorDashboard';
 import { FounderDashboard } from '@/components/dashboard/FounderDashboard';
 import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
+import { ClaimedWorkspaceBanner } from '@/components/founder/ClaimedWorkspaceBanner';
 import { WorkspaceFilters } from '@/components/workspace/WorkspaceFilters';
 import { WorkspaceTable } from '@/components/workspace/WorkspaceTable';
 import { WorkspacePagination } from '@/components/workspace/WorkspacePagination';
@@ -38,6 +39,7 @@ import { useRealtimeWorkspaces } from '@/hooks/useRealtimeWorkspaces';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 
 const PAGE_SIZE = 15;
 
@@ -48,6 +50,7 @@ export default function MyWorkspaces() {
   const { isConsultor, isMentor, isAdmin, roles } = useAuth();
   const isFounder = roles.includes('founder');
   const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
+  const founderState = useFounderOnboardingState();
   
   // Consultant view mode - assigned only by default (not for admins)
   const [showAssignedOnly, setShowAssignedOnly] = useState(isConsultor && !isAdmin);
@@ -315,6 +318,13 @@ export default function MyWorkspaces() {
     >
       <OnboardingTour />
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
+
+      {/* Claimed/Pending state banner for founders */}
+      {isFounder && !isConsultor && !isAdmin && founderState.status !== 'has_active_workspace' && founderState.status !== 'loading' && founderState.status !== 'not_founder' && founderState.status !== 'staff_exempt' && (
+        <div className="mb-4">
+          <ClaimedWorkspaceBanner founderState={founderState} />
+        </div>
+      )}
 
       {/* Role-Specific Dashboards */}
       {showAdminDashboard && (
