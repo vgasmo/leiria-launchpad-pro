@@ -209,7 +209,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Investor Update Template',
     desc_pt: 'Estrutura mensal para comunicar métricas, progressos, pedidos e próximos passos a investidores.',
     desc_en: 'Monthly structure to communicate metrics, progress, asks, and next steps to investors.',
-    url: '/resources',
+    url: '/resources/guide/guide-investor-update',
     category: 'fundraising',
     tags: ['investors', 'update', 'communication'],
     stages: ['seed', 'scale'],
