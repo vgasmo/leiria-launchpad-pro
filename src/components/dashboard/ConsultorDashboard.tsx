@@ -266,7 +266,7 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
       {/* SECTION 0: Work Queue - ALWAYS VISIBLE for triage cockpit */}
       <WorkQueuePanel compact={false} />
 
-      {/* SECTION 1: HERO - "Risco e Prioridades de Hoje" */}
+      {/* SECTION 1: HERO - "Risco e Prioridades de Hoje" — Daily Triage */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -275,6 +275,9 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
             </h2>
             <p className="text-sm text-muted-foreground">
               {t('consultor.hero.subtitle')}
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">
+              {t('consultor.hero.triageHint', { defaultValue: 'Triage diária — foque-se no que precisa de atenção hoje. Para gestão aprofundada, use o portefólio.' })}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -500,10 +503,12 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         </div>
       </Card>
 
-      {/* SECTION 3: Main Grid - Pipeline (Primary) + Agenda + Actions */}
-      {/* UX EMPHASIS: CRM Pipeline is NOW FIRST for consultants - their main operational view */}
+      {/* SECTION 3: Portfolio Management — Deeper operational view */}
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
+        {t('consultor.portfolioSection', { defaultValue: 'Gestão de Portefólio' })}
+      </p>
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Pipeline Snapshot - NOW PRIMARY for Consultants */}
+        {/* Pipeline Snapshot */}
         <Card className="rounded-2xl border-primary/20 bg-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
