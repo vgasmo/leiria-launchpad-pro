@@ -58,6 +58,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const [transcript, setTranscript] = useState(session.raw_transcript || '');
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [isFetchingTeams, setIsFetchingTeams] = useState(false);
+  const [aiError, setAiError] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     summary: true,
     decisions: true,
