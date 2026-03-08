@@ -103,14 +103,19 @@ export function TransitionalFounderDashboard({
               {statusConfig.description}
             </p>
 
-            <Badge
-              variant="secondary"
-              className={cn('mt-4 gap-1.5 text-xs', statusConfig.badgeClass)}
-            >
-              <Clock className="h-3 w-3" />
-              {statusConfig.badge}
-            </Badge>
-          </div>
+            <div className="flex items-center gap-2 mt-4">
+              <Badge
+                variant="secondary"
+                className={cn('gap-1.5 text-xs', statusConfig.badgeClass)}
+              >
+                <Clock className="h-3 w-3" />
+                {statusConfig.badge}
+              </Badge>
+              <Badge variant={contract.variant} className="gap-1.5 text-xs">
+                <FileText className="h-3 w-3" />
+                {contract.label}
+              </Badge>
+            </div>
         </CardContent>
       </Card>
 
