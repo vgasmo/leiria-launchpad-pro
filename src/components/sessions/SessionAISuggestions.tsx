@@ -28,6 +28,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<AISuggestions | null>(null);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
+  const [aiError, setAiError] = useState(false);
 
   const handleGenerate = async () => {
     if (!sessionNotes?.trim() || sessionNotes.length < 50) {
@@ -36,6 +37,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
     }
 
     setIsGenerating(true);
+    setAiError(false);
     try {
       const { data, error } = await supabase.functions.invoke('generate-session-suggestions', {
         body: { notes: sessionNotes, workspace_id: workspaceId },
@@ -45,6 +47,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
       setSuggestions(data);
     } catch (error: any) {
       console.error('Error generating suggestions:', error);
+      setAiError(true);
       toast.error(error.message || t('sessions.aiSuggestionsFailed'));
     } finally {
       setIsGenerating(false);
