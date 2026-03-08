@@ -117,6 +117,7 @@ export default function Resources() {
   }, [query, filterType, filterCategory, filterStage]);
 
   const isSearching = query.trim().length > 0;
+  const isFiltering = filterType !== 'all' || filterCategory !== '' || filterStage !== '';
 
   // FAQ search results
   const filteredFaqs = useMemo(() => {
