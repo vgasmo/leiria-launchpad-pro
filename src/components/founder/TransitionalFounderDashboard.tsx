@@ -44,14 +44,25 @@ const CHECKLIST_ITEMS = [
   { key: 'explore_resources', icon: FolderOpen, defaultLabel: 'Explorar recursos disponíveis' },
 ] as const;
 
+function getContractLabel(status: string | null | undefined, t: (k: string, o?: any) => string): { label: string; variant: 'default' | 'secondary' | 'outline' } {
+  switch (status) {
+    case 'active': return { label: t('founder.transitional.contractActive', { defaultValue: 'Contrato ativo' }), variant: 'default' };
+    case 'pending_signature': return { label: t('founder.transitional.contractPendingSig', { defaultValue: 'Aguarda assinatura' }), variant: 'secondary' };
+    case 'draft': return { label: t('founder.transitional.contractDraft', { defaultValue: 'Contrato em preparação' }), variant: 'outline' };
+    default: return { label: t('founder.transitional.contractNone', { defaultValue: 'Sem contrato' }), variant: 'outline' };
+  }
+}
+
 export function TransitionalFounderDashboard({
   workspace,
   workspaceStatus,
+  contractStatus,
 }: TransitionalFounderDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const statusConfig = getStatusConfig(workspaceStatus, t);
+  const contract = getContractLabel(contractStatus, t);
 
   return (
     <div className="space-y-6 max-w-3xl">
