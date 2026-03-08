@@ -261,7 +261,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'OKRs vs KPIs — When to Use Each',
     desc_pt: 'Diferenças práticas, exemplos concretos e como combinar ambos no dia-a-dia da startup.',
     desc_en: 'Practical differences, concrete examples, and how to combine both in daily startup life.',
-    url: '/resources',
+    url: '/resources/guide/guide-okrs-vs-kpis',
     category: 'metrics',
     tags: ['okrs', 'kpis', 'execution'],
     stages: ['ideation', 'pre_seed', 'seed', 'scale'],
