@@ -123,7 +123,7 @@ export function HealthScorePanel({
                 className="h-6 text-xs"
               >
                 <MessageSquare className="h-3 w-3 mr-1" />
-                {healthNotes ? 'Edit' : 'Add note'}
+                {healthNotes ? t('common.edit', 'Edit') : t('healthScore.addNote', 'Add note')}
               </Button>
             )}
           </div>
