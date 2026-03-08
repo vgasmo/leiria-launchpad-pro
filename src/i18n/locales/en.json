@@ -5765,5 +5765,29 @@
       "workflows": "Workflow Rules",
       "auditLog": "Audit Log"
     }
+  },
+  "founder": {
+    "claimed": {
+      "pendingTitle": "Application under review",
+      "pendingDesc": "Your application is being reviewed by the team. You'll be notified when it's approved.",
+      "pendingDescNamed": "Your application for \"{{name}}\" is being reviewed by the team. You'll be notified when it's approved.",
+      "awaitingReview": "Awaiting approval",
+      "claimTitle": "Association pending",
+      "claimDesc": "Your association request is being verified by the team. This may take 1-2 business days.",
+      "awaitingVerification": "Under verification",
+      "viewSettings": "View settings",
+      "getStartedTitle": "Welcome to the platform!",
+      "getStartedDesc": "To access your workspace, associate with an existing startup or create a new application.",
+      "claimCta": "Associate startup",
+      "nextSteps": "Next steps",
+      "nextStepsDesc": "While you wait, you can explore the platform and prepare documentation.",
+      "contactSupport": "Contact team"
+    }
+  },
+  "consultor": {
+    "prepSheet": {
+      "button": "Prep meeting",
+      "title": "First Contact Prep"
+    }
   }
 }
