@@ -289,6 +289,13 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* Prep Sheet Button — Consultant/Admin only */}
+              {(isConsultor || isAdmin) && (
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowPrepSheet(true)}>
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  {t('workspaceOverview.prepSheet', { defaultValue: 'Preparar Reunião' })}
+                </Button>
+              )}
               {/* Progress Report Button */}
               <ProgressReportView 
                 workspaceId={workspace.id} 
