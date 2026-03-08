@@ -32,8 +32,11 @@ export function CommandPalette() {
   const { isAdmin, isConsultor, isStaff, isMentor, isFounder } = useAuth();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [copilotMode, setCopilotMode] = useState(false);
+  const [copilotThinking, setCopilotThinking] = useState(false);
+  const [copilotAnswer, setCopilotAnswer] = useState<string | null>(null);
 
-  const { data: searchResults } = useGlobalSearch({ query });
+  const { data: searchResults } = useGlobalSearch({ query: copilotMode ? '' : query });
 
   // Keyboard shortcut
   useEffect(() => {
