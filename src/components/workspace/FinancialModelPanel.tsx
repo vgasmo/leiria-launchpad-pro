@@ -481,9 +481,17 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
 
                 <TabsContent value="insights" className="space-y-4">
                   {insights.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      {t('financialPanel.notEnoughData', { defaultValue: 'Not enough data to generate insights' })}
-                    </p>
+                    <div className="flex flex-col items-center text-center py-6">
+                      <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center mb-2">
+                        <Sparkles className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-0.5">
+                        {t('financialPanel.noInsightsTitle', { defaultValue: 'Sem insights disponíveis' })}
+                      </p>
+                      <p className="text-xs text-muted-foreground max-w-[260px]">
+                        {t('financialPanel.notEnoughData', { defaultValue: 'Carregue mais dados ou versões do modelo financeiro para gerar insights automáticos.' })}
+                      </p>
+                    </div>
                   ) : (
                     <>
                       <div className="space-y-2">

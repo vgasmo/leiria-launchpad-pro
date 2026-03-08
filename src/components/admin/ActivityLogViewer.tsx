@@ -67,9 +67,17 @@ export function ActivityLogViewer({ workspaceId, maxHeight = '400px' }: Activity
       <CardContent>
         <ScrollArea style={{ maxHeight }}>
           {!activities?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No activity recorded yet
-            </p>
+            <div className="flex flex-col items-center text-center py-8">
+              <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center mb-2">
+                <Activity className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-0.5">
+                Sem atividade registada
+              </p>
+              <p className="text-xs text-muted-foreground max-w-[240px]">
+                As ações realizadas neste contexto serão registadas aqui automaticamente.
+              </p>
+            </div>
           ) : (
             <div className="space-y-4">
               {activities.map((activity) => (

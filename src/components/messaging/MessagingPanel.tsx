@@ -119,7 +119,15 @@ export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelPro
               {loadingConvs ? (
                 <div className="p-4 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}</div>
               ) : !conversations?.length ? (
-                <p className="text-center text-muted-foreground py-8">No conversations yet</p>
+                <div className="flex flex-col items-center text-center py-10 px-4">
+                  <div className="h-12 w-12 rounded-full bg-muted/60 flex items-center justify-center mb-3">
+                    <MessageCircle className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground mb-1">Sem conversas</p>
+                  <p className="text-xs text-muted-foreground max-w-[220px]">
+                    Inicie uma conversa com alguém do ecossistema usando o botão acima.
+                  </p>
+                </div>
               ) : (
                 <div className="p-2 space-y-1">
                   {conversations.map(conv => (
