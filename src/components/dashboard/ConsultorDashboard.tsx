@@ -42,6 +42,7 @@ import {
 
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
+import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 
 interface ConsultorDashboardProps {
   workspaces: WorkspaceWithDetails[];
