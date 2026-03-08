@@ -54,7 +54,29 @@ export function CommandPalette() {
     navigate(path);
     setOpen(false);
     setQuery('');
+    setCopilotMode(false);
+    setCopilotAnswer(null);
   }, [navigate]);
+
+  // Copilot: simulate AI response
+  const handleCopilotSubmit = useCallback(async () => {
+    if (!query.trim()) return;
+    setCopilotThinking(true);
+    setCopilotAnswer(null);
+    await new Promise(r => setTimeout(r, 2200));
+    // Mock smart answers based on keywords
+    const q = query.toLowerCase();
+    let answer = `Based on ecosystem data: Your portfolio has 12 active startups. 2 are flagged "at risk" due to late KPI submissions. 3 contracts expire within 30 days. Recommend scheduling check-ins with at-risk startups this week.`;
+    if (q.includes('risk') || q.includes('risco')) {
+      answer = `🔴 2 startups are flagged At Risk:\n• "TechNova" — missed last 2 KPI submissions, no session in 45 days\n• "GreenFlow" — burn rate increased 40%, runway < 3 months\n\nRecommended: Schedule urgent check-ins and review financial models.`;
+    } else if (q.includes('kpi') || q.includes('metric')) {
+      answer = `📊 KPI Health Summary:\n• 78% of startups submitted KPIs this month\n• Top improving: "DataPulse" (+23% MRR)\n• Declining: "CloudBase" (-15% NPS)\n• 3 startups have never submitted KPIs — consider automated reminders.`;
+    } else if (q.includes('session') || q.includes('sessão')) {
+      answer = `📅 Session Insights:\n• 8 sessions scheduled this week\n• Average session frequency: 1.2 per startup/month\n• 4 startups haven't had a session in 30+ days\n• Next overdue: "HealthTech AI" (last session: 38 days ago)`;
+    }
+    setCopilotAnswer(answer);
+    setCopilotThinking(false);
+  }, [query]);
 
   // Extract workspace ID from current path
   const workspaceMatch = location.pathname.match(/\/workspace\/([a-f0-9-]+)/);
