@@ -111,10 +111,13 @@ export function TransitionalFounderDashboard({
                 <Clock className="h-3 w-3" />
                 {statusConfig.badge}
               </Badge>
-              <Badge variant={contract.variant} className="gap-1.5 text-xs">
-                <FileText className="h-3 w-3" />
-                {contract.label}
-              </Badge>
+              {/* Only render contract badge when real data is provided — avoid misleading fallback */}
+              {contractStatus && (
+                <Badge variant={contract.variant} className="gap-1.5 text-xs">
+                  <FileText className="h-3 w-3" />
+                  {contract.label}
+                </Badge>
+              )}
             </div>
           </div>
         </CardContent>
