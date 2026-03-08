@@ -14,8 +14,7 @@ export type ResourceCategory =
   | 'ops'
   | 'team'
   | 'privacy'
-  | 'metrics'
-  | 'ideation';
+  | 'metrics';
 
 export type ResourceItem = {
   id: string;
