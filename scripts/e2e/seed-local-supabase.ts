@@ -396,6 +396,55 @@ async function validateFounderPersona() {
     process.exit(1);
   }
 
+  // 8. RLS-aware validation: sign in as the founder and run the exact hook query
+  console.log('\n  🔒 RLS-aware validation (signing in as founder)...');
+  const ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  if (ANON_KEY) {
+    const founderClient = createClient(SUPABASE_URL, ANON_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data: signInData, error: signInErr } = await founderClient.auth.signInWithPassword({
+      email: founderEmail,
+      password: TEST_PASSWORD,
+    });
+    if (signInErr || !signInData?.user) {
+      console.error('  ✗ RLS VALIDATION: Cannot sign in as founder:', signInErr?.message);
+      process.exit(1);
+    }
+    console.log(`  ✓ Signed in as ${founderEmail}`);
+
+    // Run the exact query from useFounderOnboardingState
+    const { data: rlsResult, error: rlsErr } = await founderClient
+      .from('workspace_users')
+      .select('workspace_id, workspaces!inner(id, status, startup_id, startups(name))')
+      .eq('user_id', signInData.user.id)
+      .eq('active', true)
+      .eq('role', 'founder')
+      .limit(5);
+
+    if (rlsErr) {
+      console.error('  ✗ RLS VALIDATION: Hook query failed through RLS:', rlsErr.message);
+      process.exit(1);
+    }
+    if (!rlsResult || rlsResult.length === 0) {
+      console.error('  ✗ RLS VALIDATION: Hook query returned 0 rows through RLS!');
+      console.error('    Data exists (service role sees it) but RLS blocks the founder.');
+      console.error('    Fix: Check workspace_users SELECT policy and workspaces SELECT policy.');
+      process.exit(1);
+    }
+    const rlsWs = (rlsResult[0] as any).workspaces;
+    if (rlsWs?.status === 'active' || rlsWs?.status === 'claimed') {
+      console.log(`  ✓ RLS query returns workspace status='${rlsWs.status}' — CONFIRMED: founder will bypass gate`);
+    } else {
+      console.error(`  ✗ RLS VALIDATION: Query returns status='${rlsWs?.status}' through RLS`);
+      process.exit(1);
+    }
+
+    await founderClient.auth.signOut();
+  } else {
+    console.warn('  ⚠ Skipping RLS validation: SUPABASE_ANON_KEY not available');
+  }
+
   console.log('  ✅ All founder persona validations passed\n');
 }
 
