@@ -33,16 +33,18 @@ export function TemplateCoachPanel({
   const createActions = useCreateActionsFromAI(workspaceId);
   const [feedback, setFeedback] = useState<AICoachFeedback | null>(null);
   const [isOpen, setIsOpen] = useState(true);
+  const [aiError, setAiError] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['summary', 'actions']));
 
   const handleGenerate = async () => {
+    setAiError(false);
     try {
       const result = await generateCoach.mutateAsync({ templateInstanceId: instanceId });
       if (result.feedback) {
         setFeedback(result.feedback);
       }
     } catch {
-      // Error handled by mutation
+      setAiError(true);
     }
   };
 
