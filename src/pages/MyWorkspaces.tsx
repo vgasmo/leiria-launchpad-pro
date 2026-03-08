@@ -320,10 +320,25 @@ export default function MyWorkspaces() {
       <CreateStartupDialog open={showCreateStartup} onOpenChange={setShowCreateStartup} />
 
       {/* Claimed/Pending state banner for founders */}
-      {isFounder && !isConsultor && !isAdmin && founderState.status !== 'has_active_workspace' && founderState.status !== 'loading' && founderState.status !== 'not_founder' && founderState.status !== 'staff_exempt' && (
-        <div className="mb-4">
-          <ClaimedWorkspaceBanner founderState={founderState} />
-        </div>
+      {isFounder && !isConsultor && !isAdmin && founderState.status !== 'loading' && founderState.status !== 'not_founder' && founderState.status !== 'staff_exempt' && (
+        (() => {
+          // LOCAL detection: even if founderState says "has_active_workspace",
+          // check if the actual workspace is "claimed" (not truly active yet).
+          const hasClaimedOnly = founderState.status === 'has_active_workspace' &&
+            workspaces && workspaces.length > 0 &&
+            workspaces.every(w => (w as any).status === 'claimed');
+          const showBanner = founderState.status !== 'has_active_workspace' || hasClaimedOnly;
+          if (!showBanner) return null;
+          return (
+            <div className="mb-4">
+              {hasClaimedOnly ? (
+                <ClaimedWorkspaceBanner founderState={{ ...founderState, status: 'has_pending_workspace', startupName: workspaces[0]?.startup?.name || founderState.startupName }} />
+              ) : (
+                <ClaimedWorkspaceBanner founderState={founderState} />
+              )}
+            </div>
+          );
+        })()
       )}
 
       {/* Role-Specific Dashboards */}
