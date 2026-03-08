@@ -33,16 +33,18 @@ export function TemplateCoachPanel({
   const createActions = useCreateActionsFromAI(workspaceId);
   const [feedback, setFeedback] = useState<AICoachFeedback | null>(null);
   const [isOpen, setIsOpen] = useState(true);
+  const [aiError, setAiError] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['summary', 'actions']));
 
   const handleGenerate = async () => {
+    setAiError(false);
     try {
       const result = await generateCoach.mutateAsync({ templateInstanceId: instanceId });
       if (result.feedback) {
         setFeedback(result.feedback);
       }
     } catch {
-      // Error handled by mutation
+      setAiError(true);
     }
   };
 
@@ -163,6 +165,19 @@ export function TemplateCoachPanel({
     const owner = t(`templates.ownerHint.${ownerHint}`, { defaultValue: ownerHint });
     return t('templates.dueAndOwner', { days, owner, defaultValue: '{{days}} • {{owner}}' });
   };
+
+  // Error state - friendly fallback
+  if (aiError && !feedback && !generateCoach.isPending) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/40 text-xs text-muted-foreground">
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+        <span>{t('templates.aiCoachUnavailable', 'AI Coach is temporarily unavailable.')}</span>
+        <Button variant="ghost" size="sm" onClick={handleGenerate} className="h-6 text-xs ml-auto">
+          {t('common.retry', 'Retry')}
+        </Button>
+      </div>
+    );
+  }
 
   // Initial state - compact button
   if (!feedback && !generateCoach.isPending) {

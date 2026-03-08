@@ -58,6 +58,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
   const [transcript, setTranscript] = useState(session.raw_transcript || '');
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [isFetchingTeams, setIsFetchingTeams] = useState(false);
+  const [aiError, setAiError] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     summary: true,
     decisions: true,
@@ -91,6 +92,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       toast.error(t('errors.rateLimitReached'));
       return;
     }
+    setAiError(false);
     try {
       await generateMutation.mutateAsync({ 
         sessionId, 
@@ -98,7 +100,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
       });
       onRefresh?.();
     } catch {
-      // Error already handled by mutation onError
+      setAiError(true);
     }
   };
 
@@ -223,9 +225,11 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
               </Button>
             </div>
             <CardDescription>
-              {hasAIOutputs 
-                ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
-                : 'Generate AI summary, action items, and insights from meeting notes or transcript'
+              {aiError
+                ? t('sessions.aiTemporarilyUnavailable', 'AI assistance is temporarily resting. Please try again in a few moments.')
+                : hasAIOutputs 
+                  ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
+                  : 'Generate AI summary, action items, and insights from meeting notes or transcript'
               }
             </CardDescription>
           </CardHeader>
