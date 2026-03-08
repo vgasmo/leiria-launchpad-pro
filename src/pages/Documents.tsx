@@ -305,7 +305,7 @@ export default function Documents() {
             <EmptyState
               icon={BookTemplate}
               title={t('documentsPage.noTemplates', { defaultValue: 'Sem templates disponíveis' })}
-              description={t('documentsPage.noTemplatesDesc', { defaultValue: 'Ainda não existem templates configurados.' })}
+              description={t('documentsPage.noTemplatesDesc', { defaultValue: 'Os templates são modelos reutilizáveis (canvas, checklists, pitch structures) configurados pela equipa do programa. Quando estiverem disponíveis, aparecerão aqui.' })}
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

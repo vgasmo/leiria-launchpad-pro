@@ -273,7 +273,12 @@ export default function Resources() {
               )}
               {/* Empty state */}
               {(!searchGroups || Object.keys(searchGroups).length === 0) && filteredFaqs.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
+                <div className="text-center py-8 space-y-1">
+                  <p className="text-sm text-muted-foreground">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
+                  <p className="text-xs text-muted-foreground/70">
+                    {t('resources.noResultsHint', { defaultValue: 'Experimente termos diferentes ou consulte o Glossário & FAQ para definições.' })}
+                  </p>
+                </div>
               )}
             </div>
           ) : isFiltering ? (
