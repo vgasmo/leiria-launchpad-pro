@@ -4,13 +4,15 @@ import { useTranslation } from 'react-i18next';
 import {
   Search, FileText, ListTodo, StickyNote, File, Target, MessageSquare,
   Calendar, CheckSquare, BarChart3, Users, Building2, Settings, Home,
-  Briefcase, ArrowRight, Command as CommandIcon
+  Briefcase, ArrowRight, Command as CommandIcon, Sparkles, Bot, Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   CommandDialog, CommandInput, CommandList, CommandEmpty,
   CommandGroup, CommandItem, CommandSeparator
 } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
 import { useAuth } from '@/contexts/AuthContext';
 
