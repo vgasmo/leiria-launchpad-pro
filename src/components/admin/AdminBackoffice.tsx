@@ -30,6 +30,8 @@ import { BackofficeDashboard } from '@/components/backoffice/BackofficeDashboard
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
 import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
+import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
+import { OpsActionPrompts } from '@/components/backoffice/OpsActionPrompts';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
