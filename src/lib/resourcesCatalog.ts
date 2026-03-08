@@ -326,7 +326,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Privacy & Compliance for Startups (basics)',
     desc_pt: 'Primeiros passos em RGPD, política de privacidade, consentimento e segurança de dados para early-stage.',
     desc_en: 'First steps in GDPR, privacy policy, consent, and data security for early-stage startups.',
-    url: '/resources',
+    url: '/resources/guide/guide-privacy-startups',
     category: 'privacy',
     tags: ['gdpr', 'privacy', 'compliance'],
     stages: ['ideation', 'pre_seed', 'seed', 'scale'],
