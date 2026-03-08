@@ -117,6 +117,7 @@ export default function Resources() {
   }, [query, filterType, filterCategory, filterStage]);
 
   const isSearching = query.trim().length > 0;
+  const isFiltering = filterType !== 'all' || filterCategory !== '' || filterStage !== '';
 
   // FAQ search results
   const filteredFaqs = useMemo(() => {
@@ -218,7 +219,7 @@ export default function Resources() {
             ))}
             {hasFilters && (
               <Button variant="ghost" size="sm" className="text-xs h-6" onClick={() => { setFilterType('all'); setFilterCategory(''); setFilterStage(''); }}>
-                {t('filters.clearAll', { defaultValue: 'Limpar' })}
+                {t('filters.clearAll', { defaultValue: 'Limpar Todos os Filtros' })}
               </Button>
             )}
           </div>
@@ -264,6 +265,21 @@ export default function Resources() {
               )}
               {/* Empty state */}
               {(!searchGroups || Object.keys(searchGroups).length === 0) && filteredFaqs.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
+              )}
+            </div>
+          ) : isFiltering ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {lang === 'pt'
+                  ? `${filtered.length} recurso${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}`
+                  : `${filtered.length} resource${filtered.length !== 1 ? 's' : ''} found`}
+              </p>
+              {filtered.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {filtered.map(r => <ResourceCard key={r.id} r={r} favs={favs} onToggleFav={handleToggleFav} lang={lang} />)}
+                </div>
+              ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">{t('common.noResults', { defaultValue: 'Nenhum resultado encontrado' })}</p>
               )}
             </div>
