@@ -116,6 +116,7 @@ export function TransitionalFounderDashboard({
                 {contract.label}
               </Badge>
             </div>
+          </div>
         </CardContent>
       </Card>
 
