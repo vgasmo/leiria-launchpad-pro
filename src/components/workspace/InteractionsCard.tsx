@@ -98,9 +98,17 @@ export function InteractionsCard({ workspaceId, onViewAll }: InteractionsCardPro
                 <Skeleton className="h-12 w-full" />
               </div>
             ) : activities?.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t('crm.noInteractionsYet')}
-              </p>
+              <div className="flex flex-col items-center text-center py-6">
+                <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center mb-2">
+                  <MessageCircle className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-0.5">
+                  {t('crm.noInteractionsYet', { defaultValue: 'Sem interações registadas' })}
+                </p>
+                <p className="text-xs text-muted-foreground max-w-[220px]">
+                  {t('crm.noInteractionsHint', { defaultValue: 'As interações serão registadas aqui à medida que a relação evolui.' })}
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {activities?.slice(0, 3).map((activity) => (
