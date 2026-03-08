@@ -80,10 +80,22 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
             </Badge>
           )}
         </div>
-        <CardDescription>
-          {t('sessionPrep.context')}
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <CardDescription>
+            {t('sessionPrep.context')}
+          </CardDescription>
+          <SmartPrepButton onClick={() => setShowPrepSheet(true)} />
+        </div>
       </CardHeader>
+
+      {/* AI Prep Sheet Slide-over */}
+      <SmartPrepSheet
+        open={showPrepSheet}
+        onOpenChange={setShowPrepSheet}
+        workspaceName={data.workspaceName}
+        stage={data.workspaceStage}
+        health={data.healthScore}
+      />
       
       <CardContent className="space-y-4">
         {/* Tags */}
