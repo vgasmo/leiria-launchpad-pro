@@ -958,11 +958,11 @@ function KpiCard({
 
         {effectiveCanEdit ? (
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Notes (optional)</Label>
+            <Label className="text-xs text-muted-foreground">{t('kpis.notesOptional', 'Notes (optional)')}</Label>
             <Textarea
               value={displayNotes}
               onChange={e => onValueChange('notes', e.target.value)}
-              placeholder="Add context..."
+              placeholder={t('kpis.addContext', 'Add context...')}
               rows={2}
               className="text-sm"
             />
