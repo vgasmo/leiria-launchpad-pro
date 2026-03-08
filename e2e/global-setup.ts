@@ -59,6 +59,9 @@ async function loginAndSave(
     // Wait a bit for auth state to settle
     await page.waitForTimeout(2_000);
 
+    // Mark as E2E environment to disable onboarding tour (Joyride)
+    await page.evaluate(() => localStorage.setItem('e2e-test', 'true'));
+
     // Save storage state
     const statePath = path.join(storageDir, `${role}.json`);
     await context.storageState({ path: statePath });
