@@ -3065,6 +3065,12 @@
     "required": "Obrigatório",
     "selectKpi": "Selecionar KPI",
     "skipImport": "Ignorar",
+    "stripe": {
+      "activeCustomers": "Clientes Ativos",
+      "monthlyRevenue": "Receita Mensal",
+      "mrr": "Receita Recorrente Mensal",
+      "totalCustomers": "Total de Clientes"
+    },
     "target": "Meta",
     "title": "KPIs",
     "trend": "Tendência",
