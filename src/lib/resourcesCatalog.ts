@@ -313,7 +313,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Fundraising Readiness Checklist',
     desc_pt: 'O que ter pronto antes de iniciar uma ronda: métricas, deck, dataroom, narrativa e referências.',
     desc_en: 'What to have ready before starting a round: metrics, deck, dataroom, narrative, and references.',
-    url: '/resources',
+    url: '/resources/guide/guide-fundraising-readiness',
     category: 'fundraising',
     tags: ['fundraising', 'readiness', 'checklist'],
     stages: ['pre_seed', 'seed', 'scale'],
