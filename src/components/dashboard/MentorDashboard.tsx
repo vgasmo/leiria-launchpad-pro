@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -13,6 +13,9 @@ import {
   Heart,
   Sparkles,
   Star,
+  ClipboardList,
+  Target,
+  BarChart3,
 } from 'lucide-react';
 import { format, formatDistanceToNow, isToday } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CalendarWidget } from '@/components/dashboard/CalendarWidget';
 import { MentorNextSessionPrep } from '@/components/dashboard/MentorNextSessionPrep';
+import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { cn } from '@/lib/utils';
@@ -36,6 +40,7 @@ interface MentorDashboardProps {
 export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoading }: MentorDashboardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
 
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
@@ -121,7 +126,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
             {t('mentor.welcomeTitle', 'Bem-vindo ao Painel de Mentor')}
           </h3>
           <p className="text-muted-foreground mb-2 max-w-md mx-auto">
-            {t('mentor.noStartupsAssignedDesc', 'Ainda não tens startups atribuídas. Verifica os pedidos de conexão ou aguarda que te sejam atribuídas startups.')}
+            {t('mentor.noStartupsAssignedDesc', 'Ainda não tens startups atribuídas. Quando a equipa do programa te associar a startups, elas aparecerão aqui com toda a informação para preparares as tuas sessões.')}
           </p>
           <p className="text-sm text-primary/70 mb-6 max-w-sm mx-auto flex items-center justify-center gap-1.5">
             <Sparkles className="h-4 w-4" />
@@ -130,12 +135,15 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button onClick={() => navigate('/mentors')} className="gap-2 shadow-md">
               <Users className="h-4 w-4" />
-              {t('mentor.viewConnectionRequests', 'Ver Pedidos de Conexão')}
+              {t('mentor.viewConnectionRequests', 'Ver Conexões & Recursos')}
             </Button>
             <Button variant="outline" onClick={() => navigate('/settings')}>
               {t('mentor.updateAvailability', 'Atualizar Disponibilidade')}
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground mt-6 max-w-sm mx-auto">
+            {t('mentor.emptyHint', 'Enquanto espera, pode consultar o Guia Rápido na barra lateral para se familiarizar com a plataforma.')}
+          </p>
         </CardContent>
       </Card>
     );
@@ -155,8 +163,8 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                 <FileText className="h-4 w-4 text-amber-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold">{t('mentor.postSession.title', { defaultValue: 'Log your session notes' })}</p>
-                <p className="text-xs text-muted-foreground">{t('mentor.postSession.subtitle', { defaultValue: 'You have recent sessions without notes — log them while fresh.' })}</p>
+                <p className="text-sm font-semibold">{t('mentor.postSession.title', { defaultValue: 'Regista as notas da sessão' })}</p>
+                <p className="text-xs text-muted-foreground">{t('mentor.postSession.subtitle', { defaultValue: 'Tens sessões recentes sem notas — regista enquanto está fresco.' })}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -212,7 +220,12 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
+            <div>
+              <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
+              <p className="text-xs text-muted-foreground">
+                {t('mentor.myStartupsHint', { defaultValue: 'Startups que acompanha. Use "Preparar Reunião" para contexto rápido antes de cada sessão.' })}
+              </p>
+            </div>
             <Button variant="ghost" size="sm" onClick={() => navigate('/mentors')} className="gap-1 text-xs text-muted-foreground hover:text-foreground">
               {t('mentor.manageConnections')}
               <ArrowRight className="h-3 w-3" />
@@ -248,18 +261,48 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                           <h3 className="font-semibold truncate group-hover:text-primary transition-colors">{workspace.startup?.name}</h3>
                           <HealthBadge score={health as HealthScore | null} size="sm" />
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                           <StageBadge stage={workspace.stage} size="sm" />
-                          {workspace.lastSession && (
+                          {workspace.lastSession ? (
                             <span className="flex items-center gap-1">
                               <FileText className="h-3 w-3" />
                               {t('mentor.lastSession', 'Última sessão')}: {formatDistanceToNow(new Date(workspace.lastSession.scheduled_at), { addSuffix: true })}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 text-muted-foreground/50 italic">
+                              <FileText className="h-3 w-3" />
+                              {t('mentor.noSessionsYet', { defaultValue: 'Sem sessões registadas' })}
+                            </span>
+                          )}
+                        </div>
+                        {/* Compact summary cues */}
+                        <div className="flex items-center gap-2.5 mt-1.5 text-[11px] text-muted-foreground">
+                          {workspace.hasCurrentMonthKpi ? (
+                            <span className="flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400">
+                              <BarChart3 className="h-3 w-3" />
+                              {t('mentor.kpiUpToDate', { defaultValue: 'KPIs atualizados' })}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-0.5">
+                              <BarChart3 className="h-3 w-3" />
+                              {t('mentor.kpiMissing', { defaultValue: 'KPIs por atualizar' })}
+                            </span>
+                          )}
+                          {workspace.pendingActionsCount > 0 && (
+                            <span className="flex items-center gap-0.5">
+                              <Target className="h-3 w-3" />
+                              {workspace.pendingActionsCount} {t('mentor.actionsPending', { defaultValue: 'ações' })}
+                              {workspace.overdueActionsCount > 0 && (
+                                <span className="text-destructive font-medium ml-0.5">
+                                  ({workspace.overdueActionsCount} {t('common.overdue', 'atrasadas')})
+                                </span>
+                              )}
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="text-right shrink-0">
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {workspace.nextMeetingDate ? (
                           <div className={hasUpcomingMeeting ? 'text-primary' : 'text-muted-foreground'}>
                             <div className="flex items-center gap-1.5 text-xs font-medium">
@@ -288,22 +331,21 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                             {t('mentor.scheduleSession', 'Agendar')}
                           </Button>
                         )}
+                        {/* Prep Sheet button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[11px] h-6 px-2 gap-1 opacity-50 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPrepSheetWorkspaceId(workspace.id);
+                          }}
+                        >
+                          <ClipboardList className="h-3 w-3" />
+                          {t('mentor.prepSheet', { defaultValue: 'Preparar' })}
+                        </Button>
                       </div>
                     </div>
-
-                    {workspace.pendingActionsCount > 0 && (
-                      <div className="mt-3 pt-3 border-t flex items-center gap-2 text-xs">
-                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">
-                          {workspace.pendingActionsCount} {t('mentor.pendingActionsCount', 'ações pendentes')}
-                        </span>
-                        {workspace.overdueActionsCount > 0 && (
-                          <Badge variant="outline" className="text-[10px] border-destructive/50 text-destructive">
-                            {workspace.overdueActionsCount} {t('common.overdue', 'atrasadas')}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -342,6 +384,15 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           </Card>
         </div>
       </div>
+
+      {/* Prep Sheet Dialog */}
+      {prepSheetWorkspaceId && (
+        <FirstContactPrepSheet
+          open={!!prepSheetWorkspaceId}
+          onOpenChange={(open) => { if (!open) setPrepSheetWorkspaceId(null); }}
+          workspaceId={prepSheetWorkspaceId}
+        />
+      )}
     </div>
   );
 });
