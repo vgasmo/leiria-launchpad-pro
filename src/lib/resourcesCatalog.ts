@@ -196,7 +196,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'CAC/LTV Cheat Sheet',
     desc_pt: 'Fórmulas, benchmarks e boas práticas para medir custo de aquisição e valor ao longo do tempo.',
     desc_en: 'Formulas, benchmarks, and best practices to measure acquisition cost and lifetime value.',
-    url: '/resources',
+    url: '/resources/guide/guide-cac-ltv',
     category: 'metrics',
     tags: ['cac', 'ltv', 'unit-economics'],
     stages: ['pre_seed', 'seed', 'scale'],
