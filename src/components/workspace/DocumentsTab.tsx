@@ -610,7 +610,6 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8"
                                       onClick={() => handleDelete(doc)}
                                       disabled={deleteMutation.isPending}
                                       className="text-destructive hover:text-destructive h-8 w-8"
