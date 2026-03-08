@@ -367,7 +367,11 @@ export function AdminBackoffice() {
           {/* Separador visual */}
           <div className="w-px h-6 bg-border mx-1 self-center" />
 
-          {/* Grupo 3: Infraestrutura & Ocupação (consolidado) */}
+          {/* Grupo 3: Operações & Infraestrutura */}
+          <TabsTrigger value="operations" className="gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {t('admin.backoffice.operations', { defaultValue: 'Consola Operações' })}
+          </TabsTrigger>
           <TabsTrigger value="infrastructure" className="gap-1.5">
             <Building2 className="h-4 w-4" />
             {t('admin.backoffice.infrastructure', { defaultValue: 'Infraestrutura' })}
