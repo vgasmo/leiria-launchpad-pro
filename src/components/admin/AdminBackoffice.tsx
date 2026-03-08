@@ -378,9 +378,12 @@ export function AdminBackoffice() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Dashboard Tab - KPIs, Alerts, Anniversaries */}
+        {/* Dashboard Tab - KPIs, Alerts, Anniversaries + Action Prompts */}
         <TabsContent value="dashboard">
-          <BackofficeDashboard />
+          <div className="space-y-6">
+            <OpsActionPrompts />
+            <BackofficeDashboard />
+          </div>
         </TabsContent>
 
         {/* Overview Tab - Original Backoffice Content */}
