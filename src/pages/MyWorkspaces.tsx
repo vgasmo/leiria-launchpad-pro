@@ -27,6 +27,7 @@ import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
 import { MentorDashboard } from '@/components/dashboard/MentorDashboard';
 import { FounderDashboard } from '@/components/dashboard/FounderDashboard';
 import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
+import { ClaimedWorkspaceBanner } from '@/components/founder/ClaimedWorkspaceBanner';
 import { WorkspaceFilters } from '@/components/workspace/WorkspaceFilters';
 import { WorkspaceTable } from '@/components/workspace/WorkspaceTable';
 import { WorkspacePagination } from '@/components/workspace/WorkspacePagination';
