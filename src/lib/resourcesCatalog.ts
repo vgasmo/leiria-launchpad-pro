@@ -235,7 +235,7 @@ export const RESOURCES_CATALOG: ResourceItem[] = [
     title_en: 'Term Sheet Basics',
     desc_pt: 'Cláusulas típicas de um term sheet, trade-offs e o que negociar com confiança.',
     desc_en: 'Typical term sheet clauses, trade-offs, and what to negotiate with confidence.',
-    url: '/resources',
+    url: '/resources/guide/guide-term-sheet',
     category: 'legal',
     tags: ['term-sheet', 'negotiation', 'legal'],
     stages: ['seed', 'scale'],
