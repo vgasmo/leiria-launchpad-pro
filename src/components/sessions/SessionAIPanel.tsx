@@ -225,9 +225,11 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
               </Button>
             </div>
             <CardDescription>
-              {hasAIOutputs 
-                ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
-                : 'Generate AI summary, action items, and insights from meeting notes or transcript'
+              {aiError
+                ? t('sessions.aiTemporarilyUnavailable', 'AI assistance is temporarily resting. Please try again in a few moments.')
+                : hasAIOutputs 
+                  ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
+                  : 'Generate AI summary, action items, and insights from meeting notes or transcript'
               }
             </CardDescription>
           </CardHeader>

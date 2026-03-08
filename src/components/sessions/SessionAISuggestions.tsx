@@ -68,11 +68,14 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
           <Sparkles className="h-10 w-10 mx-auto text-primary/60 mb-4" />
           <h3 className="font-semibold mb-2">{t('sessions.aiAssistant')}</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-            {t('sessions.aiAssistantDesc')}
+            {aiError
+              ? t('sessions.aiTemporarilyUnavailable', 'A assistência IA está temporariamente indisponível. Tente novamente em alguns momentos.')
+              : t('sessions.aiAssistantDesc')}
           </p>
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating || !sessionNotes?.trim()}
+            variant={aiError ? 'outline' : 'default'}
           >
             {isGenerating ? (
               <>
@@ -82,7 +85,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
             ) : (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
-                {t('sessions.generateSuggestions')}
+                {aiError ? t('common.retry', 'Tentar novamente') : t('sessions.generateSuggestions')}
               </>
             )}
           </Button>

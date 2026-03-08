@@ -166,6 +166,19 @@ export function TemplateCoachPanel({
     return t('templates.dueAndOwner', { days, owner, defaultValue: '{{days}} • {{owner}}' });
   };
 
+  // Error state - friendly fallback
+  if (aiError && !feedback && !generateCoach.isPending) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/40 text-xs text-muted-foreground">
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+        <span>{t('templates.aiCoachUnavailable', 'AI Coach is temporarily unavailable.')}</span>
+        <Button variant="ghost" size="sm" onClick={handleGenerate} className="h-6 text-xs ml-auto">
+          {t('common.retry', 'Retry')}
+        </Button>
+      </div>
+    );
+  }
+
   // Initial state - compact button
   if (!feedback && !generateCoach.isPending) {
     return (
