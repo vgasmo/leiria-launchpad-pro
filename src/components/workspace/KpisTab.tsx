@@ -872,7 +872,7 @@ function KpiCard({
             <CardTitle className="text-base font-medium flex items-center gap-2">
               {def.name}
               {workspaceKpi.required && (
-                <Badge variant="outline" className="text-xs">Required</Badge>
+                <Badge variant="outline" className="text-xs">{t('kpis.required', 'Required')}</Badge>
               )}
               {isLocked && (
                 <Lock className="h-3.5 w-3.5 text-amber-600" />
