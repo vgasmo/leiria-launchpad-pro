@@ -8,3 +8,4 @@ import { validateEnv } from "./lib/env";
 validateEnv();
 
 createRoot(document.getElementById("root")!).render(<App />);
+
