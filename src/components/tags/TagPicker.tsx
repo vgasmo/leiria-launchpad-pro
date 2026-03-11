@@ -28,6 +28,7 @@ export function TagPicker({
   className,
   size = 'md',
 }: TagPickerProps) {
+  const { t } = useTranslation();
   const { data: allTags, isLoading: loadingTags } = useTags();
   const createTag = useCreateTag();
   const [open, setOpen] = useState(false);
