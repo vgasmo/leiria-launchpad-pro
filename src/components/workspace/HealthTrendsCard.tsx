@@ -103,7 +103,7 @@ export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardPro
               .filter(([, delta]) => (delta as number) !== 0)
               .map(([key, delta]) => renderComponentTrend(key, delta as number))}
             {Object.values(componentTrends).every(d => d === 0) && (
-              <span className="text-xs text-muted-foreground">No component changes</span>
+              <span className="text-xs text-muted-foreground">{t('health.noComponentChanges', 'Sem alterações nos componentes')}</span>
             )}
           </div>
         )}

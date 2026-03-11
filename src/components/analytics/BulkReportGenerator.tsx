@@ -173,7 +173,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
         </div>
 
         <div className="space-y-3">
-          <Label>Include in Report</Label>
+          <Label>{t('analytics.includeInReport', 'Incluir no Relatório')}</Label>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center space-x-2">
               <Checkbox id="kpis" checked={includeKpis} onCheckedChange={(c) => setIncludeKpis(!!c)} />

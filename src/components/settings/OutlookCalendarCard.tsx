@@ -164,7 +164,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Ask admin to configure MS_GRAPH_CLIENT_SECRET</p>
+                    <p>{t('settings.askAdminGraphSecret', 'Peça ao administrador para configurar o MS_GRAPH_CLIENT_SECRET')}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
