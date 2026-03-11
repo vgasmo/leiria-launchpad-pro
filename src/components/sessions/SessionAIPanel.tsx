@@ -509,7 +509,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        <CardTitle className="text-sm text-amber-900 dark:text-amber-200">KPIs to Update</CardTitle>
+                        <CardTitle className="text-sm text-amber-900 dark:text-amber-200">{t('sessions.kpisToUpdate', 'KPIs para Atualizar')}</CardTitle>
                         <Badge variant="outline" className="text-xs border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">{kpiPrompts.length}</Badge>
                       </div>
                       {expandedSections.kpis ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
