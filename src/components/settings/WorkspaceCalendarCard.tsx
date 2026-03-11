@@ -232,7 +232,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
             {/* Custom Email Input (only when override is on) */}
             {useCustomEmail && (
               <div className="space-y-2 pl-6 border-l-2 border-primary/20">
-                <Label htmlFor="custom-calendar-email" className="text-xs">Custom Calendar Email</Label>
+                <Label htmlFor="custom-calendar-email" className="text-xs">{t('settings.customCalendarEmail', 'Email de Calendário Personalizado')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="custom-calendar-email"
