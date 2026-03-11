@@ -408,10 +408,10 @@ export function SessionFrameworksTab() {
                     {/* Stages */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">Session Flow</h4>
+                        <h4 className="text-sm font-medium">{t('consultorTools.sessionFlow')}</h4>
                         <Button variant="outline" size="sm" onClick={() => copyQuestions(framework)}>
                           <Copy className="h-3.5 w-3.5 mr-1" />
-                          Copy All Questions
+                          {t('consultorTools.copyAllQuestions')}
                         </Button>
                       </div>
 
