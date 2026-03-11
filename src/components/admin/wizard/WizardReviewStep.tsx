@@ -22,6 +22,7 @@ interface WizardReviewStepProps {
 }
 
 export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepProps) {
+  const { t } = useTranslation();
   const { basics, stages, kpis, coreKpis, playbooks, alertRules, healthModel } = draft.draft_json;
 
   const activeStages = stages?.filter((s) => s.is_active) || [];
