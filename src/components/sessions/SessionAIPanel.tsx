@@ -228,8 +228,8 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
               {aiError
                 ? t('sessions.aiTemporarilyUnavailable', 'AI assistance is temporarily resting. Please try again in a few moments.')
                 : hasAIOutputs 
-                  ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
-                  : 'Generate AI summary, action items, and insights from meeting notes or transcript'
+                  ? t('sessions.lastGenerated', { date: new Date(session.ai_generated_at!).toLocaleString(), defaultValue: `Última geração: ${new Date(session.ai_generated_at!).toLocaleString()}` })
+                  : t('sessions.aiDescription', 'Gerar resumo AI, ações e insights a partir das notas ou transcrição da reunião')
               }
             </CardDescription>
           </CardHeader>
