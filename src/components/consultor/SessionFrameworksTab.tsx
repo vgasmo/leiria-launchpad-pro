@@ -496,7 +496,7 @@ export function SessionFrameworksTab() {
                       <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                         <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-2 flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
-                          Expected Outcomes
+                          {t('consultorTools.expectedOutcomes')}
                         </p>
                         <ul className="space-y-1">
                           {framework.outcomes.map((o, i) => (
