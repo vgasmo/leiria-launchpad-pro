@@ -216,10 +216,16 @@ const COACHING_TECHNIQUES: CoachingTechnique[] = [
   },
 ];
 
+const CATEGORY_KEYS: Record<string, string> = {
+  questions: 'consultorTools.powerfulQuestions',
+  reframes: 'consultorTools.reframes',
+  exercises: 'consultorTools.exercises',
+};
+
 const CATEGORIES = [
-  { key: 'questions', label: 'Powerful Questions', icon: HelpCircle, color: 'text-blue-600' },
-  { key: 'reframes', label: 'Reframes', icon: RotateCcw, color: 'text-purple-600' },
-  { key: 'exercises', label: 'Exercises', icon: Target, color: 'text-green-600' },
+  { key: 'questions', icon: HelpCircle, color: 'text-blue-600' },
+  { key: 'reframes', icon: RotateCcw, color: 'text-purple-600' },
+  { key: 'exercises', icon: Target, color: 'text-green-600' },
 ];
 
 export function CoachingToolkitTab() {
