@@ -4066,6 +4066,7 @@
     "change": "Alterar",
     "confirmBooking": "Confirmar Marcação",
     "discussPlaceholder": "Breve descrição do seu projeto ou o que gostaria de discutir...",
+    "fillRequired": "Por favor preencha o seu nome e email",
     "fullName": "Nome Completo",
     "invalidLink": "Link de Marcação Inválido",
     "invalidLinkDesc": "Este link de marcação é inválido ou expirou. Por favor solicite um novo link.",

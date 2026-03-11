@@ -4066,6 +4066,7 @@
     "change": "Change",
     "confirmBooking": "Confirm Booking",
     "discussPlaceholder": "Brief description of your project or what you'd like to discuss...",
+    "fillRequired": "Please fill in your name and email",
     "fullName": "Full Name",
     "invalidLink": "Invalid Booking Link",
     "invalidLinkDesc": "This booking link is invalid or has expired. Please request a new link.",
