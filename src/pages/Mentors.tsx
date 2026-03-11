@@ -590,7 +590,7 @@ export default function Mentors() {
                                   <Linkedin className="h-5 w-5" />
                                 </a>
                               )}
-                              <Badge variant="secondary" className="text-green-600">
+                              <Badge variant="secondary" className="text-emerald-600 dark:text-emerald-400">
                                 <Check className="h-3 w-3 mr-1" />
                                 {t('mentorsPage.connected')}
                               </Badge>
