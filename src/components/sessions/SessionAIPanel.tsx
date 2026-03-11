@@ -482,7 +482,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                           ) : (
                             <Plus className="h-4 w-4 mr-2" />
                           )}
-                          Apply Selected ({selectedActions.length})
+                          {t('sessions.applySelected', { count: selectedActions.length, defaultValue: `Aplicar Selecionadas (${selectedActions.length})` })}
                         </Button>
                         <Button
                           size="sm"
