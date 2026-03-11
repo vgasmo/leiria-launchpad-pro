@@ -462,7 +462,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                             )}
                             {action.suggestedDueInDays && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Suggested due: {action.suggestedDueInDays} day(s)
+                                {t('sessions.suggestedDue', { days: action.suggestedDueInDays, defaultValue: `Prazo sugerido: ${action.suggestedDueInDays} dia(s)` })}
                               </p>
                             )}
                           </div>
