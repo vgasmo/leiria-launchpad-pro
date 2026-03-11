@@ -158,8 +158,8 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
                     <div className="flex items-center space-x-2 opacity-50 cursor-not-allowed">
                       <RadioGroupItem value="graph" id="graph" disabled />
                       <Label htmlFor="graph" className="flex flex-col pointer-events-none">
-                        <span className="font-medium">Microsoft Graph API</span>
-                        <span className="text-xs text-muted-foreground">Not configured</span>
+                        <span className="font-medium">{t('settings.graphApi', 'Microsoft Graph API')}</span>
+                        <span className="text-xs text-muted-foreground">{t('settings.notConfigured', 'Não configurado')}</span>
                       </Label>
                     </div>
                   </TooltipTrigger>
