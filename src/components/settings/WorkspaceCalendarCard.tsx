@@ -28,6 +28,7 @@ interface WorkspaceCalendarCardProps {
 }
 
 export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: WorkspaceCalendarCardProps) {
+  const { t } = useTranslation();
   const { data: settings, isLoading } = useOutlookSettings(workspaceId);
   const { data: globalSettings, isLoading: globalLoading } = useGlobalGraphSettings();
   const updateSettings = useUpdateOutlookSettings(workspaceId);
