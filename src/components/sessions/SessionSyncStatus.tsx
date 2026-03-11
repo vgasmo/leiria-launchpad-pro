@@ -162,7 +162,7 @@ export function SessionSyncStatus({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Join Teams Meeting</p>
+            <p>{t('sessions.joinTeamsMeeting', 'Entrar na Reunião Teams')}</p>
           </TooltipContent>
         </Tooltip>
       )}

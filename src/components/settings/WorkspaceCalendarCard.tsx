@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ interface WorkspaceCalendarCardProps {
 }
 
 export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: WorkspaceCalendarCardProps) {
+  const { t } = useTranslation();
   const { data: settings, isLoading } = useOutlookSettings(workspaceId);
   const { data: globalSettings, isLoading: globalLoading } = useGlobalGraphSettings();
   const updateSettings = useUpdateOutlookSettings(workspaceId);
@@ -230,7 +232,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
             {/* Custom Email Input (only when override is on) */}
             {useCustomEmail && (
               <div className="space-y-2 pl-6 border-l-2 border-primary/20">
-                <Label htmlFor="custom-calendar-email" className="text-xs">Custom Calendar Email</Label>
+                <Label htmlFor="custom-calendar-email" className="text-xs">{t('settings.customCalendarEmail', 'Email de Calendário Personalizado')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="custom-calendar-email"

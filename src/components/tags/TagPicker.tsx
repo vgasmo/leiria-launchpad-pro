@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Plus, Tag as TagIcon, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export function TagPicker({
   className,
   size = 'md',
 }: TagPickerProps) {
+  const { t } = useTranslation();
   const { data: allTags, isLoading: loadingTags } = useTags();
   const createTag = useCreateTag();
   const [open, setOpen] = useState(false);
@@ -156,7 +158,7 @@ export function TagPicker({
                           Create "{searchValue}"
                         </button>
                       ) : (
-                        <span className="text-muted-foreground">No tags found</span>
+                        <span className="text-muted-foreground">{t('common.noResults', 'Nenhum resultado encontrado')}</span>
                       )}
                     </CommandEmpty>
                     <CommandGroup>

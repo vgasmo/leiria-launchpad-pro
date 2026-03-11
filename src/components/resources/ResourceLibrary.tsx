@@ -122,7 +122,7 @@ export function ResourceLibrary({ programId }: ResourceLibraryProps) {
           {!filteredResources?.length ? (
             <div className="text-center py-8 text-muted-foreground">
               <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No resources available</p>
+              <p>{t('resources.noResourcesAvailable', 'Sem recursos disponíveis')}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">

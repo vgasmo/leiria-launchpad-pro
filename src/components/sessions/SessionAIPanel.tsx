@@ -213,7 +213,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                <CardTitle className="text-base">AI Meeting Assistant</CardTitle>
+                <CardTitle className="text-base">{t('sessions.aiAssistant', 'Assistente AI de Reunião')}</CardTitle>
               </div>
               <Button
                 variant="outline"
@@ -221,15 +221,15 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                 onClick={() => setShowImport(!showImport)}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {showImport ? 'Hide Import' : 'Import Transcript'}
+                {showImport ? t('sessions.hideImport', 'Ocultar Importação') : t('sessions.importTranscript', 'Importar Transcrição')}
               </Button>
             </div>
             <CardDescription>
               {aiError
                 ? t('sessions.aiTemporarilyUnavailable', 'AI assistance is temporarily resting. Please try again in a few moments.')
                 : hasAIOutputs 
-                  ? `Last generated: ${new Date(session.ai_generated_at!).toLocaleString()}`
-                  : 'Generate AI summary, action items, and insights from meeting notes or transcript'
+                  ? t('sessions.lastGenerated', { date: new Date(session.ai_generated_at!).toLocaleString(), defaultValue: `Última geração: ${new Date(session.ai_generated_at!).toLocaleString()}` })
+                  : t('sessions.aiDescription', 'Gerar resumo AI, ações e insights a partir das notas ou transcrição da reunião')
               }
             </CardDescription>
           </CardHeader>
@@ -428,7 +428,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm">Suggested Action Items</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.suggestedActions', 'Ações Sugeridas')}</CardTitle>
                         <Badge variant="secondary" className="text-xs">{actionSuggestions.length}</Badge>
                       </div>
                       {expandedSections.actions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -462,7 +462,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                             )}
                             {action.suggestedDueInDays && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Suggested due: {action.suggestedDueInDays} day(s)
+                                {t('sessions.suggestedDue', { days: action.suggestedDueInDays, defaultValue: `Prazo sugerido: ${action.suggestedDueInDays} dia(s)` })}
                               </p>
                             )}
                           </div>
@@ -482,7 +482,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                           ) : (
                             <Plus className="h-4 w-4 mr-2" />
                           )}
-                          Apply Selected ({selectedActions.length})
+                          {t('sessions.applySelected', { count: selectedActions.length, defaultValue: `Aplicar Selecionadas (${selectedActions.length})` })}
                         </Button>
                         <Button
                           size="sm"
@@ -490,7 +490,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                           onClick={handleApplyAll}
                           disabled={applyActionsMutation.isPending}
                         >
-                          Apply All
+                          {t('sessions.applyAll', 'Aplicar Todas')}
                         </Button>
                       </div>
                     )}
@@ -509,7 +509,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        <CardTitle className="text-sm text-amber-900 dark:text-amber-200">KPIs to Update</CardTitle>
+                        <CardTitle className="text-sm text-amber-900 dark:text-amber-200">{t('sessions.kpisToUpdate', 'KPIs para Atualizar')}</CardTitle>
                         <Badge variant="outline" className="text-xs border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">{kpiPrompts.length}</Badge>
                       </div>
                       {expandedSections.kpis ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

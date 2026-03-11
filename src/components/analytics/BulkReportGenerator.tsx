@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { FileDown, Loader2, FileSpreadsheet, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ interface BulkReportGeneratorProps {
 }
 
 export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(programId || 'all');
   const [includeKpis, setIncludeKpis] = useState(true);
@@ -167,13 +169,13 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
               <SelectValue placeholder="Select program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="all">{t('common.all', 'Todos')} {t('common.program', 'Programa')}s</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-3">
-          <Label>Include in Report</Label>
+          <Label>{t('analytics.includeInReport', 'Incluir no Relatório')}</Label>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center space-x-2">
               <Checkbox id="kpis" checked={includeKpis} onCheckedChange={(c) => setIncludeKpis(!!c)} />

@@ -207,9 +207,9 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
         {/* Enable Toggle */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="space-y-0.5">
-            <Label>Enable Teams notifications</Label>
+            <Label>{t('settings.enableTeamsNotifications', 'Ativar notificações do Teams')}</Label>
             <p className="text-sm text-muted-foreground">
-              Send notifications to your configured Teams channel
+              {t('settings.teamsNotificationsDesc', 'Enviar notificações para o canal Teams configurado')}
             </p>
           </div>
           <Switch

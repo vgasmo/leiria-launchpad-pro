@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -21,6 +22,7 @@ interface WizardReviewStepProps {
 }
 
 export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepProps) {
+  const { t } = useTranslation();
   const { basics, stages, kpis, coreKpis, playbooks, alertRules, healthModel } = draft.draft_json;
 
   const activeStages = stages?.filter((s) => s.is_active) || [];
@@ -36,7 +38,7 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       {hasErrors ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Cannot Publish</AlertTitle>
+          <AlertTitle>{t('admin.wizard.cannotPublish', 'Não é possível publicar')}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside mt-2 space-y-1">
               {validationErrors.map((error, idx) => (
@@ -48,9 +50,9 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       ) : (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950/20">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-600">Ready to Publish</AlertTitle>
+          <AlertTitle className="text-green-600">{t('admin.wizard.readyToPublish', 'Pronto para Publicar')}</AlertTitle>
           <AlertDescription className="text-green-700 dark:text-green-400">
-            All validations passed. Your program configuration is ready to be published.
+            {t('admin.wizard.allValidationsPassed', 'Todas as validações passaram. A configuração do programa está pronta para ser publicada.')}
           </AlertDescription>
         </Alert>
       )}
