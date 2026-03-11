@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { FileDown, Loader2, FileSpreadsheet, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
