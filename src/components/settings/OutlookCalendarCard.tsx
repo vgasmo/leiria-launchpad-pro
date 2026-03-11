@@ -147,8 +147,8 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="graph" id="graph" disabled={!canEdit} />
                 <Label htmlFor="graph" className="flex flex-col cursor-pointer">
-                  <span className="font-medium">Microsoft Graph API</span>
-                  <span className="text-xs text-muted-foreground">Direct integration</span>
+                  <span className="font-medium">{t('settings.graphApi', 'Microsoft Graph API')}</span>
+                  <span className="text-xs text-muted-foreground">{t('settings.directIntegration', 'Integração direta')}</span>
                 </Label>
               </div>
             ) : (
