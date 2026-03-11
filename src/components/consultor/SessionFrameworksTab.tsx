@@ -313,7 +313,7 @@ export function SessionFrameworksTab() {
       )
       .join('\n\n');
     navigator.clipboard.writeText(text);
-    toast.success('Questions copied to clipboard');
+    toast.success(t('consultorTools.questionsCopied'));
   };
 
   const copyAgenda = (framework: SessionFramework) => {
