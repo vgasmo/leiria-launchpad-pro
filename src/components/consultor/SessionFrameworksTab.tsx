@@ -339,7 +339,7 @@ export function SessionFrameworksTab() {
         </div>
         <Badge variant="outline" className="gap-1">
           <Sparkles className="h-3 w-3" />
-          {FRAMEWORKS.length} frameworks
+          {FRAMEWORKS.length} {t('consultorTools.frameworks')}
         </Badge>
       </div>
 
