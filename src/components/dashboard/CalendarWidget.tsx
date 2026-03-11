@@ -16,7 +16,7 @@ interface CalendarWidgetProps {
   className?: string;
 }
 
-export function CalendarWidget({ className }: CalendarWidgetProps) {
+export const CalendarWidget = forwardRef<HTMLDivElement, CalendarWidgetProps>(function CalendarWidget({ className }, ref) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { data: sessions, isLoading } = useUpcomingSessions();

@@ -23,30 +23,32 @@ const sizeStyles = {
   lg: 'px-3 py-1 text-sm',
 };
 
-export function StageBadge({ stage, size = 'md', className }: StageBadgeProps) {
-  const { t } = useTranslation();
-  const config = stageConfig[stage];
+export const StageBadge = forwardRef<HTMLSpanElement, StageBadgeProps>(
+  function StageBadge({ stage, size = 'md', className }, ref) {
+    const { t } = useTranslation();
+    const config = stageConfig[stage];
 
-  if (!config) {
+    if (!config) {
+      return (
+        <span ref={ref} className={cn(
+          "inline-flex items-center rounded-full font-medium border bg-muted text-muted-foreground border-border",
+          sizeStyles[size],
+          className
+        )}>
+          {stage ?? '—'}
+        </span>
+      );
+    }
+    
     return (
-      <span className={cn(
-        "inline-flex items-center rounded-full font-medium border bg-muted text-muted-foreground border-border",
+      <span ref={ref} className={cn(
+        "inline-flex items-center rounded-full font-medium border",
         sizeStyles[size],
+        config.className,
         className
       )}>
-        {stage ?? '—'}
+        {t(config.labelKey, { defaultValue: stage })}
       </span>
     );
   }
-  
-  return (
-    <span className={cn(
-      "inline-flex items-center rounded-full font-medium border",
-      sizeStyles[size],
-      config.className,
-      className
-    )}>
-      {t(config.labelKey, { defaultValue: stage })}
-    </span>
-  );
-}
+);

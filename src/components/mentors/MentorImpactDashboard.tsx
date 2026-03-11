@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTimeEntrySummary } from '@/hooks/useTimeTracking';
 import { useMentorAverageRating } from '@/hooks/useSessionFeedback';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function MentorImpactDashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { data: timeSummary, isLoading: loadingTime } = useTimeEntrySummary();
   const { data: rating, isLoading: loadingRating } = useMentorAverageRating(user?.id);
 
@@ -27,29 +29,27 @@ export function MentorImpactDashboard() {
   }
 
   const startupsHelped = timeSummary?.byWorkspace.length || 0;
-  const monthlyGoal = 20; // hours per month goal
+  const monthlyGoal = 20;
   const monthlyProgress = timeSummary ? (timeSummary.thisMonth / monthlyGoal) * 100 : 0;
 
-  // P0: Compact stats in single row for less clutter
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
-          Your Impact
+          {t('mentor.yourImpact', 'O Teu Impacto')}
         </h2>
       </div>
 
-      {/* P0: Single row compact stats */}
       <Card>
         <CardContent className="py-3">
-          <div className="flex items-center justify-between divide-x">
+          <div className="flex items-center justify-between divide-x divide-border">
             <div className="flex-1 text-center px-3">
               <div className="flex items-center justify-center gap-1.5">
                 <Clock className="h-4 w-4 text-primary" />
                 <span className="text-xl font-bold">{timeSummary?.totalHours.toFixed(0) || 0}h</span>
               </div>
-              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-xs text-muted-foreground">{t('common.total', 'Total')}</p>
             </div>
             
             <div className="flex-1 text-center px-3">
@@ -57,7 +57,7 @@ export function MentorImpactDashboard() {
                 <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-xl font-bold">{timeSummary?.thisMonth.toFixed(0) || 0}h</span>
               </div>
-              <p className="text-xs text-muted-foreground">This month</p>
+              <p className="text-xs text-muted-foreground">{t('common.thisMonth', 'Este mês')}</p>
             </div>
             
             <div className="flex-1 text-center px-3">
@@ -70,17 +70,16 @@ export function MentorImpactDashboard() {
             
             <div className="flex-1 text-center px-3">
               <div className="flex items-center justify-center gap-1.5">
-                <Star className="h-4 w-4 text-yellow-500" />
+                <Star className="h-4 w-4 text-accent-foreground" />
                 <span className="text-xl font-bold">{rating?.average || '-'}</span>
               </div>
-              <p className="text-xs text-muted-foreground">{rating?.count || 0} reviews</p>
+              <p className="text-xs text-muted-foreground">{rating?.count || 0} {t('mentor.reviews', 'avaliações')}</p>
             </div>
           </div>
           
-          {/* Monthly goal progress - compact */}
-          <div className="mt-3 pt-3 border-t">
+          <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Monthly goal</span>
+              <span className="text-xs text-muted-foreground">{t('mentor.monthlyGoal', 'Objetivo mensal')}</span>
               <Progress value={Math.min(monthlyProgress, 100)} className="h-1.5 flex-1" />
               <span className="text-xs font-medium">{Math.round(monthlyProgress)}%</span>
             </div>
@@ -91,8 +90,8 @@ export function MentorImpactDashboard() {
       {timeSummary?.byWorkspace.length ? (
         <Card>
           <CardHeader>
-            <CardTitle>Hours by Startup</CardTitle>
-            <CardDescription>Breakdown of time invested</CardDescription>
+            <CardTitle>{t('mentor.hoursByStartup', 'Horas por Startup')}</CardTitle>
+            <CardDescription>{t('mentor.timeBreakdown', 'Distribuição do tempo investido')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
