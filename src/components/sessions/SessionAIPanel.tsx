@@ -221,7 +221,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                 onClick={() => setShowImport(!showImport)}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {showImport ? 'Hide Import' : 'Import Transcript'}
+                {showImport ? t('sessions.hideImport', 'Ocultar Importação') : t('sessions.importTranscript', 'Importar Transcrição')}
               </Button>
             </div>
             <CardDescription>
