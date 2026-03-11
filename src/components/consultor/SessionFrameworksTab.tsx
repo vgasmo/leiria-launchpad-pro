@@ -331,10 +331,10 @@ export function SessionFrameworksTab() {
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Session Frameworks
+            {t('consultorTools.sessionFrameworks')}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Proven structures for different consulting scenarios
+            {t('consultorTools.sessionFrameworksDesc')}
           </p>
         </div>
         <Badge variant="outline" className="gap-1">
