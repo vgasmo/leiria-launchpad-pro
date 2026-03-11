@@ -139,8 +139,8 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="webhook" id="webhook" />
               <Label htmlFor="webhook" className="flex flex-col cursor-pointer">
-                <span className="font-medium">Power Automate Webhook</span>
-                <span className="text-xs text-muted-foreground">Recommended - Easy setup</span>
+                <span className="font-medium">{t('settings.powerAutomateWebhook', 'Power Automate Webhook')}</span>
+                <span className="text-xs text-muted-foreground">{t('settings.recommendedEasy', 'Recomendado - Configuração fácil')}</span>
               </Label>
             </div>
             {graphAvailable ? (
