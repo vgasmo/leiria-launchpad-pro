@@ -490,7 +490,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                           onClick={handleApplyAll}
                           disabled={applyActionsMutation.isPending}
                         >
-                          Apply All
+                          {t('sessions.applyAll', 'Aplicar Todas')}
                         </Button>
                       </div>
                     )}
