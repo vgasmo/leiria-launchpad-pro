@@ -48,6 +48,35 @@ serve(async (req) => {
     let createdCount = 0;
     let updatedCount = 0;
 
+    // Helper: upsert work queue item handling partial unique index
+    // The table has a partial unique index on (workspace_id, type) WHERE status IN ('open', 'in_progress')
+    // Standard upsert doesn't work with partial indexes, so we check-then-insert/update
+    async function upsertWorkQueueItem(item: Record<string, unknown>) {
+      const { data: existing } = await supabase
+        .from("staff_work_queue_items")
+        .select("id")
+        .eq("workspace_id", item.workspace_id as string)
+        .eq("type", item.type as string)
+        .in("status", ["open", "in_progress"])
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        const { error } = await supabase
+          .from("staff_work_queue_items")
+          .update(item)
+          .eq("id", existing[0].id);
+        return !error;
+      } else {
+        const { error } = await supabase
+          .from("staff_work_queue_items")
+          .insert(item);
+        if (error) {
+          console.error("Insert work queue item error:", error.message, JSON.stringify(item));
+        }
+        return !error;
+      }
+    }
+
     for (const workspace of workspaces || []) {
       const startupName = (workspace.startup as any)?.name || "Workspace";
       const leadConsultant = (workspace.workspace_assignments as any[])?.find(
@@ -72,21 +101,18 @@ serve(async (req) => {
       const missingKpis = expectedCount - filledCount;
 
       if (missingKpis > 0) {
-        const { error: insertError } = await supabase
-          .from("staff_work_queue_items")
-          .upsert({
-            workspace_id: workspace.id,
-            type: "missing_kpis",
-            title: `${startupName}: ${missingKpis} KPIs em falta`,
-            description: `${filledCount}/${expectedCount} KPIs preenchidos este mês`,
-            priority: missingKpis > 3 ? "high" : "medium",
-            due_at: new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString(), // End of month
-            status: "open",
-            assigned_to: leadConsultant,
-            evidence_json: { expected: expectedCount, filled: filledCount, missing: missingKpis },
-          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
-
-        if (!insertError) createdCount++;
+        const ok = await upsertWorkQueueItem({
+          workspace_id: workspace.id,
+          type: "missing_kpis",
+          title: `${startupName}: ${missingKpis} KPIs em falta`,
+          description: `${filledCount}/${expectedCount} KPIs preenchidos este mês`,
+          priority: missingKpis > 3 ? "high" : "medium",
+          due_at: new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString(),
+          status: "open",
+          assigned_to: leadConsultant,
+          evidence_json: { expected: expectedCount, filled: filledCount, missing: missingKpis },
+        });
+        if (ok) createdCount++;
       }
 
       // Check for overdue actions
@@ -99,21 +125,18 @@ serve(async (req) => {
 
       const overdueCount = overdueActions?.length || 0;
       if (overdueCount >= 3) {
-        await supabase
-          .from("staff_work_queue_items")
-          .upsert({
-            workspace_id: workspace.id,
-            type: "overdue_actions",
-            title: `${startupName}: ${overdueCount} ações em atraso`,
-            description: `Startup tem ${overdueCount} ações passadas do prazo`,
-            priority: overdueCount >= 5 ? "urgent" : "high",
-            due_at: today.toISOString(),
-            status: "open",
-            assigned_to: leadConsultant,
-            evidence_json: { overdue_count: overdueCount },
-          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
-
-        createdCount++;
+        const ok = await upsertWorkQueueItem({
+          workspace_id: workspace.id,
+          type: "overdue_actions",
+          title: `${startupName}: ${overdueCount} ações em atraso`,
+          description: `Startup tem ${overdueCount} ações passadas do prazo`,
+          priority: overdueCount >= 5 ? "urgent" : "high",
+          due_at: today.toISOString(),
+          status: "open",
+          assigned_to: leadConsultant,
+          evidence_json: { overdue_count: overdueCount },
+        });
+        if (ok) createdCount++;
       }
 
       // Check for no recent sessions
@@ -126,21 +149,18 @@ serve(async (req) => {
         .limit(1);
 
       if (!recentSessions || recentSessions.length === 0) {
-        await supabase
-          .from("staff_work_queue_items")
-          .upsert({
-            workspace_id: workspace.id,
-            type: "schedule_session",
-            title: `${startupName}: Sem sessão há 30+ dias`,
-            description: "Agendar sessão de acompanhamento",
-            priority: "high",
-            due_at: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "open",
-            assigned_to: leadConsultant,
-            evidence_json: { last_session_check: thirtyDaysAgo.toISOString() },
-          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
-
-        createdCount++;
+        const ok = await upsertWorkQueueItem({
+          workspace_id: workspace.id,
+          type: "schedule_session",
+          title: `${startupName}: Sem sessão há 30+ dias`,
+          description: "Agendar sessão de acompanhamento",
+          priority: "high",
+          due_at: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "open",
+          assigned_to: leadConsultant,
+          evidence_json: { last_session_check: thirtyDaysAgo.toISOString() },
+        });
+        if (ok) createdCount++;
       }
 
       // Check for overdue check-ins
@@ -152,21 +172,18 @@ serve(async (req) => {
         .lt("due_date", today.toISOString().split("T")[0]);
 
       if (overdueCheckins && overdueCheckins.length > 0) {
-        await supabase
-          .from("staff_work_queue_items")
-          .upsert({
-            workspace_id: workspace.id,
-            type: "outreach",
-            title: `${startupName}: Check-in em atraso`,
-            description: `${overdueCheckins.length} check-in(s) por submeter`,
-            priority: "medium",
-            due_at: today.toISOString(),
-            status: "open",
-            assigned_to: leadConsultant,
-            evidence_json: { overdue_checkins: overdueCheckins.length },
-          }, { onConflict: "workspace_id,type", ignoreDuplicates: false });
-
-        createdCount++;
+        const ok = await upsertWorkQueueItem({
+          workspace_id: workspace.id,
+          type: "outreach",
+          title: `${startupName}: Check-in em atraso`,
+          description: `${overdueCheckins.length} check-in(s) por submeter`,
+          priority: "medium",
+          due_at: today.toISOString(),
+          status: "open",
+          assigned_to: leadConsultant,
+          evidence_json: { overdue_checkins: overdueCheckins.length },
+        });
+        if (ok) createdCount++;
       }
 
       // Update health confidence
@@ -192,7 +209,7 @@ serve(async (req) => {
       updatedCount++;
     }
 
-    // Resolve items that are no longer relevant
+    // Resolve items that are no longer relevant (open items older than 14 days)
     const { error: resolveError } = await supabase
       .from("staff_work_queue_items")
       .update({ status: "done" })
