@@ -457,7 +457,7 @@ export function SessionFrameworksTab() {
                                   <div>
                                     <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                                       <CheckCircle2 className="h-3 w-3" />
-                                      Objectives
+                                      {t('consultorTools.objectives')}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                       {stage.objectives.map((obj, i) => (
