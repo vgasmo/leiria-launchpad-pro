@@ -472,7 +472,7 @@ export function SessionFrameworksTab() {
                                   <div>
                                     <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                                       <MessageSquare className="h-3 w-3" />
-                                      Questions to Ask
+                                      {t('consultorTools.questionsToAsk')}
                                     </p>
                                     <ul className="space-y-2">
                                       {stage.questions.map((q, i) => (
