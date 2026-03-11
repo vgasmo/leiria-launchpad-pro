@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Clock, CheckCircle, AlertCircle, Building2 } from 'lucide-react';
-import { format, addDays, startOfDay, setHours, setMinutes } from 'date-fns';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 interface TimeSlot {
@@ -30,6 +31,7 @@ interface BookingToken {
 export default function PublicBooking() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [step, setStep] = useState<'loading' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [formData, setFormData] = useState({
@@ -108,8 +110,9 @@ export default function PublicBooking() {
     }
   }, [tokenData, tokenError, slotsLoading]);
 
-  // Group slots by date
+  // Group slots by date, filtering out days with no available slots
   const slotsByDate = slots?.reduce((acc, slot) => {
+    if (!slot.available) return acc;
     if (!acc[slot.date]) acc[slot.date] = [];
     acc[slot.date].push(slot);
     return acc;
@@ -118,7 +121,7 @@ export default function PublicBooking() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email) {
-      toast.error('Please fill in your name and email');
+      toast.error(t('publicBooking.fillRequired', { defaultValue: 'Please fill in your name and email' }));
       return;
     }
     bookMutation.mutate();
@@ -144,9 +147,9 @@ export default function PublicBooking() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-            <h1 className="text-xl font-semibold">Invalid Booking Link</h1>
+            <h1 className="text-xl font-semibold text-foreground">{t('publicBooking.invalidLink')}</h1>
             <p className="text-muted-foreground">
-              This booking link is invalid or has expired. Please request a new link.
+              {t('publicBooking.invalidLinkDesc')}
             </p>
           </CardContent>
         </Card>
@@ -159,18 +162,18 @@ export default function PublicBooking() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
-            <h1 className="text-xl font-semibold">Booking Confirmed!</h1>
+            <CheckCircle className="h-12 w-12 text-primary mx-auto" />
+            <h1 className="text-xl font-semibold text-foreground">{t('publicBooking.bookingConfirmed')}</h1>
             <p className="text-muted-foreground">
-              Your first contact session has been scheduled. You'll receive a calendar invite shortly.
+              {t('publicBooking.bookingConfirmedDesc')}
             </p>
             {selectedSlot && (
               <div className="bg-muted rounded-lg p-4 mt-4">
-                <div className="flex items-center justify-center gap-2 text-sm">
+                <div className="flex items-center justify-center gap-2 text-sm text-foreground">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(selectedSlot.date), 'EEEE, MMMM d, yyyy')}
                 </div>
-                <div className="flex items-center justify-center gap-2 text-sm mt-1">
+                <div className="flex items-center justify-center gap-2 text-sm text-foreground mt-1">
                   <Clock className="h-4 w-4" />
                   {selectedSlot.time}
                 </div>
@@ -188,7 +191,7 @@ export default function PublicBooking() {
         {/* Header */}
         <div className="text-center">
           <Building2 className="h-10 w-10 mx-auto text-primary mb-2" />
-          <h1 className="text-2xl font-bold">Book a First Contact Session</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('publicBooking.bookFirstMeeting')}</h1>
           {tokenData?.program_name && (
             <p className="text-muted-foreground mt-1">{tokenData.program_name}</p>
           )}
@@ -197,23 +200,23 @@ export default function PublicBooking() {
         {step === 'slots' && (
           <Card>
             <CardHeader>
-              <CardTitle>Select a Time</CardTitle>
-              <CardDescription>Choose a convenient time for your first contact session</CardDescription>
+              <CardTitle className="text-foreground">{t('publicBooking.selectTime')}</CardTitle>
+              <CardDescription>{t('publicBooking.selectTimeDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {Object.keys(slotsByDate).length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">
-                  Sem horários disponíveis de momento. Tente novamente mais tarde.
+                  {t('publicBooking.noSlotsAvailable')}
                 </p>
               ) : (
                 <div className="space-y-4">
                   {Object.entries(slotsByDate).slice(0, 5).map(([date, daySlots]) => (
                     <div key={date}>
-                      <h3 className="font-medium mb-2">
+                      <h3 className="font-medium mb-2 text-foreground">
                         {format(new Date(date), 'EEEE, MMMM d')}
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {daySlots.filter(s => s.available).map((slot) => (
+                        {daySlots.map((slot) => (
                           <Button
                             key={`${slot.date}-${slot.time}`}
                             variant={selectedSlot?.date === slot.date && selectedSlot?.time === slot.time ? 'default' : 'outline'}
@@ -234,7 +237,7 @@ export default function PublicBooking() {
                   className="w-full mt-6" 
                   onClick={() => setStep('form')}
                 >
-                  Continue
+                  {t('common.continue', { defaultValue: 'Continue' })}
                 </Button>
               )}
             </CardContent>
@@ -244,14 +247,14 @@ export default function PublicBooking() {
         {step === 'form' && (
           <Card>
             <CardHeader>
-              <CardTitle>Your Details</CardTitle>
+              <CardTitle className="text-foreground">{t('publicBooking.yourDetails')}</CardTitle>
               <CardDescription>
                 {selectedSlot && (
                   <span className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     {format(new Date(selectedSlot.date), 'MMMM d')} at {selectedSlot.time}
                     <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => setStep('slots')}>
-                      Change
+                      {t('publicBooking.change')}
                     </Button>
                   </span>
                 )}
@@ -261,17 +264,17 @@ export default function PublicBooking() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name *</Label>
+                    <Label htmlFor="name">{t('publicBooking.fullName')} *</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Your name"
+                      placeholder={t('login.fullNamePlaceholder', { defaultValue: 'Your name' })}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t('common.email', { defaultValue: 'Email' })} *</Label>
                     <Input
                       id="email"
                       type="email"
@@ -285,7 +288,7 @@ export default function PublicBooking() {
                 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">{t('common.phone', { defaultValue: 'Phone' })}</Label>
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -294,23 +297,23 @@ export default function PublicBooking() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="organization">Organization / Startup Name</Label>
+                    <Label htmlFor="organization">{t('publicBooking.organization')}</Label>
                     <Input
                       id="organization"
                       value={formData.organization}
                       onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                      placeholder="Your company or project name"
+                      placeholder={t('publicBooking.organizationPlaceholder')}
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="message">What would you like to discuss?</Label>
+                  <Label htmlFor="message">{t('publicBooking.whatToDiscuss')}</Label>
                   <Textarea
                     id="message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Brief description of your project or what you'd like to discuss..."
+                    placeholder={t('publicBooking.discussPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -320,7 +323,7 @@ export default function PublicBooking() {
                   className="w-full" 
                   disabled={bookMutation.isPending}
                 >
-                  {bookMutation.isPending ? 'Booking...' : 'Confirm Booking'}
+                  {bookMutation.isPending ? t('publicBooking.booking') : t('publicBooking.confirmBooking')}
                 </Button>
               </form>
             </CardContent>
