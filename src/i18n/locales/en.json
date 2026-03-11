@@ -3246,6 +3246,10 @@
     "viewConnectionRequests": "View Connection Requests",
     "welcomeTitle": "Welcome to the Mentor Panel",
     "yourImpact": "Your Impact",
+    "reviews": "reviews",
+    "monthlyGoal": "Monthly goal",
+    "hoursByStartup": "Hours by Startup",
+    "timeBreakdown": "Breakdown of time invested",
     "postSession": {
       "title": "Log your session notes",
       "subtitle": "You have recent sessions without notes — log them while fresh."
