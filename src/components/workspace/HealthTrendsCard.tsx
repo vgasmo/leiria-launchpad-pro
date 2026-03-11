@@ -16,6 +16,7 @@ interface HealthTrendsCardProps {
 }
 
 export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardProps) {
+  const { t } = useTranslation();
   const { data: history, isLoading } = useHealthHistory(workspaceId, 90);
   const { delta7d, delta30d, componentTrends, current, previous } = useHealthTrends(workspaceId);
   const [isOpen, setIsOpen] = useState(false);

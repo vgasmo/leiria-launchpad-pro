@@ -15,6 +15,7 @@ interface BulkReportGeneratorProps {
 }
 
 export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(programId || 'all');
   const [includeKpis, setIncludeKpis] = useState(true);
