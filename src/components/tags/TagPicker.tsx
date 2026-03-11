@@ -158,7 +158,7 @@ export function TagPicker({
                           Create "{searchValue}"
                         </button>
                       ) : (
-                        <span className="text-muted-foreground">No tags found</span>
+                        <span className="text-muted-foreground">{t('common.noResults', 'Nenhum resultado encontrado')}</span>
                       )}
                     </CommandEmpty>
                     <CommandGroup>

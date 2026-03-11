@@ -50,9 +50,9 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       ) : (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950/20">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-600">Ready to Publish</AlertTitle>
+          <AlertTitle className="text-green-600">{t('admin.wizard.readyToPublish', 'Pronto para Publicar')}</AlertTitle>
           <AlertDescription className="text-green-700 dark:text-green-400">
-            All validations passed. Your program configuration is ready to be published.
+            {t('admin.wizard.allValidationsPassed', 'Todas as validações passaram. A configuração do programa está pronta para ser publicada.')}
           </AlertDescription>
         </Alert>
       )}
