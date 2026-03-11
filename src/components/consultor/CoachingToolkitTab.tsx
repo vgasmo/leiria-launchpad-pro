@@ -216,10 +216,16 @@ const COACHING_TECHNIQUES: CoachingTechnique[] = [
   },
 ];
 
+const CATEGORY_KEYS: Record<string, string> = {
+  questions: 'consultorTools.powerfulQuestions',
+  reframes: 'consultorTools.reframes',
+  exercises: 'consultorTools.exercises',
+};
+
 const CATEGORIES = [
-  { key: 'questions', label: 'Powerful Questions', icon: HelpCircle, color: 'text-blue-600' },
-  { key: 'reframes', label: 'Reframes', icon: RotateCcw, color: 'text-purple-600' },
-  { key: 'exercises', label: 'Exercises', icon: Target, color: 'text-green-600' },
+  { key: 'questions', icon: HelpCircle, color: 'text-blue-600' },
+  { key: 'reframes', icon: RotateCcw, color: 'text-purple-600' },
+  { key: 'exercises', icon: Target, color: 'text-green-600' },
 ];
 
 export function CoachingToolkitTab() {
@@ -281,7 +287,7 @@ export function CoachingToolkitTab() {
             return (
               <TabsTrigger key={cat.key} value={cat.key} className="gap-2">
                 <Icon className={cn('h-4 w-4', cat.color)} />
-                {cat.label}
+                {t(CATEGORY_KEYS[cat.key])}
                 <Badge variant="secondary" className="ml-1 text-xs">
                   {count}
                 </Badge>

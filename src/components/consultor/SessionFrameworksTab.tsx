@@ -313,7 +313,7 @@ export function SessionFrameworksTab() {
       )
       .join('\n\n');
     navigator.clipboard.writeText(text);
-    toast.success('Questions copied to clipboard');
+    toast.success(t('consultorTools.questionsCopied'));
   };
 
   const copyAgenda = (framework: SessionFramework) => {
@@ -321,7 +321,7 @@ export function SessionFrameworksTab() {
       .map((s) => `## ${s.name} (${s.duration})\nObjectives:\n${s.objectives.map((o) => `- ${o}`).join('\n')}`)
       .join('\n\n')}`;
     navigator.clipboard.writeText(text);
-    toast.success('Agenda template copied');
+    toast.success(t('consultorTools.agendaCopied'));
   };
 
   return (
@@ -331,15 +331,15 @@ export function SessionFrameworksTab() {
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Session Frameworks
+            {t('consultorTools.sessionFrameworks')}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Proven structures for different consulting scenarios
+            {t('consultorTools.sessionFrameworksDesc')}
           </p>
         </div>
         <Badge variant="outline" className="gap-1">
           <Sparkles className="h-3 w-3" />
-          {FRAMEWORKS.length} frameworks
+          {FRAMEWORKS.length} {t('consultorTools.frameworks')}
         </Badge>
       </div>
 
@@ -381,7 +381,7 @@ export function SessionFrameworksTab() {
                           }}
                         >
                           <Copy className="h-3.5 w-3.5 mr-1" />
-                          Agenda
+                          {t('consultorTools.agenda')}
                         </Button>
                         {isExpanded ? (
                           <ChevronUp className="h-5 w-5 text-muted-foreground" />
@@ -408,10 +408,10 @@ export function SessionFrameworksTab() {
                     {/* Stages */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">Session Flow</h4>
+                        <h4 className="text-sm font-medium">{t('consultorTools.sessionFlow')}</h4>
                         <Button variant="outline" size="sm" onClick={() => copyQuestions(framework)}>
                           <Copy className="h-3.5 w-3.5 mr-1" />
-                          Copy All Questions
+                          {t('consultorTools.copyAllQuestions')}
                         </Button>
                       </div>
 
@@ -439,7 +439,7 @@ export function SessionFrameworksTab() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <Badge variant="secondary" className="text-xs">
-                                        {stage.questions.length} questions
+                                        {stage.questions.length} {t('consultorTools.questions')}
                                       </Badge>
                                       {isStageExpanded ? (
                                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -457,7 +457,7 @@ export function SessionFrameworksTab() {
                                   <div>
                                     <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                                       <CheckCircle2 className="h-3 w-3" />
-                                      Objectives
+                                      {t('consultorTools.objectives')}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                       {stage.objectives.map((obj, i) => (
@@ -472,7 +472,7 @@ export function SessionFrameworksTab() {
                                   <div>
                                     <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                                       <MessageSquare className="h-3 w-3" />
-                                      Questions to Ask
+                                      {t('consultorTools.questionsToAsk')}
                                     </p>
                                     <ul className="space-y-2">
                                       {stage.questions.map((q, i) => (
@@ -496,7 +496,7 @@ export function SessionFrameworksTab() {
                       <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                         <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-2 flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
-                          Expected Outcomes
+                          {t('consultorTools.expectedOutcomes')}
                         </p>
                         <ul className="space-y-1">
                           {framework.outcomes.map((o, i) => (
@@ -511,7 +511,7 @@ export function SessionFrameworksTab() {
                       <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                         <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2 flex items-center gap-1">
                           <Lightbulb className="h-3 w-3" />
-                          Pro Tips
+                          {t('consultorTools.proTips')}
                         </p>
                         <ul className="space-y-1">
                           {framework.tips.map((tip, i) => (
