@@ -399,7 +399,7 @@ export function AdminWorkspacesManager() {
                           </button>
                         ))}
                         {filteredProfiles?.length === 0 && (
-                          <p className="p-2 text-sm text-muted-foreground">No users found</p>
+                          <p className="p-2 text-sm text-muted-foreground">{t('common.noResults', 'Nenhum resultado encontrado')}</p>
                         )}
                       </div>
                     )}

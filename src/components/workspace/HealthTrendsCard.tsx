@@ -25,7 +25,7 @@ export function HealthTrendsCard({ workspaceId, className }: HealthTrendsCardPro
     return (
       <Card className={className}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Health Trends</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('health.trends', 'Tendências de Saúde')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-24 w-full" />
