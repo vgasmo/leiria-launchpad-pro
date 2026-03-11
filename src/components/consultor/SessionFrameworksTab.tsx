@@ -321,7 +321,7 @@ export function SessionFrameworksTab() {
       .map((s) => `## ${s.name} (${s.duration})\nObjectives:\n${s.objectives.map((o) => `- ${o}`).join('\n')}`)
       .join('\n\n')}`;
     navigator.clipboard.writeText(text);
-    toast.success('Agenda template copied');
+    toast.success(t('consultorTools.agendaCopied'));
   };
 
   return (
