@@ -439,7 +439,7 @@ export function SessionFrameworksTab() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <Badge variant="secondary" className="text-xs">
-                                        {stage.questions.length} questions
+                                        {stage.questions.length} {t('consultorTools.questions')}
                                       </Badge>
                                       {isStageExpanded ? (
                                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
