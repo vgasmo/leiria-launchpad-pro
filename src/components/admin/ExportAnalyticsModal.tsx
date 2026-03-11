@@ -145,4 +145,4 @@ export const ExportAnalyticsModal = forwardRef<HTMLDivElement, ExportAnalyticsMo
       </DialogContent>
     </Dialog>
   );
-}
+});
