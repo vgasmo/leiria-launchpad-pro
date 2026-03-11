@@ -208,4 +208,4 @@ export const CalendarWidget = forwardRef<HTMLDivElement, CalendarWidgetProps>(fu
       </CardContent>
     </Card>
   );
-}
+});
