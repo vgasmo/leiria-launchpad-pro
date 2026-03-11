@@ -38,7 +38,7 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       {hasErrors ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Cannot Publish</AlertTitle>
+          <AlertTitle>{t('admin.wizard.cannotPublish', 'Não é possível publicar')}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside mt-2 space-y-1">
               {validationErrors.map((error, idx) => (
