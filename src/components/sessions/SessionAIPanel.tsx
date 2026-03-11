@@ -428,7 +428,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm">Suggested Action Items</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.suggestedActions', 'Ações Sugeridas')}</CardTitle>
                         <Badge variant="secondary" className="text-xs">{actionSuggestions.length}</Badge>
                       </div>
                       {expandedSections.actions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
