@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, FileSpreadsheet, FileText, Check, Loader2 } from 'lucide-react';
@@ -45,7 +45,7 @@ const EXPORT_OPTIONS = [
   },
 ] as const;
 
-export function ExportAnalyticsModal({ open, onOpenChange }: ExportAnalyticsModalProps) {
+export const ExportAnalyticsModal = forwardRef<HTMLDivElement, ExportAnalyticsModalProps>(function ExportAnalyticsModal({ open, onOpenChange }, ref) {
   const { t } = useTranslation();
   const [exporting, setExporting] = useState<string | null>(null);
   const [completed, setCompleted] = useState<string[]>([]);
@@ -68,7 +68,7 @@ export function ExportAnalyticsModal({ open, onOpenChange }: ExportAnalyticsModa
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent ref={ref} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -145,4 +145,4 @@ export function ExportAnalyticsModal({ open, onOpenChange }: ExportAnalyticsModa
       </DialogContent>
     </Dialog>
   );
-}
+});
