@@ -287,7 +287,7 @@ export function CoachingToolkitTab() {
             return (
               <TabsTrigger key={cat.key} value={cat.key} className="gap-2">
                 <Icon className={cn('h-4 w-4', cat.color)} />
-                {cat.label}
+                {t(CATEGORY_KEYS[cat.key])}
                 <Badge variant="secondary" className="ml-1 text-xs">
                   {count}
                 </Badge>
