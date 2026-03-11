@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, addDays } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
@@ -16,7 +16,7 @@ interface CalendarWidgetProps {
   className?: string;
 }
 
-export function CalendarWidget({ className }: CalendarWidgetProps) {
+export const CalendarWidget = forwardRef<HTMLDivElement, CalendarWidgetProps>(function CalendarWidget({ className }, ref) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { data: sessions, isLoading } = useUpcomingSessions();
@@ -208,4 +208,4 @@ export function CalendarWidget({ className }: CalendarWidgetProps) {
       </CardContent>
     </Card>
   );
-}
+});

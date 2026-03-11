@@ -1447,7 +1447,9 @@
     "submitting": "A submeter...",
     "success": "Sucesso",
     "title": "Título",
+    "thisMonth": "Este mês",
     "today": "Hoje",
+    "total": "Total",
     "tomorrow": "Amanhã",
     "tryAgain": "Tentar Novamente",
     "undo": "Desfazer",
@@ -3246,6 +3248,10 @@
     "viewConnectionRequests": "Ver Pedidos de Ligação",
     "welcomeTitle": "Bem-vindo ao Painel de Mentor",
     "yourImpact": "O Teu Impacto",
+    "reviews": "avaliações",
+    "monthlyGoal": "Objetivo mensal",
+    "hoursByStartup": "Horas por Startup",
+    "timeBreakdown": "Distribuição do tempo investido",
     "postSession": {
       "title": "Regista as notas da sessão",
       "subtitle": "Tens sessões recentes sem notas — regista enquanto estão frescas."
