@@ -381,7 +381,7 @@ export function SessionFrameworksTab() {
                           }}
                         >
                           <Copy className="h-3.5 w-3.5 mr-1" />
-                          Agenda
+                          {t('consultorTools.agenda')}
                         </Button>
                         {isExpanded ? (
                           <ChevronUp className="h-5 w-5 text-muted-foreground" />
