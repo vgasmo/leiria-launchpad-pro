@@ -167,7 +167,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
               <SelectValue placeholder="Select program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="all">{t('common.all', 'Todos')} {t('common.program', 'Programa')}s</SelectItem>
             </SelectContent>
           </Select>
         </div>
