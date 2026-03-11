@@ -511,7 +511,7 @@ export function SessionFrameworksTab() {
                       <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                         <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2 flex items-center gap-1">
                           <Lightbulb className="h-3 w-3" />
-                          Pro Tips
+                          {t('consultorTools.proTips')}
                         </p>
                         <ul className="space-y-1">
                           {framework.tips.map((tip, i) => (
