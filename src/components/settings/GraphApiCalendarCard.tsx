@@ -150,7 +150,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span>Invite attendees</span>
+            <span>{t('settings.inviteAttendees', 'Convidar participantes')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Link2 className="h-4 w-4 text-muted-foreground" />
