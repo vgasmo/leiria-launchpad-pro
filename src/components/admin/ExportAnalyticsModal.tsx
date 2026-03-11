@@ -45,7 +45,7 @@ const EXPORT_OPTIONS = [
   },
 ] as const;
 
-export function ExportAnalyticsModal({ open, onOpenChange }: ExportAnalyticsModalProps) {
+export const ExportAnalyticsModal = forwardRef<HTMLDivElement, ExportAnalyticsModalProps>(function ExportAnalyticsModal({ open, onOpenChange }, ref) {
   const { t } = useTranslation();
   const [exporting, setExporting] = useState<string | null>(null);
   const [completed, setCompleted] = useState<string[]>([]);
