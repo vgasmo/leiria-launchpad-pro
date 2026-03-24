@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { useGlobalSearch, useTags, useSaveSearch, useSavedSearches, useDeleteSavedSearch, SearchResult, SearchFilters } from '@/hooks/useGlobalSearch';
 import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/contexts/AuthContext';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
 const RESULT_TYPES = [
