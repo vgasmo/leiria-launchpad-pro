@@ -278,6 +278,12 @@ export default function WorkspaceDetail() {
         <div className="animate-fade-in">
           {activeTab === 'overview' && (
             <div role="tabpanel" id="tabpanel-overview" aria-labelledby="tab-overview">
+              {/* AI Relationship Recap — visible to staff only */}
+              {isStaff && (
+                <div className="mb-6">
+                  <RelationshipRecapCard workspaceId={workspace.id} />
+                </div>
+              )}
               <WorkspaceOverview 
                 workspace={{
                   id: workspace.id,

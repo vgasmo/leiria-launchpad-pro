@@ -52,6 +52,9 @@ export default function StaffCockpit() {
         {/* Portfolio Overview */}
         <CockpitPortfolioOverview workspaces={workspaces} />
 
+        {/* Silent Disengagement Alerts */}
+        <SilentDisengagementCard workspaces={workspaces} />
+
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* LEFT: Smart Triage & Intake */}
