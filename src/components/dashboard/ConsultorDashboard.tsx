@@ -503,7 +503,9 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
         </div>
       </Card>
 
-      {/* SECTION 3: Portfolio Management — Deeper operational view */}
+      {/* SECTION 3: Portfolio Performance Table — Dense operational view */}
+      <PortfolioPerformanceTable workspaces={workspaces} />
+
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
         {t('consultor.portfolioSection', { defaultValue: 'Gestão de Portefólio' })}
       </p>
