@@ -8,6 +8,7 @@ import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
+import { SilentDisengagementCard } from '@/components/staff/SilentDisengagementCard';
 import { OnboardingPipelineCard } from '@/components/staff/OnboardingPipelineCard';
 import { AdminQuickAccessCard } from '@/components/staff/AdminQuickAccessCard';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
