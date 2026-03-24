@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { UnifiedSmartInbox } from '@/components/dashboard/UnifiedSmartInbox';
+import { PortfolioPerformanceTable } from '@/components/dashboard/PortfolioPerformanceTable';
 import { toast } from 'sonner';
 import { isToday, isThisWeek, format, differenceInDays, isPast } from 'date-fns';
 import { pt } from 'date-fns/locale';

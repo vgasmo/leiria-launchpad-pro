@@ -269,8 +269,17 @@ export default function SearchPage() {
               </Badge>
             ))}
           </div>
-        )}
+          )}
 
+          {/* Staff-only: show all workspace statuses toggle */}
+          {isStaff && (
+            <div className="flex items-center gap-2">
+              <Switch checked={showAllStatuses} onCheckedChange={setShowAllStatuses} />
+              <span className="text-xs text-muted-foreground">
+                {t('search.showAllStatuses', { defaultValue: 'Mostrar todos os estados' })}
+              </span>
+            </div>
+          )}
         {/* Results */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
