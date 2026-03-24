@@ -8,6 +8,7 @@ import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
 import { CockpitPortfolioOverview } from '@/components/staff/CockpitPortfolioOverview';
+import { SilentDisengagementCard } from '@/components/staff/SilentDisengagementCard';
 import { OnboardingPipelineCard } from '@/components/staff/OnboardingPipelineCard';
 import { AdminQuickAccessCard } from '@/components/staff/AdminQuickAccessCard';
 import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsManager';
@@ -50,6 +51,9 @@ export default function StaffCockpit() {
 
         {/* Portfolio Overview */}
         <CockpitPortfolioOverview workspaces={workspaces} />
+
+        {/* Silent Disengagement Alerts */}
+        <SilentDisengagementCard workspaces={workspaces} />
 
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">

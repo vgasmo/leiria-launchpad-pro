@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { useGlobalSearch, useTags, useSaveSearch, useSavedSearches, useDeleteSavedSearch, SearchResult, SearchFilters } from '@/hooks/useGlobalSearch';
 import { useWorkspaces, ALL_WORKSPACE_STATUSES } from '@/hooks/useWorkspaces';
+import { useAuth } from '@/contexts/AuthContext';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
 const RESULT_TYPES = [
@@ -32,9 +34,12 @@ const DATE_RANGES = [
 
 export default function SearchPage() {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useAuth();
+  const isStaff = isAdmin || isConsultor;
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [showAllStatuses, setShowAllStatuses] = useState(false);
   const [filters, setFilters] = useState<Omit<SearchFilters, 'query'>>({
     types: [],
     workspaceIds: [],
@@ -44,7 +49,9 @@ export default function SearchPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
 
-  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
+  // Default: only active workspaces. Staff can toggle to see all statuses.
+  const workspaceStatuses = (isStaff && showAllStatuses) ? ALL_WORKSPACE_STATUSES : undefined;
+  const { data: workspaces } = useWorkspaces({}, false, workspaceStatuses);
   const { data: tags } = useTags();
   const { data: savedSearches } = useSavedSearches();
   const saveSearch = useSaveSearch();
@@ -262,8 +269,17 @@ export default function SearchPage() {
               </Badge>
             ))}
           </div>
-        )}
+          )}
 
+          {/* Staff-only: show all workspace statuses toggle */}
+          {isStaff && (
+            <div className="flex items-center gap-2">
+              <Switch checked={showAllStatuses} onCheckedChange={setShowAllStatuses} />
+              <span className="text-xs text-muted-foreground">
+                {t('search.showAllStatuses', { defaultValue: 'Mostrar todos os estados' })}
+              </span>
+            </div>
+          )}
         {/* Results */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
