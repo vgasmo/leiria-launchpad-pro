@@ -29,6 +29,7 @@ import { TeamTab } from '@/components/workspace/TeamTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
+import { RelationshipRecapCard } from '@/components/workspace/RelationshipRecapCard';
 import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { useWorkspace } from '@/hooks/useWorkspaces';
