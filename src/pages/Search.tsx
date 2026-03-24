@@ -34,9 +34,12 @@ const DATE_RANGES = [
 
 export default function SearchPage() {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useAuth();
+  const isStaff = isAdmin || isConsultor;
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [showAllStatuses, setShowAllStatuses] = useState(false);
   const [filters, setFilters] = useState<Omit<SearchFilters, 'query'>>({
     types: [],
     workspaceIds: [],
@@ -46,7 +49,9 @@ export default function SearchPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
 
-  const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
+  // Default: only active workspaces. Staff can toggle to see all statuses.
+  const workspaceStatuses = (isStaff && showAllStatuses) ? ALL_WORKSPACE_STATUSES : undefined;
+  const { data: workspaces } = useWorkspaces({}, false, workspaceStatuses);
   const { data: tags } = useTags();
   const { data: savedSearches } = useSavedSearches();
   const saveSearch = useSaveSearch();
