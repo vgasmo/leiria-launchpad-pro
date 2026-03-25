@@ -125,8 +125,8 @@ export default function PublicBooking() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) {
-      toast.error(t('publicBooking.fillRequired', { defaultValue: 'Please fill in your name and email' }));
+    if (!formData.name || !formData.email || !formData.sector || !formData.stage) {
+      toast.error(t('publicBooking.fillRequired', { defaultValue: 'Preencha os campos obrigatórios: nome, email, setor e fase' }));
       return;
     }
     bookMutation.mutate();
