@@ -204,9 +204,7 @@ export default function Admin() {
           <ComplianceDashboard />
         </TabsContent>
 
-        <TabsContent value="lifecycle">
-          <ContractLifecycleHub />
-        </TabsContent>
+        {/* lifecycle merged into backoffice */}
 
         <TabsContent value="backoffice">
           <AdminBackoffice />
