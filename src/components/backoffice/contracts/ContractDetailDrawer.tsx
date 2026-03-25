@@ -562,6 +562,11 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               </div>
             </TabsContent>
 
+            {/* Signature Tab */}
+            <TabsContent value="signature" className="mt-4 space-y-4 pb-8">
+              <SignatureProviderPanel contract={contract} />
+            </TabsContent>
+
             {/* Pricing Tab */}
             <TabsContent value="pricing" className="mt-4 pb-8">
               {pricing ? (
