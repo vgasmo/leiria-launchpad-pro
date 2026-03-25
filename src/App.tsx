@@ -51,6 +51,7 @@ const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
 const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
+const ContractOnboarding = lazy(() => import("./pages/ContractOnboarding"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
