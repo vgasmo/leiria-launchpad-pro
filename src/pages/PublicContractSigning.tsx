@@ -90,11 +90,27 @@ const STEPS: { key: WizardStep; icon: typeof Building2 }[] = [
   { key: 'signing', icon: PenTool },
 ];
 
-const stepLabels: Record<WizardStep, { pt: string; en: string }> = {
+type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | string;
+
+const providerLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
+  switch (p) {
+    case 'docusign': return 'DocuSign';
+    case 'pandadoc': return 'PandaDoc';
+    case 'manual': return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
+    default: return lang === 'pt' ? 'Assinatura' : 'Signature';
+  }
+};
+
+const stepSigningLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
+  if (p === 'manual') return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
+  return lang === 'pt' ? 'Assinatura Digital' : 'Digital Signature';
+};
+
+const getStepLabels = (provider: SignatureProvider): Record<WizardStep, { pt: string; en: string }> => ({
   company_data: { pt: 'Dados e Documentos', en: 'Data & Documents' },
   review_contract: { pt: 'Rever Contrato', en: 'Review Contract' },
-  signing: { pt: 'Assinatura Digital', en: 'Digital Signature' },
-};
+  signing: { pt: stepSigningLabel(provider, 'pt'), en: stepSigningLabel(provider, 'en') },
+});
 
 export default function PublicContractSigning() {
   const { token } = useParams<{ token: string }>();
@@ -228,7 +244,7 @@ export default function PublicContractSigning() {
     onError: () => toast.error(isPt ? 'Erro ao guardar dados' : 'Error saving data'),
   });
 
-  // Submit for digital signature (provider-agnostic — backend resolves provider)
+  // Submit for signature (provider-agnostic — backend resolves provider)
   const submitForSigning = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
@@ -240,7 +256,12 @@ export default function PublicContractSigning() {
     },
     onSuccess: () => {
       setCurrentStep('signing');
-      toast.success(isPt ? 'Contrato enviado para assinatura digital!' : 'Contract sent for digital signature!');
+      const sigProv: SignatureProvider = contract?.signature_provider || 'manual';
+      if (sigProv === 'manual') {
+        toast.success(isPt ? 'Contrato submetido para assinatura manual!' : 'Contract submitted for manual signature!');
+      } else {
+        toast.success(isPt ? `Contrato enviado para assinatura via ${providerLabel(sigProv, 'pt')}!` : `Contract sent for signature via ${providerLabel(sigProv, 'en')}!`);
+      }
     },
     onError: (err: any) => {
       toast.error(err?.message || (isPt ? 'Erro ao enviar para assinatura' : 'Signing error'));
@@ -300,7 +321,9 @@ export default function PublicContractSigning() {
   }
 
   const sigStatus = contract.signature_status;
+  const sigProvider: SignatureProvider = contract.signature_provider || 'manual';
   const startupName = contract.workspace?.startup?.name || 'Startup';
+  const stepLabels = getStepLabels(sigProvider);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -599,9 +622,13 @@ export default function PublicContractSigning() {
                 {isPt ? 'Rever Contrato e Regulamento' : 'Review Contract & Regulation'}
               </CardTitle>
               <CardDescription>
-                {isPt
-                  ? 'Reveja os documentos antes de enviar para assinatura digital.'
-                  : 'Review the documents before sending for digital signature.'}
+                {sigProvider === 'manual'
+                  ? (isPt
+                    ? 'Reveja os documentos antes de submeter para assinatura manual.'
+                    : 'Review the documents before submitting for manual signature.')
+                  : (isPt
+                    ? `Reveja os documentos antes de enviar para assinatura via ${providerLabel(sigProvider, 'pt')}.`
+                    : `Review the documents before sending for signature via ${providerLabel(sigProvider, 'en')}.`)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -727,21 +754,28 @@ export default function PublicContractSigning() {
                   className="gap-2"
                 >
                   {submitForSigning.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PenTool className="h-4 w-4" />}
-                  {isPt ? 'Enviar para Assinatura' : 'Send for Signature'}
+                  {sigProvider === 'manual'
+                    ? (isPt ? 'Submeter Contrato' : 'Submit Contract')
+                    : (isPt ? `Enviar via ${providerLabel(sigProvider, 'pt')}` : `Send via ${providerLabel(sigProvider, 'en')}`)}
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* ===== Step 3: Signing Status ===== */}
+        {/* ===== Step 3: Signing Status (provider-aware) ===== */}
         {currentStep === 'signing' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PenTool className="h-5 w-5 text-primary" />
-                {isPt ? 'Assinatura Digital' : 'Digital Signature'}
+                {stepSigningLabel(sigProvider, lang)}
               </CardTitle>
+              {sigProvider !== 'manual' && (
+                <CardDescription className="flex items-center gap-1.5">
+                  <Badge variant="secondary" className="text-[10px]">{providerLabel(sigProvider, lang)}</Badge>
+                </CardDescription>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {sigStatus === 'completed' ? (
@@ -751,12 +785,44 @@ export default function PublicContractSigning() {
                     {isPt ? 'Contrato Assinado!' : 'Contract Signed!'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {isPt
-                      ? 'O contrato foi assinado digitalmente com sucesso. Receberá um email com os acessos à plataforma.'
-                      : 'The contract has been digitally signed. You will receive an email with platform access.'}
+                    {sigProvider === 'manual'
+                      ? (isPt
+                        ? 'O contrato foi assinado com sucesso. Receberá um email com os acessos à plataforma.'
+                        : 'The contract has been signed successfully. You will receive an email with platform access.')
+                      : (isPt
+                        ? `O contrato foi assinado via ${providerLabel(sigProvider, 'pt')} com sucesso. Receberá um email com os acessos à plataforma.`
+                        : `The contract has been signed via ${providerLabel(sigProvider, 'en')} successfully. You will receive an email with platform access.`)}
                   </p>
                 </div>
+              ) : sigProvider === 'manual' ? (
+                /* ---- MANUAL provider: no digital redirect ---- */
+                <div className="text-center py-8 space-y-4">
+                  <div className="mx-auto w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+                    <FileText className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {isPt ? 'Assinatura Manual em Processamento' : 'Manual Signature in Progress'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {isPt
+                        ? 'O seu contrato foi submetido para assinatura manual. A equipa da Startup Leiria irá contactá-lo para agendar a assinatura presencial do contrato.'
+                        : 'Your contract has been submitted for manual signature. The Startup Leiria team will contact you to schedule the in-person contract signing.'}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isPt
+                        ? <>Email de contacto: <strong>{formData.legal_representative_email}</strong></>
+                        : <>Contact email: <strong>{formData.legal_representative_email}</strong></>}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {sigStatus === 'pending_manual'
+                      ? (isPt ? 'Aguarda contacto da equipa' : 'Awaiting team contact')
+                      : (isPt ? 'Submetido' : 'Submitted')}
+                  </Badge>
+                </div>
               ) : (
+                /* ---- DIGITAL providers (DocuSign / PandaDoc): bilateral flow ---- */
                 <div className="text-center py-8 space-y-4">
                   <div className="relative mx-auto w-20 h-20">
                     <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
@@ -769,8 +835,8 @@ export default function PublicContractSigning() {
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       {isPt
-                        ? <>O contrato foi enviado para assinatura bilateral. Verifique o email <strong>{formData.legal_representative_email}</strong>.</>
-                        : <>The contract was sent for bilateral signature. Check your email at <strong>{formData.legal_representative_email}</strong>.</>}
+                        ? <>O contrato foi enviado para assinatura via <strong>{providerLabel(sigProvider, 'pt')}</strong>. Verifique o email <strong>{formData.legal_representative_email}</strong>.</>
+                        : <>The contract was sent for signature via <strong>{providerLabel(sigProvider, 'en')}</strong>. Check your email at <strong>{formData.legal_representative_email}</strong>.</>}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {isPt
@@ -787,11 +853,11 @@ export default function PublicContractSigning() {
                       {sigStatus === 'sent_for_signature' || sigStatus === 'viewed' ? (
                         <Badge variant="outline" className="text-[10px]">{isPt ? 'Pendente' : 'Pending'}</Badge>
                       ) : (
-                        <Badge className="text-[10px] bg-green-100 text-green-700">{isPt ? 'Assinado' : 'Signed'}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{isPt ? 'Assinado' : 'Signed'}</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center text-[10px] font-bold text-amber-700">2</div>
+                      <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">2</div>
                       <span className="flex-1">{isPt ? 'Startup Leiria (Segundo Outorgante)' : 'Startup Leiria (Second Party)'}</span>
                       <Badge variant="outline" className="text-[10px]">{isPt ? 'Aguarda' : 'Waiting'}</Badge>
                     </div>
@@ -799,13 +865,11 @@ export default function PublicContractSigning() {
 
                   <Badge variant="outline" className="text-xs">
                     {sigStatus === 'sent_for_signature'
-                      ? (isPt ? 'Enviado para assinatura' : 'Sent for signature')
+                      ? (isPt ? `Enviado via ${providerLabel(sigProvider, 'pt')}` : `Sent via ${providerLabel(sigProvider, 'en')}`)
                       : sigStatus === 'viewed'
                       ? (isPt ? 'Documento visualizado' : 'Document viewed')
                       : sigStatus === 'declined'
                       ? (isPt ? 'Assinatura recusada' : 'Signature declined')
-                      : sigStatus === 'pending_manual'
-                      ? (isPt ? 'Processamento em curso' : 'Processing')
                       : (isPt ? 'Pendente' : 'Pending')}
                   </Badge>
                 </div>
