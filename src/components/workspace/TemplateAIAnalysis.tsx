@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { AiFallbackCard } from '@/components/ui/AiFallbackCard';
 
 interface AIAnalysis {
   overall_score: number;
