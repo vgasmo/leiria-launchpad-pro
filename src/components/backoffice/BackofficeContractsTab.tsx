@@ -144,6 +144,15 @@ export function BackofficeContractsTab() {
     return workspaces.filter(w => !contractedWorkspaceIds.has(w.id));
   }, [workspaces, contracts]);
 
+  // Resolve default workspace from CRM params
+  const resolvedDefaultWorkspaceId = useMemo(() => {
+    if (crmWorkspaceId) return crmWorkspaceId;
+    if (!crmOrgName || !workspaces) return undefined;
+    const orgLower = crmOrgName.toLowerCase();
+    const match = workspaces.find(w => (w as any).startup?.name?.toLowerCase() === orgLower);
+    return match?.id;
+  }, [crmWorkspaceId, crmOrgName, workspaces]);
+
   const toggleWorkspaceSelection = (workspaceId: string) => {
     setSelectedWorkspaces(prev => {
       const next = new Set(prev);
