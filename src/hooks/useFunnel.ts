@@ -28,6 +28,11 @@ export interface FunnelItem {
   next_action_at: string | null;
   next_action_description: string | null;
   last_activity_at: string | null;
+  deal_value: number | null;
+  deal_currency: string | null;
+  expected_close_date: string | null;
+  win_probability: number | null;
+  loss_reason: string | null;
   created_at: string;
   updated_at: string;
   owner?: { id: string; full_name: string | null; email: string } | null;
