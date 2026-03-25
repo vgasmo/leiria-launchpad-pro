@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, 
   TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator,
-  FileDown, Loader2
+  FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send
 } from 'lucide-react';
 import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
@@ -388,6 +388,10 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               <TabsTrigger value="details" className="flex-1 gap-1.5 text-xs">
                 <Info className="h-3.5 w-3.5" />
                 {t('common.details')}
+              </TabsTrigger>
+              <TabsTrigger value="signature" className="flex-1 gap-1.5 text-xs">
+                <Shield className="h-3.5 w-3.5" />
+                {t('contractDetail.signatureTab', { defaultValue: 'Assinatura' })}
               </TabsTrigger>
               <TabsTrigger value="pricing" className="flex-1 gap-1.5 text-xs">
                 <Calculator className="h-3.5 w-3.5" />
