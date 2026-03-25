@@ -188,6 +188,11 @@ export function FounderDashboard({
         <FounderReadinessStrip workspace={workspace} />
       </WidgetErrorBoundary>
 
+      {/* ★ PENDING CONTRACT — High-priority CTA for unsigned contracts ★ */}
+      <WidgetErrorBoundary name="PendingContract">
+        <PendingContractBanner workspaceId={workspace.id} />
+      </WidgetErrorBoundary>
+
       {/* ★ JOURNEY MAP — Gamified visual ★ */}
       <WidgetErrorBoundary name="JourneyMap">
         <FounderJourneyMap currentStage={workspace.stage} />
