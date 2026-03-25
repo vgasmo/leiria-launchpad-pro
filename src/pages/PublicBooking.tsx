@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +40,10 @@ export default function PublicBooking() {
     email: '',
     phone: '',
     organization: '',
+    sector: '',
+    stage: '',
+    referral_source: '',
+    has_team: '',
     message: '',
   });
 
@@ -120,8 +125,8 @@ export default function PublicBooking() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) {
-      toast.error(t('publicBooking.fillRequired', { defaultValue: 'Please fill in your name and email' }));
+    if (!formData.name || !formData.email || !formData.sector || !formData.stage) {
+      toast.error(t('publicBooking.fillRequired', { defaultValue: 'Preencha os campos obrigatórios: nome, email, setor e fase' }));
       return;
     }
     bookMutation.mutate();
@@ -306,7 +311,68 @@ export default function PublicBooking() {
                     />
                   </div>
                 </div>
-                
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>{t('publicBooking.sector', { defaultValue: 'Setor / Indústria' })} *</Label>
+                    <Select value={formData.sector} onValueChange={(v) => setFormData({ ...formData, sector: v })}>
+                      <SelectTrigger><SelectValue placeholder={t('publicBooking.sectorPlaceholder', { defaultValue: 'Selecione o setor' })} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="healthtech">HealthTech</SelectItem>
+                        <SelectItem value="edtech">EdTech</SelectItem>
+                        <SelectItem value="fintech">Fintech</SelectItem>
+                        <SelectItem value="saas">SaaS / Software</SelectItem>
+                        <SelectItem value="ecommerce">E-commerce / Marketplace</SelectItem>
+                        <SelectItem value="cleantech">CleanTech / Sustentabilidade</SelectItem>
+                        <SelectItem value="foodtech">FoodTech / AgriTech</SelectItem>
+                        <SelectItem value="manufacturing">Indústria / Manufacturing</SelectItem>
+                        <SelectItem value="social_impact">Impacto Social</SelectItem>
+                        <SelectItem value="other">{t('common.other', { defaultValue: 'Outro' })}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('publicBooking.stage', { defaultValue: 'Fase da Startup' })} *</Label>
+                    <Select value={formData.stage} onValueChange={(v) => setFormData({ ...formData, stage: v })}>
+                      <SelectTrigger><SelectValue placeholder={t('publicBooking.stagePlaceholder', { defaultValue: 'Selecione a fase' })} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="idea">{t('publicBooking.stageIdea', { defaultValue: 'Ideia / Conceito' })}</SelectItem>
+                        <SelectItem value="mvp">{t('publicBooking.stageMvp', { defaultValue: 'MVP / Protótipo' })}</SelectItem>
+                        <SelectItem value="early_revenue">{t('publicBooking.stageEarlyRevenue', { defaultValue: 'Early Revenue' })}</SelectItem>
+                        <SelectItem value="growth">{t('publicBooking.stageGrowth', { defaultValue: 'Growth / Escala' })}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>{t('publicBooking.referralSource', { defaultValue: 'Como nos conheceu?' })}</Label>
+                    <Select value={formData.referral_source} onValueChange={(v) => setFormData({ ...formData, referral_source: v })}>
+                      <SelectTrigger><SelectValue placeholder={t('publicBooking.referralPlaceholder', { defaultValue: 'Selecione' })} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="referral">{t('publicBooking.refReferral', { defaultValue: 'Recomendação' })}</SelectItem>
+                        <SelectItem value="event">{t('publicBooking.refEvent', { defaultValue: 'Evento' })}</SelectItem>
+                        <SelectItem value="social_media">{t('publicBooking.refSocial', { defaultValue: 'Redes Sociais' })}</SelectItem>
+                        <SelectItem value="website">{t('publicBooking.refWebsite', { defaultValue: 'Website' })}</SelectItem>
+                        <SelectItem value="press">{t('publicBooking.refPress', { defaultValue: 'Imprensa / Media' })}</SelectItem>
+                        <SelectItem value="other">{t('common.other', { defaultValue: 'Outro' })}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('publicBooking.hasTeam', { defaultValue: 'Tem equipa formada?' })}</Label>
+                    <Select value={formData.has_team} onValueChange={(v) => setFormData({ ...formData, has_team: v })}>
+                      <SelectTrigger><SelectValue placeholder={t('publicBooking.hasTeamPlaceholder', { defaultValue: 'Selecione' })} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes">{t('common.yes', { defaultValue: 'Sim' })}</SelectItem>
+                        <SelectItem value="no">{t('common.no', { defaultValue: 'Não' })}</SelectItem>
+                        <SelectItem value="forming">{t('publicBooking.teamForming', { defaultValue: 'Em formação' })}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="message">{t('publicBooking.whatToDiscuss')}</Label>
                   <Textarea
