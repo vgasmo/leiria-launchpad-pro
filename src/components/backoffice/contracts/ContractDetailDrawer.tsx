@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, 
-  TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator 
+  TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator,
+  FileDown, Loader2
 } from 'lucide-react';
 import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
@@ -22,6 +23,7 @@ import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelli
 import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
 import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
 import { supabase } from '@/lib/supabaseClient';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
