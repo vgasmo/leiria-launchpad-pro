@@ -182,12 +182,12 @@ export function BookingLinksManager() {
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>{t('admin.bookingLinks.program', 'Program (optional)')}</Label>
-                  <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                  <Select value={selectedProgram || '__any__'} onValueChange={(v) => setSelectedProgram(v === '__any__' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Any program" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any program</SelectItem>
+                      <SelectItem value="__any__">Any program</SelectItem>
                       {programs?.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
@@ -197,7 +197,7 @@ export function BookingLinksManager() {
                 
                 <div className="space-y-2">
                   <Label>{t('admin.bookingLinks.expires', 'Expires in')}</Label>
-                  <Select value={expiresInDays} onValueChange={setExpiresInDays}>
+                  <Select value={expiresInDays || '__never__'} onValueChange={(v) => setExpiresInDays(v === '__never__' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -205,7 +205,7 @@ export function BookingLinksManager() {
                       <SelectItem value="7">7 days</SelectItem>
                       <SelectItem value="30">30 days</SelectItem>
                       <SelectItem value="90">90 days</SelectItem>
-                      <SelectItem value="">Never</SelectItem>
+                      <SelectItem value="__never__">Never</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

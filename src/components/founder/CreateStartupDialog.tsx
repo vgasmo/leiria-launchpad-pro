@@ -259,7 +259,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
                 </SelectTrigger>
                 <SelectContent>
                   {loadingPrograms ? (
-                    <SelectItem value="" disabled>{t('common.loading')}</SelectItem>
+                    <SelectItem value="__loading__" disabled>{t('common.loading')}</SelectItem>
                   ) : (
                     programs?.map((p) => (
                       <SelectItem key={p.id} value={p.id}>

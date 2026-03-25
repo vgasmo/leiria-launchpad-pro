@@ -5,7 +5,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, TrendingUp, 
   Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, Tag, GitBranch
+  ChevronDown, Database, Tag, GitBranch, UserPlus
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -34,10 +34,11 @@ import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
+import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCenter';
 
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
-  operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
+  operations: ['approvals', 'enrollment', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
   crm: ['funnel'],
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   reports: ['analytics', 'health'],
@@ -86,6 +87,7 @@ export default function Admin() {
   const getTabIcon = (tab: string) => {
     const icons: Record<string, React.ReactNode> = {
       approvals: <Clock className="h-4 w-4" />,
+      enrollment: <UserPlus className="h-4 w-4" />,
       compliance: <ShieldCheck className="h-4 w-4" />,
       lifecycle: <GitBranch className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
@@ -109,6 +111,7 @@ export default function Admin() {
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
       approvals: t('admin.approvals'),
+      enrollment: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }),
       compliance: t('admin.compliance'),
       lifecycle: t('admin.lifecycle'),
       backoffice: t('admin.backoffice.tab'),
@@ -193,6 +196,10 @@ export default function Admin() {
 
         <TabsContent value="approvals">
           <PendingApprovalsManager />
+        </TabsContent>
+
+        <TabsContent value="enrollment">
+          <EnrollmentControlCenter />
         </TabsContent>
 
         <TabsContent value="compliance">

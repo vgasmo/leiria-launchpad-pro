@@ -387,12 +387,12 @@ export function AdminTagCategoriesManager() {
             </div>
             <div className="space-y-2">
               <Label>{t('common.color')}</Label>
-              <Select value={categoryForm.color} onValueChange={(v) => setCategoryForm(f => ({ ...f, color: v }))}>
+              <Select value={categoryForm.color || '__none__'} onValueChange={(v) => setCategoryForm(f => ({ ...f, color: v === '__none__' ? '' : v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('admin.tags.selectColor', 'Select color')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {COLOR_OPTIONS.map(c => (
                     <SelectItem key={c.value} value={c.value}>
                       <div className="flex items-center gap-2">
@@ -439,12 +439,12 @@ export function AdminTagCategoriesManager() {
             </div>
             <div className="space-y-2">
               <Label>{t('admin.tags.category', 'Category')}</Label>
-              <Select value={tagForm.category_id} onValueChange={(v) => setTagForm(f => ({ ...f, category_id: v }))}>
+              <Select value={tagForm.category_id || '__none__'} onValueChange={(v) => setTagForm(f => ({ ...f, category_id: v === '__none__' ? '' : v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('admin.tags.selectCategory', 'Select category')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {categories?.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
@@ -453,12 +453,12 @@ export function AdminTagCategoriesManager() {
             </div>
             <div className="space-y-2">
               <Label>{t('common.color')}</Label>
-              <Select value={tagForm.color} onValueChange={(v) => setTagForm(f => ({ ...f, color: v }))}>
+              <Select value={tagForm.color || '__none__'} onValueChange={(v) => setTagForm(f => ({ ...f, color: v === '__none__' ? '' : v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('admin.tags.selectColor', 'Select color')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {COLOR_OPTIONS.map(c => (
                     <SelectItem key={c.value} value={c.value}>
                       <div className="flex items-center gap-2">
