@@ -297,17 +297,34 @@ export function BackofficeContractsTab() {
 
       {/* Review Form (Post-Upload or Manual) */}
       {flowState === 'review' && (
-        <ContractReviewForm
-          aiData={aiData}
-          documentUrl={documentUrl}
-          isAIPopulated={isAIPopulated}
-          workspaces={workspaces || []}
-          incubationTypes={incubationTypes}
-          buildings={buildings}
-          onSubmit={handleReviewSubmit}
-          onCancel={handleCancelReview}
-          isSubmitting={createContract.isPending}
-        />
+        <div className="space-y-3">
+          {crmFunnelId && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="py-3 px-4 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  {t('contracts.fromCRM', { org: crmOrgName || 'Lead', defaultValue: 'Criar contrato para: {{org}}' })}
+                </span>
+                <Badge variant="outline" className="ml-auto text-xs">CRM</Badge>
+              </CardContent>
+            </Card>
+          )}
+          <ContractReviewForm
+            aiData={aiData}
+            documentUrl={documentUrl}
+            isAIPopulated={isAIPopulated}
+            workspaces={workspaces || []}
+            incubationTypes={incubationTypes}
+            buildings={buildings}
+            onSubmit={handleReviewSubmit}
+            onCancel={() => {
+              handleCancelReview();
+              setCrmFunnelId(null);
+              setCrmOrgName(null);
+            }}
+            isSubmitting={createContract.isPending}
+          />
+        </div>
       )}
 
       {/* Filters */}
