@@ -31,6 +31,7 @@ import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSh
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
