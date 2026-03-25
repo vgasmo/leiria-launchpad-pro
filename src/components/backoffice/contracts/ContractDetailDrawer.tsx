@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,11 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, TrendingUp, AlertTriangle } from 'lucide-react';
+import { 
+  Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, 
+  TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator 
+} from 'lucide-react';
 import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
 import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
 import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelligenceCard';
+import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
+import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
+import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -38,10 +46,58 @@ interface ContractDetailDrawerProps {
 
 export function ContractDetailDrawer({ contract, incubationTypes, buildings, open, onOpenChange }: ContractDetailDrawerProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const updateContract = useUpdateContract();
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState<Record<string, any>>({});
   const [activeTab, setActiveTab] = useState('details');
+
+  // Fetch discounts for pricing engine
+  const { data: discounts } = useQuery({
+    queryKey: ['contract-discounts', contract?.id],
+    queryFn: async () => {
+      if (!contract?.id) return [];
+      const { data, error } = await supabase
+        .from('contract_discounts')
+        .select('*')
+        .eq('contract_id', contract.id)
+        .order('start_date', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!contract?.id,
+  });
+
+  // Fetch linked invoices count
+  const { data: invoiceCount } = useQuery({
+    queryKey: ['contract-invoice-count', contract?.id],
+    queryFn: async () => {
+      if (!contract?.id) return 0;
+      const { count, error } = await supabase
+        .from('invoices')
+        .select('id', { count: 'exact', head: true })
+        .eq('contract_id', contract.id);
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!contract?.id,
+  });
+
+  // Fetch linked funnel item
+  const { data: linkedFunnelItem } = useQuery({
+    queryKey: ['contract-funnel-link', contract?.id],
+    queryFn: async () => {
+      if (!contract?.funnel_item_id) return null;
+      const { data, error } = await supabase
+        .from('funnel_items')
+        .select('id, organization_name, contact_name, stage')
+        .eq('id', contract.funnel_item_id)
+        .single();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!contract?.funnel_item_id,
+  });
 
   if (!contract) return null;
 
@@ -59,6 +115,33 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   const daysUntilAnniversary = differenceInDays(nextAnniversary, now);
   const endDate = contract.end_date ? new Date(contract.end_date) : null;
   const daysUntilEnd = endDate ? differenceInDays(endDate, now) : null;
+
+  // Calculate pricing using the engine
+  const pricing = useMemo(() => {
+    if (!incubationType) return null;
+    const input: PricingInput = {
+      incubationType: {
+        id: incubationType.id,
+        name: incubationType.name,
+        base_monthly_fee: incubationType.base_monthly_fee || 0,
+        base_currency: incubationType.base_currency || 'EUR',
+        price_per_sqm: incubationType.price_per_sqm,
+        requires_space: incubationType.requires_space || false,
+        is_virtual: incubationType.is_virtual || false,
+        equity_percentage: incubationType.equity_percentage,
+        contract_type: incubationType.contract_type,
+      },
+      building: building ? { id: building.id, name: building.name, code: building.code } : null,
+      squareMeters: contract.square_meters,
+      discounts: discounts || [],
+      contractStartDate: contract.start_date,
+      manualOverride: contract.monthly_fee !== incubationType.base_monthly_fee ? {
+        fee: contract.monthly_fee,
+        reason: 'Custom fee set on contract',
+      } : undefined,
+    };
+    return calculateContractPricing(input);
+  }, [incubationType, building, contract, discounts]);
 
   const startEditing = () => {
     setEditValues({
@@ -172,6 +255,41 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               {t('lifecycle.anniversary', { year: years + 1 })} — {daysUntilAnniversary} {t('lifecycle.daysRemaining', { count: daysUntilAnniversary })}
             </div>
           )}
+
+          {/* Quick Cross-Links Bar */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {contract.workspace_id && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => navigate(`/workspace/${contract.workspace_id}`)}
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t('contractDetail.viewWorkspace')}
+              </Button>
+            )}
+            {linkedFunnelItem && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => navigate('/admin?tab=funnel')}
+              >
+                <LinkIcon className="h-3 w-3" />
+                {t('contractDetail.viewInCRM')}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => navigate('/admin?tab=backoffice')}
+            >
+              <Receipt className="h-3 w-3" />
+              {t('contractDetail.viewInvoices')} {invoiceCount ? `(${invoiceCount})` : ''}
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -180,11 +298,15 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
             <TabsList className="w-full">
               <TabsTrigger value="details" className="flex-1 gap-1.5 text-xs">
                 <Info className="h-3.5 w-3.5" />
-                {t('common.details', { defaultValue: 'Detalhes' })}
+                {t('common.details')}
+              </TabsTrigger>
+              <TabsTrigger value="pricing" className="flex-1 gap-1.5 text-xs">
+                <Calculator className="h-3.5 w-3.5" />
+                {t('contractDetail.pricingTab')}
               </TabsTrigger>
               <TabsTrigger value="discounts" className="flex-1 gap-1.5 text-xs">
                 <Euro className="h-3.5 w-3.5" />
-                {t('admin.backoffice.discounts', { defaultValue: 'Descontos' })}
+                {t('admin.backoffice.discounts')}
               </TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-1 gap-1.5 text-xs">
                 <TrendingUp className="h-3.5 w-3.5" />
@@ -215,7 +337,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
 
               {/* Key Info Grid */}
               <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                {/* Contract Number */}
                 <FieldDisplay
                   label={t('admin.backoffice.contractNumber')}
                   icon={<FileText className="h-3 w-3" />}
@@ -227,7 +348,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   )}
                 </FieldDisplay>
 
-                {/* Monthly Fee */}
                 <FieldDisplay
                   label={t('admin.backoffice.monthlyFee')}
                   icon={<Euro className="h-3 w-3" />}
@@ -239,10 +359,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   )}
                 </FieldDisplay>
 
-                {/* Incubation Type */}
-                <FieldDisplay
-                  label={t('admin.backoffice.type')}
-                >
+                <FieldDisplay label={t('admin.backoffice.type')}>
                   {isEditing ? (
                     <Select
                       value={editValues.incubation_type_id || '__none__'}
@@ -261,7 +378,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   )}
                 </FieldDisplay>
 
-                {/* Building */}
                 <FieldDisplay
                   label={t('admin.backoffice.building')}
                   icon={<Building2 className="h-3 w-3" />}
@@ -284,7 +400,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   )}
                 </FieldDisplay>
 
-                {/* Start Date */}
                 <FieldDisplay
                   label={t('contracts.startDate')}
                   icon={<Calendar className="h-3 w-3" />}
@@ -296,7 +411,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   )}
                 </FieldDisplay>
 
-                {/* End Date */}
                 <FieldDisplay
                   label={t('contracts.endDate')}
                   icon={<Calendar className="h-3 w-3" />}
@@ -311,6 +425,39 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
 
               <Separator />
 
+              {/* Linked Entities Summary */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                  {t('contractDetail.linkedEntities')}
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {incubationType && (
+                    <div className="flex items-center gap-2 text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                      <Badge variant="outline" className="text-[10px]">{incubationType.name}</Badge>
+                    </div>
+                  )}
+                  {building && (
+                    <div className="flex items-center gap-2 text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                      <Building2 className="h-3 w-3" />
+                      {building.name}
+                    </div>
+                  )}
+                  {contract.square_meters && (
+                    <div className="flex items-center gap-2 text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                      📐 {contract.square_meters} m²
+                    </div>
+                  )}
+                  {linkedFunnelItem && (
+                    <div className="flex items-center gap-2 text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                      <LinkIcon className="h-3 w-3" />
+                      CRM: {linkedFunnelItem.organization_name || linkedFunnelItem.contact_name}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Notes */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{t('common.notes')}</Label>
@@ -320,6 +467,18 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contract.notes || t('contracts.noNotes')}</p>
                 )}
               </div>
+            </TabsContent>
+
+            {/* Pricing Tab */}
+            <TabsContent value="pricing" className="mt-4 pb-8">
+              {pricing ? (
+                <PricingBreakdown pricing={pricing} />
+              ) : (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  <Calculator className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>{t('pricing.noIncubationType', { defaultValue: 'Select an incubation type to see pricing breakdown' })}</p>
+                </div>
+              )}
             </TabsContent>
 
             {/* Discounts Tab */}
