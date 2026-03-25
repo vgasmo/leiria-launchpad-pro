@@ -394,6 +394,12 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                   updateFunnelItem.mutate({ id: item.id, linked_contract_id: contractId } as any);
                 }
               }}
+              onInitiateContract={() => {
+                if (item.linked_workspace_id) {
+                  onOpenChange(false);
+                  navigate(`/backoffice?tab=contracts&action=create&workspace=${item.linked_workspace_id}&funnel=${item.id}`);
+                }
+              }}
             />
 
             {!item.linked_workspace_id && !item.linked_startup_id && !item.linked_contract_id && (
