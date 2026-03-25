@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, Clock, Rocket, Shield, AlertCircle, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 
 type ClaimPageState = 'idle' | 'verifying' | 'auto_claimed' | 'already_claimed' | 'pending_review' | 'error';
@@ -105,16 +106,16 @@ export default function ClaimStartup() {
 
   return (
     <main data-testid="claim-startup-page" className="flex min-h-screen items-center justify-center bg-background p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+      <Card className="w-full max-w-md shadow-lg border-border/60">
+        <CardHeader className="text-center pb-4">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
             <Rocket className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl font-heading">
             {t('claimStartup.title', { defaultValue: 'Verificar a sua Startup' })}
           </CardTitle>
-          <CardDescription className="max-w-sm mx-auto">
-            {t('claimStartup.subtitle', { defaultValue: 'Esta plataforma é apenas por convite. Vamos verificar se a sua startup já está preparada no sistema.' })}
+          <CardDescription className="max-w-sm mx-auto text-sm">
+            {t('claimStartup.subtitle', { defaultValue: 'Vamos verificar se a sua startup já está preparada no sistema e associá-la à sua conta.' })}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
@@ -131,21 +132,35 @@ export default function ClaimStartup() {
 
           {/* READY TO VERIFY — primary CTA */}
           {displayState === 'ready_to_verify' && (
-            <div className="flex flex-col items-center gap-4 py-6 text-center w-full">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2.5">
-                <Shield className="h-4 w-4 text-primary shrink-0" />
-                <span>{t('claimStartup.inviteOnlyNote', { defaultValue: 'Plataforma apenas por convite. A verificação é rápida e segura.' })}</span>
+            <div className="flex flex-col items-center gap-5 py-6 text-center w-full">
+              {/* How it works — step by step */}
+              <div className="w-full space-y-2.5 text-left">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+                  {t('claimStartup.howItWorksTitle', { defaultValue: 'Como funciona' })}
+                </p>
+                {[
+                  { step: '1', text: t('claimStartup.step1', { defaultValue: 'Verificamos se existe uma startup associada ao seu email no nosso sistema.' }) },
+                  { step: '2', text: t('claimStartup.step2', { defaultValue: 'Se encontrarmos, a startup é associada automaticamente à sua conta.' }) },
+                  { step: '3', text: t('claimStartup.step3', { defaultValue: 'Se não, o pedido é enviado para a equipa para revisão manual.' }) },
+                ].map(({ step, text }) => (
+                  <div key={step} className="flex items-start gap-3 px-1">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-primary">{step}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
+                  </div>
+                ))}
               </div>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                {t('claimStartup.howItWorks', { defaultValue: 'Vamos verificar se existe uma startup associada ao seu email. Se encontrarmos, será associada automaticamente à sua conta.' })}
-              </p>
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-4 py-2.5 w-full">
+                <Shield className="h-4 w-4 text-primary shrink-0" />
+                <span>{t('claimStartup.securityNote', { defaultValue: 'Processo seguro e confidencial. Os seus dados não são partilhados externamente.' })}</span>
+              </div>
+
               <Button onClick={handleVerify} size="lg" className="gap-2 w-full max-w-xs shadow-lg">
                 <Rocket className="h-5 w-5" />
                 {t('claimStartup.verifyCta', { defaultValue: 'Verificar Agora' })}
               </Button>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t('claimStartup.noMatchHint', { defaultValue: 'Se não encontrarmos correspondência, a nossa equipa irá rever o seu pedido.' })}
-              </p>
             </div>
           )}
 
@@ -153,8 +168,11 @@ export default function ClaimStartup() {
           {displayState === 'verifying' && (
             <div className="flex flex-col items-center gap-3 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t('claimStartup.searching', { defaultValue: 'A verificar a sua startup...' })}
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                {t('claimStartup.searchingHint', { defaultValue: 'Isto demora apenas alguns segundos.' })}
               </p>
             </div>
           )}
@@ -162,12 +180,14 @@ export default function ClaimStartup() {
           {/* AUTO CLAIMED — success */}
           {displayState === 'auto_claimed' && (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <div className="h-16 w-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center ring-1 ring-emerald-200 dark:ring-emerald-800/30">
+                <CheckCircle2 className="h-9 w-9 text-emerald-600 dark:text-emerald-400" />
+              </div>
               <p className="text-lg font-semibold text-foreground">
                 {t('claimStartup.found', { defaultValue: 'Startup verificada com sucesso!' })}
               </p>
               {claimedStartupName && (
-                <p className="text-sm font-medium text-primary">{claimedStartupName}</p>
+                <Badge variant="default" className="text-sm px-3 py-1">{claimedStartupName}</Badge>
               )}
               <p className="text-sm text-muted-foreground">
                 {t('claimStartup.redirecting', { defaultValue: 'A redirecionar para o seu espaço de trabalho...' })}
@@ -179,12 +199,12 @@ export default function ClaimStartup() {
           {/* ALREADY CLAIMED — user already has a workspace */}
           {displayState === 'already_claimed' && (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <CheckCircle2 className="h-12 w-12 text-emerald-500" />
               <p className="text-lg font-semibold text-foreground">
                 {t('claimStartup.alreadyLinked', { defaultValue: 'A sua startup já está associada' })}
               </p>
               {founderState.startupName && (
-                <p className="text-sm font-medium text-primary">{founderState.startupName}</p>
+                <Badge variant="default" className="text-sm px-3 py-1">{founderState.startupName}</Badge>
               )}
               <Button onClick={() => navigate('/my-workspaces', { replace: true })} className="gap-2 mt-2">
                 <ArrowRight className="h-4 w-4" />
@@ -195,36 +215,48 @@ export default function ClaimStartup() {
 
           {/* PENDING REVIEW — claim request submitted, awaiting staff */}
           {(displayState === 'pending_review') && (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <Clock className="h-12 w-12 text-amber-500" />
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center ring-1 ring-amber-200 dark:ring-amber-800/30">
+                <Clock className="h-9 w-9 text-amber-600 dark:text-amber-400" />
+              </div>
               <p className="text-lg font-semibold text-foreground">
                 {t('claimStartup.pendingTitle', { defaultValue: 'Pedido em Análise' })}
               </p>
               <p className="text-sm text-muted-foreground max-w-xs">
-                {t('claimStartup.pendingDesc', { defaultValue: 'Não encontrámos uma correspondência automática, mas a sua equipa irá analisar e associá-lo manualmente. Isto é normal no modelo por convite.' })}
+                {t('claimStartup.pendingDesc', { defaultValue: 'Não encontrámos uma correspondência automática. A equipa irá analisar o seu pedido e associá-lo manualmente.' })}
               </p>
-              <div className="bg-muted/50 rounded-lg px-4 py-2.5 text-xs text-muted-foreground mt-2">
+              <div className="bg-muted/50 rounded-lg px-4 py-2.5 text-xs text-muted-foreground">
                 <p>{profile?.email}</p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t('claimStartup.pendingTiming', { defaultValue: 'Este processo é geralmente concluído em poucos dias úteis.' })}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>{t('claimStartup.pendingTiming', { defaultValue: 'Geralmente concluído em 1-3 dias úteis.' })}</span>
+              </div>
+              <p className="text-xs text-muted-foreground/60 max-w-xs">
+                {t('claimStartup.pendingReassurance', { defaultValue: 'Não precisa de fazer mais nada. Receberá acesso assim que a equipa confirmar.' })}
               </p>
             </div>
           )}
 
           {/* PENDING APPLICATION — founder submitted a new startup */}
           {displayState === 'pending_application' && (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <Clock className="h-12 w-12 text-amber-500" />
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center ring-1 ring-amber-200 dark:ring-amber-800/30">
+                <Clock className="h-9 w-9 text-amber-600 dark:text-amber-400" />
+              </div>
               <p className="text-lg font-semibold text-foreground">
                 {t('claimStartup.applicationPendingTitle', { defaultValue: 'Candidatura em Análise' })}
               </p>
               {founderState.startupName && (
-                <p className="text-sm font-medium text-primary">{founderState.startupName}</p>
+                <Badge variant="secondary" className="text-sm px-3 py-1">{founderState.startupName}</Badge>
               )}
               <p className="text-sm text-muted-foreground max-w-xs">
                 {t('claimStartup.applicationPendingDesc', { defaultValue: 'A sua candidatura foi recebida e está a ser analisada pela nossa equipa. Será notificado assim que for aprovada.' })}
               </p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>{t('claimStartup.pendingTiming', { defaultValue: 'Geralmente concluído em 1-3 dias úteis.' })}</span>
+              </div>
             </div>
           )}
 
@@ -232,10 +264,13 @@ export default function ClaimStartup() {
           {displayState === 'error' && (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <AlertCircle className="h-12 w-12 text-destructive" />
-              <p className="text-sm text-destructive">
-                {t('claimStartup.error', { defaultValue: 'Ocorreu um erro na verificação. Por favor tente novamente.' })}
+              <p className="text-sm font-medium text-foreground">
+                {t('claimStartup.errorTitle', { defaultValue: 'Erro na verificação' })}
               </p>
-              <Button onClick={() => setPageState('idle')} variant="outline">
+              <p className="text-xs text-muted-foreground max-w-xs">
+                {t('claimStartup.error', { defaultValue: 'Ocorreu um erro temporário. Os seus dados estão seguros. Por favor tente novamente.' })}
+              </p>
+              <Button onClick={() => setPageState('idle')} variant="outline" className="gap-2">
                 {t('common.retry', { defaultValue: 'Tentar novamente' })}
               </Button>
             </div>
