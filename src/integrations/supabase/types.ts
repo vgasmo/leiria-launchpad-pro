@@ -5012,6 +5012,11 @@ export type Database = {
         Row: {
           billing_day: number | null
           building_id: string | null
+          company_address: string | null
+          company_city: string | null
+          company_country: string | null
+          company_nif: string | null
+          company_postal_code: string | null
           contract_number: string | null
           created_at: string
           created_by: string | null
@@ -5020,14 +5025,22 @@ export type Database = {
           discount_percentage: number | null
           discount_reason: string | null
           document_url: string | null
+          docusign_envelope_id: string | null
           end_date: string | null
           equity_percentage: number | null
           funnel_item_id: string | null
           id: string
           incubation_type_id: string | null
+          legal_representative_email: string | null
+          legal_representative_name: string | null
           monthly_fee: number
           notes: string | null
+          onboarding_completed_at: string | null
           payment_terms_days: number | null
+          regulation_accepted_at: string | null
+          regulation_version: string | null
+          signature_requested_at: string | null
+          signature_status: string | null
           signed_at: string | null
           square_meters: number | null
           start_date: string
@@ -5040,6 +5053,11 @@ export type Database = {
         Insert: {
           billing_day?: number | null
           building_id?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country?: string | null
+          company_nif?: string | null
+          company_postal_code?: string | null
           contract_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -5048,14 +5066,22 @@ export type Database = {
           discount_percentage?: number | null
           discount_reason?: string | null
           document_url?: string | null
+          docusign_envelope_id?: string | null
           end_date?: string | null
           equity_percentage?: number | null
           funnel_item_id?: string | null
           id?: string
           incubation_type_id?: string | null
+          legal_representative_email?: string | null
+          legal_representative_name?: string | null
           monthly_fee?: number
           notes?: string | null
+          onboarding_completed_at?: string | null
           payment_terms_days?: number | null
+          regulation_accepted_at?: string | null
+          regulation_version?: string | null
+          signature_requested_at?: string | null
+          signature_status?: string | null
           signed_at?: string | null
           square_meters?: number | null
           start_date: string
@@ -5068,6 +5094,11 @@ export type Database = {
         Update: {
           billing_day?: number | null
           building_id?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country?: string | null
+          company_nif?: string | null
+          company_postal_code?: string | null
           contract_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -5076,14 +5107,22 @@ export type Database = {
           discount_percentage?: number | null
           discount_reason?: string | null
           document_url?: string | null
+          docusign_envelope_id?: string | null
           end_date?: string | null
           equity_percentage?: number | null
           funnel_item_id?: string | null
           id?: string
           incubation_type_id?: string | null
+          legal_representative_email?: string | null
+          legal_representative_name?: string | null
           monthly_fee?: number
           notes?: string | null
+          onboarding_completed_at?: string | null
           payment_terms_days?: number | null
+          regulation_accepted_at?: string | null
+          regulation_version?: string | null
+          signature_requested_at?: string | null
+          signature_status?: string | null
           signed_at?: string | null
           square_meters?: number | null
           start_date?: string

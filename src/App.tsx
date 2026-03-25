@@ -51,6 +51,7 @@ const StaffCockpit = lazy(() => import("./pages/StaffCockpit"));
 const SystemSettings = lazy(() => import("./pages/SystemSettings"));
 const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
+const ContractOnboarding = lazy(() => import("./pages/ContractOnboarding"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
@@ -139,6 +140,7 @@ function AppRoutes() {
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
         <Route path="/claim-startup" element={<ProtectedRoute><ClaimStartup /></ProtectedRoute>} />
+        <Route path="/contract-onboarding/:contractId" element={<ProtectedRoute><ContractOnboarding /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
         <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
         <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
