@@ -335,6 +335,11 @@ export function BackofficeContractsTab() {
                 <span className="text-sm font-medium">
                   {t('contracts.fromCRM', { org: crmOrgName || 'Lead', defaultValue: 'Criar contrato para: {{org}}' })}
                 </span>
+                {!resolvedDefaultWorkspaceId && crmOrgName && (
+                  <Badge variant="destructive" className="text-[10px]">
+                    {t('contracts.noMatchingWorkspace', { defaultValue: 'Startup não encontrada — selecione manualmente ou crie primeiro o workspace' })}
+                  </Badge>
+                )}
                 <Badge variant="outline" className="ml-auto text-xs">CRM</Badge>
               </CardContent>
             </Card>
@@ -351,8 +356,10 @@ export function BackofficeContractsTab() {
               handleCancelReview();
               setCrmFunnelId(null);
               setCrmOrgName(null);
+              setCrmWorkspaceId(null);
             }}
             isSubmitting={createContract.isPending}
+            defaultWorkspaceId={resolvedDefaultWorkspaceId}
           />
         </div>
       )}
