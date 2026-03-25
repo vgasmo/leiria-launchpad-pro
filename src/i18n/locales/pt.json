@@ -1958,6 +1958,7 @@
     "selectContract": "Selecionar contrato...",
     "noContractsAvailable": "Sem contratos neste workspace",
     "linkContract": "Vincular Contrato",
+    "initiateContract": "Iniciar Contrato",
     "emailHistory": "Histórico de Email",
     "sync": "Sincronizar",
     "noEmails": "Sem emails sincronizados",
