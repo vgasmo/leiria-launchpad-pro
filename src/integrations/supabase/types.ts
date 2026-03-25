@@ -734,6 +734,50 @@ export type Database = {
           },
         ]
       }
+      contract_discounts: {
+        Row: {
+          approved_by: string | null
+          contract_id: string
+          created_at: string
+          discount_percentage: number
+          end_date: string | null
+          id: string
+          reason: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          contract_id: string
+          created_at?: string
+          discount_percentage: number
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          contract_id?: string
+          created_at?: string
+          discount_percentage?: number
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_discounts_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_reminders: {
         Row: {
           contract_id: string
