@@ -157,7 +157,7 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
                 {(contract as any).contract_number || t('crm.contract', { defaultValue: 'Contrato' })}
               </span>
               <Badge className={cn('text-[10px] h-5', CONTRACT_STATUS_COLORS[(contract as any).status] || '')}>
-                {(contract as any).status}
+                {t(`admin.backoffice.contractStatus.${(contract as any).status}`, { defaultValue: (contract as any).status })}
               </Badge>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
