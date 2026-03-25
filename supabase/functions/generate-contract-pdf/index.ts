@@ -659,13 +659,29 @@ Deno.serve(async (req) => {
       console.error('Upload error:', uploadError)
     }
 
-    // Update contract with document URL
+    // Update contract with document URL + pricing snapshot
     const documentPath = `generated/${fileName}`
+    const pricingSnapshot = {
+      monthly_fee: contractData.monthlyFee,
+      effective_fee: contractData.effectiveFee,
+      discount_percentage: contractData.discountPercentage,
+      discount_months: contractData.discountMonths,
+      incubation_type: contractData.incubationType,
+      is_virtual: contractData.isVirtual,
+      square_meters: contractData.squareMeters,
+      building: contractData.buildingName,
+      currency: contractData.currency,
+      snapshot_date: new Date().toISOString(),
+      regulation_version: 'V11-REG-2026',
+      contract_template_version: 'V9',
+    }
     await supabase
       .from('startup_contracts')
       .update({ 
         document_url: documentPath,
         regulation_version: 'V11-REG-2026',
+        contract_template_version: 'V9',
+        pricing_snapshot_json: pricingSnapshot,
       })
       .eq('id', contractId)
 
