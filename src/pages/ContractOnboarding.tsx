@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft, Download, Shield, Loader2, ExternalLink } from 'lucide-react';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
 
