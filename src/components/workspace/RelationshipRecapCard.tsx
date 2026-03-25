@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles, TrendingUp, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
+import { AiFallbackCard } from '@/components/ui/AiFallbackCard';
 
 interface RelationshipRecapCardProps {
   workspaceId: string;
@@ -53,13 +54,23 @@ export function RelationshipRecapCard({ workspaceId }: RelationshipRecapCardProp
         key_points: d.key_points || [],
         next_best_step: d.next_best_actions?.[0] || d.next_best_step || '',
       });
-    } catch {
-      setError(true);
-      toast.error(t('workspace.relationshipRecap.error', { defaultValue: 'Não foi possível gerar o resumo. Tente mais tarde.' }));
+    } catch (err: any) {
+      const status = err?.status ?? err?.context?.status;
+      if (status === 401 || status === 500 || status === 404) {
+        setError(true);
+        // Don't toast on expected service-unavailable — fallback card is enough
+      } else {
+        setError(true);
+        toast.error(t('workspace.relationshipRecap.error', { defaultValue: 'Não foi possível gerar o resumo. Tente mais tarde.' }));
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (error && !recap) {
+    return <AiFallbackCard title={t('workspace.relationshipRecap.title', { defaultValue: 'Relationship Intelligence' })} />;
+  }
 
   if (!recap && !loading) {
     return (
@@ -72,14 +83,12 @@ export function RelationshipRecapCard({ workspaceId }: RelationshipRecapCardProp
             <div>
               <p className="text-sm font-medium">{t('workspace.relationshipRecap.title', { defaultValue: 'Relationship Intelligence' })}</p>
               <p className="text-xs text-muted-foreground">
-                {error
-                  ? t('workspace.relationshipRecap.unavailable', { defaultValue: 'Indisponível agora — tente mais tarde.' })
-                  : t('workspace.relationshipRecap.cta', { defaultValue: 'Analisa o vibe e momentum das últimas interações.' })}
+                {t('workspace.relationshipRecap.cta', { defaultValue: 'Analisa o vibe e momentum das últimas interações.' })}
               </p>
             </div>
           </div>
           <Button size="sm" onClick={handleGenerate} disabled={loading} className="gap-1.5">
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            <Sparkles className="h-3.5 w-3.5" />
             {t('workspace.relationshipRecap.generate', { defaultValue: 'Gerar Resumo' })}
           </Button>
         </CardContent>

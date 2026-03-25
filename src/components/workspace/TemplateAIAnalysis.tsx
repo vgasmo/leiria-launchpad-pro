@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { AiFallbackCard } from '@/components/ui/AiFallbackCard';
 
 interface AIAnalysis {
   overall_score: number;
@@ -50,9 +51,14 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
       setAnalysis(data.analysis);
       toast.success(t('templates.aiAnalysisComplete', 'AI analysis complete'));
     } catch (err: any) {
-      const message = err.message || 'Failed to analyze template';
-      setError(message);
-      toast.error(message);
+      const status = err?.status ?? err?.context?.status;
+      if (status === 401 || status === 500 || status === 404) {
+        setError('__ai_unavailable__');
+      } else {
+        const message = err.message || 'Failed to analyze template';
+        setError(message);
+        toast.error(message);
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -123,6 +129,9 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
   }
 
   if (error) {
+    if (error === '__ai_unavailable__') {
+      return <AiFallbackCard title={t('templates.aiAnalysis', 'AI Analysis')} />;
+    }
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="py-4">
