@@ -405,9 +405,19 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 onOpenChange(false);
                 navigate(`/admin?${params.toString()}`);
               }}
-              onSendContract={(contractId) => {
-                onOpenChange(false);
-                navigate(`/contract-onboarding/${contractId}?source=crm&funnel=${item.id}`);
+              onSendContract={async (contractId) => {
+                try {
+                  const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+                    body: { action: 'generate_token', contractId },
+                  });
+                  if (error) throw error;
+                  if (data?.error) throw new Error(data.error);
+                  const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
+                  await navigator.clipboard.writeText(url);
+                  toast.success(t('crm.contractLinkCopied', { defaultValue: 'Link público do contrato copiado! Envie ao founder por email.' }));
+                } catch (err: any) {
+                  toast.error(err?.message || 'Erro ao gerar link');
+                }
               }}
             />
 
