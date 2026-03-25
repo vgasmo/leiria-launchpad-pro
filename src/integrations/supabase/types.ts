@@ -5449,6 +5449,7 @@ export type Database = {
           onboarding_completed_at: string | null
           onboarding_token: string | null
           onboarding_token_expires_at: string | null
+          organization_name: string | null
           payment_method: string | null
           payment_terms_days: number | null
           pricing_line_id: string | null
@@ -5513,6 +5514,7 @@ export type Database = {
           onboarding_completed_at?: string | null
           onboarding_token?: string | null
           onboarding_token_expires_at?: string | null
+          organization_name?: string | null
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
@@ -5577,6 +5579,7 @@ export type Database = {
           onboarding_completed_at?: string | null
           onboarding_token?: string | null
           onboarding_token_expires_at?: string | null
+          organization_name?: string | null
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
