@@ -504,7 +504,7 @@ export function BackofficeContractsTab() {
                       )}
                       onClick={() => setDetailContract(contract)}
                     >
-                      <TableCell>
+                      <TableCell onClick={e => e.stopPropagation()}>
                         <Checkbox
                           checked={selectedContractIds.has(contract.id)}
                           onCheckedChange={() => toggleContractSelection(contract.id)}
