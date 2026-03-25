@@ -1,7 +1,7 @@
 /**
  * Public Contract Signing Page
  * Accessible via token link — no authentication required.
- * Multi-step: 1) Company Data + Documents → 2) Review Contract & Regulation → 3) DocuSign Signing
+ * Multi-step: 1) Company Data + Documents → 2) Review Contract & Regulation → 3) Digital Signature (provider-agnostic)
  * Fully bilingual PT/EN with language switcher.
  */
 import { useState, useEffect, useRef } from 'react';
@@ -228,7 +228,7 @@ export default function PublicContractSigning() {
     onError: () => toast.error(isPt ? 'Erro ao guardar dados' : 'Error saving data'),
   });
 
-  // Submit for DocuSign signing
+  // Submit for digital signature (provider-agnostic — backend resolves provider)
   const submitForSigning = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
@@ -618,8 +618,8 @@ export default function PublicContractSigning() {
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {isPt
-                    ? 'O contrato será gerado automaticamente com os seus dados e enviado para assinatura digital via DocuSign. O documento segue a minuta oficial V9 da Startup Leiria.'
-                    : 'The contract will be automatically generated with your data and sent for digital signature via DocuSign. The document follows the official V9 template from Startup Leiria.'}
+                    ? 'O contrato será gerado automaticamente com os seus dados e enviado para assinatura digital. O documento segue a minuta oficial V9 da Startup Leiria.'
+                    : 'The contract will be automatically generated with your data and sent for digital signature. The document follows the official V9 template from Startup Leiria.'}
                 </p>
                 <div className="flex items-start gap-2">
                   <Checkbox
