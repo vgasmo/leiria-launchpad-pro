@@ -389,16 +389,25 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               linkedStartupId={item.linked_startup_id}
               linkedContractId={item.linked_contract_id}
               funnelItemId={item.id}
-              onLinkContract={(contractId) => {
-                if (contractId) {
-                  updateFunnelItem.mutate({ id: item.id, linked_contract_id: contractId } as any);
-                }
-              }}
               onInitiateContract={() => {
+                const params = new URLSearchParams({
+                  tab: 'backoffice',
+                  subtab: 'contracts',
+                  action: 'create',
+                  funnel: item.id,
+                  contact: item.contact_name || '',
+                  email: item.contact_email || '',
+                  org: item.organization_name || '',
+                });
                 if (item.linked_workspace_id) {
-                  onOpenChange(false);
-                  navigate(`/backoffice?tab=contracts&action=create&workspace=${item.linked_workspace_id}&funnel=${item.id}`);
+                  params.set('workspace', item.linked_workspace_id);
                 }
+                onOpenChange(false);
+                navigate(`/admin?${params.toString()}`);
+              }}
+              onSendContract={(contractId) => {
+                onOpenChange(false);
+                navigate(`/contract-onboarding/${contractId}?source=crm&funnel=${item.id}`);
               }}
             />
 
@@ -419,8 +428,17 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                     size="sm"
                     className="gap-1.5"
                     onClick={() => {
+                      const params = new URLSearchParams({
+                        tab: 'backoffice',
+                        subtab: 'contracts',
+                        action: 'create',
+                        funnel: item.id,
+                        contact: item.contact_name || '',
+                        email: item.contact_email || '',
+                        org: item.organization_name || '',
+                      });
                       onOpenChange(false);
-                      navigate(`/backoffice?tab=contracts&action=create&funnel=${item.id}&contact=${encodeURIComponent(item.contact_name || '')}&email=${encodeURIComponent(item.contact_email || '')}&org=${encodeURIComponent(item.organization_name || '')}`);
+                      navigate(`/admin?${params.toString()}`);
                     }}
                   >
                     <FileText className="h-3.5 w-3.5" />
