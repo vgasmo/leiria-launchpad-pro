@@ -90,11 +90,27 @@ const STEPS: { key: WizardStep; icon: typeof Building2 }[] = [
   { key: 'signing', icon: PenTool },
 ];
 
-const stepLabels: Record<WizardStep, { pt: string; en: string }> = {
+type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | string;
+
+const providerLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
+  switch (p) {
+    case 'docusign': return 'DocuSign';
+    case 'pandadoc': return 'PandaDoc';
+    case 'manual': return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
+    default: return lang === 'pt' ? 'Assinatura' : 'Signature';
+  }
+};
+
+const stepSigningLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
+  if (p === 'manual') return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
+  return lang === 'pt' ? 'Assinatura Digital' : 'Digital Signature';
+};
+
+const getStepLabels = (provider: SignatureProvider): Record<WizardStep, { pt: string; en: string }> => ({
   company_data: { pt: 'Dados e Documentos', en: 'Data & Documents' },
   review_contract: { pt: 'Rever Contrato', en: 'Review Contract' },
-  signing: { pt: 'Assinatura Digital', en: 'Digital Signature' },
-};
+  signing: { pt: stepSigningLabel(provider, 'pt'), en: stepSigningLabel(provider, 'en') },
+});
 
 export default function PublicContractSigning() {
   const { token } = useParams<{ token: string }>();
