@@ -5,7 +5,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { Shield, Info } from 'lucide-react';
+import { Shield, Globe } from 'lucide-react';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { cn } from '@/lib/utils';
 
