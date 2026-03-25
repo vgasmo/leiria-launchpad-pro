@@ -123,6 +123,9 @@ export function TransitionalFounderDashboard({
         </CardContent>
       </Card>
 
+      {/* Pending Contract Banner */}
+      <PendingContractBanner workspaceId={workspace.id} />
+
       {/* What happens next */}
       <Card className="rounded-2xl">
         <CardHeader className="pb-2">
