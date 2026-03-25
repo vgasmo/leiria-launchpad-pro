@@ -32,6 +32,8 @@ import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
+import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
+import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
