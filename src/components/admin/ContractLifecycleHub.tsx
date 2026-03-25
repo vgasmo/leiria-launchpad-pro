@@ -498,28 +498,42 @@ export function ContractLifecycleHub() {
               </Card>
             </div>
             
-            {/* AI Contract Intelligence */}
+            {/* AI Contract Intelligence — per startup */}
             {contracts && contracts.filter(c => c.status === 'active').length > 0 && (
               <Card className="md:col-span-2">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    {t('lifecycle.aiAnalysis')}
+                    {t('lifecycle.aiAnalysis', 'Inteligência Contratual IA')}
                   </CardTitle>
                   <CardDescription>
-                    {t('lifecycle.aiAnalysisDesc')}
+                    {t('lifecycle.aiAnalysisDesc', 'Analise contratos ativos por startup — extrai datas-chave, riscos e ações recomendadas')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {contracts.filter(c => c.status === 'active').slice(0, 6).map(contract => (
-                      <div key={contract.id} className="flex items-center gap-2">
-                        <ContractIntelligenceCard
-                          contractId={contract.id}
-                          contractLabel={contract.workspace?.startup?.name || 'Contract'}
-                        />
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {contracts.filter(c => c.status === 'active').slice(0, 8).map(contract => {
+                      const startupName = (contract as any).workspace?.startup?.name;
+                      const contractNumber = (contract as any).contract_number;
+                      return (
+                        <div key={contract.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-medium truncate">
+                              {startupName || t('common.unnamed', 'Sem nome')}
+                            </span>
+                            {contractNumber && (
+                              <span className="text-xs text-muted-foreground truncate">
+                                {contractNumber}
+                              </span>
+                            )}
+                          </div>
+                          <ContractIntelligenceCard
+                            contractId={contract.id}
+                            contractLabel={startupName || 'Contract'}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
