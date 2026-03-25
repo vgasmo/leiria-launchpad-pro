@@ -89,7 +89,6 @@ export default function Admin() {
       approvals: <Clock className="h-4 w-4" />,
       enrollment: <UserPlus className="h-4 w-4" />,
       compliance: <ShieldCheck className="h-4 w-4" />,
-      lifecycle: <GitBranch className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
       announcements: <Bell className="h-4 w-4" />,
       'data-quality': <Database className="h-4 w-4" />,
