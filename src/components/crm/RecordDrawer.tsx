@@ -379,6 +379,40 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
             </div>
           </TabsContent>
 
+          {/* Context Tab - Linked Workspace, Contract, Emails */}
+          <TabsContent value="context" className="flex-1 overflow-y-auto p-4 pt-2 space-y-4">
+            <LinkedContextPanel
+              linkedWorkspaceId={item.linked_workspace_id}
+              linkedStartupId={item.linked_startup_id}
+              linkedContractId={item.linked_contract_id}
+              funnelItemId={item.id}
+              onLinkContract={(contractId) => {
+                if (contractId) {
+                  updateFunnelItem.mutate({ id: item.id, linked_contract_id: contractId } as any);
+                }
+              }}
+            />
+
+            {!item.linked_workspace_id && !item.linked_startup_id && !item.linked_contract_id && (
+              <div className="text-center py-8">
+                <Briefcase className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  {t('crm.noLinkedContext', { defaultValue: 'Este lead ainda não está vinculado a um workspace ou contrato.' })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('crm.linkHint', { defaultValue: 'O vínculo é criado automaticamente ao converter o lead ou pode ser feito manualmente.' })}
+                </p>
+              </div>
+            )}
+
+            <EmailHistoryPanel
+              funnelItemId={item.id}
+              onSyncEmails={() => syncEmails.mutate({ funnelItemId: item.id })}
+              isSyncing={syncEmails.isPending}
+              emailSyncEnabled={emailSyncEnabled}
+            />
+          </TabsContent>
+
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-y-auto" data-testid="timeline">
             {/* Quick Actions */}
