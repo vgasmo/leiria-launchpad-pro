@@ -16,8 +16,8 @@ import type { IncubationType } from '@/hooks/backoffice/useIncubationTypes';
 
 const STATUS_OPTIONS = ['draft', 'pending_signature', 'active', 'suspended', 'terminated', 'expired'] as const;
 
-const contractSchema = z.object({
-  workspace_id: z.string().min(1, 'Required'),
+const contractSchemaBase = {
+  workspace_id: z.string().optional(),
   incubation_type_id: z.string().optional(),
   building_id: z.string().optional(),
   contract_number: z.string().optional(),
@@ -30,7 +30,14 @@ const contractSchema = z.object({
   equity_percentage: z.coerce.number().min(0).max(100).optional(),
   square_meters: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
+};
+
+const contractSchema = z.object({
+  ...contractSchemaBase,
+  workspace_id: z.string().min(1, 'Required'),
 });
+
+const contractSchemaCRM = z.object(contractSchemaBase);
 
 export type ContractFormValues = z.infer<typeof contractSchema>;
 
@@ -45,6 +52,8 @@ interface ContractReviewFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   defaultWorkspaceId?: string;
+  fromCRM?: boolean;
+  crmOrgName?: string | null;
 }
 
 export function ContractReviewForm({
@@ -58,11 +67,13 @@ export function ContractReviewForm({
   onCancel,
   isSubmitting,
   defaultWorkspaceId,
+  fromCRM = false,
+  crmOrgName,
 }: ContractReviewFormProps) {
   const { t } = useTranslation();
 
   const form = useForm<ContractFormValues>({
-    resolver: zodResolver(contractSchema),
+    resolver: zodResolver(fromCRM ? contractSchemaCRM : contractSchema),
     defaultValues: {
       workspace_id: defaultWorkspaceId || '',
       status: 'draft',
@@ -78,7 +89,12 @@ export function ContractReviewForm({
   });
 
   const handleFormSubmit = (values: ContractFormValues) => {
-    onSubmit({ ...values, document_url: documentUrl });
+    const cleanValues = {
+      ...values,
+      workspace_id: values.workspace_id === '__none__' ? '' : values.workspace_id,
+      document_url: documentUrl,
+    };
+    onSubmit(cleanValues);
   };
 
   return (
@@ -110,14 +126,28 @@ export function ContractReviewForm({
                 name="workspace_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('admin.backoffice.startup', { defaultValue: 'Startup' })}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <FormLabel>
+                      {t('admin.backoffice.startup', { defaultValue: 'Startup' })}
+                      {fromCRM && <span className="text-muted-foreground font-normal ml-1">(opcional)</span>}
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={t('admin.backoffice.selectStartup', { defaultValue: 'Select startup' })} />
+                          <SelectValue placeholder={
+                            fromCRM
+                              ? t('contracts.crmWorkspaceOptional', { defaultValue: 'Sem workspace — será vinculado depois' })
+                              : t('admin.backoffice.selectStartup', { defaultValue: 'Select startup' })
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        {fromCRM && (
+                          <SelectItem value="__none__">
+                            <span className="text-muted-foreground italic">
+                              {t('contracts.noWorkspaceYet', { defaultValue: 'Sem workspace (criar depois)' })}
+                            </span>
+                          </SelectItem>
+                        )}
                         {workspaces.map(w => (
                           <SelectItem key={w.id} value={w.id}>
                             {w.startup?.name || 'Unnamed'}

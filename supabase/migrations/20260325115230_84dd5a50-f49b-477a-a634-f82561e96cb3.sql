@@ -1,0 +1,1 @@
+ALTER TABLE public.startup_contracts ALTER COLUMN workspace_id DROP NOT NULL;

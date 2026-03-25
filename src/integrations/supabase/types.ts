@@ -5474,7 +5474,7 @@ export type Database = {
           termination_notice_days: number | null
           termination_reason: string | null
           updated_at: string
-          workspace_id: string
+          workspace_id: string | null
         }
         Insert: {
           billing_day?: number | null
@@ -5538,7 +5538,7 @@ export type Database = {
           termination_notice_days?: number | null
           termination_reason?: string | null
           updated_at?: string
-          workspace_id: string
+          workspace_id?: string | null
         }
         Update: {
           billing_day?: number | null
@@ -5602,7 +5602,7 @@ export type Database = {
           termination_notice_days?: number | null
           termination_reason?: string | null
           updated_at?: string
-          workspace_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {

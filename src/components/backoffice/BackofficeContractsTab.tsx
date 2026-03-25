@@ -230,9 +230,10 @@ export function BackofficeContractsTab() {
   }, []);
 
   const handleReviewSubmit = useCallback(async (values: ContractFormValues & { document_url?: string }) => {
-    const { document_url, incubation_type_id, building_id, discount_reason, equity_percentage, square_meters, notes, end_date, contract_number, ...rest } = values;
-    const newContract = await createContract.mutateAsync({
+    const { document_url, incubation_type_id, building_id, discount_reason, equity_percentage, square_meters, notes, end_date, contract_number, workspace_id, ...rest } = values;
+    const payload: Record<string, unknown> = {
       ...rest,
+      workspace_id: workspace_id || null,
       incubation_type_id: incubation_type_id || null,
       building_id: building_id || null,
       contract_number: contract_number || null,
@@ -244,7 +245,8 @@ export function BackofficeContractsTab() {
       document_url: document_url || null,
       discount_applied_by: user?.id,
       funnel_item_id: crmFunnelId || null,
-    });
+    };
+    const newContract = await createContract.mutateAsync(payload);
 
     // Link the funnel item back to this contract
     if (crmFunnelId && newContract?.id) {
@@ -336,8 +338,8 @@ export function BackofficeContractsTab() {
                   {t('contracts.fromCRM', { org: crmOrgName || 'Lead', defaultValue: 'Criar contrato para: {{org}}' })}
                 </span>
                 {!resolvedDefaultWorkspaceId && crmOrgName && (
-                  <Badge variant="destructive" className="text-[10px]">
-                    {t('contracts.noMatchingWorkspace', { defaultValue: 'Startup não encontrada — selecione manualmente ou crie primeiro o workspace' })}
+                  <Badge variant="secondary" className="text-[10px]">
+                    {t('contracts.noWorkspaceInfo', { defaultValue: 'O workspace será criado automaticamente quando o contrato for assinado' })}
                   </Badge>
                 )}
                 <Badge variant="outline" className="ml-auto text-xs">CRM</Badge>
@@ -360,6 +362,8 @@ export function BackofficeContractsTab() {
             }}
             isSubmitting={createContract.isPending}
             defaultWorkspaceId={resolvedDefaultWorkspaceId}
+            fromCRM={!!crmFunnelId}
+            crmOrgName={crmOrgName}
           />
         </div>
       )}
