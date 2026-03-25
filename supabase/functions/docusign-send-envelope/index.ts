@@ -111,6 +111,27 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Generate the contract PDF first
+    let documentBase64 = ''
+    try {
+      const pdfRes = await fetch(`${supabaseUrl}/functions/v1/generate-contract-pdf`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ contractId }),
+      })
+      if (pdfRes.ok) {
+        const pdfData = await pdfRes.json()
+        documentBase64 = pdfData.documentBase64 || ''
+      } else {
+        console.warn('PDF generation failed, proceeding with placeholder')
+      }
+    } catch (pdfErr) {
+      console.warn('PDF generation error:', pdfErr)
+    }
+
     // Check if DocuSign keys are configured
     const integrationKey = Deno.env.get('DOCUSIGN_INTEGRATION_KEY')
     if (!integrationKey) {
