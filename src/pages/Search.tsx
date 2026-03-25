@@ -273,11 +273,16 @@ export default function SearchPage() {
 
           {/* Staff-only: show all workspace statuses toggle */}
           {isStaff && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border border-border/40">
               <Switch checked={showAllStatuses} onCheckedChange={setShowAllStatuses} />
               <span className="text-xs text-muted-foreground">
                 {t('search.showAllStatuses', { defaultValue: 'Mostrar todos os estados' })}
               </span>
+              {showAllStatuses && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-300 text-amber-600 dark:text-amber-400">
+                  {t('search.allStatusesActive', { defaultValue: 'Todos os estados visíveis' })}
+                </Badge>
+              )}
             </div>
           )}
         {/* Results */}

@@ -33,6 +33,7 @@ import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
+import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
 
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
@@ -148,6 +149,9 @@ export default function Admin() {
 
   return (
     <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Ecosystem Directory & CRM' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Manage startups, mentors, programs and operational workflows' })}>
+      {/* Mission Control Directory */}
+      <AdminMissionControlDirectory />
+
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
         {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">

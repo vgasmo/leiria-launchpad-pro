@@ -31,6 +31,7 @@ import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSh
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -153,6 +154,9 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
     <div className="space-y-6 max-w-5xl">
       {/* P0 HERO: Next Session Prep */}
       <MentorNextSessionPrep workspaces={workspaces} />
+
+      {/* Open Loops — what needs attention */}
+      <MentorOpenLoops workspaces={workspaces} />
 
       {/* Post-session feedback CTA */}
       {recentUnloggedSessions.length > 0 && (
