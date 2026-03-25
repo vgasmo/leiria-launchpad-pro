@@ -602,6 +602,240 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   );
 }
 
+/** Signature Provider Panel — shows provider status, allows selection for unsent drafts, retry */
+function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
+  const { t } = useTranslation();
+  const [sending, setSending] = useState(false);
+  const queryClient = useQueryClient();
+
+  const provider = contract.signature_provider;
+  const sigStatus = contract.signature_status;
+  const isSent = sigStatus && !['draft', 'failed', 'ready_to_send', 'pending_manual'].includes(sigStatus);
+  const canChangeProvider = !isSent && !contract.provider_document_id;
+  const canRetry = sigStatus === 'failed' || sigStatus === 'ready_to_send';
+
+  const providerLabel = provider === 'pandadoc' ? 'PandaDoc' : provider === 'docusign' ? 'DocuSign' : provider === 'manual' ? t('contractDetail.manualSignature', { defaultValue: 'Manual' }) : t('contractDetail.notSelected', { defaultValue: 'Não selecionado' });
+
+  const STATUS_ICON: Record<string, React.ReactNode> = {
+    completed: <CheckCircle2 className="h-4 w-4 text-green-600" />,
+    sent_for_signature: <Send className="h-4 w-4 text-blue-600" />,
+    viewed: <FileText className="h-4 w-4 text-blue-500" />,
+    declined: <XCircle className="h-4 w-4 text-destructive" />,
+    voided: <XCircle className="h-4 w-4 text-muted-foreground" />,
+    failed: <AlertTriangle className="h-4 w-4 text-destructive" />,
+    pending_manual: <Clock className="h-4 w-4 text-amber-500" />,
+    draft: <FileText className="h-4 w-4 text-muted-foreground" />,
+    ready_to_send: <Send className="h-4 w-4 text-amber-500" />,
+  };
+
+  const handleSetProvider = async (newProvider: string) => {
+    try {
+      const { error } = await supabase
+        .from('startup_contracts')
+        .update({ signature_provider: newProvider } as any)
+        .eq('id', contract.id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success(t('contractDetail.providerUpdated', { defaultValue: 'Fornecedor de assinatura atualizado' }));
+    } catch {
+      toast.error(t('contractDetail.providerUpdateFailed', { defaultValue: 'Erro ao atualizar fornecedor' }));
+    }
+  };
+
+  const handleSendPandaDoc = async () => {
+    setSending(true);
+    try {
+      const result = await invokeWithAuth('pandadoc-send-document', {
+        body: {
+          contractId: contract.id,
+          signerEmail: (contract as any).legal_representative_email || '',
+          signerName: (contract as any).legal_representative_name || 'Founder',
+        },
+      });
+      if (result.error) throw result.error;
+      if (result.data?.error) throw new Error(result.data.error);
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success(t('contractDetail.sentViaPandaDoc', { defaultValue: 'Contrato enviado via PandaDoc' }));
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao enviar via PandaDoc');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendDocuSign = async () => {
+    setSending(true);
+    try {
+      const result = await invokeWithAuth('docusign-send-envelope', {
+        body: {
+          contractId: contract.id,
+          signerEmail: (contract as any).legal_representative_email || '',
+          signerName: (contract as any).legal_representative_name || 'Founder',
+        },
+      });
+      if (result.error) throw result.error;
+      if (result.data?.error) throw new Error(result.data.error);
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success(t('contractDetail.sentViaDocuSign', { defaultValue: 'Contrato enviado via DocuSign' }));
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao enviar via DocuSign');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Provider Selection */}
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          {t('contractDetail.signatureProvider', { defaultValue: 'Fornecedor de Assinatura' })}
+        </Label>
+        {canChangeProvider ? (
+          <Select value={provider || ''} onValueChange={handleSetProvider}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder={t('contractDetail.selectProvider', { defaultValue: 'Selecionar fornecedor...' })} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pandadoc">PandaDoc</SelectItem>
+              <SelectItem value="docusign">DocuSign</SelectItem>
+              <SelectItem value="manual">{t('contractDetail.manualSignature', { defaultValue: 'Manual' })}</SelectItem>
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-sm">{providerLabel}</Badge>
+            {isSent && (
+              <span className="text-xs text-muted-foreground">
+                ({t('contractDetail.providerLocked', { defaultValue: 'bloqueado — contrato já enviado' })})
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <Separator />
+
+      {/* Canonical Signature Status */}
+      <div className="space-y-3">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          {t('contractDetail.signatureStatus', { defaultValue: 'Estado da Assinatura' })}
+        </Label>
+        <div className="flex items-center gap-2">
+          {STATUS_ICON[sigStatus || ''] || <Clock className="h-4 w-4 text-muted-foreground" />}
+          <Badge className={cn(
+            'text-xs',
+            sigStatus === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+            sigStatus === 'declined' || sigStatus === 'failed' ? 'bg-destructive/10 text-destructive' :
+            sigStatus === 'sent_for_signature' || sigStatus === 'viewed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+            'bg-muted text-muted-foreground'
+          )}>
+            {t(`contractDetail.sigStatus.${sigStatus}`, { defaultValue: sigStatus || 'N/A' })}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Provider Details Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground uppercase">{t('contractDetail.providerDocId', { defaultValue: 'ID do Documento' })}</Label>
+          <p className="text-xs font-mono truncate">{contract.provider_document_id || contract.docusign_envelope_id || '—'}</p>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground uppercase">{t('contractDetail.lastEvent', { defaultValue: 'Último Evento' })}</Label>
+          <p className="text-xs font-mono">{contract.provider_last_event || '—'}</p>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground uppercase">{t('contractDetail.sentAt', { defaultValue: 'Enviado em' })}</Label>
+          <p className="text-xs">{contract.provider_sent_at ? format(new Date(contract.provider_sent_at), 'dd MMM yyyy HH:mm') : contract.signature_requested_at ? format(new Date(contract.signature_requested_at), 'dd MMM yyyy HH:mm') : '—'}</p>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] text-muted-foreground uppercase">{t('contractDetail.completedAt', { defaultValue: 'Concluído em' })}</Label>
+          <p className="text-xs">{contract.provider_completed_at ? format(new Date(contract.provider_completed_at), 'dd MMM yyyy HH:mm') : contract.signed_at ? format(new Date(contract.signed_at), 'dd MMM yyyy HH:mm') : '—'}</p>
+        </div>
+        <div className="space-y-1 col-span-2">
+          <Label className="text-[10px] text-muted-foreground uppercase">{t('contractDetail.lastSync', { defaultValue: 'Última Sincronização' })}</Label>
+          <p className="text-xs">{contract.provider_last_sync_at ? format(new Date(contract.provider_last_sync_at), 'dd MMM yyyy HH:mm') : '—'}</p>
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {contract.provider_last_error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-destructive">{t('contractDetail.lastError', { defaultValue: 'Último Erro' })}</p>
+              <p className="text-xs text-destructive/80 mt-1 break-all">{contract.provider_last_error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Separator />
+
+      {/* Actions */}
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          {t('contractDetail.signatureActions', { defaultValue: 'Ações' })}
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {/* Send via PandaDoc */}
+          {(provider === 'pandadoc' || !provider) && (!isSent || canRetry) && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={handleSendPandaDoc}
+              disabled={sending}
+              className="h-8 gap-1.5 text-xs"
+            >
+              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              {canRetry
+                ? t('contractDetail.retrySendPandaDoc', { defaultValue: 'Reenviar via PandaDoc' })
+                : t('contractDetail.sendViaPandaDoc', { defaultValue: 'Enviar via PandaDoc' })}
+            </Button>
+          )}
+          {/* Send via DocuSign */}
+          {(provider === 'docusign' || !provider) && (!isSent || canRetry) && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSendDocuSign}
+              disabled={sending}
+              className="h-8 gap-1.5 text-xs"
+            >
+              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              {canRetry
+                ? t('contractDetail.retrySendDocuSign', { defaultValue: 'Reenviar via DocuSign' })
+                : t('contractDetail.sendViaDocuSign', { defaultValue: 'Enviar via DocuSign' })}
+            </Button>
+          )}
+          {/* Refresh status */}
+          {isSent && sigStatus !== 'completed' && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1.5 text-xs"
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                toast.info(t('contractDetail.statusRefreshed', { defaultValue: 'Estado atualizado' }));
+              }}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              {t('contractDetail.refreshStatus', { defaultValue: 'Atualizar Estado' })}
+            </Button>
+          )}
+        </div>
+        {!provider && !isSent && (
+          <p className="text-xs text-muted-foreground">
+            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor acima ou envie diretamente para iniciar o processo de assinatura.' })}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** Small helper for consistent field display */
 function FieldDisplay({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
