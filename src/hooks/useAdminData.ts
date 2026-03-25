@@ -201,7 +201,7 @@ export function useWorkspaceUsers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('workspace_users')
-        .select('*');
+        .select('id, workspace_id, user_id, role, active, created_at');
       if (error) throw error;
       return data;
     },
