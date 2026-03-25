@@ -1,7 +1,12 @@
 /**
- * PandaDoc Webhook Handler
- * Receives document status updates from PandaDoc and updates contract status.
- * Maps PandaDoc events → canonical signature states.
+ * PandaDoc Webhook Handler — Hardened V1
+ * 
+ * Security:
+ * 1. Verifies webhook authenticity via shared secret (PANDADOC_WEBHOOK_KEY)
+ * 2. Idempotency protection via provider_webhook_event_id
+ * 3. Stores provider event payloads for auditability
+ * 
+ * Maps PandaDoc events → canonical internal signature states.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -29,6 +34,30 @@ const PANDADOC_STATUS_MAP: Record<string, string> = {
   'document.deleted': 'voided',
 }
 
+/**
+ * Verify PandaDoc webhook authenticity.
+ * PandaDoc sends a shared key in the request body or via header.
+ */
+function verifyWebhookAuthenticity(body: any, req: Request): boolean {
+  const webhookKey = Deno.env.get('PANDADOC_WEBHOOK_KEY')
+  if (!webhookKey) {
+    console.warn('PANDADOC_WEBHOOK_KEY not configured — webhook verification skipped (INSECURE)')
+    return true // Allow in development, but log warning
+  }
+
+  // PandaDoc sends the shared key in the payload as 'shared_key' field
+  // or in the Authorization header
+  const payloadKey = body?.shared_key || null
+  const headerKey = req.headers.get('x-pandadoc-signature') || req.headers.get('authorization')?.replace('Bearer ', '') || null
+
+  if (payloadKey === webhookKey || headerKey === webhookKey) {
+    return true
+  }
+
+  console.error('PandaDoc webhook authentication FAILED — rejecting event')
+  return false
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -41,31 +70,45 @@ Deno.serve(async (req) => {
 
     const body = await req.json()
 
+    // ═══ SECURITY: Verify webhook authenticity ═══
+    if (!verifyWebhookAuthenticity(body, req)) {
+      return new Response(JSON.stringify({ error: 'Unauthorized — webhook verification failed' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // PandaDoc webhook payload structure
     const events = Array.isArray(body) ? body : [body]
 
     for (const event of events) {
       const pandadocDocId = event.data?.id || event.uuid || null
-      const pandadocStatus = event.event || event.data?.status || null
-      const eventName = event.event || 'unknown'
+      const eventName = event.event || event.data?.status || 'unknown'
+      const eventId = event.event_id || event.id || `${pandadocDocId}_${eventName}_${Date.now()}`
 
       if (!pandadocDocId) {
         console.warn('PandaDoc webhook: no document ID found in payload', JSON.stringify(event).slice(0, 300))
         continue
       }
 
-      console.log(`PandaDoc webhook: doc=${pandadocDocId}, event=${eventName}, status=${pandadocStatus}`)
+      console.log(`PandaDoc webhook: doc=${pandadocDocId}, event=${eventName}, eventId=${eventId}`)
 
       // Find contract by provider_document_id
       const { data: contract, error: findError } = await supabase
         .from('startup_contracts')
-        .select('id, workspace_id, status as contract_status, legal_representative_email, legal_representative_name, signature_status')
+        .select('id, workspace_id, status as contract_status, legal_representative_email, legal_representative_name, signature_status, provider_webhook_event_id')
         .eq('provider_document_id', pandadocDocId)
         .eq('signature_provider', 'pandadoc')
         .single()
 
       if (findError || !contract) {
         console.warn('Contract not found for PandaDoc document:', pandadocDocId)
+        continue
+      }
+
+      // ═══ IDEMPOTENCY: Skip duplicate events ═══
+      if (contract.provider_webhook_event_id === eventId) {
+        console.log(`Duplicate event skipped: ${eventId}`)
         continue
       }
 
@@ -77,6 +120,7 @@ Deno.serve(async (req) => {
         provider_last_event: eventName,
         provider_last_sync_at: new Date().toISOString(),
         provider_last_error: null,
+        provider_webhook_event_id: eventId,
       }
 
       if (canonicalStatus === 'completed') {
@@ -92,6 +136,21 @@ Deno.serve(async (req) => {
         .from('startup_contracts')
         .update(updatePayload)
         .eq('id', contract.id)
+
+      // ═══ AUDIT: Log lifecycle event with full payload ═══
+      await supabase.from('contract_lifecycle_events').insert({
+        contract_id: contract.id,
+        event_type: `pandadoc_${eventName}`,
+        event_date: new Date().toISOString().split('T')[0],
+        details: {
+          provider: 'pandadoc',
+          event_name: eventName,
+          event_id: eventId,
+          canonical_status: canonicalStatus,
+          pandadoc_document_id: pandadocDocId,
+          raw_payload_preview: JSON.stringify(event).slice(0, 1000),
+        },
+      })
 
       // Notify staff on completion
       if (canonicalStatus === 'completed') {
@@ -109,7 +168,7 @@ Deno.serve(async (req) => {
               message: `O contrato ${contract.id.slice(0, 8)} foi assinado por ${contract.legal_representative_name || 'founder'} via PandaDoc.`,
               entity_type: 'contract',
               entity_id: contract.id,
-              link: '/admin?tab=contracts',
+              link: '/admin?tab=backoffice&subtab=contracts',
             }))
           )
         }
@@ -121,7 +180,7 @@ Deno.serve(async (req) => {
           entity_id: contract.id,
           action: 'digitally_signed_pandadoc',
           workspace_id: contract.workspace_id,
-          metadata: { pandadoc_document_id: pandadocDocId, event: eventName },
+          metadata: { pandadoc_document_id: pandadocDocId, event: eventName, event_id: eventId },
         })
       }
 
@@ -141,7 +200,7 @@ Deno.serve(async (req) => {
               message: `O contrato ${contract.id.slice(0, 8)} foi recusado via PandaDoc.`,
               entity_type: 'contract',
               entity_id: contract.id,
-              link: '/admin?tab=contracts',
+              link: '/admin?tab=backoffice&subtab=contracts',
             }))
           )
         }
