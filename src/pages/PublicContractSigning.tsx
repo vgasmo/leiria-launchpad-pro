@@ -754,7 +754,9 @@ export default function PublicContractSigning() {
                   className="gap-2"
                 >
                   {submitForSigning.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PenTool className="h-4 w-4" />}
-                  {isPt ? 'Enviar para Assinatura' : 'Send for Signature'}
+                  {sigProvider === 'manual'
+                    ? (isPt ? 'Submeter Contrato' : 'Submit Contract')
+                    : (isPt ? `Enviar via ${providerLabel(sigProvider, 'pt')}` : `Send via ${providerLabel(sigProvider, 'en')}`)}
                 </Button>
               </div>
             </CardContent>
