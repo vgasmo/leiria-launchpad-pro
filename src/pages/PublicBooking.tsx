@@ -40,6 +40,10 @@ export default function PublicBooking() {
     email: '',
     phone: '',
     organization: '',
+    sector: '',
+    stage: '',
+    referral_source: '',
+    has_team: '',
     message: '',
   });
 
