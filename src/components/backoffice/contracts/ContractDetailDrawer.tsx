@@ -146,8 +146,8 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   // Generate PDF mutation
   const generatePdf = useMutation({
     mutationFn: async () => {
-      const result = await invokeWithAuth('generate-contract-pdf', { contractId: contract?.id });
-      return result;
+      const result = await invokeWithAuth('generate-contract-pdf', { body: { contractId: contract?.id } });
+      if (result.error) throw result.error;
     },
     onSuccess: () => {
       toast.success(t('contractDetail.pdfGenerated', { defaultValue: 'PDF do contrato gerado com sucesso' }));
