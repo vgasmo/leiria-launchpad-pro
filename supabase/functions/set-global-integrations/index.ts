@@ -11,13 +11,8 @@ const FUNCTION_NAME = 'set-global-integrations';
 
 interface SetIntegrationRequest {
   integration_type: string;
-  settings: {
-    tenant_id?: string;
-    client_id?: string;
-    // SECURITY: client_secret is NO LONGER accepted via API
-    // It must be configured as MS_GRAPH_CLIENT_SECRET environment variable
-    [key: string]: unknown;
-  };
+  settings?: Record<string, unknown>;
+  settings_json?: Record<string, unknown>;
   is_enabled?: boolean;
 }
 
