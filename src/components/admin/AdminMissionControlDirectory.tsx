@@ -51,32 +51,53 @@ export function AdminMissionControlDirectory() {
     setSearchParams({ tab }, { replace: true });
   };
 
+  const groupOrder = ['operations', 'crm', 'programs', 'users', 'reports', 'settings'];
+  const groupLabels: Record<string, string> = {
+    operations: t('admin.directory.groupOps', { defaultValue: 'Operações' }),
+    crm: t('admin.directory.groupCrm', { defaultValue: 'CRM & Pipeline' }),
+    programs: t('admin.directory.groupPrograms', { defaultValue: 'Programas & Conteúdos' }),
+    users: t('admin.directory.groupUsers', { defaultValue: 'Pessoas' }),
+    reports: t('admin.directory.groupReports', { defaultValue: 'Relatórios & Saúde' }),
+    settings: t('admin.directory.groupSettings', { defaultValue: 'Sistema' }),
+  };
+
   return (
     <Card className="rounded-2xl border-border/60 mb-6">
       <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3 font-medium">
-          {t('admin.directory.title', { defaultValue: 'Diretório de Secções' })}
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-4 font-medium">
+          {t('admin.directory.title', { defaultValue: 'Mission Control' })}
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {items.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.tab}
-                onClick={() => handleNavigate(item.tab)}
-                className={cn(
-                  'flex flex-col items-start gap-1 p-3 rounded-xl border border-border/40 text-left',
-                  'hover:bg-muted/60 hover:border-border/80 transition-all duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20'
-                )}
-              >
-                <Icon className="h-4 w-4 text-primary/70 mb-0.5" />
-                <span className="text-xs font-medium leading-tight">{item.label}</span>
-                <span className="text-[10px] text-muted-foreground leading-tight line-clamp-2">{item.description}</span>
-              </button>
-            );
-          })}
-        </div>
+        {groupOrder.map(group => {
+          const groupItems = items.filter(i => i.group === group);
+          if (groupItems.length === 0) return null;
+          return (
+            <div key={group} className="mb-3 last:mb-0">
+              <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1.5 pl-1">
+                {groupLabels[group]}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5">
+                {groupItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.tab}
+                      onClick={() => handleNavigate(item.tab)}
+                      className={cn(
+                        'flex flex-col items-start gap-0.5 p-2.5 rounded-xl border border-border/40 text-left',
+                        'hover:bg-muted/60 hover:border-border/80 transition-all duration-150',
+                        'focus:outline-none focus:ring-2 focus:ring-primary/20'
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-primary/70 mb-0.5" />
+                      <span className="text-xs font-medium leading-tight">{item.label}</span>
+                      <span className="text-[10px] text-muted-foreground leading-tight line-clamp-1">{item.description}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );
