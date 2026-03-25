@@ -23,7 +23,7 @@ export function AdminMissionControlDirectory() {
   const items: DirectoryItem[] = [
     // Operations
     { tab: 'approvals', label: t('admin.approvals'), icon: Clock, description: t('admin.directory.approvalsDesc', { defaultValue: 'Pedidos pendentes de aprovação' }), group: 'operations' },
-    { tab: 'enrollment', label: t('enrollment.title', { defaultValue: 'Enrollment & Claims' }), icon: UserPlus, description: t('admin.directory.enrollmentDesc', { defaultValue: 'Controle de inscrições e claims' }), group: 'operations' },
+    { tab: 'enrollment', label: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }), icon: UserPlus, description: t('admin.directory.enrollmentDesc', { defaultValue: 'Controlo de inscrições e claims' }), group: 'operations' },
     { tab: 'compliance', label: t('admin.compliance'), icon: ShieldCheck, description: t('admin.directory.complianceDesc', { defaultValue: 'Check-ins e conformidade' }), group: 'operations' },
     { tab: 'lifecycle', label: t('admin.lifecycle'), icon: GitBranch, description: t('admin.directory.lifecycleDesc', { defaultValue: 'Contratos e ciclo de vida' }), group: 'operations' },
     { tab: 'backoffice', label: t('admin.backoffice.tab'), icon: Building2, description: t('admin.directory.backofficeDesc', { defaultValue: 'Espaços, edifícios e ocupação' }), group: 'operations' },
@@ -43,8 +43,6 @@ export function AdminMissionControlDirectory() {
     // Reports & Analytics
     { tab: 'analytics', label: t('admin.analytics'), icon: BarChart3, description: t('admin.directory.analyticsDesc', { defaultValue: 'Análises de cohort e relatórios' }), group: 'reports' },
     { tab: 'health', label: t('admin.healthModels'), icon: Heart, description: t('admin.directory.healthDesc', { defaultValue: 'Modelos de saúde do ecossistema' }), group: 'reports' },
-    // Settings
-    { tab: 'feature-flags', label: t('admin.featureFlags', { defaultValue: 'Feature Flags' }), icon: Settings, description: t('admin.directory.featureFlagsDesc', { defaultValue: 'Controlo de funcionalidades' }), group: 'settings' },
   ];
 
   const handleNavigate = (tab: string) => {
