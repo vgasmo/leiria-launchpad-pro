@@ -245,6 +245,24 @@ export default function SearchPage() {
               </SelectContent>
             </Select>
           )}
+          {/* Staff: status scope toggle */}
+          {isStaff && (
+            <div className="flex items-center gap-2 p-2 rounded-lg border border-border/40 bg-muted/30">
+              <Switch
+                id="show-all-statuses"
+                checked={showAllStatuses}
+                onCheckedChange={setShowAllStatuses}
+              />
+              <Label htmlFor="show-all-statuses" className="text-xs text-muted-foreground cursor-pointer">
+                {t('search.showAllStatuses', { defaultValue: 'Incluir importadas, pendentes e claims' })}
+              </Label>
+              {showAllStatuses && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-300 text-amber-600 dark:text-amber-400">
+                  {t('search.allStatusesActive', { defaultValue: 'Âmbito alargado' })}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Saved Searches */}
