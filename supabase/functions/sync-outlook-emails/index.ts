@@ -1,0 +1,532 @@
+/**
+ * Sync Outlook Emails Edge Function
+ * Fetches recent emails from a consultant's Outlook mailbox via MS Graph,
+ * matches them to CRM contacts/startups, and logs relevant ones to communication_log.
+ *
+ * Matching strategy:
+ *   1. Exact contact email match in funnel_items
+ *   2. Domain match against startup websites/contact emails
+ *   3. Founder workspace email match
+ *   4. Unmatched → needs_review = true
+ *
+ * Deduplication: uses external_id (Graph message ID) + external_source = 'outlook_email'
+ */
+
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
+import { createLogger, generateRequestId, safeErrorMessage } from '../_shared/security.ts';
+
+const FUNCTION_NAME = 'sync-outlook-emails';
+
+interface GraphCredentials {
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+}
+
+interface GraphMessage {
+  id: string;
+  internetMessageId?: string;
+  conversationId?: string;
+  subject?: string;
+  bodyPreview?: string;
+  sentDateTime?: string;
+  receivedDateTime?: string;
+  from?: { emailAddress: { address: string; name?: string } };
+  toRecipients?: Array<{ emailAddress: { address: string; name?: string } }>;
+  ccRecipients?: Array<{ emailAddress: { address: string; name?: string } }>;
+  isRead?: boolean;
+  categories?: string[];
+  importance?: string;
+  webLink?: string;
+}
+
+interface MatchResult {
+  funnelItemId: string | null;
+  workspaceId: string | null;
+  startupId: string | null;
+  contactEmail: string | null;
+  confidence: 'high' | 'medium' | 'low' | 'none';
+  method: string;
+}
+
+// Noise filters - skip these automatically
+const NOISE_SENDERS = [
+  'noreply@', 'no-reply@', 'notifications@', 'newsletter@',
+  'mailer-daemon@', 'postmaster@', 'donotreply@', 'support@microsoft.com',
+  'notification@', 'info@microsoft.com', 'calendar@', 'bounce@',
+];
+
+function isNoisyEmail(from: string, subject: string): boolean {
+  const lowerFrom = from.toLowerCase();
+  const lowerSubject = subject.toLowerCase();
+  
+  if (NOISE_SENDERS.some(n => lowerFrom.includes(n))) return true;
+  if (lowerSubject.includes('unsubscribe') && lowerSubject.includes('newsletter')) return true;
+  if (lowerFrom.includes('linkedin.com') || lowerFrom.includes('facebook.com')) return true;
+  
+  return false;
+}
+
+async function getGraphCredentials(
+  supabaseAdmin: SupabaseClient,
+  log: ReturnType<typeof createLogger>
+): Promise<GraphCredentials | null> {
+  const envClientSecret = Deno.env.get('MS_GRAPH_CLIENT_SECRET');
+  
+  const { data: globalSettings } = await supabaseAdmin
+    .from('global_integration_settings')
+    .select('settings_json, is_enabled')
+    .in('integration_type', ['graph_api', 'microsoft_graph'])
+    .eq('is_enabled', true)
+    .limit(1)
+    .maybeSingle();
+  
+  if (!globalSettings?.settings_json) {
+    log.warn('No global Graph API settings found');
+    return null;
+  }
+
+  const globalJson = globalSettings.settings_json as {
+    tenant_id?: string;
+    client_id?: string;
+    client_secret?: string;
+  };
+  
+  const tenantId = globalJson.tenant_id;
+  const clientId = globalJson.client_id;
+  const clientSecret = envClientSecret || globalJson.client_secret;
+  
+  if (!tenantId || !clientId || !clientSecret) {
+    log.warn('Incomplete Graph credentials');
+    return null;
+  }
+  
+  return { tenantId, clientId, clientSecret };
+}
+
+async function getGraphAccessToken(credentials: GraphCredentials, log: ReturnType<typeof createLogger>): Promise<string> {
+  const tokenUrl = `https://login.microsoftonline.com/${credentials.tenantId}/oauth2/v2.0/token`;
+  
+  const body = new URLSearchParams({
+    client_id: credentials.clientId,
+    client_secret: credentials.clientSecret,
+    scope: 'https://graph.microsoft.com/.default',
+    grant_type: 'client_credentials',
+  });
+
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    log.error('Graph token request failed', new Error(err));
+    throw new Error(`Graph token error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.access_token;
+}
+
+async function matchEmailToCrm(
+  supabaseAdmin: SupabaseClient,
+  participantEmails: string[],
+  consultantEmail: string,
+  log: ReturnType<typeof createLogger>
+): Promise<MatchResult> {
+  // Filter out the consultant's own email
+  const externalEmails = participantEmails
+    .filter(e => e.toLowerCase() !== consultantEmail.toLowerCase())
+    .map(e => e.toLowerCase());
+
+  if (externalEmails.length === 0) {
+    return { funnelItemId: null, workspaceId: null, startupId: null, contactEmail: null, confidence: 'none', method: 'no_external_participants' };
+  }
+
+  // 1. Exact contact email match in funnel_items
+  for (const email of externalEmails) {
+    const { data: funnelMatch } = await supabaseAdmin
+      .from('funnel_items')
+      .select('id, linked_workspace_id, linked_startup_id, contact_email')
+      .eq('contact_email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (funnelMatch) {
+      return {
+        funnelItemId: funnelMatch.id,
+        workspaceId: funnelMatch.linked_workspace_id,
+        startupId: funnelMatch.linked_startup_id,
+        contactEmail: email,
+        confidence: 'high',
+        method: 'funnel_contact_email',
+      };
+    }
+  }
+
+  // 2. Startup main_contact_email match
+  for (const email of externalEmails) {
+    const { data: startupMatch } = await supabaseAdmin
+      .from('startups')
+      .select('id, name')
+      .eq('main_contact_email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (startupMatch) {
+      // Find linked workspace
+      const { data: ws } = await supabaseAdmin
+        .from('workspaces')
+        .select('id')
+        .eq('startup_id', startupMatch.id)
+        .limit(1)
+        .maybeSingle();
+
+      return {
+        funnelItemId: null,
+        workspaceId: ws?.id || null,
+        startupId: startupMatch.id,
+        contactEmail: email,
+        confidence: 'high',
+        method: 'startup_contact_email',
+      };
+    }
+  }
+
+  // 3. Domain match against startup websites
+  const domains = [...new Set(externalEmails.map(e => e.split('@')[1]).filter(Boolean))];
+  // Skip generic domains
+  const genericDomains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'live.com', 'sapo.pt', 'icloud.com', 'protonmail.com'];
+  const specificDomains = domains.filter(d => !genericDomains.includes(d));
+
+  for (const domain of specificDomains) {
+    const { data: domainMatches } = await supabaseAdmin
+      .from('startups')
+      .select('id, name, website')
+      .or(`website.ilike.%${domain}%,main_contact_email.ilike.%@${domain}`)
+      .limit(3);
+
+    if (domainMatches && domainMatches.length === 1) {
+      const match = domainMatches[0];
+      const { data: ws } = await supabaseAdmin
+        .from('workspaces')
+        .select('id')
+        .eq('startup_id', match.id)
+        .limit(1)
+        .maybeSingle();
+
+      return {
+        funnelItemId: null,
+        workspaceId: ws?.id || null,
+        startupId: match.id,
+        contactEmail: externalEmails[0],
+        confidence: 'medium',
+        method: 'domain_match',
+      };
+    } else if (domainMatches && domainMatches.length > 1) {
+      // Multiple matches → needs review
+      return {
+        funnelItemId: null,
+        workspaceId: null,
+        startupId: null,
+        contactEmail: externalEmails[0],
+        confidence: 'low',
+        method: 'domain_multiple_matches',
+      };
+    }
+  }
+
+  // 4. Profile email match (team member / founder)
+  for (const email of externalEmails) {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (profile) {
+      const { data: wu } = await supabaseAdmin
+        .from('workspace_users')
+        .select('workspace_id, workspaces:workspaces(startup_id)')
+        .eq('user_id', profile.id)
+        .eq('active', true)
+        .eq('role', 'founder')
+        .limit(1)
+        .maybeSingle();
+
+      if (wu) {
+        const ws = wu.workspaces as unknown as { startup_id: string | null };
+        return {
+          funnelItemId: null,
+          workspaceId: wu.workspace_id,
+          startupId: ws?.startup_id || null,
+          contactEmail: email,
+          confidence: 'high',
+          method: 'founder_profile_email',
+        };
+      }
+    }
+  }
+
+  // No match found
+  return {
+    funnelItemId: null,
+    workspaceId: null,
+    startupId: null,
+    contactEmail: externalEmails[0] || null,
+    confidence: 'none',
+    method: 'no_match',
+  };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return handleCorsOptions(req);
+  }
+
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+  const corsHeaders = getCorsHeaders(req);
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+    // Verify user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    if (userError || !user) {
+      return corsJsonResponse({ error: 'Invalid token' }, req, 401);
+    }
+
+    // Check staff role
+    const { data: roleCheck } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'consultor'])
+      .limit(1)
+      .maybeSingle();
+
+    if (!roleCheck) {
+      return corsJsonResponse({ error: 'Only staff can sync emails' }, req, 403);
+    }
+
+    // Get Graph credentials
+    const credentials = await getGraphCredentials(supabaseAdmin, log);
+    if (!credentials) {
+      // Update sync status
+      await supabaseAdmin.from('email_sync_status').upsert({
+        consultant_user_id: user.id,
+        provider: 'outlook',
+        last_sync_at: new Date().toISOString(),
+        last_sync_error: 'MS Graph not configured',
+        sync_state: 'error',
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'consultant_user_id,provider' });
+
+      return corsJsonResponse({ error: 'Outlook integration not configured' }, req, 503);
+    }
+
+    // Get consultant's email
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.email) {
+      return corsJsonResponse({ error: 'Consultant profile email not found' }, req, 400);
+    }
+
+    const consultantEmail = profile.email;
+    log.info('Starting email sync', { consultant: consultantEmail });
+
+    // Update sync state
+    await supabaseAdmin.from('email_sync_status').upsert({
+      consultant_user_id: user.id,
+      provider: 'outlook',
+      mailbox_email: consultantEmail,
+      sync_state: 'syncing',
+      last_sync_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'consultant_user_id,provider' });
+
+    // Get access token
+    const accessToken = await getGraphAccessToken(credentials, log);
+
+    // Fetch recent emails (last 7 days, max 50)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const graphUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(consultantEmail)}/messages?$top=50&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${sevenDaysAgo}&$select=id,internetMessageId,conversationId,subject,bodyPreview,sentDateTime,receivedDateTime,from,toRecipients,ccRecipients,categories,importance`;
+
+    const graphRes = await fetch(graphUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+
+    if (!graphRes.ok) {
+      const errText = await graphRes.text();
+      log.error('Graph API messages fetch failed', new Error(errText));
+      
+      await supabaseAdmin.from('email_sync_status').upsert({
+        consultant_user_id: user.id,
+        provider: 'outlook',
+        sync_state: 'error',
+        last_sync_error: `Graph API ${graphRes.status}: ${errText.slice(0, 200)}`,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'consultant_user_id,provider' });
+
+      return corsJsonResponse({ error: 'Failed to fetch Outlook emails' }, req, 502);
+    }
+
+    const graphData = await graphRes.json();
+    const messages: GraphMessage[] = graphData.value || [];
+    log.info(`Fetched ${messages.length} messages from Outlook`);
+
+    let processed = 0, logged = 0, unmatched = 0, ignored = 0, duplicates = 0;
+
+    for (const msg of messages) {
+      processed++;
+      const fromEmail = msg.from?.emailAddress?.address || '';
+      const subject = msg.subject || '';
+
+      // Skip noise
+      if (isNoisyEmail(fromEmail, subject)) {
+        ignored++;
+        continue;
+      }
+
+      // Skip internal-only emails (consultant to consultant at same domain)
+      const consultantDomain = consultantEmail.split('@')[1]?.toLowerCase();
+      const allRecipients = [
+        ...(msg.toRecipients || []).map(r => r.emailAddress?.address || ''),
+        ...(msg.ccRecipients || []).map(r => r.emailAddress?.address || ''),
+      ];
+      const allParticipants = [fromEmail, ...allRecipients].filter(Boolean);
+      const externalParticipants = allParticipants.filter(
+        e => e.toLowerCase().split('@')[1] !== consultantDomain
+      );
+
+      // If no external participants, skip (internal only)
+      if (externalParticipants.length === 0 && consultantDomain) {
+        ignored++;
+        continue;
+      }
+
+      // Check for duplicate
+      const { data: existing } = await supabaseAdmin
+        .from('communication_log')
+        .select('id')
+        .eq('external_id', msg.id)
+        .eq('external_source', 'outlook_email')
+        .limit(1)
+        .maybeSingle();
+
+      if (existing) {
+        duplicates++;
+        continue;
+      }
+
+      // Match to CRM
+      const match = await matchEmailToCrm(supabaseAdmin, allParticipants, consultantEmail, log);
+
+      const isSent = fromEmail.toLowerCase() === consultantEmail.toLowerCase();
+      const direction = isSent ? 'outbound' : 'inbound';
+      const needsReview = match.confidence === 'none' || match.confidence === 'low';
+
+      // Only auto-log if confidence is high/medium OR needs_review
+      const insertData = {
+        workspace_id: match.workspaceId || null,
+        funnel_item_id: match.funnelItemId || null,
+        activity_type: 'email',
+        channel: 'outlook',
+        direction,
+        from_address: fromEmail,
+        subject: subject.slice(0, 500),
+        preview: (msg.bodyPreview || '').slice(0, 300),
+        occurred_at: msg.receivedDateTime || msg.sentDateTime || new Date().toISOString(),
+        visibility: 'staff',
+        external_source: 'outlook_email',
+        external_id: msg.id,
+        status: 'done',
+        // New fields
+        provider_thread_id: msg.conversationId || null,
+        internet_message_id: msg.internetMessageId || null,
+        matched_contact_email: match.contactEmail,
+        matched_startup_id: match.startupId,
+        matching_confidence: match.confidence,
+        matching_method: match.method,
+        needs_review: needsReview,
+        ignored: false,
+        sync_status: 'synced',
+        last_synced_at: new Date().toISOString(),
+        consultant_user_id: user.id,
+        participants_json: {
+          from: msg.from?.emailAddress || null,
+          to: (msg.toRecipients || []).map(r => r.emailAddress),
+          cc: (msg.ccRecipients || []).map(r => r.emailAddress),
+        },
+      };
+
+      const { error: insertError } = await supabaseAdmin
+        .from('communication_log')
+        .insert(insertData as Record<string, unknown>);
+
+      if (insertError) {
+        // Likely dedup conflict, skip
+        if (insertError.code === '23505') {
+          duplicates++;
+        } else {
+          log.warn('Insert failed', { error: insertError.message, msgId: msg.id });
+        }
+        continue;
+      }
+
+      if (needsReview) {
+        unmatched++;
+      } else {
+        logged++;
+      }
+    }
+
+    // Update sync status
+    await supabaseAdmin.from('email_sync_status').upsert({
+      consultant_user_id: user.id,
+      provider: 'outlook',
+      mailbox_email: consultantEmail,
+      sync_state: 'idle',
+      last_success_at: new Date().toISOString(),
+      last_sync_at: new Date().toISOString(),
+      last_sync_error: null,
+      emails_processed: processed,
+      emails_logged: logged,
+      emails_unmatched: unmatched,
+      emails_ignored: ignored,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'consultant_user_id,provider' });
+
+    log.info('Email sync complete', { processed, logged, unmatched, ignored, duplicates });
+
+    return corsJsonResponse({
+      status: 'ok',
+      processed,
+      logged,
+      unmatched,
+      ignored,
+      duplicates,
+    }, req);
+
+  } catch (err) {
+    log.error('Sync error', err);
+    return corsJsonResponse({ error: safeErrorMessage(err) }, req, 500);
+  }
+});
