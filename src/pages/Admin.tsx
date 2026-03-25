@@ -33,6 +33,7 @@ import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
+import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
 
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
