@@ -3,8 +3,11 @@
  * Handles all operations for the public contract signing flow:
  * - GET: Fetch contract by onboarding token
  * - POST action=save_data: Save company data
- * - POST action=submit_signing: Generate PDF + send to DocuSign
+ * - POST action=submit_signing: Generate PDF + dispatch to the contract's signature provider
  * - POST action=generate_token: (staff only) Generate onboarding token
+ *
+ * Provider-agnostic: dispatches to docusign, pandadoc, or manual based on
+ * the contract's `signature_provider` field. Never assumes a default provider.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -97,7 +100,7 @@ Deno.serve(async (req) => {
       .from('startup_contracts')
       .select(`
         id, contract_number, status, monthly_fee, currency, start_date, end_date,
-        square_meters, signature_status, legal_representative_name,
+        square_meters, signature_status, signature_provider, legal_representative_name,
         legal_representative_email, company_nif, company_address,
         company_city, company_postal_code, onboarding_token_expires_at,
         regulation_accepted_at, regulation_version,
@@ -123,7 +126,6 @@ Deno.serve(async (req) => {
 
     // === GET contract data ===
     if (action === 'get_contract') {
-      // Strip sensitive fields
       const { onboarding_token_expires_at, ...safeContract } = contract as any
       return new Response(JSON.stringify({ contract: safeContract }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -191,7 +193,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // === Submit for DocuSign signing ===
+    // === Submit for signing — provider-agnostic dispatch ===
     if (action === 'submit_signing') {
       const { formData } = body
       const signerEmail = formData?.legal_representative_email || contract.legal_representative_email
@@ -203,7 +205,20 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Mark regulation as accepted
+      // Determine the signature provider from the contract record
+      const provider: string | null = (contract as any).signature_provider || null
+
+      if (!provider || !['docusign', 'pandadoc', 'manual'].includes(provider)) {
+        // Fail safely — operator must configure a provider before sending
+        return new Response(JSON.stringify({
+          error: 'signature_provider_not_configured',
+          message: 'No valid signature provider configured for this contract. Staff must set signature_provider to docusign, pandadoc, or manual before sending.',
+        }), {
+          status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Mark regulation as accepted + update canonical status
       await supabase
         .from('startup_contracts')
         .update({
@@ -217,11 +232,10 @@ Deno.serve(async (req) => {
         })
         .eq('id', contract.id)
 
-      // Try to generate PDF and send via DocuSign
-      let docusignResult: any = { status: 'pending_manual' }
+      let signingResult: any = { status: 'pending_manual', provider }
 
       try {
-        // Generate PDF via internal call
+        // Generate PDF via internal call (provider-neutral step)
         const pdfRes = await fetch(`${supabaseUrl}/functions/v1/generate-contract-pdf`, {
           method: 'POST',
           headers: {
@@ -237,10 +251,8 @@ Deno.serve(async (req) => {
           documentBase64 = pdfData.documentBase64 || ''
         }
 
-        // Check DocuSign configuration
-        const integrationKey = Deno.env.get('DOCUSIGN_INTEGRATION_KEY')
-        if (integrationKey) {
-          // Send via DocuSign
+        // === Provider dispatch ===
+        if (provider === 'docusign') {
           const dsRes = await fetch(`${supabaseUrl}/functions/v1/docusign-send-envelope`, {
             method: 'POST',
             headers: {
@@ -257,13 +269,49 @@ Deno.serve(async (req) => {
           })
 
           if (dsRes.ok) {
-            docusignResult = await dsRes.json()
+            signingResult = await dsRes.json()
+            signingResult.provider = 'docusign'
           } else {
             console.warn('DocuSign send failed:', await dsRes.text())
-            docusignResult = { status: 'pending_manual', message: 'DocuSign unavailable' }
+            signingResult = { status: 'pending_manual', provider: 'docusign', message: 'DocuSign unavailable — staff notified' }
           }
-        } else {
-          // No DocuSign configured - notify staff
+
+        } else if (provider === 'pandadoc') {
+          const pdRes = await fetch(`${supabaseUrl}/functions/v1/pandadoc-send-document`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${serviceKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contractId: contract.id,
+              signerEmail,
+              signerName,
+              companyNif: formData?.company_nif || contract.company_nif,
+              documentBase64,
+            }),
+          })
+
+          if (pdRes.ok) {
+            signingResult = await pdRes.json()
+            signingResult.provider = 'pandadoc'
+          } else {
+            console.warn('PandaDoc send failed:', await pdRes.text())
+            signingResult = { status: 'pending_manual', provider: 'pandadoc', message: 'PandaDoc unavailable — staff notified' }
+          }
+
+        } else if (provider === 'manual') {
+          // Manual signing: mark as pending manual, notify staff
+          await supabase
+            .from('startup_contracts')
+            .update({ signature_status: 'pending_manual' })
+            .eq('id', contract.id)
+
+          signingResult = { status: 'pending_manual', provider: 'manual', message: 'Contract submitted for manual signing. Staff will coordinate.' }
+        }
+
+        // Notify staff if provider dispatch failed or is manual
+        if (signingResult.status === 'pending_manual') {
           const { data: staffUsers } = await supabase
             .from('user_roles')
             .select('user_id')
@@ -272,24 +320,24 @@ Deno.serve(async (req) => {
           if (staffUsers?.length) {
             const startupName = (contract as any).workspace?.startup?.name || 'Startup'
             await supabase.from('notifications').insert(
-              staffUsers.map(s => ({
+              staffUsers.map((s: any) => ({
                 user_id: s.user_id,
                 type: 'contract_signing',
                 title: `Contrato pendente: ${startupName}`,
-                message: `${signerName} (${signerEmail}) completou o onboarding contratual. DocuSign não configurado.`,
+                message: `${signerName} (${signerEmail}) completou o onboarding contratual. Fornecedor: ${provider}. Ação manual necessária.`,
                 entity_type: 'contract',
                 entity_id: contract.id,
-                link: '/admin?tab=contracts',
+                link: '/admin?tab=backoffice&subtab=contracts',
               }))
             )
           }
         }
       } catch (err) {
         console.error('Signing flow error:', err)
-        docusignResult = { status: 'pending_manual', message: String(err) }
+        signingResult = { status: 'pending_manual', provider, message: String(err) }
       }
 
-      return new Response(JSON.stringify(docusignResult), {
+      return new Response(JSON.stringify(signingResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }

@@ -1,7 +1,8 @@
 /**
  * Generate Contract PDF Edge Function
- * Creates a professional PDF contract matching the V9 Minuta template.
+ * Creates a professional PDF contract based on the official Startup Leiria minuta.
  * Uses raw PDF operators for full Portuguese character support via WinAnsiEncoding.
+ * Source basis: Minuta Oficial de Contrato de Incubação (current approved version).
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 

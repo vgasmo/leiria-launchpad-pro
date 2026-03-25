@@ -1,6 +1,7 @@
 /**
- * Contract Onboarding Wizard
- * Multi-step: 1) Company Data → 2) Review Contract & Regulation → 3) DocuSign Signing
+ * Contract Onboarding Wizard (Authenticated)
+ * Multi-step: 1) Company Data → 2) Review Contract & Regulation → 3) Digital Signature
+ * Provider-agnostic: dispatches to backend which routes by contract's signature_provider.
  */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -35,6 +36,16 @@ interface CompanyFormData {
   company_address: string;
   company_city: string;
   company_postal_code: string;
+}
+
+/** Human-readable provider label */
+function providerLabel(provider: string | null): string {
+  switch (provider) {
+    case 'docusign': return 'DocuSign';
+    case 'pandadoc': return 'PandaDoc';
+    case 'manual': return 'Assinatura Manual';
+    default: return 'Assinatura Digital';
+  }
 }
 
 export default function ContractOnboarding() {
@@ -120,7 +131,7 @@ export default function ContractOnboarding() {
     onError: () => toast.error('Erro ao guardar dados'),
   });
 
-  // Accept regulation + send to DocuSign
+  // Accept regulation + send for signing (provider-agnostic via edge function)
   const submitForSigning = useMutation({
     mutationFn: async () => {
       // 1. Mark regulation as accepted
@@ -134,27 +145,30 @@ export default function ContractOnboarding() {
         } as any)
         .eq('id', contractId!);
 
-      // 2. Call DocuSign edge function
-      const { data, error } = await supabase.functions.invoke('docusign-send-envelope', {
+      // 2. Call provider-agnostic onboarding function (it dispatches by signature_provider)
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
         body: {
+          action: 'submit_signing',
+          token: null, // Authenticated flow — the edge function also accepts contractId
           contractId,
-          signerEmail: formData.legal_representative_email,
-          signerName: formData.legal_representative_name,
-          companyNif: formData.company_nif,
+          formData: {
+            legal_representative_email: formData.legal_representative_email,
+            legal_representative_name: formData.legal_representative_name,
+            company_nif: formData.company_nif,
+          },
         },
       });
 
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       setCurrentStep('signing');
       queryClient.invalidateQueries({ queryKey: ['contract-onboarding', contractId] });
       toast.success('Contrato enviado para assinatura digital!');
     },
     onError: (err: any) => {
       toast.error(err?.message || 'Erro ao enviar para assinatura. A equipa foi notificada.');
-      // Still move to signing step to show status
       setCurrentStep('signing');
     },
   });
@@ -192,6 +206,7 @@ export default function ContractOnboarding() {
   }
 
   const sigStatus = (contract as any).signature_status;
+  const sigProvider: string | null = (contract as any).signature_provider || null;
 
   return (
     <AppLayout>
@@ -342,7 +357,7 @@ export default function ContractOnboarding() {
                     <FileText className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-sm font-medium">Minuta de Contrato de Incubação</p>
-                      <p className="text-xs text-muted-foreground">V9 — 2026</p>
+                      <p className="text-xs text-muted-foreground">Minuta Oficial — 2026</p>
                     </div>
                   </div>
                   <a href="/templates/V9_Minuta_Contrato_IF_e_IV_2026.docx" download>
@@ -452,16 +467,19 @@ export default function ContractOnboarding() {
                   <div>
                     <h3 className="text-lg font-semibold">Aguardando Assinatura</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      O contrato foi enviado para <strong>{formData.legal_representative_email}</strong> via DocuSign.
+                      O contrato foi enviado para <strong>{formData.legal_representative_email}</strong> via {providerLabel(sigProvider)}.
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Verifique a sua caixa de email (incluindo spam) para assinar digitalmente.
+                      {sigProvider === 'manual'
+                        ? 'A equipa da Startup Leiria irá coordenar a assinatura presencial.'
+                        : 'Verifique a sua caixa de email (incluindo spam) para assinar digitalmente.'}
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
                     {sigStatus === 'sent_for_signature' ? 'Enviado para assinatura' :
                      sigStatus === 'viewed' ? 'Documento visualizado' :
                      sigStatus === 'declined' ? 'Assinatura recusada' :
+                     sigStatus === 'pending_manual' ? 'Assinatura manual pendente' :
                      'Pendente'}
                   </Badge>
                   <div className="flex justify-center gap-3 mt-4">

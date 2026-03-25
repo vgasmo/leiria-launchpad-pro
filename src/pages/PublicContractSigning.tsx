@@ -613,13 +613,13 @@ export default function PublicContractSigning() {
                     <p className="text-sm font-medium">
                       {isPt ? 'Minuta de Contrato de Incubação' : 'Incubation Contract Template'}
                     </p>
-                    <p className="text-xs text-muted-foreground">V9 — 2026</p>
+                    <p className="text-xs text-muted-foreground">{isPt ? 'Minuta Oficial' : 'Official Template'} — 2026</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {isPt
-                    ? 'O contrato será gerado automaticamente com os seus dados e enviado para assinatura digital. O documento segue a minuta oficial V9 da Startup Leiria.'
-                    : 'The contract will be automatically generated with your data and sent for digital signature. The document follows the official V9 template from Startup Leiria.'}
+                    ? 'O contrato será gerado automaticamente com os seus dados e enviado para assinatura digital. O documento segue a minuta oficial da Startup Leiria.'
+                    : 'The contract will be automatically generated with your data and sent for digital signature. The document follows the official template from Startup Leiria.'}
                 </p>
                 <div className="flex items-start gap-2">
                   <Checkbox
