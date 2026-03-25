@@ -121,14 +121,28 @@ export function ContractReviewForm({
                 name="workspace_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('admin.backoffice.startup', { defaultValue: 'Startup' })}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <FormLabel>
+                      {t('admin.backoffice.startup', { defaultValue: 'Startup' })}
+                      {fromCRM && <span className="text-muted-foreground font-normal ml-1">(opcional)</span>}
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={t('admin.backoffice.selectStartup', { defaultValue: 'Select startup' })} />
+                          <SelectValue placeholder={
+                            fromCRM
+                              ? t('contracts.crmWorkspaceOptional', { defaultValue: 'Sem workspace — será vinculado depois' })
+                              : t('admin.backoffice.selectStartup', { defaultValue: 'Select startup' })
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        {fromCRM && (
+                          <SelectItem value="__none__">
+                            <span className="text-muted-foreground italic">
+                              {t('contracts.noWorkspaceYet', { defaultValue: 'Sem workspace (criar depois)' })}
+                            </span>
+                          </SelectItem>
+                        )}
                         {workspaces.map(w => (
                           <SelectItem key={w.id} value={w.id}>
                             {w.startup?.name || 'Unnamed'}
