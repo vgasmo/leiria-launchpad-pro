@@ -17,6 +17,7 @@ import { format, differenceInMonths, addYears, differenceInDays } from 'date-fns
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabaseClient';
 import { ContractUploadDropzone, type AIExtractedData } from './contracts/ContractUploadDropzone';
 import { ContractReviewForm, type ContractFormValues } from './contracts/ContractReviewForm';
 import { BulkActionsBar } from './contracts/BulkActionsBar';
