@@ -68,6 +68,10 @@ export function RelationshipRecapCard({ workspaceId }: RelationshipRecapCardProp
     }
   };
 
+  if (error && !recap) {
+    return <AiFallbackCard title={t('workspace.relationshipRecap.title', { defaultValue: 'Relationship Intelligence' })} />;
+  }
+
   if (!recap && !loading) {
     return (
       <Card className="border-primary/20 bg-primary/5">
@@ -79,14 +83,12 @@ export function RelationshipRecapCard({ workspaceId }: RelationshipRecapCardProp
             <div>
               <p className="text-sm font-medium">{t('workspace.relationshipRecap.title', { defaultValue: 'Relationship Intelligence' })}</p>
               <p className="text-xs text-muted-foreground">
-                {error
-                  ? t('workspace.relationshipRecap.unavailable', { defaultValue: 'Indisponível agora — tente mais tarde.' })
-                  : t('workspace.relationshipRecap.cta', { defaultValue: 'Analisa o vibe e momentum das últimas interações.' })}
+                {t('workspace.relationshipRecap.cta', { defaultValue: 'Analisa o vibe e momentum das últimas interações.' })}
               </p>
             </div>
           </div>
           <Button size="sm" onClick={handleGenerate} disabled={loading} className="gap-1.5">
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            <Sparkles className="h-3.5 w-3.5" />
             {t('workspace.relationshipRecap.generate', { defaultValue: 'Gerar Resumo' })}
           </Button>
         </CardContent>

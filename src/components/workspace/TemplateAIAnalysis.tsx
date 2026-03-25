@@ -129,6 +129,9 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
   }
 
   if (error) {
+    if (error === '__ai_unavailable__') {
+      return <AiFallbackCard title={t('templates.aiAnalysis', 'AI Analysis')} />;
+    }
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="py-4">
