@@ -85,7 +85,8 @@ Deno.serve(async (req) => {
 
     // SECURITY: Never store client_secret in database
     // Remove any client_secret from settings before storing
-    const { client_secret: _removed, ...sanitizedSettings } = body.settings;
+    const rawSettings = body.settings ?? {};
+    const { client_secret: _removed, ...sanitizedSettings } = rawSettings;
     const finalSettings = { ...sanitizedSettings };
     
     if (_removed) {
