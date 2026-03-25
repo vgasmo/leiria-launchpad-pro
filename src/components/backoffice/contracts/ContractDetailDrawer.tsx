@@ -883,7 +883,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
           {t('contractDetail.signatureActions', { defaultValue: 'Ações' })}
         </Label>
         <div className="flex flex-wrap gap-2">
-          {(provider === 'pandadoc' || !provider) && (!isSent || canRetry) && (
+          {provider === 'pandadoc' && (!isSent || canRetry) && (
             <Button
               size="sm"
               variant="default"
@@ -928,7 +928,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
         </div>
         {!provider && !isSent && (
           <p className="text-xs text-muted-foreground">
-            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor acima ou envie diretamente. O contrato será enviado para assinatura bilateral (founder + Startup Leiria).' })}
+            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor de assinatura acima antes de enviar o contrato.' })}
           </p>
         )}
       </div>
