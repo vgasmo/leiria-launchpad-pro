@@ -1,7 +1,8 @@
 /**
  * PandaDoc Send Document Edge Function
- * Sends a contract for digital signature via PandaDoc API.
- * Uses the REAL generated contract PDF from the canonical contract engine.
+ * Sends a contract for BILATERAL digital signature via PandaDoc API.
+ * Signer 1: Founder / Legal Representative
+ * Signer 2: Startup Leiria Representative (counter-signer)
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -29,7 +30,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Verify user
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
     if (userError || !user) {
@@ -49,10 +49,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check PandaDoc API key
     const pandadocApiKey = Deno.env.get('PANDADOC_API_KEY')
     if (!pandadocApiKey) {
-      // Fallback: mark as pending manual
       await supabase
         .from('startup_contracts')
         .update({
@@ -98,23 +96,17 @@ Deno.serve(async (req) => {
 
     if (!signerEmail) {
       const missingSignerError = 'No signer email found. Fill Legal Representative Email or Startup main contact email before sending.'
-
-      await supabase
-        .from('startup_contracts')
-        .update({
-          provider_last_error: missingSignerError,
-          provider_last_sync_at: new Date().toISOString(),
-        })
-        .eq('id', contractId)
+      await supabase.from('startup_contracts').update({
+        provider_last_error: missingSignerError,
+        provider_last_sync_at: new Date().toISOString(),
+      }).eq('id', contractId)
 
       return new Response(JSON.stringify({ error: missingSignerError }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Guard: do not resend contracts that are already in a terminal/sent state
-    // Allow retries for draft/failed/ready_to_send/pending_manual
+    // Guard: do not resend contracts already in terminal/sent state
     if (contract.signature_provider && contract.provider_document_id &&
         contract.signature_status && !['draft', 'failed', 'ready_to_send', 'pending_manual'].includes(contract.signature_status)) {
       return new Response(JSON.stringify({
@@ -126,7 +118,39 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Generate the contract PDF using canonical engine
+    // Resolve counter-signer (Startup Leiria representative)
+    let counterSignerName = contract.counter_signer_name || ''
+    let counterSignerEmail = contract.counter_signer_email || ''
+
+    if (!counterSignerEmail) {
+      const { data: sigSettings } = await supabase
+        .from('global_integration_settings')
+        .select('settings_json')
+        .eq('integration_type', 'signature')
+        .eq('is_enabled', true)
+        .single()
+
+      if (sigSettings?.settings_json) {
+        const settings = sigSettings.settings_json as Record<string, any>
+        counterSignerName = settings.default_counter_signer_name || ''
+        counterSignerEmail = settings.default_counter_signer_email || ''
+      }
+    }
+
+    if (!counterSignerEmail) {
+      const { data: staffProfile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .single()
+
+      if (staffProfile?.email) {
+        counterSignerName = staffProfile.full_name || 'Startup Leiria'
+        counterSignerEmail = staffProfile.email
+      }
+    }
+
+    // Generate the contract PDF
     let documentBase64 = ''
     try {
       const pdfRes = await fetch(`${supabaseUrl}/functions/v1/generate-contract-pdf`, {
@@ -163,26 +187,40 @@ Deno.serve(async (req) => {
 
     const startupName = contract.workspace?.startup?.name || 'Startup'
 
+    // Build recipients — founder + counter-signer
+    const recipients: any[] = [
+      {
+        email: signerEmail,
+        first_name: signerName.split(' ')[0],
+        last_name: signerName.split(' ').slice(1).join(' ') || '',
+        role: 'Primeiro Outorgante',
+        signing_order: 1,
+      },
+    ]
+
+    if (counterSignerEmail) {
+      recipients.push({
+        email: counterSignerEmail,
+        first_name: (counterSignerName || 'Startup Leiria').split(' ')[0],
+        last_name: (counterSignerName || 'Startup Leiria').split(' ').slice(1).join(' ') || '',
+        role: 'Segundo Outorgante',
+        signing_order: 2,
+      })
+    }
+
     // Step 1: Create document from PDF file upload
     const boundary = '----PandaDocBoundary' + Date.now()
     const pdfBytes = Uint8Array.from(atob(documentBase64), c => c.charCodeAt(0))
 
     const metadata = JSON.stringify({
       name: `Contrato de Incubação — ${startupName}`,
-      recipients: [{
-        email: signerEmail,
-        first_name: signerName.split(' ')[0],
-        last_name: signerName.split(' ').slice(1).join(' ') || '',
-        role: 'signer',
-      }],
+      recipients,
       parse_form_fields: false,
     })
 
-    // Build multipart body
     const encoder = new TextEncoder()
     const parts: Uint8Array[] = []
 
-    // Metadata part
     parts.push(encoder.encode(
       `--${boundary}\r\n` +
       `Content-Disposition: form-data; name="data"\r\n` +
@@ -190,7 +228,6 @@ Deno.serve(async (req) => {
       metadata + '\r\n'
     ))
 
-    // File part
     parts.push(encoder.encode(
       `--${boundary}\r\n` +
       `Content-Disposition: form-data; name="file"; filename="Contrato_Incubacao_${startupName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf"\r\n` +
@@ -198,11 +235,8 @@ Deno.serve(async (req) => {
     ))
     parts.push(pdfBytes)
     parts.push(encoder.encode('\r\n'))
-
-    // Closing boundary
     parts.push(encoder.encode(`--${boundary}--\r\n`))
 
-    // Combine parts
     const totalLength = parts.reduce((sum, p) => sum + p.length, 0)
     const bodyBytes = new Uint8Array(totalLength)
     let offset = 0
@@ -233,7 +267,6 @@ Deno.serve(async (req) => {
     const doc = await createRes.json()
     const pandadocDocId = doc.id
 
-    // Update contract with PandaDoc document ID
     await supabase.from('startup_contracts').update({
       signature_provider: 'pandadoc',
       provider_document_id: pandadocDocId,
@@ -242,13 +275,15 @@ Deno.serve(async (req) => {
       provider_last_sync_at: new Date().toISOString(),
       provider_last_event: 'document.created',
       provider_last_error: null,
+      founder_signer_status: 'pending',
+      counter_signer_name: counterSignerName || null,
+      counter_signer_email: counterSignerEmail || null,
+      counter_signer_status: counterSignerEmail ? 'pending' : null,
     }).eq('id', contractId)
 
-    // Step 2: Wait briefly for document processing, then send
-    // PandaDoc needs time to process the uploaded document
+    // Wait for document processing
     await new Promise(resolve => setTimeout(resolve, 3000))
 
-    // Check document status before sending
     const statusRes = await fetch(`${PANDADOC_API}/documents/${pandadocDocId}`, {
       headers: { 'Authorization': `API-Key ${pandadocApiKey}` },
     })
@@ -264,15 +299,13 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         error: `PandaDoc status check failed [${statusRes.status}]`,
       }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
     const statusData = await statusRes.json()
 
     if (statusData.status !== 'document.draft') {
-      // Document still processing — mark as ready_to_send for retry
       await supabase.from('startup_contracts').update({
         signature_status: 'ready_to_send',
         provider_last_event: statusData.status,
@@ -282,8 +315,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         error: 'Documento ainda em processamento no PandaDoc. Tenta novamente em alguns segundos.',
       }), {
-        status: 409,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -295,7 +327,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: `Caro/a ${signerName}, segue o contrato de incubação para assinatura digital via PandaDoc.`,
+        message: `Segue o contrato de incubação para assinatura digital bilateral.`,
         silent: false,
       }),
     })
@@ -327,21 +359,29 @@ Deno.serve(async (req) => {
       provider_last_event: 'document.sent',
       provider_last_sync_at: new Date().toISOString(),
       provider_last_error: null,
+      founder_signer_status: 'sent',
+      counter_signer_status: counterSignerEmail ? 'pending' : null,
     }).eq('id', contractId)
 
-    // Log activity
     await supabase.from('activity_log').insert({
       user_id: user.id,
       entity_type: 'contract',
       entity_id: contractId,
       action: 'sent_for_signature_pandadoc',
-      metadata: { pandadoc_document_id: pandadocDocId, signer: signerEmail },
+      metadata: {
+        pandadoc_document_id: pandadocDocId,
+        founder_signer: signerEmail,
+        counter_signer: counterSignerEmail || 'none',
+        bilateral: !!counterSignerEmail,
+      },
     })
 
     return new Response(JSON.stringify({
       status: 'sent',
       provider: 'pandadoc',
       documentId: pandadocDocId,
+      bilateral: !!counterSignerEmail,
+      counterSigner: counterSignerEmail || null,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
