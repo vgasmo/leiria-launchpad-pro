@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Clock, ShieldCheck, Building2, Bell, Database, Users, Users2,
   BarChart3, FileText, BookOpen, Heart, Filter, GitBranch, 
-  ClipboardList, Tag
+  ClipboardList, Tag, UserPlus, Settings, MapPin, Rocket
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
