@@ -182,7 +182,7 @@ export function BookingLinksManager() {
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>{t('admin.bookingLinks.program', 'Program (optional)')}</Label>
-                  <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                  <Select value={selectedProgram || '__any__'} onValueChange={(v) => setSelectedProgram(v === '__any__' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Any program" />
                     </SelectTrigger>
