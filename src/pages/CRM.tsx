@@ -42,6 +42,8 @@ import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMo
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import { PipelineForecastCard } from '@/components/crm/PipelineForecastCard';
 import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
+import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
+import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
@@ -523,6 +525,10 @@ export default function CRM() {
 
           <TabsContent value="analytics" className="space-y-4">
             <PipelineForecastCard pipeline={inbox as unknown as Record<string, CrmInboxItem[]>} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <EmailSyncHealthPanel />
+              <EmailReviewQueue />
+            </div>
             <CrmAnalyticsDashboard />
           </TabsContent>
         </Tabs>
