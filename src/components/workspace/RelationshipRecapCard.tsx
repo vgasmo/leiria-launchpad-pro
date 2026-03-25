@@ -53,9 +53,15 @@ export function RelationshipRecapCard({ workspaceId }: RelationshipRecapCardProp
         key_points: d.key_points || [],
         next_best_step: d.next_best_actions?.[0] || d.next_best_step || '',
       });
-    } catch {
-      setError(true);
-      toast.error(t('workspace.relationshipRecap.error', { defaultValue: 'Não foi possível gerar o resumo. Tente mais tarde.' }));
+    } catch (err: any) {
+      const status = err?.status ?? err?.context?.status;
+      if (status === 401 || status === 500 || status === 404) {
+        setError(true);
+        // Don't toast on expected service-unavailable — fallback card is enough
+      } else {
+        setError(true);
+        toast.error(t('workspace.relationshipRecap.error', { defaultValue: 'Não foi possível gerar o resumo. Tente mais tarde.' }));
+      }
     } finally {
       setLoading(false);
     }
