@@ -522,6 +522,7 @@ export default function CRM() {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
+            <PipelineForecastCard pipeline={inbox} />
             <CrmAnalyticsDashboard />
           </TabsContent>
         </Tabs>
