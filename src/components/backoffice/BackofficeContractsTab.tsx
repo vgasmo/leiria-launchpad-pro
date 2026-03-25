@@ -597,7 +597,7 @@ export function BackofficeContractsTab() {
                           onCheckedChange={() => toggleContractSelection(contract.id)}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{startup?.name || 'Unnamed'}</TableCell>
+                      <TableCell className="font-medium">{startup?.name || (contract as any).organization_name || t('common.unnamed', { defaultValue: 'Unnamed' })}</TableCell>
                       <TableCell className="text-muted-foreground">{contract.contract_number || '-'}</TableCell>
                       <TableCell>{incubationType?.name || '-'}</TableCell>
                       <TableCell>
