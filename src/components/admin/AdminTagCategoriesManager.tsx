@@ -439,7 +439,7 @@ export function AdminTagCategoriesManager() {
             </div>
             <div className="space-y-2">
               <Label>{t('admin.tags.category', 'Category')}</Label>
-              <Select value={tagForm.category_id} onValueChange={(v) => setTagForm(f => ({ ...f, category_id: v }))}>
+              <Select value={tagForm.category_id || '__none__'} onValueChange={(v) => setTagForm(f => ({ ...f, category_id: v === '__none__' ? '' : v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('admin.tags.selectCategory', 'Select category')} />
                 </SelectTrigger>
