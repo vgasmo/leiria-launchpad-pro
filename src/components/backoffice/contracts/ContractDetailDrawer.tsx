@@ -47,6 +47,7 @@ interface ContractDetailDrawerProps {
 export function ContractDetailDrawer({ contract, incubationTypes, buildings, open, onOpenChange }: ContractDetailDrawerProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const contractId = contract?.id ?? '';
   const updateContract = useUpdateContract();
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState<Record<string, any>>({});
