@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
+import { useCurrentPricingTable, findMatchingPricingLine, getIncubationYear } from '@/hooks/backoffice/usePricingLines';
 import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
 import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelligenceCard';
 import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
@@ -54,6 +55,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState<Record<string, any>>({});
   const [activeTab, setActiveTab] = useState('details');
+  const { data: pricingTable } = useCurrentPricingTable();
 
   // Fetch discounts for pricing engine
   const { data: discounts } = useQuery({
@@ -116,9 +118,17 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   const endDate = contract?.end_date ? new Date(contract.end_date) : null;
   const daysUntilEnd = endDate ? differenceInDays(endDate, now) : null;
 
-  // Calculate pricing using the engine
+  // Calculate pricing using the canonical engine with pricing lines
   const pricing = useMemo(() => {
     if (!incubationType || !contract) return null;
+
+    // Find matching pricing line from the official table
+    const matchedLine = pricingTable?.lines
+      ? findMatchingPricingLine(pricingTable.lines, incubationType.id, contract.square_meters)
+      : null;
+
+    const incubationYear = getIncubationYear(contract.start_date);
+
     const input: PricingInput = {
       incubationType: {
         id: incubationType.id,
@@ -135,13 +145,26 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
       squareMeters: contract.square_meters,
       discounts: discounts || [],
       contractStartDate: contract.start_date,
-      manualOverride: contract.monthly_fee !== incubationType.base_monthly_fee ? {
-        fee: contract.monthly_fee,
-        reason: 'Custom fee set on contract',
+      pricingLine: matchedLine ? {
+        id: matchedLine.id,
+        designation: matchedLine.designation,
+        startup_monthly_fee: matchedLine.startup_monthly_fee,
+        non_startup_monthly_fee: matchedLine.non_startup_monthly_fee,
+        startup_annual_increase_pct: matchedLine.startup_annual_increase_pct,
+        non_startup_annual_increase_pct: matchedLine.non_startup_annual_increase_pct,
+        area_sqm: matchedLine.area_sqm,
+        is_per_sqm: matchedLine.is_per_sqm,
+        is_post_incubation: matchedLine.is_post_incubation,
+        max_duration_months: matchedLine.max_duration_months,
+        billing_frequency: matchedLine.billing_frequency,
+        location_type: matchedLine.location_type,
       } : undefined,
+      incubationYear,
+      pricingVersionCode: pricingTable?.version?.version_code || 'V11-MAR-2026',
+      startupCategory: 'startup',
     };
     return calculateContractPricing(input);
-  }, [incubationType, building, contract, discounts]);
+  }, [incubationType, building, contract, discounts, pricingTable]);
 
   // Generate PDF mutation
   const generatePdf = useMutation({
