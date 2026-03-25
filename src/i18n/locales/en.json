@@ -5741,5 +5741,40 @@
       "workflows": "Workflow Rules",
       "auditLog": "Audit Log"
     }
+  },
+  "pricing": {
+    "baseFee": "Base Fee",
+    "spaceSurcharge": "Space Surcharge",
+    "discount": "Discount",
+    "effectiveFee": "Effective Fee",
+    "grossFee": "Gross Fee",
+    "noReason": "No reason specified",
+    "manualOverride": "Manual Override",
+    "manualOverrideWarning": "Base fee was manually set. Standard pricing rules were bypassed.",
+    "auditTrail": "Pricing Audit Trail",
+    "breakdown": "Pricing Breakdown",
+    "source": "Source",
+    "ruleApplied": "Rule Applied"
+  },
+  "contractDetail": {
+    "viewWorkspace": "View Workspace",
+    "viewInCRM": "View in CRM",
+    "viewInvoices": "View Invoices",
+    "linkedEntities": "Linked Entities",
+    "sendToDocuSign": "Send for Signature",
+    "docuSignStatus": "Signature Status",
+    "docuSignNotConfigured": "Digital signature not configured",
+    "docuSignPendingManual": "Pending manual signature",
+    "noWorkspace": "No workspace linked",
+    "noInvoices": "No invoices yet",
+    "generateInvoice": "Generate Invoice",
+    "contractTimeline": "Contract Timeline",
+    "pricingTab": "Pricing",
+    "linksTab": "Links",
+    "integrationStatus": "Integration Status",
+    "lastSync": "Last Sync",
+    "retry": "Retry",
+    "configured": "Configured",
+    "notConfigured": "Not Configured"
   }
 }
