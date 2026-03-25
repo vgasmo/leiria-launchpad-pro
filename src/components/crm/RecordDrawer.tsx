@@ -253,11 +253,11 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
         />
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-4">
-            <TabsTrigger value="overview">{t('crm.overview')}</TabsTrigger>
-            <TabsTrigger value="context">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
-            <TabsTrigger value="timeline">{t('crm.timeline', 'Timeline')}</TabsTrigger>
-            <TabsTrigger value="tasks">{t('crm.tasks')}</TabsTrigger>
+          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-4 shrink-0">
+            <TabsTrigger value="overview" className="text-xs px-1">{t('crm.overview')}</TabsTrigger>
+            <TabsTrigger value="context" className="text-xs px-1">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs px-1">{t('crm.timeline', 'Timeline')}</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-xs px-1">{t('crm.tasks')}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
