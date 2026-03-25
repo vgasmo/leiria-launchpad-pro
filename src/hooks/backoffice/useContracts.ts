@@ -43,6 +43,11 @@ export interface StartupContract {
   provider_sent_at: string | null;
   provider_completed_at: string | null;
   docusign_envelope_id: string | null;
+  // Bilateral signing fields
+  founder_signer_status: string | null;
+  counter_signer_name: string | null;
+  counter_signer_email: string | null;
+  counter_signer_status: string | null;
   workspace?: { id: string; startup?: { name: string } | null } | null;
   incubation_type?: IncubationType | null;
   building?: Building | null;
