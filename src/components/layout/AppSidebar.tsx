@@ -133,9 +133,8 @@ export function AppSidebar() {
   // ADMIN Navigation (simplified)
   const adminNavigation: NavItem[] = [
     { name: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
-    { name: t('ecosystemHub.navLabel', { defaultValue: 'Ecossistema & CRM' }), href: '/admin', icon: ClipboardList },
-    { name: t('nav.admin.crm', { defaultValue: 'CRM' }), href: '/crm', icon: Contact },
-    { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas & Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
+    { name: t('ecosystemHub.navLabel', { defaultValue: 'Ecossistema & CRM' }), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas e Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.admin.usersPermissions', { defaultValue: 'Utilizadores & Permissões' }), href: '/admin?tab=users', icon: Shield },
     { name: t('consultorTools.title', { defaultValue: 'Ferramentas de Consultor' }), href: '/consultor-tools', icon: Briefcase },
