@@ -100,26 +100,23 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     enabled: !!contract?.funnel_item_id,
   });
 
-  if (!contract) return null;
-
-  const startup = (contract.workspace as any)?.startup;
-  const incubationType = contract.incubation_type as any;
-  const building = contract.building as any;
-  const startDate = new Date(contract.start_date);
+  const startup = contract ? (contract.workspace as any)?.startup : null;
+  const incubationType = contract ? contract.incubation_type as any : null;
+  const building = contract ? contract.building as any : null;
+  const startDate = contract ? new Date(contract.start_date) : new Date();
   const now = new Date();
-  const months = differenceInMonths(now, startDate);
+  const months = contract ? differenceInMonths(now, startDate) : 0;
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
 
-  // Anniversary/renewal alerts
   const nextAnniversary = addYears(startDate, years + 1);
   const daysUntilAnniversary = differenceInDays(nextAnniversary, now);
-  const endDate = contract.end_date ? new Date(contract.end_date) : null;
+  const endDate = contract?.end_date ? new Date(contract.end_date) : null;
   const daysUntilEnd = endDate ? differenceInDays(endDate, now) : null;
 
   // Calculate pricing using the engine
   const pricing = useMemo(() => {
-    if (!incubationType) return null;
+    if (!incubationType || !contract) return null;
     const input: PricingInput = {
       incubationType: {
         id: incubationType.id,
@@ -143,6 +140,8 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     };
     return calculateContractPricing(input);
   }, [incubationType, building, contract, discounts]);
+
+  if (!contract) return null;
 
   const startEditing = () => {
     setEditValues({
