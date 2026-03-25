@@ -765,19 +765,38 @@ export default function PublicContractSigning() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">
-                      {isPt ? 'Aguardando Assinatura' : 'Awaiting Signature'}
+                      {isPt ? 'Aguardando Assinaturas' : 'Awaiting Signatures'}
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       {isPt
-                        ? <>O contrato foi enviado para <strong>{formData.legal_representative_email}</strong> via DocuSign.</>
-                        : <>The contract was sent to <strong>{formData.legal_representative_email}</strong> via DocuSign.</>}
+                        ? <>O contrato foi enviado para assinatura bilateral. Verifique o email <strong>{formData.legal_representative_email}</strong>.</>
+                        : <>The contract was sent for bilateral signature. Check your email at <strong>{formData.legal_representative_email}</strong>.</>}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {isPt
-                        ? 'Verifique a sua caixa de email (incluindo spam) para assinar digitalmente.'
-                        : 'Check your email inbox (including spam) to sign digitally.'}
+                        ? 'Após a sua assinatura, o representante da Startup Leiria irá contra-assinar o contrato.'
+                        : 'After your signature, the Startup Leiria representative will counter-sign the contract.'}
                     </p>
                   </div>
+
+                  {/* Bilateral progress */}
+                  <div className="max-w-sm mx-auto space-y-2 text-left">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">1</div>
+                      <span className="flex-1">{isPt ? 'Sua assinatura (Primeiro Outorgante)' : 'Your signature (First Party)'}</span>
+                      {sigStatus === 'sent_for_signature' || sigStatus === 'viewed' ? (
+                        <Badge variant="outline" className="text-[10px]">{isPt ? 'Pendente' : 'Pending'}</Badge>
+                      ) : (
+                        <Badge className="text-[10px] bg-green-100 text-green-700">{isPt ? 'Assinado' : 'Signed'}</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center text-[10px] font-bold text-amber-700">2</div>
+                      <span className="flex-1">{isPt ? 'Startup Leiria (Segundo Outorgante)' : 'Startup Leiria (Second Party)'}</span>
+                      <Badge variant="outline" className="text-[10px]">{isPt ? 'Aguarda' : 'Waiting'}</Badge>
+                    </div>
+                  </div>
+
                   <Badge variant="outline" className="text-xs">
                     {sigStatus === 'sent_for_signature'
                       ? (isPt ? 'Enviado para assinatura' : 'Sent for signature')

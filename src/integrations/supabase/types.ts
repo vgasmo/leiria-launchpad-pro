@@ -5422,6 +5422,9 @@ export type Database = {
           company_postal_code: string | null
           contract_number: string | null
           contract_template_version: string | null
+          counter_signer_email: string | null
+          counter_signer_name: string | null
+          counter_signer_status: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -5432,6 +5435,7 @@ export type Database = {
           docusign_envelope_id: string | null
           end_date: string | null
           equity_percentage: number | null
+          founder_signer_status: string | null
           funnel_item_id: string | null
           has_startup_portugal_status: boolean | null
           iban: string | null
@@ -5487,6 +5491,9 @@ export type Database = {
           company_postal_code?: string | null
           contract_number?: string | null
           contract_template_version?: string | null
+          counter_signer_email?: string | null
+          counter_signer_name?: string | null
+          counter_signer_status?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -5497,6 +5504,7 @@ export type Database = {
           docusign_envelope_id?: string | null
           end_date?: string | null
           equity_percentage?: number | null
+          founder_signer_status?: string | null
           funnel_item_id?: string | null
           has_startup_portugal_status?: boolean | null
           iban?: string | null
@@ -5552,6 +5560,9 @@ export type Database = {
           company_postal_code?: string | null
           contract_number?: string | null
           contract_template_version?: string | null
+          counter_signer_email?: string | null
+          counter_signer_name?: string | null
+          counter_signer_status?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -5562,6 +5573,7 @@ export type Database = {
           docusign_envelope_id?: string | null
           end_date?: string | null
           equity_percentage?: number | null
+          founder_signer_status?: string | null
           funnel_item_id?: string | null
           has_startup_portugal_status?: boolean | null
           iban?: string | null

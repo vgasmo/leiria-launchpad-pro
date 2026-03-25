@@ -624,16 +624,46 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
 
   const providerLabel = provider === 'pandadoc' ? 'PandaDoc' : provider === 'docusign' ? 'DocuSign' : provider === 'manual' ? t('contractDetail.manualSignature', { defaultValue: 'Manual' }) : t('contractDetail.notSelected', { defaultValue: 'Não selecionado' });
 
+  // Bilateral signing fields
+  const founderStatus = (contract as any).founder_signer_status || 'pending';
+  const counterSignerName = (contract as any).counter_signer_name || '';
+  const counterSignerEmail = (contract as any).counter_signer_email || '';
+  const counterSignerStatus = (contract as any).counter_signer_status || '';
+  const hasBilateral = !!counterSignerEmail;
+  const founderName = (contract as any).legal_representative_name || contract.workspace?.startup?.name || 'Founder';
+  const founderEmail = (contract as any).legal_representative_email || '';
+
   const STATUS_ICON: Record<string, React.ReactNode> = {
     completed: <CheckCircle2 className="h-4 w-4 text-green-600" />,
+    signed: <CheckCircle2 className="h-4 w-4 text-green-600" />,
     sent_for_signature: <Send className="h-4 w-4 text-blue-600" />,
+    sent: <Send className="h-4 w-4 text-blue-600" />,
     viewed: <FileText className="h-4 w-4 text-blue-500" />,
     declined: <XCircle className="h-4 w-4 text-destructive" />,
     voided: <XCircle className="h-4 w-4 text-muted-foreground" />,
     failed: <AlertTriangle className="h-4 w-4 text-destructive" />,
     pending_manual: <Clock className="h-4 w-4 text-amber-500" />,
+    pending: <Clock className="h-4 w-4 text-muted-foreground" />,
     draft: <FileText className="h-4 w-4 text-muted-foreground" />,
     ready_to_send: <Send className="h-4 w-4 text-amber-500" />,
+  };
+
+  const signerStatusLabel = (status: string) => {
+    const map: Record<string, string> = {
+      pending: 'Pendente',
+      sent: 'Enviado',
+      signed: 'Assinado ✓',
+      declined: 'Recusado',
+      completed: 'Assinado ✓',
+    };
+    return map[status] || status;
+  };
+
+  const signerStatusColor = (status: string) => {
+    if (status === 'signed' || status === 'completed') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+    if (status === 'sent') return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+    if (status === 'declined') return 'bg-destructive/10 text-destructive';
+    return 'bg-muted text-muted-foreground';
   };
 
   const handleSetProvider = async (newProvider: string) => {
@@ -724,10 +754,75 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
 
       <Separator />
 
+      {/* Bilateral Signing Status */}
+      <div className="space-y-3">
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          Assinaturas Bilaterais
+        </Label>
+
+        {/* Signer 1: Founder */}
+        <div className="border rounded-lg p-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">1</div>
+              <div>
+                <p className="text-sm font-medium">Primeiro Outorgante</p>
+                <p className="text-xs text-muted-foreground">{founderName} {founderEmail ? `(${founderEmail})` : ''}</p>
+              </div>
+            </div>
+            <Badge className={cn('text-[10px] h-5', signerStatusColor(founderStatus))}>
+              {signerStatusLabel(founderStatus)}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Signer 2: Counter-signer (Startup Leiria) */}
+        <div className="border rounded-lg p-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-full bg-amber-500/10 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-300">2</div>
+              <div>
+                <p className="text-sm font-medium">Segundo Outorgante</p>
+                {hasBilateral ? (
+                  <p className="text-xs text-muted-foreground">{counterSignerName} ({counterSignerEmail})</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    Será atribuído automaticamente ao enviar
+                  </p>
+                )}
+              </div>
+            </div>
+            {hasBilateral ? (
+              <Badge className={cn('text-[10px] h-5', signerStatusColor(counterSignerStatus))}>
+                {signerStatusLabel(counterSignerStatus)}
+              </Badge>
+            ) : (
+              <Badge className="text-[10px] h-5 bg-muted text-muted-foreground">Pendente</Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Overall status hint */}
+        {isSent && hasBilateral && founderStatus !== 'signed' && counterSignerStatus !== 'signed' && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Info className="h-3.5 w-3.5" />
+            O founder assina primeiro. Após a assinatura, o contrato é enviado ao representante da Startup Leiria.
+          </p>
+        )}
+        {isSent && founderStatus === 'signed' && counterSignerStatus !== 'signed' && counterSignerStatus !== 'completed' && (
+          <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+            <Send className="h-3.5 w-3.5" />
+            Founder já assinou. Aguardando assinatura do representante da Startup Leiria.
+          </p>
+        )}
+      </div>
+
+      <Separator />
+
       {/* Canonical Signature Status */}
       <div className="space-y-3">
         <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-          {t('contractDetail.signatureStatus', { defaultValue: 'Estado da Assinatura' })}
+          {t('contractDetail.signatureStatus', { defaultValue: 'Estado Geral' })}
         </Label>
         <div className="flex items-center gap-2">
           {STATUS_ICON[sigStatus || ''] || <Clock className="h-4 w-4 text-muted-foreground" />}
@@ -788,7 +883,6 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
           {t('contractDetail.signatureActions', { defaultValue: 'Ações' })}
         </Label>
         <div className="flex flex-wrap gap-2">
-          {/* Send via PandaDoc */}
           {(provider === 'pandadoc' || !provider) && (!isSent || canRetry) && (
             <Button
               size="sm"
@@ -803,7 +897,6 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                 : t('contractDetail.sendViaPandaDoc', { defaultValue: 'Enviar via PandaDoc' })}
             </Button>
           )}
-          {/* Send via DocuSign */}
           {(provider === 'docusign' || !provider) && (!isSent || canRetry) && (
             <Button
               size="sm"
@@ -818,7 +911,6 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                 : t('contractDetail.sendViaDocuSign', { defaultValue: 'Enviar via DocuSign' })}
             </Button>
           )}
-          {/* Refresh status */}
           {isSent && sigStatus !== 'completed' && (
             <Button
               size="sm"
@@ -836,7 +928,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
         </div>
         {!provider && !isSent && (
           <p className="text-xs text-muted-foreground">
-            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor acima ou envie diretamente para iniciar o processo de assinatura.' })}
+            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor acima ou envie diretamente. O contrato será enviado para assinatura bilateral (founder + Startup Leiria).' })}
           </p>
         )}
       </div>
