@@ -40,6 +40,8 @@ import { SavedViewsDropdown } from '@/components/crm/SavedViewsDropdown';
 import { supabase } from '@/lib/supabaseClient';
 import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
+import { PipelineForecastCard } from '@/components/crm/PipelineForecastCard';
+import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
