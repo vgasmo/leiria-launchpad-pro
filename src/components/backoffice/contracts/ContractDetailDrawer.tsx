@@ -143,6 +143,20 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     return calculateContractPricing(input);
   }, [incubationType, building, contract, discounts]);
 
+  // Generate PDF mutation
+  const generatePdf = useMutation({
+    mutationFn: async () => {
+      const result = await invokeWithAuth('generate-contract-pdf', { contractId: contract?.id });
+      return result;
+    },
+    onSuccess: () => {
+      toast.success(t('contractDetail.pdfGenerated', { defaultValue: 'PDF do contrato gerado com sucesso' }));
+    },
+    onError: () => {
+      toast.error(t('contractDetail.pdfGenerationFailed', { defaultValue: 'Erro ao gerar PDF' }));
+    },
+  });
+
   if (!contract) return null;
 
   const startEditing = () => {
