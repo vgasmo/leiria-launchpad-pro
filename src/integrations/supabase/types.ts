@@ -1751,12 +1751,16 @@ export type Database = {
           contact_phone: string | null
           converted_at: string | null
           created_at: string
+          deal_currency: string | null
+          deal_value: number | null
+          expected_close_date: string | null
           first_contact_at: string | null
           id: string
           last_activity_at: string | null
           linked_contract_id: string | null
           linked_startup_id: string | null
           linked_workspace_id: string | null
+          loss_reason: string | null
           next_action_at: string | null
           next_action_description: string | null
           notes: string | null
@@ -1769,6 +1773,7 @@ export type Database = {
           tags: string[] | null
           type: string
           updated_at: string
+          win_probability: number | null
         }
         Insert: {
           contact_email?: string | null
@@ -1776,12 +1781,16 @@ export type Database = {
           contact_phone?: string | null
           converted_at?: string | null
           created_at?: string
+          deal_currency?: string | null
+          deal_value?: number | null
+          expected_close_date?: string | null
           first_contact_at?: string | null
           id?: string
           last_activity_at?: string | null
           linked_contract_id?: string | null
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
+          loss_reason?: string | null
           next_action_at?: string | null
           next_action_description?: string | null
           notes?: string | null
@@ -1794,6 +1803,7 @@ export type Database = {
           tags?: string[] | null
           type?: string
           updated_at?: string
+          win_probability?: number | null
         }
         Update: {
           contact_email?: string | null
@@ -1801,12 +1811,16 @@ export type Database = {
           contact_phone?: string | null
           converted_at?: string | null
           created_at?: string
+          deal_currency?: string | null
+          deal_value?: number | null
+          expected_close_date?: string | null
           first_contact_at?: string | null
           id?: string
           last_activity_at?: string | null
           linked_contract_id?: string | null
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
+          loss_reason?: string | null
           next_action_at?: string | null
           next_action_description?: string | null
           notes?: string | null
@@ -1819,6 +1833,7 @@ export type Database = {
           tags?: string[] | null
           type?: string
           updated_at?: string
+          win_probability?: number | null
         }
         Relationships: [
           {
