@@ -49,14 +49,13 @@ export function AdminMissionControlDirectory() {
     setSearchParams({ tab }, { replace: true });
   };
 
-  const groupOrder = ['operations', 'crm', 'programs', 'users', 'reports', 'settings'];
+  const groupOrder = ['operations', 'crm', 'programs', 'users', 'reports'];
   const groupLabels: Record<string, string> = {
     operations: t('admin.directory.groupOps', { defaultValue: 'Operações' }),
     crm: t('admin.directory.groupCrm', { defaultValue: 'CRM & Pipeline' }),
     programs: t('admin.directory.groupPrograms', { defaultValue: 'Programas & Conteúdos' }),
     users: t('admin.directory.groupUsers', { defaultValue: 'Pessoas' }),
     reports: t('admin.directory.groupReports', { defaultValue: 'Relatórios & Saúde' }),
-    settings: t('admin.directory.groupSettings', { defaultValue: 'Sistema' }),
   };
 
   return (
