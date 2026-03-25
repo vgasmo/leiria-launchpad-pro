@@ -403,14 +403,30 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
             />
 
             {!item.linked_workspace_id && !item.linked_startup_id && !item.linked_contract_id && (
-              <div className="text-center py-8">
-                <Briefcase className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {t('crm.noLinkedContext', { defaultValue: 'Este lead ainda não está vinculado a um workspace ou contrato.' })}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('crm.linkHint', { defaultValue: 'O vínculo é criado automaticamente ao converter o lead ou pode ser feito manualmente.' })}
-                </p>
+              <div className="text-center py-6 space-y-3">
+                <Briefcase className="h-10 w-10 mx-auto text-muted-foreground/40" />
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('crm.noLinkedContext', { defaultValue: 'Este lead ainda não está vinculado a um workspace ou contrato.' })}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('crm.linkHint', { defaultValue: 'O vínculo é criado automaticamente ao converter o lead ou pode ser feito manualmente.' })}
+                  </p>
+                </div>
+                {/* Direct contract initiation for advanced-stage leads without workspace */}
+                {['qualified', 'proposal_sent', 'negotiating', 'contracted'].includes(item.stage) && (
+                  <Button
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => {
+                      onOpenChange(false);
+                      navigate(`/backoffice?tab=contracts&action=create&funnel=${item.id}&contact=${encodeURIComponent(item.contact_name || '')}&email=${encodeURIComponent(item.contact_email || '')}&org=${encodeURIComponent(item.organization_name || '')}`);
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
+                  </Button>
+                )}
               </div>
             )}
 
