@@ -456,7 +456,15 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                   {isEditing ? (
                     <Select
                       value={editValues.incubation_type_id || '__none__'}
-                      onValueChange={v => setEditValues(p => ({ ...p, incubation_type_id: v === '__none__' ? '' : v }))}
+                      onValueChange={v => {
+                        const selectedTypeId = v === '__none__' ? '' : v;
+                        const selectedType = incubationTypes?.find(it => it.id === selectedTypeId);
+                        setEditValues(p => ({
+                          ...p,
+                          incubation_type_id: selectedTypeId,
+                          monthly_fee: selectedType?.base_monthly_fee ?? p.monthly_fee,
+                        }));
+                      }}
                     >
                       <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="—" /></SelectTrigger>
                       <SelectContent>
@@ -610,7 +618,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
 
   const provider = contract.signature_provider;
   const sigStatus = contract.signature_status;
-  const isSent = sigStatus && !['draft', 'failed', 'ready_to_send', 'pending_manual'].includes(sigStatus);
+  const isSent = sigStatus && !['draft', 'failed', 'ready_to_send', 'pending_manual', 'pending', 'pending_signature'].includes(sigStatus);
   const canChangeProvider = !isSent && !contract.provider_document_id;
   const canRetry = sigStatus === 'failed' || sigStatus === 'ready_to_send';
 

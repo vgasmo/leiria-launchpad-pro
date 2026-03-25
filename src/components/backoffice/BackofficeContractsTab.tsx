@@ -644,7 +644,7 @@ export function BackofficeContractsTab() {
 
       {/* Contract Detail Drawer */}
       <ContractDetailDrawer
-        contract={detailContract}
+        contract={detailContract ? (contracts?.find(c => c.id === detailContract.id) || detailContract) : null}
         incubationTypes={incubationTypes}
         buildings={buildings}
         open={!!detailContract}
