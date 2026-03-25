@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { LeadScoreCard } from '@/components/crm/LeadScoreCard';
 import { getFunnelStageLabel } from '@/lib/stageLabels';
 import { formatRelativeTime } from '@/lib/dateUtils';
@@ -20,6 +24,11 @@ interface OverviewTabProps {
   isClearingNextAction: boolean;
 }
 
+const DEFAULT_WIN_PROBABILITY: Record<string, number> = {
+  new: 5, first_contact_booked: 10, met: 20, qualified: 40,
+  proposal_sent: 60, negotiating: 75, contracted: 95,
+};
+
 export function OverviewTab({
   item,
   nextActionAt,
@@ -32,9 +41,109 @@ export function OverviewTab({
   const { t } = useTranslation();
   const stageColor = STAGE_COLORS[item.stage];
   const stageLabel = getFunnelStageLabel(t, item.stage);
+  const updateItem = useUpdateFunnelItem();
+
+  const [editingDeal, setEditingDeal] = useState(false);
+  const [dealValue, setDealValue] = useState(item.deal_value?.toString() || '');
+  const [dealCurrency, setDealCurrency] = useState(item.deal_currency || 'EUR');
+  const [expectedClose, setExpectedClose] = useState(item.expected_close_date || '');
+  const [winProb, setWinProb] = useState(
+    (item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0).toString()
+  );
+
+  const handleSaveDeal = () => {
+    updateItem.mutate({
+      id: item.id,
+      deal_value: dealValue ? parseFloat(dealValue) : null,
+      deal_currency: dealCurrency,
+      expected_close_date: expectedClose || null,
+      win_probability: winProb ? parseInt(winProb) : null,
+    } as any);
+    setEditingDeal(false);
+  };
+
+  const weightedValue = (item.deal_value || 0) * ((item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0) / 100);
 
   return (
     <div className="flex-1 p-4 space-y-4 overflow-auto">
+      {/* Deal Value Card */}
+      <Card className="border-primary/20">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-sm font-medium flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              {t('crm.dealValue', { defaultValue: 'Valor do Deal' })}
+            </span>
+            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setEditingDeal(!editingDeal)}>
+              {editingDeal ? t('common.cancel') : t('common.edit', { defaultValue: 'Editar' })}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 pt-0">
+          {editingDeal ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('crm.value', { defaultValue: 'Valor' })}</Label>
+                  <Input type="number" value={dealValue} onChange={e => setDealValue(e.target.value)} placeholder="0" className="h-8" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('crm.currency', { defaultValue: 'Moeda' })}</Label>
+                  <Select value={dealCurrency} onValueChange={setDealCurrency}>
+                    <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EUR">EUR €</SelectItem>
+                      <SelectItem value="USD">USD $</SelectItem>
+                      <SelectItem value="GBP">GBP £</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('crm.expectedClose', { defaultValue: 'Fecho previsto' })}</Label>
+                  <Input type="date" value={expectedClose} onChange={e => setExpectedClose(e.target.value)} className="h-8" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('crm.winProbability', { defaultValue: 'Probabilidade (%)' })}</Label>
+                  <Input type="number" min="0" max="100" value={winProb} onChange={e => setWinProb(e.target.value)} className="h-8" />
+                </div>
+              </div>
+              <Button size="sm" className="w-full h-7 text-xs" onClick={handleSaveDeal} disabled={updateItem.isPending}>
+                {t('common.save')}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {item.deal_value ? (
+                <>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-foreground">
+                      {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: item.deal_currency || 'EUR' }).format(item.deal_value)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="h-3 w-3" />
+                      {t('crm.weighted', { defaultValue: 'Ponderado' })}: {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: item.deal_currency || 'EUR' }).format(weightedValue)}
+                    </span>
+                    <span>{item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0}%</span>
+                  </div>
+                  {item.expected_close_date && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <CalendarDays className="h-3 w-3" />
+                      {t('crm.closeBy', { defaultValue: 'Fecho' })}: {new Date(item.expected_close_date).toLocaleDateString('pt-PT')}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t('crm.noDealValue', { defaultValue: 'Sem valor atribuído — clique Editar' })}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Next Action Card */}
       <Card className={cn(
         nextActionAt && new Date(nextActionAt) < new Date() && 'border-warning/50 bg-warning/5'

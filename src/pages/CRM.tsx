@@ -40,6 +40,8 @@ import { SavedViewsDropdown } from '@/components/crm/SavedViewsDropdown';
 import { supabase } from '@/lib/supabaseClient';
 import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMode, sortByFocusUrgency } from '@/lib/crmUtils';
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
+import { PipelineForecastCard } from '@/components/crm/PipelineForecastCard';
+import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
@@ -112,6 +114,11 @@ export default function CRM() {
       next_action_at: item.next_action_at,
       next_action_description: item.next_action_description,
       last_activity_at: item.last_activity_at,
+      deal_value: (item as any).deal_value ?? null,
+      deal_currency: (item as any).deal_currency ?? 'EUR',
+      expected_close_date: (item as any).expected_close_date ?? null,
+      win_probability: (item as any).win_probability ?? null,
+      loss_reason: (item as any).loss_reason ?? null,
       created_at: item.created_at,
       updated_at: item.created_at,
       owner: item.owner ? { ...item.owner, email: '' } : null,
@@ -331,6 +338,10 @@ export default function CRM() {
           </div>
         </div>
 
+        <div className="flex items-center justify-between mb-2">
+          <div />
+          <CsvLeadImport />
+        </div>
         <Tabs defaultValue="pipeline" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="pipeline" className="gap-2">
@@ -511,6 +522,7 @@ export default function CRM() {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
+            <PipelineForecastCard pipeline={inbox as unknown as Record<string, CrmInboxItem[]>} />
             <CrmAnalyticsDashboard />
           </TabsContent>
         </Tabs>

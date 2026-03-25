@@ -23,7 +23,8 @@ const FUNNEL_ITEM_FIELDS = `
   id, stage, type, owner_consultant_id, program_id,
   contact_name, contact_email, organization_name,
   next_action_at, next_action_description, last_activity_at,
-  linked_workspace_id, created_at, updated_at
+  linked_workspace_id, deal_value, deal_currency, expected_close_date, win_probability,
+  created_at, updated_at
 `;
 
 export function useCrmPipeline(filters?: UseCrmPipelineFilters) {
