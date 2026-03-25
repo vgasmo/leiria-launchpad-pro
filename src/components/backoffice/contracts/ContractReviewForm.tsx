@@ -52,6 +52,8 @@ interface ContractReviewFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   defaultWorkspaceId?: string;
+  fromCRM?: boolean;
+  crmOrgName?: string | null;
 }
 
 export function ContractReviewForm({
@@ -65,11 +67,13 @@ export function ContractReviewForm({
   onCancel,
   isSubmitting,
   defaultWorkspaceId,
+  fromCRM = false,
+  crmOrgName,
 }: ContractReviewFormProps) {
   const { t } = useTranslation();
 
   const form = useForm<ContractFormValues>({
-    resolver: zodResolver(contractSchema),
+    resolver: zodResolver(fromCRM ? contractSchemaCRM : contractSchema),
     defaultValues: {
       workspace_id: defaultWorkspaceId || '',
       status: 'draft',
