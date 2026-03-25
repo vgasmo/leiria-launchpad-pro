@@ -316,7 +316,9 @@ export default function PublicContractSigning() {
   }
 
   const sigStatus = contract.signature_status;
+  const sigProvider: SignatureProvider = contract.signature_provider || 'manual';
   const startupName = contract.workspace?.startup?.name || 'Startup';
+  const stepLabels = getStepLabels(sigProvider);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
