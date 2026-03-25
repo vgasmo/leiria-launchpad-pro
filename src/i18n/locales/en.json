@@ -1469,7 +1469,9 @@
     "first": "First",
     "previousPage": "Previous page",
     "nextPage": "Next page",
-    "lastPage": "Last page"
+    "lastPage": "Last page",
+    "years": "years",
+    "months": "months"
   },
   "cockpit": {
     "actionTitle": "Action Title",
@@ -1508,70 +1510,9 @@
     "overdueCheckins": "Overdue Check-ins"
   },
   "consultor": {
-    "actions": {
-      "allClear": "No overdue actions",
-      "overdueCount": "{{count}} overdue action",
-      "overdueCount_plural": "{{count}} overdue actions",
-      "resolve": "Resolve",
-      "title": "Critical Actions"
-    },
-    "agenda": {
-      "empty": "No scheduled sessions",
-      "prep": "Prep",
-      "schedule": "Schedule session",
-      "title": "Agenda (7 days)"
-    },
-    "alerts": {
-      "missingKpis": "{{count}} startup missing KPIs this month",
-      "missingKpis_plural": "{{count}} startups missing KPIs this month",
-      "noRecentSessions": "{{count}} startup without session in 30+ days",
-      "noRecentSessions_plural": "{{count}} startups without session in 30+ days"
-    },
-    "dataQuality": {
-      "title": "Data Quality Alerts"
-    },
-    "hero": {
-      "allClear": "All under control!",
-      "noPriorities": "No startups in critical or at-risk state.",
-      "openWorkspace": "Open",
-      "subtitle": "Startups that need your immediate attention",
-      "title": "Risk & Priorities Today",
-      "viewAll": "View All"
-    },
-    "pipeline": {
-      "contracted": "Contracted",
-      "empty": "No pipeline data",
-      "needsAction": "{{count}} lead needs action",
-      "needsAction_plural": "{{count}} leads need action",
-      "newLeads": "New leads",
-      "open": "Open CRM",
-      "title": "Pipeline (CRM)",
-      "totalLeads": "Active leads"
-    },
-    "risk": {
-      "atRisk": "At risk",
-      "criticalHealth": "Critical health",
-      "missingKpis": "Missing KPIs",
-      "noRecentSession": "No session in 30+ days",
-      "overdueActions": "{{count}} overdue action",
-      "overdueActions_plural": "{{count}} overdue actions"
-    },
-    "weeklyImpact": {
-      "actionsCreated": "Actions created",
-      "leadsConverted": "Leads converted",
-      "sessionsCompleted": "Sessions completed",
-      "title": "Weekly Summary"
-    },
-    "healthMatrix": {
-      "title": "Portfolio Health Matrix"
-    },
-    "nudgeFounder": "Nudge",
-    "reviewMilestone": "Review",
-    "aiBriefing": {
-      "cta": "Briefing",
-      "title": "30-Day Briefing",
-      "error": "Could not generate briefing.",
-      "nextActions": "Next Actions"
+    "prepSheet": {
+      "button": "Prep meeting",
+      "title": "First Contact Prep"
     }
   },
   "consultorTools": {
@@ -1709,7 +1650,13 @@
       "step4": "Save the contract to the database",
       "tooLarge": "File must be under 10MB.",
       "uploading": "Uploading document..."
-    }
+    },
+    "noNumber": "No contract number",
+    "noNotes": "No notes",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "updated": "Contract updated",
+    "updateFailed": "Failed to update contract"
   },
   "createStartup": {
     "contactEmailPlaceholder": "john@startup.com",
@@ -2005,7 +1952,17 @@
     "upcomingSession": "Upcoming Session",
     "updateNextAction": "Update",
     "viewAll": "View All",
-    "viewSession": "View Session"
+    "viewSession": "View Session",
+    "linkedContext": "Linked Context",
+    "contract": "Contract",
+    "selectContract": "Select contract...",
+    "noContractsAvailable": "No contracts in this workspace",
+    "linkContract": "Link Contract",
+    "emailHistory": "Email History",
+    "sync": "Sync",
+    "noEmails": "No synced emails",
+    "syncNow": "Sync now",
+    "emailSyncDisabled": "Enable the crm_graph_email_sync feature flag to sync."
   },
   "dashboard": {
     "acrossPrograms": "Across {{count}} program",
@@ -2594,24 +2551,22 @@
     "title": "Follow-up Autopilot"
   },
   "founder": {
-    "applicationBeingReviewed": "Your startup application is being reviewed by our team. You'll receive access to your workspace once approved.",
-    "applicationUnderReview": "Application Under Review",
-    "commonTasks": "Common tasks for your workspace",
-    "createYourStartup": "Create Your Startup",
-    "kpiStatus": "KPI Status",
-    "lastSession": "Last Session",
-    "learnMore": "Learn More",
-    "nextMeeting": "Next Meeting",
-    "noSessionsYet": "No sessions yet",
-    "openWorkspace": "Open Workspace",
-    "pending": "Pending",
-    "quickActions": "Quick Actions",
-    "responseTime": "We typically respond within 2-3 business days",
-    "startYourJourney": "Start Your Startup Journey",
-    "startYourJourneyDesc": "Register your startup to access mentorship, track your progress, and prepare for your next funding round.",
-    "startYourJourneyValue": "Get mentor guidance and track your KPIs in one place.",
-    "updateKpis": "Update KPIs",
-    "viewActions": "View Actions"
+    "claimed": {
+      "pendingTitle": "Application under review",
+      "pendingDesc": "Your application is being reviewed by the team. You'll be notified when it's approved.",
+      "pendingDescNamed": "Your application for \"{{name}}\" is being reviewed by the team. You'll be notified when it's approved.",
+      "awaitingReview": "Awaiting approval",
+      "claimTitle": "Association pending",
+      "claimDesc": "Your association request is being verified by the team. This may take 1-2 business days.",
+      "awaitingVerification": "Under verification",
+      "viewSettings": "View settings",
+      "getStartedTitle": "Welcome to the platform!",
+      "getStartedDesc": "To access your workspace, associate with an existing startup or create a new application.",
+      "claimCta": "Associate startup",
+      "nextSteps": "Next steps",
+      "nextStepsDesc": "While you wait, you can explore the platform and prepare documentation.",
+      "contactSupport": "Contact team"
+    }
   },
   "founderHome": {
     "bookFirstContact": "Book Your First Meeting",
@@ -5785,30 +5740,6 @@
       "featureFlags": "Feature Flags",
       "workflows": "Workflow Rules",
       "auditLog": "Audit Log"
-    }
-  },
-  "founder": {
-    "claimed": {
-      "pendingTitle": "Application under review",
-      "pendingDesc": "Your application is being reviewed by the team. You'll be notified when it's approved.",
-      "pendingDescNamed": "Your application for \"{{name}}\" is being reviewed by the team. You'll be notified when it's approved.",
-      "awaitingReview": "Awaiting approval",
-      "claimTitle": "Association pending",
-      "claimDesc": "Your association request is being verified by the team. This may take 1-2 business days.",
-      "awaitingVerification": "Under verification",
-      "viewSettings": "View settings",
-      "getStartedTitle": "Welcome to the platform!",
-      "getStartedDesc": "To access your workspace, associate with an existing startup or create a new application.",
-      "claimCta": "Associate startup",
-      "nextSteps": "Next steps",
-      "nextStepsDesc": "While you wait, you can explore the platform and prepare documentation.",
-      "contactSupport": "Contact team"
-    }
-  },
-  "consultor": {
-    "prepSheet": {
-      "button": "Prep meeting",
-      "title": "First Contact Prep"
     }
   }
 }
