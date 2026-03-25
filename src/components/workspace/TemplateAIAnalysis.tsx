@@ -50,9 +50,14 @@ export function TemplateAIAnalysis({ instanceId, onApplyRecommendation }: Templa
       setAnalysis(data.analysis);
       toast.success(t('templates.aiAnalysisComplete', 'AI analysis complete'));
     } catch (err: any) {
-      const message = err.message || 'Failed to analyze template';
-      setError(message);
-      toast.error(message);
+      const status = err?.status ?? err?.context?.status;
+      if (status === 401 || status === 500 || status === 404) {
+        setError('__ai_unavailable__');
+      } else {
+        const message = err.message || 'Failed to analyze template';
+        setError(message);
+        toast.error(message);
+      }
     } finally {
       setAnalyzing(false);
     }
