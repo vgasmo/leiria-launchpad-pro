@@ -85,7 +85,7 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
   const hasAnyLink = linkedWorkspaceId || linkedStartupId || linkedContractId;
   if (!hasAnyLink) return null;
 
-  const isLoading = loadingWs || loadingContract;
+  const isLoading = loadingWs || loadingContract || loadingWsContracts;
 
   if (isLoading) {
     return (
