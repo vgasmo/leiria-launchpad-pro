@@ -576,8 +576,8 @@ export function BackofficeContractsTab() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
+                      <TableCell onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="sm" onClick={() => setDetailContract(contract)}>
                           {t('common.edit', { defaultValue: 'Edit' })}
                         </Button>
                       </TableCell>
