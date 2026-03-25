@@ -392,7 +392,7 @@ export function AdminTagCategoriesManager() {
                   <SelectValue placeholder={t('admin.tags.selectColor', 'Select color')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {COLOR_OPTIONS.map(c => (
                     <SelectItem key={c.value} value={c.value}>
                       <div className="flex items-center gap-2">
