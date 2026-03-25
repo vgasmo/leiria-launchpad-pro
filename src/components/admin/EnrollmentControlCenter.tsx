@@ -38,7 +38,7 @@ export function EnrollmentControlCenter() {
       const [claimsRes, unclaimedRes, pendingProfilesRes] = await Promise.all([
         supabase.from('startup_claim_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('workspaces').select('id', { count: 'exact', head: true }).eq('status', 'imported_unclaimed'),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('account_status', 'pending_approval'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('account_status', 'pending'),
       ]);
       return {
         pendingClaims: claimsRes.count ?? 0,
