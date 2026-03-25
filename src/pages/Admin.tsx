@@ -198,6 +198,10 @@ export default function Admin() {
           <PendingApprovalsManager />
         </TabsContent>
 
+        <TabsContent value="enrollment">
+          <EnrollmentControlCenter />
+        </TabsContent>
+
         <TabsContent value="compliance">
           <ComplianceDashboard />
         </TabsContent>
