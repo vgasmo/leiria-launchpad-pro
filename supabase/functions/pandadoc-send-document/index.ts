@@ -38,10 +38,13 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { contractId, signerEmail, signerName } = await req.json()
+    const body = await req.json().catch(() => ({}))
+    const contractId = typeof body?.contractId === 'string' ? body.contractId.trim() : ''
+    const requestedSignerEmail = typeof body?.signerEmail === 'string' ? body.signerEmail.trim() : ''
+    const requestedSignerName = typeof body?.signerName === 'string' ? body.signerName.trim() : ''
 
-    if (!contractId || !signerEmail || !signerName) {
-      return new Response(JSON.stringify({ error: 'Missing required fields: contractId, signerEmail, signerName' }), {
+    if (!contractId) {
+      return new Response(JSON.stringify({ error: 'Missing required field: contractId' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -71,13 +74,42 @@ Deno.serve(async (req) => {
     // Fetch contract
     const { data: contract, error: contractError } = await supabase
       .from('startup_contracts')
-      .select('*, workspace:workspaces(startup:startups(name))')
+      .select('*, workspace:workspaces(startup:startups(name,main_contact_email))')
       .eq('id', contractId)
       .single()
 
     if (contractError || !contract) {
       return new Response(JSON.stringify({ error: 'Contract not found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const signerEmail =
+      requestedSignerEmail ||
+      contract.legal_representative_email ||
+      contract.workspace?.startup?.main_contact_email ||
+      ''
+
+    const signerName =
+      requestedSignerName ||
+      contract.legal_representative_name ||
+      contract.workspace?.startup?.name ||
+      'Founder'
+
+    if (!signerEmail) {
+      const missingSignerError = 'No signer email found. Fill Legal Representative Email or Startup main contact email before sending.'
+
+      await supabase
+        .from('startup_contracts')
+        .update({
+          provider_last_error: missingSignerError,
+          provider_last_sync_at: new Date().toISOString(),
+        })
+        .eq('id', contractId)
+
+      return new Response(JSON.stringify({ error: missingSignerError }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -171,10 +203,10 @@ Deno.serve(async (req) => {
 
     // Combine parts
     const totalLength = parts.reduce((sum, p) => sum + p.length, 0)
-    const body = new Uint8Array(totalLength)
+    const bodyBytes = new Uint8Array(totalLength)
     let offset = 0
     for (const part of parts) {
-      body.set(part, offset)
+      bodyBytes.set(part, offset)
       offset += part.length
     }
 
@@ -184,7 +216,7 @@ Deno.serve(async (req) => {
         'Authorization': `API-Key ${pandadocApiKey}`,
         'Content-Type': `multipart/form-data; boundary=${boundary}`,
       },
-      body: body,
+      body: bodyBytes,
     })
 
     if (!createRes.ok) {
@@ -282,7 +314,8 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error('PandaDoc error:', err)
-    return new Response(JSON.stringify({ error: err.message }), {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown PandaDoc error'
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
