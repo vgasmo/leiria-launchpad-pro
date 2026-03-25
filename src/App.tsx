@@ -137,6 +137,7 @@ function AppRoutes() {
         <Route path="/share/:token" element={<SharedWorkspace />} />
         <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
         <Route path="/book/:token" element={<PublicBooking />} />
+        <Route path="/contract-signing/:token" element={<PublicContractSigning />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
         <Route path="/claim-startup" element={<ProtectedRoute><ClaimStartup /></ProtectedRoute>} />
