@@ -245,6 +245,7 @@ export function BackofficeContractsTab() {
       document_url: document_url || null,
       discount_applied_by: user?.id,
       funnel_item_id: crmFunnelId || null,
+      organization_name: crmOrgName || null,
     };
     const newContract = await createContract.mutateAsync(payload);
 
