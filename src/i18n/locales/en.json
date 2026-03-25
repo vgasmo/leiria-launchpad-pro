@@ -556,7 +556,8 @@
       "waitlistSuggestions": "Waitlist Suggestions",
       "workspaceBlocked": "Workspace blocked",
       "workspaceUnblocked": "Workspace unblocked",
-      "workspacesWithoutContracts": "Workspaces Without Contracts"
+      "workspacesWithoutContracts": "Workspaces Without Contracts",
+      "discounts": "Discounts"
     },
     "backofficeExtended": {
       "addSpace": "Add Space",
@@ -1471,7 +1472,8 @@
     "nextPage": "Next page",
     "lastPage": "Last page",
     "years": "years",
-    "months": "months"
+    "months": "months",
+    "notes": "Notes"
   },
   "cockpit": {
     "actionTitle": "Action Title",
@@ -5755,7 +5757,8 @@
     "auditTrail": "Pricing Audit Trail",
     "breakdown": "Pricing Breakdown",
     "source": "Source",
-    "ruleApplied": "Rule Applied"
+    "ruleApplied": "Rule Applied",
+    "noIncubationType": "Select an incubation type to see pricing breakdown"
   },
   "contractDetail": {
     "viewWorkspace": "View Workspace",
