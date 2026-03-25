@@ -37,6 +37,7 @@ import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
 import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
+import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
