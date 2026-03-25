@@ -41,9 +41,10 @@ export interface IncubationType {
 
 export interface StartupContract {
   id: string;
-  workspace_id: string;
+  workspace_id: string | null;
   incubation_type_id: string | null;
   contract_number: string | null;
+  organization_name: string | null;
   status: 'draft' | 'pending_signature' | 'active' | 'suspended' | 'terminated' | 'expired';
   start_date: string;
   end_date: string | null;
@@ -74,7 +75,7 @@ export interface StartupContract {
   provider_completed_at: string | null;
   docusign_envelope_id: string | null;
   // Joined data
-  workspace?: { id: string; startup?: { name: string } | null };
+  workspace?: { id: string; startup?: { name: string } | null } | null;
   incubation_type?: IncubationType | null;
   building?: Building | null;
 }

@@ -245,6 +245,7 @@ export function BackofficeContractsTab() {
       document_url: document_url || null,
       discount_applied_by: user?.id,
       funnel_item_id: crmFunnelId || null,
+      organization_name: crmOrgName || null,
     };
     const newContract = await createContract.mutateAsync(payload);
 
@@ -596,7 +597,7 @@ export function BackofficeContractsTab() {
                           onCheckedChange={() => toggleContractSelection(contract.id)}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{startup?.name || 'Unnamed'}</TableCell>
+                      <TableCell className="font-medium">{startup?.name || (contract as any).organization_name || t('common.unnamed', { defaultValue: 'Unnamed' })}</TableCell>
                       <TableCell className="text-muted-foreground">{contract.contract_number || '-'}</TableCell>
                       <TableCell>{incubationType?.name || '-'}</TableCell>
                       <TableCell>
