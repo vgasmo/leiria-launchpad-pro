@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -84,16 +84,22 @@ export function BackofficeContractsTab() {
   const [isAIPopulated, setIsAIPopulated] = useState(false);
   const [crmFunnelId, setCrmFunnelId] = useState<string | null>(null);
   const [crmOrgName, setCrmOrgName] = useState<string | null>(null);
+  const [crmWorkspaceId, setCrmWorkspaceId] = useState<string | null>(null);
 
   // Auto-open review form when coming from CRM with action=create
+  const crmInitRef = useRef(false);
   useEffect(() => {
+    if (crmInitRef.current) return;
     const action = searchParams.get('action');
     const funnelId = searchParams.get('funnel');
     const org = searchParams.get('org');
+    const workspaceParam = searchParams.get('workspace');
     
     if (action === 'create' && funnelId) {
+      crmInitRef.current = true;
       setCrmFunnelId(funnelId);
       setCrmOrgName(org);
+      setCrmWorkspaceId(workspaceParam || null);
       setAiData({});
       setDocumentUrl('');
       setIsAIPopulated(false);
@@ -105,6 +111,7 @@ export function BackofficeContractsTab() {
       newParams.delete('contact');
       newParams.delete('email');
       newParams.delete('org');
+      newParams.delete('workspace');
       setSearchParams(newParams, { replace: true });
     }
   }, []);
@@ -214,7 +221,7 @@ export function BackofficeContractsTab() {
 
   const handleReviewSubmit = useCallback(async (values: ContractFormValues & { document_url?: string }) => {
     const { document_url, incubation_type_id, building_id, discount_reason, equity_percentage, square_meters, notes, end_date, contract_number, ...rest } = values;
-    await createContract.mutateAsync({
+    const newContract = await createContract.mutateAsync({
       ...rest,
       incubation_type_id: incubation_type_id || null,
       building_id: building_id || null,
@@ -226,11 +233,24 @@ export function BackofficeContractsTab() {
       notes: notes || null,
       document_url: document_url || null,
       discount_applied_by: user?.id,
+      funnel_item_id: crmFunnelId || null,
     });
+
+    // Link the funnel item back to this contract
+    if (crmFunnelId && newContract?.id) {
+      await supabase
+        .from('funnel_items')
+        .update({ linked_contract_id: newContract.id } as any)
+        .eq('id', crmFunnelId);
+    }
+
     setFlowState('idle');
     setAiData({});
     setDocumentUrl('');
-  }, [createContract, user?.id]);
+    setCrmFunnelId(null);
+    setCrmOrgName(null);
+    setCrmWorkspaceId(null);
+  }, [createContract, user?.id, crmFunnelId]);
 
   const handleCancelReview = useCallback(() => {
     setFlowState('idle');
