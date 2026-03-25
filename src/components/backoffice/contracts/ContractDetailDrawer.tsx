@@ -265,7 +265,8 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
           {/* Discounts Panel */}
           <ContractDiscountsPanel
             contractId={contract.id}
-            baseFee={contract.monthly_fee}
+            monthlyFee={contract.monthly_fee}
+            isStaff={true}
           />
 
           <Separator />
