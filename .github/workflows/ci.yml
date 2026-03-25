@@ -134,20 +134,15 @@ jobs:
       - name: Run i18n sync
         run: node scripts/i18n-sync.cjs
 
-      - name: Verify no changes after sync
+      - name: Verify no changes after sync (fail-on-drift)
         run: |
           if ! git diff --exit-code src/i18n/locales; then
-            echo "📋 i18n sync produced changes (showing first 60 lines):"
+            echo "❌ i18n sync produced uncommitted changes!"
+            echo "📋 Diff (first 60 lines):"
             git diff src/i18n/locales | head -60
             echo ""
-            echo "Auto-applying sync output..."
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add src/i18n/locales
-            git diff --cached --quiet && echo "✅ No staged changes" || {
-              git commit -m "chore(i18n): auto-sync locale files [skip ci]"
-              echo "⚠️ i18n sync committed automatically. This commit won't re-trigger CI."
-            }
+            echo "Fix: run 'node scripts/i18n-sync.cjs' locally and commit the result."
+            exit 1
           fi
           echo "✅ i18n locales are in sync"
 
