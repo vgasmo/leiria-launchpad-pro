@@ -87,6 +87,7 @@ export default function Admin() {
   const getTabIcon = (tab: string) => {
     const icons: Record<string, React.ReactNode> = {
       approvals: <Clock className="h-4 w-4" />,
+      enrollment: <UserPlus className="h-4 w-4" />,
       compliance: <ShieldCheck className="h-4 w-4" />,
       lifecycle: <GitBranch className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
