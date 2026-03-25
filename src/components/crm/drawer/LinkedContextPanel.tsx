@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users } from 'lucide-react';
+import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
