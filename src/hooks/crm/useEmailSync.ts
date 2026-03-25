@@ -4,7 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { invokeWithAuth } from '@/lib/supabaseClient';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
