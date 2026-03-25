@@ -19,6 +19,7 @@ interface LinkedContextPanelProps {
   linkedContractId: string | null;
   funnelItemId: string;
   onLinkContract?: (contractId: string | null) => void;
+  onInitiateContract?: () => void;
 }
 
 const CONTRACT_STATUS_COLORS: Record<string, string> = {
