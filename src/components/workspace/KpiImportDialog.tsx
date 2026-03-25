@@ -210,7 +210,7 @@ export function KpiImportDialog({ open, onOpenChange, workspaceId }: KpiImportDi
                             <SelectValue placeholder={t('kpis.selectKpi', 'Select KPI')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">
+                            <SelectItem value="__skip__">
                               <span className="text-muted-foreground">{t('kpis.skipImport', 'Skip')}</span>
                             </SelectItem>
                             {workspaceKpis?.map((wk) => (

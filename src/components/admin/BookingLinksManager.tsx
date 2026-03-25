@@ -205,7 +205,7 @@ export function BookingLinksManager() {
                       <SelectItem value="7">7 days</SelectItem>
                       <SelectItem value="30">30 days</SelectItem>
                       <SelectItem value="90">90 days</SelectItem>
-                      <SelectItem value="">Never</SelectItem>
+                      <SelectItem value="__never__">Never</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
