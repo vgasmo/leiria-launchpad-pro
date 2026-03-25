@@ -69,6 +69,7 @@ type FlowState = 'idle' | 'upload' | 'review';
 export function BackofficeContractsTab() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -81,6 +82,32 @@ export function BackofficeContractsTab() {
   const [aiData, setAiData] = useState<AIExtractedData>({});
   const [documentUrl, setDocumentUrl] = useState<string>('');
   const [isAIPopulated, setIsAIPopulated] = useState(false);
+  const [crmFunnelId, setCrmFunnelId] = useState<string | null>(null);
+  const [crmOrgName, setCrmOrgName] = useState<string | null>(null);
+
+  // Auto-open review form when coming from CRM with action=create
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const funnelId = searchParams.get('funnel');
+    const org = searchParams.get('org');
+    
+    if (action === 'create' && funnelId) {
+      setCrmFunnelId(funnelId);
+      setCrmOrgName(org);
+      setAiData({});
+      setDocumentUrl('');
+      setIsAIPopulated(false);
+      setFlowState('review');
+      // Clean URL params after consuming
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('action');
+      newParams.delete('funnel');
+      newParams.delete('contact');
+      newParams.delete('email');
+      newParams.delete('org');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, []);
 
   // Bulk contract creation state
   const [selectedWorkspaces, setSelectedWorkspaces] = useState<Set<string>>(new Set());
