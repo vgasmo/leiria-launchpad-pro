@@ -589,6 +589,7 @@ export type Database = {
           body: string | null
           channel: string | null
           completed_at: string | null
+          consultant_user_id: string | null
           created_at: string | null
           direction: string | null
           due_at: string | null
@@ -597,12 +598,24 @@ export type Database = {
           from_address: string | null
           funnel_item_id: string | null
           id: string
+          ignored: boolean | null
+          internet_message_id: string | null
+          last_synced_at: string | null
+          matched_contact_email: string | null
+          matched_startup_id: string | null
+          matching_confidence: string | null
+          matching_method: string | null
           metadata_json: Json | null
+          needs_review: boolean | null
           occurred_at: string
+          participants_json: Json | null
           preview: string | null
           priority: string | null
+          provider_thread_id: string | null
           status: string
           subject: string | null
+          sync_error: string | null
+          sync_status: string | null
           visibility: string
           workspace_id: string
         }
@@ -612,6 +625,7 @@ export type Database = {
           body?: string | null
           channel?: string | null
           completed_at?: string | null
+          consultant_user_id?: string | null
           created_at?: string | null
           direction?: string | null
           due_at?: string | null
@@ -620,12 +634,24 @@ export type Database = {
           from_address?: string | null
           funnel_item_id?: string | null
           id?: string
+          ignored?: boolean | null
+          internet_message_id?: string | null
+          last_synced_at?: string | null
+          matched_contact_email?: string | null
+          matched_startup_id?: string | null
+          matching_confidence?: string | null
+          matching_method?: string | null
           metadata_json?: Json | null
+          needs_review?: boolean | null
           occurred_at?: string
+          participants_json?: Json | null
           preview?: string | null
           priority?: string | null
+          provider_thread_id?: string | null
           status?: string
           subject?: string | null
+          sync_error?: string | null
+          sync_status?: string | null
           visibility?: string
           workspace_id: string
         }
@@ -635,6 +661,7 @@ export type Database = {
           body?: string | null
           channel?: string | null
           completed_at?: string | null
+          consultant_user_id?: string | null
           created_at?: string | null
           direction?: string | null
           due_at?: string | null
@@ -643,12 +670,24 @@ export type Database = {
           from_address?: string | null
           funnel_item_id?: string | null
           id?: string
+          ignored?: boolean | null
+          internet_message_id?: string | null
+          last_synced_at?: string | null
+          matched_contact_email?: string | null
+          matched_startup_id?: string | null
+          matching_confidence?: string | null
+          matching_method?: string | null
           metadata_json?: Json | null
+          needs_review?: boolean | null
           occurred_at?: string
+          participants_json?: Json | null
           preview?: string | null
           priority?: string | null
+          provider_thread_id?: string | null
           status?: string
           subject?: string | null
+          sync_error?: string | null
+          sync_status?: string | null
           visibility?: string
           workspace_id?: string
         }
@@ -679,6 +718,20 @@ export type Database = {
             columns: ["funnel_item_id"]
             isOneToOne: false
             referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_log_matched_startup_id_fkey"
+            columns: ["matched_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_log_matched_startup_id_fkey"
+            columns: ["matched_startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups_safe"
             referencedColumns: ["id"]
           },
           {
@@ -1522,6 +1575,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_sync_status: {
+        Row: {
+          consultant_user_id: string
+          created_at: string | null
+          delta_link: string | null
+          emails_ignored: number | null
+          emails_logged: number | null
+          emails_processed: number | null
+          emails_unmatched: number | null
+          id: string
+          last_success_at: string | null
+          last_sync_at: string | null
+          last_sync_error: string | null
+          mailbox_email: string | null
+          provider: string
+          sync_state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          consultant_user_id: string
+          created_at?: string | null
+          delta_link?: string | null
+          emails_ignored?: number | null
+          emails_logged?: number | null
+          emails_processed?: number | null
+          emails_unmatched?: number | null
+          id?: string
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          mailbox_email?: string | null
+          provider?: string
+          sync_state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          consultant_user_id?: string
+          created_at?: string | null
+          delta_link?: string | null
+          emails_ignored?: number | null
+          emails_logged?: number | null
+          emails_processed?: number | null
+          emails_unmatched?: number | null
+          id?: string
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          mailbox_email?: string | null
+          provider?: string
+          sync_state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       exercise_attachments: {
         Row: {
