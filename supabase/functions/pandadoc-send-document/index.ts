@@ -113,9 +113,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Guard: do not resend already-sent contracts
+    // Guard: do not resend contracts that are already in a terminal/sent state
+    // Allow retries for draft/failed/ready_to_send/pending_manual
     if (contract.signature_provider && contract.provider_document_id &&
-        contract.signature_status && !['draft', 'failed'].includes(contract.signature_status)) {
+        contract.signature_status && !['draft', 'failed', 'ready_to_send', 'pending_manual'].includes(contract.signature_status)) {
       return new Response(JSON.stringify({
         error: 'Contract already sent for signature. Cannot resend.',
         currentProvider: contract.signature_provider,
