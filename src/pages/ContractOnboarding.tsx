@@ -447,7 +447,7 @@ export default function ContractOnboarding() {
                   <div className="relative mx-auto w-20 h-20">
                     <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
                     <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                    <PenTool className="absolute inset-0 m-auto h-8 w-8 text-primary" />
+                    <PenTool className="absolute inset-0 m-auto h-8 w-8 text-foreground" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">Aguardando Assinatura</h3>

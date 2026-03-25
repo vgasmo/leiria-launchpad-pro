@@ -139,6 +139,7 @@ function AppRoutes() {
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
         <Route path="/claim-startup" element={<ProtectedRoute><ClaimStartup /></ProtectedRoute>} />
+        <Route path="/contract-onboarding/:contractId" element={<ProtectedRoute><ContractOnboarding /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/my-workspaces" replace />} />
         <Route path="/my-workspaces" element={<ProtectedRoute><MyWorkspaces /></ProtectedRoute>} />
         <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
