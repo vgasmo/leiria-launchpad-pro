@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, Flag, Plug, TestTube, Activity, Workflow } from 'lucide-react';
 import { AdminFeatureFlagsManager } from '@/components/admin/AdminFeatureFlagsManager';
+import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCenter';
 import { IntegrationErrorsPanel } from '@/components/admin/IntegrationErrorsPanel';
 import { AdminTeamsTestPanel } from '@/components/admin/AdminTeamsTestPanel';
 import { IntegrationTestHarness } from '@/components/admin/IntegrationTestHarness';
