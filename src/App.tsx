@@ -52,6 +52,7 @@ const SystemSettings = lazy(() => import("./pages/SystemSettings"));
 const ClaimStartup = lazy(() => import("./pages/ClaimStartup"));
 const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
 const ContractOnboarding = lazy(() => import("./pages/ContractOnboarding"));
+const PublicContractSigning = lazy(() => import("./pages/PublicContractSigning"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
@@ -137,6 +138,7 @@ function AppRoutes() {
         <Route path="/share/:token" element={<SharedWorkspace />} />
         <Route path="/dataroom/shared/:token" element={<SharedDataroom />} />
         <Route path="/book/:token" element={<PublicBooking />} />
+        <Route path="/contract-signing/:token" element={<PublicContractSigning />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/mentor-nda" element={<ProtectedRoute><MentorNda /></ProtectedRoute>} />
         <Route path="/claim-startup" element={<ProtectedRoute><ClaimStartup /></ProtectedRoute>} />

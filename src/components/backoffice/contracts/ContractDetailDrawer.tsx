@@ -330,20 +330,29 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               {generatePdf.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
               {t('contractDetail.generatePDF', { defaultValue: 'Gerar PDF' })}
             </Button>
-            {/* Copy onboarding link for founder */}
+            {/* Generate public signing link for founder */}
             {['draft', 'pending_signature'].includes(contract.status) && (
               <Button
                 variant="default"
                 size="sm"
                 className="h-7 text-xs gap-1"
-                onClick={() => {
-                  const url = `${window.location.origin}/contract-onboarding/${contract.id}`;
-                  navigator.clipboard.writeText(url);
-                  toast.success(t('contractDetail.linkCopied', { defaultValue: 'Link de onboarding copiado!' }));
+                onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+                      body: { action: 'generate_token', contractId: contract.id },
+                    });
+                    if (error) throw error;
+                    if (data?.error) throw new Error(data.error);
+                    const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
+                    await navigator.clipboard.writeText(url);
+                    toast.success(t('contractDetail.linkGenerated', { defaultValue: 'Link público gerado e copiado! Envie ao founder.' }));
+                  } catch (err: any) {
+                    toast.error(err?.message || 'Erro ao gerar link');
+                  }
                 }}
               >
                 <ExternalLink className="h-3 w-3" />
-                {t('contractDetail.copyOnboardingLink', { defaultValue: 'Copiar Link Founder' })}
+                {t('contractDetail.generatePublicLink', { defaultValue: 'Gerar Link Público' })}
               </Button>
             )}
           </div>

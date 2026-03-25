@@ -1,0 +1,487 @@
+/**
+ * Public Contract Signing Page
+ * Accessible via token link — no authentication required.
+ * Multi-step: 1) Company Data → 2) Review Contract & Regulation → 3) DocuSign Signing
+ */
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft, Download, Shield, Loader2, AlertTriangle } from 'lucide-react';
+
+type WizardStep = 'company_data' | 'review_contract' | 'signing';
+
+const STEPS: { key: WizardStep; icon: typeof Building2; labelPt: string; labelEn: string }[] = [
+  { key: 'company_data', icon: Building2, labelPt: 'Dados da Empresa', labelEn: 'Company Data' },
+  { key: 'review_contract', icon: FileText, labelPt: 'Rever Contrato', labelEn: 'Review Contract' },
+  { key: 'signing', icon: PenTool, labelPt: 'Assinatura Digital', labelEn: 'Digital Signature' },
+];
+
+interface CompanyFormData {
+  legal_representative_name: string;
+  legal_representative_email: string;
+  company_nif: string;
+  company_address: string;
+  company_city: string;
+  company_postal_code: string;
+}
+
+export default function PublicContractSigning() {
+  const { token } = useParams<{ token: string }>();
+  const { t, i18n } = useTranslation();
+  const [currentStep, setCurrentStep] = useState<WizardStep>('company_data');
+  const [regulationAccepted, setRegulationAccepted] = useState(false);
+  const [contractAccepted, setContractAccepted] = useState(false);
+
+  const [formData, setFormData] = useState<CompanyFormData>({
+    legal_representative_name: '',
+    legal_representative_email: '',
+    company_nif: '',
+    company_address: '',
+    company_city: '',
+    company_postal_code: '',
+  });
+
+  // Fetch contract via public edge function
+  const { data: contract, isLoading, error: fetchError } = useQuery({
+    queryKey: ['public-contract', token],
+    enabled: !!token,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'get_contract', token },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data.contract;
+    },
+    retry: false,
+  });
+
+  // Pre-fill from contract/startup data
+  useEffect(() => {
+    if (contract) {
+      const startup = contract.workspace?.startup;
+      setFormData(prev => ({
+        ...prev,
+        legal_representative_name: contract.legal_representative_name || startup?.main_contact_name || '',
+        legal_representative_email: contract.legal_representative_email || startup?.main_contact_email || '',
+        company_nif: contract.company_nif || startup?.nif || '',
+        company_address: contract.company_address || startup?.address || '',
+        company_city: contract.company_city || '',
+        company_postal_code: contract.company_postal_code || '',
+      }));
+
+      // If already sent for signature, jump to signing step
+      if (contract.signature_status === 'sent_for_signature' || contract.signature_status === 'completed') {
+        setCurrentStep('signing');
+      }
+    }
+  }, [contract]);
+
+  // Save company data
+  const saveCompanyData = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'save_data', token, formData },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      setCurrentStep('review_contract');
+      toast.success(t('contractOnboarding.dataSaved', { defaultValue: 'Dados guardados com sucesso' }));
+    },
+    onError: () => toast.error(t('contractOnboarding.saveError', { defaultValue: 'Erro ao guardar dados' })),
+  });
+
+  // Submit for DocuSign signing
+  const submitForSigning = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'submit_signing', token, formData },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      setCurrentStep('signing');
+      toast.success(t('contractOnboarding.sentForSignature', { defaultValue: 'Contrato enviado para assinatura digital!' }));
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || t('contractOnboarding.signingError', { defaultValue: 'Erro ao enviar para assinatura' }));
+      setCurrentStep('signing');
+    },
+  });
+
+  const stepIndex = STEPS.findIndex(s => s.key === currentStep);
+  const progress = ((stepIndex + 1) / STEPS.length) * 100;
+  const isPt = i18n.language?.startsWith('pt');
+
+  const isFormValid = formData.legal_representative_name.trim() &&
+    formData.legal_representative_email.trim() &&
+    formData.company_nif.trim() &&
+    formData.company_address.trim() &&
+    formData.company_city.trim() &&
+    formData.company_postal_code.trim();
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground text-sm">
+            {isPt ? 'A carregar contrato...' : 'Loading contract...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error / expired state
+  if (fetchError || !contract) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="py-12 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 mx-auto text-destructive/60" />
+            <h2 className="text-lg font-semibold">
+              {isPt ? 'Link inválido ou expirado' : 'Invalid or expired link'}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {isPt
+                ? 'Este link de contrato já não é válido. Contacte a equipa da Startup Leiria para obter um novo link.'
+                : 'This contract link is no longer valid. Contact the Startup Leiria team for a new link.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const sigStatus = contract.signature_status;
+  const startupName = contract.workspace?.startup?.name || 'Startup';
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Public header */}
+      <div className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary" />
+            <span className="font-semibold text-sm">Startup Leiria</span>
+          </div>
+          <Badge variant="outline" className="text-xs">
+            {isPt ? 'Onboarding Contratual' : 'Contract Onboarding'}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isPt ? 'Contrato de Incubação' : 'Incubation Contract'}
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {startupName} — {contract.contract_number || (isPt ? 'Novo Contrato' : 'New Contract')}
+          </p>
+        </div>
+
+        {/* Progress */}
+        <div className="space-y-3">
+          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between">
+            {STEPS.map((step, i) => {
+              const Icon = step.icon;
+              const isActive = step.key === currentStep;
+              const isDone = i < stepIndex;
+              return (
+                <div key={step.key} className={`flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-primary' : isDone ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                  {isDone ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                  {isPt ? step.labelPt : step.labelEn}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Step 1: Company Data */}
+        {currentStep === 'company_data' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                {isPt ? 'Dados da Empresa e Representante Legal' : 'Company & Legal Representative Data'}
+              </CardTitle>
+              <CardDescription>
+                {isPt
+                  ? 'Estes dados serão utilizados para a geração automática do contrato de incubação.'
+                  : 'This data will be used to automatically generate the incubation contract.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'Nome do Representante Legal *' : 'Legal Representative Name *'}</Label>
+                  <Input
+                    value={formData.legal_representative_name}
+                    onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
+                    placeholder={isPt ? 'Nome completo' : 'Full name'}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'Email do Representante *' : 'Representative Email *'}</Label>
+                  <Input
+                    type="email"
+                    value={formData.legal_representative_email}
+                    onChange={e => setFormData(prev => ({ ...prev, legal_representative_email: e.target.value }))}
+                    placeholder="email@empresa.pt"
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'NIF da Empresa *' : 'Company Tax ID *'}</Label>
+                  <Input
+                    value={formData.company_nif}
+                    onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
+                    placeholder="123456789"
+                    maxLength={9}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'Morada Fiscal *' : 'Registered Address *'}</Label>
+                  <Input
+                    value={formData.company_address}
+                    onChange={e => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                    placeholder={isPt ? 'Rua, número, andar' : 'Street, number, floor'}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'Cidade *' : 'City *'}</Label>
+                  <Input
+                    value={formData.company_city}
+                    onChange={e => setFormData(prev => ({ ...prev, company_city: e.target.value }))}
+                    placeholder="Leiria"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{isPt ? 'Código Postal *' : 'Postal Code *'}</Label>
+                  <Input
+                    value={formData.company_postal_code}
+                    onChange={e => setFormData(prev => ({ ...prev, company_postal_code: e.target.value }))}
+                    placeholder="2400-000"
+                  />
+                </div>
+              </div>
+
+              {/* Contract summary */}
+              <Separator />
+              <div className="bg-muted/40 rounded-lg p-4 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {isPt ? 'Resumo do Contrato' : 'Contract Summary'}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-muted-foreground">{isPt ? 'Tipo:' : 'Type:'}</span> {contract.incubation_type?.name || '—'}</div>
+                  <div><span className="text-muted-foreground">{isPt ? 'Edifício:' : 'Building:'}</span> {contract.building?.name || '—'}</div>
+                  <div><span className="text-muted-foreground">{isPt ? 'Mensalidade:' : 'Monthly Fee:'}</span> {contract.monthly_fee}€/{contract.currency || 'EUR'}</div>
+                  <div><span className="text-muted-foreground">{isPt ? 'Início:' : 'Start:'}</span> {new Date(contract.start_date).toLocaleDateString(isPt ? 'pt-PT' : 'en-GB')}</div>
+                  {contract.square_meters && (
+                    <div><span className="text-muted-foreground">{isPt ? 'Área:' : 'Area:'}</span> {contract.square_meters} m²</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => saveCompanyData.mutate()}
+                  disabled={!isFormValid || saveCompanyData.isPending}
+                  className="gap-2"
+                >
+                  {saveCompanyData.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {isPt ? 'Continuar' : 'Continue'} <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 2: Review Contract & Regulation */}
+        {currentStep === 'review_contract' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                {isPt ? 'Rever Contrato e Regulamento' : 'Review Contract & Regulation'}
+              </CardTitle>
+              <CardDescription>
+                {isPt
+                  ? 'Reveja os documentos antes de enviar para assinatura digital.'
+                  : 'Review the documents before sending for digital signature.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Contract Document */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">
+                        {isPt ? 'Minuta de Contrato de Incubação' : 'Incubation Contract Template'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">V9 — 2026</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="accept-contract"
+                    checked={contractAccepted}
+                    onCheckedChange={(v) => setContractAccepted(v === true)}
+                  />
+                  <label htmlFor="accept-contract" className="text-xs leading-tight cursor-pointer">
+                    {isPt
+                      ? 'Li e aceito os termos do Contrato de Incubação, incluindo as condições de prestação de serviços, obrigações e direitos das partes.'
+                      : 'I have read and accept the Incubation Contract terms, including service conditions, obligations and rights of both parties.'}
+                  </label>
+                </div>
+              </div>
+
+              {/* Regulation Document */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-amber-600" />
+                    <div>
+                      <p className="text-sm font-medium">
+                        {isPt ? 'Regulamento Startup Leiria' : 'Startup Leiria Regulation'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">V11 — Anexo I — 2026</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="accept-regulation"
+                    checked={regulationAccepted}
+                    onCheckedChange={(v) => setRegulationAccepted(v === true)}
+                  />
+                  <label htmlFor="accept-regulation" className="text-xs leading-tight cursor-pointer">
+                    {isPt
+                      ? 'Li e aceito o Regulamento da Startup Leiria, comprometendo-me a cumprir as normas e procedimentos nele estabelecidos.'
+                      : 'I have read and accept the Startup Leiria Regulation, committing to comply with its norms and procedures.'}
+                  </label>
+                </div>
+              </div>
+
+              {/* Company data summary */}
+              <div className="bg-muted/40 rounded-lg p-4 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {isPt ? 'Dados Confirmados' : 'Confirmed Data'}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-muted-foreground">{isPt ? 'Representante:' : 'Representative:'}</span> {formData.legal_representative_name}</div>
+                  <div><span className="text-muted-foreground">Email:</span> {formData.legal_representative_email}</div>
+                  <div><span className="text-muted-foreground">NIF:</span> {formData.company_nif}</div>
+                  <div><span className="text-muted-foreground">{isPt ? 'Morada:' : 'Address:'}</span> {formData.company_address}, {formData.company_city}</div>
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setCurrentStep('company_data')} className="gap-1.5">
+                  <ArrowLeft className="h-4 w-4" /> {isPt ? 'Voltar' : 'Back'}
+                </Button>
+                <Button
+                  onClick={() => submitForSigning.mutate()}
+                  disabled={!contractAccepted || !regulationAccepted || submitForSigning.isPending}
+                  className="gap-2"
+                >
+                  {submitForSigning.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PenTool className="h-4 w-4" />}
+                  {isPt ? 'Enviar para Assinatura' : 'Send for Signature'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 3: Signing Status */}
+        {currentStep === 'signing' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PenTool className="h-5 w-5 text-primary" />
+                {isPt ? 'Assinatura Digital' : 'Digital Signature'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {sigStatus === 'completed' ? (
+                <div className="text-center py-8 space-y-3">
+                  <CheckCircle2 className="h-16 w-16 mx-auto text-primary" />
+                  <h3 className="text-lg font-semibold text-primary">
+                    {isPt ? 'Contrato Assinado!' : 'Contract Signed!'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isPt
+                      ? 'O contrato foi assinado digitalmente com sucesso. Receberá um email com os acessos à plataforma.'
+                      : 'The contract has been digitally signed. You will receive an email with platform access.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-8 space-y-4">
+                  <div className="relative mx-auto w-20 h-20">
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+                    <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                    <PenTool className="absolute inset-0 m-auto h-8 w-8 text-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {isPt ? 'Aguardando Assinatura' : 'Awaiting Signature'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isPt
+                        ? <>O contrato foi enviado para <strong>{formData.legal_representative_email}</strong> via DocuSign.</>
+                        : <>The contract was sent to <strong>{formData.legal_representative_email}</strong> via DocuSign.</>}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {isPt
+                        ? 'Verifique a sua caixa de email (incluindo spam) para assinar digitalmente.'
+                        : 'Check your email inbox (including spam) to sign digitally.'}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {sigStatus === 'sent_for_signature' ? (isPt ? 'Enviado para assinatura' : 'Sent for signature') :
+                     sigStatus === 'viewed' ? (isPt ? 'Documento visualizado' : 'Document viewed') :
+                     sigStatus === 'declined' ? (isPt ? 'Assinatura recusada' : 'Signature declined') :
+                     sigStatus === 'pending_manual' ? (isPt ? 'Processamento em curso' : 'Processing') :
+                     (isPt ? 'Pendente' : 'Pending')}
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Footer */}
+        <div className="text-center text-xs text-muted-foreground py-4">
+          <p>© {new Date().getFullYear()} Startup Leiria — {isPt ? 'Associação para o Empreendedorismo e Inovação' : 'Association for Entrepreneurship and Innovation'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
