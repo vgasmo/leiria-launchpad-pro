@@ -433,8 +433,8 @@ export default function ContractOnboarding() {
             <CardContent className="space-y-4">
               {sigStatus === 'completed' ? (
                 <div className="text-center py-8 space-y-3">
-                  <CheckCircle2 className="h-16 w-16 mx-auto text-emerald-500" />
-                  <h3 className="text-lg font-semibold text-emerald-700">Contrato Assinado!</h3>
+                  <CheckCircle2 className="h-16 w-16 mx-auto text-primary" />
+                  <h3 className="text-lg font-semibold text-primary">Contrato Assinado!</h3>
                   <p className="text-sm text-muted-foreground">
                     O contrato foi assinado digitalmente com sucesso. Os dados foram registados automaticamente.
                   </p>
