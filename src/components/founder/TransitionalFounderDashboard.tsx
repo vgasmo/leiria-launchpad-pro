@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
+import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { cn } from '@/lib/utils';
 
 interface TransitionalFounderDashboardProps {
