@@ -146,13 +146,28 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
   // Generate PDF mutation
   const generatePdf = useMutation({
     mutationFn: async () => {
-      const result = await invokeWithAuth('generate-contract-pdf', { body: { contractId: contract?.id } });
+      const result = await invokeWithAuth<{ documentBase64?: string; fileName?: string }>('generate-contract-pdf', { body: { contractId: contract?.id } });
       if (result.error) throw result.error;
+      return result.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success(t('contractDetail.pdfGenerated', { defaultValue: 'PDF do contrato gerado com sucesso' }));
+      // Auto-download
+      if (data?.documentBase64) {
+        const byteChars = atob(data.documentBase64);
+        const byteArr = new Uint8Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+        const blob = new Blob([byteArr], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.fileName || 'contrato.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     },
-    onError: () => {
+    onError: (err) => {
+      console.error('PDF generation error:', err);
       toast.error(t('contractDetail.pdfGenerationFailed', { defaultValue: 'Erro ao gerar PDF' }));
     },
   });
