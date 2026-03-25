@@ -305,6 +305,16 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               <Receipt className="h-3 w-3" />
               {t('contractDetail.viewInvoices')} {invoiceCount ? `(${invoiceCount})` : ''}
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => generatePdf.mutate()}
+              disabled={generatePdf.isPending}
+            >
+              {generatePdf.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
+              {t('contractDetail.generatePDF', { defaultValue: 'Gerar PDF' })}
+            </Button>
           </div>
         </div>
 
