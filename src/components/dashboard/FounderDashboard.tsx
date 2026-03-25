@@ -38,6 +38,7 @@ import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
 import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
+import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -185,6 +186,11 @@ export function FounderDashboard({
       {/* ★ READINESS STRIP — Quick status overview ★ */}
       <WidgetErrorBoundary name="ReadinessStrip">
         <FounderReadinessStrip workspace={workspace} />
+      </WidgetErrorBoundary>
+
+      {/* ★ PENDING CONTRACT — High-priority CTA for unsigned contracts ★ */}
+      <WidgetErrorBoundary name="PendingContract">
+        <PendingContractBanner workspaceId={workspace.id} />
       </WidgetErrorBoundary>
 
       {/* ★ JOURNEY MAP — Gamified visual ★ */}

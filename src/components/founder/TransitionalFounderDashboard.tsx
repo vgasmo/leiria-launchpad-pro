@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
+import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { cn } from '@/lib/utils';
 
 interface TransitionalFounderDashboardProps {
@@ -122,6 +123,9 @@ export function TransitionalFounderDashboard({
           </div>
         </CardContent>
       </Card>
+
+      {/* Pending Contract Banner */}
+      <PendingContractBanner workspaceId={workspace.id} />
 
       {/* What happens next */}
       <Card className="rounded-2xl">
