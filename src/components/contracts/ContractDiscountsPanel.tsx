@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Percent, Plus, Trash2, Calendar, AlertCircle } from 'lucide-react';
-import { format, isAfter, isBefore, isWithinInterval, parseISO } from 'date-fns';
+import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -76,9 +76,9 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
       queryClient.invalidateQueries({ queryKey: ['contract-discounts', contractId] });
       setShowAddForm(false);
       setNewDiscount({ discount_percentage: '', start_date: '', end_date: '', reason: '' });
-      toast.success('Desconto adicionado');
+      toast.success(t('discounts.added'));
     },
-    onError: () => toast.error('Erro ao adicionar desconto'),
+    onError: () => toast.error(t('discounts.addError')),
   });
 
   const removeMutation = useMutation({
@@ -88,9 +88,9 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract-discounts', contractId] });
-      toast.success('Desconto removido');
+      toast.success(t('discounts.removed'));
     },
-    onError: () => toast.error('Erro ao remover desconto'),
+    onError: () => toast.error(t('discounts.removeError')),
   });
 
   const today = new Date();
@@ -146,7 +146,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
         })}
         {activeDiscount && monthlyFee && (
           <p className="text-[10px] text-amber-600 font-medium">
-            Fee efetiva: {effectiveFee?.toFixed(0)} {currency}/mês
+            {t('discounts.effectiveFee')}: {effectiveFee?.toFixed(0)} {currency}/{t('common.month', { defaultValue: 'month' })}
           </p>
         )}
       </div>
@@ -159,12 +159,12 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
         <CardTitle className="text-sm font-semibold flex items-center justify-between">
           <span className="flex items-center gap-1.5">
             <Percent className="h-4 w-4 text-amber-600" />
-            Descontos
+            {t('discounts.title')}
           </span>
           {isStaff && !showAddForm && (
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => setShowAddForm(true)}>
               <Plus className="h-3 w-3" />
-              Adicionar
+              {t('discounts.add')}
             </Button>
           )}
         </CardTitle>
@@ -176,11 +176,11 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
             <AlertCircle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
             <div className="text-xs">
               <span className="font-medium text-amber-700">
-                Desconto ativo: {activeDiscount.discount_percentage}%
+                {t('discounts.activeDiscount')}: {activeDiscount.discount_percentage}%
               </span>
               <span className="text-muted-foreground ml-1">
-                — Fee efetiva: <strong>{effectiveFee?.toFixed(0)} {currency}</strong>/mês
-                (base: {monthlyFee} {currency})
+                — {t('discounts.effectiveFee')}: <strong>{effectiveFee?.toFixed(0)} {currency}</strong>/{t('common.month', { defaultValue: 'month' })}
+                ({t('discounts.base')}: {monthlyFee} {currency})
               </span>
             </div>
           </div>
@@ -214,7 +214,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <Calendar className="h-3 w-3 flex-shrink-0" />
                         {format(parseISO(d.start_date), 'dd/MM/yyyy')}
-                        {d.end_date ? ` → ${format(parseISO(d.end_date), 'dd/MM/yyyy')}` : ' → sem fim'}
+                        {d.end_date ? ` → ${format(parseISO(d.end_date), 'dd/MM/yyyy')}` : ` → ${t('discounts.noEnd')}`}
                       </div>
                       {d.reason && (
                         <p className="text-muted-foreground truncate">{d.reason}</p>
@@ -223,7 +223,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Badge variant={status === 'active' ? 'default' : 'secondary'} className="text-[10px] h-5">
-                      {status === 'active' ? 'Ativo' : status === 'future' ? 'Futuro' : 'Expirado'}
+                      {t(`discounts.${status}`)}
                     </Badge>
                     {isStaff && status !== 'expired' && (
                       <Button
@@ -243,7 +243,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
           </div>
         ) : !showAddForm ? (
           <p className="text-xs text-muted-foreground py-2 text-center">
-            Sem descontos aplicados a este contrato
+            {t('discounts.noDiscounts')}
           </p>
         ) : null}
 
@@ -252,7 +252,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
           <div className="border rounded-md p-3 space-y-3 bg-background">
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <Label className="text-xs">Desconto (%)</Label>
+                <Label className="text-xs">{t('discounts.percentage')}</Label>
                 <Input
                   type="number"
                   min="1"
@@ -264,7 +264,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
                 />
               </div>
               <div>
-                <Label className="text-xs">Início</Label>
+                <Label className="text-xs">{t('discounts.startDate')}</Label>
                 <Input
                   type="date"
                   className="h-8 text-xs"
@@ -273,7 +273,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
                 />
               </div>
               <div>
-                <Label className="text-xs">Fim (opcional)</Label>
+                <Label className="text-xs">{t('discounts.endDate')}</Label>
                 <Input
                   type="date"
                   className="h-8 text-xs"
@@ -283,17 +283,17 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
               </div>
             </div>
             <div>
-              <Label className="text-xs">Motivo</Label>
+              <Label className="text-xs">{t('discounts.reason')}</Label>
               <Textarea
                 className="text-xs min-h-[40px] resize-none"
-                placeholder="Ex: Desconto de arranque primeiros 6 meses"
+                placeholder={t('discounts.reasonPlaceholder')}
                 value={newDiscount.reason}
                 onChange={e => setNewDiscount(p => ({ ...p, reason: e.target.value }))}
               />
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setShowAddForm(false)}>
-                Cancelar
+                {t('discounts.cancel')}
               </Button>
               <Button
                 size="sm"
@@ -301,7 +301,7 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
                 disabled={!newDiscount.discount_percentage || !newDiscount.start_date || addMutation.isPending}
                 onClick={() => addMutation.mutate()}
               >
-                Guardar
+                {t('discounts.save')}
               </Button>
             </div>
           </div>

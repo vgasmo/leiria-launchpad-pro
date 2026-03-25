@@ -5775,6 +5775,34 @@
     "lastSync": "Last Sync",
     "retry": "Retry",
     "configured": "Configured",
-    "notConfigured": "Not Configured"
+    "notConfigured": "Not Configured",
+    "generatePDF": "Generate PDF",
+    "pdfGenerated": "Contract PDF generated successfully",
+    "pdfGenerationFailed": "Error generating PDF",
+    "generateInvoices": "Generate Invoices",
+    "invoicesGenerated": "Invoices generated successfully"
+  },
+  "discounts": {
+    "title": "Discounts",
+    "add": "Add",
+    "cancel": "Cancel",
+    "save": "Save",
+    "percentage": "Discount (%)",
+    "startDate": "Start",
+    "endDate": "End (optional)",
+    "reason": "Reason",
+    "reasonPlaceholder": "e.g. Startup discount for first 6 months",
+    "active": "Active",
+    "future": "Future",
+    "expired": "Expired",
+    "noDiscounts": "No discounts applied to this contract",
+    "activeDiscount": "Active discount",
+    "effectiveFee": "Effective fee",
+    "base": "base",
+    "noEnd": "no end",
+    "added": "Discount added",
+    "addError": "Error adding discount",
+    "removed": "Discount removed",
+    "removeError": "Error removing discount"
   }
 }

@@ -5775,6 +5775,34 @@
     "lastSync": "Última Sincronização",
     "retry": "Tentar Novamente",
     "configured": "Configurado",
-    "notConfigured": "Não Configurado"
+    "notConfigured": "Não Configurado",
+    "generatePDF": "Gerar PDF",
+    "pdfGenerated": "PDF do contrato gerado com sucesso",
+    "pdfGenerationFailed": "Erro ao gerar PDF",
+    "generateInvoices": "Gerar Faturas",
+    "invoicesGenerated": "Faturas geradas com sucesso"
+  },
+  "discounts": {
+    "title": "Descontos",
+    "add": "Adicionar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "percentage": "Desconto (%)",
+    "startDate": "Início",
+    "endDate": "Fim (opcional)",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Ex: Desconto de arranque primeiros 6 meses",
+    "active": "Ativo",
+    "future": "Futuro",
+    "expired": "Expirado",
+    "noDiscounts": "Sem descontos aplicados a este contrato",
+    "activeDiscount": "Desconto ativo",
+    "effectiveFee": "Fee efetiva",
+    "base": "base",
+    "noEnd": "sem fim",
+    "added": "Desconto adicionado",
+    "addError": "Erro ao adicionar desconto",
+    "removed": "Desconto removido",
+    "removeError": "Erro ao remover desconto"
   }
 }
