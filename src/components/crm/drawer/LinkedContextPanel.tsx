@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users } from 'lucide-react';
+import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -189,11 +190,14 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
                 {(contract as any).incubation_type.name}
               </Badge>
             )}
-            {(contract as any).discount_percentage > 0 && (
-              <p className="text-[10px] text-amber-600">
-                {t('crm.discount', { defaultValue: 'Desconto' })}: {(contract as any).discount_percentage}%
-              </p>
-            )}
+            {/* Period-based discounts */}
+            <ContractDiscountsPanel
+              contractId={(contract as any).id}
+              monthlyFee={(contract as any).monthly_fee}
+              currency={(contract as any).currency || 'EUR'}
+              isStaff={true}
+              compact={true}
+            />
           </div>
         ) : linkedWorkspaceId && !linkedContractId ? (
           <div className="border-t pt-2">
