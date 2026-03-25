@@ -5457,6 +5457,7 @@ export type Database = {
           payment_method: string | null
           payment_terms_days: number | null
           pricing_line_id: string | null
+          pricing_snapshot_json: Json | null
           pricing_version_id: string | null
           provider_completed_at: string | null
           provider_document_id: string | null
@@ -5464,6 +5465,7 @@ export type Database = {
           provider_last_event: string | null
           provider_last_sync_at: string | null
           provider_sent_at: string | null
+          provider_webhook_event_id: string | null
           regulation_accepted_at: string | null
           regulation_version: string | null
           signature_provider: string | null
@@ -5526,6 +5528,7 @@ export type Database = {
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
+          pricing_snapshot_json?: Json | null
           pricing_version_id?: string | null
           provider_completed_at?: string | null
           provider_document_id?: string | null
@@ -5533,6 +5536,7 @@ export type Database = {
           provider_last_event?: string | null
           provider_last_sync_at?: string | null
           provider_sent_at?: string | null
+          provider_webhook_event_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
           signature_provider?: string | null
@@ -5595,6 +5599,7 @@ export type Database = {
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
+          pricing_snapshot_json?: Json | null
           pricing_version_id?: string | null
           provider_completed_at?: string | null
           provider_document_id?: string | null
@@ -5602,6 +5607,7 @@ export type Database = {
           provider_last_event?: string | null
           provider_last_sync_at?: string | null
           provider_sent_at?: string | null
+          provider_webhook_event_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
           signature_provider?: string | null
