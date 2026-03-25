@@ -23,6 +23,7 @@ import {
   Lightbulb,
   Target,
   Clock,
+  Briefcase,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
