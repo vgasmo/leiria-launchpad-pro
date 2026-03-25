@@ -61,6 +61,7 @@ interface RecordDrawerProps {
 export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const language = i18n.language.startsWith('pt') ? 'pt' : 'en';
   const dateLocale = language === 'pt' ? pt : enUS;
   
