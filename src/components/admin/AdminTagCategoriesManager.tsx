@@ -444,7 +444,7 @@ export function AdminTagCategoriesManager() {
                   <SelectValue placeholder={t('admin.tags.selectCategory', 'Select category')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {categories?.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
