@@ -133,14 +133,14 @@ export function EnrollmentControlCenter() {
             <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border/40 bg-background">
               <Rocket className="h-3.5 w-3.5 text-primary" />
               <div>
-                <p className="text-lg font-semibold leading-tight">{stats?.claimRequestsCount ?? '—'}</p>
+                <p className="text-lg font-semibold leading-tight">—</p>
                 <p className="text-[10px] text-muted-foreground">{t('enrollment.claimRequests', { defaultValue: 'Claims pendentes' })}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border/40 bg-background">
               <UserPlus className="h-3.5 w-3.5 text-blue-500" />
               <div>
-                <p className="text-lg font-semibold leading-tight">{stats?.importedUnclaimedCount ?? '—'}</p>
+                <p className="text-lg font-semibold leading-tight">—</p>
                 <p className="text-[10px] text-muted-foreground">{t('enrollment.unclaimed', { defaultValue: 'Importadas não reclamadas' })}</p>
               </div>
             </div>
