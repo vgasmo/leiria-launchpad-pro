@@ -244,7 +244,7 @@ export default function PublicContractSigning() {
     onError: () => toast.error(isPt ? 'Erro ao guardar dados' : 'Error saving data'),
   });
 
-  // Submit for digital signature (provider-agnostic — backend resolves provider)
+  // Submit for signature (provider-agnostic — backend resolves provider)
   const submitForSigning = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
@@ -256,7 +256,12 @@ export default function PublicContractSigning() {
     },
     onSuccess: () => {
       setCurrentStep('signing');
-      toast.success(isPt ? 'Contrato enviado para assinatura digital!' : 'Contract sent for digital signature!');
+      const sigProv: SignatureProvider = contract?.signature_provider || 'manual';
+      if (sigProv === 'manual') {
+        toast.success(isPt ? 'Contrato submetido para assinatura manual!' : 'Contract submitted for manual signature!');
+      } else {
+        toast.success(isPt ? `Contrato enviado para assinatura via ${providerLabel(sigProv, 'pt')}!` : `Contract sent for signature via ${providerLabel(sigProv, 'en')}!`);
+      }
     },
     onError: (err: any) => {
       toast.error(err?.message || (isPt ? 'Erro ao enviar para assinatura' : 'Signing error'));
@@ -617,9 +622,13 @@ export default function PublicContractSigning() {
                 {isPt ? 'Rever Contrato e Regulamento' : 'Review Contract & Regulation'}
               </CardTitle>
               <CardDescription>
-                {isPt
-                  ? 'Reveja os documentos antes de enviar para assinatura digital.'
-                  : 'Review the documents before sending for digital signature.'}
+                {sigProvider === 'manual'
+                  ? (isPt
+                    ? 'Reveja os documentos antes de submeter para assinatura manual.'
+                    : 'Review the documents before submitting for manual signature.')
+                  : (isPt
+                    ? `Reveja os documentos antes de enviar para assinatura via ${providerLabel(sigProvider, 'pt')}.`
+                    : `Review the documents before sending for signature via ${providerLabel(sigProvider, 'en')}.`)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
