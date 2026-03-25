@@ -498,9 +498,11 @@ export function BackofficeContractsTab() {
                     <TableRow
                       key={contract.id}
                       className={cn(
+                        'cursor-pointer',
                         alert?.severity === 'critical' && 'bg-red-50/50 dark:bg-red-950/10',
                         selectedContractIds.has(contract.id) && 'bg-primary/5'
                       )}
+                      onClick={() => setDetailContract(contract)}
                     >
                       <TableCell>
                         <Checkbox
