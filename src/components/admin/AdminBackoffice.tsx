@@ -32,6 +32,7 @@ import { BackofficeIncubationTypesTab } from '@/components/backoffice/Backoffice
 import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
 import { OpsActionPrompts } from '@/components/backoffice/OpsActionPrompts';
+import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
@@ -340,47 +341,28 @@ export function AdminBackoffice() {
 
   return (
     <div className="space-y-6">
-      {/* Sub-tabs for different backoffice sections — 3 logical groups */}
+      {/* Simplified sub-tabs: 4 clear sections */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
-          {/* Grupo 1: Painel & Startups */}
           <TabsTrigger value="dashboard" className="gap-1.5">
             <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.dashboard', { defaultValue: 'Painel' })}
+            {t('admin.backoffice.dashboard', { defaultValue: 'Visão Geral' })}
           </TabsTrigger>
-          <TabsTrigger value="overview" className="gap-1.5">
-            <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.overview', { defaultValue: 'Startups' })}
-          </TabsTrigger>
-
-          {/* Separador visual */}
-          <div className="w-px h-6 bg-border mx-1 self-center" />
-
-          {/* Grupo 2: Contratos & Tipos */}
           <TabsTrigger value="contracts" className="gap-1.5">
             <FileText className="h-4 w-4" />
-            {t('admin.backoffice.contracts', { defaultValue: 'Contratos' })}
+            {t('admin.backoffice.contractsAndLifecycle', { defaultValue: 'Contratos' })}
+          </TabsTrigger>
+          <TabsTrigger value="spaces" className="gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {t('admin.backoffice.spacesAndInfra', { defaultValue: 'Espaços & Infraestrutura' })}
           </TabsTrigger>
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
             {t('admin.backoffice.incubationTypes', { defaultValue: 'Tipos de Incubação' })}
           </TabsTrigger>
-
-          {/* Separador visual */}
-          <div className="w-px h-6 bg-border mx-1 self-center" />
-
-          {/* Grupo 3: Operações & Infraestrutura */}
-          <TabsTrigger value="operations" className="gap-1.5">
-            <MapPin className="h-4 w-4" />
-            {t('admin.backoffice.operations', { defaultValue: 'Consola Operações' })}
-          </TabsTrigger>
-          <TabsTrigger value="infrastructure" className="gap-1.5">
-            <Building2 className="h-4 w-4" />
-            {t('admin.backoffice.infrastructure', { defaultValue: 'Infraestrutura' })}
-          </TabsTrigger>
         </TabsList>
 
-        {/* Dashboard Tab - KPIs, Alerts, Anniversaries + Action Prompts */}
+        {/* Dashboard Tab - KPIs + Overview + Action Prompts */}
         <TabsContent value="dashboard">
           <div className="space-y-6">
             <OpsActionPrompts />
@@ -768,24 +750,25 @@ export function AdminBackoffice() {
     </Card>
         </TabsContent>
 
-        {/* Contracts Tab */}
+        {/* Contracts Tab — merged with lifecycle */}
         <TabsContent value="contracts">
-          <BackofficeContractsTab />
+          <div className="space-y-8">
+            <BackofficeContractsTab />
+            <ContractLifecycleHub />
+          </div>
+        </TabsContent>
+
+        {/* Spaces & Infrastructure — merged */}
+        <TabsContent value="spaces">
+          <div className="space-y-8">
+            <SpaceOperationsConsole />
+            <InfrastructureTab />
+          </div>
         </TabsContent>
 
         {/* Incubation Types Tab */}
         <TabsContent value="incubation">
           <BackofficeIncubationTypesTab />
-        </TabsContent>
-
-        {/* Operations Console Tab */}
-        <TabsContent value="operations">
-          <SpaceOperationsConsole />
-        </TabsContent>
-
-        {/* Infrastructure Tab (consolidated: buildings, spaces, rooms, maps, waitlist) */}
-        <TabsContent value="infrastructure">
-          <InfrastructureTab />
         </TabsContent>
       </Tabs>
     </div>

@@ -38,10 +38,10 @@ import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCen
 
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
-  operations: ['approvals', 'enrollment', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
+  operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
   crm: ['funnel'],
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
-  reports: ['analytics', 'health'],
+  reports: ['analytics', 'health', 'compliance', 'data-quality'],
   users: ['users', 'mentors'],
 };
 
@@ -89,7 +89,6 @@ export default function Admin() {
       approvals: <Clock className="h-4 w-4" />,
       enrollment: <UserPlus className="h-4 w-4" />,
       compliance: <ShieldCheck className="h-4 w-4" />,
-      lifecycle: <GitBranch className="h-4 w-4" />,
       backoffice: <Building2 className="h-4 w-4" />,
       announcements: <Bell className="h-4 w-4" />,
       'data-quality': <Database className="h-4 w-4" />,
@@ -113,7 +112,6 @@ export default function Admin() {
       approvals: t('admin.approvals'),
       enrollment: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }),
       compliance: t('admin.compliance'),
-      lifecycle: t('admin.lifecycle'),
       backoffice: t('admin.backoffice.tab'),
       announcements: t('admin.announcements.tab'),
       'data-quality': t('dataQuality.title'),
@@ -206,9 +204,7 @@ export default function Admin() {
           <ComplianceDashboard />
         </TabsContent>
 
-        <TabsContent value="lifecycle">
-          <ContractLifecycleHub />
-        </TabsContent>
+        {/* lifecycle merged into backoffice */}
 
         <TabsContent value="backoffice">
           <AdminBackoffice />
