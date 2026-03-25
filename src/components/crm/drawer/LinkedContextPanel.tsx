@@ -84,7 +84,7 @@ function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any;
   );
 }
 
-export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract }: LinkedContextPanelProps) {
+export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract, onInitiateContract }: LinkedContextPanelProps) {
   const { t } = useTranslation();
 
   // Fetch workspace + startup info
