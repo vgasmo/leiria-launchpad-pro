@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { ContractUploadDropzone, type AIExtractedData } from './contracts/ContractUploadDropzone';
 import { ContractReviewForm, type ContractFormValues } from './contracts/ContractReviewForm';
 import { BulkActionsBar } from './contracts/BulkActionsBar';
+import { ContractDetailDrawer } from './contracts/ContractDetailDrawer';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -89,6 +90,7 @@ export function BackofficeContractsTab() {
   // Table row selection for bulk actions
   const [selectedContractIds, setSelectedContractIds] = useState<Set<string>>(new Set());
   const [isArchiving, setIsArchiving] = useState(false);
+  const [detailContract, setDetailContract] = useState<StartupContract | null>(null);
 
   const { data: contracts, isLoading } = useContracts(
     statusFilter !== 'all' ? { status: statusFilter } : undefined
@@ -496,11 +498,13 @@ export function BackofficeContractsTab() {
                     <TableRow
                       key={contract.id}
                       className={cn(
+                        'cursor-pointer',
                         alert?.severity === 'critical' && 'bg-red-50/50 dark:bg-red-950/10',
                         selectedContractIds.has(contract.id) && 'bg-primary/5'
                       )}
+                      onClick={() => setDetailContract(contract)}
                     >
-                      <TableCell>
+                      <TableCell onClick={e => e.stopPropagation()}>
                         <Checkbox
                           checked={selectedContractIds.has(contract.id)}
                           onCheckedChange={() => toggleContractSelection(contract.id)}
@@ -572,8 +576,8 @@ export function BackofficeContractsTab() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
+                      <TableCell onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="sm" onClick={() => setDetailContract(contract)}>
                           {t('common.edit', { defaultValue: 'Edit' })}
                         </Button>
                       </TableCell>
@@ -592,6 +596,15 @@ export function BackofficeContractsTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Contract Detail Drawer */}
+      <ContractDetailDrawer
+        contract={detailContract}
+        incubationTypes={incubationTypes}
+        buildings={buildings}
+        open={!!detailContract}
+        onOpenChange={(open) => { if (!open) setDetailContract(null); }}
+      />
     </div>
   );
 }
