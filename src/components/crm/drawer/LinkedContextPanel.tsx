@@ -5,7 +5,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users, LinkIcon } from 'lucide-react';
+import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users, LinkIcon, PlusCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ interface LinkedContextPanelProps {
   linkedContractId: string | null;
   funnelItemId: string;
   onLinkContract?: (contractId: string | null) => void;
+  onInitiateContract?: () => void;
 }
 
 const CONTRACT_STATUS_COLORS: Record<string, string> = {
@@ -83,7 +84,7 @@ function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any;
   );
 }
 
-export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract }: LinkedContextPanelProps) {
+export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract, onInitiateContract }: LinkedContextPanelProps) {
   const { t } = useTranslation();
 
   // Fetch workspace + startup info
@@ -213,10 +214,21 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
             ))}
           </div>
         ) : linkedWorkspaceId ? (
-          <div className="border-t pt-2">
+          <div className="border-t pt-2 space-y-2">
             <p className="text-xs text-muted-foreground italic">
               {t('crm.noContractsAvailable', { defaultValue: 'Sem contratos neste workspace' })}
             </p>
+            {onInitiateContract && (
+              <Button
+                size="sm"
+                variant="default"
+                className="w-full h-8 text-xs gap-1.5"
+                onClick={onInitiateContract}
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
+              </Button>
+            )}
           </div>
         ) : null}
       </CardContent>

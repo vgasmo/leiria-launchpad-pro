@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format, isThisWeek, isThisMonth } from 'date-fns';
 import { pt, enUS } from 'date-fns/locale';
@@ -60,6 +61,7 @@ interface RecordDrawerProps {
 export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const language = i18n.language.startsWith('pt') ? 'pt' : 'en';
   const dateLocale = language === 'pt' ? pt : enUS;
   
@@ -390,6 +392,12 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               onLinkContract={(contractId) => {
                 if (contractId) {
                   updateFunnelItem.mutate({ id: item.id, linked_contract_id: contractId } as any);
+                }
+              }}
+              onInitiateContract={() => {
+                if (item.linked_workspace_id) {
+                  onOpenChange(false);
+                  navigate(`/backoffice?tab=contracts&action=create&workspace=${item.linked_workspace_id}&funnel=${item.id}`);
                 }
               }}
             />
