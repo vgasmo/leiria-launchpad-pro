@@ -182,6 +182,27 @@ Deno.serve(async (req) => {
           workspace_id: contract.workspace_id,
           metadata: { pandadoc_document_id: pandadocDocId, event: eventName, event_id: eventId },
         })
+
+        // ═══ AUTO-GENERATE FIRST INVOICE on completion ═══
+        try {
+          const targetMonth = new Date().toISOString().slice(0, 7)
+          console.log(`Triggering invoice generation for contract ${contract.id}, month ${targetMonth}`)
+          
+          const functionUrl = `${supabaseUrl}/functions/v1/generate-invoices`
+          await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              targetMonth,
+              contractId: contract.id,
+            }),
+          })
+        } catch (invoiceErr) {
+          console.error('Auto-invoice generation error (non-fatal):', invoiceErr)
+        }
       }
 
       // On decline, notify staff
