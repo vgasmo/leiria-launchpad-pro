@@ -112,7 +112,6 @@ export default function Admin() {
       approvals: t('admin.approvals'),
       enrollment: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }),
       compliance: t('admin.compliance'),
-      lifecycle: t('admin.lifecycle'),
       backoffice: t('admin.backoffice.tab'),
       announcements: t('admin.announcements.tab'),
       'data-quality': t('dataQuality.title'),
