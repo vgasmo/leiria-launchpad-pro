@@ -35,6 +35,8 @@ export function AdminMissionControlDirectory() {
     { tab: 'mentors', label: t('admin.externalMentors'), icon: Users2, description: t('admin.directory.mentorsDesc', { defaultValue: 'Mentores externos e atribuição' }), group: 'users' },
     { tab: 'analytics', label: t('admin.analytics'), icon: BarChart3, description: t('admin.directory.analyticsDesc', { defaultValue: 'Análises de cohort e relatórios' }), group: 'reports' },
     { tab: 'health', label: t('admin.healthModels'), icon: Heart, description: t('admin.directory.healthDesc', { defaultValue: 'Modelos de saúde do ecossistema' }), group: 'reports' },
+    { tab: 'announcements', label: t('admin.announcements.tab'), icon: Bell, description: t('admin.directory.announcementsDesc', { defaultValue: 'Comunicados e avisos ao ecossistema' }), group: 'operations' },
+    { tab: 'surveys', label: t('admin.surveys.title'), icon: ClipboardList, description: t('admin.directory.surveysDesc', { defaultValue: 'Inquéritos e formulários' }), group: 'programs' },
   ];
 
   const handleNavigate = (tab: string) => {
