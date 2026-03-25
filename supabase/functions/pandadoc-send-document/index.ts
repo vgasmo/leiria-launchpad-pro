@@ -113,9 +113,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Guard: do not resend already-sent contracts
+    // Guard: do not resend contracts that are already in a terminal/sent state
+    // Allow retries for draft/failed/ready_to_send/pending_manual
     if (contract.signature_provider && contract.provider_document_id &&
-        contract.signature_status && !['draft', 'failed'].includes(contract.signature_status)) {
+        contract.signature_status && !['draft', 'failed', 'ready_to_send', 'pending_manual'].includes(contract.signature_status)) {
       return new Response(JSON.stringify({
         error: 'Contract already sent for signature. Cannot resend.',
         currentProvider: contract.signature_provider,
@@ -252,48 +253,81 @@ Deno.serve(async (req) => {
       headers: { 'Authorization': `API-Key ${pandadocApiKey}` },
     })
 
-    if (statusRes.ok) {
-      const statusData = await statusRes.json()
+    if (!statusRes.ok) {
+      const statusErr = await statusRes.text()
+      await supabase.from('startup_contracts').update({
+        signature_status: 'ready_to_send',
+        provider_last_error: `Status check failed [${statusRes.status}]: ${statusErr.slice(0, 500)}`,
+        provider_last_sync_at: new Date().toISOString(),
+      }).eq('id', contractId)
 
-      if (statusData.status === 'document.draft') {
-        // Send the document for signature
-        const sendRes = await fetch(`${PANDADOC_API}/documents/${pandadocDocId}/send`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `API-Key ${pandadocApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: `Caro/a ${signerName}, segue o contrato de incubação para assinatura digital via PandaDoc.`,
-            silent: false,
-          }),
-        })
-
-        if (sendRes.ok) {
-          await supabase.from('startup_contracts').update({
-            signature_status: 'sent_for_signature',
-            provider_sent_at: new Date().toISOString(),
-            provider_last_event: 'document.sent',
-            provider_last_sync_at: new Date().toISOString(),
-            provider_last_error: null,
-          }).eq('id', contractId)
-        } else {
-          const sendErr = await sendRes.text()
-          await supabase.from('startup_contracts').update({
-            signature_status: 'ready_to_send',
-            provider_last_error: `Send failed [${sendRes.status}]: ${sendErr.slice(0, 500)}`,
-            provider_last_sync_at: new Date().toISOString(),
-          }).eq('id', contractId)
-        }
-      } else {
-        // Document still processing — mark as ready_to_send for retry
-        await supabase.from('startup_contracts').update({
-          signature_status: 'ready_to_send',
-          provider_last_event: statusData.status,
-          provider_last_sync_at: new Date().toISOString(),
-        }).eq('id', contractId)
-      }
+      return new Response(JSON.stringify({
+        error: `PandaDoc status check failed [${statusRes.status}]`,
+      }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
+
+    const statusData = await statusRes.json()
+
+    if (statusData.status !== 'document.draft') {
+      // Document still processing — mark as ready_to_send for retry
+      await supabase.from('startup_contracts').update({
+        signature_status: 'ready_to_send',
+        provider_last_event: statusData.status,
+        provider_last_sync_at: new Date().toISOString(),
+      }).eq('id', contractId)
+
+      return new Response(JSON.stringify({
+        error: 'Documento ainda em processamento no PandaDoc. Tenta novamente em alguns segundos.',
+      }), {
+        status: 409,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Send the document for signature
+    const sendRes = await fetch(`${PANDADOC_API}/documents/${pandadocDocId}/send`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `API-Key ${pandadocApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Caro/a ${signerName}, segue o contrato de incubação para assinatura digital via PandaDoc.`,
+        silent: false,
+      }),
+    })
+
+    if (!sendRes.ok) {
+      const sendErr = await sendRes.text()
+      await supabase.from('startup_contracts').update({
+        signature_status: 'ready_to_send',
+        provider_last_error: `Send failed [${sendRes.status}]: ${sendErr.slice(0, 500)}`,
+        provider_last_sync_at: new Date().toISOString(),
+      }).eq('id', contractId)
+
+      const friendlyError = sendRes.status === 403
+        ? 'PandaDoc rejeitou o envio (403). Esta API key não tem permissão para enviar em nome da organização.'
+        : `PandaDoc send failed [${sendRes.status}]`
+
+      return new Response(JSON.stringify({
+        error: friendlyError,
+        details: sendErr.slice(0, 500),
+      }), {
+        status: sendRes.status === 403 ? 403 : 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    await supabase.from('startup_contracts').update({
+      signature_status: 'sent_for_signature',
+      provider_sent_at: new Date().toISOString(),
+      provider_last_event: 'document.sent',
+      provider_last_sync_at: new Date().toISOString(),
+      provider_last_error: null,
+    }).eq('id', contractId)
 
     // Log activity
     await supabase.from('activity_log').insert({

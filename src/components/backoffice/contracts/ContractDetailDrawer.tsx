@@ -619,8 +619,8 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
   const provider = contract.signature_provider;
   const sigStatus = contract.signature_status;
   const isSent = sigStatus && !['draft', 'failed', 'ready_to_send', 'pending_manual', 'pending', 'pending_signature'].includes(sigStatus);
-  const canChangeProvider = !isSent && !contract.provider_document_id;
   const canRetry = sigStatus === 'failed' || sigStatus === 'ready_to_send';
+  const canChangeProvider = !isSent && (!contract.provider_document_id || canRetry);
 
   const providerLabel = provider === 'pandadoc' ? 'PandaDoc' : provider === 'docusign' ? 'DocuSign' : provider === 'manual' ? t('contractDetail.manualSignature', { defaultValue: 'Manual' }) : t('contractDetail.notSelected', { defaultValue: 'Não selecionado' });
 
