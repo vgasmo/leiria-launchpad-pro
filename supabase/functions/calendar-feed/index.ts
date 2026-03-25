@@ -111,7 +111,8 @@ Deno.serve(async (req: Request) => {
       }
     }
     
-    if (!authenticatedUserId && !workspaceId) {
+    // Authentication is ALWAYS required — no anonymous access
+    if (!authenticatedUserId) {
       return new Response('Unauthorized - provide token parameter or Authorization header', {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
@@ -122,6 +123,30 @@ Deno.serve(async (req: Request) => {
     let sessions: Session[] = [];
     
     if (workspaceId) {
+      // Verify the authenticated user has access to this workspace
+      const { data: membership } = await supabase
+        .from('workspace_users')
+        .select('workspace_id')
+        .eq('workspace_id', workspaceId)
+        .eq('user_id', authenticatedUserId)
+        .eq('active', true)
+        .maybeSingle();
+
+      // Also allow staff (admin/consultor) to access any workspace
+      const { data: staffRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authenticatedUserId)
+        .in('role', ['admin', 'consultor'])
+        .maybeSingle();
+
+      if (!membership && !staffRole) {
+        return new Response('Forbidden - no access to this workspace', {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+        });
+      }
+
       // Fetch sessions for a specific workspace
       const { data, error } = await supabase
         .from('sessions')
