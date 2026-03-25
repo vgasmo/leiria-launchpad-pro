@@ -5,7 +5,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users, LinkIcon, PlusCircle } from 'lucide-react';
+import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users, PlusCircle, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,8 +18,8 @@ interface LinkedContextPanelProps {
   linkedStartupId: string | null;
   linkedContractId: string | null;
   funnelItemId: string;
-  onLinkContract?: (contractId: string | null) => void;
   onInitiateContract?: () => void;
+  onSendContract?: (contractId: string) => void;
 }
 
 const CONTRACT_STATUS_COLORS: Record<string, string> = {
@@ -31,25 +31,19 @@ const CONTRACT_STATUS_COLORS: Record<string, string> = {
   expired: 'bg-muted text-muted-foreground',
 };
 
-function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any; compact?: boolean; onLink?: () => void }) {
+function ContractCard({ contract, t, compact }: { contract: any; t: any; compact?: boolean }) {
   return (
-    <div className={cn("space-y-1.5", compact ? "bg-background/60 rounded-md p-2 border border-border/40" : "")}>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium flex items-center gap-1.5">
-          <FileText className="h-3.5 w-3.5 text-primary" />
-          {contract.contract_number || t('crm.contract', { defaultValue: 'Contrato' })}
+    <div className={cn('space-y-1.5', compact ? 'bg-background/60 rounded-md p-2 border border-border/40' : '')}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium flex items-center gap-1.5 min-w-0">
+          <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
+          <span className="truncate">{contract.contract_number || t('crm.contract', { defaultValue: 'Contrato' })}</span>
         </span>
-        <div className="flex items-center gap-1">
-          <Badge className={cn('text-[10px] h-5', CONTRACT_STATUS_COLORS[contract.status] || '')}>
-            {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: contract.status })}
-          </Badge>
-          {compact && onLink && (
-            <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={onLink} title={t('crm.linkContract')}>
-              <LinkIcon className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
+        <Badge className={cn('text-[10px] h-5 shrink-0', CONTRACT_STATUS_COLORS[contract.status] || '')}>
+          {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: contract.status })}
+        </Badge>
       </div>
+
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <Euro className="h-3 w-3" />
@@ -75,6 +69,7 @@ function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any;
           </span>
         )}
       </div>
+
       {contract.incubation_type?.name && (
         <Badge variant="outline" className="text-[10px] h-5">
           {contract.incubation_type.name}
@@ -84,7 +79,14 @@ function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any;
   );
 }
 
-export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract, onInitiateContract }: LinkedContextPanelProps) {
+export function LinkedContextPanel({
+  linkedWorkspaceId,
+  linkedStartupId,
+  linkedContractId,
+  funnelItemId,
+  onInitiateContract,
+  onSendContract,
+}: LinkedContextPanelProps) {
   const { t } = useTranslation();
 
   // Fetch workspace + startup info
@@ -136,7 +138,6 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
   if (!hasAnyLink) return null;
 
   const isLoading = loadingWs || loadingContract || loadingWsContracts;
-
   if (isLoading) {
     return (
       <Card className="border-border/60">
@@ -148,6 +149,8 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
       </Card>
     );
   }
+
+  const primaryContractId = contract?.id || workspaceContracts?.[0]?.id || null;
 
   return (
     <Card className="border-border/60 bg-muted/30">
@@ -210,7 +213,7 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
               {t('crm.contract', { defaultValue: 'Contratos' })} ({workspaceContracts.length})
             </p>
             {workspaceContracts.map((c) => (
-              <ContractCard key={c.id} contract={c} t={t} compact onLink={() => onLinkContract?.(c.id)} />
+              <ContractCard key={c.id} contract={c} t={t} compact />
             ))}
           </div>
         ) : linkedWorkspaceId ? (
@@ -218,19 +221,36 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
             <p className="text-xs text-muted-foreground italic">
               {t('crm.noContractsAvailable', { defaultValue: 'Sem contratos neste workspace' })}
             </p>
+          </div>
+        ) : null}
+
+        {/* Clear contract actions */}
+        {(onInitiateContract || (onSendContract && primaryContractId)) && (
+          <div className="border-t pt-2 flex flex-wrap gap-2">
             {onInitiateContract && (
               <Button
                 size="sm"
                 variant="default"
-                className="w-full h-8 text-xs gap-1.5"
+                className="h-8 text-xs gap-1.5"
                 onClick={onInitiateContract}
               >
                 <PlusCircle className="h-3.5 w-3.5" />
                 {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
               </Button>
             )}
+            {onSendContract && primaryContractId && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs gap-1.5"
+                onClick={() => onSendContract(primaryContractId)}
+              >
+                <Send className="h-3.5 w-3.5" />
+                {t('crm.sendContract', { defaultValue: 'Enviar Contrato' })}
+              </Button>
+            )}
           </div>
-        ) : null}
+        )}
       </CardContent>
     </Card>
   );
