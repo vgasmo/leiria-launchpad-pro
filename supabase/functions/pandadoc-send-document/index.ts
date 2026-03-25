@@ -280,10 +280,9 @@ Deno.serve(async (req) => {
       }).eq('id', contractId)
 
       return new Response(JSON.stringify({
-        status: 'ready_to_send',
-        message: 'Document is still processing in PandaDoc. Try sending again in a few seconds.',
+        error: 'Documento ainda em processamento no PandaDoc. Tenta novamente em alguns segundos.',
       }), {
-        status: 202,
+        status: 409,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
