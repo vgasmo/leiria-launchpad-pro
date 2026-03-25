@@ -5,16 +5,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users } from 'lucide-react';
-import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
+import { Building2, FileText, Briefcase, ExternalLink, MapPin, Calendar, Euro, Users, LinkIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface LinkedContextPanelProps {
   linkedWorkspaceId: string | null;
@@ -33,9 +30,61 @@ const CONTRACT_STATUS_COLORS: Record<string, string> = {
   expired: 'bg-muted text-muted-foreground',
 };
 
+function ContractCard({ contract, t, compact, onLink }: { contract: any; t: any; compact?: boolean; onLink?: () => void }) {
+  return (
+    <div className={cn("space-y-1.5", compact ? "bg-background/60 rounded-md p-2 border border-border/40" : "")}>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium flex items-center gap-1.5">
+          <FileText className="h-3.5 w-3.5 text-primary" />
+          {contract.contract_number || t('crm.contract', { defaultValue: 'Contrato' })}
+        </span>
+        <div className="flex items-center gap-1">
+          <Badge className={cn('text-[10px] h-5', CONTRACT_STATUS_COLORS[contract.status] || '')}>
+            {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: contract.status })}
+          </Badge>
+          {compact && onLink && (
+            <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={onLink} title={t('crm.linkContract')}>
+              <LinkIcon className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <Euro className="h-3 w-3" />
+          {contract.monthly_fee ? `€${contract.monthly_fee} /mês` : '—'}
+        </span>
+        {contract.square_meters && (
+          <span className="flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {contract.square_meters} m²
+          </span>
+        )}
+        {contract.start_date && (
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {new Date(contract.start_date).toLocaleDateString('pt-PT')}
+            {contract.end_date ? ` → ${new Date(contract.end_date).toLocaleDateString('pt-PT')}` : ''}
+          </span>
+        )}
+        {contract.building?.name && (
+          <span className="flex items-center gap-1">
+            <Building2 className="h-3 w-3" />
+            {contract.building.name}
+          </span>
+        )}
+      </div>
+      {contract.incubation_type?.name && (
+        <Badge variant="outline" className="text-[10px] h-5">
+          {contract.incubation_type.name}
+        </Badge>
+      )}
+    </div>
+  );
+}
+
 export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedContractId, funnelItemId, onLinkContract }: LinkedContextPanelProps) {
   const { t } = useTranslation();
-  const [showContractPicker, setShowContractPicker] = useState(false);
 
   // Fetch workspace + startup info
   const { data: workspace, isLoading: loadingWs } = useQuery({
@@ -59,7 +108,7 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
     queryFn: async () => {
       const { data, error } = await supabase
         .from('startup_contracts')
-        .select('id, contract_number, status, start_date, end_date, monthly_fee, currency, discount_percentage, square_meters, incubation_type:incubation_types(name), building:buildings(name, code)')
+        .select('id, contract_number, status, start_date, end_date, monthly_fee, currency, square_meters, incubation_type:incubation_types(name), building:buildings(name, code)')
         .eq('id', linkedContractId!)
         .single();
       if (error) throw error;
@@ -70,7 +119,7 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
   // Always fetch workspace contracts when workspace is linked
   const { data: workspaceContracts, isLoading: loadingWsContracts } = useQuery({
     queryKey: ['crm-workspace-contracts', linkedWorkspaceId],
-    enabled: !!linkedWorkspaceId,
+    enabled: !!linkedWorkspaceId && !linkedContractId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('startup_contracts')
@@ -148,9 +197,11 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
           </div>
         )}
 
-        {/* Contract Info — show linked contract OR all workspace contracts */}
+        {/* Contract Info — linked contract OR all workspace contracts */}
         {contract ? (
-          <ContractCard contract={contract} t={t} />
+          <div className="border-t pt-2">
+            <ContractCard contract={contract} t={t} />
+          </div>
         ) : (workspaceContracts && workspaceContracts.length > 0) ? (
           <div className="border-t pt-2 space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
@@ -163,6 +214,12 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
           </div>
         ) : linkedWorkspaceId ? (
           <div className="border-t pt-2">
-            <p className="text-xs text-muted-foreground italic">{t('crm.noContractsAvailable', { defaultValue: 'Sem contratos neste workspace' })}</p>
+            <p className="text-xs text-muted-foreground italic">
+              {t('crm.noContractsAvailable', { defaultValue: 'Sem contratos neste workspace' })}
+            </p>
           </div>
         ) : null}
+      </CardContent>
+    </Card>
+  );
+}
