@@ -112,23 +112,23 @@
   }
 
   .dark {
-    --background: 60 8% 6%;
-    --foreground: 60 5% 94%;
+    --background: 60 6% 7%;
+    --foreground: 60 5% 95%;
 
-    --card: 60 8% 10%;
-    --card-foreground: 60 5% 94%;
+    --card: 60 6% 11%;
+    --card-foreground: 60 5% 95%;
 
-    --popover: 60 8% 9%;
-    --popover-foreground: 60 5% 94%;
+    --popover: 60 6% 10%;
+    --popover-foreground: 60 5% 95%;
 
     --primary: 68 60% 52%;
     --primary-foreground: 60 5% 10%;
 
-    --secondary: 60 8% 14%;
+    --secondary: 60 6% 15%;
     --secondary-foreground: 60 5% 88%;
 
-    --muted: 60 8% 14%;
-    --muted-foreground: 60 5% 63%;
+    --muted: 60 6% 15%;
+    --muted-foreground: 60 5% 65%;
 
     --accent: 68 55% 48%;
     --accent-foreground: 60 5% 10%;
@@ -145,24 +145,24 @@
     --info: 200 60% 52%;
     --info-foreground: 0 0% 100%;
 
-    --border: 60 8% 18%;
-    --input: 60 8% 18%;
+    --border: 60 6% 20%;
+    --input: 60 6% 20%;
     --ring: 68 60% 50%;
 
-    --sidebar-background: 60 8% 5%;
-    --sidebar-foreground: 60 5% 85%;
+    --sidebar-background: 60 6% 5%;
+    --sidebar-foreground: 60 5% 88%;
     --sidebar-primary: 68 60% 52%;
     --sidebar-primary-foreground: 60 5% 10%;
-    --sidebar-accent: 60 8% 12%;
+    --sidebar-accent: 60 6% 13%;
     --sidebar-accent-foreground: 60 5% 92%;
-    --sidebar-border: 60 8% 16%;
+    --sidebar-border: 60 6% 18%;
     --sidebar-ring: 68 55% 48%;
-    --sidebar-muted: 60 5% 50%;
+    --sidebar-muted: 60 5% 55%;
 
-    --gradient-card: linear-gradient(145deg, hsl(60 8% 10%) 0%, hsl(60 8% 8%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(60 8% 12% / 0.9) 0%, hsl(60 8% 10% / 0.7) 100%);
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.25);
-    --shadow-card-hover: 0 6px 16px -4px hsl(0 0% 0% / 0.35), 0 3px 6px -2px hsl(0 0% 0% / 0.2);
+    --gradient-card: linear-gradient(145deg, hsl(60 6% 12%) 0%, hsl(60 6% 10%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(60 6% 14% / 0.9) 0%, hsl(60 6% 11% / 0.7) 100%);
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 8px 20px -4px hsl(0 0% 0% / 0.4), 0 4px 8px -2px hsl(0 0% 0% / 0.25);
   }
 }
 
@@ -587,49 +587,45 @@
   }
 }
 
-/* Dark mode refinements - P3 */
+/* Dark mode refinements */
 .dark {
-  /* Improved text contrast */
-  --text-soft: 0 0% 70%;
-  
-  /* Better separation between layers */
   color-scheme: dark;
 }
 
 .dark .glass {
-  @apply bg-background/60 border-border/30;
+  @apply bg-background/60 border-border/40;
 }
 
 .dark .glass-card {
-  @apply bg-card/70 border-border/25;
+  @apply bg-card/80 border-border/30;
 }
 
 /* Dark mode badge adjustments */
 .dark [data-health="critical"] {
-  @apply bg-destructive/20 text-destructive border-destructive/30;
+  @apply bg-destructive/15 text-destructive border-destructive/25;
 }
 
 .dark [data-health="at-risk"] {
-  @apply bg-orange-500/20 text-orange-400 border-orange-500/30;
+  @apply bg-orange-500/15 text-orange-400 border-orange-500/25;
 }
 
 .dark [data-health="stable"] {
-  @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
+  @apply bg-blue-500/15 text-blue-400 border-blue-500/25;
 }
 
 .dark [data-health="healthy"] {
-  @apply bg-green-500/20 text-green-400 border-green-500/30;
+  @apply bg-green-500/15 text-green-400 border-green-500/25;
 }
 
 .dark [data-health="thriving"] {
-  @apply bg-emerald-500/20 text-emerald-400 border-emerald-500/30;
+  @apply bg-emerald-500/15 text-emerald-400 border-emerald-500/25;
 }
 
 /* Dark mode input refinements */
 .dark input,
 .dark textarea,
 .dark select {
-  @apply bg-background/50;
+  @apply bg-background/60;
 }
 
 .dark input:focus,
@@ -640,8 +636,8 @@
 
 /* Dark mode card hover refinements */
 .dark .interactive-card:hover {
-  @apply border-primary/40;
-  box-shadow: 0 8px 24px -4px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--primary) / 0.1);
+  @apply border-primary/30;
+  box-shadow: 0 8px 24px -4px hsl(0 0% 0% / 0.45), 0 0 0 1px hsl(var(--primary) / 0.08);
 }
 
 /* Dark mode skeleton refinements */
@@ -649,7 +645,7 @@
   background: linear-gradient(
     90deg,
     hsl(var(--muted)) 0%,
-    hsl(var(--muted) / 0.3) 50%,
+    hsl(var(--muted) / 0.4) 50%,
     hsl(var(--muted)) 100%
   );
 }
