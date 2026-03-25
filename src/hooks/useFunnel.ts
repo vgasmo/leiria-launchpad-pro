@@ -247,19 +247,37 @@ export function useConvertToStartup() {
         .single();
       if (startupError) throw startupError;
 
-      // Create workspace
+      // Create workspace as 'pending' first (trigger blocks 'active' without members)
       const { data: workspace, error: workspaceError } = await supabase
         .from('workspaces')
         .insert({
           startup_id: startup.id,
           program_id: programId,
           stage: stage as any,
-          status: 'active',
+          status: 'pending',
           assigned_consultor_id: item.owner_consultant_id,
         })
         .select()
         .single();
       if (workspaceError) throw workspaceError;
+
+      // Add the staff user as consultor member so workspace can be activated
+      await supabase.from('workspace_users').insert({
+        workspace_id: workspace.id,
+        user_id: user.id,
+        role: 'consultor',
+        active: true,
+      });
+
+      // Now activate the workspace (trigger will pass since member exists)
+      const { error: activateError } = await supabase
+        .from('workspaces')
+        .update({ status: 'active' })
+        .eq('id', workspace.id);
+      if (activateError) {
+        console.error('Workspace activation error:', activateError);
+        // Still proceed — workspace is usable in 'pending' state
+      }
 
       // Create contract if incubation type is specified
       let contract = null;
