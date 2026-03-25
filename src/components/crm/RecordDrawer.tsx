@@ -27,6 +27,7 @@ import {
   Target,
   Clock,
   Briefcase,
+  ExternalLink,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
@@ -381,6 +382,73 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 onClearNextAction={handleClearNextAction}
                 isClearingNextAction={clearNextAction.isPending}
               />
+
+              {/* Contract Actions Banner - visible for advanced stage leads */}
+              {['qualified', 'proposal_sent', 'negotiating', 'contracted'].includes(item.stage) && (
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardContent className="p-3 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5" />
+                      {t('crm.contractActions', { defaultValue: 'Ações de Contrato' })}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs gap-1.5"
+                        onClick={() => {
+                          const params = new URLSearchParams({
+                            tab: 'backoffice',
+                            subtab: 'contracts',
+                            action: 'create',
+                            funnel: item.id,
+                            contact: item.contact_name || '',
+                            email: item.contact_email || '',
+                            org: item.organization_name || '',
+                          });
+                          if (item.linked_workspace_id) {
+                            params.set('workspace', item.linked_workspace_id);
+                          }
+                          onOpenChange(false);
+                          navigate(`/admin?${params.toString()}`);
+                        }}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
+                      </Button>
+                      {(item.linked_contract_id) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                          onClick={async () => {
+                            try {
+                              const contractId = item.linked_contract_id;
+                              const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+                                body: { action: 'generate_token', contractId },
+                              });
+                              if (error) throw error;
+                              if (data?.error) throw new Error(data.error);
+                              const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
+                              await navigator.clipboard.writeText(url);
+                              toast.success(t('crm.contractLinkCopied', { defaultValue: 'Link público do contrato copiado! Envie ao founder por email.' }));
+                            } catch (err: any) {
+                              toast.error(err?.message || 'Erro ao gerar link');
+                            }
+                          }}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          {t('crm.generatePublicLink', { defaultValue: 'Gerar Link Público' })}
+                        </Button>
+                      )}
+                    </div>
+                    {!item.linked_contract_id && (
+                      <p className="text-[10px] text-muted-foreground">
+                        {t('crm.createContractFirst', { defaultValue: 'Crie primeiro o contrato para depois gerar o link público de assinatura.' })}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
