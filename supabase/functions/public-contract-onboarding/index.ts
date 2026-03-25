@@ -130,6 +130,39 @@ Deno.serve(async (req) => {
       })
     }
 
+    // === Upload document (public, token-validated) ===
+    if (action === 'upload_document') {
+      const { docKey, fileName, fileBase64, fileExt, mimeType } = body
+      if (!docKey || !fileBase64) {
+        return new Response(JSON.stringify({ error: 'docKey and fileBase64 required' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const ext = fileExt || 'pdf'
+      const path = `onboarding/${contract.id}/${docKey}.${ext}`
+
+      // Decode base64 to bytes
+      const binaryStr = atob(fileBase64)
+      const bytes = new Uint8Array(binaryStr.length)
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i)
+      }
+
+      const { error: uploadErr } = await supabase.storage
+        .from('contract-documents')
+        .upload(path, bytes, { 
+          upsert: true,
+          contentType: mimeType || 'application/octet-stream',
+        })
+
+      if (uploadErr) throw uploadErr
+
+      return new Response(JSON.stringify({ success: true, path }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // === Save company data ===
     if (action === 'save_data') {
       const { formData } = body

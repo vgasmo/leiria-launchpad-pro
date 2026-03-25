@@ -162,23 +162,36 @@ export default function PublicContractSigning() {
     }
   }, [contract]);
 
-  // Upload document to storage
+  // Upload document via edge function (no auth required — token validated server-side)
   const handleFileUpload = async (docKey: string, file: File) => {
     if (!token || !contract) return;
     setUploading(docKey);
     try {
+      // Convert file to base64
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
       const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-      const path = `onboarding/${contract.id}/${docKey}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('contract-documents')
-        .upload(path, file, { upsert: true });
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: {
+          action: 'upload_document',
+          token,
+          docKey,
+          fileName: file.name,
+          fileBase64: base64,
+          fileExt: ext,
+          mimeType: file.type,
+        },
+      });
 
-      if (uploadError) throw uploadError;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       setUploadedDocs(prev => ({
         ...prev,
-        [docKey]: { name: file.name, path, size: file.size },
+        [docKey]: { name: file.name, path: data.path, size: file.size },
       }));
       toast.success(isPt ? 'Documento carregado' : 'Document uploaded');
     } catch (err: any) {
