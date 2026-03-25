@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
+import { EnrollmentModeIndicator } from '@/components/auth/EnrollmentModeIndicator';
 import startupLeiriaLogo from '@/assets/startup-leiria.svg';
 
 export default function Login() {
@@ -294,6 +295,11 @@ export default function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent className="relative">
+              {/* Enrollment mode indicator */}
+              <div className="mb-4">
+                <EnrollmentModeIndicator />
+              </div>
+
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setError(null); }}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="login" className="data-[state=active]:shadow-sm">{t('auth.signIn')}</TabsTrigger>

@@ -32,6 +32,8 @@ import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { HealthScore } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
+import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
+import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -152,7 +154,10 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* P0 HERO: Next Session Prep */}
+      {/* P0 HERO: Enhanced Session Prep */}
+      <MentorSessionPrepEnhanced workspaces={workspaces} />
+
+      {/* P0 HERO: Next Session Prep (fallback) */}
       <MentorNextSessionPrep workspaces={workspaces} />
 
       {/* Open Loops — what needs attention */}
@@ -360,32 +365,8 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
         <div className="space-y-4">
           <CalendarWidget />
           
-          {/* Your Impact Card - Enhanced */}
-          <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Star className="h-4 w-4 text-primary" />
-                {t('mentor.yourImpact', 'O Teu Impacto')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <span className="text-muted-foreground">{t('mentor.startupsSupported', 'Startups apoiadas')}</span>
-                  <span className="font-bold text-lg">{workspaces.length}</span>
-                </div>
-                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <span className="text-muted-foreground">{t('mentor.sessionsHeld', 'Sessões realizadas')}</span>
-                  <span className="font-bold text-lg">{impactStats.sessionsCompleted}</span>
-                </div>
-                <div className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <span className="text-muted-foreground">{t('mentor.healthyStartups', 'Startups saudáveis')}</span>
-                  <span className="font-bold text-lg text-green-600 dark:text-green-400">{impactStats.healthyCount}/{workspaces.length}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Your Impact - Enhanced */}
+          <MentorImpactPanel workspaces={workspaces} />
         </div>
       </div>
 
