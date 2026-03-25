@@ -89,7 +89,12 @@ export function ContractReviewForm({
   });
 
   const handleFormSubmit = (values: ContractFormValues) => {
-    onSubmit({ ...values, document_url: documentUrl });
+    const cleanValues = {
+      ...values,
+      workspace_id: values.workspace_id === '__none__' ? '' : values.workspace_id,
+      document_url: documentUrl,
+    };
+    onSubmit(cleanValues);
   };
 
   return (
