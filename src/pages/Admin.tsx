@@ -148,6 +148,9 @@ export default function Admin() {
 
   return (
     <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Ecosystem Directory & CRM' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Manage startups, mentors, programs and operational workflows' })}>
+      {/* Mission Control Directory */}
+      <AdminMissionControlDirectory />
+
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
         {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">

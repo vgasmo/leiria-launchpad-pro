@@ -155,6 +155,9 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
       {/* P0 HERO: Next Session Prep */}
       <MentorNextSessionPrep workspaces={workspaces} />
 
+      {/* Open Loops — what needs attention */}
+      <MentorOpenLoops workspaces={workspaces} />
+
       {/* Post-session feedback CTA */}
       {recentUnloggedSessions.length > 0 && (
         <Card className="border-amber-400/40 bg-gradient-to-r from-amber-50/50 via-yellow-50/30 to-transparent dark:from-amber-950/20 dark:via-yellow-950/10 rounded-2xl">

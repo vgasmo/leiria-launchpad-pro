@@ -182,6 +182,11 @@ export function FounderDashboard({
         </Card>
       )}
 
+      {/* ★ READINESS STRIP — Quick status overview ★ */}
+      <WidgetErrorBoundary name="ReadinessStrip">
+        <FounderReadinessStrip workspace={workspace} />
+      </WidgetErrorBoundary>
+
       {/* ★ JOURNEY MAP — Gamified visual ★ */}
       <WidgetErrorBoundary name="JourneyMap">
         <FounderJourneyMap currentStage={workspace.stage} />
