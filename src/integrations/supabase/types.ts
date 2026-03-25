@@ -5346,8 +5346,15 @@ export type Database = {
           payment_terms_days: number | null
           pricing_line_id: string | null
           pricing_version_id: string | null
+          provider_completed_at: string | null
+          provider_document_id: string | null
+          provider_last_error: string | null
+          provider_last_event: string | null
+          provider_last_sync_at: string | null
+          provider_sent_at: string | null
           regulation_accepted_at: string | null
           regulation_version: string | null
+          signature_provider: string | null
           signature_requested_at: string | null
           signature_status: string | null
           signed_at: string | null
@@ -5403,8 +5410,15 @@ export type Database = {
           payment_terms_days?: number | null
           pricing_line_id?: string | null
           pricing_version_id?: string | null
+          provider_completed_at?: string | null
+          provider_document_id?: string | null
+          provider_last_error?: string | null
+          provider_last_event?: string | null
+          provider_last_sync_at?: string | null
+          provider_sent_at?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
+          signature_provider?: string | null
           signature_requested_at?: string | null
           signature_status?: string | null
           signed_at?: string | null
@@ -5460,8 +5474,15 @@ export type Database = {
           payment_terms_days?: number | null
           pricing_line_id?: string | null
           pricing_version_id?: string | null
+          provider_completed_at?: string | null
+          provider_document_id?: string | null
+          provider_last_error?: string | null
+          provider_last_event?: string | null
+          provider_last_sync_at?: string | null
+          provider_sent_at?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
+          signature_provider?: string | null
           signature_requested_at?: string | null
           signature_status?: string | null
           signed_at?: string | null

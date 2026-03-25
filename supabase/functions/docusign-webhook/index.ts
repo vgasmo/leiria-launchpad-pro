@@ -85,12 +85,16 @@ Deno.serve(async (req) => {
     // Update contract
     const updatePayload: Record<string, unknown> = {
       signature_status: status,
+      provider_last_event: status,
+      provider_last_sync_at: new Date().toISOString(),
+      provider_last_error: null,
     }
 
     if (status === 'completed') {
       updatePayload.signed_at = new Date().toISOString()
       updatePayload.status = 'active'
       updatePayload.onboarding_completed_at = new Date().toISOString()
+      updatePayload.provider_completed_at = new Date().toISOString()
       // Clear the onboarding token (no longer needed)
       updatePayload.onboarding_token = null
       updatePayload.onboarding_token_expires_at = null
