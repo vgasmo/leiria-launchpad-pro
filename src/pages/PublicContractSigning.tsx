@@ -1,9 +1,10 @@
 /**
  * Public Contract Signing Page
  * Accessible via token link — no authentication required.
- * Multi-step: 1) Company Data → 2) Review Contract & Regulation → 3) DocuSign Signing
+ * Multi-step: 1) Company Data + Documents → 2) Review Contract & Regulation → 3) DocuSign Signing
+ * Fully bilingual PT/EN with language switcher.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -17,15 +18,12 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft, Download, Shield, Loader2, AlertTriangle } from 'lucide-react';
+import {
+  Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft,
+  Shield, Loader2, AlertTriangle, Upload, X, Globe, FileUp
+} from 'lucide-react';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
-
-const STEPS: { key: WizardStep; icon: typeof Building2; labelPt: string; labelEn: string }[] = [
-  { key: 'company_data', icon: Building2, labelPt: 'Dados da Empresa', labelEn: 'Company Data' },
-  { key: 'review_contract', icon: FileText, labelPt: 'Rever Contrato', labelEn: 'Review Contract' },
-  { key: 'signing', icon: PenTool, labelPt: 'Assinatura Digital', labelEn: 'Digital Signature' },
-];
 
 interface CompanyFormData {
   legal_representative_name: string;
@@ -36,12 +34,82 @@ interface CompanyFormData {
   company_postal_code: string;
 }
 
+interface UploadedDoc {
+  name: string;
+  path: string;
+  size: number;
+}
+
+// Required documents for onboarding
+const REQUIRED_DOCS = [
+  {
+    key: 'certidao_comercial',
+    labelPt: 'Certidão Permanente / Código de Acesso',
+    labelEn: 'Commercial Registry Certificate / Access Code',
+    descPt: 'Certidão permanente da empresa ou código de acesso ao registo comercial',
+    descEn: 'Permanent certificate or commercial registry access code',
+    required: true,
+  },
+  {
+    key: 'cartao_empresa',
+    labelPt: 'Cartão da Empresa (NIF)',
+    labelEn: 'Company Tax Card (NIF)',
+    descPt: 'Comprovativo do número de identificação fiscal da empresa',
+    descEn: 'Company tax identification number proof',
+    required: true,
+  },
+  {
+    key: 'id_representante',
+    labelPt: 'Documento de Identificação do Representante Legal',
+    labelEn: 'Legal Representative ID Document',
+    descPt: 'Cartão de cidadão, BI ou passaporte do representante legal',
+    descEn: 'Citizen card, ID card or passport of the legal representative',
+    required: true,
+  },
+  {
+    key: 'comprovativo_iban',
+    labelPt: 'Comprovativo de IBAN',
+    labelEn: 'IBAN Proof',
+    descPt: 'Comprovativo do IBAN da conta bancária da empresa',
+    descEn: 'Proof of company bank account IBAN',
+    required: false,
+  },
+  {
+    key: 'pitch_deck',
+    labelPt: 'Pitch Deck / Apresentação da Startup',
+    labelEn: 'Pitch Deck / Startup Presentation',
+    descPt: 'Apresentação do projeto (PDF ou PPT)',
+    descEn: 'Project presentation (PDF or PPT)',
+    required: false,
+  },
+];
+
+const STEPS: { key: WizardStep; icon: typeof Building2 }[] = [
+  { key: 'company_data', icon: Building2 },
+  { key: 'review_contract', icon: FileText },
+  { key: 'signing', icon: PenTool },
+];
+
+const stepLabels: Record<WizardStep, { pt: string; en: string }> = {
+  company_data: { pt: 'Dados e Documentos', en: 'Data & Documents' },
+  review_contract: { pt: 'Rever Contrato', en: 'Review Contract' },
+  signing: { pt: 'Assinatura Digital', en: 'Digital Signature' },
+};
+
 export default function PublicContractSigning() {
   const { token } = useParams<{ token: string }>();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
+  const [lang, setLang] = useState<'pt' | 'en'>(() =>
+    i18n.language?.startsWith('pt') ? 'pt' : 'en'
+  );
+  const isPt = lang === 'pt';
+
   const [currentStep, setCurrentStep] = useState<WizardStep>('company_data');
   const [regulationAccepted, setRegulationAccepted] = useState(false);
   const [contractAccepted, setContractAccepted] = useState(false);
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc | null>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
@@ -51,6 +119,13 @@ export default function PublicContractSigning() {
     company_city: '',
     company_postal_code: '',
   });
+
+  // Toggle language
+  const toggleLang = () => {
+    const next = lang === 'pt' ? 'en' : 'pt';
+    setLang(next);
+    i18n.changeLanguage(next);
+  };
 
   // Fetch contract via public edge function
   const { data: contract, isLoading, error: fetchError } = useQuery({
@@ -81,27 +156,63 @@ export default function PublicContractSigning() {
         company_postal_code: contract.company_postal_code || '',
       }));
 
-      // If already sent for signature, jump to signing step
       if (contract.signature_status === 'sent_for_signature' || contract.signature_status === 'completed') {
         setCurrentStep('signing');
       }
     }
   }, [contract]);
 
+  // Upload document to storage
+  const handleFileUpload = async (docKey: string, file: File) => {
+    if (!token || !contract) return;
+    setUploading(docKey);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+      const path = `onboarding/${contract.id}/${docKey}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('contract-documents')
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      setUploadedDocs(prev => ({
+        ...prev,
+        [docKey]: { name: file.name, path, size: file.size },
+      }));
+      toast.success(isPt ? 'Documento carregado' : 'Document uploaded');
+    } catch (err: any) {
+      toast.error(err?.message || (isPt ? 'Erro ao carregar documento' : 'Upload error'));
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const removeDoc = (docKey: string) => {
+    setUploadedDocs(prev => ({ ...prev, [docKey]: null }));
+  };
+
   // Save company data
   const saveCompanyData = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
-        body: { action: 'save_data', token, formData },
+        body: {
+          action: 'save_data',
+          token,
+          formData,
+          documents: Object.fromEntries(
+            Object.entries(uploadedDocs).filter(([, v]) => v).map(([k, v]) => [k, v!.path])
+          ),
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       setCurrentStep('review_contract');
-      toast.success(t('contractOnboarding.dataSaved', { defaultValue: 'Dados guardados com sucesso' }));
+      toast.success(isPt ? 'Dados guardados com sucesso' : 'Data saved successfully');
     },
-    onError: () => toast.error(t('contractOnboarding.saveError', { defaultValue: 'Erro ao guardar dados' })),
+    onError: () => toast.error(isPt ? 'Erro ao guardar dados' : 'Error saving data'),
   });
 
   // Submit for DocuSign signing
@@ -116,24 +227,29 @@ export default function PublicContractSigning() {
     },
     onSuccess: () => {
       setCurrentStep('signing');
-      toast.success(t('contractOnboarding.sentForSignature', { defaultValue: 'Contrato enviado para assinatura digital!' }));
+      toast.success(isPt ? 'Contrato enviado para assinatura digital!' : 'Contract sent for digital signature!');
     },
     onError: (err: any) => {
-      toast.error(err?.message || t('contractOnboarding.signingError', { defaultValue: 'Erro ao enviar para assinatura' }));
+      toast.error(err?.message || (isPt ? 'Erro ao enviar para assinatura' : 'Signing error'));
       setCurrentStep('signing');
     },
   });
 
   const stepIndex = STEPS.findIndex(s => s.key === currentStep);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
-  const isPt = i18n.language?.startsWith('pt');
 
-  const isFormValid = formData.legal_representative_name.trim() &&
+  const requiredDocsUploaded = REQUIRED_DOCS
+    .filter(d => d.required)
+    .every(d => uploadedDocs[d.key]);
+
+  const isFormValid =
+    formData.legal_representative_name.trim() &&
     formData.legal_representative_email.trim() &&
     formData.company_nif.trim() &&
     formData.company_address.trim() &&
     formData.company_city.trim() &&
-    formData.company_postal_code.trim();
+    formData.company_postal_code.trim() &&
+    requiredDocsUploaded;
 
   // Loading state
   if (isLoading) {
@@ -175,16 +291,27 @@ export default function PublicContractSigning() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Public header */}
+      {/* Public header with language toggle */}
       <div className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
             <span className="font-semibold text-sm">Startup Leiria</span>
           </div>
-          <Badge variant="outline" className="text-xs">
-            {isPt ? 'Onboarding Contratual' : 'Contract Onboarding'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleLang}
+              className="h-8 text-xs gap-1.5"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {lang === 'pt' ? 'EN' : 'PT'}
+            </Button>
+            <Badge variant="outline" className="text-xs">
+              {isPt ? 'Onboarding Contratual' : 'Contract Onboarding'}
+            </Badge>
+          </div>
         </div>
       </div>
 
@@ -208,120 +335,249 @@ export default function PublicContractSigning() {
               const isActive = step.key === currentStep;
               const isDone = i < stepIndex;
               return (
-                <div key={step.key} className={`flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-primary' : isDone ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                <div
+                  key={step.key}
+                  className={`flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-primary' : isDone ? 'text-emerald-600' : 'text-muted-foreground'}`}
+                >
                   {isDone ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                  {isPt ? step.labelPt : step.labelEn}
+                  {stepLabels[step.key][lang]}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Step 1: Company Data */}
+        {/* ===== Step 1: Company Data + Document Uploads ===== */}
         {currentStep === 'company_data' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                {isPt ? 'Dados da Empresa e Representante Legal' : 'Company & Legal Representative Data'}
-              </CardTitle>
-              <CardDescription>
-                {isPt
-                  ? 'Estes dados serão utilizados para a geração automática do contrato de incubação.'
-                  : 'This data will be used to automatically generate the incubation contract.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'Nome do Representante Legal *' : 'Legal Representative Name *'}</Label>
-                  <Input
-                    value={formData.legal_representative_name}
-                    onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
-                    placeholder={isPt ? 'Nome completo' : 'Full name'}
-                  />
+          <div className="space-y-6">
+            {/* Company & Legal Rep Data */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  {isPt ? 'Dados da Empresa e Representante Legal' : 'Company & Legal Representative Data'}
+                </CardTitle>
+                <CardDescription>
+                  {isPt
+                    ? 'Estes dados serão utilizados para a geração automática do contrato de incubação.'
+                    : 'This data will be used to automatically generate the incubation contract.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Nome do Representante Legal *' : 'Legal Representative Name *'}</Label>
+                    <Input
+                      value={formData.legal_representative_name}
+                      onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
+                      placeholder={isPt ? 'Nome completo' : 'Full name'}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Email do Representante *' : 'Representative Email *'}</Label>
+                    <Input
+                      type="email"
+                      value={formData.legal_representative_email}
+                      onChange={e => setFormData(prev => ({ ...prev, legal_representative_email: e.target.value }))}
+                      placeholder="email@empresa.pt"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'Email do Representante *' : 'Representative Email *'}</Label>
-                  <Input
-                    type="email"
-                    value={formData.legal_representative_email}
-                    onChange={e => setFormData(prev => ({ ...prev, legal_representative_email: e.target.value }))}
-                    placeholder="email@empresa.pt"
-                  />
-                </div>
-              </div>
 
-              <Separator />
+                <Separator />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'NIF da Empresa *' : 'Company Tax ID *'}</Label>
-                  <Input
-                    value={formData.company_nif}
-                    onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
-                    placeholder="123456789"
-                    maxLength={9}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'NIF da Empresa *' : 'Company Tax ID (NIF) *'}</Label>
+                    <Input
+                      value={formData.company_nif}
+                      onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
+                      placeholder="123456789"
+                      maxLength={9}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Morada Fiscal *' : 'Registered Address *'}</Label>
+                    <Input
+                      value={formData.company_address}
+                      onChange={e => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                      placeholder={isPt ? 'Rua, número, andar' : 'Street, number, floor'}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Cidade *' : 'City *'}</Label>
+                    <Input
+                      value={formData.company_city}
+                      onChange={e => setFormData(prev => ({ ...prev, company_city: e.target.value }))}
+                      placeholder="Leiria"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Código Postal *' : 'Postal Code *'}</Label>
+                    <Input
+                      value={formData.company_postal_code}
+                      onChange={e => setFormData(prev => ({ ...prev, company_postal_code: e.target.value }))}
+                      placeholder="2400-000"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'Morada Fiscal *' : 'Registered Address *'}</Label>
-                  <Input
-                    value={formData.company_address}
-                    onChange={e => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
-                    placeholder={isPt ? 'Rua, número, andar' : 'Street, number, floor'}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'Cidade *' : 'City *'}</Label>
-                  <Input
-                    value={formData.company_city}
-                    onChange={e => setFormData(prev => ({ ...prev, company_city: e.target.value }))}
-                    placeholder="Leiria"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>{isPt ? 'Código Postal *' : 'Postal Code *'}</Label>
-                  <Input
-                    value={formData.company_postal_code}
-                    onChange={e => setFormData(prev => ({ ...prev, company_postal_code: e.target.value }))}
-                    placeholder="2400-000"
-                  />
-                </div>
-              </div>
 
-              {/* Contract summary */}
-              <Separator />
-              <div className="bg-muted/40 rounded-lg p-4 space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {isPt ? 'Resumo do Contrato' : 'Contract Summary'}
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">{isPt ? 'Tipo:' : 'Type:'}</span> {contract.incubation_type?.name || '—'}</div>
-                  <div><span className="text-muted-foreground">{isPt ? 'Edifício:' : 'Building:'}</span> {contract.building?.name || '—'}</div>
-                  <div><span className="text-muted-foreground">{isPt ? 'Mensalidade:' : 'Monthly Fee:'}</span> {contract.monthly_fee}€/{contract.currency || 'EUR'}</div>
-                  <div><span className="text-muted-foreground">{isPt ? 'Início:' : 'Start:'}</span> {new Date(contract.start_date).toLocaleDateString(isPt ? 'pt-PT' : 'en-GB')}</div>
-                  {contract.square_meters && (
-                    <div><span className="text-muted-foreground">{isPt ? 'Área:' : 'Area:'}</span> {contract.square_meters} m²</div>
-                  )}
+                {/* Contract summary */}
+                <Separator />
+                <div className="bg-muted/40 rounded-lg p-4 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {isPt ? 'Resumo do Contrato' : 'Contract Summary'}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">{isPt ? 'Tipo:' : 'Type:'}</span>{' '}
+                      {contract.incubation_type?.name || '—'}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{isPt ? 'Edifício:' : 'Building:'}</span>{' '}
+                      {contract.building?.name || '—'}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{isPt ? 'Mensalidade:' : 'Monthly Fee:'}</span>{' '}
+                      {contract.monthly_fee}€/{contract.currency || 'EUR'}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{isPt ? 'Início:' : 'Start:'}</span>{' '}
+                      {new Date(contract.start_date).toLocaleDateString(isPt ? 'pt-PT' : 'en-GB')}
+                    </div>
+                    {contract.square_meters && (
+                      <div>
+                        <span className="text-muted-foreground">{isPt ? 'Área:' : 'Area:'}</span>{' '}
+                        {contract.square_meters} m²
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => saveCompanyData.mutate()}
-                  disabled={!isFormValid || saveCompanyData.isPending}
-                  className="gap-2"
-                >
-                  {saveCompanyData.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isPt ? 'Continuar' : 'Continue'} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Required Document Uploads */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileUp className="h-5 w-5 text-primary" />
+                  {isPt ? 'Documentos Obrigatórios' : 'Required Documents'}
+                </CardTitle>
+                <CardDescription>
+                  {isPt
+                    ? 'Carregue os seguintes documentos para completar o processo de onboarding.'
+                    : 'Upload the following documents to complete the onboarding process.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {REQUIRED_DOCS.map(doc => {
+                  const uploaded = uploadedDocs[doc.key];
+                  const isUploading = uploading === doc.key;
+                  return (
+                    <div
+                      key={doc.key}
+                      className={`border rounded-lg p-3 transition-colors ${
+                        uploaded ? 'border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-border'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-medium">
+                              {isPt ? doc.labelPt : doc.labelEn}
+                            </p>
+                            {doc.required && (
+                              <Badge variant="destructive" className="text-[10px] px-1 py-0 h-4">
+                                {isPt ? 'Obrigatório' : 'Required'}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {isPt ? doc.descPt : doc.descEn}
+                          </p>
+                          {uploaded && (
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              <span className="text-xs text-emerald-700 dark:text-emerald-400 truncate">
+                                {uploaded.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                ({(uploaded.size / 1024).toFixed(0)} KB)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0">
+                          {uploaded ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-xs text-destructive hover:text-destructive gap-1"
+                              onClick={() => removeDoc(doc.key)}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              {isPt ? 'Remover' : 'Remove'}
+                            </Button>
+                          ) : (
+                            <>
+                              <input
+                                ref={el => { fileInputRefs.current[doc.key] = el; }}
+                                type="file"
+                                className="hidden"
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                onChange={e => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleFileUpload(doc.key, file);
+                                  e.target.value = '';
+                                }}
+                              />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs gap-1.5"
+                                disabled={isUploading}
+                                onClick={() => fileInputRefs.current[doc.key]?.click()}
+                              >
+                                {isUploading ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Upload className="h-3.5 w-3.5" />
+                                )}
+                                {isPt ? 'Carregar' : 'Upload'}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {!requiredDocsUploaded && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-2">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    {isPt
+                      ? 'Carregue todos os documentos obrigatórios para continuar.'
+                      : 'Upload all required documents to continue.'}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button
+                onClick={() => saveCompanyData.mutate()}
+                disabled={!isFormValid || saveCompanyData.isPending}
+                className="gap-2"
+              >
+                {saveCompanyData.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isPt ? 'Continuar' : 'Continue'} <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         )}
 
-        {/* Step 2: Review Contract & Regulation */}
+        {/* ===== Step 2: Review Contract & Regulation ===== */}
         {currentStep === 'review_contract' && (
           <Card>
             <CardHeader>
@@ -338,17 +594,20 @@ export default function PublicContractSigning() {
             <CardContent className="space-y-5">
               {/* Contract Document */}
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {isPt ? 'Minuta de Contrato de Incubação' : 'Incubation Contract Template'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">V9 — 2026</p>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">
+                      {isPt ? 'Minuta de Contrato de Incubação' : 'Incubation Contract Template'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">V9 — 2026</p>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isPt
+                    ? 'O contrato será gerado automaticamente com os seus dados e enviado para assinatura digital via DocuSign. O documento segue a minuta oficial V9 da Startup Leiria.'
+                    : 'The contract will be automatically generated with your data and sent for digital signature via DocuSign. The document follows the official V9 template from Startup Leiria.'}
+                </p>
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="accept-contract"
@@ -365,17 +624,20 @@ export default function PublicContractSigning() {
 
               {/* Regulation Document */}
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-amber-600" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {isPt ? 'Regulamento Startup Leiria' : 'Startup Leiria Regulation'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">V11 — Anexo I — 2026</p>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-amber-600" />
+                  <div>
+                    <p className="text-sm font-medium">
+                      {isPt ? 'Regulamento Startup Leiria' : 'Startup Leiria Regulation'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">V11 — Anexo I — 2026</p>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isPt
+                    ? 'O regulamento define as normas de funcionamento, direitos e deveres dos incubados, incluindo utilização de espaços, serviços complementares e condições de permanência.'
+                    : 'The regulation defines the operating rules, rights and duties of incubatees, including use of spaces, complementary services and conditions of stay.'}
+                </p>
                 <div className="flex items-start gap-2">
                   <Checkbox
                     id="accept-regulation"
@@ -384,8 +646,8 @@ export default function PublicContractSigning() {
                   />
                   <label htmlFor="accept-regulation" className="text-xs leading-tight cursor-pointer">
                     {isPt
-                      ? 'Li e aceito o Regulamento da Startup Leiria, comprometendo-me a cumprir as normas e procedimentos nele estabelecidos.'
-                      : 'I have read and accept the Startup Leiria Regulation, committing to comply with its norms and procedures.'}
+                      ? 'Li e aceito o Regulamento da Startup Leiria (Anexo I), comprometendo-me a cumprir as normas e procedimentos nele estabelecidos.'
+                      : 'I have read and accept the Startup Leiria Regulation (Annex I), committing to comply with its norms and procedures.'}
                   </label>
                 </div>
               </div>
@@ -396,10 +658,49 @@ export default function PublicContractSigning() {
                   {isPt ? 'Dados Confirmados' : 'Confirmed Data'}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">{isPt ? 'Representante:' : 'Representative:'}</span> {formData.legal_representative_name}</div>
-                  <div><span className="text-muted-foreground">Email:</span> {formData.legal_representative_email}</div>
-                  <div><span className="text-muted-foreground">NIF:</span> {formData.company_nif}</div>
-                  <div><span className="text-muted-foreground">{isPt ? 'Morada:' : 'Address:'}</span> {formData.company_address}, {formData.company_city}</div>
+                  <div>
+                    <span className="text-muted-foreground">{isPt ? 'Representante:' : 'Representative:'}</span>{' '}
+                    {formData.legal_representative_name}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Email:</span>{' '}
+                    {formData.legal_representative_email}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">NIF:</span>{' '}
+                    {formData.company_nif}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{isPt ? 'Morada:' : 'Address:'}</span>{' '}
+                    {formData.company_address}, {formData.company_city}
+                  </div>
+                </div>
+                {/* Uploaded docs summary */}
+                <Separator className="my-2" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {isPt ? 'Documentos Carregados' : 'Uploaded Documents'}
+                </p>
+                <div className="space-y-1">
+                  {REQUIRED_DOCS.map(doc => {
+                    const uploaded = uploadedDocs[doc.key];
+                    return (
+                      <div key={doc.key} className="flex items-center gap-2 text-xs">
+                        {uploaded ? (
+                          <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                        ) : doc.required ? (
+                          <AlertTriangle className="h-3 w-3 text-destructive" />
+                        ) : (
+                          <span className="h-3 w-3 rounded-full bg-muted-foreground/30 inline-block" />
+                        )}
+                        <span className={uploaded ? '' : 'text-muted-foreground'}>
+                          {isPt ? doc.labelPt : doc.labelEn}
+                        </span>
+                        {uploaded && (
+                          <span className="text-muted-foreground">— {uploaded.name}</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -420,7 +721,7 @@ export default function PublicContractSigning() {
           </Card>
         )}
 
-        {/* Step 3: Signing Status */}
+        {/* ===== Step 3: Signing Status ===== */}
         {currentStep === 'signing' && (
           <Card>
             <CardHeader>
@@ -465,11 +766,15 @@ export default function PublicContractSigning() {
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
-                    {sigStatus === 'sent_for_signature' ? (isPt ? 'Enviado para assinatura' : 'Sent for signature') :
-                     sigStatus === 'viewed' ? (isPt ? 'Documento visualizado' : 'Document viewed') :
-                     sigStatus === 'declined' ? (isPt ? 'Assinatura recusada' : 'Signature declined') :
-                     sigStatus === 'pending_manual' ? (isPt ? 'Processamento em curso' : 'Processing') :
-                     (isPt ? 'Pendente' : 'Pending')}
+                    {sigStatus === 'sent_for_signature'
+                      ? (isPt ? 'Enviado para assinatura' : 'Sent for signature')
+                      : sigStatus === 'viewed'
+                      ? (isPt ? 'Documento visualizado' : 'Document viewed')
+                      : sigStatus === 'declined'
+                      ? (isPt ? 'Assinatura recusada' : 'Signature declined')
+                      : sigStatus === 'pending_manual'
+                      ? (isPt ? 'Processamento em curso' : 'Processing')
+                      : (isPt ? 'Pendente' : 'Pending')}
                   </Badge>
                 </div>
               )}
@@ -479,7 +784,10 @@ export default function PublicContractSigning() {
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground py-4">
-          <p>© {new Date().getFullYear()} Startup Leiria — {isPt ? 'Associação para o Empreendedorismo e Inovação' : 'Association for Entrepreneurship and Innovation'}</p>
+          <p>
+            © {new Date().getFullYear()} Startup Leiria —{' '}
+            {isPt ? 'Associação para o Empreendedorismo e Inovação' : 'Association for Entrepreneurship and Innovation'}
+          </p>
         </div>
       </div>
     </div>
