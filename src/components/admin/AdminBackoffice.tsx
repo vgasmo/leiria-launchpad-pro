@@ -750,24 +750,25 @@ export function AdminBackoffice() {
     </Card>
         </TabsContent>
 
-        {/* Contracts Tab */}
+        {/* Contracts Tab — merged with lifecycle */}
         <TabsContent value="contracts">
-          <BackofficeContractsTab />
+          <div className="space-y-8">
+            <BackofficeContractsTab />
+            <ContractLifecycleHub />
+          </div>
+        </TabsContent>
+
+        {/* Spaces & Infrastructure — merged */}
+        <TabsContent value="spaces">
+          <div className="space-y-8">
+            <SpaceOperationsConsole />
+            <InfrastructureTab />
+          </div>
         </TabsContent>
 
         {/* Incubation Types Tab */}
         <TabsContent value="incubation">
           <BackofficeIncubationTypesTab />
-        </TabsContent>
-
-        {/* Operations Console Tab */}
-        <TabsContent value="operations">
-          <SpaceOperationsConsole />
-        </TabsContent>
-
-        {/* Infrastructure Tab (consolidated: buildings, spaces, rooms, maps, waitlist) */}
-        <TabsContent value="infrastructure">
-          <InfrastructureTab />
         </TabsContent>
       </Tabs>
     </div>
