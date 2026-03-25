@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -166,7 +167,14 @@ export function ContractReviewForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('admin.backoffice.incubationType', { defaultValue: 'Incubation Type' })}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={(val) => {
+                      field.onChange(val);
+                      // Auto-fill monthly fee from selected type
+                      const selectedType = incubationTypes?.find(it => it.id === val);
+                      if (selectedType?.base_monthly_fee != null) {
+                        form.setValue('monthly_fee', selectedType.base_monthly_fee);
+                      }
+                    }} value={field.value || ''}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t('admin.backoffice.selectType', { defaultValue: 'Select type' })} />
