@@ -6,3 +6,5 @@ export { AddActivityDialog } from './AddActivityDialog';
 export { AddTaskDialog } from './AddTaskDialog';
 export { ActivityItem } from './ActivityItem';
 export { TaskRow } from './TaskRow';
+export { LinkedContextPanel } from './LinkedContextPanel';
+export { EmailHistoryPanel } from './EmailHistoryPanel';
