@@ -295,6 +295,11 @@ export default function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent className="relative">
+              {/* Enrollment mode indicator */}
+              <div className="mb-4">
+                <EnrollmentModeIndicator />
+              </div>
+
               <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setError(null); }}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="login" className="data-[state=active]:shadow-sm">{t('auth.signIn')}</TabsTrigger>

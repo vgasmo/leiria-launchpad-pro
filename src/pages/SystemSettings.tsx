@@ -57,7 +57,10 @@ export default function SystemSettings() {
         </TabsContent>
 
         <TabsContent value="flags">
-          <AdminFeatureFlagsManager />
+          <div className="space-y-6">
+            <EnrollmentControlCenter />
+            <AdminFeatureFlagsManager />
+          </div>
         </TabsContent>
 
         <TabsContent value="workflows">
