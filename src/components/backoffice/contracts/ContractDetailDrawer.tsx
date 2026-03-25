@@ -330,6 +330,22 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               {generatePdf.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
               {t('contractDetail.generatePDF', { defaultValue: 'Gerar PDF' })}
             </Button>
+            {/* Copy onboarding link for founder */}
+            {['draft', 'pending_signature'].includes(contract.status) && (
+              <Button
+                variant="default"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => {
+                  const url = `${window.location.origin}/contract-onboarding/${contract.id}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success(t('contractDetail.linkCopied', { defaultValue: 'Link de onboarding copiado!' }));
+                }}
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t('contractDetail.copyOnboardingLink', { defaultValue: 'Copiar Link Founder' })}
+              </Button>
+            )}
           </div>
         </div>
 

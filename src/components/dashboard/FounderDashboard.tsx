@@ -38,6 +38,7 @@ import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
 import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
+import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
