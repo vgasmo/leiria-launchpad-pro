@@ -67,14 +67,14 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
     },
   });
 
-  // Fetch available contracts for linking (when workspace is known)
-  const { data: availableContracts } = useQuery({
-    queryKey: ['crm-available-contracts', linkedWorkspaceId],
-    enabled: !!linkedWorkspaceId && showContractPicker,
+  // Always fetch workspace contracts when workspace is linked
+  const { data: workspaceContracts, isLoading: loadingWsContracts } = useQuery({
+    queryKey: ['crm-workspace-contracts', linkedWorkspaceId],
+    enabled: !!linkedWorkspaceId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('startup_contracts')
-        .select('id, contract_number, status, monthly_fee, currency')
+        .select('id, contract_number, status, start_date, end_date, monthly_fee, currency, square_meters, incubation_type:incubation_types(name), building:buildings(name, code)')
         .eq('workspace_id', linkedWorkspaceId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
