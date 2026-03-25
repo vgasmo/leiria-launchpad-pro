@@ -216,13 +216,19 @@ Deno.serve(async (req) => {
 
     const envelope = await envRes.json()
 
-    // Update contract with envelope ID
+    // Update contract with envelope ID and provider info
     await supabase
       .from('startup_contracts')
       .update({
         docusign_envelope_id: envelope.envelopeId,
+        signature_provider: 'docusign',
+        provider_document_id: envelope.envelopeId,
         signature_status: 'sent_for_signature',
         signature_requested_at: new Date().toISOString(),
+        provider_sent_at: new Date().toISOString(),
+        provider_last_event: 'envelope-sent',
+        provider_last_sync_at: new Date().toISOString(),
+        provider_last_error: null,
       })
       .eq('id', contractId)
 
