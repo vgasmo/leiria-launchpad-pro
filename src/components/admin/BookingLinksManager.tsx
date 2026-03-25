@@ -187,7 +187,7 @@ export function BookingLinksManager() {
                       <SelectValue placeholder="Any program" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any program</SelectItem>
+                      <SelectItem value="__any__">Any program</SelectItem>
                       {programs?.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
