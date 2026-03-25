@@ -5340,6 +5340,8 @@ export type Database = {
           next_price_review_date: string | null
           notes: string | null
           onboarding_completed_at: string | null
+          onboarding_token: string | null
+          onboarding_token_expires_at: string | null
           payment_method: string | null
           payment_terms_days: number | null
           pricing_line_id: string | null
@@ -5395,6 +5397,8 @@ export type Database = {
           next_price_review_date?: string | null
           notes?: string | null
           onboarding_completed_at?: string | null
+          onboarding_token?: string | null
+          onboarding_token_expires_at?: string | null
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
@@ -5450,6 +5454,8 @@ export type Database = {
           next_price_review_date?: string | null
           notes?: string | null
           onboarding_completed_at?: string | null
+          onboarding_token?: string | null
+          onboarding_token_expires_at?: string | null
           payment_method?: string | null
           payment_terms_days?: number | null
           pricing_line_id?: string | null
