@@ -690,6 +690,56 @@ export type Database = {
           },
         ]
       }
+      complementary_services: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_included: boolean | null
+          name: string
+          notes: string | null
+          pricing_version_id: string
+          sort_order: number | null
+          unit: string | null
+          unit_price: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_included?: boolean | null
+          name: string
+          notes?: string | null
+          pricing_version_id: string
+          sort_order?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_included?: boolean | null
+          name?: string
+          notes?: string | null
+          pricing_version_id?: string
+          sort_order?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complementary_services_pricing_version_id_fkey"
+            columns: ["pricing_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_table_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_notes: {
         Row: {
           author_id: string
@@ -771,6 +821,94 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contract_discounts_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_lifecycle_events: {
+        Row: {
+          contract_id: string
+          created_at: string | null
+          details: Json | null
+          event_date: string
+          event_type: string
+          id: string
+          performed_by: string | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string | null
+          details?: Json | null
+          event_date: string
+          event_type: string
+          id?: string
+          performed_by?: string | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string | null
+          details?: Json | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_lifecycle_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_notices: {
+        Row: {
+          contract_id: string
+          created_at: string | null
+          created_by: string | null
+          details: Json | null
+          id: string
+          notice_type: string
+          response_deadline: string | null
+          response_received_date: string | null
+          response_status: string | null
+          sent_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string | null
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          notice_type: string
+          response_deadline?: string | null
+          response_received_date?: string | null
+          response_status?: string | null
+          sent_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          notice_type?: string
+          response_deadline?: string | null
+          response_received_date?: string | null
+          response_status?: string | null
+          sent_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_notices_contract_id_fkey"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "startup_contracts"
@@ -3202,6 +3340,120 @@ export type Database = {
           },
         ]
       }
+      pricing_lines: {
+        Row: {
+          area_sqm: number | null
+          billing_frequency: string | null
+          created_at: string | null
+          designation: string
+          id: string
+          incubation_type_id: string | null
+          is_per_sqm: boolean | null
+          is_post_incubation: boolean | null
+          location_type: string | null
+          max_duration_months: number | null
+          non_startup_annual_increase_pct: number | null
+          non_startup_monthly_fee: number | null
+          notes: string | null
+          pricing_version_id: string
+          services_description: string | null
+          sort_order: number | null
+          startup_annual_increase_pct: number | null
+          startup_monthly_fee: number
+        }
+        Insert: {
+          area_sqm?: number | null
+          billing_frequency?: string | null
+          created_at?: string | null
+          designation: string
+          id?: string
+          incubation_type_id?: string | null
+          is_per_sqm?: boolean | null
+          is_post_incubation?: boolean | null
+          location_type?: string | null
+          max_duration_months?: number | null
+          non_startup_annual_increase_pct?: number | null
+          non_startup_monthly_fee?: number | null
+          notes?: string | null
+          pricing_version_id: string
+          services_description?: string | null
+          sort_order?: number | null
+          startup_annual_increase_pct?: number | null
+          startup_monthly_fee?: number
+        }
+        Update: {
+          area_sqm?: number | null
+          billing_frequency?: string | null
+          created_at?: string | null
+          designation?: string
+          id?: string
+          incubation_type_id?: string | null
+          is_per_sqm?: boolean | null
+          is_post_incubation?: boolean | null
+          location_type?: string | null
+          max_duration_months?: number | null
+          non_startup_annual_increase_pct?: number | null
+          non_startup_monthly_fee?: number | null
+          notes?: string | null
+          pricing_version_id?: string
+          services_description?: string | null
+          sort_order?: number | null
+          startup_annual_increase_pct?: number | null
+          startup_monthly_fee?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_lines_incubation_type_id_fkey"
+            columns: ["incubation_type_id"]
+            isOneToOne: false
+            referencedRelation: "incubation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_lines_pricing_version_id_fkey"
+            columns: ["pricing_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_table_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_table_versions: {
+        Row: {
+          approved_by: string | null
+          created_at: string | null
+          effective_date: string
+          id: string
+          is_current: boolean | null
+          notes: string | null
+          regulation_reference: string | null
+          updated_at: string | null
+          version_code: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string | null
+          effective_date: string
+          id?: string
+          is_current?: boolean | null
+          notes?: string | null
+          regulation_reference?: string | null
+          updated_at?: string | null
+          version_code: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string | null
+          effective_date?: string
+          id?: string
+          is_current?: boolean | null
+          notes?: string | null
+          regulation_reference?: string | null
+          updated_at?: string | null
+          version_code?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"] | null
@@ -5062,6 +5314,7 @@ export type Database = {
           company_nif: string | null
           company_postal_code: string | null
           contract_number: string | null
+          contract_template_version: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -5073,14 +5326,24 @@ export type Database = {
           end_date: string | null
           equity_percentage: number | null
           funnel_item_id: string | null
+          has_startup_portugal_status: boolean | null
+          iban: string | null
           id: string
           incubation_type_id: string | null
+          incubation_year: number | null
+          is_associate: boolean | null
+          is_post_incubation: boolean | null
+          last_price_review_date: string | null
           legal_representative_email: string | null
           legal_representative_name: string | null
           monthly_fee: number
+          next_price_review_date: string | null
           notes: string | null
           onboarding_completed_at: string | null
+          payment_method: string | null
           payment_terms_days: number | null
+          pricing_line_id: string | null
+          pricing_version_id: string | null
           regulation_accepted_at: string | null
           regulation_version: string | null
           signature_requested_at: string | null
@@ -5088,8 +5351,11 @@ export type Database = {
           signed_at: string | null
           square_meters: number | null
           start_date: string
+          startup_category: string | null
           status: string
           terminated_at: string | null
+          termination_date: string | null
+          termination_notice_days: number | null
           termination_reason: string | null
           updated_at: string
           workspace_id: string
@@ -5103,6 +5369,7 @@ export type Database = {
           company_nif?: string | null
           company_postal_code?: string | null
           contract_number?: string | null
+          contract_template_version?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -5114,14 +5381,24 @@ export type Database = {
           end_date?: string | null
           equity_percentage?: number | null
           funnel_item_id?: string | null
+          has_startup_portugal_status?: boolean | null
+          iban?: string | null
           id?: string
           incubation_type_id?: string | null
+          incubation_year?: number | null
+          is_associate?: boolean | null
+          is_post_incubation?: boolean | null
+          last_price_review_date?: string | null
           legal_representative_email?: string | null
           legal_representative_name?: string | null
           monthly_fee?: number
+          next_price_review_date?: string | null
           notes?: string | null
           onboarding_completed_at?: string | null
+          payment_method?: string | null
           payment_terms_days?: number | null
+          pricing_line_id?: string | null
+          pricing_version_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
           signature_requested_at?: string | null
@@ -5129,8 +5406,11 @@ export type Database = {
           signed_at?: string | null
           square_meters?: number | null
           start_date: string
+          startup_category?: string | null
           status?: string
           terminated_at?: string | null
+          termination_date?: string | null
+          termination_notice_days?: number | null
           termination_reason?: string | null
           updated_at?: string
           workspace_id: string
@@ -5144,6 +5424,7 @@ export type Database = {
           company_nif?: string | null
           company_postal_code?: string | null
           contract_number?: string | null
+          contract_template_version?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -5155,14 +5436,24 @@ export type Database = {
           end_date?: string | null
           equity_percentage?: number | null
           funnel_item_id?: string | null
+          has_startup_portugal_status?: boolean | null
+          iban?: string | null
           id?: string
           incubation_type_id?: string | null
+          incubation_year?: number | null
+          is_associate?: boolean | null
+          is_post_incubation?: boolean | null
+          last_price_review_date?: string | null
           legal_representative_email?: string | null
           legal_representative_name?: string | null
           monthly_fee?: number
+          next_price_review_date?: string | null
           notes?: string | null
           onboarding_completed_at?: string | null
+          payment_method?: string | null
           payment_terms_days?: number | null
+          pricing_line_id?: string | null
+          pricing_version_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
           signature_requested_at?: string | null
@@ -5170,8 +5461,11 @@ export type Database = {
           signed_at?: string | null
           square_meters?: number | null
           start_date?: string
+          startup_category?: string | null
           status?: string
           terminated_at?: string | null
+          termination_date?: string | null
+          termination_notice_days?: number | null
           termination_reason?: string | null
           updated_at?: string
           workspace_id?: string
@@ -5196,6 +5490,20 @@ export type Database = {
             columns: ["incubation_type_id"]
             isOneToOne: false
             referencedRelation: "incubation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_pricing_line_id_fkey"
+            columns: ["pricing_line_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_pricing_version_id_fkey"
+            columns: ["pricing_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_table_versions"
             referencedColumns: ["id"]
           },
           {
