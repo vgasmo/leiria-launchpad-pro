@@ -62,6 +62,17 @@ export interface StartupContract {
   building_id: string | null;
   funnel_item_id: string | null;
   created_at: string;
+  // Signature provider fields
+  signature_provider: 'docusign' | 'pandadoc' | 'manual' | null;
+  signature_status: string | null;
+  signature_requested_at: string | null;
+  provider_document_id: string | null;
+  provider_last_sync_at: string | null;
+  provider_last_error: string | null;
+  provider_last_event: string | null;
+  provider_sent_at: string | null;
+  provider_completed_at: string | null;
+  docusign_envelope_id: string | null;
   // Joined data
   workspace?: { id: string; startup?: { name: string } | null };
   incubation_type?: IncubationType | null;
