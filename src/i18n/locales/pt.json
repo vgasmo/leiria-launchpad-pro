@@ -1454,7 +1454,7 @@
     "tryAgain": "Tentar Novamente",
     "undo": "Desfazer",
     "unknown": "Desconhecido",
-    "unnamed": "Sem Nome",
+    "unnamed": "Sem nome",
     "upToDate": "Atualizado",
     "update": "Atualizar",
     "updated": "Atualizado",
@@ -1469,7 +1469,9 @@
     "first": "Primeira",
     "previousPage": "Página anterior",
     "nextPage": "Página seguinte",
-    "lastPage": "Última página"
+    "lastPage": "Última página",
+    "years": "anos",
+    "months": "meses"
   },
   "cockpit": {
     "actionTitle": "Título da Ação",
@@ -1508,70 +1510,9 @@
     "overdueCheckins": "Check-ins Atrasados"
   },
   "consultor": {
-    "actions": {
-      "allClear": "Sem ações atrasadas",
-      "overdueCount": "{{count}} ação atrasada",
-      "overdueCount_plural": "{{count}} ações atrasadas",
-      "resolve": "Resolver",
-      "title": "Ações Críticas"
-    },
-    "agenda": {
-      "empty": "Sem sessões agendadas",
-      "prep": "Prep",
-      "schedule": "Agendar sessão",
-      "title": "Agenda (7 dias)"
-    },
-    "alerts": {
-      "missingKpis": "{{count}} startup sem KPIs este mês",
-      "missingKpis_plural": "{{count}} startups sem KPIs este mês",
-      "noRecentSessions": "{{count}} startup sem sessão há 30+ dias",
-      "noRecentSessions_plural": "{{count}} startups sem sessão há 30+ dias"
-    },
-    "dataQuality": {
-      "title": "Alertas de Qualidade de Dados"
-    },
-    "hero": {
-      "allClear": "Tudo sob controlo!",
-      "noPriorities": "Nenhuma startup em estado crítico ou de risco.",
-      "openWorkspace": "Abrir",
-      "subtitle": "Startups que precisam da sua atenção imediata",
-      "title": "Risco e Prioridades de Hoje",
-      "viewAll": "Ver Todas"
-    },
-    "pipeline": {
-      "contracted": "Contratados",
-      "empty": "Sem dados de pipeline",
-      "needsAction": "{{count}} lead precisa de ação",
-      "needsAction_plural": "{{count}} leads precisam de ação",
-      "newLeads": "Novos leads",
-      "open": "Abrir CRM",
-      "title": "Pipeline (CRM)",
-      "totalLeads": "Leads ativos"
-    },
-    "risk": {
-      "atRisk": "Em risco",
-      "criticalHealth": "Saúde crítica",
-      "missingKpis": "KPIs em falta",
-      "noRecentSession": "Sem sessão há 30+ dias",
-      "overdueActions": "{{count}} ação atrasada",
-      "overdueActions_plural": "{{count}} ações atrasadas"
-    },
-    "weeklyImpact": {
-      "actionsCreated": "Ações criadas",
-      "leadsConverted": "Leads convertidos",
-      "sessionsCompleted": "Sessões realizadas",
-      "title": "Resumo Semanal"
-    },
-    "healthMatrix": {
-      "title": "Matriz de Saúde do Portfólio"
-    },
-    "nudgeFounder": "Contactar",
-    "reviewMilestone": "Rever",
-    "aiBriefing": {
-      "cta": "Briefing",
-      "title": "Briefing 30 Dias",
-      "error": "Não foi possível gerar o briefing.",
-      "nextActions": "Próximas Ações"
+    "prepSheet": {
+      "button": "Preparar reunião",
+      "title": "Preparação 1.ª Reunião"
     }
   },
   "consultorTools": {
@@ -1709,7 +1650,13 @@
       "step4": "Guarde o contrato na base de dados",
       "tooLarge": "O ficheiro deve ter menos de 10MB.",
       "uploading": "A carregar documento..."
-    }
+    },
+    "noNumber": "Sem número de contrato",
+    "noNotes": "Sem notas",
+    "startDate": "Data de Início",
+    "endDate": "Data de Fim",
+    "updated": "Contrato atualizado",
+    "updateFailed": "Falha ao atualizar contrato"
   },
   "createStartup": {
     "contactEmailPlaceholder": "john@Startup.com",
@@ -2005,7 +1952,17 @@
     "upcomingSession": "Próxima Sessão",
     "updateNextAction": "Atualizar",
     "viewAll": "Ver Tudo",
-    "viewSession": "Ver Sessão"
+    "viewSession": "Ver Sessão",
+    "linkedContext": "Contexto Vinculado",
+    "contract": "Contrato",
+    "selectContract": "Selecionar contrato...",
+    "noContractsAvailable": "Sem contratos neste workspace",
+    "linkContract": "Vincular Contrato",
+    "emailHistory": "Histórico de Email",
+    "sync": "Sincronizar",
+    "noEmails": "Sem emails sincronizados",
+    "syncNow": "Sincronizar agora",
+    "emailSyncDisabled": "Ative a feature flag crm_graph_email_sync para sincronizar."
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -2594,24 +2551,22 @@
     "title": "Acompanhamento Automático"
   },
   "founder": {
-    "applicationBeingReviewed": "A sua candidatura de startup está a ser revista pela nossa equipa. Terá acesso ao seu workspace após a aprovação.",
-    "applicationUnderReview": "Candidatura em Análise",
-    "commonTasks": "Tarefas comuns para o seu workspace",
-    "createYourStartup": "Criar a Sua Startup",
-    "kpiStatus": "Estado dos KPIs",
-    "lastSession": "Última Sessão",
-    "learnMore": "Saber Mais",
-    "nextMeeting": "Próxima Reunião",
-    "noSessionsYet": "Sem sessões ainda",
-    "openWorkspace": "Abrir Workspace",
-    "pending": "Pendente",
-    "quickActions": "Ações Rápidas",
-    "responseTime": "Normalmente respondemos em 2-3 dias úteis",
-    "startYourJourney": "Inicie a Sua Jornada Startup",
-    "startYourJourneyDesc": "Registe a sua startup para aceder a mentoria, acompanhar o progresso e preparar a próxima ronda de financiamento.",
-    "startYourJourneyValue": "Obtém orientação de mentores e acompanha os teus KPIs num único lugar.",
-    "updateKpis": "Atualizar KPIs",
-    "viewActions": "Ver Ações"
+    "claimed": {
+      "pendingTitle": "Candidatura em análise",
+      "pendingDesc": "A sua candidatura está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
+      "pendingDescNamed": "A sua candidatura para \"{{name}}\" está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
+      "awaitingReview": "Aguarda aprovação",
+      "claimTitle": "Associação pendente",
+      "claimDesc": "O seu pedido de associação está a ser verificado pela equipa. Isto pode demorar 1-2 dias úteis.",
+      "awaitingVerification": "Em verificação",
+      "viewSettings": "Ver definições",
+      "getStartedTitle": "Bem-vindo à plataforma!",
+      "getStartedDesc": "Para aceder ao seu espaço de trabalho, associe-se a uma startup existente ou crie uma nova candidatura.",
+      "claimCta": "Associar startup",
+      "nextSteps": "Próximos passos",
+      "nextStepsDesc": "Enquanto aguarda, pode explorar a plataforma e preparar documentação.",
+      "contactSupport": "Contactar equipa"
+    }
   },
   "founderHome": {
     "bookFirstContact": "Marcar Primeira Reunião",
@@ -5785,30 +5740,6 @@
       "featureFlags": "Feature Flags",
       "workflows": "Regras de Workflow",
       "auditLog": "Registo de Auditoria"
-    }
-  },
-  "founder": {
-    "claimed": {
-      "pendingTitle": "Candidatura em análise",
-      "pendingDesc": "A sua candidatura está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
-      "pendingDescNamed": "A sua candidatura para \"{{name}}\" está a ser analisada pela equipa. Receberá uma notificação quando for aprovada.",
-      "awaitingReview": "Aguarda aprovação",
-      "claimTitle": "Associação pendente",
-      "claimDesc": "O seu pedido de associação está a ser verificado pela equipa. Isto pode demorar 1-2 dias úteis.",
-      "awaitingVerification": "Em verificação",
-      "viewSettings": "Ver definições",
-      "getStartedTitle": "Bem-vindo à plataforma!",
-      "getStartedDesc": "Para aceder ao seu espaço de trabalho, associe-se a uma startup existente ou crie uma nova candidatura.",
-      "claimCta": "Associar startup",
-      "nextSteps": "Próximos passos",
-      "nextStepsDesc": "Enquanto aguarda, pode explorar a plataforma e preparar documentação.",
-      "contactSupport": "Contactar equipa"
-    }
-  },
-  "consultor": {
-    "prepSheet": {
-      "button": "Preparar reunião",
-      "title": "Preparação 1.ª Reunião"
     }
   }
 }
