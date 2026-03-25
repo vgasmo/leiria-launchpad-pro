@@ -190,11 +190,14 @@ export function LinkedContextPanel({ linkedWorkspaceId, linkedStartupId, linkedC
                 {(contract as any).incubation_type.name}
               </Badge>
             )}
-            {(contract as any).discount_percentage > 0 && (
-              <p className="text-[10px] text-amber-600">
-                {t('crm.discount', { defaultValue: 'Desconto' })}: {(contract as any).discount_percentage}%
-              </p>
-            )}
+            {/* Period-based discounts */}
+            <ContractDiscountsPanel
+              contractId={(contract as any).id}
+              monthlyFee={(contract as any).monthly_fee}
+              currency={(contract as any).currency || 'EUR'}
+              isStaff={true}
+              compact={true}
+            />
           </div>
         ) : linkedWorkspaceId && !linkedContractId ? (
           <div className="border-t pt-2">
