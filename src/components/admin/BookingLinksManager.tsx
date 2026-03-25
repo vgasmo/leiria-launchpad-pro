@@ -197,7 +197,7 @@ export function BookingLinksManager() {
                 
                 <div className="space-y-2">
                   <Label>{t('admin.bookingLinks.expires', 'Expires in')}</Label>
-                  <Select value={expiresInDays} onValueChange={setExpiresInDays}>
+                  <Select value={expiresInDays || '__never__'} onValueChange={(v) => setExpiresInDays(v === '__never__' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

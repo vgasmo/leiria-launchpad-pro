@@ -453,7 +453,7 @@ export function AdminTagCategoriesManager() {
             </div>
             <div className="space-y-2">
               <Label>{t('common.color')}</Label>
-              <Select value={tagForm.color} onValueChange={(v) => setTagForm(f => ({ ...f, color: v }))}>
+              <Select value={tagForm.color || '__none__'} onValueChange={(v) => setTagForm(f => ({ ...f, color: v === '__none__' ? '' : v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('admin.tags.selectColor', 'Select color')} />
                 </SelectTrigger>
