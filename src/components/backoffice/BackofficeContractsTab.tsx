@@ -90,6 +90,7 @@ export function BackofficeContractsTab() {
   // Table row selection for bulk actions
   const [selectedContractIds, setSelectedContractIds] = useState<Set<string>>(new Set());
   const [isArchiving, setIsArchiving] = useState(false);
+  const [detailContract, setDetailContract] = useState<StartupContract | null>(null);
 
   const { data: contracts, isLoading } = useContracts(
     statusFilter !== 'all' ? { status: statusFilter } : undefined
