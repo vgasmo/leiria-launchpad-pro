@@ -16,8 +16,8 @@ import type { IncubationType } from '@/hooks/backoffice/useIncubationTypes';
 
 const STATUS_OPTIONS = ['draft', 'pending_signature', 'active', 'suspended', 'terminated', 'expired'] as const;
 
-const contractSchema = z.object({
-  workspace_id: z.string().min(1, 'Required'),
+const contractSchemaBase = {
+  workspace_id: z.string().optional(),
   incubation_type_id: z.string().optional(),
   building_id: z.string().optional(),
   contract_number: z.string().optional(),
@@ -30,7 +30,14 @@ const contractSchema = z.object({
   equity_percentage: z.coerce.number().min(0).max(100).optional(),
   square_meters: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
+};
+
+const contractSchema = z.object({
+  ...contractSchemaBase,
+  workspace_id: z.string().min(1, 'Required'),
 });
+
+const contractSchemaCRM = z.object(contractSchemaBase);
 
 export type ContractFormValues = z.infer<typeof contractSchema>;
 
