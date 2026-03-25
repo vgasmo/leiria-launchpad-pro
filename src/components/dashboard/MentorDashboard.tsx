@@ -154,7 +154,10 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* P0 HERO: Next Session Prep */}
+      {/* P0 HERO: Enhanced Session Prep */}
+      <MentorSessionPrepEnhanced workspaces={workspaces} />
+
+      {/* P0 HERO: Next Session Prep (fallback) */}
       <MentorNextSessionPrep workspaces={workspaces} />
 
       {/* Open Loops — what needs attention */}
