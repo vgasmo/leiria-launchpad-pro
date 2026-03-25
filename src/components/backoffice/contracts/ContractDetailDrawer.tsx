@@ -170,10 +170,13 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">{t('admin.backoffice.type', { defaultValue: 'Incubation Type' })}</Label>
               {isEditing ? (
-                <Select value={editValues.incubation_type_id} onValueChange={v => setEditValues(p => ({ ...p, incubation_type_id: v }))}>
+                <Select
+                  value={editValues.incubation_type_id}
+                  onValueChange={v => setEditValues(p => ({ ...p, incubation_type_id: v === '__none__' ? '' : v }))}
+                >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">—</SelectItem>
+                    <SelectItem value="__none__">—</SelectItem>
                     {incubationTypes?.map(it => (
                       <SelectItem key={it.id} value={it.id}>{it.name}</SelectItem>
                     ))}
@@ -191,10 +194,13 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                 {t('admin.backoffice.building', { defaultValue: 'Building' })}
               </Label>
               {isEditing ? (
-                <Select value={editValues.building_id} onValueChange={v => setEditValues(p => ({ ...p, building_id: v }))}>
+                <Select
+                  value={editValues.building_id}
+                  onValueChange={v => setEditValues(p => ({ ...p, building_id: v === '__none__' ? '' : v }))}
+                >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">—</SelectItem>
+                    <SelectItem value="__none__">—</SelectItem>
                     {buildings?.filter(b => b.is_active).map(b => (
                       <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                     ))}
