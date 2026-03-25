@@ -596,6 +596,15 @@ export function BackofficeContractsTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Contract Detail Drawer */}
+      <ContractDetailDrawer
+        contract={detailContract}
+        incubationTypes={incubationTypes}
+        buildings={buildings}
+        open={!!detailContract}
+        onOpenChange={(open) => { if (!open) setDetailContract(null); }}
+      />
     </div>
   );
 }
