@@ -5741,5 +5741,40 @@
       "workflows": "Regras de Workflow",
       "auditLog": "Registo de Auditoria"
     }
+  },
+  "pricing": {
+    "baseFee": "Taxa Base",
+    "spaceSurcharge": "Suplemento de Espaço",
+    "discount": "Desconto",
+    "effectiveFee": "Taxa Efetiva",
+    "grossFee": "Taxa Bruta",
+    "noReason": "Sem motivo especificado",
+    "manualOverride": "Valor Manual",
+    "manualOverrideWarning": "Taxa base definida manualmente. Regras de preço padrão ignoradas.",
+    "auditTrail": "Histórico de Cálculo",
+    "breakdown": "Decomposição do Preço",
+    "source": "Origem",
+    "ruleApplied": "Regra Aplicada"
+  },
+  "contractDetail": {
+    "viewWorkspace": "Ver Workspace",
+    "viewInCRM": "Ver no CRM",
+    "viewInvoices": "Ver Faturas",
+    "linkedEntities": "Entidades Ligadas",
+    "sendToDocuSign": "Enviar para Assinatura",
+    "docuSignStatus": "Estado da Assinatura",
+    "docuSignNotConfigured": "Assinatura digital não configurada",
+    "docuSignPendingManual": "Pendente de assinatura manual",
+    "noWorkspace": "Sem workspace associado",
+    "noInvoices": "Sem faturas ainda",
+    "generateInvoice": "Gerar Fatura",
+    "contractTimeline": "Cronologia do Contrato",
+    "pricingTab": "Preços",
+    "linksTab": "Ligações",
+    "integrationStatus": "Estado da Integração",
+    "lastSync": "Última Sincronização",
+    "retry": "Tentar Novamente",
+    "configured": "Configurado",
+    "notConfigured": "Não Configurado"
   }
 }
