@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
       documents: [{
         documentId: '1',
         name: `Contrato_Incubacao_${startupName}.pdf`,
-        documentBase64: '', // Would be generated from template
+        documentBase64: documentBase64, // Real generated contract PDF
         fileExtension: 'pdf',
       }],
     }
