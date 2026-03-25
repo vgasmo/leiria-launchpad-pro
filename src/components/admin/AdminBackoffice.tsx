@@ -32,6 +32,7 @@ import { BackofficeIncubationTypesTab } from '@/components/backoffice/Backoffice
 import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
 import { OpsActionPrompts } from '@/components/backoffice/OpsActionPrompts';
+import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
