@@ -44,6 +44,8 @@ import {
   AddTaskDialog,
   ActivityItem,
   TaskRow,
+  LinkedContextPanel,
+  EmailHistoryPanel,
 } from './drawer';
 
 type TaskStatusFilter = 'open' | 'done' | 'canceled';
