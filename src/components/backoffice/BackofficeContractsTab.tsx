@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,7 @@ type FlowState = 'idle' | 'upload' | 'review';
 export function BackofficeContractsTab() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -80,6 +82,32 @@ export function BackofficeContractsTab() {
   const [aiData, setAiData] = useState<AIExtractedData>({});
   const [documentUrl, setDocumentUrl] = useState<string>('');
   const [isAIPopulated, setIsAIPopulated] = useState(false);
+  const [crmFunnelId, setCrmFunnelId] = useState<string | null>(null);
+  const [crmOrgName, setCrmOrgName] = useState<string | null>(null);
+
+  // Auto-open review form when coming from CRM with action=create
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const funnelId = searchParams.get('funnel');
+    const org = searchParams.get('org');
+    
+    if (action === 'create' && funnelId) {
+      setCrmFunnelId(funnelId);
+      setCrmOrgName(org);
+      setAiData({});
+      setDocumentUrl('');
+      setIsAIPopulated(false);
+      setFlowState('review');
+      // Clean URL params after consuming
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('action');
+      newParams.delete('funnel');
+      newParams.delete('contact');
+      newParams.delete('email');
+      newParams.delete('org');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, []);
 
   // Bulk contract creation state
   const [selectedWorkspaces, setSelectedWorkspaces] = useState<Set<string>>(new Set());
@@ -269,17 +297,34 @@ export function BackofficeContractsTab() {
 
       {/* Review Form (Post-Upload or Manual) */}
       {flowState === 'review' && (
-        <ContractReviewForm
-          aiData={aiData}
-          documentUrl={documentUrl}
-          isAIPopulated={isAIPopulated}
-          workspaces={workspaces || []}
-          incubationTypes={incubationTypes}
-          buildings={buildings}
-          onSubmit={handleReviewSubmit}
-          onCancel={handleCancelReview}
-          isSubmitting={createContract.isPending}
-        />
+        <div className="space-y-3">
+          {crmFunnelId && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="py-3 px-4 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  {t('contracts.fromCRM', { org: crmOrgName || 'Lead', defaultValue: 'Criar contrato para: {{org}}' })}
+                </span>
+                <Badge variant="outline" className="ml-auto text-xs">CRM</Badge>
+              </CardContent>
+            </Card>
+          )}
+          <ContractReviewForm
+            aiData={aiData}
+            documentUrl={documentUrl}
+            isAIPopulated={isAIPopulated}
+            workspaces={workspaces || []}
+            incubationTypes={incubationTypes}
+            buildings={buildings}
+            onSubmit={handleReviewSubmit}
+            onCancel={() => {
+              handleCancelReview();
+              setCrmFunnelId(null);
+              setCrmOrgName(null);
+            }}
+            isSubmitting={createContract.isPending}
+          />
+        </div>
       )}
 
       {/* Filters */}
