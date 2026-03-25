@@ -38,7 +38,7 @@ import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCen
 
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS: Record<string, string[]> = {
-  operations: ['approvals', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
+  operations: ['approvals', 'enrollment', 'compliance', 'lifecycle', 'backoffice', 'announcements', 'data-quality'],
   crm: ['funnel'],
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
   reports: ['analytics', 'health'],
