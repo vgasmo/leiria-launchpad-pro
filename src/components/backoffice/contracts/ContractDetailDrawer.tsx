@@ -897,7 +897,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                 : t('contractDetail.sendViaPandaDoc', { defaultValue: 'Enviar via PandaDoc' })}
             </Button>
           )}
-          {(provider === 'docusign' || !provider) && (!isSent || canRetry) && (
+          {provider === 'docusign' && (!isSent || canRetry) && (
             <Button
               size="sm"
               variant="outline"

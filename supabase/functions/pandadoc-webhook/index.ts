@@ -1,10 +1,11 @@
 /**
- * PandaDoc Webhook Handler — Hardened V1
+ * PandaDoc Webhook Handler — Hardened V1 (Fail-Closed)
  * 
  * Security:
- * 1. Verifies webhook authenticity via shared secret (PANDADOC_WEBHOOK_KEY)
- * 2. Idempotency protection via provider_webhook_event_id
- * 3. Stores provider event payloads for auditability
+ * 1. REJECTS requests when PANDADOC_WEBHOOK_KEY is missing (fail-closed)
+ * 2. REJECTS requests with invalid signature
+ * 3. Idempotency protection via provider_webhook_event_id
+ * 4. Stores provider event payloads for auditability
  * 
  * Maps PandaDoc events → canonical internal signature states.
  */
@@ -35,14 +36,16 @@ const PANDADOC_STATUS_MAP: Record<string, string> = {
 }
 
 /**
- * Verify PandaDoc webhook authenticity.
- * PandaDoc sends a shared key in the request body or via header.
+ * Verify PandaDoc webhook authenticity — FAIL-CLOSED.
+ * Returns { ok: true } on success, { ok: false, reason: string } on failure.
  */
-function verifyWebhookAuthenticity(body: any, req: Request): boolean {
+function verifyWebhookAuthenticity(body: any, req: Request): { ok: boolean; reason?: string } {
   const webhookKey = Deno.env.get('PANDADOC_WEBHOOK_KEY')
+  
+  // FAIL-CLOSED: If secret is not configured, reject ALL requests
   if (!webhookKey) {
-    console.warn('PANDADOC_WEBHOOK_KEY not configured — webhook verification skipped (INSECURE)')
-    return true // Allow in development, but log warning
+    console.error('PANDADOC_WEBHOOK_KEY not configured — REJECTING request (fail-closed policy)')
+    return { ok: false, reason: 'Webhook secret not configured — cannot verify authenticity' }
   }
 
   // PandaDoc sends the shared key in the payload as 'shared_key' field
@@ -51,11 +54,11 @@ function verifyWebhookAuthenticity(body: any, req: Request): boolean {
   const headerKey = req.headers.get('x-pandadoc-signature') || req.headers.get('authorization')?.replace('Bearer ', '') || null
 
   if (payloadKey === webhookKey || headerKey === webhookKey) {
-    return true
+    return { ok: true }
   }
 
-  console.error('PandaDoc webhook authentication FAILED — rejecting event')
-  return false
+  console.error('PandaDoc webhook authentication FAILED — invalid signature, rejecting event')
+  return { ok: false, reason: 'Invalid webhook signature' }
 }
 
 Deno.serve(async (req) => {
@@ -64,19 +67,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
     const body = await req.json()
 
-    // ═══ SECURITY: Verify webhook authenticity ═══
-    if (!verifyWebhookAuthenticity(body, req)) {
-      return new Response(JSON.stringify({ error: 'Unauthorized — webhook verification failed' }), {
+    // ═══ SECURITY: Verify webhook authenticity (FAIL-CLOSED) ═══
+    const authResult = verifyWebhookAuthenticity(body, req)
+    if (!authResult.ok) {
+      return new Response(JSON.stringify({ error: `Unauthorized — ${authResult.reason}` }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // PandaDoc webhook payload structure
     const events = Array.isArray(body) ? body : [body]
