@@ -111,6 +111,7 @@ export default function Admin() {
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
       approvals: t('admin.approvals'),
+      enrollment: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }),
       compliance: t('admin.compliance'),
       lifecycle: t('admin.lifecycle'),
       backoffice: t('admin.backoffice.tab'),
