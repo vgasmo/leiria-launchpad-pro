@@ -71,7 +71,8 @@ export function useSessions(workspaceId: string | undefined) {
         .from('sessions')
         .select('id, workspace_id, title, scheduled_at, duration, agenda, notes, decisions, location, join_url, created_by, created_at, updated_at, source, ai_summary, ai_decisions, ai_risks, ai_action_suggestions, ai_kpi_prompts, ai_generated_at, ai_generated_by, raw_transcript, session_type')
         .eq('workspace_id', workspaceId)
-        .order('scheduled_at', { ascending: false });
+        .order('scheduled_at', { ascending: false })
+        .limit(200);
 
       if (error) throw error;
       if (!sessions || sessions.length === 0) return [];
