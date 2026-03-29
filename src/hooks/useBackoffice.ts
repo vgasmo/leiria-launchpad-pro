@@ -421,7 +421,8 @@ export function usePayments(filters?: { invoiceId?: string; workspaceId?: string
       let query = supabase
         .from('payments')
         .select('*')
-        .order('payment_date', { ascending: false });
+        .order('payment_date', { ascending: false })
+        .limit(500);
 
       if (filters?.invoiceId) {
         query = query.eq('invoice_id', filters.invoiceId);

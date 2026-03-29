@@ -43,6 +43,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { KpiSparkline } from './KpiSparkline';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface KpisTabProps {
   workspaceId: string;
@@ -374,94 +375,26 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   }
 
   if (!workspaceKpis?.length) {
+    // Stage-specific hint
+    const stageKey = workspace?.stage ? `emptyStates.kpis.stage${workspace.stage.charAt(0).toUpperCase() + workspace.stage.slice(1)}` : '';
+    const stageHint = stageKey ? t(stageKey, { defaultValue: '' }) : '';
+
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <TrendingUp className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-          <p className="text-muted-foreground mb-4">
-            {t('kpis.noKpisDesc')}
-          </p>
-          
-          <div className="mb-6 p-4 rounded-lg bg-muted/50 max-w-md mx-auto text-left">
-            <p className="text-sm text-muted-foreground mb-2">
-              <strong>{t('kpis.whatAreKpis', 'O que são KPIs?')}</strong>
-            </p>
-            <p className="text-xs text-muted-foreground mb-3">
-              {t('kpis.kpisExplanation', 'KPIs (Key Performance Indicators) são métricas que medem o progresso da sua startup. Exemplos:')}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1 text-xs">
-                <QuickHelp term="mrr" /> MRR
-              </span>
-              <span className="inline-flex items-center gap-1 text-xs">
-                <QuickHelp term="cac" /> CAC
-              </span>
-              <span className="inline-flex items-center gap-1 text-xs">
-                <QuickHelp term="ltv" /> LTV
-              </span>
-              <span className="inline-flex items-center gap-1 text-xs">
-                <QuickHelp term="runway" /> Runway
-              </span>
-            </div>
-            <Link to="/help" className="text-xs text-primary hover:underline mt-2 inline-block">
-              {t('kpis.learnMore', 'Aprender mais no glossário →')}
-            </Link>
-          </div>
-          
-          {canConfigureKpis && (
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button onClick={handleApplyDefaults} disabled={applyDefaults.isPending}>
-                <Sparkles className="h-4 w-4 mr-2" />
-                {t('kpis.applyDefaults', { stage: workspace?.stage })}
-              </Button>
-              <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Settings2 className="h-4 w-4 mr-2" />
-                    {t('kpis.configureManually')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md" aria-describedby={undefined}>
-                  <DialogHeader>
-                    <DialogTitle>{t('kpis.addKpis')}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                    {availableKpis.map(kpi => (
-                      <div key={kpi.id} className="p-3 rounded border space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-medium text-sm">{kpi.name}</p>
-                            <p className="text-xs text-muted-foreground">{kpi.category} • {kpi.unit}</p>
-                          </div>
-                          <Button size="sm" variant="ghost" onClick={() => handleAddKpi(kpi.id)}>
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-xs text-muted-foreground whitespace-nowrap">{t('kpis.target')}:</Label>
-                          <Input
-                            type="number"
-                            placeholder={`${t('kpis.target')} ${kpi.unit || ''}`}
-                            className="h-7 text-sm"
-                            value={pendingTargets[kpi.id] || ''}
-                            onChange={(e) => setPendingTargets(prev => ({ ...prev, [kpi.id]: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                    {availableKpis.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">{t('kpis.allKpisAdded')}</p>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          )}
-          {!canConfigureKpis && (
-            <p className="text-sm text-muted-foreground">{t('kpis.askAdminToSetup')}</p>
-          )}
-        </CardContent>
-      </Card>
+      <EmptyState
+        illustration="chart"
+        title={t('emptyStates.kpis.title')}
+        description={t('emptyStates.kpis.description')}
+        value={stageHint || undefined}
+        action={canConfigureKpis ? {
+          label: t('kpis.applyDefaults', { stage: workspace?.stage }),
+          onClick: handleApplyDefaults,
+          icon: Sparkles,
+        } : undefined}
+        secondaryAction={canConfigureKpis ? {
+          label: t('kpis.configureManually'),
+          onClick: () => setShowConfigDialog(true),
+        } : undefined}
+      />
     );
   }
 

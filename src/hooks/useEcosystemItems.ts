@@ -76,7 +76,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         wsQuery = wsQuery.or(`health_score.eq.${filters.healthScore},health_score_override.eq.${filters.healthScore}`);
       }
 
-      const { data: workspaces, error: wsError } = await wsQuery;
+      const { data: workspaces, error: wsError } = await wsQuery.limit(500);
       if (wsError) throw wsError;
 
       // Fetch funnel items (leads not yet converted)
@@ -108,7 +108,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         fiQuery = fiQuery.eq('owner_consultant_id', filters.ownerId);
       }
 
-      const { data: funnelItems, error: fiError } = await fiQuery;
+      const { data: funnelItems, error: fiError } = await fiQuery.limit(500);
       if (fiError) throw fiError;
 
       // Get owner info for workspaces
