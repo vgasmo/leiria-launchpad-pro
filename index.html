@@ -37,6 +37,13 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Preload LCP image (login logo) for faster first paint -->
+    <link rel="preload" href="/src/assets/startup-leiria.svg" as="image" type="image/svg+xml" fetchpriority="high" />
+
+    <!-- Preconnect to backend API to reduce first-request latency -->
+    <link rel="preconnect" href="https://apxzuslwhjujgrcsfzqw.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://apxzuslwhjujgrcsfzqw.supabase.co" />
   </head>
 
   <body>

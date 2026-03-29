@@ -191,6 +191,9 @@ export default function Login() {
               <img 
                 src={startupLeiriaLogo} 
                 alt="Startup Leiria" 
+                width={480}
+                height={96}
+                fetchPriority="high"
                 className="relative h-24 w-auto drop-shadow-2xl transition-transform duration-500 hover:scale-105"
               />
             </div>
@@ -276,6 +279,9 @@ export default function Login() {
             <img 
               src={startupLeiriaLogo} 
               alt="Startup Leiria" 
+              width={320}
+              height={64}
+              fetchPriority="high"
               className="h-16 w-auto mx-auto mb-4"
             />
             <h1 className="font-heading text-2xl font-bold text-foreground">
