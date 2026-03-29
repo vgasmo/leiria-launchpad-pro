@@ -69,7 +69,8 @@ export function useHealthDistribution() {
       const { data, error } = await supabase
         .from('workspaces')
         .select('health_score, health_score_override')
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .limit(1000);
 
       if (error) throw error;
       const distribution = { thriving: 0, healthy: 0, stable: 0, at_risk: 0, critical: 0, unknown: 0 };

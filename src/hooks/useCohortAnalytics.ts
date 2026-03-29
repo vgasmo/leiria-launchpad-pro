@@ -36,7 +36,8 @@ export function useCohortAnalytics(programId?: string) {
           health_score,
           health_score_override
         `)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .limit(1000);
 
       if (wsError) throw wsError;
 
