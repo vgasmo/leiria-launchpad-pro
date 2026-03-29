@@ -39,6 +39,8 @@ Required variables:
 
 ## Local Development
 
+> **Important**: Do NOT commit `.env` files to version control. The `.env` file is auto-managed by Lovable Cloud. Copy `.env.example` and fill in your values if running locally.
+
 ```bash
 # Install dependencies
 npm install
