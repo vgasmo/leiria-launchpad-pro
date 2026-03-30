@@ -16,35 +16,31 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, AlertTriangle, GripVertical, Flame, ThermometerSun, Snowflake } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
-import { useCrmPipeline, PIPELINE_STAGES } from '@/hooks/useCrmPipeline';
+import { useCrmPipeline } from '@/hooks/useCrmPipeline';
 import { calculateLeadScore } from './LeadScoreCard';
 import { useUpdateFunnelItem } from '@/hooks/useFunnel';
-import { useState } from 'react';
-import { STAGE_LABELS } from '@/constants/funnelStages';
+import { useState, useMemo } from 'react';
+import {
+  SIMPLE_PIPELINE_STAGES,
+  SIMPLE_STAGE_LABELS,
+  SIMPLE_STAGE_SOURCES,
+  STAGE_TO_SIMPLE,
+  STAGE_LABELS,
+  type SimplePipelineStage,
+} from '@/constants/funnelStages';
 import { toast } from 'sonner';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 import type { FunnelStage } from '@/hooks/useFunnel';
 
-// Stage config with i18n keys - labels resolved via t() at render time
-const STAGE_CONFIG: Record<FunnelStage, { labelKey: string; color: string; bgColor: string }> = {
-  new: { labelKey: 'pipeline.stages.new', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-800' },
-  first_contact_booked: { labelKey: 'pipeline.stages.first_contact_booked', color: 'text-blue-700 dark:text-blue-300', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
-  met: { labelKey: 'pipeline.stages.met', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
-  qualified: { labelKey: 'pipeline.stages.qualified', color: 'text-purple-700 dark:text-purple-300', bgColor: 'bg-purple-50 dark:bg-purple-900/30' },
-  proposal_sent: { labelKey: 'pipeline.stages.proposal_sent', color: 'text-amber-700 dark:text-amber-300', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
-  negotiating: { labelKey: 'pipeline.stages.negotiating', color: 'text-orange-700 dark:text-orange-300', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-  intake_requested: { labelKey: 'pipeline.stages.intake_requested', color: 'text-cyan-700 dark:text-cyan-300', bgColor: 'bg-cyan-50 dark:bg-cyan-900/30' },
-  intake_filling: { labelKey: 'pipeline.stages.intake_filling', color: 'text-cyan-600 dark:text-cyan-400', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20' },
-  intake_submitted: { labelKey: 'pipeline.stages.intake_submitted', color: 'text-teal-700 dark:text-teal-300', bgColor: 'bg-teal-50 dark:bg-teal-900/30' },
-  intake_review: { labelKey: 'pipeline.stages.intake_review', color: 'text-teal-800 dark:text-teal-200', bgColor: 'bg-teal-100 dark:bg-teal-900/40' },
-  intake_changes_requested: { labelKey: 'pipeline.stages.intake_changes_requested', color: 'text-yellow-700 dark:text-yellow-300', bgColor: 'bg-yellow-50 dark:bg-yellow-900/30' },
-  approved_for_signature: { labelKey: 'pipeline.stages.approved_for_signature', color: 'text-lime-700 dark:text-lime-300', bgColor: 'bg-lime-50 dark:bg-lime-900/30' },
-  sent_for_signature: { labelKey: 'pipeline.stages.sent_for_signature', color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20' },
-  contracted: { labelKey: 'pipeline.stages.contracted', color: 'text-green-700 dark:text-green-300', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-  incubating: { labelKey: 'pipeline.stages.incubating', color: 'text-emerald-700 dark:text-emerald-300', bgColor: 'bg-emerald-50 dark:bg-emerald-900/30' },
-  accelerating: { labelKey: 'pipeline.stages.accelerating', color: 'text-primary', bgColor: 'bg-primary/10' },
-  rejected: { labelKey: 'pipeline.stages.rejected', color: 'text-destructive', bgColor: 'bg-destructive/10' },
-  archived: { labelKey: 'pipeline.stages.archived', color: 'text-muted-foreground', bgColor: 'bg-muted' },
+// Simplified stage visual config
+const SIMPLE_STAGE_CONFIG: Record<SimplePipelineStage, { color: string; bgColor: string }> = {
+  lead: { color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-800' },
+  qualified: { color: 'text-purple-700 dark:text-purple-300', bgColor: 'bg-purple-50 dark:bg-purple-900/30' },
+  proposal_negotiation: { color: 'text-amber-700 dark:text-amber-300', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
+  contracting_in_progress: { color: 'text-cyan-700 dark:text-cyan-300', bgColor: 'bg-cyan-50 dark:bg-cyan-900/30' },
+  signature_in_progress: { color: 'text-lime-700 dark:text-lime-300', bgColor: 'bg-lime-50 dark:bg-lime-900/30' },
+  contracted: { color: 'text-green-700 dark:text-green-300', bgColor: 'bg-green-50 dark:bg-green-900/30' },
+  archived_or_lost: { color: 'text-muted-foreground', bgColor: 'bg-muted' },
 };
 
 interface PipelineViewProps {
@@ -77,6 +73,24 @@ export function PipelineView({
 
   const updateFunnelItem = useUpdateFunnelItem();
 
+  // Group all pipeline items by simplified stage
+  const groupedBySimple = useMemo(() => {
+    const groups: Record<SimplePipelineStage, CrmInboxItem[]> = {} as any;
+    SIMPLE_PIPELINE_STAGES.forEach(s => { groups[s] = []; });
+
+    if (!pipeline) return groups;
+
+    // pipeline is keyed by fine-grained stage
+    Object.entries(pipeline).forEach(([stage, items]) => {
+      const simple = STAGE_TO_SIMPLE[stage as FunnelStage];
+      if (simple && groups[simple]) {
+        groups[simple].push(...(items as CrmInboxItem[]));
+      }
+    });
+
+    return groups;
+  }, [pipeline]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -87,9 +101,7 @@ export function PipelineView({
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    // Find the item being dragged
-    for (const stage of PIPELINE_STAGES) {
-      const items = pipeline?.[stage] || [];
+    for (const items of Object.values(groupedBySimple)) {
       const item = items.find(i => i.id === active.id);
       if (item) {
         setActiveItem(item);
@@ -105,28 +117,32 @@ export function PipelineView({
     if (!over) return;
 
     const itemId = active.id as string;
-    const newStage = over.id as FunnelStage;
+    const targetSimple = over.id as SimplePipelineStage;
 
-    // Find current stage
-    let currentStage: FunnelStage | null = null;
-    for (const stage of PIPELINE_STAGES) {
-      const items = pipeline?.[stage] || [];
-      if (items.find(i => i.id === itemId)) {
-        currentStage = stage;
-        break;
-      }
+    // Find the item's current stage
+    let currentItem: CrmInboxItem | null = null;
+    for (const items of Object.values(groupedBySimple)) {
+      const found = items.find(i => i.id === itemId);
+      if (found) { currentItem = found; break; }
     }
+    if (!currentItem) return;
 
-    if (!currentStage || currentStage === newStage) return;
+    const currentSimple = STAGE_TO_SIMPLE[currentItem.stage as FunnelStage];
+    if (currentSimple === targetSimple) return;
+
+    // Map simplified stage to its first fine-grained stage as default target
+    const targetFineStages = SIMPLE_STAGE_SOURCES[targetSimple];
+    if (!targetFineStages?.length) return;
+    const newStage = targetFineStages[0] as FunnelStage;
 
     try {
       await updateFunnelItem.mutateAsync({
         id: itemId,
         stage: newStage,
       });
-      toast.success(t('crm.stageMoved', { stage: STAGE_LABELS[newStage] }));
+      toast.success(`Movido para ${SIMPLE_STAGE_LABELS[targetSimple]}`);
     } catch (error) {
-      toast.error(t('crm.stageMoveFailed'));
+      toast.error('Erro ao mover lead');
     }
   };
 
@@ -139,7 +155,7 @@ export function PipelineView({
         </div>
         <div className="overflow-x-auto pb-4">
           <div className="flex gap-4 min-w-max">
-            {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            {SIMPLE_PIPELINE_STAGES.map(i => (
               <div key={i} className="w-72 flex-shrink-0">
                 <div className="h-[500px] bg-muted/30 rounded-xl animate-pulse" />
               </div>
@@ -150,7 +166,7 @@ export function PipelineView({
     );
   }
 
-  const totalItems = PIPELINE_STAGES.reduce((sum, stage) => sum + (pipeline?.[stage]?.length || 0), 0);
+  const totalItems = Object.values(groupedBySimple).reduce((sum, items) => sum + items.length, 0);
 
   return (
     <DndContext
@@ -160,21 +176,19 @@ export function PipelineView({
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-4">
-        {/* Pipeline header with totals */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{t('crm.totalLeads')}: {totalItems}</span>
-          <span className="text-xs">{t('crm.dragDropHint', 'Drag cards to change stage')}</span>
+          <span className="text-xs">{t('crm.dragDropHint', 'Arraste cards para mudar fase')}</span>
         </div>
 
-        {/* Horizontal scrollable pipeline board */}
         <div className="overflow-x-auto pb-4">
           <div className="flex gap-4 min-w-max">
-            {PIPELINE_STAGES.map(stage => (
+            {SIMPLE_PIPELINE_STAGES.map(simpleStage => (
               <PipelineColumn
-                key={stage}
-                stage={stage}
-                items={pipeline?.[stage] || []}
-                config={STAGE_CONFIG[stage]}
+                key={simpleStage}
+                simpleStage={simpleStage}
+                items={groupedBySimple[simpleStage] || []}
+                config={SIMPLE_STAGE_CONFIG[simpleStage]}
                 onOpenDrawer={onOpenDrawer}
               />
             ))}
@@ -192,16 +206,15 @@ export function PipelineView({
 }
 
 interface PipelineColumnProps {
-  stage: FunnelStage;
+  simpleStage: SimplePipelineStage;
   items: CrmInboxItem[];
-  config: { labelKey: string; color: string; bgColor: string };
+  config: { color: string; bgColor: string };
   onOpenDrawer: (item: CrmInboxItem) => void;
 }
 
-function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnProps) {
-  const { t } = useTranslation();
+function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
-    id: stage,
+    id: simpleStage,
   });
 
   return (
@@ -216,7 +229,7 @@ function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnPr
       >
         <CardHeader className="py-3 px-4">
           <CardTitle className={cn('text-sm font-semibold flex items-center justify-between', config.color)}>
-            <span>{STAGE_LABELS[stage] || t(config.labelKey)}</span>
+            <span>{SIMPLE_STAGE_LABELS[simpleStage]}</span>
             <Badge 
               variant="secondary" 
               className={cn('text-xs font-medium', config.color, 'bg-background/80')}
@@ -232,7 +245,7 @@ function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnPr
                 <div className="h-8 w-8 mx-auto mb-2 rounded-full bg-muted/50 flex items-center justify-center">
                   <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
                 </div>
-                <p className="text-xs text-muted-foreground">{t('crm.emptyColumn', 'Arraste leads para aqui')}</p>
+                <p className="text-xs text-muted-foreground">Arraste leads para aqui</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -270,6 +283,9 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
   } : undefined;
+
+  // Show fine-grained sub-stage as small badge
+  const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
 
   return (
     <Card
@@ -322,6 +338,13 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
                 {temperature === 'cold' && <Snowflake className="h-3 w-3" />}
                 {totalScore}
               </div>
+
+              {/* Sub-stage badge */}
+              {subStageLabel && (
+                <Badge variant="outline" className="text-[9px] h-4 px-1">
+                  {subStageLabel}
+                </Badge>
+              )}
 
               {item.owner && (
                 <Badge variant="outline" className="text-[10px] h-5 px-1.5">
