@@ -141,7 +141,7 @@ export function useIntakeEvents(intakeId: string | undefined) {
   });
 }
 
-/** Create a new intake request from CRM */
+/** Create a new intake request from CRM + send real email */
 export function useCreateIntake() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -194,7 +194,27 @@ export function useCreateIntake() {
         },
       });
 
-      return { intake: data, token, publicUrl: `${window.location.origin}/contract-intake/${token}` };
+      const publicUrl = `${window.location.origin}/contract-intake/${token}`;
+
+      // Send real email to the lead
+      if (params.contactEmail) {
+        try {
+          await supabase.functions.invoke('send-intake-email', {
+            body: {
+              type: 'intake_request',
+              intakeId: data.id,
+              recipientEmail: params.contactEmail,
+              recipientName: params.contactName,
+              organizationName: params.organizationName,
+              intakeToken: token,
+            },
+          });
+        } catch (emailErr) {
+          console.warn('Failed to send intake email (non-blocking):', emailErr);
+        }
+      }
+
+      return { intake: data, token, publicUrl };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
@@ -271,6 +291,9 @@ export function useTransitionIntakeStatus() {
       }
       if (params.newStatus === 'changes_requested') {
         updateFields.changes_requested_notes = params.notes || null;
+        // Reset reminder count so intake reminders restart for corrections
+        updateFields.reminder_count = 0;
+        updateFields.last_reminder_sent_at = null;
       }
 
       const { error } = await supabase
