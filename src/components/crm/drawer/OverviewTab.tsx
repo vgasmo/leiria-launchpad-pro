@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,10 @@ import { getFunnelStageLabel } from '@/lib/stageLabels';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import { STAGE_COLORS } from './RecordDrawerHeader';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { supabase } from '@/lib/supabaseClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface OverviewTabProps {
   item: FunnelItem;
@@ -217,6 +221,11 @@ export function OverviewTab({
         }}
       />
 
+      {/* Startup Category */}
+      {item.linked_workspace_id && (
+        <StartupCategorySelector workspaceId={item.linked_workspace_id} />
+      )}
+
       {/* Details */}
       <div className="grid gap-3">
         <div className="flex justify-between text-sm">
@@ -252,5 +261,77 @@ export function OverviewTab({
         </div>
       )}
     </div>
+  );
+}
+
+const CATEGORIES = [
+  { value: 'A', label: 'A — Alto Potencial', color: 'text-emerald-600' },
+  { value: 'B', label: 'B — Médio Potencial', color: 'text-blue-600' },
+  { value: 'C', label: 'C — Baixo Potencial', color: 'text-amber-600' },
+] as const;
+
+function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    supabase
+      .from('workspaces')
+      .select('startup_category')
+      .eq('id', workspaceId)
+      .single()
+      .then(({ data }) => {
+        setCurrentCategory(data?.startup_category || null);
+        setLoading(false);
+      });
+  }, [workspaceId]);
+
+  const handleChange = async (value: string) => {
+    const newValue = value === 'none' ? null : value;
+    setCurrentCategory(newValue);
+    const { error } = await supabase
+      .from('workspaces')
+      .update({ startup_category: newValue } as any)
+      .eq('id', workspaceId);
+    if (error) {
+      toast.error(t('common.error'));
+    } else {
+      toast.success(t('crm.categoryUpdated', { defaultValue: 'Categoria atualizada' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    }
+  };
+
+  if (loading) return null;
+
+  return (
+    <Card>
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">{t('crm.startupCategory', { defaultValue: 'Categoria' })}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {currentCategory && <CategoryBadge category={currentCategory} />}
+            <Select value={currentCategory || 'none'} onValueChange={handleChange}>
+              <SelectTrigger className="h-7 w-[160px] text-xs">
+                <SelectValue placeholder={t('crm.selectCategory', { defaultValue: 'Definir categoria' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t('crm.noCategory', { defaultValue: 'Sem categoria' })}</SelectItem>
+                {CATEGORIES.map(c => (
+                  <SelectItem key={c.value} value={c.value}>
+                    <span className={c.color}>{c.label}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
