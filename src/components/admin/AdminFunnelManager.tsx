@@ -27,7 +27,7 @@ export function AdminFunnelManager() {
   const createItem = useCreateFunnelItem();
   
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<CrmInboxItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
   const [convertDialogItem, setConvertDialogItem] = useState<FunnelItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showMineOnly, setShowMineOnly] = useState(false);
