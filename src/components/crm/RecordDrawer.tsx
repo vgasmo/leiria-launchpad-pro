@@ -713,7 +713,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
         )}
 
         {/* Review panel for submitted/review_pending intakes */}
-        {['intake_submitted', 'review_pending', 'changes_requested', 'approved_for_signature', 'signed'].includes(intake.status) && (
+        {['intake_submitted', 'review_pending', 'changes_requested', 'approved_for_signature', 'signature_sent', 'signed'].includes(intake.status) && (
           <IntakeReviewPanel intake={intake} />
         )}
       </div>
