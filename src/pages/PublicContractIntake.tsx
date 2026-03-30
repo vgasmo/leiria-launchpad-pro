@@ -27,6 +27,7 @@ import {
 
 interface IntakeFormData {
   organization_name: string;
+  project_name: string;
   company_nif: string;
   company_address: string;
   company_city: string;
@@ -41,10 +42,12 @@ interface IntakeFormData {
 }
 
 const OPTIONAL_DOCS = [
-  { key: 'certidao_comercial', labelPt: 'Certidão Permanente', labelEn: 'Commercial Registry Certificate' },
-  { key: 'cartao_empresa', labelPt: 'Cartão da Empresa (NIF)', labelEn: 'Company Tax Card (NIF)' },
-  { key: 'id_representante', labelPt: 'Documento de Identificação', labelEn: 'ID Document' },
+  { key: 'certidao_comercial', labelPt: 'Certidão Permanente / Código de Acesso', labelEn: 'Commercial Registry Certificate / Access Code' },
+  { key: 'id_representante', labelPt: 'Documento de Identificação do Representante Legal', labelEn: 'Legal Representative ID Document' },
+  { key: 'comprovativo_morada', labelPt: 'Comprovativo de Morada', labelEn: 'Proof of Address' },
   { key: 'comprovativo_iban', labelPt: 'Comprovativo de IBAN', labelEn: 'IBAN Proof' },
+  { key: 'pitch_deck', labelPt: 'Pitch Deck / Apresentação da Startup', labelEn: 'Pitch Deck / Startup Presentation' },
+  { key: 'docs_associacoes', labelPt: 'Documentos de Associações', labelEn: 'Association Documents' },
 ];
 
 export default function PublicContractIntake() {

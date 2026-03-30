@@ -28,10 +28,12 @@ type WizardStep = 'company_data' | 'review_contract' | 'signing';
 interface CompanyFormData {
   legal_representative_name: string;
   legal_representative_email: string;
+  legal_representative_phone: string;
   company_nif: string;
   company_address: string;
   company_city: string;
   company_postal_code: string;
+  project_name: string;
 }
 
 interface UploadedDoc {
@@ -40,23 +42,14 @@ interface UploadedDoc {
   size: number;
 }
 
-// Required documents for onboarding
-const REQUIRED_DOCS = [
+// All documents are optional
+const ONBOARDING_DOCS = [
   {
     key: 'certidao_comercial',
     labelPt: 'Certidão Permanente / Código de Acesso',
     labelEn: 'Commercial Registry Certificate / Access Code',
     descPt: 'Certidão permanente da empresa ou código de acesso ao registo comercial',
     descEn: 'Permanent certificate or commercial registry access code',
-    required: true,
-  },
-  {
-    key: 'cartao_empresa',
-    labelPt: 'Cartão da Empresa (NIF)',
-    labelEn: 'Company Tax Card (NIF)',
-    descPt: 'Comprovativo do número de identificação fiscal da empresa',
-    descEn: 'Company tax identification number proof',
-    required: true,
   },
   {
     key: 'id_representante',
@@ -64,7 +57,13 @@ const REQUIRED_DOCS = [
     labelEn: 'Legal Representative ID Document',
     descPt: 'Cartão de cidadão, BI ou passaporte do representante legal',
     descEn: 'Citizen card, ID card or passport of the legal representative',
-    required: true,
+  },
+  {
+    key: 'comprovativo_morada',
+    labelPt: 'Comprovativo de Morada',
+    labelEn: 'Proof of Address',
+    descPt: 'Comprovativo de morada da empresa ou representante legal',
+    descEn: 'Proof of address of the company or legal representative',
   },
   {
     key: 'comprovativo_iban',
@@ -72,7 +71,6 @@ const REQUIRED_DOCS = [
     labelEn: 'IBAN Proof',
     descPt: 'Comprovativo do IBAN da conta bancária da empresa',
     descEn: 'Proof of company bank account IBAN',
-    required: false,
   },
   {
     key: 'pitch_deck',
@@ -80,7 +78,13 @@ const REQUIRED_DOCS = [
     labelEn: 'Pitch Deck / Startup Presentation',
     descPt: 'Apresentação do projeto (PDF ou PPT)',
     descEn: 'Project presentation (PDF or PPT)',
-    required: false,
+  },
+  {
+    key: 'docs_associacoes',
+    labelPt: 'Documentos de Associações',
+    labelEn: 'Association Documents',
+    descPt: 'Documentos de associações relevantes para o projeto',
+    descEn: 'Documents from relevant associations for the project',
   },
 ];
 
