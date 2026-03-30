@@ -1,0 +1,204 @@
+/**
+ * Edge Function: send-intake-email
+ * Sends contract intake emails via Resend:
+ * - type=intake_request: initial email to lead with intake link
+ * - type=changes_requested: email with correction notes + return link
+ * - type=signature_reminder: reminder for pending signature
+ * - type=intake_reminder: reminder for pending intake submission
+ */
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'npm:resend@2.0.0'
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
+}
+
+function escapeHtml(text: string): string {
+  const entities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+  return text.replace(/[&<>"']/g, c => entities[c] || c)
+}
+
+interface EmailRequest {
+  type: 'intake_request' | 'changes_requested' | 'intake_reminder' | 'signature_reminder'
+  intakeId?: string
+  recipientEmail: string
+  recipientName?: string
+  organizationName?: string
+  intakeToken?: string
+  changesNotes?: string
+  senderName?: string
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+    // Allow cron OR authenticated staff
+    const cronSecret = req.headers.get('x-cron-secret')
+    const isCron = cronSecret && cronSecret === Deno.env.get('CRON_SECRET')
+
+    if (!isCron) {
+      const authHeader = req.headers.get('Authorization')
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const supabase = createClient(supabaseUrl, serviceKey)
+      const jwt = authHeader.replace('Bearer ', '')
+      const { data: claims, error: claimsErr } = await supabase.auth.getUser(jwt)
+      if (claimsErr || !claims.user) {
+        return new Response(JSON.stringify({ error: 'Invalid token' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const { data: roles } = await supabase
+        .from('user_roles').select('role')
+        .eq('user_id', claims.user.id)
+        .in('role', ['admin', 'consultor', 'backoffice'])
+      if (!roles?.length) {
+        return new Response(JSON.stringify({ error: 'Staff only' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    const body: EmailRequest = await req.json()
+    const { type, recipientEmail, recipientName, organizationName, intakeToken, changesNotes, senderName } = body
+
+    if (!recipientEmail || !type) {
+      return new Response(JSON.stringify({ error: 'recipientEmail and type required' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const appUrl = 'https://leiria-launchpad-pro.lovable.app'
+    const intakeUrl = intakeToken ? `${appUrl}/contract-intake/${intakeToken}` : ''
+    const safeName = escapeHtml(recipientName || '')
+    const safeOrg = escapeHtml(organizationName || '')
+    const safeSender = escapeHtml(senderName || 'Startup Leiria')
+    const safeNotes = escapeHtml(changesNotes || '')
+
+    let subject = ''
+    let html = ''
+
+    if (type === 'intake_request') {
+      subject = `${safeOrg ? safeOrg + ' — ' : ''}Pedido de Contratação — Startup Leiria`
+      html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#1a1a2e">Pedido de Contratação</h2>
+          <p>Olá${safeName ? ' ' + safeName : ''},</p>
+          <p>A equipa <strong>Startup Leiria</strong> iniciou o processo de contratação${safeOrg ? ' para <strong>' + safeOrg + '</strong>' : ''}.</p>
+          <p>Para avançar, pedimos que preencha o formulário com os dados da empresa:</p>
+          <p style="text-align:center;margin:25px 0">
+            <a href="${intakeUrl}" style="background:#1a1a2e;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block">
+              Preencher Dados
+            </a>
+          </p>
+          <p style="font-size:13px;color:#666">Este link é válido por 30 dias. Após o preenchimento, a nossa equipa irá validar os dados antes de enviar o contrato para assinatura.</p>
+          <p style="font-size:13px;color:#666">Se não reconhece este pedido, pode ignorar este email.</p>
+          <hr style="border:none;border-top:1px solid #eee;margin:25px 0"/>
+          <p style="font-size:12px;color:#999">Startup Leiria — Ecossistema de Inovação</p>
+        </div>
+      `
+    } else if (type === 'changes_requested') {
+      subject = `Correções Necessárias — Processo de Contratação — Startup Leiria`
+      html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#1a1a2e">Correções Necessárias</h2>
+          <p>Olá${safeName ? ' ' + safeName : ''},</p>
+          <p>Após a revisão dos dados submetidos${safeOrg ? ' para <strong>' + safeOrg + '</strong>' : ''}, a nossa equipa identificou alguns pontos que necessitam de correção:</p>
+          ${safeNotes ? `<div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;margin:15px 0;border-radius:4px"><p style="margin:0;font-size:14px;color:#92400e">${safeNotes.replace(/\n/g, '<br/>')}</p></div>` : ''}
+          <p>Por favor, aceda ao formulário para efetuar as correções:</p>
+          <p style="text-align:center;margin:25px 0">
+            <a href="${intakeUrl}" style="background:#1a1a2e;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block">
+              Corrigir Dados
+            </a>
+          </p>
+          <p style="font-size:13px;color:#666">Após submeter as correções, a equipa irá rever novamente os dados.</p>
+          <hr style="border:none;border-top:1px solid #eee;margin:25px 0"/>
+          <p style="font-size:12px;color:#999">Startup Leiria — Ecossistema de Inovação</p>
+        </div>
+      `
+    } else if (type === 'intake_reminder') {
+      subject = `Lembrete — Dados de Contratação Pendentes — Startup Leiria`
+      html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#1a1a2e">Lembrete de Preenchimento</h2>
+          <p>Olá${safeName ? ' ' + safeName : ''},</p>
+          <p>Relembramos que os dados de contratação${safeOrg ? ' para <strong>' + safeOrg + '</strong>' : ''} ainda estão pendentes de preenchimento.</p>
+          <p>Para avançar com o processo, preencha o formulário:</p>
+          <p style="text-align:center;margin:25px 0">
+            <a href="${intakeUrl}" style="background:#1a1a2e;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block">
+              Preencher Dados
+            </a>
+          </p>
+          <p style="font-size:13px;color:#666">Se já submeteu os dados, pode ignorar esta mensagem.</p>
+          <hr style="border:none;border-top:1px solid #eee;margin:25px 0"/>
+          <p style="font-size:12px;color:#999">Startup Leiria — Ecossistema de Inovação</p>
+        </div>
+      `
+    } else if (type === 'signature_reminder') {
+      subject = `Lembrete — Assinatura de Contrato Pendente — Startup Leiria`
+      html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#1a1a2e">Assinatura Pendente</h2>
+          <p>Olá${safeName ? ' ' + safeName : ''},</p>
+          <p>O contrato${safeOrg ? ' para <strong>' + safeOrg + '</strong>' : ''} foi enviado para assinatura e aguarda a sua ação.</p>
+          <p>Por favor, verifique o seu email para o link de assinatura do fornecedor (DocuSign / PandaDoc) ou contacte a nossa equipa se necessitar de ajuda.</p>
+          <p style="font-size:13px;color:#666">Se já assinou, pode ignorar esta mensagem.</p>
+          <hr style="border:none;border-top:1px solid #eee;margin:25px 0"/>
+          <p style="font-size:12px;color:#999">Startup Leiria — Ecossistema de Inovação</p>
+        </div>
+      `
+    } else {
+      return new Response(JSON.stringify({ error: `Unknown email type: ${type}` }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { data: emailResult, error: emailErr } = await resend.emails.send({
+      from: 'Startup Leiria <noreply@startupleiria.com>',
+      to: recipientEmail,
+      subject,
+      html,
+    })
+
+    if (emailErr) {
+      console.error('Resend error:', emailErr)
+      return new Response(JSON.stringify({ error: 'Failed to send email', details: emailErr }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Log to email_log if intake context available
+    if (body.intakeId) {
+      const supabase = createClient(supabaseUrl, serviceKey)
+      await supabase.from('email_log').insert({
+        email_type: `intake_${type}`,
+        subject,
+        recipients: JSON.stringify([recipientEmail]),
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        created_by: null,
+      }).catch(() => {}) // non-blocking
+    }
+
+    return new Response(JSON.stringify({ success: true, messageId: emailResult?.id }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (err) {
+    console.error('send-intake-email error:', err)
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+})

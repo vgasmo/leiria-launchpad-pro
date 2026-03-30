@@ -215,6 +215,115 @@ Deno.serve(async (req) => {
       })
     }
 
+    // === INTAKE: Load by token (public, no auth) ===
+    if (action === 'intake_load_by_token') {
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'Token required' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const { data: intake, error: iErr } = await supabase
+        .from('contract_intakes')
+        .select('id, status, organization_name, company_nif, company_address, company_city, company_postal_code, iban, legal_representative_name, legal_representative_email, legal_representative_phone, billing_email, startup_description, website, documents_json, missing_documents, changes_requested_notes, intake_token_expires_at, submitted_at')
+        .eq('intake_token', token)
+        .maybeSingle()
+
+      if (iErr || !intake) {
+        return new Response(JSON.stringify({ error: 'Invalid or expired link' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      if (intake.intake_token_expires_at && new Date(intake.intake_token_expires_at) < new Date()) {
+        return new Response(JSON.stringify({ error: 'This link has expired' }), {
+          status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      return new Response(JSON.stringify({ intake }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // === INTAKE: Submit by token (public, no auth) ===
+    if (action === 'intake_submit_by_token') {
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'Token required' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const { formData: fd } = body
+      if (!fd) {
+        return new Response(JSON.stringify({ error: 'formData required' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Verify token
+      const { data: intake, error: iErr } = await supabase
+        .from('contract_intakes')
+        .select('id, status, intake_token_expires_at')
+        .eq('intake_token', token)
+        .maybeSingle()
+
+      if (iErr || !intake) {
+        return new Response(JSON.stringify({ error: 'Invalid or expired link' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (intake.intake_token_expires_at && new Date(intake.intake_token_expires_at) < new Date()) {
+        return new Response(JSON.stringify({ error: 'This link has expired' }), {
+          status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Only allow submission from editable states
+      const editableStates = ['intake_requested', 'intake_in_progress', 'changes_requested']
+      if (!editableStates.includes(intake.status)) {
+        return new Response(JSON.stringify({ error: 'Form already submitted' }), {
+          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Update intake with form data
+      const { error: updateErr } = await supabase
+        .from('contract_intakes')
+        .update({
+          organization_name: fd.organization_name,
+          company_nif: fd.company_nif,
+          company_address: fd.company_address,
+          company_city: fd.company_city,
+          company_postal_code: fd.company_postal_code,
+          iban: fd.iban,
+          legal_representative_name: fd.legal_representative_name,
+          legal_representative_email: fd.legal_representative_email,
+          legal_representative_phone: fd.legal_representative_phone,
+          billing_email: fd.billing_email,
+          startup_description: fd.startup_description,
+          website: fd.website,
+          missing_documents: fd.missing_documents || [],
+          status: 'intake_submitted',
+          submitted_at: new Date().toISOString(),
+        })
+        .eq('id', intake.id)
+
+      if (updateErr) throw updateErr
+
+      // Audit event
+      await supabase.from('intake_events').insert({
+        intake_id: intake.id,
+        event_type: 'customer_submitted',
+        from_status: intake.status,
+        to_status: 'intake_submitted',
+        metadata: { missing_documents: fd.missing_documents || [], channel: 'public_form' },
+      })
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // === Public actions: require valid onboarding token ===
     if (!token) {
       return new Response(JSON.stringify({ error: 'Token required' }), {

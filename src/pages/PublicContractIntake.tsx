@@ -3,6 +3,9 @@
  * Accessible via token link — no authentication required.
  * Phase 1 of 2-phase onboarding: Data collection (NOT signature).
  * Uploads are optional. Customer can submit with missing documents.
+ *
+ * SECURITY: All data access goes through the public-contract-onboarding
+ * edge function (service-role). No direct SELECT/UPDATE on contract_intakes.
  */
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -10,16 +13,15 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
-  Building2, FileText, CheckCircle2, ArrowRight, ArrowLeft,
+  Building2, CheckCircle2,
   Shield, Loader2, AlertTriangle, Upload, Globe, Info
 } from 'lucide-react';
 
@@ -60,22 +62,17 @@ export default function PublicContractIntake() {
     billing_email: '', startup_description: '', website: '',
   });
 
-  // Fetch intake by token
+  // Fetch intake via edge function (no direct DB access)
   const { data: intake, isLoading, error: fetchError } = useQuery({
     queryKey: ['public-intake', token],
     enabled: !!token,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('contract_intakes')
-        .select('*')
-        .eq('intake_token', token!)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'intake_load_by_token', token },
+      });
       if (error) throw error;
-      if (!data) throw new Error(isPt ? 'Link inválido ou expirado' : 'Invalid or expired link');
-      if (data.intake_token_expires_at && new Date(data.intake_token_expires_at) < new Date()) {
-        throw new Error(isPt ? 'Este link expirou' : 'This link has expired');
-      }
-      return data;
+      if (data?.error) throw new Error(data.error);
+      return data.intake;
     },
     retry: false,
   });
@@ -104,33 +101,22 @@ export default function PublicContractIntake() {
   const isSubmitted = intake?.status === 'intake_submitted' || intake?.status === 'review_pending';
   const hasChangesRequested = intake?.status === 'changes_requested';
 
-  // Submit form
+  // Submit form via edge function (no direct DB access)
   const submitMutation = useMutation({
     mutationFn: async () => {
-      // Determine missing documents
       const missingDocs = OPTIONAL_DOCS
         .filter(d => !intake?.documents_json?.[d.key])
         .map(d => d.key);
 
-      const { error } = await supabase
-        .from('contract_intakes')
-        .update({
-          ...formData,
-          missing_documents: missingDocs,
-          status: 'intake_submitted' as any,
-          submitted_at: new Date().toISOString(),
-        })
-        .eq('id', intake!.id);
-      if (error) throw error;
-
-      // Audit event
-      await supabase.from('intake_events').insert({
-        intake_id: intake!.id,
-        event_type: 'customer_submitted',
-        from_status: intake!.status,
-        to_status: 'intake_submitted',
-        metadata: { missing_documents: missingDocs },
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: {
+          action: 'intake_submit_by_token',
+          token,
+          formData: { ...formData, missing_documents: missingDocs },
+        },
       });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       toast.success(isPt ? 'Dados submetidos com sucesso!' : 'Data submitted successfully!');
