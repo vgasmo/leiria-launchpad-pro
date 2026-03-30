@@ -373,7 +373,7 @@ function NewLeadForm({
   });
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="space-y-4">
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...formData, owner_consultant_id: formData.owner_consultant_id || undefined, program_id: formData.program_id || undefined }); }} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>{t('admin.funnel.contactName')}</Label>
