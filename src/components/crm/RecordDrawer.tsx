@@ -28,6 +28,8 @@ import {
   Clock,
   Briefcase,
   ExternalLink,
+  Copy,
+  Send,
 } from 'lucide-react';
 import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useActivityTimeline, useRelationshipRecap, useGenerateRecap, useSyncEmails, useAddActivity, ActivityType, ActivityEntry } from '@/hooks/useActivityTimeline';
@@ -38,6 +40,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
+import { useIntakeByFunnelItem, useCreateIntake } from '@/hooks/useContractIntakes';
+import { IntakeReviewPanel } from './IntakeReviewPanel';
+import { INTAKE_STATE_LABELS, CUSTOMER_EDITABLE_STATES, type IntakeState } from '@/constants/intakeStates';
 
 // Extracted sub-components
 import {
@@ -383,91 +388,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                 isClearingNextAction={clearNextAction.isPending}
               />
 
-              {/* Contract Actions Banner - visible for advanced stage leads */}
-              {['qualified', 'proposal_sent', 'negotiating'].includes(item.stage) && (
-                <Card className="border-primary/30 bg-primary/5">
-                  <CardContent className="p-3 space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-primary flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5" />
-                      {t('crm.contractActions', { defaultValue: 'Ações de Contratação' })}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {/* Primary CTA: Send contracting request */}
-                      <Button
-                        size="sm"
-                        className="h-8 text-xs gap-1.5"
-                        onClick={async () => {
-                          try {
-                            const tokenParts = [crypto.randomUUID().replace(/-/g, ''), crypto.randomUUID().replace(/-/g, '')];
-                            const intakeToken = tokenParts.join('');
-                            const { data, error } = await supabase.from('contract_intakes').insert({
-                              funnel_item_id: item.id,
-                              status: 'intake_requested' as any,
-                              organization_name: item.organization_name || '',
-                              legal_representative_email: item.contact_email || '',
-                              legal_representative_name: item.contact_name || '',
-                              created_by: user?.id,
-                              assigned_to: item.owner_consultant_id || user?.id,
-                              intake_token: intakeToken,
-                              intake_token_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                            }).select().single();
-                            if (error) throw error;
-
-                            await supabase.from('intake_events').insert({
-                              intake_id: data.id,
-                              event_type: 'intake_created',
-                              to_status: 'intake_requested',
-                              performed_by: user?.id,
-                              metadata: { funnel_item_id: item.id },
-                            });
-
-                            // Move CRM stage
-                            await supabase.from('funnel_items').update({ stage: 'intake_requested' }).eq('id', item.id);
-
-                            const url = `${window.location.origin}/contract-intake/${intakeToken}`;
-                            await navigator.clipboard.writeText(url);
-                            toast.success(t('crm.intakeRequestSent', { defaultValue: 'Pedido de contratação criado! Link copiado para enviar ao cliente.' }));
-                          } catch (err: any) {
-                            toast.error(err?.message || 'Erro ao criar pedido');
-                          }
-                        }}
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        {t('crm.sendIntakeRequest', { defaultValue: 'Enviar Pedido de Contratação' })}
-                      </Button>
-
-                      {item.linked_contract_id && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                          onClick={async () => {
-                            try {
-                              const contractId = item.linked_contract_id;
-                              const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
-                                body: { action: 'generate_token', contractId },
-                              });
-                              if (error) throw error;
-                              if (data?.error) throw new Error(data.error);
-                              const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
-                              await navigator.clipboard.writeText(url);
-                              toast.success(t('crm.contractLinkCopied', { defaultValue: 'Link público do contrato copiado!' }));
-                            } catch (err: any) {
-                              toast.error(err?.message || 'Erro ao gerar link');
-                            }
-                          }}
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          {t('crm.generatePublicLink', { defaultValue: 'Gerar Link Público' })}
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">
-                      {t('crm.intakeHint', { defaultValue: 'O cliente receberá um formulário para preencher dados da empresa. Após submissão, a equipa valida antes de enviar para assinatura.' })}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Intake Actions Panel — stage-aware */}
+              <IntakeActionsPanel item={item} user={user} />
             </div>
           </TabsContent>
 
