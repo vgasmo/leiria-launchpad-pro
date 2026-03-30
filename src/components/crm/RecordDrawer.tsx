@@ -665,7 +665,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                   assignedTo: item.owner_consultant_id || user?.id,
                 });
                 await navigator.clipboard.writeText(result.publicUrl);
-                toast.success('Pedido de contratação criado! Link copiado.');
+                toast.success('Pedido de contratação enviado por email! Link também copiado.');
               } catch {}
             }}
           >
