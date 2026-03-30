@@ -7361,6 +7361,7 @@ export type Database = {
           quality_mode: string | null
           stage: Database["public"]["Enums"]["startup_stage"]
           stage_id: string | null
+          startup_category: string | null
           startup_id: string
           status: string
           updated_at: string
@@ -7398,6 +7399,7 @@ export type Database = {
           quality_mode?: string | null
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
+          startup_category?: string | null
           startup_id: string
           status?: string
           updated_at?: string
@@ -7435,6 +7437,7 @@ export type Database = {
           quality_mode?: string | null
           stage?: Database["public"]["Enums"]["startup_stage"]
           stage_id?: string | null
+          startup_category?: string | null
           startup_id?: string
           status?: string
           updated_at?: string

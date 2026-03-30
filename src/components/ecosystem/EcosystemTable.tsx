@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { HealthBadge } from '@/components/ui/HealthBadge';
 import { StageBadge } from '@/components/ui/StageBadge';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Select,
@@ -132,10 +133,11 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                 </Badge>
               </div>
 
-              {/* Row 2: Stage + Health */}
+              {/* Row 2: Stage + Health + Category */}
               <div className="flex items-center gap-2 flex-wrap">
                 {item.stage && <StageBadge stage={item.stage as any} />}
                 {item.health_score && <HealthBadge score={item.health_score as any} />}
+                <CategoryBadge category={item.startup_category} />
                 {item.program_name && (
                   <span className="text-xs text-muted-foreground">{item.program_name}</span>
                 )}
@@ -165,6 +167,7 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
               <TableHead className="w-[80px]">{t('ecosystem.type', { defaultValue: 'Type' })}</TableHead>
               <TableHead>{t('workspace.program', { defaultValue: 'Program' })}</TableHead>
               <TableHead>{t('workspace.stage', { defaultValue: 'Stage' })}</TableHead>
+              <TableHead>{t('workspace.category', { defaultValue: 'Cat.' })}</TableHead>
               <TableHead>{t('workspace.healthScore', { defaultValue: 'Health' })}</TableHead>
               <TableHead>{t('ecosystem.owner', { defaultValue: 'Owner' })}</TableHead>
               <TableHead>{t('ecosystem.lastActivity', { defaultValue: 'Last Activity' })}</TableHead>
@@ -203,6 +206,9 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                   {item.stage ? (
                     <StageBadge stage={item.stage as any} />
                   ) : '-'}
+                </TableCell>
+                <TableCell>
+                  <CategoryBadge category={item.startup_category} />
                 </TableCell>
                 <TableCell>
                   {item.health_score ? (

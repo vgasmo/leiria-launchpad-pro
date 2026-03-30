@@ -12,6 +12,7 @@ export interface EcosystemItem {
   stage: string | null;
   health_score: string | null;
   priority_level: string | null;
+  startup_category: string | null;
   owner_id: string | null;
   owner_name?: string | null;
   space_id: string | null;
@@ -59,6 +60,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
           health_score,
           health_score_override,
           priority_level,
+          startup_category,
           updated_at,
           created_at,
           startup:startups(name),
@@ -165,6 +167,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         stage: w.stage,
         health_score: w.health_score_override || w.health_score,
         priority_level: w.priority_level,
+        startup_category: (w as any).startup_category || null,
         owner_id: ownerMap[w.id]?.id || null,
         owner_name: ownerMap[w.id]?.name || null,
         space_id: null,
@@ -191,6 +194,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         stage: f.stage,
         health_score: null,
         priority_level: null,
+        startup_category: null,
         owner_id: f.owner_consultant_id,
         owner_name: f.owner_consultant_id ? ownerNames[f.owner_consultant_id] : null,
         space_id: null,
