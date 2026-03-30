@@ -11,6 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   CheckCircle2, AlertTriangle, XCircle, Building2,
   User, Mail, Phone, Globe, CreditCard, Clock, Shield,
   ClipboardCheck, RotateCcw, Loader2, Send,
@@ -20,17 +27,24 @@ import { type ContractIntake, useTransitionIntakeStatus, useIntakeEvents } from 
 import { INTAKE_STATE_LABELS, type IntakeState, REVIEWABLE_STATES } from '@/constants/intakeStates';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabaseClient';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
 interface IntakeReviewPanelProps {
   intake: ContractIntake;
   onClose?: () => void;
 }
 
+const SIGNATURE_PROVIDERS = [
+  { value: 'docusign', label: 'DocuSign' },
+  { value: 'pandadoc', label: 'PandaDoc' },
+  { value: 'manual', label: 'Manual' },
+] as const;
+
 export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
   const [actionNotes, setActionNotes] = useState('');
   const [showNotes, setShowNotes] = useState<'approve' | 'changes' | 'cancel' | null>(null);
   const [sendingSignature, setSendingSignature] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
   const transition = useTransitionIntakeStatus();
   const { data: events } = useIntakeEvents(intake.id);
 
@@ -54,37 +68,38 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
     }
   };
 
-  /** Send to signature — dispatches to the linked contract's provider */
+  /** Send to signature — staff-authenticated action via edge function */
   const handleSendToSignature = async () => {
     if (!intake.contract_id) {
       toast.error('Nenhum contrato associado a este intake. Crie o contrato primeiro.');
       return;
     }
+    if (!selectedProvider) {
+      toast.error('Selecione um provider de assinatura.');
+      return;
+    }
     setSendingSignature(true);
     try {
-      // Generate contract PDF + send via provider
-      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+      const snapshot = intake.approved_data_snapshot || {};
+      const { data, error } = await invokeWithAuth('public-contract-onboarding', {
         body: {
-          action: 'submit_signing',
-          token: null, // Staff action — we pass contractId directly
+          action: 'staff_submit_signing',
           contractId: intake.contract_id,
-          formData: intake.approved_data_snapshot || {
-            legal_representative_name: intake.legal_representative_name,
-            legal_representative_email: intake.legal_representative_email,
-            company_nif: intake.company_nif,
-          },
+          signatureProvider: selectedProvider,
+          signerEmail: (snapshot as any).legal_representative_email || intake.legal_representative_email,
+          signerName: (snapshot as any).legal_representative_name || intake.legal_representative_name,
         },
       });
 
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if ((data as any)?.error) throw new Error((data as any).error);
 
       // Transition intake to signature_sent
       await transition.mutateAsync({
         intakeId: intake.id,
         newStatus: 'signature_sent',
-        notes: `Enviado para assinatura via ${data?.provider || 'provider'}`,
-        metadata: { provider: data?.provider, signing_result: data },
+        notes: `Enviado para assinatura via ${selectedProvider}`,
+        metadata: { provider: selectedProvider, signing_result: data },
       });
 
       toast.success('Contrato enviado para assinatura!');
@@ -277,7 +292,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
 
         {/* ── APPROVED: Send to Signature CTA ── */}
         {isApproved && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {intake.approved_data_snapshot && (
               <div className="rounded-md border border-lime-200 bg-lime-50 dark:bg-lime-900/20 p-3">
                 <p className="text-xs font-semibold text-lime-800 dark:text-lime-200 flex items-center gap-1.5">
@@ -289,10 +304,26 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
                 </p>
               </div>
             )}
+
+            {/* Provider selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Provider de Assinatura</label>
+              <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Selecionar provider..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {SIGNATURE_PROVIDERS.map(p => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button
               className="w-full gap-2"
               onClick={handleSendToSignature}
-              disabled={sendingSignature}
+              disabled={sendingSignature || !selectedProvider}
             >
               {sendingSignature ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -302,7 +333,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
               Enviar para Assinatura
             </Button>
             <p className="text-[10px] text-muted-foreground text-center">
-              O contrato será enviado para assinatura digital através do provider configurado.
+              O contrato será enviado para assinatura digital via {selectedProvider ? SIGNATURE_PROVIDERS.find(p => p.value === selectedProvider)?.label : '—'}.
             </p>
           </div>
         )}
