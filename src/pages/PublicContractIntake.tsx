@@ -27,6 +27,7 @@ import {
 
 interface IntakeFormData {
   organization_name: string;
+  project_name: string;
   company_nif: string;
   company_address: string;
   company_city: string;
@@ -41,10 +42,12 @@ interface IntakeFormData {
 }
 
 const OPTIONAL_DOCS = [
-  { key: 'certidao_comercial', labelPt: 'Certidão Permanente', labelEn: 'Commercial Registry Certificate' },
-  { key: 'cartao_empresa', labelPt: 'Cartão da Empresa (NIF)', labelEn: 'Company Tax Card (NIF)' },
-  { key: 'id_representante', labelPt: 'Documento de Identificação', labelEn: 'ID Document' },
+  { key: 'certidao_comercial', labelPt: 'Certidão Permanente / Código de Acesso', labelEn: 'Commercial Registry Certificate / Access Code' },
+  { key: 'id_representante', labelPt: 'Documento de Identificação do Representante Legal', labelEn: 'Legal Representative ID Document' },
+  { key: 'comprovativo_morada', labelPt: 'Comprovativo de Morada', labelEn: 'Proof of Address' },
   { key: 'comprovativo_iban', labelPt: 'Comprovativo de IBAN', labelEn: 'IBAN Proof' },
+  { key: 'pitch_deck', labelPt: 'Pitch Deck / Apresentação da Startup', labelEn: 'Pitch Deck / Startup Presentation' },
+  { key: 'docs_associacoes', labelPt: 'Documentos de Associações', labelEn: 'Association Documents' },
 ];
 
 export default function PublicContractIntake() {
@@ -56,7 +59,7 @@ export default function PublicContractIntake() {
   const isPt = lang === 'pt';
 
   const [formData, setFormData] = useState<IntakeFormData>({
-    organization_name: '', company_nif: '', company_address: '', company_city: '',
+    organization_name: '', project_name: '', company_nif: '', company_address: '', company_city: '',
     company_postal_code: '', iban: '', legal_representative_name: '',
     legal_representative_email: '', legal_representative_phone: '',
     billing_email: '', startup_description: '', website: '',
@@ -83,6 +86,7 @@ export default function PublicContractIntake() {
       setFormData(prev => ({
         ...prev,
         organization_name: intake.organization_name || '',
+        project_name: '',
         company_nif: intake.company_nif || '',
         company_address: intake.company_address || '',
         company_city: intake.company_city || '',
@@ -238,7 +242,11 @@ export default function PublicContractIntake() {
                 <Input value={formData.organization_name} onChange={e => setFormData(p => ({ ...p, organization_name: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>NIF *</Label>
+                <Label>{isPt ? 'Nome do Projeto (se diferente)' : 'Project Name (if different)'}</Label>
+                <Input value={formData.project_name} onChange={e => setFormData(p => ({ ...p, project_name: e.target.value }))} placeholder={isPt ? 'Nome comercial do projeto' : 'Commercial project name'} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{isPt ? 'NIF (Empresa ou Pessoa)' : 'Tax ID (Company or Personal)'} *</Label>
                 <Input value={formData.company_nif} onChange={e => setFormData(p => ({ ...p, company_nif: e.target.value }))} />
               </div>
               <div className="md:col-span-2 space-y-1.5">
@@ -276,8 +284,8 @@ export default function PublicContractIntake() {
                 <Input type="email" value={formData.legal_representative_email} onChange={e => setFormData(p => ({ ...p, legal_representative_email: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>{isPt ? 'Telefone' : 'Phone'}</Label>
-                <Input value={formData.legal_representative_phone} onChange={e => setFormData(p => ({ ...p, legal_representative_phone: e.target.value }))} />
+                <Label>{isPt ? 'Telefone' : 'Phone'} *</Label>
+                <Input type="tel" value={formData.legal_representative_phone} onChange={e => setFormData(p => ({ ...p, legal_representative_phone: e.target.value }))} placeholder="+351 900 000 000" />
               </div>
               <div className="space-y-1.5">
                 <Label>{isPt ? 'Email de Faturação' : 'Billing Email'}</Label>
@@ -334,7 +342,8 @@ export default function PublicContractIntake() {
               !formData.organization_name ||
               !formData.company_nif ||
               !formData.legal_representative_name ||
-              !formData.legal_representative_email
+              !formData.legal_representative_email ||
+              !formData.legal_representative_phone
             }
             onClick={() => submitMutation.mutate()}
           >

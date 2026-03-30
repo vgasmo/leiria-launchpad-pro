@@ -28,10 +28,12 @@ type WizardStep = 'company_data' | 'review_contract' | 'signing';
 interface CompanyFormData {
   legal_representative_name: string;
   legal_representative_email: string;
+  legal_representative_phone: string;
   company_nif: string;
   company_address: string;
   company_city: string;
   company_postal_code: string;
+  project_name: string;
 }
 
 interface UploadedDoc {
@@ -40,23 +42,14 @@ interface UploadedDoc {
   size: number;
 }
 
-// Required documents for onboarding
-const REQUIRED_DOCS = [
+// All documents are optional
+const ONBOARDING_DOCS = [
   {
     key: 'certidao_comercial',
     labelPt: 'Certidão Permanente / Código de Acesso',
     labelEn: 'Commercial Registry Certificate / Access Code',
     descPt: 'Certidão permanente da empresa ou código de acesso ao registo comercial',
     descEn: 'Permanent certificate or commercial registry access code',
-    required: true,
-  },
-  {
-    key: 'cartao_empresa',
-    labelPt: 'Cartão da Empresa (NIF)',
-    labelEn: 'Company Tax Card (NIF)',
-    descPt: 'Comprovativo do número de identificação fiscal da empresa',
-    descEn: 'Company tax identification number proof',
-    required: true,
   },
   {
     key: 'id_representante',
@@ -64,7 +57,13 @@ const REQUIRED_DOCS = [
     labelEn: 'Legal Representative ID Document',
     descPt: 'Cartão de cidadão, BI ou passaporte do representante legal',
     descEn: 'Citizen card, ID card or passport of the legal representative',
-    required: true,
+  },
+  {
+    key: 'comprovativo_morada',
+    labelPt: 'Comprovativo de Morada',
+    labelEn: 'Proof of Address',
+    descPt: 'Comprovativo de morada da empresa ou representante legal',
+    descEn: 'Proof of address of the company or legal representative',
   },
   {
     key: 'comprovativo_iban',
@@ -72,7 +71,6 @@ const REQUIRED_DOCS = [
     labelEn: 'IBAN Proof',
     descPt: 'Comprovativo do IBAN da conta bancária da empresa',
     descEn: 'Proof of company bank account IBAN',
-    required: false,
   },
   {
     key: 'pitch_deck',
@@ -80,7 +78,13 @@ const REQUIRED_DOCS = [
     labelEn: 'Pitch Deck / Startup Presentation',
     descPt: 'Apresentação do projeto (PDF ou PPT)',
     descEn: 'Project presentation (PDF or PPT)',
-    required: false,
+  },
+  {
+    key: 'docs_associacoes',
+    labelPt: 'Documentos de Associações',
+    labelEn: 'Association Documents',
+    descPt: 'Documentos de associações relevantes para o projeto',
+    descEn: 'Documents from relevant associations for the project',
   },
 ];
 
@@ -130,10 +134,12 @@ export default function PublicContractSigning() {
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
     legal_representative_email: '',
+    legal_representative_phone: '',
     company_nif: '',
     company_address: '',
     company_city: '',
     company_postal_code: '',
+    project_name: '',
   });
 
   // Toggle language
@@ -166,10 +172,12 @@ export default function PublicContractSigning() {
         ...prev,
         legal_representative_name: contract.legal_representative_name || startup?.main_contact_name || '',
         legal_representative_email: contract.legal_representative_email || startup?.main_contact_email || '',
+        legal_representative_phone: contract.legal_representative_phone || '',
         company_nif: contract.company_nif || startup?.nif || '',
         company_address: contract.company_address || startup?.address || '',
         company_city: contract.company_city || '',
         company_postal_code: contract.company_postal_code || '',
+        project_name: '',
       }));
 
       if (contract.signature_status === 'sent_for_signature' || contract.signature_status === 'completed') {
@@ -272,9 +280,7 @@ export default function PublicContractSigning() {
   const stepIndex = STEPS.findIndex(s => s.key === currentStep);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
 
-  const requiredDocsUploaded = REQUIRED_DOCS
-    .filter(d => d.required)
-    .every(d => uploadedDocs[d.key]);
+  const allDocsOptional = true; // All documents are now optional
 
   const isFormValid =
     formData.legal_representative_name.trim() &&
@@ -282,8 +288,7 @@ export default function PublicContractSigning() {
     formData.company_nif.trim() &&
     formData.company_address.trim() &&
     formData.company_city.trim() &&
-    formData.company_postal_code.trim() &&
-    requiredDocsUploaded;
+    formData.company_postal_code.trim();
 
   // Loading state
   if (isLoading) {
@@ -418,13 +423,30 @@ export default function PublicContractSigning() {
                       placeholder="email@empresa.pt"
                     />
                   </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Telefone' : 'Phone'}</Label>
+                    <Input
+                      type="tel"
+                      value={formData.legal_representative_phone}
+                      onChange={e => setFormData(prev => ({ ...prev, legal_representative_phone: e.target.value }))}
+                      placeholder="+351 900 000 000"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Nome do Projeto (se diferente)' : 'Project Name (if different)'}</Label>
+                    <Input
+                      value={formData.project_name}
+                      onChange={e => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
+                      placeholder={isPt ? 'Nome comercial do projeto' : 'Commercial project name'}
+                    />
+                  </div>
                 </div>
 
                 <Separator />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>{isPt ? 'NIF da Empresa *' : 'Company Tax ID (NIF) *'}</Label>
+                    <Label>{isPt ? 'NIF (Empresa ou Pessoa) *' : 'Tax ID (Company or Personal) *'}</Label>
                     <Input
                       value={formData.company_nif}
                       onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
@@ -497,16 +519,16 @@ export default function PublicContractSigning() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileUp className="h-5 w-5 text-primary" />
-                  {isPt ? 'Documentos Obrigatórios' : 'Required Documents'}
+                  {isPt ? 'Documentos' : 'Documents'}
                 </CardTitle>
                 <CardDescription>
                   {isPt
-                    ? 'Carregue os seguintes documentos para completar o processo de onboarding.'
-                    : 'Upload the following documents to complete the onboarding process.'}
+                    ? 'Carregue os seguintes documentos para completar o processo de onboarding. Todos os documentos são opcionais nesta fase.'
+                    : 'Upload the following documents to complete the onboarding process. All documents are optional at this stage.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {REQUIRED_DOCS.map(doc => {
+                {ONBOARDING_DOCS.map(doc => {
                   const uploaded = uploadedDocs[doc.key];
                   const isUploading = uploading === doc.key;
                   return (
@@ -522,9 +544,9 @@ export default function PublicContractSigning() {
                             <p className="text-sm font-medium">
                               {isPt ? doc.labelPt : doc.labelEn}
                             </p>
-                            {doc.required && (
-                              <Badge variant="destructive" className="text-[10px] px-1 py-0 h-4">
-                                {isPt ? 'Obrigatório' : 'Required'}
+                            {false && (
+                              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                                {isPt ? 'Opcional' : 'Optional'}
                               </Badge>
                             )}
                           </div>
@@ -589,14 +611,7 @@ export default function PublicContractSigning() {
                   );
                 })}
 
-                {!requiredDocsUploaded && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-2">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {isPt
-                      ? 'Carregue todos os documentos obrigatórios para continuar.'
-                      : 'Upload all required documents to continue.'}
-                  </p>
-                )}
+                {/* All documents are optional — no blocking warning */}
               </CardContent>
             </Card>
 
@@ -721,14 +736,12 @@ export default function PublicContractSigning() {
                   {isPt ? 'Documentos Carregados' : 'Uploaded Documents'}
                 </p>
                 <div className="space-y-1">
-                  {REQUIRED_DOCS.map(doc => {
+                  {ONBOARDING_DOCS.map(doc => {
                     const uploaded = uploadedDocs[doc.key];
                     return (
                       <div key={doc.key} className="flex items-center gap-2 text-xs">
                         {uploaded ? (
                           <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                        ) : doc.required ? (
-                          <AlertTriangle className="h-3 w-3 text-destructive" />
                         ) : (
                           <span className="h-3 w-3 rounded-full bg-muted-foreground/30 inline-block" />
                         )}
