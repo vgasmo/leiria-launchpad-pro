@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,10 @@ import { getFunnelStageLabel } from '@/lib/stageLabels';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import { STAGE_COLORS } from './RecordDrawerHeader';
+import { CategoryBadge } from '@/components/ui/CategoryBadge';
+import { supabase } from '@/lib/supabaseClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface OverviewTabProps {
   item: FunnelItem;
@@ -216,6 +220,11 @@ export function OverviewTab({
           notes: item.notes,
         }}
       />
+
+      {/* Startup Category */}
+      {item.linked_workspace_id && (
+        <StartupCategorySelector workspaceId={item.linked_workspace_id} />
+      )}
 
       {/* Details */}
       <div className="grid gap-3">
