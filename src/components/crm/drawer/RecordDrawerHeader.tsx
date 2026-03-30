@@ -98,10 +98,10 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
           }}
           disabled={isUpdating}
         >
-          <SelectTrigger className={cn('w-auto min-w-[140px] h-8', stageColor, 'text-white border-0 hover:opacity-90')} data-testid="stage-select">
+          <SelectTrigger className={cn('w-auto min-w-[180px] h-8', stageColor, 'text-white border-0 hover:opacity-90')} data-testid="stage-select">
             <SelectValue>{stageLabel}</SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="min-w-[220px]">
             {STAGE_OPTIONS.map((stage) => (
               <SelectItem key={stage} value={stage}>
                 {getFunnelStageLabel(t, stage)}
