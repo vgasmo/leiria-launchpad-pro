@@ -252,7 +252,7 @@ export default function ContractOnboarding() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>Nome do Representante Legal *</Label>
+                  <Label>Nome do Representante Legal / Gerente(s) / Promotor *</Label>
                   <Input
                     value={formData.legal_representative_name}
                     onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}

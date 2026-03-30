@@ -407,7 +407,7 @@ export default function PublicContractSigning() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>{isPt ? 'Nome do Representante Legal *' : 'Legal Representative Name *'}</Label>
+                    <Label>{isPt ? 'Nome do Representante Legal / Gerente(s) / Promotor *' : 'Legal Representative / Manager(s) / Promoter *'}</Label>
                     <Input
                       value={formData.legal_representative_name}
                       onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
