@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -276,10 +276,8 @@ function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch current category
-  const [initialized, setInitialized] = useState(false);
-  if (!initialized) {
-    setInitialized(true);
+  useEffect(() => {
+    setLoading(true);
     supabase
       .from('workspaces')
       .select('startup_category')
@@ -289,7 +287,7 @@ function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
         setCurrentCategory(data?.startup_category || null);
         setLoading(false);
       });
-  }
+  }, [workspaceId]);
 
   const handleChange = async (value: string) => {
     const newValue = value === 'none' ? null : value;
