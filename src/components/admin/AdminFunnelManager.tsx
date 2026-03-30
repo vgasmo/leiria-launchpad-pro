@@ -1,92 +1,40 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Settings } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Settings, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useFunnelItems, useCreateFunnelItem, useUpdateFunnelItem, useConvertToStartup, FunnelItem, FunnelStage } from '@/hooks/useFunnel';
-import { useUpdateNextAction } from '@/hooks/useNextAction';
 import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useIncubationTypes, useBuildings } from '@/hooks/useBackoffice';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
-import { formatRelativeTime } from '@/lib/dateUtils';
 import { IntakeRoutingManager } from './IntakeRoutingManager';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
-import { STAGE_LABELS } from '@/constants/funnelStages';
-
-const STAGE_COLORS: Record<FunnelStage, string> = {
-  new: 'bg-slate-500',
-  first_contact_booked: 'bg-blue-500',
-  met: 'bg-indigo-500',
-  qualified: 'bg-purple-500',
-  proposal_sent: 'bg-amber-500',
-  negotiating: 'bg-orange-500',
-  intake_requested: 'bg-cyan-500',
-  intake_filling: 'bg-cyan-400',
-  intake_submitted: 'bg-teal-500',
-  intake_review: 'bg-teal-600',
-  intake_changes_requested: 'bg-yellow-500',
-  approved_for_signature: 'bg-lime-500',
-  sent_for_signature: 'bg-green-400',
-  contracted: 'bg-green-500',
-  incubating: 'bg-emerald-600',
-  accelerating: 'bg-primary',
-  rejected: 'bg-destructive',
-  archived: 'bg-muted-foreground',
-};
-
-const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'intake_requested', 'intake_filling', 'intake_submitted', 'intake_review', 'approved_for_signature', 'sent_for_signature', 'contracted'];
+import { PipelineView } from '@/components/crm/PipelineView';
+import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 
 export function AdminFunnelManager() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: items } = useFunnelItems();
-  const { data: consultors } = useConsultors();
   const { data: programs } = usePrograms();
+  const { data: consultors } = useConsultors();
   const createItem = useCreateFunnelItem();
-  const updateItem = useUpdateFunnelItem();
-  const convertToStartup = useConvertToStartup();
   
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<FunnelItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<CrmInboxItem | null>(null);
   const [convertDialogItem, setConvertDialogItem] = useState<FunnelItem | null>(null);
-  const [showMineOnly, setShowMineOnly] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showMineOnly, setShowMineOnly] = useState(false);
 
-  // Filter items based on showMineOnly toggle
-  const filteredItems = showMineOnly && user 
-    ? items?.filter(i => i.owner_consultant_id === user.id) 
-    : items;
-
-  // Group items by stage for kanban view
-  const itemsByStage = ACTIVE_STAGES.reduce((acc, stage) => {
-    acc[stage] = filteredItems?.filter(i => i.stage === stage) || [];
-    return acc;
-  }, {} as Record<FunnelStage, FunnelItem[]>);
-
-  const handleCardClick = (item: FunnelItem) => {
+  const handleOpenDrawer = (item: CrmInboxItem) => {
     setSelectedItem(item);
     setDrawerOpen(true);
-  };
-
-  const handleStageChange = (item: FunnelItem, newStage: FunnelStage) => {
-    updateItem.mutate({ id: item.id, stage: newStage });
-  };
-
-  const handleAssign = (item: FunnelItem, consultorId: string) => {
-    updateItem.mutate({ id: item.id, owner_consultant_id: consultorId });
   };
 
   return (
@@ -137,63 +85,11 @@ export function AdminFunnelManager() {
       </TabsContent>
 
       <TabsContent value="funnel">
-        {/* Kanban Board */}
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {ACTIVE_STAGES.map(stage => {
-            const stageItems = itemsByStage[stage];
-            
-            return (
-              <div key={stage} className="flex-shrink-0 w-72">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={cn('h-3 w-3 rounded-full', STAGE_COLORS[stage])} />
-                  <span className="font-medium text-sm">{t(`pipeline.stages.${stage}`, STAGE_LABELS[stage])}</span>
-                  <Badge variant="secondary" className="ml-auto text-xs">{stageItems.length}</Badge>
-                </div>
-                <ScrollArea className="h-[600px]">
-                  <div className="space-y-2 pr-2">
-                    {stageItems.map(item => (
-                      <FunnelCard
-                        key={item.id}
-                        item={item}
-                        consultors={consultors || []}
-                        onStageChange={handleStageChange}
-                        onAssign={handleAssign}
-                        onConvert={() => setConvertDialogItem(item)}
-                        onClick={() => handleCardClick(item)}
-                      />
-                    ))}
-                    {stageItems.length === 0 && (
-                      <div className="p-4 text-center text-muted-foreground text-sm border border-dashed rounded-lg">
-                        {t('crm.emptyColumn', 'Arraste leads para aqui')}
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Convert Dialog */}
-        {convertDialogItem && (
-          <Dialog open={!!convertDialogItem} onOpenChange={() => setConvertDialogItem(null)}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t('crm.convertToStartup', 'Converter para Startup')}</DialogTitle>
-              </DialogHeader>
-              <ConvertForm
-                item={convertDialogItem}
-                programs={programs || []}
-                onSubmit={(data) => {
-                  convertToStartup.mutate(
-                    { funnelItemId: convertDialogItem.id, ...data },
-                    { onSuccess: () => setConvertDialogItem(null) }
-                  );
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
+        <PipelineView
+          myItemsOnly={showMineOnly}
+          currentUserId={user?.id}
+          onOpenDrawer={handleOpenDrawer}
+        />
 
         {/* CRM Record Drawer */}
         <RecordDrawer
