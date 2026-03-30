@@ -222,7 +222,7 @@ export function useTransitionIntakeStatus() {
       // Get current status
       const { data: current, error: fetchErr } = await supabase
         .from('contract_intakes')
-        .select('status, funnel_item_id, organization_name, company_nif, company_address, company_city, company_postal_code, iban, legal_representative_name, legal_representative_email, legal_representative_phone, billing_email, startup_description, website, documents_json, missing_documents')
+        .select('status, funnel_item_id, organization_name, company_nif, company_address, company_city, company_postal_code, iban, legal_representative_name, legal_representative_email, legal_representative_phone, billing_email, startup_description, website, documents_json, missing_documents, submitted_at')
         .eq('id', params.intakeId)
         .single();
       if (fetchErr) throw fetchErr;
