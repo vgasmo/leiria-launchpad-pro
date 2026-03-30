@@ -29,9 +29,18 @@ const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
   { key: 'signing', icon: PenTool, label: 'Assinatura Digital' },
 ];
 
+interface RepresentativeEntry {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface CompanyFormData {
   legal_representative_name: string;
   legal_representative_email: string;
+  legal_representative_phone: string;
+  certidao_permanente_code: string;
+  additional_representatives: RepresentativeEntry[];
   company_nif: string;
   company_address: string;
   company_city: string;
@@ -61,6 +70,9 @@ export default function ContractOnboarding() {
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
     legal_representative_email: '',
+    legal_representative_phone: '',
+    certidao_permanente_code: '',
+    additional_representatives: [],
     company_nif: '',
     company_address: '',
     company_city: '',
@@ -268,18 +280,101 @@ export default function ContractOnboarding() {
                     placeholder="email@empresa.pt"
                   />
                 </div>
+               <div className="space-y-1.5">
+                  <Label>Telefone do Representante</Label>
+                  <Input
+                    type="tel"
+                    value={formData.legal_representative_phone}
+                    onChange={e => setFormData(prev => ({ ...prev, legal_representative_phone: e.target.value }))}
+                    placeholder="+351 900 000 000"
+                  />
+                </div>
               </div>
+
+              {/* Additional representatives */}
+              {formData.additional_representatives.map((rep, idx) => (
+                <div key={idx} className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Representante/Gerente adicional {idx + 2}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs text-destructive"
+                      onClick={() => setFormData(p => ({
+                        ...p,
+                        additional_representatives: p.additional_representatives.filter((_, i) => i !== idx),
+                      }))}
+                    >
+                      Remover
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      value={rep.name}
+                      onChange={e => {
+                        const updated = [...formData.additional_representatives];
+                        updated[idx] = { ...updated[idx], name: e.target.value };
+                        setFormData(p => ({ ...p, additional_representatives: updated }));
+                      }}
+                      placeholder="Nome completo"
+                    />
+                    <Input
+                      type="email"
+                      value={rep.email}
+                      onChange={e => {
+                        const updated = [...formData.additional_representatives];
+                        updated[idx] = { ...updated[idx], email: e.target.value };
+                        setFormData(p => ({ ...p, additional_representatives: updated }));
+                      }}
+                      placeholder="Email"
+                    />
+                    <Input
+                      type="tel"
+                      value={rep.phone}
+                      onChange={e => {
+                        const updated = [...formData.additional_representatives];
+                        updated[idx] = { ...updated[idx], phone: e.target.value };
+                        setFormData(p => ({ ...p, additional_representatives: updated }));
+                      }}
+                      placeholder="Telefone"
+                    />
+                  </div>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setFormData(p => ({
+                  ...p,
+                  additional_representatives: [...p.additional_representatives, { name: '', email: '', phone: '' }],
+                }))}
+              >
+                + Adicionar Representante/Gerente
+              </Button>
 
               <Separator />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>NIF da Empresa *</Label>
+                  <Label>NIF (Empresa ou Pessoa) *</Label>
                   <Input
                     value={formData.company_nif}
                     onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
                     placeholder="123456789"
                     maxLength={9}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Código da Certidão Permanente</Label>
+                  <Input
+                    value={formData.certidao_permanente_code}
+                    onChange={e => setFormData(prev => ({ ...prev, certidao_permanente_code: e.target.value }))}
+                    placeholder="Código de acesso online"
                   />
                 </div>
                 <div className="space-y-1.5">
