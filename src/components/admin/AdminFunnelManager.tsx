@@ -306,7 +306,7 @@ function FunnelCard({
               {ACTIVE_STAGES.filter(s => s !== item.stage).map(s => (
                 <SelectItem key={s} value={s}>{t(`pipeline.stages.${s}`, STAGE_LABELS[s])}</SelectItem>
               ))}
-              <SelectItem value="rejected">{t('pipeline.stages.rejected')}</SelectItem>
+              <SelectItem value="rejected">{t('pipeline.stages.rejected', STAGE_LABELS.rejected)}</SelectItem>
             </SelectContent>
           </Select>
           
