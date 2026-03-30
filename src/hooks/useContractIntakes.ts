@@ -1,26 +1,26 @@
 /**
  * Hook for managing contract intake lifecycle.
- * Provides CRUD, status transitions, and audit trail for the two-phase onboarding flow.
+ * Provides CRUD, status transitions with validation, audit trail,
+ * and data snapshot on approval for the two-phase onboarding flow.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  type IntakeState,
+  isValidIntakeTransition,
+  INTAKE_TO_CRM_STAGE,
+  CUSTOMER_EDITABLE_STATES,
+} from '@/constants/intakeStates';
 
-export type IntakeStatus =
-  | 'intake_requested'
-  | 'intake_in_progress'
-  | 'intake_submitted'
-  | 'review_pending'
-  | 'changes_requested'
-  | 'approved_for_signature'
-  | 'rejected';
+export type { IntakeState };
 
 export interface ContractIntake {
   id: string;
   funnel_item_id: string | null;
   contract_id: string | null;
-  status: IntakeStatus;
+  status: IntakeState;
   organization_name: string | null;
   company_nif: string | null;
   company_address: string | null;
@@ -34,8 +34,8 @@ export interface ContractIntake {
   billing_email: string | null;
   startup_description: string | null;
   website: string | null;
-  documents_json: Record<string, any>;
-  missing_documents: string[];
+  documents_json: Record<string, any> | null;
+  missing_documents: string[] | null;
   intake_token: string | null;
   intake_token_expires_at: string | null;
   reviewed_by: string | null;
@@ -64,7 +64,7 @@ export interface IntakeEvent {
 }
 
 /** Fetch all intakes with optional status filter */
-export function useContractIntakes(statusFilter?: IntakeStatus | IntakeStatus[]) {
+export function useContractIntakes(statusFilter?: IntakeState | IntakeState[]) {
   return useQuery({
     queryKey: ['contract-intakes', statusFilter],
     queryFn: async (): Promise<ContractIntake[]> => {
@@ -105,6 +105,25 @@ export function useContractIntake(intakeId: string | undefined) {
   });
 }
 
+/** Fetch intake by funnel item ID */
+export function useIntakeByFunnelItem(funnelItemId: string | undefined) {
+  return useQuery({
+    queryKey: ['contract-intake-by-funnel', funnelItemId],
+    enabled: !!funnelItemId,
+    queryFn: async (): Promise<ContractIntake | null> => {
+      const { data, error } = await supabase
+        .from('contract_intakes')
+        .select('*')
+        .eq('funnel_item_id', funnelItemId!)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as ContractIntake | null;
+    },
+  });
+}
+
 /** Fetch intake events (audit trail) */
 export function useIntakeEvents(intakeId: string | undefined) {
   return useQuery({
@@ -135,11 +154,10 @@ export function useCreateIntake() {
       contactName: string;
       assignedTo?: string;
     }) => {
-      // Generate token for public form
       const tokenArr = new Uint8Array(32);
       crypto.getRandomValues(tokenArr);
       const token = Array.from(tokenArr, b => b.toString(16).padStart(2, '0')).join('');
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       const { data, error } = await supabase
         .from('contract_intakes')
@@ -159,7 +177,12 @@ export function useCreateIntake() {
 
       if (error) throw error;
 
-      // Log audit event
+      // Move CRM stage
+      await supabase.from('funnel_items')
+        .update({ stage: 'intake_requested' })
+        .eq('id', params.funnelItemId);
+
+      // Audit trail
       await supabase.from('intake_events').insert({
         intake_id: data.id,
         event_type: 'intake_created',
@@ -184,7 +207,7 @@ export function useCreateIntake() {
   });
 }
 
-/** Transition intake status with audit trail */
+/** Transition intake status with validation and audit trail */
 export function useTransitionIntakeStatus() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -192,29 +215,59 @@ export function useTransitionIntakeStatus() {
   return useMutation({
     mutationFn: async (params: {
       intakeId: string;
-      newStatus: IntakeStatus;
+      newStatus: IntakeState;
       notes?: string;
       metadata?: Record<string, any>;
     }) => {
       // Get current status
       const { data: current, error: fetchErr } = await supabase
         .from('contract_intakes')
-        .select('status')
+        .select('status, funnel_item_id, organization_name, company_nif, company_address, company_city, company_postal_code, iban, legal_representative_name, legal_representative_email, legal_representative_phone, billing_email, startup_description, website, documents_json, missing_documents')
         .eq('id', params.intakeId)
         .single();
       if (fetchErr) throw fetchErr;
+
+      const currentStatus = current.status as IntakeState;
+
+      // Validate transition
+      if (!isValidIntakeTransition(currentStatus, params.newStatus)) {
+        throw new Error(`Transição inválida: ${currentStatus} → ${params.newStatus}`);
+      }
 
       const updateFields: Record<string, any> = {
         status: params.newStatus,
       };
 
-      if (params.newStatus === 'intake_submitted' || params.newStatus === 'review_pending') {
+      // Status-specific field updates
+      if (params.newStatus === 'intake_submitted') {
         updateFields.submitted_at = new Date().toISOString();
+      }
+      if (params.newStatus === 'review_pending') {
+        updateFields.submitted_at = updateFields.submitted_at || current.submitted_at || new Date().toISOString();
       }
       if (params.newStatus === 'approved_for_signature') {
         updateFields.reviewed_by = user?.id;
         updateFields.reviewed_at = new Date().toISOString();
         updateFields.review_notes = params.notes || null;
+        // Freeze data snapshot
+        updateFields.approved_data_snapshot = {
+          organization_name: current.organization_name,
+          company_nif: current.company_nif,
+          company_address: current.company_address,
+          company_city: current.company_city,
+          company_postal_code: current.company_postal_code,
+          iban: current.iban,
+          legal_representative_name: current.legal_representative_name,
+          legal_representative_email: current.legal_representative_email,
+          legal_representative_phone: current.legal_representative_phone,
+          billing_email: current.billing_email,
+          startup_description: current.startup_description,
+          website: current.website,
+          documents_json: current.documents_json,
+          missing_documents: current.missing_documents,
+          frozen_at: new Date().toISOString(),
+          frozen_by: user?.id,
+        };
       }
       if (params.newStatus === 'changes_requested') {
         updateFields.changes_requested_notes = params.notes || null;
@@ -226,20 +279,33 @@ export function useTransitionIntakeStatus() {
         .eq('id', params.intakeId);
       if (error) throw error;
 
+      // Sync CRM stage if funnel item is linked
+      if (current.funnel_item_id) {
+        const crmStage = INTAKE_TO_CRM_STAGE[params.newStatus];
+        if (crmStage) {
+          await supabase.from('funnel_items')
+            .update({ stage: crmStage })
+            .eq('id', current.funnel_item_id);
+        }
+      }
+
       // Audit trail
       await supabase.from('intake_events').insert({
         intake_id: params.intakeId,
         event_type: `status_changed_to_${params.newStatus}`,
-        from_status: current.status,
+        from_status: currentStatus,
         to_status: params.newStatus,
         performed_by: user?.id,
-        metadata: params.metadata || { notes: params.notes },
+        metadata: { notes: params.notes, ...params.metadata },
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
       queryClient.invalidateQueries({ queryKey: ['contract-intake'] });
+      queryClient.invalidateQueries({ queryKey: ['contract-intake-by-funnel'] });
       queryClient.invalidateQueries({ queryKey: ['intake-events'] });
+      queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
     },
   });
 }
