@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     const body = await req.json()
     const { action, token, contractId } = body
 
-    // === Staff action: generate onboarding token ===
-    if (action === 'generate_token') {
+    // === Staff-authenticated actions ===
+    if (action === 'generate_token' || action === 'staff_submit_signing') {
       const authHeader = req.headers.get('Authorization')
       if (!authHeader) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -64,6 +64,133 @@ Deno.serve(async (req) => {
         })
       }
 
+      // === Staff: Send to Signature (from approved_for_signature) ===
+      if (action === 'staff_submit_signing') {
+        if (!contractId) {
+          return new Response(JSON.stringify({ error: 'contractId required' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+
+        // Fetch contract
+        const { data: contract, error: cErr } = await supabase
+          .from('startup_contracts')
+          .select(`
+            id, contract_number, status, monthly_fee, currency, start_date, end_date,
+            square_meters, signature_status, signature_provider, legal_representative_name,
+            legal_representative_email, company_nif, company_address,
+            company_city, company_postal_code,
+            workspace:workspaces(id, startup:startups(id, name))
+          `)
+          .eq('id', contractId)
+          .single()
+
+        if (cErr || !contract) {
+          return new Response(JSON.stringify({ error: 'Contract not found' }), {
+            status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+
+        // Use provider from body or from contract record
+        const provider: string | null = body.signatureProvider || (contract as any).signature_provider || null
+
+        if (!provider || !['docusign', 'pandadoc', 'manual'].includes(provider)) {
+          return new Response(JSON.stringify({
+            error: 'signature_provider_not_configured',
+            message: 'Selecione um provider de assinatura antes de enviar.',
+          }), {
+            status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+
+        const signerEmail = body.signerEmail || (contract as any).legal_representative_email
+        const signerName = body.signerName || (contract as any).legal_representative_name
+
+        if (!signerEmail || !signerName) {
+          return new Response(JSON.stringify({ error: 'Dados do signatário em falta (nome e email)' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+
+        // Update contract with provider and sent status
+        await supabase
+          .from('startup_contracts')
+          .update({
+            signature_provider: provider,
+            signature_status: 'sent_for_signature',
+            signature_requested_at: new Date().toISOString(),
+          })
+          .eq('id', contractId)
+
+        let signingResult: any = { status: 'pending_manual', provider }
+
+        try {
+          // Generate PDF
+          let documentBase64 = ''
+          const pdfRes = await fetch(`${supabaseUrl}/functions/v1/generate-contract-pdf`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${serviceKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ contractId }),
+          })
+          if (pdfRes.ok) {
+            const pdfData = await pdfRes.json()
+            documentBase64 = pdfData.documentBase64 || ''
+          }
+
+          // Provider dispatch
+          if (provider === 'docusign') {
+            const dsRes = await fetch(`${supabaseUrl}/functions/v1/docusign-send-envelope`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contractId, signerEmail, signerName, companyNif: (contract as any).company_nif, documentBase64 }),
+            })
+            if (dsRes.ok) { signingResult = await dsRes.json(); signingResult.provider = 'docusign' }
+            else { console.warn('DocuSign failed:', await dsRes.text()); signingResult = { status: 'pending_manual', provider: 'docusign', message: 'DocuSign indisponível' } }
+
+          } else if (provider === 'pandadoc') {
+            const pdRes = await fetch(`${supabaseUrl}/functions/v1/pandadoc-send-document`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contractId, signerEmail, signerName, companyNif: (contract as any).company_nif, documentBase64 }),
+            })
+            if (pdRes.ok) { signingResult = await pdRes.json(); signingResult.provider = 'pandadoc' }
+            else { console.warn('PandaDoc failed:', await pdRes.text()); signingResult = { status: 'pending_manual', provider: 'pandadoc', message: 'PandaDoc indisponível' } }
+
+          } else if (provider === 'manual') {
+            await supabase.from('startup_contracts').update({ signature_status: 'pending_manual' }).eq('id', contractId)
+            signingResult = { status: 'pending_manual', provider: 'manual', message: 'Assinatura manual. O staff coordenará o processo.' }
+          }
+
+          // Notify staff if manual fallback
+          if (signingResult.status === 'pending_manual') {
+            const { data: staffUsers } = await supabase.from('user_roles').select('user_id').in('role', ['admin', 'consultor'])
+            if (staffUsers?.length) {
+              const startupName = (contract as any).workspace?.startup?.name || 'Startup'
+              await supabase.from('notifications').insert(
+                staffUsers.map((s: any) => ({
+                  user_id: s.user_id, type: 'contract_signing',
+                  title: `Contrato pendente: ${startupName}`,
+                  message: `Assinatura pendente via ${provider}. Ação manual necessária.`,
+                  entity_type: 'contract', entity_id: contractId,
+                  link: '/admin?tab=backoffice&subtab=contracts',
+                }))
+              )
+            }
+          }
+        } catch (err) {
+          console.error('Signing flow error:', err)
+          signingResult = { status: 'pending_manual', provider, message: String(err) }
+        }
+
+        return new Response(JSON.stringify(signingResult), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // === Generate onboarding token ===
       const onboardingToken = generateToken()
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
