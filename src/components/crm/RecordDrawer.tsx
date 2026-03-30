@@ -630,3 +630,95 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
     </Sheet>
   );
 }
+
+/** Inline sub-component: stage-aware intake actions for the drawer */
+function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any }) {
+  const { t } = useTranslation();
+  const { data: intake, isLoading } = useIntakeByFunnelItem(item.id);
+  const createIntake = useCreateIntake();
+
+  const preIntakeStages = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating'];
+  const showCreateCTA = preIntakeStages.includes(item.stage) && !intake;
+
+  if (isLoading) return null;
+
+  // No intake yet — show primary CTA
+  if (showCreateCTA) {
+    return (
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-3 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            Ações de Contratação
+          </p>
+          <Button
+            size="sm"
+            className="h-8 text-xs gap-1.5"
+            disabled={createIntake.isPending}
+            onClick={async () => {
+              try {
+                const result = await createIntake.mutateAsync({
+                  funnelItemId: item.id,
+                  organizationName: item.organization_name || '',
+                  contactEmail: item.contact_email || '',
+                  contactName: item.contact_name || '',
+                  assignedTo: item.owner_consultant_id || user?.id,
+                });
+                await navigator.clipboard.writeText(result.publicUrl);
+                toast.success('Pedido de contratação criado! Link copiado.');
+              } catch {}
+            }}
+          >
+            <Send className="h-3.5 w-3.5" />
+            Enviar Pedido de Contratação
+          </Button>
+          <p className="text-[10px] text-muted-foreground">
+            O cliente receberá um formulário para preencher dados. Após submissão, a equipa valida antes de enviar para assinatura.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Intake exists — show review panel or status info
+  if (intake) {
+    return (
+      <div className="space-y-2">
+        {/* Copy link action for in-progress intakes */}
+        {CUSTOMER_EDITABLE_STATES.includes(intake.status as IntakeState) && intake.intake_token && (
+          <Card className="border-cyan-200 bg-cyan-50/50 dark:bg-cyan-900/10">
+            <CardContent className="p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium">Cliente a preencher dados</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {INTAKE_STATE_LABELS[intake.status as IntakeState]}
+                  {intake.reminder_count > 0 && ` • ${intake.reminder_count}x lembrado`}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1"
+                onClick={async () => {
+                  const url = `${window.location.origin}/contract-intake/${intake.intake_token}`;
+                  await navigator.clipboard.writeText(url);
+                  toast.success('Link copiado!');
+                }}
+              >
+                <Copy className="h-3 w-3" />
+                Copiar Link
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Review panel for submitted/review_pending intakes */}
+        {['intake_submitted', 'review_pending', 'changes_requested', 'approved_for_signature', 'signed'].includes(intake.status) && (
+          <IntakeReviewPanel intake={intake} />
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
