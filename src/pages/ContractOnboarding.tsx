@@ -70,6 +70,9 @@ export default function ContractOnboarding() {
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
     legal_representative_email: '',
+    legal_representative_phone: '',
+    certidao_permanente_code: '',
+    additional_representatives: [],
     company_nif: '',
     company_address: '',
     company_city: '',
