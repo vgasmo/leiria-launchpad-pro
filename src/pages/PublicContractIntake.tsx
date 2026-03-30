@@ -25,10 +25,17 @@ import {
   Shield, Loader2, AlertTriangle, Upload, Globe, Info
 } from 'lucide-react';
 
+interface RepresentativeEntry {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface IntakeFormData {
   organization_name: string;
   project_name: string;
   company_nif: string;
+  certidao_permanente_code: string;
   company_address: string;
   company_city: string;
   company_postal_code: string;
@@ -36,6 +43,7 @@ interface IntakeFormData {
   legal_representative_name: string;
   legal_representative_email: string;
   legal_representative_phone: string;
+  additional_representatives: RepresentativeEntry[];
   billing_email: string;
   startup_description: string;
   website: string;
@@ -273,7 +281,14 @@ export default function PublicContractIntake() {
 
             <Separator />
 
-            <p className="text-sm font-semibold">{isPt ? 'Representante Legal' : 'Legal Representative'}</p>
+            <div className="space-y-1.5">
+              <Label>{isPt ? 'Código da Certidão Permanente' : 'Permanent Certificate Code'}</Label>
+              <Input value={formData.certidao_permanente_code} onChange={e => setFormData(p => ({ ...p, certidao_permanente_code: e.target.value }))} placeholder={isPt ? 'Código de acesso online' : 'Online access code'} />
+            </div>
+
+            <Separator />
+
+            <p className="text-sm font-semibold">{isPt ? 'Representante Legal / Gerente(s) / Promotor' : 'Legal Representative / Manager(s) / Promoter'}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>{isPt ? 'Nome Completo' : 'Full Name'} *</Label>
@@ -292,6 +307,72 @@ export default function PublicContractIntake() {
                 <Input type="email" value={formData.billing_email} onChange={e => setFormData(p => ({ ...p, billing_email: e.target.value }))} />
               </div>
             </div>
+
+            {/* Additional representatives */}
+            {formData.additional_representatives.map((rep, idx) => (
+              <div key={idx} className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/20">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    {isPt ? `Representante/Gerente adicional ${idx + 2}` : `Additional Representative/Manager ${idx + 2}`}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs text-destructive"
+                    onClick={() => setFormData(p => ({
+                      ...p,
+                      additional_representatives: p.additional_representatives.filter((_, i) => i !== idx),
+                    }))}
+                  >
+                    {isPt ? 'Remover' : 'Remove'}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input
+                    value={rep.name}
+                    onChange={e => {
+                      const updated = [...formData.additional_representatives];
+                      updated[idx] = { ...updated[idx], name: e.target.value };
+                      setFormData(p => ({ ...p, additional_representatives: updated }));
+                    }}
+                    placeholder={isPt ? 'Nome completo' : 'Full name'}
+                  />
+                  <Input
+                    type="email"
+                    value={rep.email}
+                    onChange={e => {
+                      const updated = [...formData.additional_representatives];
+                      updated[idx] = { ...updated[idx], email: e.target.value };
+                      setFormData(p => ({ ...p, additional_representatives: updated }));
+                    }}
+                    placeholder="Email"
+                  />
+                  <Input
+                    type="tel"
+                    value={rep.phone}
+                    onChange={e => {
+                      const updated = [...formData.additional_representatives];
+                      updated[idx] = { ...updated[idx], phone: e.target.value };
+                      setFormData(p => ({ ...p, additional_representatives: updated }));
+                    }}
+                    placeholder={isPt ? 'Telefone' : 'Phone'}
+                  />
+                </div>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setFormData(p => ({
+                ...p,
+                additional_representatives: [...p.additional_representatives, { name: '', email: '', phone: '' }],
+              }))}
+            >
+              + {isPt ? 'Adicionar Representante/Gerente' : 'Add Representative/Manager'}
+            </Button>
 
             <Separator />
 
