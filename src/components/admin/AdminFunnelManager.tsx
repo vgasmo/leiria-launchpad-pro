@@ -32,6 +32,13 @@ const STAGE_COLORS: Record<FunnelStage, string> = {
   qualified: 'bg-purple-500',
   proposal_sent: 'bg-amber-500',
   negotiating: 'bg-orange-500',
+  intake_requested: 'bg-cyan-500',
+  intake_filling: 'bg-cyan-400',
+  intake_submitted: 'bg-teal-500',
+  intake_review: 'bg-teal-600',
+  intake_changes_requested: 'bg-yellow-500',
+  approved_for_signature: 'bg-lime-500',
+  sent_for_signature: 'bg-green-400',
   contracted: 'bg-green-500',
   incubating: 'bg-emerald-600',
   accelerating: 'bg-primary',
@@ -39,7 +46,7 @@ const STAGE_COLORS: Record<FunnelStage, string> = {
   archived: 'bg-muted-foreground',
 };
 
-const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'contracted'];
+const ACTIVE_STAGES: FunnelStage[] = ['new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent', 'negotiating', 'intake_requested', 'intake_filling', 'intake_submitted', 'intake_review', 'approved_for_signature', 'sent_for_signature', 'contracted'];
 
 export function AdminFunnelManager() {
   const { t } = useTranslation();

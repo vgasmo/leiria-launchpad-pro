@@ -881,6 +881,129 @@ export type Database = {
           },
         ]
       }
+      contract_intakes: {
+        Row: {
+          approved_data_snapshot: Json | null
+          assigned_to: string | null
+          billing_email: string | null
+          changes_requested_notes: string | null
+          company_address: string | null
+          company_city: string | null
+          company_country: string | null
+          company_nif: string | null
+          company_postal_code: string | null
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          documents_json: Json | null
+          funnel_item_id: string | null
+          iban: string | null
+          id: string
+          intake_token: string | null
+          intake_token_expires_at: string | null
+          last_reminder_sent_at: string | null
+          legal_representative_email: string | null
+          legal_representative_name: string | null
+          legal_representative_phone: string | null
+          missing_documents: string[] | null
+          organization_name: string | null
+          reminder_count: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          startup_description: string | null
+          status: Database["public"]["Enums"]["intake_status"]
+          submitted_at: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          approved_data_snapshot?: Json | null
+          assigned_to?: string | null
+          billing_email?: string | null
+          changes_requested_notes?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country?: string | null
+          company_nif?: string | null
+          company_postal_code?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          documents_json?: Json | null
+          funnel_item_id?: string | null
+          iban?: string | null
+          id?: string
+          intake_token?: string | null
+          intake_token_expires_at?: string | null
+          last_reminder_sent_at?: string | null
+          legal_representative_email?: string | null
+          legal_representative_name?: string | null
+          legal_representative_phone?: string | null
+          missing_documents?: string[] | null
+          organization_name?: string | null
+          reminder_count?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_description?: string | null
+          status?: Database["public"]["Enums"]["intake_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          approved_data_snapshot?: Json | null
+          assigned_to?: string | null
+          billing_email?: string | null
+          changes_requested_notes?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country?: string | null
+          company_nif?: string | null
+          company_postal_code?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          documents_json?: Json | null
+          funnel_item_id?: string | null
+          iban?: string | null
+          id?: string
+          intake_token?: string | null
+          intake_token_expires_at?: string | null
+          last_reminder_sent_at?: string | null
+          legal_representative_email?: string | null
+          legal_representative_name?: string | null
+          legal_representative_phone?: string | null
+          missing_documents?: string[] | null
+          organization_name?: string | null
+          reminder_count?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_description?: string | null
+          status?: Database["public"]["Enums"]["intake_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_intakes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_intakes_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_lifecycle_events: {
         Row: {
           contract_id: string
@@ -2290,6 +2413,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      intake_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          from_status: string | null
+          id: string
+          intake_id: string
+          metadata: Json | null
+          performed_by: string | null
+          to_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          from_status?: string | null
+          id?: string
+          intake_id: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          intake_id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intake_events_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "contract_intakes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       intake_routing: {
         Row: {
@@ -7692,6 +7856,14 @@ export type Database = {
         | "backoffice"
       compliance_status: "on_track" | "needs_update" | "overdue"
       health_score: "critical" | "at_risk" | "stable" | "healthy" | "thriving"
+      intake_status:
+        | "intake_requested"
+        | "intake_in_progress"
+        | "intake_submitted"
+        | "review_pending"
+        | "changes_requested"
+        | "approved_for_signature"
+        | "rejected"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
       startup_stage: "ideation" | "validation" | "mvp" | "growth" | "scale"
       workspace_priority: "star" | "high" | "standard" | "maintenance"
@@ -7834,6 +8006,15 @@ export const Constants = {
       ],
       compliance_status: ["on_track", "needs_update", "overdue"],
       health_score: ["critical", "at_risk", "stable", "healthy", "thriving"],
+      intake_status: [
+        "intake_requested",
+        "intake_in_progress",
+        "intake_submitted",
+        "review_pending",
+        "changes_requested",
+        "approved_for_signature",
+        "rejected",
+      ],
       milestone_status: ["not_started", "in_progress", "completed", "delayed"],
       startup_stage: ["ideation", "validation", "mvp", "growth", "scale"],
       workspace_priority: ["star", "high", "standard", "maintenance"],
