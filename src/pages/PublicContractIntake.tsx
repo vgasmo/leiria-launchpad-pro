@@ -67,9 +67,11 @@ export default function PublicContractIntake() {
   const isPt = lang === 'pt';
 
   const [formData, setFormData] = useState<IntakeFormData>({
-    organization_name: '', project_name: '', company_nif: '', company_address: '', company_city: '',
+    organization_name: '', project_name: '', company_nif: '', certidao_permanente_code: '',
+    company_address: '', company_city: '',
     company_postal_code: '', iban: '', legal_representative_name: '',
     legal_representative_email: '', legal_representative_phone: '',
+    additional_representatives: [],
     billing_email: '', startup_description: '', website: '',
   });
 
