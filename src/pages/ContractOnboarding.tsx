@@ -377,7 +377,6 @@ export default function ContractOnboarding() {
                     placeholder="Código de acesso online"
                   />
                 </div>
-                </div>
                 <div className="space-y-1.5">
                   <Label>Morada Fiscal *</Label>
                   <Input
