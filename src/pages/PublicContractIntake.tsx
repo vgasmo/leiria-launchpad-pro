@@ -242,7 +242,11 @@ export default function PublicContractIntake() {
                 <Input value={formData.organization_name} onChange={e => setFormData(p => ({ ...p, organization_name: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>NIF *</Label>
+                <Label>{isPt ? 'Nome do Projeto (se diferente)' : 'Project Name (if different)'}</Label>
+                <Input value={formData.project_name} onChange={e => setFormData(p => ({ ...p, project_name: e.target.value }))} placeholder={isPt ? 'Nome comercial do projeto' : 'Commercial project name'} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{isPt ? 'NIF (Empresa ou Pessoa)' : 'Tax ID (Company or Personal)'} *</Label>
                 <Input value={formData.company_nif} onChange={e => setFormData(p => ({ ...p, company_nif: e.target.value }))} />
               </div>
               <div className="md:col-span-2 space-y-1.5">
@@ -280,8 +284,8 @@ export default function PublicContractIntake() {
                 <Input type="email" value={formData.legal_representative_email} onChange={e => setFormData(p => ({ ...p, legal_representative_email: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>{isPt ? 'Telefone' : 'Phone'}</Label>
-                <Input value={formData.legal_representative_phone} onChange={e => setFormData(p => ({ ...p, legal_representative_phone: e.target.value }))} />
+                <Label>{isPt ? 'Telefone' : 'Phone'} *</Label>
+                <Input type="tel" value={formData.legal_representative_phone} onChange={e => setFormData(p => ({ ...p, legal_representative_phone: e.target.value }))} placeholder="+351 900 000 000" />
               </div>
               <div className="space-y-1.5">
                 <Label>{isPt ? 'Email de Faturação' : 'Billing Email'}</Label>
