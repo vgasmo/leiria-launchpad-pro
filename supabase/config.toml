@@ -220,6 +220,25 @@ verify_jwt = false
 verify_jwt = false
 
 # ============================================
+# CONTRACT ONBOARDING FUNCTIONS
+# ============================================
+
+# Public intake form — token-based auth, no JWT
+# Called by founders via /contract-intake/:token
+[functions.public-contract-onboarding]
+verify_jwt = false
+
+# Cron/system — sends automated intake & signature reminders
+# Called by pg_cron with x-cron-secret header
+[functions.run-intake-reminders]
+verify_jwt = false
+
+# System/staff — sends intake emails (initial request, corrections, etc.)
+# Called by staff actions via invokeWithAuth (runtime JWT validation)
+[functions.send-intake-email]
+verify_jwt = false
+
+# ============================================
 # AI COPILOT (User-facing, streaming)
 # JWT disabled at gateway, validated at runtime
 # ============================================
