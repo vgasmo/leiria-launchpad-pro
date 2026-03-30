@@ -544,7 +544,7 @@ export default function PublicContractSigning() {
                             <p className="text-sm font-medium">
                               {isPt ? doc.labelPt : doc.labelEn}
                             </p>
-                            {doc.required && (
+                            {false && (
                               <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
                                 {isPt ? 'Opcional' : 'Optional'}
                               </Badge>
@@ -742,8 +742,6 @@ export default function PublicContractSigning() {
                       <div key={doc.key} className="flex items-center gap-2 text-xs">
                         {uploaded ? (
                           <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                        ) : doc.required ? (
-                          <AlertTriangle className="h-3 w-3 text-destructive" />
                         ) : (
                           <span className="h-3 w-3 rounded-full bg-muted-foreground/30 inline-block" />
                         )}
