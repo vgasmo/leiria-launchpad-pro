@@ -134,10 +134,12 @@ export default function PublicContractSigning() {
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
     legal_representative_email: '',
+    legal_representative_phone: '',
     company_nif: '',
     company_address: '',
     company_city: '',
     company_postal_code: '',
+    project_name: '',
   });
 
   // Toggle language
