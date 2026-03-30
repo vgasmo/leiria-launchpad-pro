@@ -342,7 +342,8 @@ export default function PublicContractIntake() {
               !formData.organization_name ||
               !formData.company_nif ||
               !formData.legal_representative_name ||
-              !formData.legal_representative_email
+              !formData.legal_representative_email ||
+              !formData.legal_representative_phone
             }
             onClick={() => submitMutation.mutate()}
           >
