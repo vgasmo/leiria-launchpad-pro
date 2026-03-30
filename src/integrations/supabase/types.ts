@@ -7864,6 +7864,11 @@ export type Database = {
         | "changes_requested"
         | "approved_for_signature"
         | "rejected"
+        | "draft_internal"
+        | "signature_sent"
+        | "signed"
+        | "activated"
+        | "cancelled"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
       startup_stage: "ideation" | "validation" | "mvp" | "growth" | "scale"
       workspace_priority: "star" | "high" | "standard" | "maintenance"
@@ -8014,6 +8019,11 @@ export const Constants = {
         "changes_requested",
         "approved_for_signature",
         "rejected",
+        "draft_internal",
+        "signature_sent",
+        "signed",
+        "activated",
+        "cancelled",
       ],
       milestone_status: ["not_started", "in_progress", "completed", "delayed"],
       startup_stage: ["ideation", "validation", "mvp", "growth", "scale"],
