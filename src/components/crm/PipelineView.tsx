@@ -308,7 +308,6 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
           <div
             className="flex-1 min-w-0 cursor-pointer"
             onClick={() => onOpenDrawer(item)}
-            onPointerDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-medium line-clamp-2 flex-1">
