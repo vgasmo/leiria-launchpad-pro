@@ -197,9 +197,11 @@ export function useCreateIntake() {
       const publicUrl = `${window.location.origin}/contract-intake/${token}`;
 
       // Send real email to the lead
+      let emailSent = false;
+      let emailError: string | null = null;
       if (params.contactEmail) {
         try {
-          await supabase.functions.invoke('send-intake-email', {
+          const { error: emailErr } = await supabase.functions.invoke('send-intake-email', {
             body: {
               type: 'intake_request',
               intakeId: data.id,
@@ -209,12 +211,19 @@ export function useCreateIntake() {
               intakeToken: token,
             },
           });
-        } catch (emailErr) {
-          console.warn('Failed to send intake email (non-blocking):', emailErr);
+          if (emailErr) {
+            emailError = typeof emailErr === 'string' ? emailErr : 'Erro ao enviar email';
+            console.warn('Failed to send intake email:', emailErr);
+          } else {
+            emailSent = true;
+          }
+        } catch (err: any) {
+          emailError = err?.message || 'Erro ao enviar email';
+          console.warn('Failed to send intake email (non-blocking):', err);
         }
       }
 
-      return { intake: data, token, publicUrl };
+      return { intake: data, token, publicUrl, emailSent, emailError };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });

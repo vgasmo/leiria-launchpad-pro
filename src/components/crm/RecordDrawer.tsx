@@ -665,7 +665,34 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                   assignedTo: item.owner_consultant_id || user?.id,
                 });
                 await navigator.clipboard.writeText(result.publicUrl);
-                toast.success('Pedido de contratação enviado por email! Link também copiado.');
+                if (result.emailSent) {
+                  toast.success('Pedido de contratação enviado por email! Link também copiado.');
+                } else {
+                  toast.warning('Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.', {
+                    duration: 8000,
+                    action: {
+                      label: 'Reenviar',
+                      onClick: async () => {
+                        try {
+                          const { error } = await supabase.functions.invoke('send-intake-email', {
+                            body: {
+                              type: 'intake_request',
+                              intakeId: result.intake.id,
+                              recipientEmail: item.contact_email,
+                              recipientName: item.contact_name,
+                              organizationName: item.organization_name,
+                              intakeToken: result.token,
+                            },
+                          });
+                          if (error) throw error;
+                          toast.success('Email reenviado com sucesso!');
+                        } catch {
+                          toast.error('Falha ao reenviar. Use o link copiado como alternativa.');
+                        }
+                      },
+                    },
+                  });
+                }
               } catch {}
             }}
           >
