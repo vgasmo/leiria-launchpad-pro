@@ -277,7 +277,9 @@ function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
   const [loading, setLoading] = useState(true);
 
   // Fetch current category
-  useState(() => {
+  const [initialized, setInitialized] = useState(false);
+  if (!initialized) {
+    setInitialized(true);
     supabase
       .from('workspaces')
       .select('startup_category')
@@ -287,7 +289,7 @@ function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
         setCurrentCategory(data?.startup_category || null);
         setLoading(false);
       });
-  });
+  }
 
   const handleChange = async (value: string) => {
     const newValue = value === 'none' ? null : value;
