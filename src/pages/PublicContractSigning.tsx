@@ -172,10 +172,12 @@ export default function PublicContractSigning() {
         ...prev,
         legal_representative_name: contract.legal_representative_name || startup?.main_contact_name || '',
         legal_representative_email: contract.legal_representative_email || startup?.main_contact_email || '',
+        legal_representative_phone: contract.legal_representative_phone || '',
         company_nif: contract.company_nif || startup?.nif || '',
         company_address: contract.company_address || startup?.address || '',
         company_city: contract.company_city || '',
         company_postal_code: contract.company_postal_code || '',
+        project_name: '',
       }));
 
       if (contract.signature_status === 'sent_for_signature' || contract.signature_status === 'completed') {
@@ -278,9 +280,7 @@ export default function PublicContractSigning() {
   const stepIndex = STEPS.findIndex(s => s.key === currentStep);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
 
-  const requiredDocsUploaded = REQUIRED_DOCS
-    .filter(d => d.required)
-    .every(d => uploadedDocs[d.key]);
+  const allDocsOptional = true; // All documents are now optional
 
   const isFormValid =
     formData.legal_representative_name.trim() &&
@@ -288,8 +288,7 @@ export default function PublicContractSigning() {
     formData.company_nif.trim() &&
     formData.company_address.trim() &&
     formData.company_city.trim() &&
-    formData.company_postal_code.trim() &&
-    requiredDocsUploaded;
+    formData.company_postal_code.trim();
 
   // Loading state
   if (isLoading) {
@@ -424,13 +423,30 @@ export default function PublicContractSigning() {
                       placeholder="email@empresa.pt"
                     />
                   </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Telefone' : 'Phone'}</Label>
+                    <Input
+                      type="tel"
+                      value={formData.legal_representative_phone}
+                      onChange={e => setFormData(prev => ({ ...prev, legal_representative_phone: e.target.value }))}
+                      placeholder="+351 900 000 000"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{isPt ? 'Nome do Projeto (se diferente)' : 'Project Name (if different)'}</Label>
+                    <Input
+                      value={formData.project_name}
+                      onChange={e => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
+                      placeholder={isPt ? 'Nome comercial do projeto' : 'Commercial project name'}
+                    />
+                  </div>
                 </div>
 
                 <Separator />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>{isPt ? 'NIF da Empresa *' : 'Company Tax ID (NIF) *'}</Label>
+                    <Label>{isPt ? 'NIF (Empresa ou Pessoa) *' : 'Tax ID (Company or Personal) *'}</Label>
                     <Input
                       value={formData.company_nif}
                       onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
@@ -503,16 +519,16 @@ export default function PublicContractSigning() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileUp className="h-5 w-5 text-primary" />
-                  {isPt ? 'Documentos Obrigatórios' : 'Required Documents'}
+                  {isPt ? 'Documentos' : 'Documents'}
                 </CardTitle>
                 <CardDescription>
                   {isPt
-                    ? 'Carregue os seguintes documentos para completar o processo de onboarding.'
-                    : 'Upload the following documents to complete the onboarding process.'}
+                    ? 'Carregue os seguintes documentos para completar o processo de onboarding. Todos os documentos são opcionais nesta fase.'
+                    : 'Upload the following documents to complete the onboarding process. All documents are optional at this stage.'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {REQUIRED_DOCS.map(doc => {
+                {ONBOARDING_DOCS.map(doc => {
                   const uploaded = uploadedDocs[doc.key];
                   const isUploading = uploading === doc.key;
                   return (
@@ -529,8 +545,8 @@ export default function PublicContractSigning() {
                               {isPt ? doc.labelPt : doc.labelEn}
                             </p>
                             {doc.required && (
-                              <Badge variant="destructive" className="text-[10px] px-1 py-0 h-4">
-                                {isPt ? 'Obrigatório' : 'Required'}
+                              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                                {isPt ? 'Opcional' : 'Optional'}
                               </Badge>
                             )}
                           </div>
@@ -595,14 +611,7 @@ export default function PublicContractSigning() {
                   );
                 })}
 
-                {!requiredDocsUploaded && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-2">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {isPt
-                      ? 'Carregue todos os documentos obrigatórios para continuar.'
-                      : 'Upload all required documents to continue.'}
-                  </p>
-                )}
+                {/* All documents are optional — no blocking warning */}
               </CardContent>
             </Card>
 
@@ -727,7 +736,7 @@ export default function PublicContractSigning() {
                   {isPt ? 'Documentos Carregados' : 'Uploaded Documents'}
                 </p>
                 <div className="space-y-1">
-                  {REQUIRED_DOCS.map(doc => {
+                  {ONBOARDING_DOCS.map(doc => {
                     const uploaded = uploadedDocs[doc.key];
                     return (
                       <div key={doc.key} className="flex items-center gap-2 text-xs">
