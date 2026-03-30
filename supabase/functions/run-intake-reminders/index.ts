@@ -18,9 +18,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  // Require cron secret
+  // Auth: accept either x-cron-secret header or valid Authorization bearer (for pg_cron)
   const cronSecret = req.headers.get('x-cron-secret')
-  if (!cronSecret || cronSecret !== Deno.env.get('CRON_SECRET')) {
+  const authHeader = req.headers.get('authorization')
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  const cronSecretEnv = Deno.env.get('CRON_SECRET')
+  
+  const isAuthedByCron = cronSecret && cronSecretEnv && cronSecret === cronSecretEnv
+  const isAuthedByKey = authHeader && anonKey && authHeader === `Bearer ${anonKey}`
+  
+  if (!isAuthedByCron && !isAuthedByKey) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
