@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { IntakeRoutingManager } from './IntakeRoutingManager';
 import { RecordDrawer } from '@/components/crm/RecordDrawer';
+import { STAGE_LABELS } from '@/constants/funnelStages';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
   new: 'bg-slate-500',
@@ -145,7 +146,7 @@ export function AdminFunnelManager() {
               <div key={stage} className="flex-shrink-0 w-72">
                 <div className="flex items-center gap-2 mb-3">
                   <div className={cn('h-3 w-3 rounded-full', STAGE_COLORS[stage])} />
-                  <span className="font-medium text-sm">{t(`pipeline.stages.${stage}`)}</span>
+                  <span className="font-medium text-sm">{t(`pipeline.stages.${stage}`, STAGE_LABELS[stage])}</span>
                   <Badge variant="secondary" className="ml-auto text-xs">{stageItems.length}</Badge>
                 </div>
                 <ScrollArea className="h-[600px]">
@@ -303,7 +304,7 @@ function FunnelCard({
             </SelectTrigger>
             <SelectContent>
               {ACTIVE_STAGES.filter(s => s !== item.stage).map(s => (
-                <SelectItem key={s} value={s}>{t(`pipeline.stages.${s}`)}</SelectItem>
+                <SelectItem key={s} value={s}>{t(`pipeline.stages.${s}`, STAGE_LABELS[s])}</SelectItem>
               ))}
               <SelectItem value="rejected">{t('pipeline.stages.rejected')}</SelectItem>
             </SelectContent>
