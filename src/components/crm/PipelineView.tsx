@@ -291,24 +291,28 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
     <Card
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
       className={cn(
-        'cursor-grab active:cursor-grabbing transition-all hover:shadow-md',
+        'cursor-pointer transition-all hover:shadow-md',
         'bg-background border shadow-sm',
         isOverdue && 'border-l-2 border-l-amber-500',
         isDragging && 'opacity-50 shadow-lg'
       )}
       data-testid="crm-record"
+      onClick={() => onOpenDrawer(item)}
     >
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-          
           <div
-            className="flex-1 min-w-0 cursor-pointer"
-            onClick={() => onOpenDrawer(item)}
+            {...listeners}
+            {...attributes}
+            className="cursor-grab active:cursor-grabbing p-1 -ml-1 -mt-0.5 hover:bg-muted rounded shrink-0 touch-none"
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Arrastar para mover"
           >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-medium line-clamp-2 flex-1">
                 {item.organization_name || item.contact_name || t('crm.unnamed')}
