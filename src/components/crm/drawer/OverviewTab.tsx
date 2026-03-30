@@ -263,3 +263,75 @@ export function OverviewTab({
     </div>
   );
 }
+
+const CATEGORIES = [
+  { value: 'A', label: 'A — Alto Potencial', color: 'text-emerald-600' },
+  { value: 'B', label: 'B — Médio Potencial', color: 'text-blue-600' },
+  { value: 'C', label: 'C — Baixo Potencial', color: 'text-amber-600' },
+] as const;
+
+function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch current category
+  useState(() => {
+    supabase
+      .from('workspaces')
+      .select('startup_category')
+      .eq('id', workspaceId)
+      .single()
+      .then(({ data }) => {
+        setCurrentCategory(data?.startup_category || null);
+        setLoading(false);
+      });
+  });
+
+  const handleChange = async (value: string) => {
+    const newValue = value === 'none' ? null : value;
+    setCurrentCategory(newValue);
+    const { error } = await supabase
+      .from('workspaces')
+      .update({ startup_category: newValue } as any)
+      .eq('id', workspaceId);
+    if (error) {
+      toast.error(t('common.error'));
+    } else {
+      toast.success(t('crm.categoryUpdated', { defaultValue: 'Categoria atualizada' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    }
+  };
+
+  if (loading) return null;
+
+  return (
+    <Card>
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">{t('crm.startupCategory', { defaultValue: 'Categoria' })}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {currentCategory && <CategoryBadge category={currentCategory} />}
+            <Select value={currentCategory || 'none'} onValueChange={handleChange}>
+              <SelectTrigger className="h-7 w-[160px] text-xs">
+                <SelectValue placeholder={t('crm.selectCategory', { defaultValue: 'Definir categoria' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t('crm.noCategory', { defaultValue: 'Sem categoria' })}</SelectItem>
+                {CATEGORIES.map(c => (
+                  <SelectItem key={c.value} value={c.value}>
+                    <span className={c.color}>{c.label}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
