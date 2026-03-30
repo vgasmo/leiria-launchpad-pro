@@ -389,7 +389,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               />
 
               {/* Intake Actions Panel — stage-aware */}
-              <IntakeActionsPanel item={item} user={user} />
+              <IntakeActionsForDrawer item={item} user={user} />
             </div>
           </TabsContent>
 
