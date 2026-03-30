@@ -20,6 +20,7 @@ import { useCrmPipeline, PIPELINE_STAGES } from '@/hooks/useCrmPipeline';
 import { calculateLeadScore } from './LeadScoreCard';
 import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useState } from 'react';
+import { STAGE_LABELS } from '@/constants/funnelStages';
 import { toast } from 'sonner';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 import type { FunnelStage } from '@/hooks/useFunnel';
