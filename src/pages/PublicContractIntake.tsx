@@ -86,6 +86,7 @@ export default function PublicContractIntake() {
       setFormData(prev => ({
         ...prev,
         organization_name: intake.organization_name || '',
+        project_name: '',
         company_nif: intake.company_nif || '',
         company_address: intake.company_address || '',
         company_city: intake.company_city || '',
