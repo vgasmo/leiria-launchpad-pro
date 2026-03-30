@@ -321,6 +321,34 @@ export function useTransitionIntakeStatus() {
         performed_by: user?.id,
         metadata: { notes: params.notes, ...params.metadata },
       });
+
+      // Send changes_requested email automatically
+      if (params.newStatus === 'changes_requested') {
+        // Fetch intake token for the email link
+        const { data: intakeData } = await supabase
+          .from('contract_intakes')
+          .select('intake_token, legal_representative_email, legal_representative_name, organization_name')
+          .eq('id', params.intakeId)
+          .single();
+
+        if (intakeData?.legal_representative_email && intakeData?.intake_token) {
+          try {
+            await supabase.functions.invoke('send-intake-email', {
+              body: {
+                type: 'changes_requested',
+                intakeId: params.intakeId,
+                recipientEmail: intakeData.legal_representative_email,
+                recipientName: intakeData.legal_representative_name,
+                organizationName: intakeData.organization_name,
+                intakeToken: intakeData.intake_token,
+                changesNotes: params.notes,
+              },
+            });
+          } catch (emailErr) {
+            console.warn('Failed to send changes_requested email (non-blocking):', emailErr);
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
