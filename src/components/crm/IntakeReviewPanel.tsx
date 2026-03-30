@@ -1,9 +1,9 @@
 /**
  * Intake Review Panel — Staff component for reviewing submitted intake data.
- * Shows customer-submitted data, missing docs, and action buttons.
+ * Shows customer-submitted data, missing docs, action buttons,
+ * and the "Enviar para Assinatura" action when approved.
  */
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +11,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  CheckCircle2, AlertTriangle, XCircle, FileText, Building2,
+  CheckCircle2, AlertTriangle, XCircle, Building2,
   User, Mail, Phone, Globe, CreditCard, Clock, Shield,
-  ClipboardCheck, ArrowRight, RotateCcw, Loader2,
+  ClipboardCheck, RotateCcw, Loader2, Send,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type ContractIntake, useTransitionIntakeStatus, useIntakeEvents } from '@/hooks/useContractIntakes';
 import { INTAKE_STATE_LABELS, type IntakeState, REVIEWABLE_STATES } from '@/constants/intakeStates';
 import { formatRelativeTime } from '@/lib/dateUtils';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabaseClient';
 
 interface IntakeReviewPanelProps {
   intake: ContractIntake;
@@ -27,15 +28,16 @@ interface IntakeReviewPanelProps {
 }
 
 export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
-  const { t } = useTranslation();
   const [actionNotes, setActionNotes] = useState('');
   const [showNotes, setShowNotes] = useState<'approve' | 'changes' | 'cancel' | null>(null);
+  const [sendingSignature, setSendingSignature] = useState(false);
   const transition = useTransitionIntakeStatus();
   const { data: events } = useIntakeEvents(intake.id);
 
   const canReview = REVIEWABLE_STATES.includes(intake.status as IntakeState);
   const isApproved = intake.status === 'approved_for_signature';
   const isSigned = intake.status === 'signed';
+  const isSignatureSent = intake.status === 'signature_sent';
 
   const handleTransition = async (newStatus: IntakeState) => {
     try {
@@ -49,6 +51,47 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
       setActionNotes('');
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao atualizar estado');
+    }
+  };
+
+  /** Send to signature — dispatches to the linked contract's provider */
+  const handleSendToSignature = async () => {
+    if (!intake.contract_id) {
+      toast.error('Nenhum contrato associado a este intake. Crie o contrato primeiro.');
+      return;
+    }
+    setSendingSignature(true);
+    try {
+      // Generate contract PDF + send via provider
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: {
+          action: 'submit_signing',
+          token: null, // Staff action — we pass contractId directly
+          contractId: intake.contract_id,
+          formData: intake.approved_data_snapshot || {
+            legal_representative_name: intake.legal_representative_name,
+            legal_representative_email: intake.legal_representative_email,
+            company_nif: intake.company_nif,
+          },
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Transition intake to signature_sent
+      await transition.mutateAsync({
+        intakeId: intake.id,
+        newStatus: 'signature_sent',
+        notes: `Enviado para assinatura via ${data?.provider || 'provider'}`,
+        metadata: { provider: data?.provider, signing_result: data },
+      });
+
+      toast.success('Contrato enviado para assinatura!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao enviar para assinatura');
+    } finally {
+      setSendingSignature(false);
     }
   };
 
@@ -142,7 +185,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
 
         <Separator />
 
-        {/* Action Buttons */}
+        {/* Review Action Buttons */}
         {canReview && (
           <div className="space-y-2">
             {showNotes ? (
@@ -232,15 +275,60 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
           </div>
         )}
 
-        {/* Approved state — show frozen snapshot info */}
-        {isApproved && intake.approved_data_snapshot && (
-          <div className="rounded-md border border-lime-200 bg-lime-50 dark:bg-lime-900/20 p-3">
-            <p className="text-xs font-semibold text-lime-800 dark:text-lime-200 flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5" />
-              Dados Congelados para Contrato
+        {/* ── APPROVED: Send to Signature CTA ── */}
+        {isApproved && (
+          <div className="space-y-2">
+            {intake.approved_data_snapshot && (
+              <div className="rounded-md border border-lime-200 bg-lime-50 dark:bg-lime-900/20 p-3">
+                <p className="text-xs font-semibold text-lime-800 dark:text-lime-200 flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5" />
+                  Dados Congelados para Contrato
+                </p>
+                <p className="text-[10px] text-lime-700 dark:text-lime-300 mt-1">
+                  Snapshot criado em {intake.approved_data_snapshot.frozen_at ? new Date(intake.approved_data_snapshot.frozen_at as string).toLocaleString('pt-PT') : '—'}
+                </p>
+              </div>
+            )}
+            <Button
+              className="w-full gap-2"
+              onClick={handleSendToSignature}
+              disabled={sendingSignature}
+            >
+              {sendingSignature ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              Enviar para Assinatura
+            </Button>
+            <p className="text-[10px] text-muted-foreground text-center">
+              O contrato será enviado para assinatura digital através do provider configurado.
             </p>
-            <p className="text-[10px] text-lime-700 dark:text-lime-300 mt-1">
-              Snapshot criado em {intake.approved_data_snapshot.frozen_at ? new Date(intake.approved_data_snapshot.frozen_at as string).toLocaleString('pt-PT') : '—'}
+          </div>
+        )}
+
+        {/* Signature sent info */}
+        {isSignatureSent && (
+          <div className="rounded-md border border-green-200 bg-green-50 dark:bg-green-900/20 p-3">
+            <p className="text-xs font-semibold text-green-800 dark:text-green-200 flex items-center gap-1.5">
+              <Send className="h-3.5 w-3.5" />
+              Contrato Enviado para Assinatura
+            </p>
+            <p className="text-[10px] text-green-700 dark:text-green-300 mt-1">
+              A aguardar assinatura do cliente. Verifique o estado no provider de assinatura.
+            </p>
+          </div>
+        )}
+
+        {/* Signed info */}
+        {isSigned && (
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 p-3">
+            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Contrato Assinado
+            </p>
+            <p className="text-[10px] text-emerald-700 dark:text-emerald-300 mt-1">
+              Pendente de ativação do workspace e condições operacionais.
             </p>
           </div>
         )}

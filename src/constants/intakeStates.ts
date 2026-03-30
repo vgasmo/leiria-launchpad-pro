@@ -34,7 +34,11 @@ export const INTAKE_TRANSITIONS: Record<IntakeState, IntakeState[]> = {
   cancelled: [],
 };
 
-/** CRM stage that corresponds to each intake state */
+/**
+ * CRM macro-stage that corresponds to each intake state.
+ * These map to SIMPLIFIED pipeline stages, not fine-grained ones.
+ * The pipeline view groups items by these macro-stages.
+ */
 export const INTAKE_TO_CRM_STAGE: Record<IntakeState, string> = {
   draft_internal: 'qualified',
   intake_requested: 'intake_requested',

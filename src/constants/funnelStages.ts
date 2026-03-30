@@ -1,9 +1,9 @@
 /**
  * Centralized funnel stage constants for CRM pipeline.
  * Single source of truth for stage values and labels.
- * 
- * V2: Redesigned to reflect the real contracting lifecycle:
- *   Lead → Qualified → Proposal → Intake Request → Customer Filling → Submitted → Review → Approved → Sent for Signature → Signed → Operational
+ *
+ * V3: Simplified commercial pipeline with 7 macro-stages.
+ * Fine-grained DB values are preserved; the kanban groups them visually.
  */
 
 export const FUNNEL_STAGES = [
@@ -38,7 +38,65 @@ export const FUNNEL_TYPES = [
 
 export type FunnelType = (typeof FUNNEL_TYPES)[number];
 
-/** Stages visible in the main pipeline Kanban board */
+// ── Simplified pipeline (7 macro-columns for Kanban) ──────────────
+
+export const SIMPLE_PIPELINE_STAGES = [
+  'lead',
+  'qualified',
+  'proposal_negotiation',
+  'contracting_in_progress',
+  'signature_in_progress',
+  'contracted',
+  'archived_or_lost',
+] as const;
+
+export type SimplePipelineStage = (typeof SIMPLE_PIPELINE_STAGES)[number];
+
+/** Map every fine-grained DB stage to its macro pipeline column */
+export const STAGE_TO_SIMPLE: Record<FunnelStage, SimplePipelineStage> = {
+  new: 'lead',
+  first_contact_booked: 'lead',
+  met: 'qualified',
+  qualified: 'qualified',
+  proposal_sent: 'proposal_negotiation',
+  negotiating: 'proposal_negotiation',
+  intake_requested: 'contracting_in_progress',
+  intake_filling: 'contracting_in_progress',
+  intake_submitted: 'contracting_in_progress',
+  intake_review: 'contracting_in_progress',
+  intake_changes_requested: 'contracting_in_progress',
+  approved_for_signature: 'signature_in_progress',
+  sent_for_signature: 'signature_in_progress',
+  contracted: 'contracted',
+  incubating: 'contracted',
+  accelerating: 'contracted',
+  rejected: 'archived_or_lost',
+  archived: 'archived_or_lost',
+};
+
+/** PT labels for the simplified pipeline columns */
+export const SIMPLE_STAGE_LABELS: Record<SimplePipelineStage, string> = {
+  lead: 'Leads',
+  qualified: 'Qualificados',
+  proposal_negotiation: 'Proposta / Negociação',
+  contracting_in_progress: 'Contratação em Curso',
+  signature_in_progress: 'Em Assinatura',
+  contracted: 'Contratado',
+  archived_or_lost: 'Arquivo / Perdido',
+};
+
+/** Fine-grained stages that feed each simple column */
+export const SIMPLE_STAGE_SOURCES: Record<SimplePipelineStage, FunnelStage[]> = {
+  lead: ['new', 'first_contact_booked'],
+  qualified: ['met', 'qualified'],
+  proposal_negotiation: ['proposal_sent', 'negotiating'],
+  contracting_in_progress: ['intake_requested', 'intake_filling', 'intake_submitted', 'intake_review', 'intake_changes_requested'],
+  signature_in_progress: ['approved_for_signature', 'sent_for_signature'],
+  contracted: ['contracted', 'incubating', 'accelerating'],
+  archived_or_lost: ['rejected', 'archived'],
+};
+
+/** Stages visible in the main pipeline Kanban board (legacy compat) */
 export const PIPELINE_STAGES: FunnelStage[] = [
   'new',
   'first_contact_booked',
@@ -77,7 +135,7 @@ export const STAGE_LABEL_KEYS: Record<FunnelStage, string> = {
   archived: 'pipeline.stages.archived',
 };
 
-/** @deprecated Use STAGE_LABEL_KEYS with t() instead — kept only for non-i18n fallback contexts */
+/** PT labels per fine-grained stage – fallback for non-i18n contexts */
 export const STAGE_LABELS: Record<FunnelStage, string> = {
   new: 'Novo',
   first_contact_booked: 'Reunião Marcada',
