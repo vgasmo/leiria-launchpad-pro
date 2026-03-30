@@ -17,7 +17,9 @@ import { cn } from '@/lib/utils';
 
 const STAGE_OPTIONS: FunnelStage[] = [
   'new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent',
-  'negotiating', 'contracted', 'incubating', 'accelerating', 'rejected', 'archived',
+  'negotiating', 'intake_requested', 'intake_filling', 'intake_submitted',
+  'intake_review', 'intake_changes_requested', 'approved_for_signature',
+  'sent_for_signature', 'contracted', 'incubating', 'accelerating', 'rejected', 'archived',
 ];
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
@@ -27,6 +29,13 @@ const STAGE_COLORS: Record<FunnelStage, string> = {
   qualified: 'bg-purple-500',
   proposal_sent: 'bg-amber-500',
   negotiating: 'bg-orange-500',
+  intake_requested: 'bg-cyan-500',
+  intake_filling: 'bg-cyan-400',
+  intake_submitted: 'bg-teal-500',
+  intake_review: 'bg-teal-600',
+  intake_changes_requested: 'bg-yellow-500',
+  approved_for_signature: 'bg-lime-500',
+  sent_for_signature: 'bg-green-400',
   contracted: 'bg-green-500',
   incubating: 'bg-emerald-600',
   accelerating: 'bg-primary',
