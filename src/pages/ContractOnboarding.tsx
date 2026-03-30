@@ -29,9 +29,18 @@ const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
   { key: 'signing', icon: PenTool, label: 'Assinatura Digital' },
 ];
 
+interface RepresentativeEntry {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface CompanyFormData {
   legal_representative_name: string;
   legal_representative_email: string;
+  legal_representative_phone: string;
+  certidao_permanente_code: string;
+  additional_representatives: RepresentativeEntry[];
   company_nif: string;
   company_address: string;
   company_city: string;
