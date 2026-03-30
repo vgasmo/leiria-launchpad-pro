@@ -20,6 +20,7 @@ import { useCrmPipeline, PIPELINE_STAGES } from '@/hooks/useCrmPipeline';
 import { calculateLeadScore } from './LeadScoreCard';
 import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useState } from 'react';
+import { STAGE_LABELS } from '@/constants/funnelStages';
 import { toast } from 'sonner';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 import type { FunnelStage } from '@/hooks/useFunnel';
@@ -123,7 +124,7 @@ export function PipelineView({
         id: itemId,
         stage: newStage,
       });
-      toast.success(t('crm.stageMoved', { stage: t(STAGE_CONFIG[newStage].labelKey) }));
+      toast.success(t('crm.stageMoved', { stage: STAGE_LABELS[newStage] }));
     } catch (error) {
       toast.error(t('crm.stageMoveFailed'));
     }
@@ -215,7 +216,7 @@ function PipelineColumn({ stage, items, config, onOpenDrawer }: PipelineColumnPr
       >
         <CardHeader className="py-3 px-4">
           <CardTitle className={cn('text-sm font-semibold flex items-center justify-between', config.color)}>
-            <span>{t(config.labelKey)}</span>
+            <span>{STAGE_LABELS[stage] || t(config.labelKey)}</span>
             <Badge 
               variant="secondary" 
               className={cn('text-xs font-medium', config.color, 'bg-background/80')}

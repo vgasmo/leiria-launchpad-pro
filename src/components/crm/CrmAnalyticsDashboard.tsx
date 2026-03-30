@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useCrmPipeline, PIPELINE_STAGES } from '@/hooks/useCrmPipeline';
+import { STAGE_LABELS } from '@/constants/funnelStages';
 import { differenceInDays, differenceInHours, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
@@ -221,7 +222,7 @@ export function CrmAnalyticsDashboard({
               const isOverTargetTime = metric.avgDaysInStage > targetDays;
               const hasOverdue = metric.overdueCount > 0;
               const isLastStage = idx === arr.length - 1;
-              const stageLabel = t(`pipeline.stages.${metric.stage}`);
+              const stageLabel = STAGE_LABELS[metric.stage as FunnelStage] || metric.stage;
 
               return (
                 <div key={metric.stage} className="flex items-center gap-4">
