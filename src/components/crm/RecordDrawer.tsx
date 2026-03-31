@@ -693,7 +693,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                     },
                   });
                 }
-              } catch {}
+              } catch (_e) { /* email send failed – toast already shown */ }
             }}
           >
             <Send className="h-3.5 w-3.5" />
