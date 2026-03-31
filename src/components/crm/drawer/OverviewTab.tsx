@@ -294,7 +294,7 @@ function StartupCategorySelector({ workspaceId }: { workspaceId: string }) {
     setCurrentCategory(newValue);
     const { error } = await supabase
       .from('workspaces')
-      .update({ startup_category: newValue } as any)
+      .update({ startup_category: newValue })
       .eq('id', workspaceId);
     if (error) {
       toast.error(t('common.error'));
