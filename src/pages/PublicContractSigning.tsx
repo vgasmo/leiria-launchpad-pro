@@ -544,11 +544,7 @@ export default function PublicContractSigning() {
                             <p className="text-sm font-medium">
                               {isPt ? doc.labelPt : doc.labelEn}
                             </p>
-                            {false && (
-                              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
-                                {isPt ? 'Opcional' : 'Optional'}
-                              </Badge>
-                            )}
+                            {/* Optional badge placeholder – removed to satisfy lint */}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {isPt ? doc.descPt : doc.descEn}
