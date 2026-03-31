@@ -167,7 +167,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         stage: w.stage,
         health_score: w.health_score_override || w.health_score,
         priority_level: w.priority_level,
-        startup_category: (w as any).startup_category || null,
+        startup_category: w.startup_category || null,
         owner_id: ownerMap[w.id]?.id || null,
         owner_name: ownerMap[w.id]?.name || null,
         space_id: null,
