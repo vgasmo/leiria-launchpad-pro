@@ -214,10 +214,18 @@ export function useAddWorkspaceUser() {
     mutationFn: async ({ workspace_id, user_id, role, active = true }: { workspace_id: string; user_id: string; role: 'admin' | 'consultor' | 'mentor_externo' | 'founder' | 'team_member'; active?: boolean }) => {
       const { data, error } = await supabase.from('workspace_users').insert({ workspace_id, user_id, role, active }).select().single();
       if (error) throw error;
+
+      // Ensure user has the role in user_roles (idempotent)
+      await supabase.from('user_roles').upsert({ user_id, role }, { onConflict: 'user_id,role' });
+
+      // Ensure account is approved
+      await supabase.from('profiles').update({ account_status: 'approved' }).eq('id', user_id).eq('account_status', 'pending');
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('User assigned to workspace');
     },
     onError: (e) => toast.error(`Failed: ${e.message}`),

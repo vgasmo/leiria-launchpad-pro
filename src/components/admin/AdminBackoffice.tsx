@@ -28,7 +28,8 @@ import type { StartupStage, WorkspacePriority } from '@/types/database';
 // Backoffice sub-tab components
 import { BackofficeDashboard } from '@/components/backoffice/BackofficeDashboard';
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
-import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
+// BackofficeInvoicesTab kept for future use but removed from nav
+// import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
 import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
@@ -362,10 +363,7 @@ export function AdminBackoffice() {
             <FileText className="h-4 w-4" />
             {t('admin.backoffice.contractsAndLifecycle', { defaultValue: 'Contratos' })}
           </TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-1.5">
-            <Receipt className="h-4 w-4" />
-            {t('admin.backoffice.invoicesTab', { defaultValue: 'Faturação' })}
-          </TabsTrigger>
+          {/* Invoices tab removed per user request */}
           <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
             {t('admin.backoffice.spacesAndInfra', { defaultValue: 'Espaços & Infraestrutura' })}
@@ -384,10 +382,7 @@ export function AdminBackoffice() {
           </div>
         </TabsContent>
 
-        {/* Invoices Tab */}
-        <TabsContent value="invoices">
-          <BackofficeInvoicesTab />
-        </TabsContent>
+        {/* Invoices tab removed per user request */}
 
         {/* Overview Tab - Original Backoffice Content */}
         <TabsContent value="overview">

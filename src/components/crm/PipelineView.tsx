@@ -22,7 +22,6 @@ import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useState, useMemo } from 'react';
 import {
   SIMPLE_PIPELINE_STAGES,
-  SIMPLE_STAGE_LABELS,
   SIMPLE_STAGE_SOURCES,
   STAGE_TO_SIMPLE,
   STAGE_LABELS,
@@ -141,8 +140,9 @@ export function PipelineView({
         id: itemId,
         stage: newStage,
       });
+      const stageLabel = t(`pipeline.simple.${targetSimple}`, targetSimple);
       toast.success(
-        t('crm.movedTo', { stage: SIMPLE_STAGE_LABELS[targetSimple], defaultValue: `Movido para ${SIMPLE_STAGE_LABELS[targetSimple]}` }),
+        t('crm.movedTo', { stage: stageLabel, defaultValue: `Movido para ${stageLabel}` }),
         {
           action: {
             label: t('common.undo', { defaultValue: 'Desfazer' }),
@@ -241,7 +241,7 @@ function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineCo
       >
         <CardHeader className="py-3 px-4">
           <CardTitle className={cn('text-sm font-semibold flex items-center justify-between', config.color)}>
-            <span>{SIMPLE_STAGE_LABELS[simpleStage]}</span>
+            <span>{t(`pipeline.simple.${simpleStage}`, simpleStage)}</span>
             <Badge 
               variant="secondary" 
               className={cn('text-xs font-medium', config.color, 'bg-background/80')}

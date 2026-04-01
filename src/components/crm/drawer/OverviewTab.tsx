@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FunnelItem, FunnelStage, useUpdateFunnelItem } from '@/hooks/useFunnel';
@@ -252,6 +253,51 @@ export function OverviewTab({
             <span>{item.contact_phone}</span>
           </div>
         )}
+      </div>
+
+      {/* Commercial Proposal Section */}
+      <div className="space-y-3 pt-4 border-t">
+        <h4 className="text-sm font-medium flex items-center gap-2">
+          <Briefcase className="h-4 w-4 text-muted-foreground" />
+          {t('crm.commercialProposal', { defaultValue: 'Proposta Comercial' })}
+        </h4>
+        
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">{t('crm.proposedMonthlyFee', { defaultValue: 'Mensalidade Proposta (€)' })}</Label>
+            <Input 
+              type="number" 
+              className="w-32 h-8 text-xs" 
+              value={(item as any).metadata_json?.proposed_fee || ''} 
+              onChange={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), proposed_fee: e.target.value } } as any)}
+              placeholder="0"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">{t('crm.proposedDiscount', { defaultValue: 'Desconto Proposto (%)' })}</Label>
+            <Input 
+              type="number" 
+              className="w-24 h-8 text-xs" 
+              min="0" max="100"
+              value={(item as any).metadata_json?.proposed_discount || ''} 
+              onChange={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), proposed_discount: e.target.value } } as any)}
+              placeholder="0"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs text-muted-foreground">{t('crm.commercialNotes', { defaultValue: 'Notas Comerciais' })}</Label>
+            <Textarea 
+              className="mt-1 text-xs" 
+              rows={2}
+              value={(item as any).metadata_json?.commercial_notes || ''} 
+              onBlur={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), commercial_notes: e.target.value } } as any)}
+              defaultValue={(item as any).metadata_json?.commercial_notes || ''}
+              placeholder={t('crm.commercialNotesPlaceholder', { defaultValue: 'Tipo de contrato, condições especiais...' })}
+            />
+          </div>
+        </div>
       </div>
 
       {item.notes && (

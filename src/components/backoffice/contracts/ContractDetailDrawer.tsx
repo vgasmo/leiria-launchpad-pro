@@ -594,6 +594,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                 contractId={contract.id}
                 monthlyFee={contract.monthly_fee}
                 isStaff={true}
+                isAdmin={true}
               />
             </TabsContent>
 

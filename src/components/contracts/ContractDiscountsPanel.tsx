@@ -23,6 +23,7 @@ interface ContractDiscountsPanelProps {
   monthlyFee?: number;
   currency?: string;
   isStaff?: boolean;
+  isAdmin?: boolean;
   compact?: boolean;
 }
 
@@ -37,7 +38,7 @@ interface Discount {
   created_at: string;
 }
 
-export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR', isStaff = false, compact = false }: ContractDiscountsPanelProps) {
+export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR', isStaff = false, isAdmin = false, compact = false }: ContractDiscountsPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -161,11 +162,14 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
             <Percent className="h-4 w-4 text-amber-600" />
             {t('discounts.title')}
           </span>
-          {isStaff && !showAddForm && (
+          {isAdmin && !showAddForm && (
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => setShowAddForm(true)}>
               <Plus className="h-3 w-3" />
               {t('discounts.add')}
             </Button>
+          )}
+          {isStaff && !isAdmin && !showAddForm && (
+            <span className="text-[10px] text-muted-foreground">{t('contracts.discountApprovalRequired', { defaultValue: 'Apenas admin pode adicionar descontos' })}</span>
           )}
         </CardTitle>
       </CardHeader>
