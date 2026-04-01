@@ -6063,6 +6063,10 @@
     "youAreOffline": "You are offline. Cached data is still available.",
     "backOnline": "Back online! Syncing your data..."
   },
+  "app": {
+    "newVersionAvailable": "New version available.",
+    "clickToUpdate": "Click to refresh."
+  },
   "smartNudges": {
     "title": "Smart Suggestions",
     "kpiStale": "Your KPIs haven't been updated this month. Keep your data fresh!",
