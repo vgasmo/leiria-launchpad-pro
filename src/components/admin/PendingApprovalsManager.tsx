@@ -487,7 +487,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Link2 className="h-4 w-4" />
-            Pedidos de Associação Pendentes ({pendingClaims!.length})
+            {t('admin.pendingClaimRequests', 'Pedidos de Associação Pendentes')} ({pendingClaims!.length})
           </h3>
           {pendingClaims!.map((claim) => {
             const initials = claim.user_name
