@@ -230,7 +230,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
             className="gap-2"
           >
             <Send className="h-3 w-3" />
-            {testWebhook.isPending ? 'Sending...' : 'Send test message'}
+            {testWebhook.isPending ? t('settings.sending') : t('settings.sendTestMessage')}
           </Button>
         )}
 
