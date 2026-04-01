@@ -273,7 +273,7 @@ export function SpaceWaitingListTab() {
               <Clock className="h-5 w-5 text-yellow-600" />
               <div>
                 <div className="text-2xl font-bold">{waitingCount}</div>
-                <p className="text-sm text-muted-foreground">Waiting</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.statusWaiting', 'Waiting')}</p>
               </div>
             </div>
           </CardContent>
