@@ -160,6 +160,16 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
 
   return (
     <div className="space-y-6 max-w-6xl">
+      {/* Weekly Impact One-Liner */}
+      <p className="text-sm text-muted-foreground bg-muted/30 rounded-lg px-4 py-2.5 border border-border/40">
+        {t('consultor.weekSummary', {
+          defaultValue: 'Esta semana: {{sessions}} sessões · {{actions}} ações fechadas · {{health}} startups melhoraram',
+          sessions: upcomingSessions.length,
+          actions: criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0),
+          health: stats.healthCounts.healthy + stats.healthCounts.thriving,
+        })}
+      </p>
+
       <UnifiedSmartInbox overdueCount={stats.overdueActionsCount} missingKpiCount={stats.missingKpiCount} />
       <WorkQueuePanel compact={false} />
 
