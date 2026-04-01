@@ -8,10 +8,11 @@ import { useFounderOnboardingState } from '@/hooks/useFounderOnboardingState';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2, Clock, Rocket, Shield, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle2, Clock, Rocket, Shield, AlertCircle, ArrowRight, Plus } from 'lucide-react';
 import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { CreateStartupDialog } from '@/components/founder/CreateStartupDialog';
 
 type ClaimPageState = 'idle' | 'verifying' | 'auto_claimed' | 'already_claimed' | 'pending_review' | 'error';
 
@@ -25,6 +26,7 @@ export default function ClaimStartup() {
   const [pageState, setPageState] = useState<ClaimPageState>('idle');
   const [claimedStartupName, setClaimedStartupName] = useState<string | null>(null);
   const [claimedWorkspaceId, setClaimedWorkspaceId] = useState<string | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Determine the effective display state based on founderState + pageState
   const getDisplayState = () => {
@@ -165,6 +167,16 @@ export default function ClaimStartup() {
                 <Rocket className="h-5 w-5" />
                 {t('claimStartup.verifyCta', { defaultValue: 'Verificar Agora' })}
               </Button>
+
+              <div className="w-full border-t pt-4 mt-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('claimStartup.newStartupHint', { defaultValue: 'Tem uma startup nova que ainda não está no sistema?' })}
+                </p>
+                <Button variant="outline" onClick={() => setShowCreateDialog(true)} className="gap-2 w-full max-w-xs">
+                  <Plus className="h-4 w-4" />
+                  {t('claimStartup.submitApplication', { defaultValue: 'Submeter Candidatura' })}
+                </Button>
+              </div>
             </div>
           )}
 
@@ -239,6 +251,16 @@ export default function ClaimStartup() {
               <p className="text-xs text-muted-foreground/60 max-w-xs">
                 {t('claimStartup.pendingReassurance', { defaultValue: 'Não precisa de fazer mais nada. Receberá acesso assim que a equipa confirmar.' })}
               </p>
+
+              <div className="w-full border-t pt-4 mt-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('claimStartup.orSubmitNew', { defaultValue: 'Ou, se preferir, pode submeter uma candidatura de nova startup:' })}
+                </p>
+                <Button variant="outline" onClick={() => setShowCreateDialog(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  {t('claimStartup.submitApplication', { defaultValue: 'Submeter Candidatura' })}
+                </Button>
+              </div>
             </div>
           )}
 
@@ -282,6 +304,11 @@ export default function ClaimStartup() {
 
         </CardContent>
       </Card>
+
+      <CreateStartupDialog 
+        open={showCreateDialog} 
+        onOpenChange={setShowCreateDialog} 
+      />
     </main>
   );
 }
