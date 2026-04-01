@@ -149,16 +149,16 @@ export function AdminTeamsTestPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TeamsIcon className="h-5 w-5 text-[#6264A7]" />
-          Teams Notification Test
+          {t('admin.teams.testTitle', 'Teams Notification Test')}
           {hasGlobalConfig && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Global Configured
+              {t('admin.teams.globalConfigured', 'Global Configurado')}
             </Badge>
           )}
         </CardTitle>
         <CardDescription>
-          Test Teams notifications for specific workspaces to verify both workspace-specific and global fallback settings
+          {t('admin.teams.testDescription', 'Testar notificações Teams para workspaces específicos')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
