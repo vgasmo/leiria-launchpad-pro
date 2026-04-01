@@ -353,7 +353,7 @@ export function SpaceWaitingListTab() {
                         {item.preferred_capacity && (
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            {item.preferred_capacity} people
+                            {item.preferred_capacity} {t('waitingList.people', 'people')}
                           </div>
                         )}
                       </TableCell>
