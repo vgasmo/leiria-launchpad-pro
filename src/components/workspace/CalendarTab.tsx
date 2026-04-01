@@ -416,7 +416,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                     {t('sessions.createNewSession')}
                   </DialogDescription>
                 </DialogHeader>
-                {renderSessionFormFields(false)}
+                {renderFormFields(false)}
                 <DialogFooter>
                   <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); resetForm(); }}>
                     {t('common.cancel')}
