@@ -274,8 +274,8 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'relative_due_days', Number(e.target.value))
                                   }
                                   className="h-7 w-14 text-sm"
-                                  placeholder="Days"
-                                />
+                                   placeholder={t('common.days')}
+                                 />
                                 <Button
                                   variant="ghost"
                                   size="icon"
