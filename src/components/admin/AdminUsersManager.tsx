@@ -201,22 +201,35 @@ export function AdminUsersManager() {
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">{profile.email}</p>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={isSuspended ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
-                          onClick={() => setSuspendTarget({ 
-                            userId: profile.id, 
-                            userName: profile.full_name || profile.email,
-                            currentStatus: profile.account_status || 'approved'
-                          })}
-                        >
-                          {isSuspended ? (
-                            <><RotateCcw className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })}</>
-                          ) : (
-                            <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
+                        <div className="flex items-center gap-1">
+                          {isPending && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-emerald-600 hover:text-emerald-700"
+                              onClick={() => handleApproveUser(profile.id)}
+                            >
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                              Aprovar
+                            </Button>
                           )}
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={isSuspended ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
+                            onClick={() => setSuspendTarget({ 
+                              userId: profile.id, 
+                              userName: profile.full_name || profile.email,
+                              currentStatus: profile.account_status || 'approved'
+                            })}
+                          >
+                            {isSuspended ? (
+                              <><RotateCcw className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })}</>
+                            ) : (
+                              <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
+                            )}
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Global Roles */}
