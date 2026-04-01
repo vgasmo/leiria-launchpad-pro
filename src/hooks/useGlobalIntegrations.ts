@@ -33,6 +33,11 @@ export function useGlobalGraphSettings() {
       });
       
       if (error) {
+        // Non-staff users get 403 — return null silently instead of throwing
+        const msg = typeof error === 'object' && error !== null ? (error as any).message || JSON.stringify(error) : String(error);
+        if (msg.includes('403') || msg.includes('Access denied')) {
+          return null;
+        }
         console.error('[useGlobalGraphSettings] Edge function error:', error);
         throw error;
       }
