@@ -233,7 +233,7 @@ export function AdminTeamsTestPanel() {
                 <Info className="h-5 w-5 text-amber-500" />
               )}
               <span className="font-medium">
-                {lastResult.sent ? 'Message Sent' : lastResult.error ? 'Error' : 'Not Sent'}
+                {lastResult.sent ? t('admin.teams.messageSent', 'Mensagem Enviada') : lastResult.error ? t('common.error', 'Erro') : t('admin.teams.notSent', 'Não Enviada')}
               </span>
             </div>
             
