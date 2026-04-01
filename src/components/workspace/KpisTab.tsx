@@ -36,6 +36,7 @@ import { useExportKpis, exportToCsv } from '@/hooks/useExportData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
+import { triggerKpiCelebration } from '@/lib/confetti';
 import { useTranslation } from 'react-i18next';
 import { KpiImportDialog } from './KpiImportDialog';
 import { QuickHelp, GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
