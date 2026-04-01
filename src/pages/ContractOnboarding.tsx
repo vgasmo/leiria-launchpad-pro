@@ -63,6 +63,12 @@ export default function ContractOnboarding() {
   const [regulationAccepted, setRegulationAccepted] = useState(false);
   const [contractAccepted, setContractAccepted] = useState(false);
 
+  const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
+    { key: 'company_data', icon: Building2, label: t('contractOnboarding.step.companyData', 'Dados da Empresa') },
+    { key: 'review_contract', icon: FileText, label: t('contractOnboarding.step.reviewContract', 'Rever Contrato') },
+    { key: 'signing', icon: PenTool, label: t('contractOnboarding.step.signing', 'Assinatura Digital') },
+  ];
+
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
     legal_representative_email: '',
