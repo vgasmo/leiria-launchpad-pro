@@ -1630,7 +1630,8 @@
       "strength": "Força",
       "title": "Portfolio Performance",
       "trend": "Trend"
-    }
+    },
+    "weekSummary": "This week: {{sessions}} sessions · {{actions}} actions closed · {{health}} startups improved"
   },
   "consultorTools": {
     "allCategories": "All",
