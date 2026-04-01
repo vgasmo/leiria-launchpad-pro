@@ -129,6 +129,7 @@ function SuspenseFallback() {
 }
 
 function AppRoutes() {
+  useVersionCheck();
   return (
     <Suspense fallback={<SuspenseFallback />}>
       <Routes>
