@@ -375,7 +375,7 @@ export default function WorkspaceDetail() {
               <FundingTrackerTab startupId={startup.id} />
             </div>
           )}
-          {activeTab === 'notes' && (isAdmin || isConsultor || isMentor) && (
+          {activeTab === 'notes' && (isAdmin || isConsultor || isMentor || isBackoffice) && (
             <div role="tabpanel" id="tabpanel-notes" aria-labelledby="tab-notes">
               <NotesAndTasksTab workspaceId={workspace.id} startupId={startup?.id} />
             </div>
