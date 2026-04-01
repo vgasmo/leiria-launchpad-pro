@@ -96,7 +96,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             <Bookmark className="h-4 w-4" />
-            Saved Filters
+            {t('filters.savedFilters', 'Saved Filters')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
