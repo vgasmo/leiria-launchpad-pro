@@ -53,7 +53,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
     });
 
     if (error) {
-      console.warn('[IntegrationTrigger] Outlook sync error (non-blocking):', error.message);
+      logger.warn('outlook_sync_error', { message: error.message });
       return { success: false, reason: error.message };
     }
 
