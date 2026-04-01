@@ -160,7 +160,7 @@ function DocuSignSettingsCard() {
               <Input value={userId} onChange={e => setUserId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">Base URL</Label>
+              <Label className="text-xs">{t('integrations.baseUrl', 'Base URL')}</Label>
               <Input value={baseUrl} onChange={e => setBaseUrl(e.target.value)} placeholder="https://demo.docusign.net/restapi" className="text-xs h-8" />
             </div>
             <Alert>
