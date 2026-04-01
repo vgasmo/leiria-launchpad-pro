@@ -36,13 +36,13 @@ interface TeamsIntegrationCardProps {
   canEdit: boolean;
 }
 
-const EVENT_OPTIONS = [
-  { key: 'notify_checkin_submitted', icon: ClipboardList, label: 'Check-in submitted', description: 'When a startup submits their monthly check-in' },
-  { key: 'notify_action_assigned', icon: Bell, label: 'Action assigned', description: 'When an action item is assigned to someone' },
-  { key: 'notify_action_overdue', icon: AlertTriangle, label: 'Action overdue', description: 'When an action item becomes overdue' },
-  { key: 'notify_session_created', icon: Calendar, label: 'Session created', description: 'When a new session/meeting is scheduled' },
-  { key: 'notify_session_rescheduled', icon: Calendar, label: 'Session rescheduled', description: 'When a session time is changed' },
-  { key: 'notify_health_alert', icon: Activity, label: 'Health alert', description: 'When a startup health score drops significantly' },
+const EVENT_OPTIONS_KEYS = [
+  { key: 'notify_checkin_submitted', icon: ClipboardList, labelKey: 'settings.checkinSubmitted', descKey: 'settings.checkinSubmittedDesc' },
+  { key: 'notify_action_assigned', icon: Bell, labelKey: 'settings.actionAssigned', descKey: 'settings.actionAssignedDesc' },
+  { key: 'notify_action_overdue', icon: AlertTriangle, labelKey: 'settings.actionOverdue', descKey: 'settings.actionOverdueDesc' },
+  { key: 'notify_session_created', icon: Calendar, labelKey: 'settings.sessionCreated', descKey: 'settings.sessionCreatedDesc' },
+  { key: 'notify_session_rescheduled', icon: Calendar, labelKey: 'settings.sessionRescheduled', descKey: 'settings.sessionRescheduledDesc' },
+  { key: 'notify_health_alert', icon: Activity, labelKey: 'settings.healthAlert', descKey: 'settings.healthAlertDesc' },
 ] as const;
 
 export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsIntegrationCardProps) {
@@ -68,7 +68,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
         enabled,
         ...(webhookUrl && { webhook_url: webhookUrl })
       });
-      toast.success(enabled ? 'Teams integration enabled' : 'Teams integration disabled');
+      toast.success(enabled ? t('integrations.teamsEnabled', 'Teams integration enabled') : t('integrations.teamsDisabled', 'Teams integration disabled'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to update settings');
     }
@@ -144,7 +144,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       <CardContent className="space-y-4">
         {/* Webhook URL */}
         <div className="space-y-2">
-          <Label htmlFor="teams-webhook">Webhook URL</Label>
+          <Label htmlFor="teams-webhook">{t('settings.webhookUrl')}</Label>
           <div className="flex gap-2">
             <Input
               id="teams-webhook"
@@ -160,7 +160,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
               onClick={handleSaveWebhook} 
               disabled={!webhookUrl || updateSettings.isPending || !canEdit}
             >
-              Save
+              {t('settings.save')}
             </Button>
           </div>
         </div>
@@ -170,7 +170,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
               <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
-              How to get a webhook URL
+              {t('settings.howToGetWebhook')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
@@ -230,16 +230,16 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
             className="gap-2"
           >
             <Send className="h-3 w-3" />
-            {testWebhook.isPending ? 'Sending...' : 'Send test message'}
+            {testWebhook.isPending ? t('settings.sending') : t('settings.sendTestMessage')}
           </Button>
         )}
 
         {/* Event Toggles */}
         {isEnabled && (
           <div className="space-y-3 pt-4 border-t">
-            <Label>Notification events</Label>
+            <Label>{t('settings.notificationEvents')}</Label>
             <div className="space-y-2">
-              {EVENT_OPTIONS.map(({ key, icon: Icon, label, description }) => (
+              {EVENT_OPTIONS_KEYS.map(({ key, icon: Icon, labelKey, descKey }) => (
                 <div key={key} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50">
                   <Checkbox
                     id={key}
@@ -250,9 +250,9 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
                   <div className="flex-1 grid gap-0.5">
                     <label htmlFor={key} className="text-sm font-medium flex items-center gap-2 cursor-pointer">
                       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      {label}
+                      {t(labelKey)}
                     </label>
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    <p className="text-xs text-muted-foreground">{t(descKey)}</p>
                   </div>
                 </div>
               ))}

@@ -21,16 +21,16 @@ export function HubSpotIntegrationCard() {
           <HubSpotIcon className="h-5 w-5 text-[#FF7A59]" />
           HubSpot CRM
           <Badge variant="secondary" className="ml-2">
-            Coming Soon
+            {t('settings.comingSoon')}
           </Badge>
         </CardTitle>
         <CardDescription>
-          Sync contacts, deals, and activities between Startup Leiria and HubSpot CRM
+          {t('settings.hubspotDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground space-y-3">
-          <p className="font-medium text-foreground">Planned features:</p>
+          <p className="font-medium text-foreground">{t('settings.plannedFeatures')}</p>
           <ul className="list-disc list-inside space-y-1">
             <li>Two-way contact sync between startups and HubSpot contacts</li>
             <li>Track investor interactions as HubSpot activities</li>
@@ -43,12 +43,8 @@ export function HubSpotIntegrationCard() {
         <div className="pt-2 border-t">
           <Button variant="outline" size="sm" disabled className="gap-2">
             <ExternalLink className="h-3 w-3" />
-            Connect HubSpot
+            {t('settings.connectHubSpot')}
           </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            This integration requires HubSpot API credentials and OAuth setup. 
-            We're working on making this available soon.
-          </p>
         </div>
       </CardContent>
     </Card>

@@ -135,26 +135,26 @@ export function GlobalGraphApiCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-primary" />
-          Global Microsoft Graph API
+          {t('settings.globalGraphApi')}
           {isEnabled && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Active
+              {t('settings.active')}
             </Badge>
           )}
           {isConfigured && !isEnabled && (
-            <Badge variant="outline">Configured</Badge>
+            <Badge variant="outline">{t('settings.configured')}</Badge>
           )}
         </CardTitle>
         <CardDescription>
-          Configure Azure AD credentials once. Workspaces automatically use the assigned consultant's calendar.
+          {t('settings.graphApiCardDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Alert className="bg-primary/5 border-primary/20">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>How it works:</strong> Sessions are created in the Outlook calendar of each workspace's assigned consultant. No manual email entry needed per workspace.
+            <strong>{t('settings.howItWorks')}</strong> {t('settings.howItWorksDesc')}
           </AlertDescription>
         </Alert>
 
@@ -162,19 +162,19 @@ export function GlobalGraphApiCard() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4 text-[#0078D4]" />
-            <span>Outlook events</span>
+            <span>{t('settings.outlookEvents')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Video className="h-4 w-4 text-[#6264A7]" />
-            <span>Teams meetings</span>
+            <span>{t('settings.teamsMeetings')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span>Per-consultant calendars</span>
+            <span>{t('settings.perConsultantCalendars')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <FileText className="h-4 w-4" />
-            <span>Auto transcripts</span>
+            <span>{t('settings.autoTranscripts')}</span>
           </div>
         </div>
 
@@ -182,11 +182,11 @@ export function GlobalGraphApiCard() {
         <div className="space-y-3 pt-3 border-t">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-amber-500" />
-            <Label className="font-medium">Azure AD App Registration</Label>
+            <Label className="font-medium">{t('settings.azureAdAppRegistration')}</Label>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="global-tenant-id" className="text-xs">Tenant ID (Directory ID)</Label>
+            <Label htmlFor="global-tenant-id" className="text-xs">{t('settings.tenantIdLabel')}</Label>
             <Input
               id="global-tenant-id"
               type="text"
@@ -198,7 +198,7 @@ export function GlobalGraphApiCard() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="global-client-id" className="text-xs">Application (Client) ID</Label>
+            <Label htmlFor="global-client-id" className="text-xs">{t('settings.clientIdLabel')}</Label>
             <Input
               id="global-client-id"
               type="text"
@@ -212,7 +212,7 @@ export function GlobalGraphApiCard() {
           <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
             <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
-              <strong>Client Secret</strong> is configured server-side as the <code className="bg-muted px-1 rounded">MS_GRAPH_CLIENT_SECRET</code> environment variable and is never stored in the database.
+              <strong>Client Secret</strong> {t('settings.clientSecretNote')}
             </AlertDescription>
           </Alert>
 
@@ -222,7 +222,7 @@ export function GlobalGraphApiCard() {
             size="sm"
             className="w-full"
           >
-            {updateSettings.isPending ? 'Saving...' : isConfigured ? 'Update Identifiers' : 'Save Identifiers'}
+            {updateSettings.isPending ? t('settings.saving') : isConfigured ? t('settings.updateIdentifiers') : t('settings.saveIdentifiers')}
           </Button>
         </div>
 
@@ -231,7 +231,7 @@ export function GlobalGraphApiCard() {
           <div className="space-y-2 pt-3 border-t">
             <Label className="flex items-center gap-2 text-sm">
               <TestTube className="h-4 w-4" />
-              Test Graph API Connection
+              {t('settings.testGraphConnection')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -247,11 +247,11 @@ export function GlobalGraphApiCard() {
                 onClick={handleTestGraph}
                 disabled={isTesting || !testEmail}
               >
-                {isTesting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Test'}
+                {isTesting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('settings.test')}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Creates a test event with Teams link in this user's calendar, then deletes it.
+              {t('settings.testDesc')}
             </p>
           </div>
         )}
@@ -261,7 +261,7 @@ export function GlobalGraphApiCard() {
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
               <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
-              How to set up Azure AD App
+              {t('settings.howToSetupAzure')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
@@ -281,10 +281,10 @@ export function GlobalGraphApiCard() {
                 <li>Select "Microsoft Graph" → "Application permissions"</li>
                 <li>Add these permissions:
                   <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
-                    <li><code className="bg-muted px-1 rounded">Calendars.ReadWrite</code> - Create/update calendar events</li>
-                    <li><code className="bg-muted px-1 rounded">OnlineMeetings.ReadWrite.All</code> - Create Teams meetings</li>
-                    <li><code className="bg-muted px-1 rounded">OnlineMeetingTranscript.Read.All</code> - Read transcripts (required!)</li>
-                    <li><code className="bg-muted px-1 rounded">User.Read.All</code> - Resolve user emails</li>
+                    <li><code className="bg-muted px-1 rounded">Calendars.ReadWrite</code></li>
+                    <li><code className="bg-muted px-1 rounded">OnlineMeetings.ReadWrite.All</code></li>
+                    <li><code className="bg-muted px-1 rounded">OnlineMeetingTranscript.Read.All</code></li>
+                    <li><code className="bg-muted px-1 rounded">User.Read.All</code></li>
                   </ul>
                 </li>
                 <li><strong>Click "Grant admin consent for [Your Org]"</strong></li>
@@ -306,7 +306,7 @@ export function GlobalGraphApiCard() {
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto text-amber-600 dark:text-amber-400">
               <ChevronDown className={`h-3 w-3 transition-transform ${showPolicyGuide ? 'rotate-180' : ''}`} />
-              Teams Application Access Policy (required for transcripts)
+              {t('settings.teamsAccessPolicy')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
@@ -329,10 +329,6 @@ export function GlobalGraphApiCard() {
                 <p className="text-muted-foreground"># OR grant to specific user:</p>
                 <code>Grant-CsApplicationAccessPolicy -PolicyName "StartupLeiriaAccess" -Identity "consultor@startupleiria.com"</code>
               </div>
-              
-              <p className="text-xs text-muted-foreground">
-                <strong>Note:</strong> Policy changes can take up to 30 minutes to propagate. Transcripts only appear after meetings end with transcription enabled.
-              </p>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -340,9 +336,9 @@ export function GlobalGraphApiCard() {
         {/* Enable Toggle */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="space-y-0.5">
-            <Label>Enable Graph API globally</Label>
+            <Label>{t('settings.enableGraphGlobally')}</Label>
             <p className="text-sm text-muted-foreground">
-              All workspaces can use this for calendar sync
+              {t('settings.allWorkspacesCanUse')}
             </p>
           </div>
           <Switch
@@ -354,8 +350,8 @@ export function GlobalGraphApiCard() {
 
         {isEnabled && (
           <div className="text-xs text-muted-foreground bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-            <p className="font-medium text-green-700 dark:text-green-400">🎉 Global integration active!</p>
-            <p>Sessions auto-sync to the assigned consultant's Outlook calendar. No per-workspace setup needed.</p>
+            <p className="font-medium text-green-700 dark:text-green-400">🎉 {t('settings.globalIntegrationActive')}</p>
+            <p>{t('settings.globalIntegrationDesc')}</p>
           </div>
         )}
       </CardContent>
