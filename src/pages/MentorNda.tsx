@@ -136,7 +136,10 @@ export default function MentorNda() {
   }
   
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="relative min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="absolute top-4 left-4">
+        <BackToHomeLink />
+      </div>
       <Card className="max-w-2xl w-full">
         <CardHeader className="text-center">
           <img src={startupLeiriaLogo} alt="Startup Leiria" className="h-12 mx-auto mb-4" />
