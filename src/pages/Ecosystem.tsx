@@ -33,14 +33,7 @@ export default function Ecosystem() {
 
   const { data: items, isLoading } = useEcosystemItems(filters);
 
-  // Only staff can access
-  if (!authLoading && !isAdmin && !isConsultor) {
-    return (
-      <AppLayout>
-        <AccessDenied />
-      </AppLayout>
-    );
-  }
+  // Route-level staffOnly guard handles access control — no internal guard needed
 
   return (
     <AppLayout>
