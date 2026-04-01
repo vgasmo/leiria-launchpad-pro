@@ -755,11 +755,11 @@ export function PendingApprovalsManager() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ideation">Ideação</SelectItem>
-                        <SelectItem value="validation">Validação</SelectItem>
+                        <SelectItem value="ideation">{t('stages.ideation', 'Ideação')}</SelectItem>
+                        <SelectItem value="validation">{t('stages.validation', 'Validação')}</SelectItem>
                         <SelectItem value="mvp">MVP</SelectItem>
-                        <SelectItem value="growth">Crescimento</SelectItem>
-                        <SelectItem value="scale">Escala</SelectItem>
+                        <SelectItem value="growth">{t('stages.growth', 'Crescimento')}</SelectItem>
+                        <SelectItem value="scale">{t('stages.scale', 'Escala')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
