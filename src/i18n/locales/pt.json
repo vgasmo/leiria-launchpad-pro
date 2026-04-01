@@ -1512,10 +1512,26 @@
     "overdueCheckins": "Check-ins Atrasados"
   },
   "consultor": {
+    "aiBriefing": {
+      "cta": "Briefing",
+      "error": "Briefing indisponível neste momento. Tente mais tarde.",
+      "nextActions": "Próximas Ações",
+      "retry": "Tentar",
+      "title": "Briefing 30 Dias",
+      "unavailableHint": "Briefing IA indisponível — clique para tentar novamente"
+    },
+    "healthMatrix": {
+      "title": "Matriz de Saúde do Portfólio"
+    },
+    "hero": {
+      "triageHint": "Triage diária — foque-se no que precisa de atenção hoje. Para gestão aprofundada, use o portefólio."
+    },
+    "nudgeFounder": "Nudge",
     "prepSheet": {
       "button": "Preparar reunião",
       "title": "Preparação 1.ª Reunião"
-    }
+    },
+    "reviewMilestone": "Rever"
   },
   "consultorTools": {
     "allCategories": "Todas",
@@ -3434,12 +3450,21 @@
     "actionsFollowups": "Ações & Follow-ups",
     "admin": {
       "crm": "CRM",
+      "ecosystem": "Diretório Ecossistema",
       "operations": "Operações",
       "programsCohorts": "Programas e Coortes",
       "quickGuide": "Guia Rápido",
       "reports": "Relatórios",
       "systemConfig": "Configuração do Sistema",
       "usersPermissions": "Utilizadores & Permissões"
+    },
+    "backoffice": {
+      "approvals": "Aprovações",
+      "cockpit": "Centro de Comando",
+      "contracts": "Contratos",
+      "invoices": "Faturação",
+      "quickGuide": "Guia Rápido",
+      "spaces": "Espaços"
     },
     "adminPanel": "Painel de Admin",
     "consultor": {
@@ -3452,7 +3477,8 @@
       "quickGuide": "Guia Rápido",
       "reports": "Relatórios",
       "sessions": "Sessões",
-      "startups": "Startups"
+      "startups": "Startups",
+      "ecosystem": "Ecossistema"
     },
     "consultorTools": "Ferramentas do Consultor",
     "crm": "CRM",
@@ -3483,6 +3509,19 @@
       "upcomingSessions": "Próximas Sessões"
     },
     "mentors": "Mentores",
+    "mobile": {
+      "cockpit": "Cockpit",
+      "contracts": "Contratos",
+      "crm": "CRM",
+      "ecosystem": "Ecossistema",
+      "home": "Início",
+      "portfolio": "Portefólio",
+      "resources": "Recursos",
+      "sessions": "Sessões",
+      "spaces": "Espaços",
+      "startup": "Startup",
+      "startups": "Startups"
+    },
     "myWorkspaces": "Os Meus Workspaces",
     "opsCompliance": "Operações & Conformidade",
     "portfolio": "Portefólio",
@@ -5692,13 +5731,28 @@
     "greeting": "Olá, {{name}}",
     "greetingGeneric": "Bem-vindo ao Centro de Comando",
     "triage": "Triagem & Intake",
+    "triageDesc": "O que precisa de decisão agora: aprovações, associações e encaminhamento.",
     "pendingApprovals": "Aprovações Pendentes",
     "intakeRouting": "Encaminhamento",
     "dailyWork": "Trabalho do Dia",
+    "dailyWorkDesc": "Ações automáticas prioritárias baseadas no estado do portfólio.",
     "myTasks": "As Minhas Tarefas",
     "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
     "navLabel": "Centro de Comando",
-    "claimRequests": "Associações"
+    "claimRequests": "Associações",
+    "contractsExpiring": "Contratos a Expirar (30 dias)",
+    "invoicesOverdue": "Faturas em Atraso",
+    "noExpiringContracts": "Nenhum contrato a expirar nos próximos 30 dias.",
+    "noOverdueInvoices": "Nenhuma fatura em atraso. Tudo em dia!",
+    "expiresOn": "Expira em {{date}}",
+    "overdueSince": "Em atraso desde {{date}}"
+  },
+  "contractOnboarding": {
+    "step": {
+      "companyData": "Dados da Empresa",
+      "reviewContract": "Rever Contrato",
+      "signing": "Assinatura Digital"
+    }
   },
   "claimStartup": {
     "title": "Verificar a sua Startup",

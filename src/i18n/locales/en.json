@@ -1512,10 +1512,26 @@
     "overdueCheckins": "Overdue Check-ins"
   },
   "consultor": {
+    "aiBriefing": {
+      "cta": "Briefing",
+      "error": "Briefing unavailable at the moment. Try again later.",
+      "nextActions": "Next Actions",
+      "retry": "Retry",
+      "title": "30-Day Briefing",
+      "unavailableHint": "AI Briefing unavailable — click to retry"
+    },
+    "healthMatrix": {
+      "title": "Portfolio Health Matrix"
+    },
+    "hero": {
+      "triageHint": "Daily triage — focus on what needs attention today. For deep management, use the portfolio."
+    },
+    "nudgeFounder": "Nudge",
     "prepSheet": {
       "button": "Prep meeting",
       "title": "First Contact Prep"
-    }
+    },
+    "reviewMilestone": "Review"
   },
   "consultorTools": {
     "allCategories": "All",
@@ -3434,12 +3450,21 @@
     "actionsFollowups": "Actions & Follow-ups",
     "admin": {
       "crm": "CRM",
+      "ecosystem": "Ecosystem Directory",
       "operations": "Operations",
       "programsCohorts": "Programs & Cohorts",
       "quickGuide": "Quick Guide",
       "reports": "Reports",
       "systemConfig": "System Configuration",
       "usersPermissions": "Users & Permissions"
+    },
+    "backoffice": {
+      "approvals": "Approvals",
+      "cockpit": "Command Center",
+      "contracts": "Contracts",
+      "invoices": "Billing",
+      "quickGuide": "Quick Guide",
+      "spaces": "Spaces"
     },
     "adminPanel": "Admin Panel",
     "consultor": {
@@ -3452,7 +3477,8 @@
       "quickGuide": "Quick Guide",
       "reports": "Reports",
       "sessions": "Sessions",
-      "startups": "Startups"
+      "startups": "Startups",
+      "ecosystem": "Ecosystem"
     },
     "consultorTools": "Consultant Tools",
     "crm": "CRM",
@@ -3483,6 +3509,19 @@
       "upcomingSessions": "Upcoming Sessions"
     },
     "mentors": "Mentors",
+    "mobile": {
+      "cockpit": "Cockpit",
+      "contracts": "Contracts",
+      "crm": "CRM",
+      "ecosystem": "Ecosystem",
+      "home": "Home",
+      "portfolio": "Portfolio",
+      "resources": "Resources",
+      "sessions": "Sessions",
+      "spaces": "Spaces",
+      "startup": "Startup",
+      "startups": "Startups"
+    },
     "myWorkspaces": "My Workspaces",
     "opsCompliance": "Operations & Compliance",
     "portfolio": "Portfolio",
@@ -5692,13 +5731,28 @@
     "greeting": "Hello, {{name}}",
     "greetingGeneric": "Welcome to the Command Centre",
     "triage": "Smart Triage & Intake",
+    "triageDesc": "What needs a decision now: approvals, claims and routing.",
     "pendingApprovals": "Pending Approvals",
     "intakeRouting": "Routing",
     "dailyWork": "Today's Work",
+    "dailyWorkDesc": "Priority automated actions based on portfolio status.",
     "myTasks": "My Tasks",
     "emptyTriage": "No pending items. All clear!",
     "navLabel": "Command Centre",
-    "claimRequests": "Claim Requests"
+    "claimRequests": "Claim Requests",
+    "contractsExpiring": "Contracts Expiring (30 days)",
+    "invoicesOverdue": "Overdue Invoices",
+    "noExpiringContracts": "No contracts expiring in the next 30 days.",
+    "noOverdueInvoices": "No overdue invoices. All up to date!",
+    "expiresOn": "Expires on {{date}}",
+    "overdueSince": "Overdue since {{date}}"
+  },
+  "contractOnboarding": {
+    "step": {
+      "companyData": "Company Details",
+      "reviewContract": "Review Contract",
+      "signing": "Digital Signature"
+    }
   },
   "claimStartup": {
     "title": "Verify your Startup",

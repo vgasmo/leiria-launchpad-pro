@@ -3,7 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CockpitQuickActions } from '@/components/staff/CockpitQuickActions';
 import { WorkQueuePanel } from '@/components/staff/WorkQueuePanel';
 import { StaffTasksPanel } from '@/components/staff/StaffTasksPanel';
@@ -15,7 +15,11 @@ import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsMana
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
 import { ClaimRequestsQueue } from '@/components/admin/ClaimRequestsQueue';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
-import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck } from 'lucide-react';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck, FileText, DollarSign } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
@@ -58,6 +62,18 @@ export default function StaffCockpit() {
         {/* Silent Disengagement Alerts - Admin and Consultor */}
         {(isAdmin || isConsultor) && (
           <SilentDisengagementCard workspaces={workspaces} />
+        )}
+
+        {/* Backoffice-specific: Contracts expiring + Overdue invoices */}
+        {isBackoffice && (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <WidgetErrorBoundary name="ContractsExpiring">
+              <BackofficeContractsExpiringCard />
+            </WidgetErrorBoundary>
+            <WidgetErrorBoundary name="InvoicesOverdue">
+              <BackofficeInvoicesOverdueCard />
+            </WidgetErrorBoundary>
+          </div>
         )}
 
         {/* Main Grid: Triage + Daily Work */}
@@ -141,5 +157,121 @@ export default function StaffCockpit() {
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+/** Backoffice widget: contracts expiring within 30 days */
+function BackofficeContractsExpiringCard() {
+  const { t } = useTranslation();
+
+  const { data: contracts = [] } = useQuery({
+    queryKey: ['backoffice-contracts-expiring'],
+    queryFn: async () => {
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      const { data, error } = await supabase
+        .from('startup_contracts')
+        .select('id, contract_number, end_date, startup_id, startups(name)')
+        .eq('status', 'active')
+        .lte('end_date', thirtyDaysFromNow.toISOString())
+        .gte('end_date', new Date().toISOString())
+        .order('end_date', { ascending: true })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <FileText className="h-4 w-4 text-amber-500" />
+          {t('staffCockpit.contractsExpiring', { defaultValue: 'Contratos a Expirar (30 dias)' })}
+          {contracts.length > 0 && (
+            <Badge variant="secondary" className="ml-auto">{contracts.length}</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {contracts.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {t('staffCockpit.noExpiringContracts', { defaultValue: 'Nenhum contrato a expirar nos próximos 30 dias.' })}
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {contracts.map((c: any) => (
+              <li key={c.id} className="flex items-center justify-between text-sm border-b border-border pb-2 last:border-0">
+                <div>
+                  <span className="font-medium">{c.contract_number}</span>
+                  <span className="text-muted-foreground ml-2">
+                    {(c.startups as any)?.name}
+                  </span>
+                </div>
+                <Badge variant="outline" className="text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-600">
+                  {t('staffCockpit.expiresOn', { defaultValue: 'Expira em {{date}}', date: c.end_date ? format(new Date(c.end_date), 'dd/MM') : '-' })}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Backoffice widget: overdue invoices */
+function BackofficeInvoicesOverdueCard() {
+  const { t } = useTranslation();
+
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['backoffice-invoices-overdue'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('id, invoice_number, due_date, total_amount, status, contract_id, startup_contracts(contract_number, startups(name))')
+        .eq('status', 'overdue')
+        .order('due_date', { ascending: true })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <DollarSign className="h-4 w-4 text-destructive" />
+          {t('staffCockpit.invoicesOverdue', { defaultValue: 'Faturas em Atraso' })}
+          {invoices.length > 0 && (
+            <Badge variant="destructive" className="ml-auto">{invoices.length}</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {invoices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {t('staffCockpit.noOverdueInvoices', { defaultValue: 'Nenhuma fatura em atraso. Tudo em dia!' })}
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {invoices.map((inv: any) => (
+              <li key={inv.id} className="flex items-center justify-between text-sm border-b border-border pb-2 last:border-0">
+                <div>
+                  <span className="font-medium">{inv.invoice_number}</span>
+                  <span className="text-muted-foreground ml-2">
+                    {(inv.startup_contracts as any)?.startups?.name || (inv.startup_contracts as any)?.contract_number}
+                  </span>
+                </div>
+                <Badge variant="outline" className="text-destructive border-destructive/30">
+                  {t('staffCockpit.overdueSince', { defaultValue: 'Em atraso desde {{date}}', date: inv.due_date ? format(new Date(inv.due_date), 'dd/MM') : '-' })}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

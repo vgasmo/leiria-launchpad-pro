@@ -23,11 +23,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
 
-const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
-  { key: 'company_data', icon: Building2, label: 'Dados da Empresa' },
-  { key: 'review_contract', icon: FileText, label: 'Rever Contrato' },
-  { key: 'signing', icon: PenTool, label: 'Assinatura Digital' },
-];
+// Steps defined inside component - see STEPS useMemo below
 
 interface RepresentativeEntry {
   name: string;
@@ -66,6 +62,12 @@ export default function ContractOnboarding() {
   const [currentStep, setCurrentStep] = useState<WizardStep>('company_data');
   const [regulationAccepted, setRegulationAccepted] = useState(false);
   const [contractAccepted, setContractAccepted] = useState(false);
+
+  const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
+    { key: 'company_data', icon: Building2, label: t('contractOnboarding.step.companyData', 'Dados da Empresa') },
+    { key: 'review_contract', icon: FileText, label: t('contractOnboarding.step.reviewContract', 'Rever Contrato') },
+    { key: 'signing', icon: PenTool, label: t('contractOnboarding.step.signing', 'Assinatura Digital') },
+  ];
 
   const [formData, setFormData] = useState<CompanyFormData>({
     legal_representative_name: '',
