@@ -19,7 +19,7 @@ export const ConsultorStatsBar = memo(function ConsultorStatsBar({ stats }: Cons
 
   return (
     <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-      <Card className="p-4 rounded-2xl border-border/60">
+      <Card interactive className="p-4 rounded-2xl border-border/60">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.totalStartups')}</p>
