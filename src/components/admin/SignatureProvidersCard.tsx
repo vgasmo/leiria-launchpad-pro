@@ -369,7 +369,7 @@ function DefaultProviderSelector() {
                 DocuSign {!docusign?.is_enabled && `(${t('common.disabled', 'desativado')})`}
               </SelectItem>
               <SelectItem value="pandadoc" className="text-xs" disabled={!pandadoc?.is_enabled}>
-                PandaDoc {!pandadoc?.is_enabled && '(desativado)'}
+                PandaDoc {!pandadoc?.is_enabled && `(${t('common.disabled', 'desativado')})`}
               </SelectItem>
             </SelectContent>
           </Select>

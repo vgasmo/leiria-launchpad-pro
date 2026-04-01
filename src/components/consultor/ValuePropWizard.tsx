@@ -366,10 +366,10 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
             disabled={currentStep === 0}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t('common.back', 'Voltar')}
           </Button>
           <Button onClick={handleNext} disabled={!canProceed()}>
-            {currentStep === STEPS.length - 1 ? 'Generate' : 'Next'}
+            {currentStep === STEPS.length - 1 ? t('vp.generate', 'Gerar') : t('common.next', 'Seguinte')}
             {currentStep === STEPS.length - 1 ? (
               <Sparkles className="h-4 w-4 ml-2" />
             ) : (
