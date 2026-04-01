@@ -63,7 +63,7 @@ function meetsStageRequirement(currentStage: string, minStage?: string): boolean
  * Filter tabs based on user roles, available data, and startup stage.
  */
 export function getVisibleTabs(
-  roles: { isAdmin: boolean; isConsultor: boolean; isMentor: boolean; isFounder: boolean },
+  roles: { isAdmin: boolean; isConsultor: boolean; isMentor: boolean; isFounder: boolean; isBackoffice?: boolean },
   hasStartup: boolean,
   currentStage?: string
 ): { primaryTabs: WorkspaceTab[]; overflowTabs: WorkspaceTab[] } {
