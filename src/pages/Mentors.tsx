@@ -583,7 +583,7 @@ export default function Mentors() {
                               </div>
                               {conn.founder?.linkedin_url && (
                                 <a
-                                  href={conn.founder.linkedin_url}
+                                  href={sanitizeUrl(conn.founder.linkedin_url)!}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-muted-foreground hover:text-primary"

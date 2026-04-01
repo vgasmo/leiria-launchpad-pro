@@ -274,7 +274,7 @@ function MaterialDetailDialog({
                   {material.external_links.map((link, i) => (
                     <a
                       key={i}
-                      href={link.url}
+                      href={sanitizeUrl(link.url)!}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-primary hover:underline"

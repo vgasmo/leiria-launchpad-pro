@@ -570,7 +570,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
                           )}
                           {session.join_url && (
                             <a
-                              href={session.join_url}
+                              href={sanitizeUrl(session.join_url)!}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex"
