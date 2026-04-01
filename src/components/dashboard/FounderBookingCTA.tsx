@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, Video, ChevronRight, Sparkles } from 'lucide-react';
