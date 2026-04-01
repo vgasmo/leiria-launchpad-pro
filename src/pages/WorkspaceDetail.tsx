@@ -49,6 +49,7 @@ export default function WorkspaceDetail() {
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
+  const tabBadges = useWorkspaceTabBadges(id);
   
   useEffect(() => {
     if (shouldShowOnboarding && workspace && isFounder) {
