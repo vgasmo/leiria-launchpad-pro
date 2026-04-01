@@ -284,7 +284,7 @@ export function SpaceWaitingListTab() {
               <Building2 className="h-5 w-5 text-green-600" />
               <div>
                 <div className="text-2xl font-bold">{availableRooms.length}</div>
-                <p className="text-sm text-muted-foreground">Available Rooms</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.availableRooms', 'Available Rooms')}</p>
               </div>
             </div>
           </CardContent>
