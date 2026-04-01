@@ -6,8 +6,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
-const t = i18n.t.bind(i18n);
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+const t = i18n.t.bind(i18n);
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
