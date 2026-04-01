@@ -89,6 +89,7 @@ function MetricCard({
 }
 
 function InsightCard({ insight, onCreateAction, createActionLabel }: { insight: FinancialInsight; onCreateAction?: () => void; createActionLabel?: string }) {
+  const { t } = useTranslation();
   const severityConfig = {
     critical: { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', icon: XCircle, color: 'text-red-600' },
     warning: { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', icon: AlertTriangle, color: 'text-amber-600' },
