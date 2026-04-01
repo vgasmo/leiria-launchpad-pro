@@ -293,6 +293,20 @@ export function BookingLinksManager() {
                           <Trash2 className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       )}
+                      {!link.active && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (window.confirm(t('admin.confirmDeleteLink', 'Tem a certeza que quer apagar este link?'))) {
+                              deleteLink.mutate(link.id);
+                            }
+                          }}
+                          title={t('common.delete', 'Apagar')}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
