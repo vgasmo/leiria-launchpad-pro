@@ -241,8 +241,8 @@ export function SpaceWaitingListTab() {
                     step={1}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Low</span>
-                    <span>High</span>
+                    <span>{t('priority.low', 'Low')}</span>
+                    <span>{t('priority.high', 'High')}</span>
                   </div>
                 </div>
 
