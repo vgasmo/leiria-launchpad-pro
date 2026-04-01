@@ -355,6 +355,8 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       memberEmails={memberEmails}
     />
   );
+
+  return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Calendar View */}
       <Card className="lg:col-span-2">
