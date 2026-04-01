@@ -226,7 +226,7 @@ export function MentorAvailabilitySettings() {
         <div className="flex flex-wrap gap-3 pt-4 border-t">
           <Button variant="outline" onClick={addSlot}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Time Slot
+            {t('mentor.addTimeSlot', 'Adicionar Horário')}
           </Button>
           
           {hasChanges && (
