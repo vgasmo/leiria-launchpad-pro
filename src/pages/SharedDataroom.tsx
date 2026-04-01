@@ -165,7 +165,7 @@ export default function SharedDataroom() {
                           </Badge>
                           {dataroom?.allow_download && item.document.download_url && (
                             <Button asChild variant="outline" size="sm" className="ml-2">
-                              <a href={item.document.download_url} target="_blank" rel="noopener noreferrer">
+                              <a href={sanitizeUrl(item.document.download_url)!} target="_blank" rel="noopener noreferrer">
                                 <Download className="h-4 w-4 mr-2" />
                                 {t('dataroom.download')}
                               </a>
