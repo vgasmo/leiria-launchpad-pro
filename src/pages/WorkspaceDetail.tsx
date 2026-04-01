@@ -234,7 +234,11 @@ export default function WorkspaceDetail() {
               )}
             >
               {t(tab.labelKey)}
-            </button>
+              {tabBadges[tab.id] ? (
+                <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none">
+                  {tabBadges[tab.id] > 99 ? '99+' : tabBadges[tab.id]}
+                </span>
+              ) : null}
           ))}
 
           {/* Overflow "More" dropdown - only if there are overflow tabs */}
