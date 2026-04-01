@@ -420,10 +420,24 @@ export function SpaceOperationsConsole() {
         </Select>
       </div>
 
-      {/* Results count */}
-      <p className="text-xs text-muted-foreground">
-        {filtered.length} de {records?.length || 0} {t('ops.console.roomsShown', { defaultValue: 'salas apresentadas' })}
-      </p>
+      {/* Results count + cleanup */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {filtered.length} de {records?.length || 0} {t('ops.console.roomsShown', { defaultValue: 'salas apresentadas' })}
+        </p>
+        {staleRoomIds.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-amber-700 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-900/20"
+            disabled={cleanupMutation.isPending}
+            onClick={() => cleanupMutation.mutate(staleRoomIds)}
+          >
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Libertar {staleRoomIds.length} sala(s) órfã(s)
+          </Button>
+        )}
+      </div>
 
       {/* Table */}
       <Card className="rounded-xl overflow-hidden">
