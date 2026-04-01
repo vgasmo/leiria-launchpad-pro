@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
 import { MessageSquare, Send, User, MoreVertical, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
