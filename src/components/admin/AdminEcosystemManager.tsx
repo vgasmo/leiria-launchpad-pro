@@ -226,9 +226,9 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Stage" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Stages</SelectItem>
+              <SelectItem value="all">{t('common.allStages', 'Todos os Estágios')}</SelectItem>
               {stages.map(s => (
-                <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                <SelectItem key={s} value={s}>{t(`stages.${s}`, s.charAt(0).toUpperCase() + s.slice(1))}</SelectItem>
               ))}
             </SelectContent>
           </Select>
