@@ -224,6 +224,14 @@ export function useAddWorkspaceUser() {
       // Ensure account is approved
       await supabase.from('profiles').update({ account_status: 'approved' }).eq('id', user_id).eq('account_status', 'pending');
 
+      // C5: If adding a founder, activate the workspace if it's pending/claimed
+      if (role === 'founder') {
+        await supabase.from('workspaces')
+          .update({ status: 'active' })
+          .eq('id', workspace_id)
+          .in('status', ['pending', 'claimed']);
+      }
+
       return data;
     },
     onSuccess: () => {
