@@ -2141,7 +2141,10 @@
     "unmatched": "Por resolver",
     "value": "Valor",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "movedTo": "Movido para {{stage}}",
+    "moveError": "Erro ao mover lead",
+    "dragLeadsHere": "Arraste leads para aqui"
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -3889,7 +3892,19 @@
     "title": "Notas e Tarefas",
     "titleRequired": "Por favor insira um título para a tarefa",
     "urgent": "Urgente",
-    "visibleLabel": "Visível para membros do workspace"
+    "visibleLabel": "Visível para membros do workspace",
+    "sessionInsights": "Session Insights",
+    "savedAsNote": "Guardado como nota",
+    "failedToSave": "Falha ao guardar nota",
+    "noAiInsightsYet": "Ainda sem insights AI",
+    "aiInsightsDesc": "Os insights de sessão aparecerão aqui após executar análise AI nas suas sessões.",
+    "aiInsightsHint": "Insights AI das suas sessões podem ser guardados como notas ou convertidos em tarefas.",
+    "summary": "Resumo",
+    "saveAsNote": "Guardar como Nota",
+    "decisions": "Decisões",
+    "risksIdentified": "Riscos Identificados",
+    "suggestedActions": "Ações Sugeridas",
+    "createTaskBtn": "Criar Tarefa"
   },
   "notifications": {
     "emailSyncDone": "Emails Sincronizados",
