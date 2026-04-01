@@ -1909,6 +1909,10 @@
       "title": "Portfolio Health Matrix"
     },
     "hero": {
+      "title": "Needs Attention",
+      "subtitle": "Startups that require immediate action",
+      "allClear": "All clear!",
+      "noPriorities": "No startups need urgent attention right now.",
       "triageHint": "Daily triage — focus on what needs attention today. For deep management, use the portfolio."
     },
     "nudgeFounder": "Nudge",

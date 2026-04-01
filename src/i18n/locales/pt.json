@@ -1909,6 +1909,10 @@
       "title": "Matriz de Saúde do Portfólio"
     },
     "hero": {
+      "title": "Precisa de Atenção",
+      "subtitle": "Startups que requerem ação imediata",
+      "allClear": "Tudo em ordem!",
+      "noPriorities": "Nenhuma startup precisa de atenção urgente neste momento.",
       "triageHint": "Triage diária — foque-se no que precisa de atenção hoje. Para gestão aprofundada, use o portefólio."
     },
     "nudgeFounder": "Nudge",

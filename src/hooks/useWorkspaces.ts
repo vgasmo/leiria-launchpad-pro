@@ -70,6 +70,7 @@ export function useWorkspaces(
       if (assignedOnly) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // Get workspaces via workspace_users membership
           const { data: memberships } = await supabase
             .from('workspace_users')
             .select('workspace_id')
@@ -77,7 +78,18 @@ export function useWorkspaces(
             .eq('role', 'consultor')
             .eq('active', true);
           
-          assignedWorkspaceIds = memberships?.map(m => m.workspace_id) || [];
+          const membershipIds = memberships?.map(m => m.workspace_id) || [];
+          
+          // Also get workspaces where this user is the assigned consultant
+          const { data: assignedWorkspaces } = await supabase
+            .from('workspaces')
+            .select('id')
+            .eq('assigned_consultor_id', user.id);
+          
+          const assignedIds = assignedWorkspaces?.map(w => w.id) || [];
+          
+          // Merge both lists (deduplicate)
+          assignedWorkspaceIds = [...new Set([...membershipIds, ...assignedIds])];
         }
       }
       
