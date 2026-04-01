@@ -176,7 +176,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           <CollapsibleContent className="mt-3">
             <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
               <div>
-                <h4 className="font-medium mb-2">Option 1: Teams Workflows (Recommended)</h4>
+                <h4 className="font-medium mb-2">{t('settings.teamsWorkflows', 'Opção 1: Teams Workflows (Recomendado)')}</h4>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
                   <li>In Teams, go to your channel → ⋯ → Workflows</li>
                   <li>Search for "Post to a channel when a webhook request is received"</li>
