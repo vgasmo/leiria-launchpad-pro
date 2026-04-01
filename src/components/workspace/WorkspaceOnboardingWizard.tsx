@@ -38,6 +38,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { CompanyDetailsStep } from './CompanyDetailsStep';
 import type { StartupStage } from '@/types/database';
+import { logger } from '@/lib/logger';
 
 interface WorkspaceOnboardingWizardProps {
   open: boolean;
@@ -515,7 +516,7 @@ export function WorkspaceOnboardingWizard({
       toast.success(t('onboardingWizard.companySaved', { defaultValue: 'Company details saved' }));
       goToStep('kpis');
     } catch (err) {
-      console.error('Failed to save company details:', err);
+      logger.error('Failed to save company details', {}, err);
       toast.error(t('onboardingWizard.companyFailed', { defaultValue: 'Failed to save company details' }));
     } finally {
       setIsProcessing(false);

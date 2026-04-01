@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import i18n from '@/i18n';
+import { logger } from '@/lib/logger';
 
 interface ActionSuggestion {
   title: string;
@@ -39,7 +40,7 @@ export function useGenerateSessionSummary(workspaceId: string) {
       });
 
       if (error) {
-        console.error('Generate summary error:', error);
+        logger.error('Generate summary error', {}, error);
         throw new Error(error.message || 'Failed to generate summary');
       }
 
@@ -85,7 +86,7 @@ export function useSendSessionFollowup(workspaceId: string) {
       });
 
       if (error) {
-        console.error('Send followup error:', error);
+        logger.error('Send followup error', {}, error);
         throw new Error(error.message || 'Failed to send follow-up');
       }
 
@@ -138,7 +139,7 @@ export function useApplyActionSuggestions(workspaceId: string) {
         .select();
 
       if (error) {
-        console.error('Create actions error:', error);
+        logger.error('Create actions error', {}, error);
         throw new Error('Failed to create action items');
       }
 

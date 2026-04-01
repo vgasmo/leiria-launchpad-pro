@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { addDays, format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Database } from '@/integrations/supabase/types';
+import { logger } from '@/lib/logger';
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
 
@@ -295,7 +296,7 @@ export function useInstantiatePlaybook() {
     },
     onError: (error: Error) => {
       // Error toast handled in component for customization
-      console.error('Playbook instantiation error:', error.message);
+      logger.error('Playbook instantiation error', {}, error.message);
     },
   });
 }
@@ -337,7 +338,7 @@ export function useDismissPlaybook() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.dismissFailed'));
-      console.error('Playbook dismiss error:', error.message);
+      logger.error('Playbook dismiss error', {}, error.message);
     },
   });
 }
@@ -372,7 +373,7 @@ export function useRestorePlaybook() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.restoreFailed', { defaultValue: 'Falha ao restaurar playbook' }));
-      console.error('Playbook restore error:', error.message);
+      logger.error('Playbook restore error', {}, error.message);
     },
   });
 }
@@ -399,7 +400,7 @@ export function useCreatePlaybook() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.createFailed'));
-      console.error('Playbook create error:', error.message);
+      logger.error('Playbook create error', {}, error.message);
     },
   });
 }
@@ -427,7 +428,7 @@ export function useUpdatePlaybook() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.updateFailed'));
-      console.error('Playbook update error:', error.message);
+      logger.error('Playbook update error', {}, error.message);
     },
   });
 }
@@ -465,7 +466,7 @@ export function useCreatePlaybookItem() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.itemAddFailed'));
-      console.error('Playbook item create error:', error.message);
+      logger.error('Playbook item create error', {}, error.message);
     },
   });
 }
@@ -492,7 +493,7 @@ export function useDeletePlaybookItem() {
     },
     onError: (error: Error) => {
       toast.error(t('playbooks.errors.itemRemoveFailed'));
-      console.error('Playbook item delete error:', error.message);
+      logger.error('Playbook item delete error', {}, error.message);
     },
   });
 }

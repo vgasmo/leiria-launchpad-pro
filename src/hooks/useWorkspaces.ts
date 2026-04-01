@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
+import { logger } from '@/lib/logger';
 
 export type WorkspaceStatus = 'imported_unclaimed' | 'claimed' | 'pending' | 'active' | 'rejected' | 'archived';
 /** All non-rejected statuses — use in admin/backoffice views that need full ecosystem visibility. */
@@ -133,7 +134,7 @@ export function useWorkspaces(
         .rpc('get_workspace_stats', { workspace_ids: workspaceIds });
 
       if (statsError) {
-        console.error('Failed to get workspace stats:', statsError);
+        logger.error('Failed to get workspace stats', {}, statsError);
       }
 
       // Build lookup map for stats

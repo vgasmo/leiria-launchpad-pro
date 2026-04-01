@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useUploadDocument, useGetDocumentUrl, Document } from '@/hooks/useDocuments';
 import {
+import { logger } from '@/lib/logger';
   useFinancialModelVersions,
   useCreateFinancialModelVersion,
   useParseFinancialModel,
@@ -219,7 +220,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
       // Auto-parse
       await parseModel.mutateAsync(version.id);
     } catch (error) {
-      console.error('Upload failed:', error);
+      logger.error('Upload failed', {}, error);
     }
   };
 

@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
+import { logger } from '@/lib/logger';
 
 export interface SurveyQuestion {
   id: string;
@@ -116,7 +117,7 @@ export function useCreateSurveyDefinition() {
     },
     onError: (error) => {
       toast.error("Failed to create survey template");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }
@@ -152,7 +153,7 @@ export function useUpdateSurveyDefinition() {
     },
     onError: (error) => {
       toast.error("Failed to update survey template");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }
@@ -204,7 +205,7 @@ export function useCreateSurveyCampaign() {
     },
     onError: (error) => {
       toast.error("Failed to create campaign");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }
@@ -282,7 +283,7 @@ export function useLaunchCampaign() {
     },
     onError: (error) => {
       toast.error("Failed to launch campaign");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }
@@ -305,7 +306,7 @@ export function useCloseCampaign() {
     },
     onError: (error) => {
       toast.error("Failed to close campaign");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }
@@ -479,7 +480,7 @@ export function useSaveSurveyResponses() {
     },
     onError: (error) => {
       toast.error("Failed to save survey");
-      console.error(error);
+      logger.error('operation_error', {}, error);
     },
   });
 }

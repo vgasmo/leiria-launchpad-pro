@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertTriangle, Mail, Send, Users, Building2, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface DataIssue {
   id: string;
@@ -148,7 +149,7 @@ export function DataQualityDashboard() {
         if (error) throw error;
         successCount++;
       } catch (err) {
-        console.error('Failed to send invite:', err);
+        logger.error('Failed to send invite', {}, err);
         errorCount++;
       }
     }

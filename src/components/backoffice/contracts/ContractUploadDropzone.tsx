@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 export interface AIExtractedData {
   title?: string;
@@ -72,7 +73,7 @@ export function ContractUploadDropzone({ workspaceId, onAIDataExtracted, onManua
         onAIDataExtracted(aiResult.extraction, documentUrl);
       }
     } catch (err) {
-      console.error('Contract upload failed:', err);
+      logger.error('Contract upload failed', {}, err);
       toast.error(t('contracts.upload.error', { defaultValue: 'Upload failed. Please try again.' }));
     } finally {
       setIsProcessing(false);

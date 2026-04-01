@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 const STATUS_OPTIONS = ['draft', 'pending_signature', 'active', 'suspended', 'terminated', 'expired'];
 
@@ -190,7 +191,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
       }
     },
     onError: (err) => {
-      console.error('PDF generation error:', err);
+      logger.error('PDF generation error', {}, err);
       toast.error(t('contractDetail.pdfGenerationFailed', { defaultValue: 'Erro ao gerar PDF' }));
     },
   });

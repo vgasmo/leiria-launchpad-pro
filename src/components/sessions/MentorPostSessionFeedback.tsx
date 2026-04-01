@@ -26,6 +26,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 
 interface MentorPostSessionFeedbackProps {
   open: boolean;
@@ -128,7 +129,7 @@ export function MentorPostSessionFeedback({
       setNextSteps('');
       setRating(0);
     } catch (error) {
-      console.error('Failed to save feedback:', error);
+      logger.error('Failed to save feedback', {}, error);
       toast.error(t('mentorFeedback.error'));
     } finally {
       setSubmitting(false);

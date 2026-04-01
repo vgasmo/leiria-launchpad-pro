@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { logger } from '@/lib/logger';
 
 export interface GraphApiGlobalSettings {
   tenant_id: string;
@@ -38,7 +39,7 @@ export function useGlobalGraphSettings() {
         if (msg.includes('403') || msg.includes('Access denied')) {
           return null;
         }
-        console.error('[useGlobalGraphSettings] Edge function error:', error);
+        logger.error('[useGlobalGraphSettings] Edge function error', {}, error);
         throw error;
       }
       

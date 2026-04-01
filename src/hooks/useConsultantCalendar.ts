@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 interface TimeSlot {
   start: string;
@@ -36,7 +37,7 @@ export function useConsultantAvailability(
       });
 
       if (error) {
-        console.error('[useConsultantAvailability] Failed to check availability:', error);
+        logger.error('[useConsultantAvailability] Failed to check availability', {}, error);
         return null;
       }
 
@@ -69,7 +70,7 @@ export function useValidateBookingSlot() {
       });
 
       if (error) {
-        console.error('Validation error:', error);
+        logger.error('Validation error', {}, error);
         // Fail open (checked=false) so UI may warn but not block in case of temporary issues
         return { available: true, checked: false, reason: 'validation_error' };
       }

@@ -42,6 +42,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { renderPdfToImage, isPdfFile } from '@/lib/pdfRenderer';
+import { logger } from '@/lib/logger';
 
 // Status colors
 const STATUS_COLORS: Record<string, string> = {
@@ -160,7 +161,7 @@ export function InfrastructureTab() {
           }
         }
       } catch (err) {
-        console.error('Failed to load floor map:', err);
+        logger.error('Failed to load floor map', {}, err);
       }
       setMapLoading(false);
     };
@@ -318,7 +319,7 @@ export function InfrastructureTab() {
       setMapFloor('');
       setUploadDialogOpen(false);
     } catch (error) {
-      console.error('Upload floor map failed', error);
+      logger.error('Upload floor map failed', {}, error);
       toast.error(t('admin.backoffice.uploadMapFailed', { defaultValue: 'Erro ao carregar mapa' }));
     } finally {
       setUploading(false);

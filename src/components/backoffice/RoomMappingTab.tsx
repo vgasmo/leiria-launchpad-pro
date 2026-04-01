@@ -43,6 +43,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 // Room type config with i18n keys
 const ROOM_TYPE_ICONS: Record<string, typeof DoorOpen> = {
@@ -300,7 +301,7 @@ export function RoomMappingTab() {
       setMapFloor('');
       setMapDialogOpen(false);
     } catch (error) {
-      console.error('Upload floor map failed', error);
+      logger.error('Upload floor map failed', {}, error);
       const details = getErrorMessage(error);
       toast.error(
         details

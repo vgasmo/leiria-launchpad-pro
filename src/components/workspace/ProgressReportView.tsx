@@ -12,6 +12,7 @@ import { useWorkspaceActions, useWorkspaceKpis, useWorkspaceMilestones, useWorks
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { HealthScore, StartupStage } from '@/types/database';
+import { logger } from '@/lib/logger';
 
 interface ProgressReportViewProps {
   workspaceId: string;
@@ -80,7 +81,7 @@ export function ProgressReportView({ workspaceId, workspace }: ProgressReportVie
 
       toast.success(t('common.success'));
     } catch (error) {
-      console.error('Failed to generate report:', error);
+      logger.error('Failed to generate report', {}, error);
       toast.error(t('common.error'));
     } finally {
       setIsGeneratingPdf(false);

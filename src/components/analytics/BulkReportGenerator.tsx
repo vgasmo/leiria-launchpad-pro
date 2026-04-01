@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface BulkReportGeneratorProps {
   programId?: string;
@@ -143,7 +144,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
 
       toast.success(`Exported ${workspaces.length} startups to CSV`);
     } catch (error: any) {
-      console.error('Export error:', error);
+      logger.error('Export error', {}, error);
       toast.error(error.message || 'Failed to generate report');
     } finally {
       setLoading(false);

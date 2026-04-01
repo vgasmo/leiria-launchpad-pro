@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 import { Json } from '@/integrations/supabase/types';
 import { triggerMiniCelebration } from '@/lib/confetti';
+import { logger } from '@/lib/logger';
 
 type ActionStatus = Database['public']['Enums']['action_status'];
 
@@ -22,7 +23,7 @@ async function logActivity(action: string, entityType: string, entityId: string,
       metadata: (metadata || {}) as Json,
     });
   } catch (e) {
-    console.error('Failed to log activity:', e);
+    logger.error('Failed to log activity', {}, e);
   }
 }
 

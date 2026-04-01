@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useGlobalGraphSettings, useUpdateGlobalGraphSettings, useToggleGlobalGraph, GraphApiGlobalSettings } from '@/hooks/useGlobalIntegrations';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { logger } from '@/lib/logger';
 
 export function GlobalGraphApiCard() {
   const { data: settings, isLoading } = useGlobalGraphSettings();
@@ -109,7 +110,7 @@ export function GlobalGraphApiCard() {
         toast.error(data?.error || 'Test failed - check console for details');
       }
     } catch (err: any) {
-      console.error('[GlobalGraphApiCard] Test failed:', err);
+      logger.error('[GlobalGraphApiCard] Test failed', {}, err);
       toast.error(err.message || 'Failed to run test - are you logged in as admin?');
     } finally {
       setIsTesting(false);

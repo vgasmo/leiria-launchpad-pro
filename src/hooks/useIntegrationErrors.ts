@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 export interface IntegrationError {
   id: string;
@@ -108,6 +109,6 @@ export async function logIntegrationError(params: {
       request_payload: params.requestPayload || null,
     });
   } catch (e) {
-    console.error('Failed to log integration error:', e);
+    logger.error('Failed to log integration error', {}, e);
   }
 }

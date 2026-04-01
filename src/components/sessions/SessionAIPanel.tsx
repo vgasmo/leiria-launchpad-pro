@@ -31,6 +31,7 @@ import {
   useUpdateSessionTranscript,
 } from '@/hooks/useSessionAI';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface SessionAIPanelProps {
   workspaceId: string;
@@ -152,7 +153,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
 
       if (error) {
         toast.error(t('errors.aiProcessingError'));
-        console.error('Teams transcript import error:', error);
+        logger.error('Teams transcript import error', {}, error);
         return;
       }
 
@@ -172,7 +173,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
         toast.error(data?.error || 'Erro ao importar transcrição');
       }
     } catch (err) {
-      console.error('Teams transcript fetch error:', err);
+      logger.error('Teams transcript fetch error', {}, err);
       toast.error(t('errors.aiProcessingError'));
     } finally {
       setIsFetchingTeams(false);

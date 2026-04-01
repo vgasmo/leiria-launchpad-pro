@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 import { StartupStage } from '@/types/database';
+import { logger } from '@/lib/logger';
 
 const startupSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
@@ -111,7 +112,7 @@ export function CreateStartupDialog({ open, onOpenChange }: CreateStartupDialogP
       setMainContactPhone('');
       
     } catch (err: any) {
-      console.error('Error creating startup:', err);
+      logger.error('Error creating startup', {}, err);
       // User-friendly error messages instead of raw database errors
       if (err?.code === '23505') {
         setError(t('createStartup.duplicateName', 'A startup with this name already exists.'));

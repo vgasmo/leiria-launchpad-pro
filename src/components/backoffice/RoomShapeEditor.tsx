@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { type Room, type RoomShapeRect, type RoomShapePolygon, type RoomShapeType, useUpdateRoom } from '@/hooks/useBackoffice';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface RoomShapeEditorProps {
   open: boolean;
@@ -127,7 +128,7 @@ export function RoomShapeEditor({
       toast.success(t('admin.backoffice.shapeUpdated', 'Room shape updated'));
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to save shape:', error);
+      logger.error('Failed to save shape', {}, error);
       toast.error(t('admin.backoffice.shapeUpdateFailed', 'Failed to update room shape'));
     }
   };
