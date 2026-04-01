@@ -395,7 +395,7 @@ export function SpaceWaitingListTab() {
                       <TableCell>
                         <div className={cn('flex items-center gap-1', statusConfig?.color)}>
                           <StatusIcon className="h-4 w-4" />
-                          <span className="text-sm">{statusConfig?.label}</span>
+                          <span className="text-sm">{statusConfig ? t(statusConfig.labelKey) : item.status}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
