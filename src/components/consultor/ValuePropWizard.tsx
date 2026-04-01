@@ -150,54 +150,39 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <CardTitle>Your Value Proposition</CardTitle>
+            <CardTitle>{t('vp.title', 'A Tua Proposta de Valor')}</CardTitle>
           </div>
-          <CardDescription>Review and use your generated value proposition</CardDescription>
+          <CardDescription>{t('vp.review', 'Revê e usa a proposta gerada')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* VP Statement */}
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">Full Statement</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.vp_statement)}
-              >
+              <Label className="text-sm font-medium">{t('vp.fullStatement', 'Declaração Completa')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.vp_statement)}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy
+                {t('common.copy', 'Copiar')}
               </Button>
             </div>
             <p className="text-sm">{outputs.vp_statement}</p>
           </div>
 
-          {/* Short Version */}
           <div className="p-4 rounded-lg bg-muted">
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">One-liner</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.short_version)}
-              >
+              <Label className="text-sm font-medium">{t('vp.oneLiner', 'Frase-Chave')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.short_version)}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy
+                {t('common.copy', 'Copiar')}
               </Button>
             </div>
             <p className="text-sm">{outputs.short_version}</p>
           </div>
 
-          {/* Bullet Points */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">Bullet Points for Proposals</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.bullet_points.join('\n• '))}
-              >
+              <Label className="text-sm font-medium">{t('vp.bulletPoints', 'Pontos-Chave para Propostas')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.bullet_points.join('\n• '))}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy All
+                {t('common.copyAll', 'Copiar Tudo')}
               </Button>
             </div>
             <ul className="space-y-1">
@@ -215,16 +200,16 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
           <div className="flex justify-between">
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Edit Inputs
+              {t('vp.editInputs', 'Editar Respostas')}
             </Button>
             {canSave ? (
               <Button onClick={handleSave} disabled={createMutation.isPending}>
                 <Check className="h-4 w-4 mr-2" />
-                Save Value Proposition
+                {t('vp.saveVp', 'Guardar Proposta de Valor')}
               </Button>
             ) : (
               <Button variant="outline" onClick={() => onComplete?.()}>
-                Done (Practice Mode)
+                {t('vp.donePractice', 'Concluído (Modo Prática)')}
               </Button>
             )}
           </div>
