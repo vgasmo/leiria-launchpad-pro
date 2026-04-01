@@ -280,13 +280,13 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         {/* What this unlocks */}
         {isEnabled && isConfigured && (
           <div className="text-xs text-muted-foreground bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 space-y-1">
-            <p className="font-medium text-green-700 dark:text-green-400">🎉 Integration active!</p>
-            <p>When you schedule a session, the system will automatically:</p>
+            <p className="font-medium text-green-700 dark:text-green-400">🎉 {t('settings.integrationActive', 'Integração ativa!')}</p>
+            <p>{t('settings.whenScheduleSession', 'Quando agenda uma sessão, o sistema vai automaticamente:')}</p>
             <ul className="list-disc list-inside space-y-0.5 ml-2">
-              <li>Create an Outlook calendar event</li>
-              <li>Generate a Teams meeting link</li>
-              <li>Invite mentors and founders</li>
-              <li>Save the join URL to the session record</li>
+              <li>{t('settings.createOutlookEvent', 'Criar um evento Outlook')}</li>
+              <li>{t('settings.generateTeamsLink', 'Gerar um link de reunião Teams')}</li>
+              <li>{t('settings.inviteMentorsFounders', 'Convidar mentores e founders')}</li>
+              <li>{t('settings.saveJoinUrl', 'Guardar o URL de adesão no registo da sessão')}</li>
             </ul>
           </div>
         )}

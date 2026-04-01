@@ -264,12 +264,12 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         {/* Features info */}
         {isEnabled && (
           <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 space-y-1">
-            <p className="font-medium text-foreground">When enabled:</p>
+            <p className="font-medium text-foreground">{t('settings.whenEnabled', 'Quando ativado:')}</p>
             <ul className="list-disc list-inside space-y-0.5">
-              <li>New sessions automatically create Outlook calendar events</li>
-              <li>Events include Teams meeting links for online meetings</li>
-              <li>Rescheduled sessions update the calendar event</li>
-              <li>Cancelled sessions remove the calendar event</li>
+              <li>{t('settings.newSessionsCreate', 'Novas sessões criam automaticamente eventos Outlook')}</li>
+              <li>{t('settings.eventsIncludeTeams', 'Eventos incluem links Teams para reuniões online')}</li>
+              <li>{t('settings.rescheduledUpdate', 'Sessões reagendadas atualizam o evento')}</li>
+              <li>{t('settings.cancelledRemove', 'Sessões canceladas removem o evento')}</li>
             </ul>
           </div>
         )}

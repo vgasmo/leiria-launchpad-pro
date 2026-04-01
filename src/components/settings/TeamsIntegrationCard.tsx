@@ -184,7 +184,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
                 </ol>
               </div>
               <div>
-                <h4 className="font-medium mb-2">Option 2: Power Automate</h4>
+                <h4 className="font-medium mb-2">{t('settings.powerAutomate', 'Opção 2: Power Automate')}</h4>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
                   <li>Go to <a href="https://make.powerautomate.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Power Automate</a></li>
                   <li>Create a new Instant flow with "When an HTTP request is received" trigger</li>
