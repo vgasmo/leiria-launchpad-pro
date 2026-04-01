@@ -286,13 +286,13 @@ export function AdminEcosystemManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Startup</TableHead>
-                  <TableHead>Program</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Health</TableHead>
-                  <TableHead>Consultant</TableHead>
-                  <TableHead>Next Session</TableHead>
-                  <TableHead>Last Check-in</TableHead>
+                  <TableHead>{t('common.startup', 'Startup')}</TableHead>
+                  <TableHead>{t('common.program', 'Programa')}</TableHead>
+                  <TableHead>{t('common.stage', 'Fase')}</TableHead>
+                  <TableHead>{t('common.health', 'Saúde')}</TableHead>
+                  <TableHead>{t('common.consultant', 'Consultor')}</TableHead>
+                  <TableHead>{t('sessions.nextSession', 'Próxima Sessão')}</TableHead>
+                  <TableHead>{t('checkins.lastCheckin', 'Último Check-in')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
