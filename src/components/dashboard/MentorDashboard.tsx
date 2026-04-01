@@ -356,6 +356,19 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                           <ClipboardList className="h-3 w-3" />
                           {t('mentor.prepSheet', { defaultValue: 'Preparar' })}
                         </Button>
+                        {/* Quick Note button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[11px] h-6 px-2 gap-1 opacity-50 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickNoteWorkspaceId(workspace.id);
+                          }}
+                        >
+                          <StickyNote className="h-3 w-3" />
+                          {t('mentor.quickNote', { defaultValue: 'Nota Rápida' })}
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
