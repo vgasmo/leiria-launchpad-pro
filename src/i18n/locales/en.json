@@ -781,7 +781,11 @@
     "featureFlags": {
       "description": "Control which new features are enabled. All flags are OFF by default for safety.",
       "tab": "Tab",
-      "title": "Feature Flags"
+      "title": "Feature Flags",
+      "flagToggled": "Feature flag {{state}}",
+      "globalFlags": "Global Flags",
+      "noGlobalFlags": "No global flags configured",
+      "programOverrides": "Program Overrides"
     },
     "funnel": {
       "addLead": "Add Lead",
@@ -1155,7 +1159,23 @@
       "title": "Title"
     },
     "teams": {
-      "globalSettings": "Global Settings (no workspace)"
+      "globalSettings": "Global Settings (no workspace)",
+      "testTitle": "Teams Notification Test",
+      "globalConfigured": "Global Configured",
+      "testDescription": "Test Teams notifications for specific workspaces",
+      "notConfiguredWarning": "Global Teams integration is not configured.",
+      "globalActive": "Global Teams settings are active.",
+      "testTarget": "Test Target",
+      "selectWorkspace": "Select workspace...",
+      "sendTest": "Send Test",
+      "messageSent": "Message Sent",
+      "notSent": "Not Sent",
+      "settingsUsed": "Settings used",
+      "globalFallback": "Global Fallback",
+      "workspaceSpecific": "Workspace Specific",
+      "reason": "Reason",
+      "usedSettings": "Used",
+      "workspaceSettings": "workspace settings"
     },
     "templateAplicadoComSucesso": "Template aplicado com sucesso",
     "templateCriadoComSucesso": "Template criado com sucesso",
@@ -1233,8 +1253,36 @@
       "startup": "Startup",
       "status": "Status",
       "unblock": "Unblock",
-      "unblocked": "Workspace unblocked"
-    }
+      "unblocked": "Workspace unblocked",
+      "title": "Workspaces",
+      "create": "Create Workspace",
+      "selectStartup": "Select startup",
+      "selectProgram": "Select program",
+      "assignFounder": "Assign Founder (optional)",
+      "searchByEmailOrName": "Search by email or name..."
+    },
+    "stageUpdateFailed": "Failed to update stages",
+    "stageUpdateSuccess": "{{count}} workspaces updated",
+    "approveError": "Error approving account",
+    "approveSuccess": "Account approved successfully",
+    "workspaceCreated": "Workspace created",
+    "selectStartupProgram": "Please select a startup and program",
+    "teamsTestSuccess": "Test message sent!",
+    "teamsTestNotSent": "Message not sent",
+    "teamsTestFailed": "Test failed",
+    "flagUpdateFailed": "Failed to update flag",
+    "healthTools": "Health Tools",
+    "recomputeHealth": "Recompute Health Scores",
+    "recalculate": "Recalculate",
+    "healthThisProgram": "Workspaces in this program",
+    "healthAllActive": "All active workspaces",
+    "exportReport": "Export Report",
+    "cohortHealthPdf": "Cohort health as PDF",
+    "healthTemplates": "Health Model Templates",
+    "selectTemplate": "Select template",
+    "saveCurrentAsTemplate": "Save current model as template",
+    "saveAsTemplate": "Save as Template",
+    "createReusableTemplate": "Create a reusable template from the current model."
   },
   "adminKpis": {
     "cancel": "Cancel",
@@ -1562,7 +1610,8 @@
     "definitionSaved": "Check-in definition saved",
     "skipped": "Check-in skipped",
     "submitError": "Failed to submit check-in",
-    "submitted": "Check-in submitted successfully!"
+    "submitted": "Check-in submitted successfully!",
+    "lastCheckin": "Last Check-in"
   },
   "checklistRecovery": {
     "restoreChecklist": "Show onboarding checklist",
@@ -1767,7 +1816,23 @@
     "yes": "Yes",
     "morePages": "More pages",
     "copiedToClipboard": "Copied to clipboard",
-    "copyFailed": "Failed to copy"
+    "copyFailed": "Failed to copy",
+    "enabled": "enabled",
+    "disabled": "disabled",
+    "allStages": "All Stages",
+    "allPrograms": "All Programs",
+    "allConsultants": "All Consultants",
+    "health": "Health",
+    "consultant": "Consultant",
+    "contract": "Contract",
+    "workspace": "Workspace",
+    "active": "Active",
+    "needAttention": "need attention",
+    "noStartupsFound": "No startups found",
+    "unassigned": "Unassigned",
+    "never": "Never",
+    "descriptionOptional": "Description (optional)",
+    "unknownReason": "Unknown reason"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3995,7 +4060,14 @@
     "yourImpact": "Your Impact",
     "startBeforeEnd": "Start time must be before end time",
     "availabilitySaved": "Availability saved successfully",
-    "ndaNotSigned": "This mentor has not signed the NDA yet. They will be assigned but must sign before accessing data."
+    "ndaNotSigned": "This mentor has not signed the NDA yet. They will be assigned but must sign before accessing data.",
+    "saveFailed": "Failed to save availability",
+    "availabilitySettings": "Availability Settings",
+    "availabilityDescription": "Configure your weekly availability for mentor sessions.",
+    "noAvailability": "No availability configured yet.",
+    "addSlots": "Add time slots to let founders book sessions.",
+    "to": "to",
+    "addTimeSlot": "Add Time Slot"
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Issues or blockers identified...",
@@ -5544,7 +5616,8 @@
     "zoomDesc": "Auto-import meeting recordings and transcripts",
     "facilitatorStaffOnly": "Facilitator Mode is only available for consultants.",
     "checklistUpdateFailed": "Failed to update checklist",
-    "enterTranscript": "Please enter transcript text"
+    "enterTranscript": "Please enter transcript text",
+    "nextSession": "Next Session"
   },
   "sessionsEmpty": {
     "description": "Your consultant or program will schedule your first session soon.",
@@ -6922,7 +6995,10 @@
       "notClaimed": "Not claimed",
       "claimedNoContract": "Claimed, no contract",
       "allocExpiring": "Allocation expiring"
-    }
+    },
+    "room": "Room",
+    "status": "Status",
+    "occupant": "Startup / Occupant"
   },
   "waitingList": {
     "startup": "Startup",
@@ -6956,6 +7032,13 @@
     "noWorkspaces": "No workspaces found"
   },
   "messaging": {
-    "startConversationFailed": "Could not start conversation"
+    "startConversationFailed": "Could not start conversation",
+    "conversationFailed": "Could not start conversation",
+    "newConversation": "New Conversation",
+    "searchUsers": "Search users...",
+    "noUsersFound": "No users found",
+    "adjustSearch": "Try adjusting search or check if user is registered.",
+    "usersSelected": "{{count}} user(s) selected",
+    "startConversation": "Start Conversation"
   }
 }

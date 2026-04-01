@@ -75,7 +75,7 @@ export function SessionArtifactsPanel({
 
   const handleAddTranscript = async () => {
     if (!manualTranscript.trim()) {
-      toast.error('Please enter transcript text');
+      toast.error(t('sessions.enterTranscript', 'Introduza o texto da transcrição'));
       return;
     }
     

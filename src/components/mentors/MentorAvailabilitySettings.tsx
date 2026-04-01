@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMyAvailability, useSetAvailability, MentorAvailability } from '@/hooks/useMentorAvailability';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ interface AvailabilitySlot {
 }
 
 export function MentorAvailabilitySettings() {
+  const { t } = useTranslation();
   const { data: savedAvailability, isLoading } = useMyAvailability();
   const setAvailability = useSetAvailability();
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
@@ -82,7 +84,7 @@ export function MentorAvailabilitySettings() {
     // Validate slots
     for (const slot of slots) {
       if (slot.start_time >= slot.end_time) {
-        toast.error('Start time must be before end time');
+        toast.error(t('mentor.startBeforeEnd', 'A hora de início deve ser anterior ao fim'));
         return;
       }
     }
@@ -97,10 +99,10 @@ export function MentorAvailabilitySettings() {
           is_active: s.is_active,
         }))
       );
-      toast.success('Availability saved successfully');
+      toast.success(t('mentor.availabilitySaved', 'Disponibilidade guardada'));
       setHasChanges(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save availability');
+      toast.error(error.message || t('mentor.saveFailed', 'Falha ao guardar disponibilidade'));
     }
   };
 
@@ -121,18 +123,18 @@ export function MentorAvailabilitySettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Availability Settings
+          {t('mentor.availabilitySettings', 'Definições de Disponibilidade')}
         </CardTitle>
         <CardDescription>
-          Configure your weekly availability for mentor sessions. Founders will be able to book sessions during these time slots.
+          {t('mentor.availabilityDescription', 'Configure a sua disponibilidade semanal para sessões de mentoria. Os founders poderão agendar sessões durante estes horários.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {slots.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No availability configured yet.</p>
-            <p className="text-sm">Add time slots to let founders book sessions with you.</p>
+            <p>{t('mentor.noAvailability', 'Sem disponibilidade configurada.')}</p>
+            <p className="text-sm">{t('mentor.addSlots', 'Adicione horários para permitir que founders agendem sessões.')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -146,7 +148,7 @@ export function MentorAvailabilitySettings() {
                     checked={slot.is_active}
                     onCheckedChange={(checked) => updateSlot(slot.id, 'is_active', checked)}
                   />
-                  <span className="text-sm text-muted-foreground">Active</span>
+                  <span className="text-sm text-muted-foreground">{t('common.active', 'Ativo')}</span>
                 </div>
 
                 <div className="flex-1 min-w-[200px]">
@@ -187,7 +189,7 @@ export function MentorAvailabilitySettings() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <span className="text-muted-foreground">to</span>
+                  <span className="text-muted-foreground">{t('mentor.to', 'a')}</span>
                   <div className="w-28">
                     <Label className="sr-only">End Time</Label>
                     <Select
@@ -224,7 +226,7 @@ export function MentorAvailabilitySettings() {
         <div className="flex flex-wrap gap-3 pt-4 border-t">
           <Button variant="outline" onClick={addSlot}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Time Slot
+            {t('mentor.addTimeSlot', 'Adicionar Horário')}
           </Button>
           
           {hasChanges && (
@@ -232,12 +234,12 @@ export function MentorAvailabilitySettings() {
               {setAvailability.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  {t('common.saving', 'A guardar...')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  {t('common.saveChanges', 'Guardar Alterações')}
                 </>
               )}
             </Button>

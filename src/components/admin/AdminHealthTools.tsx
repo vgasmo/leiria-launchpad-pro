@@ -154,15 +154,15 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">Ferramentas de Health</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('admin.healthTools', 'Ferramentas de Health')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Recompute Section */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
           <div>
-            <p className="text-sm font-medium">Recalcular Health Scores</p>
+            <p className="text-sm font-medium">{t('admin.recomputeHealth', 'Recalcular Health Scores')}</p>
             <p className="text-xs text-muted-foreground">
-              {programId ? 'Workspaces deste programa' : 'Todos os workspaces ativos'}
+              {programId ? t('admin.healthThisProgram', 'Workspaces deste programa') : t('admin.healthAllActive', 'Todos os workspaces ativos')}
             </p>
           </div>
           <Button
@@ -176,7 +176,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
-            Recalcular
+            {t('admin.recalculate', 'Recalcular')}
           </Button>
         </div>
 
@@ -184,8 +184,8 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
         {programId && (
           <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
             <div>
-              <p className="text-sm font-medium">Exportar Relatório</p>
-              <p className="text-xs text-muted-foreground">Health do cohort em PDF</p>
+              <p className="text-sm font-medium">{t('admin.exportReport', 'Exportar Relatório')}</p>
+              <p className="text-xs text-muted-foreground">{t('admin.cohortHealthPdf', 'Health do cohort em PDF')}</p>
             </div>
             <Button
               variant="outline"
@@ -198,19 +198,19 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              Exportar
+              {t('common.export', 'Exportar')}
             </Button>
           </div>
         )}
 
         {/* Templates Section */}
         <div className="space-y-3 p-3 rounded-lg bg-muted/50">
-          <p className="text-sm font-medium">Templates de Health Model</p>
+          <p className="text-sm font-medium">{t('admin.healthTemplates', 'Templates de Health Model')}</p>
           
           <div className="flex gap-2">
             <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
               <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Selecionar template" />
+                <SelectValue placeholder={t('admin.selectTemplate', 'Selecionar template')} />
               </SelectTrigger>
               <SelectContent>
                 {templates?.map((t) => (
@@ -240,19 +240,19 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-full">
                   <FileText className="h-4 w-4 mr-2" />
-                  Guardar modelo atual como template
+                  {t('admin.saveCurrentAsTemplate', 'Guardar modelo atual como template')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Guardar como Template</DialogTitle>
+                  <DialogTitle>{t('admin.saveAsTemplate', 'Guardar como Template')}</DialogTitle>
                   <DialogDescription>
-                    Crie um template reutilizável a partir do modelo atual.
+                    {t('admin.createReusableTemplate', 'Crie um template reutilizável a partir do modelo atual.')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="name">{t('common.name', 'Nome')}</Label>
                     <Input
                       id="name"
                       value={newTemplateName}
@@ -261,7 +261,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="desc">Descrição (opcional)</Label>
+                    <Label htmlFor="desc">{t('common.descriptionOptional', 'Descrição (opcional)')}</Label>
                     <Textarea
                       id="desc"
                       value={newTemplateDesc}
@@ -272,7 +272,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                    Cancelar
+                    {t('common.cancel', 'Cancelar')}
                   </Button>
                   <Button 
                     onClick={handleSaveAsTemplate}
@@ -281,7 +281,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                     {createTemplate.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    Guardar
+                    {t('common.save', 'Guardar')}
                   </Button>
                 </DialogFooter>
               </DialogContent>

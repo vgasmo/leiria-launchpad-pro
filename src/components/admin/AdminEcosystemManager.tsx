@@ -226,9 +226,9 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Stage" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Stages</SelectItem>
+              <SelectItem value="all">{t('common.allStages', 'Todos os Estágios')}</SelectItem>
               {stages.map(s => (
-                <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                <SelectItem key={s} value={s}>{t(`stages.${s}`, s.charAt(0).toUpperCase() + s.slice(1))}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -238,7 +238,7 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="all">{t('common.allPrograms', 'Todos os Programas')}</SelectItem>
               {programs?.map(p => (
                 <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
               ))}
@@ -250,7 +250,7 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Consultant" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Consultants</SelectItem>
+              <SelectItem value="all">{t('common.allConsultants', 'Todos os Consultores')}</SelectItem>
               {consultants?.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
@@ -258,9 +258,9 @@ export function AdminEcosystemManager() {
           </Select>
 
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
+             <Button variant="ghost" size="sm" onClick={clearFilters}>
               <X className="h-4 w-4 mr-1" />
-              Clear
+              {t('common.clear', 'Limpar')}
             </Button>
           )}
         </div>
@@ -269,9 +269,9 @@ export function AdminEcosystemManager() {
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span>{filteredData.length} startups</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.status === 'active').length} active</span>
+          <span>{filteredData.filter(d => d.status === 'active').length} {t('common.active', 'ativos')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => healthScoreNum(d.health_score) < 50 && d.health_score !== null).length} need attention</span>
+          <span>{filteredData.filter(d => healthScoreNum(d.health_score) < 50 && d.health_score !== null).length} {t('common.needAttention', 'precisam de atenção')}</span>
         </div>
 
         {/* Table */}
@@ -286,20 +286,20 @@ export function AdminEcosystemManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Startup</TableHead>
-                  <TableHead>Program</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Health</TableHead>
-                  <TableHead>Consultant</TableHead>
-                  <TableHead>Next Session</TableHead>
-                  <TableHead>Last Check-in</TableHead>
+                  <TableHead>{t('common.startup', 'Startup')}</TableHead>
+                  <TableHead>{t('common.program', 'Programa')}</TableHead>
+                  <TableHead>{t('common.stage', 'Fase')}</TableHead>
+                  <TableHead>{t('common.health', 'Saúde')}</TableHead>
+                  <TableHead>{t('common.consultant', 'Consultor')}</TableHead>
+                  <TableHead>{t('sessions.nextSession', 'Próxima Sessão')}</TableHead>
+                  <TableHead>{t('checkins.lastCheckin', 'Último Check-in')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No startups found
+                      {t('common.noStartupsFound', 'Sem startups encontradas')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -335,7 +335,7 @@ export function AdminEcosystemManager() {
                             {item.assigned_consultant_name}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Unassigned</span>
+                          <span className="text-muted-foreground">{t('common.unassigned', 'Não atribuído')}</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -352,7 +352,7 @@ export function AdminEcosystemManager() {
                         {item.last_checkin_date ? (
                           format(new Date(item.last_checkin_date), 'MMM d')
                         ) : (
-                          <span className="text-muted-foreground">Never</span>
+                          <span className="text-muted-foreground">{t('common.never', 'Nunca')}</span>
                         )}
                       </TableCell>
                     </TableRow>

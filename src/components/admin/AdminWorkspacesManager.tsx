@@ -169,10 +169,10 @@ export function AdminWorkspacesManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
-      toast.success('Workspace created');
+      toast.success(t('admin.workspaceCreated', 'Workspace criado'));
       resetForm();
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error', 'Erro')}: ${error.message}`),
   });
 
   const deleteMutation = useMutation({
@@ -290,7 +290,7 @@ export function AdminWorkspacesManager() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStartup || !selectedProgram) {
-      toast.error('Please select a startup and program');
+      toast.error(t('admin.selectStartupProgram', 'Selecione uma startup e um programa'));
       return;
     }
     createMutation.mutate({
@@ -306,20 +306,20 @@ export function AdminWorkspacesManager() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Workspaces</CardTitle>
+        <CardTitle>{t('admin.workspacesManager.title', 'Workspaces')}</CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-2" />Create Workspace</Button>
+            <Button size="sm"><Plus className="h-4 w-4 mr-2" />{t('admin.workspacesManager.create', 'Criar Workspace')}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create Workspace</DialogTitle>
+              <DialogTitle>{t('admin.workspacesManager.create', 'Criar Workspace')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Startup *</Label>
+                <Label>{t('common.startup', 'Startup')} *</Label>
                 <Select value={selectedStartup} onValueChange={setSelectedStartup}>
-                  <SelectTrigger><SelectValue placeholder="Select startup" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('admin.workspacesManager.selectStartup', 'Selecionar startup')} /></SelectTrigger>
                   <SelectContent>
                     {startups?.map((s) => (
                       <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
@@ -328,9 +328,9 @@ export function AdminWorkspacesManager() {
                 </Select>
               </div>
               <div>
-                <Label>Program *</Label>
+                <Label>{t('common.program', 'Programa')} *</Label>
                 <Select value={selectedProgram} onValueChange={setSelectedProgram}>
-                  <SelectTrigger><SelectValue placeholder="Select program" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('admin.workspacesManager.selectProgram', 'Selecionar programa')} /></SelectTrigger>
                   <SelectContent>
                     {programs?.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -339,7 +339,7 @@ export function AdminWorkspacesManager() {
                 </Select>
               </div>
               <div>
-                <Label>Initial Stage</Label>
+                <Label>{t('common.stage', 'Fase')}</Label>
                 <Select value={selectedStage} onValueChange={(v) => setSelectedStage(v as StartupStage)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -354,7 +354,7 @@ export function AdminWorkspacesManager() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Assign Founder (optional)
+                  {t('admin.workspacesManager.assignFounder', 'Associar Founder (opcional)')}
                 </Label>
                 {selectedFounder ? (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
@@ -369,13 +369,13 @@ export function AdminWorkspacesManager() {
                       )}
                     </div>
                     <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedFounder('')}>
-                      Remove
+                      {t('common.remove', 'Remover')}
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Input 
-                      placeholder="Search by email or name..." 
+                      placeholder={t('admin.workspacesManager.searchByEmailOrName', 'Pesquisar por email ou nome...')} 
                       value={founderSearch}
                       onChange={(e) => setFounderSearch(e.target.value)}
                     />
@@ -408,7 +408,7 @@ export function AdminWorkspacesManager() {
               </div>
 
               <Button type="submit" className="w-full" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Creating...' : 'Create Workspace'}
+                {createMutation.isPending ? t('common.creating', 'A criar...') : t('admin.workspacesManager.create', 'Criar Workspace')}
               </Button>
             </form>
           </DialogContent>

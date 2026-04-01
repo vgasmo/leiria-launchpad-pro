@@ -336,13 +336,13 @@ export function AdminStartupsManager() {
           .eq('id', workspaceId);
       }
       
-      toast.success(`Updated ${workspaceIds.length} workspaces to ${bulkStage} stage`);
+      toast.success(t('admin.stageUpdateSuccess', { count: workspaceIds.length, stage: bulkStage, defaultValue: `${workspaceIds.length} workspaces atualizados para ${bulkStage}` }));
       setSelectedStartups(new Set());
       setBulkStage('');
       setIsBulkStageOpen(false);
       queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
     } catch (err: any) {
-      toast.error('Failed to update stages');
+      toast.error(t('admin.stageUpdateFailed', 'Erro ao atualizar estágios'));
     } finally {
       setIsBulkProcessing(false);
     }

@@ -45,10 +45,10 @@ export function AdminFeatureFlagsManager() {
       { id: flagId, enabled: !currentEnabled },
       {
         onSuccess: () => {
-          toast.success(`Feature flag ${!currentEnabled ? 'enabled' : 'disabled'}`);
+          toast.success(t('admin.featureFlags.flagToggled', { state: !currentEnabled ? t('common.enabled', 'ativada') : t('common.disabled', 'desativada'), defaultValue: `Feature flag ${!currentEnabled ? 'ativada' : 'desativada'}` }));
         },
         onError: (error) => {
-          toast.error('Failed to update flag', { description: error.message });
+          toast.error(t('admin.flagUpdateFailed', 'Erro ao atualizar flag'), { description: error.message });
         },
       }
     );
@@ -90,10 +90,10 @@ export function AdminFeatureFlagsManager() {
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Globe className="h-4 w-4" />
-            Global Flags
+            {t('admin.featureFlags.globalFlags', 'Flags Globais')}
           </div>
           {globalFlags.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No global flags configured</p>
+            <p className="text-sm text-muted-foreground">{t('admin.featureFlags.noGlobalFlags', 'Sem flags globais configuradas')}</p>
           ) : (
             <div className="space-y-3">
               {globalFlags.map((flag) => {
@@ -132,7 +132,7 @@ export function AdminFeatureFlagsManager() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Building2 className="h-4 w-4" />
-              Program Overrides
+              {t('admin.featureFlags.programOverrides', 'Overrides de Programa')}
             </div>
             <div className="space-y-3">
               {programFlags.map((flag) => {

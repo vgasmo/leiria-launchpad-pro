@@ -122,18 +122,18 @@ export function AdminTeamsTestPanel() {
     onSuccess: (result) => {
       setLastResult(result);
       if (result.sent) {
-        toast.success('Test message sent to Teams!', {
-          description: `Used ${result.settings_source === 'global_fallback' ? 'global settings' : 'workspace settings'}`,
+        toast.success(t('admin.teamsTestSuccess', 'Mensagem de teste enviada!'), {
+          description: `${t('admin.teams.usedSettings', 'Usou')} ${result.settings_source === 'global_fallback' ? t('admin.teams.globalSettings', 'definições globais') : t('admin.teams.workspaceSettings', 'definições do workspace')}`,
         });
       } else {
-        toast.info('Message not sent', {
-          description: result.reason || 'Unknown reason',
+        toast.info(t('admin.teamsTestNotSent', 'Mensagem não enviada'), {
+          description: result.reason || t('common.unknownReason', 'Razão desconhecida'),
         });
       }
     },
     onError: (error: Error) => {
       setLastResult({ success: false, error: error.message });
-      toast.error('Test failed', { description: error.message });
+      toast.error(t('admin.teamsTestFailed', 'Teste falhou'), { description: error.message });
     },
   });
 
@@ -149,16 +149,16 @@ export function AdminTeamsTestPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TeamsIcon className="h-5 w-5 text-[#6264A7]" />
-          Teams Notification Test
+          {t('admin.teams.testTitle', 'Teams Notification Test')}
           {hasGlobalConfig && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Global Configured
+              {t('admin.teams.globalConfigured', 'Global Configurado')}
             </Badge>
           )}
         </CardTitle>
         <CardDescription>
-          Test Teams notifications for specific workspaces to verify both workspace-specific and global fallback settings
+          {t('admin.teams.testDescription', 'Testar notificações Teams para workspaces específicos')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -169,14 +169,14 @@ export function AdminTeamsTestPanel() {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Global Teams integration is not configured. Configure it in Workflow Integrations below.
+              {t('admin.teams.notConfiguredWarning', 'A integração global com o Teams não está configurada. Configure em Workflow Integrations abaixo.')}
             </AlertDescription>
           </Alert>
         ) : (
           <Alert className="border-green-500/50 bg-green-50/50 dark:bg-green-900/10">
             <Globe className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700 dark:text-green-400">
-              Global Teams settings are active. Workspaces without specific settings will use these.
+              {t('admin.teams.globalActive', 'As definições globais do Teams estão ativas. Workspaces sem definições específicas usarão estas.')}
             </AlertDescription>
           </Alert>
         )}
@@ -184,10 +184,10 @@ export function AdminTeamsTestPanel() {
         {/* Workspace selector */}
         <div className="flex gap-3 items-end">
           <div className="flex-1 space-y-2">
-            <label className="text-sm font-medium">Test Target</label>
+            <label className="text-sm font-medium">{t('admin.teams.testTarget', 'Alvo do Teste')}</label>
             <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
               <SelectTrigger>
-                <SelectValue placeholder="Select workspace..." />
+                <SelectValue placeholder={t('admin.teams.selectWorkspace', 'Selecionar workspace...')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="global">
@@ -217,7 +217,7 @@ export function AdminTeamsTestPanel() {
             className="gap-2"
           >
             <Send className="h-4 w-4" />
-            {testMutation.isPending ? 'Sending...' : 'Send Test'}
+            {testMutation.isPending ? t('common.sending', 'A enviar...') : t('admin.teams.sendTest', 'Enviar Teste')}
           </Button>
         </div>
 
@@ -233,19 +233,19 @@ export function AdminTeamsTestPanel() {
                 <Info className="h-5 w-5 text-amber-500" />
               )}
               <span className="font-medium">
-                {lastResult.sent ? 'Message Sent' : lastResult.error ? 'Error' : 'Not Sent'}
+                {lastResult.sent ? t('admin.teams.messageSent', 'Mensagem Enviada') : lastResult.error ? t('common.error', 'Erro') : t('admin.teams.notSent', 'Não Enviada')}
               </span>
             </div>
             
             <div className="text-sm text-muted-foreground space-y-1">
               {lastResult.settings_source && (
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Settings used:</span>
+                  <span className="text-muted-foreground">{t('admin.teams.settingsUsed', 'Definições usadas')}:</span>
                   <Badge variant="outline" className="text-xs">
                     {lastResult.settings_source === 'global_fallback' ? (
-                      <><Globe className="h-3 w-3 mr-1" /> Global Fallback</>
+                      <><Globe className="h-3 w-3 mr-1" /> {t('admin.teams.globalFallback', 'Global Fallback')}</>
                     ) : lastResult.settings_source === 'workspace' ? (
-                      <><Building2 className="h-3 w-3 mr-1" /> Workspace Specific</>
+                      <><Building2 className="h-3 w-3 mr-1" /> {t('admin.teams.workspaceSpecific', 'Específico do Workspace')}</>
                     ) : (
                       lastResult.settings_source
                     )}
@@ -253,10 +253,10 @@ export function AdminTeamsTestPanel() {
                 </div>
               )}
               {lastResult.reason && (
-                <div><span className="text-muted-foreground">Reason:</span> {lastResult.reason}</div>
+                <div><span className="text-muted-foreground">{t('admin.teams.reason', 'Razão')}:</span> {lastResult.reason}</div>
               )}
               {lastResult.error && (
-                <div className="text-red-600"><span>Error:</span> {lastResult.error}</div>
+                <div className="text-red-600"><span>{t('common.error', 'Erro')}:</span> {lastResult.error}</div>
               )}
             </div>
           </div>

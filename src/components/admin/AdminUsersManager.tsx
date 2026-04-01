@@ -137,9 +137,9 @@ export function AdminUsersManager() {
       .update({ account_status: 'approved' })
       .eq('id', userId);
     if (error) {
-      toast.error('Erro ao aprovar conta');
+      toast.error(t('admin.approveError', 'Erro ao aprovar conta'));
     } else {
-      toast.success('Conta aprovada com sucesso');
+      toast.success(t('admin.approveSuccess', 'Conta aprovada com sucesso'));
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
     }
   };
@@ -210,7 +210,7 @@ export function AdminUsersManager() {
                               onClick={() => handleApproveUser(profile.id)}
                             >
                               <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                              Aprovar
+                              {t('admin.approve', 'Aprovar')}
                             </Button>
                           )}
                           <Button

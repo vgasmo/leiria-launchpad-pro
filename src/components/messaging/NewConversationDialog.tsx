@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,6 +27,7 @@ interface UserOption {
 }
 
 export function NewConversationDialog({ open, onOpenChange, onConversationCreated }: NewConversationDialogProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -78,8 +80,8 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
       onOpenChange(false);
       onConversationCreated(conversation as Conversation);
     } catch (e: any) {
-      toast.error('Could not start conversation', {
-        description: e?.message ?? 'Please try again.',
+      toast.error(t('messaging.conversationFailed', 'Não foi possível iniciar conversa'), {
+        description: e?.message ?? t('common.tryAgain', 'Tente novamente.'),
       });
     }
   };
@@ -90,7 +92,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            New Conversation
+            {t('messaging.newConversation', 'Nova Conversa')}
           </DialogTitle>
         </DialogHeader>
 
@@ -98,7 +100,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder={t('messaging.searchUsers', 'Pesquisar utilizadores...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -114,9 +116,9 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center text-center py-8 px-4">
-                <p className="text-sm font-medium text-foreground mb-0.5">Nenhum utilizador encontrado</p>
+                <p className="text-sm font-medium text-foreground mb-0.5">{t('messaging.noUsersFound', 'Nenhum utilizador encontrado')}</p>
                 <p className="text-xs text-muted-foreground max-w-[220px]">
-                  Tente ajustar a pesquisa ou verifique se o utilizador já está registado.
+                  {t('messaging.adjustSearch', 'Tente ajustar a pesquisa ou verifique se o utilizador já está registado.')}
                 </p>
               </div>
             ) : (
@@ -137,7 +139,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
                       <AvatarFallback>{user.full_name?.[0] || user.email[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{user.full_name || 'Unnamed'}</p>
+                      <p className="font-medium truncate">{user.full_name || t('common.unnamed', 'Sem nome')}</p>
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </div>
@@ -148,19 +150,19 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
 
           {selectedUsers.length > 0 && (
             <p className="text-sm text-muted-foreground">
-              {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+              {t('messaging.usersSelected', { count: selectedUsers.length, defaultValue: '{{count}} utilizador(es) selecionado(s)' })}
             </p>
           )}
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel', 'Cancelar')}
             </Button>
             <Button 
               onClick={handleCreate} 
               disabled={selectedUsers.length === 0 || createConversation.isPending}
             >
-              Start Conversation
+              {t('messaging.startConversation', 'Iniciar Conversa')}
             </Button>
           </div>
         </div>
