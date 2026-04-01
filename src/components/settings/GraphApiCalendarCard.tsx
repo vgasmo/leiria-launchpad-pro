@@ -116,11 +116,11 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           {isEnabled && isConfigured && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Connected
+              {t('settings.connected', 'Ligado')}
             </Badge>
           )}
           {isConfigured && !isEnabled && (
-            <Badge variant="outline">Configured</Badge>
+            <Badge variant="outline">{t('settings.configured', 'Configurado')}</Badge>
           )}
         </CardTitle>
         <CardDescription>
