@@ -119,7 +119,7 @@ export function CrmBulkActions({
             if (oldStage && oldStage !== newStage) {
               supabase.functions.invoke('send-crm-stage-transition-email', {
                 body: { funnel_item_id: id, from_stage: oldStage, to_stage: newStage },
-              }).catch((err) => console.warn('CRM email trigger failed (bulk):', err));
+              }).catch((err) => logger.warn('crm_email_trigger_failed_bulk', { error: String(err) }));
             }
           }
 

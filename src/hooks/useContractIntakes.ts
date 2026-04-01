@@ -355,7 +355,7 @@ export function useTransitionIntakeStatus() {
               },
             });
           } catch (emailErr) {
-            console.warn('Failed to send changes_requested email (non-blocking):', emailErr);
+            logger.warn('changes_requested_email_failed', { error: String(emailErr) });
           }
         }
       }

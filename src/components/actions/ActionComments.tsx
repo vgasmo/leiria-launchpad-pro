@@ -65,7 +65,7 @@ export function ActionComments({ actionId, canWrite }: ActionCommentsProps) {
       
       if (error) {
         // Table might not exist yet
-        console.warn('Comments table not available:', error.message);
+        logger.warn('comments_table_unavailable', { message: error.message });
         return [];
       }
       return data as unknown as Comment[];
