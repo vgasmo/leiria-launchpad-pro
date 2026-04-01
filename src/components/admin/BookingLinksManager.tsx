@@ -137,6 +137,24 @@ export function BookingLinksManager() {
     },
   });
 
+  // Delete link permanently
+  const deleteLink = useMutation({
+    mutationFn: async (linkId: string) => {
+      const { error } = await supabase
+        .from('public_booking_links')
+        .delete()
+        .eq('id', linkId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['public-booking-links'] });
+      toast.success(t('admin.bookingLinkDeleted', 'Link apagado'));
+    },
+    onError: (error: Error) => {
+      toast.error(t('admin.failedToDelete', { message: error.message }));
+    },
+  });
+
   const getProgramName = (programId: string | null) => {
     if (!programId) return t('admin.anyProgram', 'Qualquer programa');
     return programs?.find(p => p.id === programId)?.name || t('common.unknown', 'Desconhecido');
