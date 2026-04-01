@@ -260,6 +260,7 @@ function WarningBadges({ warnings }: { warnings: string[] }) {
 export function SpaceOperationsConsole() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: records, isLoading } = useSpaceOperationsData();
   const [search, setSearch] = useState('');
   const [buildingFilter, setBuildingFilter] = useState('all');
@@ -267,6 +268,31 @@ export function SpaceOperationsConsole() {
   const [warningFilter, setWarningFilter] = useState('all');
   const [selectedRecord, setSelectedRecord] = useState<UnifiedRecord | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Count stale rooms (occupied but no allocation)
+  const staleRoomIds = useMemo(() => {
+    if (!records) return [];
+    return records
+      .filter(r => r.room_status === 'occupied' && !r.allocation_id)
+      .map(r => r.room_id);
+  }, [records]);
+
+  const cleanupMutation = useMutation({
+    mutationFn: async (roomIds: string[]) => {
+      const { error } = await supabase
+        .from('rooms')
+        .update({ status: 'available' })
+        .in('id', roomIds);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['space-operations-console'] });
+      toast.success(`${staleRoomIds.length} sala(s) libertada(s) com sucesso`);
+    },
+    onError: () => {
+      toast.error('Erro ao limpar salas');
+    },
+  });
 
   const buildings = useMemo(() => {
     if (!records) return [];
