@@ -345,7 +345,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 6 && (
           <div className="space-y-3">
-            <Label>What proof or credentials do you have?</Label>
+            <Label>{t('vp.proof', 'Que prova ou credenciais tens?')}</Label>
             <Textarea
               value={fields.proof}
               onChange={(e) => updateField('proof', e.target.value)}
@@ -353,7 +353,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              KPIs, testimonials, benchmarks, case studies (optional but powerful)
+              {t('vp.proofHint', 'KPIs, testemunhos, benchmarks, case studies (opcional mas poderoso)')}
             </p>
           </div>
         )}
