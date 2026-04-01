@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useTranslation } from 'react-i18next';
 import {
   Search,
