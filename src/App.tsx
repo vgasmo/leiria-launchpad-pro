@@ -11,6 +11,7 @@ import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
 import { SkeletonDashboard } from "@/components/ui/skeleton";
 import { AccessDenied } from "@/components/ui/AccessDenied";
@@ -129,6 +130,7 @@ function SuspenseFallback() {
 }
 
 function AppRoutes() {
+  useVersionCheck();
   return (
     <Suspense fallback={<SuspenseFallback />}>
       <Routes>
