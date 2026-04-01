@@ -178,7 +178,7 @@ export default function ContractOnboarding() {
       toast.success(t('contractOnboarding.sentForSignature'));
     },
     onError: (err: any) => {
-      toast.error(err?.message || t('contractOnboarding.signingError'));
+      toast.error(err?.message || t('contractOnboarding.sendError'));
       setCurrentStep('signing');
     },
   });
@@ -222,9 +222,9 @@ export default function ContractOnboarding() {
     <AppLayout>
       <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('contractOnboarding.pageTitle')}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('contractOnboarding.title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {(contract as any).workspace?.startup?.name || 'Startup'} — {(contract as any).contract_number || t('contractOnboarding.newContract')}
+            {(contract as any).workspace?.startup?.name || 'Startup'} — {(contract as any).contract_number || t('contracts.new', 'Novo Contrato')}
           </p>
         </div>
 
@@ -251,7 +251,7 @@ export default function ContractOnboarding() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                {t('contractOnboarding.companyDataTitle')}
+                {t('contractOnboarding.companyAndRepData')}
               </CardTitle>
               <CardDescription>
                 {t('contractOnboarding.companyDataDesc')}
@@ -264,7 +264,7 @@ export default function ContractOnboarding() {
                   <Input
                     value={formData.legal_representative_name}
                     onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
-                    placeholder={t('contractOnboarding.fullNamePlaceholder')}
+                    placeholder={t('contractOnboarding.fullNamePlaceholder', 'Nome completo')}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -314,7 +314,7 @@ export default function ContractOnboarding() {
                         updated[idx] = { ...updated[idx], name: e.target.value };
                         setFormData(p => ({ ...p, additional_representatives: updated }));
                       }}
-                      placeholder={t('contractOnboarding.fullNamePlaceholder')}
+                      placeholder={t('contractOnboarding.fullNamePlaceholder', 'Nome completo')}
                     />
                     <Input
                       type="email"
@@ -334,7 +334,7 @@ export default function ContractOnboarding() {
                         updated[idx] = { ...updated[idx], phone: e.target.value };
                         setFormData(p => ({ ...p, additional_representatives: updated }));
                       }}
-                      placeholder={t('contractOnboarding.phonePlaceholder')}
+                      placeholder={t('contractOnboarding.phonePlaceholder', 'Telefone')}
                     />
                   </div>
                 </div>
@@ -349,7 +349,7 @@ export default function ContractOnboarding() {
                   additional_representatives: [...p.additional_representatives, { name: '', email: '', phone: '' }],
                 }))}
               >
-                + {t('contractOnboarding.addRepresentative')}
+                + {t('contractOnboarding.addRep')}
               </Button>
 
               <Separator />
@@ -369,7 +369,7 @@ export default function ContractOnboarding() {
                   <Input
                     value={formData.certidao_permanente_code}
                     onChange={e => setFormData(prev => ({ ...prev, certidao_permanente_code: e.target.value }))}
-                    placeholder={t('contractOnboarding.certidaoPlaceholder')}
+                    placeholder={t('contractOnboarding.certidaoPlaceholder', 'Código de acesso online')}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -377,7 +377,7 @@ export default function ContractOnboarding() {
                   <Input
                     value={formData.company_address}
                     onChange={e => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
-                    placeholder={t('contractOnboarding.addressPlaceholder')}
+                    placeholder={t('contractOnboarding.addressPlaceholder', 'Rua, número, andar')}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -444,8 +444,8 @@ export default function ContractOnboarding() {
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm font-medium">{t('contractOnboarding.contractTemplate')}</p>
-                      <p className="text-xs text-muted-foreground">{t('contractOnboarding.officialTemplate')} — 2026</p>
+                      <p className="text-sm font-medium">{t('contractOnboarding.contractDraft')}</p>
+                      <p className="text-xs text-muted-foreground">{t('contractOnboarding.officialDraft')} — 2026</p>
                     </div>
                   </div>
                   <a href="/templates/V9_Minuta_Contrato_IF_e_IV_2026.docx" download>
@@ -462,7 +462,7 @@ export default function ContractOnboarding() {
                     onCheckedChange={(v) => setContractAccepted(v === true)}
                   />
                   <label htmlFor="accept-contract" className="text-xs leading-tight cursor-pointer">
-                    {t('contractOnboarding.acceptContractTerms')}
+                    {t('contractOnboarding.acceptContract')}
                   </label>
                 </div>
               </div>
@@ -490,7 +490,7 @@ export default function ContractOnboarding() {
                     onCheckedChange={(v) => setRegulationAccepted(v === true)}
                   />
                   <label htmlFor="accept-regulation" className="text-xs leading-tight cursor-pointer">
-                    {t('contractOnboarding.acceptRegulationTerms')}
+                    {t('contractOnboarding.acceptRegulation')}
                   </label>
                 </div>
               </div>
@@ -535,9 +535,9 @@ export default function ContractOnboarding() {
               {sigStatus === 'completed' ? (
                 <div className="text-center py-8 space-y-3">
                   <CheckCircle2 className="h-16 w-16 mx-auto text-primary" />
-                  <h3 className="text-lg font-semibold text-primary">{t('contractOnboarding.signed')}</h3>
+                  <h3 className="text-lg font-semibold text-primary">{t('contractOnboarding.contractSigned')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('contractOnboarding.signedDesc')}
+                    {t('contractOnboarding.contractSignedDesc')}
                   </p>
                   <Button onClick={() => navigate('/my-workspaces')} className="mt-4">
                     {t('contractOnboarding.goToWorkspace')}
@@ -557,8 +557,8 @@ export default function ContractOnboarding() {
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {sigProvider === 'manual'
-                        ? t('contractOnboarding.manualSignatureDesc')
-                        : t('contractOnboarding.checkEmailDesc')}
+                        ? t('contractOnboarding.manualNote')
+                        : t('contractOnboarding.checkEmail')}
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
@@ -570,7 +570,7 @@ export default function ContractOnboarding() {
                   </Badge>
                   <div className="flex justify-center gap-3 mt-4">
                     <Button variant="outline" onClick={() => navigate('/my-workspaces')}>
-                      {t('contractOnboarding.comeBackLater')}
+                      {t('contractOnboarding.backLater')}
                     </Button>
                   </div>
                 </div>
