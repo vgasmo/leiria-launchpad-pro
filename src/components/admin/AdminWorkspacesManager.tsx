@@ -339,7 +339,7 @@ export function AdminWorkspacesManager() {
                 </Select>
               </div>
               <div>
-                <Label>Initial Stage</Label>
+                <Label>{t('common.stage', 'Fase')}</Label>
                 <Select value={selectedStage} onValueChange={(v) => setSelectedStage(v as StartupStage)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
