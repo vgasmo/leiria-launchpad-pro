@@ -354,7 +354,7 @@ export function AdminWorkspacesManager() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Assign Founder (optional)
+                  {t('admin.workspacesManager.assignFounder', 'Associar Founder (opcional)')}
                 </Label>
                 {selectedFounder ? (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
