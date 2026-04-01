@@ -244,7 +244,13 @@ export function PendingApprovalsManager() {
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [assignClaimTarget, setAssignClaimTarget] = useState<PendingClaim | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
-
+  const [claimDialogTab, setClaimDialogTab] = useState<string>('existing');
+  const [newStartupName, setNewStartupName] = useState('');
+  const [newStartupDesc, setNewStartupDesc] = useState('');
+  const [newProgramId, setNewProgramId] = useState('');
+  const [newStage, setNewStage] = useState('ideation');
+  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
+  const { data: programs } = usePrograms();
   const handleApprove = (workspaceId: string) => {
     approveWorkspace.mutate(workspaceId, {
       onSuccess: () => toast.success(t('admin.startupApproved')),
