@@ -232,7 +232,7 @@ function PandaDocSettingsCard() {
           </div>
           <div className="flex items-center gap-3">
             <Badge variant={isConfigured && settings?.is_enabled ? 'default' : 'secondary'} className="text-[10px]">
-              {isConfigured && settings?.is_enabled ? 'Ativo' : isConfigured ? 'Configurado' : 'Não configurado'}
+              {isConfigured && settings?.is_enabled ? t('common.active', 'Ativo') : isConfigured ? t('settings.configured', 'Configurado') : t('settings.notConfigured', 'Não configurado')}
             </Badge>
             <Switch
               checked={!!settings?.is_enabled}
