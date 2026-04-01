@@ -196,7 +196,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'relative_due_days', Number(e.target.value))
                                   }
                                   className="h-7 w-16 text-sm"
-                                  placeholder="Days"
+                                  placeholder={t('wizard.daysPlaceholder')}
                                 />
                                 <Button
                                   variant="ghost"
