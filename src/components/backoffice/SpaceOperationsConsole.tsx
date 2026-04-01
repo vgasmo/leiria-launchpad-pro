@@ -180,6 +180,7 @@ function useSpaceOperationsData() {
 }
 
 function StatusBadge({ status, type }: { status: string | null; type: 'room' | 'workspace' | 'contract' }) {
+  const { t } = useTranslation();
   if (!status) return <Badge variant="outline" className="text-[10px]">—</Badge>;
 
   const colors: Record<string, string> = {
