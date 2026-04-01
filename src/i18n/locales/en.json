@@ -5715,13 +5715,28 @@
     "greeting": "Hello, {{name}}",
     "greetingGeneric": "Welcome to the Command Centre",
     "triage": "Smart Triage & Intake",
+    "triageDesc": "What needs a decision now: approvals, claims and routing.",
     "pendingApprovals": "Pending Approvals",
     "intakeRouting": "Routing",
     "dailyWork": "Today's Work",
+    "dailyWorkDesc": "Priority automated actions based on portfolio status.",
     "myTasks": "My Tasks",
     "emptyTriage": "No pending items. All clear!",
     "navLabel": "Command Centre",
-    "claimRequests": "Claim Requests"
+    "claimRequests": "Claim Requests",
+    "contractsExpiring": "Contracts Expiring (30 days)",
+    "invoicesOverdue": "Overdue Invoices",
+    "noExpiringContracts": "No contracts expiring in the next 30 days.",
+    "noOverdueInvoices": "No overdue invoices. All up to date!",
+    "expiresOn": "Expires on {{date}}",
+    "overdueSince": "Overdue since {{date}}"
+  },
+  "contractOnboarding": {
+    "step": {
+      "companyData": "Company Details",
+      "reviewContract": "Review Contract",
+      "signing": "Digital Signature"
+    }
   },
   "claimStartup": {
     "title": "Verify your Startup",

@@ -5715,13 +5715,28 @@
     "greeting": "Olá, {{name}}",
     "greetingGeneric": "Bem-vindo ao Centro de Comando",
     "triage": "Triagem & Intake",
+    "triageDesc": "O que precisa de decisão agora: aprovações, associações e encaminhamento.",
     "pendingApprovals": "Aprovações Pendentes",
     "intakeRouting": "Encaminhamento",
     "dailyWork": "Trabalho do Dia",
+    "dailyWorkDesc": "Ações automáticas prioritárias baseadas no estado do portfólio.",
     "myTasks": "As Minhas Tarefas",
     "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
     "navLabel": "Centro de Comando",
-    "claimRequests": "Associações"
+    "claimRequests": "Associações",
+    "contractsExpiring": "Contratos a Expirar (30 dias)",
+    "invoicesOverdue": "Faturas em Atraso",
+    "noExpiringContracts": "Nenhum contrato a expirar nos próximos 30 dias.",
+    "noOverdueInvoices": "Nenhuma fatura em atraso. Tudo em dia!",
+    "expiresOn": "Expira em {{date}}",
+    "overdueSince": "Em atraso desde {{date}}"
+  },
+  "contractOnboarding": {
+    "step": {
+      "companyData": "Dados da Empresa",
+      "reviewContract": "Rever Contrato",
+      "signing": "Assinatura Digital"
+    }
   },
   "claimStartup": {
     "title": "Verificar a sua Startup",
