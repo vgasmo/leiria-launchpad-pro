@@ -37,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getVisibleTabs, type WorkspaceTab } from '@/lib/workspaceTabs';
+import { useWorkspaceTabBadges } from '@/hooks/useWorkspaceTabBadges';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
