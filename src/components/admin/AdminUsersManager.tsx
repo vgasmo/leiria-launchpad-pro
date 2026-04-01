@@ -137,9 +137,9 @@ export function AdminUsersManager() {
       .update({ account_status: 'approved' })
       .eq('id', userId);
     if (error) {
-      toast.error('Erro ao aprovar conta');
+      toast.error(t('admin.approveError', 'Erro ao aprovar conta'));
     } else {
-      toast.success('Conta aprovada com sucesso');
+      toast.success(t('admin.approveSuccess', 'Conta aprovada com sucesso'));
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
     }
   };
