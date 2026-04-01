@@ -251,6 +251,7 @@
         "virtualIncubation": "Incubação Virtual"
       },
       "contracts": "Contratos",
+      "contractsAndLifecycle": "Contratos",
       "createContractsCount": "Criar {{count}} Contratos",
       "createdAt": "Criado em",
       "currentOccupant": "Ocupante Atual",
@@ -282,28 +283,13 @@
         "waitingList": "Lista de Espera",
         "yearAnniversary": "Aniversário de {{year}} ano(s)"
       },
-      "opsHub": {
-        "rooms": "salas",
-        "pendingInvoices": "Faturas Pendentes",
-        "invoicesAwait": "aguardam pagamento",
-        "expiringContracts": "Contratos a Expirar",
-        "next30Days": "próximos 30 dias",
-        "availableRooms": "Salas Disponíveis",
-        "inWaitlist": "em lista de espera",
-        "floorMaps": "Plantas dos Pisos",
-        "noFloorMaps": "Nenhuma planta carregada",
-        "financialHealth": "Saúde Financeira",
-        "recentInvoices": "Faturas Recentes e Pendentes",
-        "allPaid": "Todas as faturas pagas",
-        "contractsAttention": "Contratos que Requerem Atenção",
-        "allContractsGood": "Todos os contratos em boa situação"
-      },
       "days": "dias",
       "deallocate": "Desatribuir",
       "description": "Descrição",
       "discount": "Desconto",
       "discountReason": "Motivo do Desconto",
       "discountReasonPlaceholder": "Motivo do desconto (ex: promoção CRM)",
+      "discounts": "Descontos",
       "dueDate": "Data de Vencimento",
       "duration": "Duração",
       "durationMonths": "Duração (meses)",
@@ -340,6 +326,7 @@
       "infrastructure": "Infraestrutura",
       "invoiceNumber": "Número da Fatura",
       "invoices": "Faturas",
+      "invoicesTab": "Faturação",
       "isVirtual": "Virtual (sem espaço físico)",
       "issueDate": "Data de Emissão",
       "lastCheckin": "Último Check-in",
@@ -410,6 +397,22 @@
       "officeSpaces": "Espaços de Escritório",
       "openPdf": "Abrir PDF",
       "openStartup": "Abrir Startup",
+      "opsHub": {
+        "rooms": "salas",
+        "pendingInvoices": "Faturas Pendentes",
+        "invoicesAwait": "aguardam pagamento",
+        "expiringContracts": "Contratos a Expirar",
+        "next30Days": "próximos 30 dias",
+        "availableRooms": "Salas Disponíveis",
+        "inWaitlist": "em lista de espera",
+        "floorMaps": "Plantas dos Pisos",
+        "noFloorMaps": "Nenhuma planta carregada",
+        "financialHealth": "Saúde Financeira",
+        "recentInvoices": "Faturas Recentes e Pendentes",
+        "allPaid": "Todas as faturas pagas",
+        "contractsAttention": "Contratos que Requerem Atenção",
+        "allContractsGood": "Todos os contratos em boa situação"
+      },
       "other": "Outro",
       "overdueInvoices": "Em Atraso",
       "overview": "Visão Geral",
@@ -520,6 +523,7 @@
       },
       "spaceVacated": "Espaço desocupado com sucesso",
       "spaces": "Espaços",
+      "spacesAndInfra": "Espaços & Infraestrutura",
       "squareMeters": "Metros Quadrados",
       "stage": "Fase",
       "stageUpdated": "Fase atualizada",
@@ -562,10 +566,7 @@
       "waitlistSuggestions": "Sugestões da Lista de Espera",
       "workspaceBlocked": "Workspace bloqueado",
       "workspaceUnblocked": "Workspace desbloqueado",
-      "workspacesWithoutContracts": "Workspaces Sem Contratos",
-      "discounts": "Descontos",
-      "contractsAndLifecycle": "Contratos",
-      "spacesAndInfra": "Espaços & Infraestrutura"
+      "workspacesWithoutContracts": "Workspaces Sem Contratos"
     },
     "backofficeExtended": {
       "addSpace": "Adicionar Espaço",
@@ -3473,7 +3474,7 @@
     "availability": {
       "available": "Disponível",
       "limited": "Limitado",
-      "full": "Sem vagas"
+      "full": "Lotado"
     },
     "actionsPending": "ações",
     "kpiMissing": "KPIs por atualizar",
@@ -3492,12 +3493,7 @@
     "quickNotePlaceholder": "Escreva a sua nota sobre esta startup...",
     "noteAdded": "Nota adicionada com sucesso",
     "feedbackNeeded": "Como correu a sessão?",
-    "giveFeedback": "Dar Feedback",
-    "availability": {
-      "available": "Disponível",
-      "limited": "Limitado",
-      "full": "Lotado"
-    }
+    "giveFeedback": "Dar Feedback"
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Problemas ou bloqueios identificados...",
