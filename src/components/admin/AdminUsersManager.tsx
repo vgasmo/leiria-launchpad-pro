@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, UserCheck, Building2 } from 'lucide-react';
+import { Plus, Trash2, UserCheck, Building2, Ban, UserX, RotateCcw } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +53,8 @@ export function AdminUsersManager() {
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
   const [wsRole, setWsRole] = useState<Role>('founder');
   const [deleteWsUserTarget, setDeleteWsUserTarget] = useState<string | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<{ userId: string; userName: string; currentStatus: string } | null>(null);
+  const queryClient = useQueryClient();
 
   const isLoading = loadingProfiles || loadingRoles || loadingWsUsers;
 
@@ -107,6 +112,25 @@ export function AdminUsersManager() {
     setDeleteWsUserTarget(null);
   };
 
+  const handleSuspendUser = async () => {
+    if (!suspendTarget) return;
+    const newStatus = suspendTarget.currentStatus === 'suspended' ? 'approved' : 'suspended';
+    const { error } = await supabase
+      .from('profiles')
+      .update({ account_status: newStatus })
+      .eq('id', suspendTarget.userId);
+    if (error) {
+      toast.error(t('admin.userManagement.suspendError', { defaultValue: 'Erro ao alterar estado da conta' }));
+    } else {
+      toast.success(newStatus === 'suspended' 
+        ? t('admin.userManagement.suspended', { defaultValue: 'Conta suspensa' })
+        : t('admin.userManagement.reactivated', { defaultValue: 'Conta reativada' })
+      );
+      queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+    }
+    setSuspendTarget(null);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -143,9 +167,11 @@ export function AdminUsersManager() {
             const roles = getUserRoles(profile.id);
             const wsAssignments = getUserWorkspaces(profile.id);
             const isAdmin = roles.some(r => r.role === 'admin');
+            const isSuspended = profile.account_status === 'suspended';
+            const isPending = profile.account_status === 'pending';
 
             return (
-              <Card key={profile.id}>
+              <Card key={profile.id} className={isSuspended ? 'opacity-60' : ''}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-10 w-10">
@@ -154,11 +180,31 @@ export function AdminUsersManager() {
                     </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-medium">{profile.full_name || t('admin.userManagement.noName')}</h3>
                         {isAdmin && <Badge variant="destructive">{t('roles.admin')}</Badge>}
+                        {isSuspended && <Badge variant="outline" className="border-destructive text-destructive">{t('admin.userManagement.statusSuspended', { defaultValue: 'Suspensa' })}</Badge>}
+                        {isPending && <Badge variant="outline" className="border-amber-500 text-amber-600">{t('admin.userManagement.statusPending', { defaultValue: 'Pendente' })}</Badge>}
                       </div>
-                      <p className="text-sm text-muted-foreground">{profile.email}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">{profile.email}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={isSuspended ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
+                          onClick={() => setSuspendTarget({ 
+                            userId: profile.id, 
+                            userName: profile.full_name || profile.email,
+                            currentStatus: profile.account_status || 'approved'
+                          })}
+                        >
+                          {isSuspended ? (
+                            <><RotateCcw className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })}</>
+                          ) : (
+                            <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
+                          )}
+                        </Button>
+                      </div>
 
                       {/* Global Roles */}
                       <div className="mt-3">
@@ -361,6 +407,38 @@ export function AdminUsersManager() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleRemoveWsUser} className="bg-destructive text-destructive-foreground">{t('common.delete')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Suspend/Reactivate User Confirmation */}
+      <AlertDialog open={!!suspendTarget} onOpenChange={(open) => !open && setSuspendTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {suspendTarget?.currentStatus === 'suspended' 
+                ? t('admin.userManagement.reactivateTitle', { defaultValue: 'Reativar Conta' })
+                : t('admin.userManagement.suspendTitle', { defaultValue: 'Suspender Conta' })
+              }
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {suspendTarget?.currentStatus === 'suspended'
+                ? t('admin.userManagement.reactivateConfirm', { name: suspendTarget?.userName, defaultValue: `Tem a certeza que quer reativar a conta de ${suspendTarget?.userName}? O utilizador voltará a ter acesso à plataforma.` })
+                : t('admin.userManagement.suspendConfirm', { name: suspendTarget?.userName, defaultValue: `Tem a certeza que quer suspender a conta de ${suspendTarget?.userName}? O utilizador perderá acesso à plataforma.` })
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSuspendUser} 
+              className={suspendTarget?.currentStatus === 'suspended' ? '' : 'bg-destructive text-destructive-foreground'}
+            >
+              {suspendTarget?.currentStatus === 'suspended' 
+                ? t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })
+                : t('admin.userManagement.suspend', { defaultValue: 'Suspender' })
+              }
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
