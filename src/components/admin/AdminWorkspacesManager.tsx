@@ -172,7 +172,7 @@ export function AdminWorkspacesManager() {
       toast.success(t('admin.workspaceCreated', 'Workspace criado'));
       resetForm();
     },
-    onError: (error) => toast.error(`Error: ${error.message}`),
+    onError: (error) => toast.error(`${t('common.error', 'Erro')}: ${error.message}`),
   });
 
   const deleteMutation = useMutation({
