@@ -395,5 +395,16 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
         />
       )}
     </div>
+
+      {/* Quick Note Dialog */}
+      {quickNoteWorkspaceId && (
+        <QuickNoteDialog
+          open={!!quickNoteWorkspaceId}
+          onOpenChange={(open) => { if (!open) setQuickNoteWorkspaceId(null); }}
+          workspaceId={quickNoteWorkspaceId}
+          startupName={workspaces.find(w => w.id === quickNoteWorkspaceId)?.startup?.name || undefined}
+        />
+      )}
+    </div>
   );
 });
