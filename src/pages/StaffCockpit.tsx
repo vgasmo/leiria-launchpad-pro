@@ -50,11 +50,15 @@ export default function StaffCockpit() {
           </div>
         )}
 
-        {/* Portfolio Overview */}
-        <CockpitPortfolioOverview workspaces={workspaces} />
+        {/* Portfolio Overview - Admin and Consultor */}
+        {(isAdmin || isConsultor) && (
+          <CockpitPortfolioOverview workspaces={workspaces} />
+        )}
 
-        {/* Silent Disengagement Alerts */}
-        <SilentDisengagementCard workspaces={workspaces} />
+        {/* Silent Disengagement Alerts - Admin and Consultor */}
+        {(isAdmin || isConsultor) && (
+          <SilentDisengagementCard workspaces={workspaces} />
+        )}
 
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">
