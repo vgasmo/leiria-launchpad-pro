@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail, Link2, Search } from 'lucide-react';
+import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail, Link2, Search, Plus, Rocket } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,11 @@ import { StageBadge } from '@/components/ui/StageBadge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePrograms } from '@/hooks/useWorkspaces';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -239,7 +244,13 @@ export function PendingApprovalsManager() {
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [assignClaimTarget, setAssignClaimTarget] = useState<PendingClaim | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
-
+  const [claimDialogTab, setClaimDialogTab] = useState<string>('existing');
+  const [newStartupName, setNewStartupName] = useState('');
+  const [newStartupDesc, setNewStartupDesc] = useState('');
+  const [newProgramId, setNewProgramId] = useState('');
+  const [newStage, setNewStage] = useState('ideation');
+  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
+  const { data: programs } = usePrograms();
   const handleApprove = (workspaceId: string) => {
     approveWorkspace.mutate(workspaceId, {
       onSuccess: () => toast.success(t('admin.startupApproved')),
@@ -300,11 +311,47 @@ export function PendingApprovalsManager() {
       queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      setAssignClaimTarget(null);
-      setSelectedWorkspaceId('');
+      resetClaimDialog();
     } catch (e: any) {
       toast.error(`Erro ao aprovar claim: ${e.message}`);
     }
+  };
+
+  const handleCreateWorkspaceForClaim = async () => {
+    if (!assignClaimTarget || !newStartupName.trim() || !newProgramId) return;
+    setIsCreatingWorkspace(true);
+
+    try {
+      const { data, error } = await supabase.rpc('staff_create_workspace_for_claim', {
+        p_claim_id: assignClaimTarget.id,
+        p_startup_name: newStartupName.trim(),
+        p_program_id: newProgramId,
+        p_stage: newStage,
+        p_description: newStartupDesc.trim() || null,
+      });
+
+      if (error) throw error;
+
+      toast.success('Workspace criado e founder associado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      resetClaimDialog();
+    } catch (e: any) {
+      toast.error(`Erro ao criar workspace: ${e.message}`);
+    } finally {
+      setIsCreatingWorkspace(false);
+    }
+  };
+
+  const resetClaimDialog = () => {
+    setAssignClaimTarget(null);
+    setSelectedWorkspaceId('');
+    setClaimDialogTab('existing');
+    setNewStartupName('');
+    setNewStartupDesc('');
+    setNewProgramId('');
+    setNewStage('ideation');
   };
 
   const handleRejectClaim = async (claimId: string) => {
@@ -616,8 +663,8 @@ export function PendingApprovalsManager() {
       </AlertDialog>
 
       {/* Assign Claim to Workspace Dialog */}
-      <Dialog open={!!assignClaimTarget} onOpenChange={(open) => !open && setAssignClaimTarget(null)}>
-        <DialogContent>
+      <Dialog open={!!assignClaimTarget} onOpenChange={(open) => !open && resetClaimDialog()}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Associar Founder a Workspace</DialogTitle>
           </DialogHeader>
@@ -626,31 +673,107 @@ export function PendingApprovalsManager() {
               <span className="font-medium">{assignClaimTarget?.user_name || 'Sem nome'}</span>
               <span className="text-muted-foreground ml-1">({assignClaimTarget?.user_email})</span>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Selecionar Workspace</label>
-              <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Escolher workspace..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableWorkspaces?.map((ws: any) => (
-                    <SelectItem key={ws.id} value={ws.id}>
-                      {(ws.startup as any)?.name || 'Sem nome'} ({ws.status})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+            <Tabs value={claimDialogTab} onValueChange={setClaimDialogTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="existing" className="gap-1.5">
+                  <Link2 className="h-3.5 w-3.5" />
+                  Workspace Existente
+                </TabsTrigger>
+                <TabsTrigger value="create" className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
+                  Criar Novo
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="existing" className="space-y-3 mt-3">
+                <div>
+                  <Label className="text-sm font-medium mb-1.5 block">Selecionar Workspace</Label>
+                  <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Escolher workspace..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableWorkspaces?.map((ws: any) => (
+                        <SelectItem key={ws.id} value={ws.id}>
+                          {(ws.startup as any)?.name || 'Sem nome'} ({ws.status})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button onClick={handleAssignClaim} disabled={!selectedWorkspaceId}>
+                    <Check className="h-4 w-4 mr-1" />
+                    Confirmar Associação
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
+
+              <TabsContent value="create" className="space-y-3 mt-3">
+                <div className="space-y-2">
+                  <Label htmlFor="new-startup-name">Nome da Startup *</Label>
+                  <Input
+                    id="new-startup-name"
+                    value={newStartupName}
+                    onChange={(e) => setNewStartupName(e.target.value)}
+                    placeholder="Nome da startup..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-startup-desc">Descrição</Label>
+                  <Textarea
+                    id="new-startup-desc"
+                    value={newStartupDesc}
+                    onChange={(e) => setNewStartupDesc(e.target.value)}
+                    placeholder="Breve descrição..."
+                    rows={2}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Programa *</Label>
+                    <Select value={newProgramId} onValueChange={setNewProgramId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Programa..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {programs?.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fase</Label>
+                    <Select value={newStage} onValueChange={setNewStage}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ideation">Ideação</SelectItem>
+                        <SelectItem value="validation">Validação</SelectItem>
+                        <SelectItem value="mvp">MVP</SelectItem>
+                        <SelectItem value="growth">Crescimento</SelectItem>
+                        <SelectItem value="scale">Escala</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button 
+                    onClick={handleCreateWorkspaceForClaim} 
+                    disabled={!newStartupName.trim() || !newProgramId || isCreatingWorkspace}
+                  >
+                    <Rocket className="h-4 w-4 mr-1" />
+                    {isCreatingWorkspace ? 'A criar...' : 'Criar Workspace'}
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
+            </Tabs>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignClaimTarget(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAssignClaim} disabled={!selectedWorkspaceId}>
-              <Check className="h-4 w-4 mr-1" />
-              Confirmar Associação
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
