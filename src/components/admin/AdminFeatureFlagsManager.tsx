@@ -90,10 +90,10 @@ export function AdminFeatureFlagsManager() {
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Globe className="h-4 w-4" />
-            Global Flags
+            {t('admin.featureFlags.globalFlags', 'Flags Globais')}
           </div>
           {globalFlags.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No global flags configured</p>
+            <p className="text-sm text-muted-foreground">{t('admin.featureFlags.noGlobalFlags', 'Sem flags globais configuradas')}</p>
           ) : (
             <div className="space-y-3">
               {globalFlags.map((flag) => {
