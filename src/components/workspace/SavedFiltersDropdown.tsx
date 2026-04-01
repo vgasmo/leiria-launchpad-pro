@@ -149,7 +149,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
             onClick={() => setShowSaveDialog(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Save Current Filters
+            {t('filters.saveCurrentFilters', 'Save Current Filters')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
