@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useTranslation } from 'react-i18next';
 import { Bot, Send, Sparkles, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';

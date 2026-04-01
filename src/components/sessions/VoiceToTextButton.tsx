@@ -69,7 +69,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       try {
         mediaRecorder = new MediaRecorder(stream, options);
       } catch (e) {
-        logger.warn('voice_recorder_options_failed', {}, e);
+        logger.warn('voice_recorder_options_failed', { error: String(e) });
         mediaRecorder = new MediaRecorder(stream);
       }
 

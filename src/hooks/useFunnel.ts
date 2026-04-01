@@ -152,7 +152,7 @@ export function useUpdateFunnelItem() {
             to_stage: updates.stage,
           },
         }).catch((err) => {
-          logger.warn('crm_stage_email_trigger_failed', {}, err);
+          logger.warn('crm_stage_email_trigger_failed', { error: String(err) });
         });
       }
 

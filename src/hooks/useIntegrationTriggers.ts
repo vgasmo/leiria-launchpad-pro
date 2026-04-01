@@ -65,7 +65,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
       teamsMeetingUrl: data?.teams_meeting_url,
     };
   } catch (err) {
-    logger.warn('outlook_sync_failed', {}, err);
+    logger.warn('outlook_sync_failed', { error: String(err) });
     return { success: false, reason: 'Network error' };
   }
 }
