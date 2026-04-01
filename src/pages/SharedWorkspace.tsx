@@ -237,7 +237,7 @@ export default function SharedWorkspace() {
                 )}
                 {updates[0].content_json?.priorities && (
                   <div>
-                    <h4 className="text-sm font-medium text-blue-600 mb-2">Next Priorities</h4>
+                    <h4 className="text-sm font-medium text-blue-600 mb-2">{t('shared.nextPriorities', 'Próximas Prioridades')}</h4>
                     <ul className="space-y-1">
                       {updates[0].content_json.priorities.map((p: string, i: number) => (
                         <li key={i} className="text-sm">{p}</li>
