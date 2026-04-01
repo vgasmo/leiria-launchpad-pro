@@ -3243,6 +3243,7 @@
     "askAdminToSetup": "Ask an admin to set up KPIs for tracking.",
     "belowTarget": "Below target",
     "checkinComplete": "Check-in marked as complete",
+    "savedSuccess": "KPIs updated! Keep it up 💪",
     "configure": "Configure",
     "configureKpis": "Configure KPIs",
     "configureManually": "Configure Manually",
