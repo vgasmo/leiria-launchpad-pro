@@ -280,7 +280,7 @@ function PandaDocSettingsCard() {
                       toast.success(t('admin.urlCopiado'));
                     }}
                   >
-                    Copiar
+                    {t('common.copy', 'Copiar')}
                   </Button>
                 </div>
               </div>
