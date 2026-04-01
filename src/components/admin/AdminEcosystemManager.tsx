@@ -238,7 +238,7 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="all">{t('common.allPrograms', 'Todos os Programas')}</SelectItem>
               {programs?.map(p => (
                 <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
               ))}
