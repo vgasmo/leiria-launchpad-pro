@@ -105,7 +105,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
           
           {savedFilters?.length === 0 ? (
             <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-              No saved filters yet
+              {t('filters.noSavedFilters', 'No saved filters yet')}
             </div>
           ) : (
             savedFilters?.map((filter) => (
