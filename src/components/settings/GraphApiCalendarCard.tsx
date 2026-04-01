@@ -213,7 +213,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
               <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
-              How to set up Azure AD App
+              {t('settings.howToSetupAzure', 'Como configurar App Azure AD')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
