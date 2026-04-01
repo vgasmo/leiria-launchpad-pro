@@ -292,7 +292,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 3 && (
           <div className="space-y-3">
-            <Label>What jobs are they trying to get done?</Label>
+            <Label>{t('vp.jobsToBeDone', 'Que jobs tentam cumprir?')}</Label>
             <Textarea
               value={fields.jobs_to_be_done}
               onChange={(e) => updateField('jobs_to_be_done', e.target.value)}
@@ -300,7 +300,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Focus on outcomes, not features
+              {t('vp.jobsHint', 'Foca em resultados, não em funcionalidades')}
             </p>
           </div>
         )}
