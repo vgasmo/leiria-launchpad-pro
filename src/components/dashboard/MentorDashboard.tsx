@@ -404,10 +404,14 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
         </div>
 
         <div className="space-y-4">
-          <CalendarWidget />
+          <WidgetErrorBoundary name="CalendarWidget">
+            <CalendarWidget />
+          </WidgetErrorBoundary>
           
           {/* Your Impact - Enhanced */}
-          <MentorImpactPanel workspaces={workspaces} />
+          <WidgetErrorBoundary name="MentorImpactPanel">
+            <MentorImpactPanel workspaces={workspaces} />
+          </WidgetErrorBoundary>
         </div>
       </div>
 
