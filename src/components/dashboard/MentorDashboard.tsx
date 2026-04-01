@@ -46,6 +46,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
+  const [quickNoteWorkspaceId, setQuickNoteWorkspaceId] = useState<string | null>(null);
 
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
