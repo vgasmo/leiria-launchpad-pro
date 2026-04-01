@@ -58,6 +58,7 @@ const EXAMPLES: Record<string, string> = {
 
 export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProps) {
   const { t } = useTranslation();
+  const STEPS = useSteps();
   const [currentStep, setCurrentStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [fields, setFields] = useState<ValuePropFields>({
