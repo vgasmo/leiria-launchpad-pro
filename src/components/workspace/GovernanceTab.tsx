@@ -381,9 +381,9 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           <div className="space-y-4 py-4">
             {selectedReview?.evidence_json && (
               <div className="p-3 rounded bg-muted/50">
-                <p className="text-sm font-medium mb-1">Submitted Evidence:</p>
+                <p className="text-sm font-medium mb-1">{t('governance.submittedEvidence', 'Submitted Evidence:')}</p>
                 <p className="text-sm text-muted-foreground">
-                  {(selectedReview.evidence_json as { notes?: string })?.notes || 'No notes provided'}
+                  {(selectedReview.evidence_json as { notes?: string })?.notes || t('governance.noNotesProvided', 'No notes provided')}
                 </p>
               </div>
             )}

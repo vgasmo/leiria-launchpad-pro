@@ -118,7 +118,7 @@ export function SessionWorkflowCard({
         updates: { [itemId]: !currentValue },
       });
     } catch (error) {
-      toast.error('Failed to update checklist');
+      toast.error(t('sessions.checklistUpdateFailed', 'Failed to update checklist'));
     } finally {
       setIsUpdating(null);
     }

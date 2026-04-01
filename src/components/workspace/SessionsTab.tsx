@@ -150,7 +150,7 @@ export function SessionsTab({ workspaceId, canWrite }: SessionsTabProps) {
           onOpenChange={(open) => !open && setSelectedSession(null)}
           onOpenFacilitator={(session) => {
             if (!canUseFacilitator) {
-              toast.error('Facilitator Mode is only available for consultants.');
+              toast.error(t('sessions.facilitatorStaffOnly', 'Facilitator Mode is only available for consultants.'));
               return;
             }
             setSelectedSession(null);
