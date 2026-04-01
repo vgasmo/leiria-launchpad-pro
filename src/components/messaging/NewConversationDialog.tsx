@@ -150,7 +150,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
 
           {selectedUsers.length > 0 && (
             <p className="text-sm text-muted-foreground">
-              {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+              {t('messaging.usersSelected', { count: selectedUsers.length, defaultValue: '{{count}} utilizador(es) selecionado(s)' })}
             </p>
           )}
 
