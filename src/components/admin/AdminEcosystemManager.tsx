@@ -335,7 +335,7 @@ export function AdminEcosystemManager() {
                             {item.assigned_consultant_name}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Unassigned</span>
+                          <span className="text-muted-foreground">{t('common.unassigned', 'Não atribuído')}</span>
                         )}
                       </TableCell>
                       <TableCell>
