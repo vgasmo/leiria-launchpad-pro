@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { triggerKpiCelebration } from '@/lib/confetti';
 import { useTranslation } from 'react-i18next';
 import { format, startOfMonth, subMonths } from 'date-fns';
 import { pt } from 'date-fns/locale';
