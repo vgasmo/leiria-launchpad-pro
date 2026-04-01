@@ -155,6 +155,25 @@ export function usePlaybookProgress(workspaceId: string | undefined) {
     },
     enabled: !!workspaceId,
   });
+
+  // Auto-complete playbook at 100%
+  useEffect(() => {
+    if (query.data && query.data.progressPercent === 100 && query.data.activePlaybook && query.data.totalActions + query.data.totalMilestones > 0) {
+      supabase
+        .from('workspace_playbook_instances')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('id', query.data.activePlaybook.instanceId)
+        .eq('status', 'instantiated')
+        .then(({ error }) => {
+          if (!error) {
+            queryClient.invalidateQueries({ queryKey: ['workspace-playbook-instances', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['playbook-progress', workspaceId] });
+          }
+        });
+    }
+  }, [query.data?.progressPercent, query.data?.activePlaybook?.instanceId]);
+
+  return query;
 }
 
 /**
