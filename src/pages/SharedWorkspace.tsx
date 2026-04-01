@@ -129,7 +129,7 @@ export default function SharedWorkspace() {
           {/* Shared link notice */}
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <Lock className="h-3 w-3" />
-            <span>Read-only view • Expires {format(new Date(expires_at), 'MMM d, yyyy')}</span>
+            <span>{t('shared.readOnly', 'Vista apenas de leitura')} • {t('shared.expires', 'Expira')} {format(new Date(expires_at), 'MMM d, yyyy')}</span>
             <Badge variant="outline" className="text-xs">{scope.replace('_', ' ')}</Badge>
           </div>
         </div>
