@@ -331,13 +331,13 @@ export function SpaceWaitingListTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Preference</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Requested</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('waitingList.organization', 'Organization')}</TableHead>
+                  <TableHead>{t('waitingList.type', 'Type')}</TableHead>
+                  <TableHead>{t('waitingList.preference', 'Preference')}</TableHead>
+                  <TableHead>{t('waitingList.priority', 'Priority')}</TableHead>
+                  <TableHead>{t('waitingList.requested', 'Requested')}</TableHead>
+                  <TableHead>{t('waitingList.status', 'Status')}</TableHead>
+                  <TableHead className="text-right">{t('common.actions', 'Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
