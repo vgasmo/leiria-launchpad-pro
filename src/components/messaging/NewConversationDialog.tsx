@@ -92,7 +92,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            New Conversation
+            {t('messaging.newConversation', 'Nova Conversa')}
           </DialogTitle>
         </DialogHeader>
 
