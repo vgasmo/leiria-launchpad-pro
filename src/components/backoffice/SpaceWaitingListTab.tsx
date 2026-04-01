@@ -321,7 +321,7 @@ export function SpaceWaitingListTab() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {statusFilter === 'all' ? 'All Requests' : STATUS_CONFIG[statusFilter]?.label + ' Requests'}
+            {statusFilter === 'all' ? t('waitingList.allRequests', 'All Requests') : t(STATUS_CONFIG[statusFilter]?.labelKey) + ' ' + t('waitingList.requests', 'Requests')}
           </CardTitle>
         </CardHeader>
         <CardContent>
