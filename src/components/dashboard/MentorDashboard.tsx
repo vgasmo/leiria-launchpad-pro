@@ -38,6 +38,7 @@ import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrep
 import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
 import { useMyAvailability } from '@/hooks/useMentorAvailability';
 import { StickyNote } from 'lucide-react';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
