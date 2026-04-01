@@ -90,7 +90,7 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   }
 
   // Claim-first gate: founders without active workspace → /claim-startup
-  const claimExemptPaths = ['/claim-startup', '/settings'];
+  const claimExemptPaths = ['/claim-startup', '/settings', '/my-workspaces'];
   if (
     !founderState.isLoading &&
     founderState.status !== 'not_founder' &&
