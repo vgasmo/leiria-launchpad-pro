@@ -685,7 +685,7 @@ export function PendingApprovalsManager() {
                 </TabsTrigger>
                 <TabsTrigger value="create" className="gap-1.5">
                   <Plus className="h-3.5 w-3.5" />
-                  Criar Novo
+                  {t('admin.createNew', 'Criar Novo')}
                 </TabsTrigger>
               </TabsList>
 
