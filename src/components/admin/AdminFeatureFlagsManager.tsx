@@ -132,7 +132,7 @@ export function AdminFeatureFlagsManager() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Building2 className="h-4 w-4" />
-              Program Overrides
+              {t('admin.featureFlags.programOverrides', 'Overrides de Programa')}
             </div>
             <div className="space-y-3">
               {programFlags.map((flag) => {
