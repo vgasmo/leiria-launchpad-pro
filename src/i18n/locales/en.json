@@ -1990,6 +1990,10 @@
     "noInteractionsYet": "No interactions yet",
     "noItems": "No items",
     "emptyColumnHint": "No leads in this category.",
+    "inboxZero": {
+      "title": "Inbox clear!",
+      "description": "All tasks are up to date. Great work!"
+    },
     "noTasks": "No tasks",
     "noTasksHint": "No tasks in this category.",
     "noNextAction": "No Next Action",

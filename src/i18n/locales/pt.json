@@ -1990,6 +1990,10 @@
     "noInteractionsYet": "Ainda sem interações",
     "noItems": "Sem items nesta fase",
     "emptyColumnHint": "Nenhum lead nesta categoria.",
+    "inboxZero": {
+      "title": "Inbox limpo!",
+      "description": "Todas as tarefas estão em dia. Bom trabalho!"
+    },
     "noTasks": "Sem tarefas",
     "noTasksHint": "Nenhuma tarefa nesta categoria.",
     "noNextAction": "Sem ação definida",
