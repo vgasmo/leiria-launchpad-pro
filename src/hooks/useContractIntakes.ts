@@ -220,7 +220,7 @@ export function useCreateIntake() {
           }
         } catch (err: any) {
           emailError = err?.message || 'Erro ao enviar email';
-          console.warn('Failed to send intake email (non-blocking):', err);
+          logger.warn('intake_email_send_error', { error: err?.message });
         }
       }
 
