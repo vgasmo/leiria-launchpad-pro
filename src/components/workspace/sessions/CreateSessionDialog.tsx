@@ -1,0 +1,588 @@
+import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { format, addDays, startOfDay } from 'date-fns';
+import {
+  Search,
+  Plus,
+  Clock,
+  Calendar,
+  AlertTriangle,
+  Mail,
+  Checkbox as CheckboxIcon,
+  Loader2,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useCreateSession, useWorkspaceMembers } from '@/hooks/useSessions';
+import { useSessionTemplates } from '@/hooks/useSessionTemplates';
+import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
+import { useConsultantAvailability, useValidateBookingSlot } from '@/hooks/useConsultantCalendar';
+import { useMentorAvailability } from '@/hooks/useMentorAvailability';
+import { logger } from '@/lib/logger';
+
+interface CreateSessionDialogProps {
+  workspaceId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateSessionDialogProps) {
+  const { t } = useTranslation();
+  const [title, setTitle] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
+  const [duration, setDuration] = useState('60');
+  const [agenda, setAgenda] = useState('');
+  const [location, setLocation] = useState('');
+  const [joinUrl, setJoinUrl] = useState('');
+  const [sendInvites, setSendInvites] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [useManualTime, setUseManualTime] = useState(false);
+  const [manualDateTime, setManualDateTime] = useState('');
+
+  const createMutation = useCreateSession(workspaceId);
+  const { data: members } = useWorkspaceMembers(workspaceId);
+  const { data: sessionTemplates } = useSessionTemplates();
+
+  const assignedConsultant = useMemo(
+    () => members?.find((m) => m.role === 'consultor') || null,
+    [members]
+  );
+  const assignedMentors = useMemo(
+    () => (members || []).filter((m) => m.role === 'mentor_externo'),
+    [members]
+  );
+
+  const [meetingWith, setMeetingWith] = useState<'consultor' | 'mentor_externo'>('consultor');
+  const [participantId, setParticipantId] = useState<string>('');
+
+  useEffect(() => {
+    if (participantId) return;
+    if (meetingWith === 'consultor' && assignedConsultant?.user_id) {
+      setParticipantId(assignedConsultant.user_id);
+      return;
+    }
+    if (meetingWith === 'mentor_externo' && assignedMentors[0]?.user_id) {
+      setParticipantId(assignedMentors[0].user_id);
+    }
+  }, [participantId, meetingWith, assignedConsultant?.user_id, assignedMentors]);
+
+  const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+  const { data: consultantAvailability, isLoading: loadingConsultantAvailability } = useConsultantAvailability(
+    workspaceId,
+    meetingWith === 'consultor' ? dateStr : undefined,
+    Number(duration)
+  );
+  const { data: mentorWeeklyAvailability } = useMentorAvailability(
+    meetingWith === 'mentor_externo' ? participantId : undefined
+  );
+
+  const availableSlots = useMemo(() => {
+    if (!dateStr || useManualTime) return [];
+    const durationMinutes = Number.parseInt(duration || '60', 10);
+
+    if (meetingWith === 'consultor') {
+      const rawSlots = consultantAvailability?.slots ?? [];
+      const slotStarts = rawSlots
+        .map((s: unknown) => (typeof s === 'string' ? s : (s as { start?: string })?.start))
+        .filter(Boolean) as string[];
+      return slotStarts;
+    }
+
+    const date = new Date(`${dateStr}T00:00:00`);
+    const day = date.getDay();
+    const windows = (mentorWeeklyAvailability || []).filter((w) => w.day_of_week === day && w.is_active);
+    if (windows.length === 0) return [];
+
+    const slots: string[] = [];
+    for (const w of windows) {
+      const start = new Date(`${dateStr}T${w.start_time}:00`);
+      const end = new Date(`${dateStr}T${w.end_time}:00`);
+      let cur = new Date(start);
+      while (cur.getTime() + durationMinutes * 60000 <= end.getTime()) {
+        slots.push(cur.toISOString());
+        cur = new Date(cur.getTime() + 30 * 60000);
+      }
+    }
+    return Array.from(new Set(slots)).sort();
+  }, [dateStr, duration, meetingWith, consultantAvailability, mentorWeeklyAvailability, useManualTime]);
+
+  const getWorkspaceInfo = async () => {
+    const { data } = await supabase
+      .from('workspaces')
+      .select(`id, startup:startups(name), program:programs(name)`)
+      .eq('id', workspaceId)
+      .maybeSingle();
+    return data;
+  };
+
+  const getCurrentUserProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .maybeSingle();
+    return data;
+  };
+
+  const validateSlotMutation = useValidateBookingSlot();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let scheduledAtISO: string;
+
+    if (useManualTime) {
+      if (!title.trim() || !manualDateTime) {
+        toast.error(t('common.error'));
+        return;
+      }
+      scheduledAtISO = new Date(manualDateTime).toISOString();
+    } else {
+      if (!title.trim() || !selectedDate || !selectedSlot) {
+        toast.error(t('sessions.selectDateAndSlot', 'Please select a date and time slot'));
+        return;
+      }
+
+      if (meetingWith === 'consultor') {
+        const durationMinutes = Number.parseInt(duration || '60', 10);
+        const start = new Date(selectedSlot);
+        const end = new Date(start.getTime() + durationMinutes * 60000);
+
+        const validation = await validateSlotMutation.mutateAsync({
+          workspaceId,
+          startTime: selectedSlot,
+          endTime: end.toISOString(),
+        });
+
+        if (validation.checked && !validation.available) {
+          toast.error(t('sessions.slotBusy', 'Esse horário está ocupado no calendário do consultor.'));
+          return;
+        }
+
+        if (!validation.checked && validation.reason) {
+          toast.warning(
+            t('sessions.slotNotVerified', 'Não foi possível confirmar a disponibilidade no calendário; por favor confirme com o consultor.'),
+          );
+        }
+      }
+
+      scheduledAtISO = new Date(selectedSlot).toISOString();
+    }
+
+    setIsSending(true);
+    try {
+      const session = await createMutation.mutateAsync({
+        title: title.trim(),
+        scheduled_at: scheduledAtISO,
+        duration: parseInt(duration),
+        agenda: agenda.trim() || null,
+        notes: null,
+        decisions: null,
+        location: location.trim() || null,
+        join_url: joinUrl.trim() || null,
+      });
+
+      if (sendInvites && members && members.length > 0) {
+        try {
+          const [workspaceInfo, currentUser] = await Promise.all([
+            getWorkspaceInfo(),
+            getCurrentUserProfile(),
+          ]);
+
+          const recipientEmails = members
+            .filter(m => m.profile?.email)
+            .map(m => m.profile!.email);
+
+          if (recipientEmails.length > 0) {
+            const { error } = await supabase.functions.invoke('send-session-invite', {
+              body: {
+                sessionId: session.id,
+                workspaceId,
+                title: title.trim(),
+                scheduledAt: scheduledAtISO,
+                duration: parseInt(duration),
+                agenda: agenda.trim() || undefined,
+                location: location.trim() || undefined,
+                joinUrl: joinUrl.trim() || undefined,
+                recipientEmails,
+                organizerName: currentUser?.full_name || currentUser?.email || 'Mentor',
+                startupName: (workspaceInfo?.startup as { name: string } | null)?.name || 'Startup',
+              },
+            });
+
+            if (error) {
+              logger.error('error', {}, 'Failed to send invites:', error);
+            }
+          }
+        } catch (emailError) {
+          logger.error('error', {}, 'Email sending error:', emailError);
+        }
+      }
+
+      toast.success(t('sessions.sessionCreated'));
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      toast.error(t('common.error'));
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setSelectedDate(undefined);
+    setSelectedSlot('');
+    setManualDateTime('');
+    setDuration('60');
+    setAgenda('');
+    setLocation('');
+    setJoinUrl('');
+    setSendInvites(true);
+    setSelectedTemplate('');
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = sessionTemplates?.find(t => t.id === templateId);
+    if (template) {
+      if (template.name && !title) setTitle(template.name);
+      if (template.agenda_template) setAgenda(template.agenda_template);
+    }
+  };
+
+  const memberCount = members?.filter(m => m.profile?.email).length || 0;
+  const hasConsultant = consultantAvailability?.consultantName || consultantAvailability?.consultantEmail;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t('sessions.scheduleSession', 'Schedule Session')}</DialogTitle>
+          <DialogDescription>
+            {hasConsultant
+              ? t('sessions.scheduleWithConsultant', 'Schedule based on {{name}}\'s availability', { name: consultantAvailability?.consultantName || consultantAvailability?.consultantEmail })
+              : t('sessions.scheduleSessionDesc', 'Schedule a new mentoring session')
+            }
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {sessionTemplates && sessionTemplates.length > 0 && (
+            <div className="space-y-2">
+              <Label>{t('sessions.useTemplateOptional', 'Use Template (optional)')}</Label>
+              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('sessions.selectTemplate', 'Select a template...')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {sessionTemplates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="title">{t('sessions.titleRequired', 'Title *')}</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('sessions.titlePlaceholder', 'Monthly check-in')}
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t('sessions.meetingWith', 'Sessão com')}</Label>
+              <Select
+                value={meetingWith}
+                onValueChange={(v) => {
+                  const next = v as 'consultor' | 'mentor_externo';
+                  setMeetingWith(next);
+                  setParticipantId('');
+                  setSelectedSlot('');
+                }}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="consultor">{t('sessions.withConsultant', 'Consultor')}</SelectItem>
+                  <SelectItem value="mentor_externo">{t('sessions.withMentor', 'Mentor')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('sessions.participant', 'Participante')}</Label>
+              <Select
+                value={participantId}
+                onValueChange={(v) => { setParticipantId(v); setSelectedSlot(''); }}
+                disabled={meetingWith === 'consultor' ? !assignedConsultant?.user_id : assignedMentors.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('sessions.selectParticipant', 'Selecionar...')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {meetingWith === 'consultor' ? (
+                    assignedConsultant ? (
+                      <SelectItem value={assignedConsultant.user_id}>
+                        {assignedConsultant.profile?.full_name || assignedConsultant.profile?.email || 'Consultor'}
+                      </SelectItem>
+                    ) : (
+                      <SelectItem value="__none" disabled>
+                        {t('sessions.noConsultantAssigned', 'Sem consultor atribuído')}
+                      </SelectItem>
+                    )
+                  ) : assignedMentors.length > 0 ? (
+                    assignedMentors.map((m) => (
+                      <SelectItem key={m.user_id} value={m.user_id}>
+                        {m.profile?.full_name || m.profile?.email || 'Mentor'}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__none" disabled>
+                      {t('sessions.noMentorAssigned', 'Sem mentor atribuído')}
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-md transition-colors ${!useManualTime ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
+              onClick={() => setUseManualTime(false)}
+            >
+              <Calendar className="h-3.5 w-3.5 inline mr-1.5" />
+              {t('sessions.availableSlots', 'Available Slots')}
+            </button>
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-md transition-colors ${useManualTime ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
+              onClick={() => setUseManualTime(true)}
+            >
+              <Clock className="h-3.5 w-3.5 inline mr-1.5" />
+              {t('sessions.manualTime', 'Manual Time')}
+            </button>
+          </div>
+
+          {useManualTime ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="scheduled_at">{t('sessions.dateTime', 'Date & Time *')}</Label>
+                <Input
+                  id="scheduled_at"
+                  type="datetime-local"
+                  value={manualDateTime}
+                  onChange={(e) => setManualDateTime(e.target.value)}
+                  required={useManualTime}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration</Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                    <SelectItem value="60">60 min</SelectItem>
+                    <SelectItem value="90">90 min</SelectItem>
+                    <SelectItem value="120">120 min</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>{t('sessions.selectDate', 'Select Date *')}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {selectedDate ? format(selectedDate, 'PPP') : t('sessions.pickDate', 'Pick a date')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => { setSelectedDate(date); setSelectedSlot(''); }}
+                      fromDate={startOfDay(new Date())}
+                      toDate={addDays(new Date(), 60)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {selectedDate && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{t('sessions.selectTimeSlot', 'Select Time Slot *')}</Label>
+                    {meetingWith === 'consultor' && loadingConsultantAvailability && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        {t('sessions.checkingAvailability', 'Checking availability...')}
+                      </span>
+                    )}
+                  </div>
+
+                  {meetingWith === 'consultor' && loadingConsultantAvailability ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 2, 3, 4, 5, 6].map(i => (
+                        <Skeleton key={i} className="h-9" />
+                      ))}
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="text-center py-4 bg-muted/30 rounded-lg">
+                      <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('sessions.noSlotsAvailable', 'No available slots for this date')}
+                      </p>
+                      <Button type="button" variant="link" size="sm" onClick={() => setUseManualTime(true)}>
+                        {t('sessions.useManualTimeInstead', 'Use manual time instead')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                      {availableSlots.map((slotStart) => {
+                        const timeStr =
+                          typeof slotStart === 'string' && slotStart.includes('T')
+                            ? slotStart.slice(11, 16)
+                            : format(new Date(slotStart), 'HH:mm');
+                        const isSelected = selectedSlot === slotStart;
+                        return (
+                          <Button
+                            key={slotStart}
+                            type="button"
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedSlot(slotStart)}
+                            className="text-xs"
+                          >
+                            {timeStr}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {meetingWith === 'consultor' && consultantAvailability?.warning && (
+                    <p className="text-xs text-amber-600 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {consultantAvailability.warning}
+                    </p>
+                  )}
+
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="duration">Duration</Label>
+                    <Select value={duration} onValueChange={setDuration}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 min</SelectItem>
+                        <SelectItem value="60">60 min</SelectItem>
+                        <SelectItem value="90">90 min</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="agenda">Agenda</Label>
+            <Textarea
+              id="agenda"
+              value={agenda}
+              onChange={(e) => setAgenda(e.target.value)}
+              placeholder="Topics to discuss..."
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Meeting room or address"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="joinUrl">
+              Meeting Link
+              <span className="text-muted-foreground text-xs ml-1">(optional if using Teams sync)</span>
+            </Label>
+            <Input
+              id="joinUrl"
+              value={joinUrl}
+              onChange={(e) => setJoinUrl(e.target.value)}
+              placeholder="Optional - Teams link added automatically if synced"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
+            <Checkbox
+              id="send-invites"
+              checked={sendInvites}
+              onCheckedChange={(checked) => setSendInvites(!!checked)}
+            />
+            <div className="flex-1">
+              <Label htmlFor="send-invites" className="cursor-pointer font-medium">
+                Send calendar invites
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {memberCount > 0
+                  ? `Email ${memberCount} workspace member${memberCount > 1 ? 's' : ''} with calendar invite`
+                  : 'No workspace members to invite'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createMutation.isPending || isSending}>
+              {(createMutation.isPending || isSending) ? 'Scheduling...' : 'Schedule Session'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -94,5 +94,3 @@ export function ChaseActionsButton({
     </TooltipProvider>
   );
 }
-import {
-import { logger } from '@/lib/logger';
