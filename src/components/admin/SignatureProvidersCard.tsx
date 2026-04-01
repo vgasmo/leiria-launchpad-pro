@@ -366,7 +366,7 @@ function DefaultProviderSelector() {
             <SelectContent>
               <SelectItem value="manual" className="text-xs">Manual</SelectItem>
               <SelectItem value="docusign" className="text-xs" disabled={!docusign?.is_enabled}>
-                DocuSign {!docusign?.is_enabled && '(desativado)'}
+                DocuSign {!docusign?.is_enabled && `(${t('common.disabled', 'desativado')})`}
               </SelectItem>
               <SelectItem value="pandadoc" className="text-xs" disabled={!pandadoc?.is_enabled}>
                 PandaDoc {!pandadoc?.is_enabled && '(desativado)'}
