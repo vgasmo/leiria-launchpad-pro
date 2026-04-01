@@ -1855,7 +1855,8 @@
     "unknownReason": "Razão desconhecida",
     "expired": "Expirado",
     "inactive": "Inativo",
-    "errors": "Erros"
+    "errors": "Erros",
+    "updating": "A atualizar..."
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3219,7 +3220,8 @@
     "failedToParse": "Failed to parse:{{ message }}",
     "failedToSync": "Failed to sync:{{ message }}",
     "financialModelParsedSuccessfully": "Financial model parsed successfully",
-    "synced": "Synced{{ length }} KPIs"
+    "synced": "Synced{{ length }} KPIs",
+    "mitigation": "Mitigação"
   },
   "financialPanel": {
     "aiFinancialReview": "Análise Financeira IA",
@@ -3697,7 +3699,12 @@
       "fundingSync": "Sincronizar rondas de financiamento com deals HubSpot",
       "leadImport": "Importar leads do HubSpot para membros do workspace",
       "sessionNotes": "Registar notas de sessão como engagements HubSpot"
-    }
+    },
+    "accountId": "Account ID",
+    "userId": "User ID (Impersonation)",
+    "baseUrl": "Base URL",
+    "pandadocWebhookLabel": "Webhook URL (configurar no PandaDoc)",
+    "setupInstructions": "Para configurar:"
   },
   "investorReadiness": {
     "createLink": "Criar Link",
@@ -5758,7 +5765,32 @@
     "calendarSyncDesc": "As sessões criarão eventos Outlook + links Teams",
     "calendarSyncActive": "✓ Sincronização de calendário ativa",
     "graphApiNotConfigured": "A API Microsoft Graph global não está configurada. Contacte um admin para configurar em Admin → Integrações.",
-    "noConsultantWarning": "Nenhum consultor atribuído a este workspace. Atribua um consultor nas Definições ou use um email personalizado."
+    "noConsultantWarning": "Nenhum consultor atribuído a este workspace. Atribua um consultor nas Definições ou use um email personalizado.",
+    "notConfigured": "Não configurado",
+    "graphSyncEnabled": "Sincronização Graph API ativada",
+    "graphSyncDisabled": "Sincronização Graph API desativada",
+    "failedToUpdate": "Erro ao atualizar",
+    "graphApiDesc": "Integração direta com Microsoft Graph para eventos de calendário e reuniões Teams",
+    "graphPerWorkspace": "Configurado por workspace em Definições → Integrações.",
+    "graphSyncDesc": "Criar eventos de calendário e reuniões Teams via Graph API",
+    "whenScheduleSession": "Quando agenda uma sessão, o sistema vai automaticamente:",
+    "createOutlookEvent": "Criar um evento Outlook",
+    "generateTeamsLink": "Gerar um link de reunião Teams",
+    "inviteMentorsFounders": "Convidar mentores e founders",
+    "saveJoinUrl": "Guardar o URL de adesão no registo da sessão",
+    "outlookSyncEnabled": "Sincronização Outlook ativada",
+    "outlookSyncDisabled": "Sincronização Outlook desativada",
+    "failedToSaveWebhook": "Erro ao guardar webhook",
+    "outlookDesc": "Cria automaticamente eventos Outlook com links Teams para sessões",
+    "enableAutoCalendar": "Ativar sincronização automática do calendário",
+    "createOutlookOnSchedule": "Criar eventos Outlook quando sessões são agendadas",
+    "newSessionsCreate": "Novas sessões criam automaticamente eventos Outlook",
+    "eventsIncludeTeams": "Eventos incluem links Teams para reuniões online",
+    "rescheduledUpdate": "Sessões reagendadas atualizam o evento",
+    "cancelledRemove": "Sessões canceladas removem o evento",
+    "teamsDesc": "Receba notificações no seu canal Teams quando ocorrem eventos importantes.",
+    "teamsWorkflows": "Opção 1: Teams Workflows (Recomendado)",
+    "powerAutomate": "Opção 2: Power Automate"
   },
   "settingsPage": {
     "areasOfExpertise": "Áreas de Especialização",
@@ -5821,7 +5853,11 @@
     "updating": "A atualizar...",
     "uploadImageFile": "Por favor carregue um ficheiro de imagem",
     "uploadPhoto": "Carregar Foto",
-    "wednesday": "Quarta-feira"
+    "wednesday": "Quarta-feira",
+    "emailConfirmHint": "Será enviado um email de confirmação para verificar o novo endereço",
+    "enterNewPassword": "Introduza nova palavra-passe",
+    "minChars": "Mínimo 6 caracteres",
+    "confirmPassword": "Confirmar Nova Palavra-passe"
   },
   "shortcuts": {
     "actions": "Ações",
@@ -7128,5 +7164,56 @@
     "incomplete": "Incompleto",
     "recalculate": "Recalcular",
     "blockingWarning": "Este {{entityType}} não pode ser marcado como pronto até a pontuação atingir 70+"
+  },
+  "vp": {
+    "step_segment": "Segmento de Clientes",
+    "step_segment_desc": "Para quem estás a resolver?",
+    "step_problem": "Problema & Evidência",
+    "step_problem_desc": "Que dor observaste?",
+    "step_consequence": "Consequência",
+    "step_consequence_desc": "O que acontece se não resolver?",
+    "step_jobs": "Jobs to be Done",
+    "step_jobs_desc": "O que precisam de conseguir?",
+    "step_alternatives": "Alternativas",
+    "step_alternatives_desc": "O que usam hoje?",
+    "step_value": "Proposta de Valor",
+    "step_value_desc": "A tua solução única",
+    "step_proof": "Prova",
+    "step_proof_desc": "Evidência & credenciais",
+    "title": "A Tua Proposta de Valor",
+    "review": "Revê e usa a proposta gerada",
+    "fullStatement": "Declaração Completa",
+    "oneLiner": "Frase-Chave",
+    "bulletPoints": "Pontos-Chave para Propostas",
+    "copyAll": "Copiar Tudo",
+    "editInputs": "Editar Respostas",
+    "saveVp": "Guardar Proposta de Valor",
+    "donePractice": "Concluído (Modo Prática)",
+    "generate": "Gerar",
+    "targetSegment": "Qual é o teu segmento-alvo?",
+    "segmentHint": "Sê específico: decisor, dimensão da empresa, indústria",
+    "problem": "Que problema enfrentam?",
+    "evidence": "Que evidência tens? (entrevistas, dados)",
+    "consequence": "O que acontece se não resolverem este problema?",
+    "consequenceHint": "Pensa: receita perdida, tempo desperdiçado, oportunidades perdidas",
+    "jobsToBeDone": "Que jobs tentam cumprir?",
+    "jobsHint": "Foca em resultados, não em funcionalidades",
+    "alternatives": "Que alternativas usam hoje?",
+    "whyAlternativesFail": "Porque falham essas alternativas?",
+    "valueProp": "Qual é a tua proposta de valor?",
+    "valueHint": "Como resolves o problema melhor que as alternativas?",
+    "proof": "Que prova ou credenciais tens?",
+    "proofHint": "KPIs, testemunhos, benchmarks, case studies (opcional mas poderoso)"
+  },
+  "shared": {
+    "accessDenied": "Acesso Negado",
+    "readOnly": "Vista apenas de leitura",
+    "expires": "Expira",
+    "keyMetrics": "Métricas Chave",
+    "milestones": "Marcos",
+    "latestUpdate": "Última Atualização",
+    "highlights": "Destaques",
+    "nextPriorities": "Próximas Prioridades",
+    "sharedVia": "Partilhado via Startup Leiria"
   }
 }
