@@ -27,6 +27,7 @@ interface UserOption {
 }
 
 export function NewConversationDialog({ open, onOpenChange, onConversationCreated }: NewConversationDialogProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
