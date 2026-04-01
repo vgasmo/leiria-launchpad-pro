@@ -420,7 +420,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <UserCheck className="h-4 w-4" />
-            Contas de Utilizador Pendentes ({pendingUsers!.length})
+            {t('admin.pendingUserAccounts', 'Contas de Utilizador Pendentes')} ({pendingUsers!.length})
           </h3>
           {pendingUsers!.map((user) => {
             const initials = user.full_name
@@ -487,7 +487,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Link2 className="h-4 w-4" />
-            Pedidos de Associação Pendentes ({pendingClaims!.length})
+            {t('admin.pendingClaimRequests', 'Pedidos de Associação Pendentes')} ({pendingClaims!.length})
           </h3>
           {pendingClaims!.map((claim) => {
             const initials = claim.user_name
@@ -529,17 +529,14 @@ export function PendingApprovalsManager() {
                         onClick={() => handleRejectClaim(claim.id)}
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Rejeitar
+                        {t('admin.reject', 'Rejeitar')}
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          setAssignClaimTarget(claim);
-                          setSelectedWorkspaceId('');
-                        }}
+                        onClick={() => { setAssignClaimTarget(claim); setSelectedWorkspaceId(''); }}
                       >
                         <Link2 className="h-4 w-4 mr-1" />
-                        Associar a Workspace
+                        {t('admin.assignToWorkspace', 'Associar a Workspace')}
                       </Button>
                     </div>
                   </div>
@@ -555,7 +552,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            Candidaturas de Startups Pendentes ({pendingWorkspaces!.length})
+            {t('admin.pendingStartupApplications', 'Candidaturas de Startups Pendentes')} ({pendingWorkspaces!.length})
           </h3>
           {pendingWorkspaces!.map((workspace) => (
             <Card key={workspace.id} className="overflow-hidden">
@@ -669,7 +666,7 @@ export function PendingApprovalsManager() {
       <Dialog open={!!assignClaimTarget} onOpenChange={(open) => !open && resetClaimDialog()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Associar Founder a Workspace</DialogTitle>
+            <DialogTitle>{t('admin.assignFounderTitle', 'Associar Founder a Workspace')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="text-sm">
@@ -681,17 +678,17 @@ export function PendingApprovalsManager() {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="existing" className="gap-1.5">
                   <Link2 className="h-3.5 w-3.5" />
-                  Workspace Existente
+                  {t('admin.existingWorkspace', 'Workspace Existente')}
                 </TabsTrigger>
                 <TabsTrigger value="create" className="gap-1.5">
                   <Plus className="h-3.5 w-3.5" />
-                  Criar Novo
+                  {t('admin.createNew', 'Criar Novo')}
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="existing" className="space-y-3 mt-3">
                 <div>
-                  <Label className="text-sm font-medium mb-1.5 block">Selecionar Workspace</Label>
+                  <Label className="text-sm font-medium mb-1.5 block">{t('admin.selectWorkspace', 'Selecionar Workspace')}</Label>
                   <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Escolher workspace..." />
@@ -706,17 +703,17 @@ export function PendingApprovalsManager() {
                   </Select>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button variant="outline" onClick={resetClaimDialog}>{t('common.cancel', 'Cancelar')}</Button>
                   <Button onClick={handleAssignClaim} disabled={!selectedWorkspaceId}>
                     <Check className="h-4 w-4 mr-1" />
-                    Confirmar Associação
+                    {t('admin.confirmAssociation', 'Confirmar Associação')}
                   </Button>
                 </DialogFooter>
               </TabsContent>
 
               <TabsContent value="create" className="space-y-3 mt-3">
                 <div className="space-y-2">
-                  <Label htmlFor="new-startup-name">Nome da Startup *</Label>
+                  <Label htmlFor="new-startup-name">{t('admin.startupName', 'Nome da Startup *')}</Label>
                   <Input
                     id="new-startup-name"
                     value={newStartupName}
@@ -725,7 +722,7 @@ export function PendingApprovalsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-startup-desc">Descrição</Label>
+                  <Label htmlFor="new-startup-desc">{t('common.description', 'Descrição')}</Label>
                   <Textarea
                     id="new-startup-desc"
                     value={newStartupDesc}
@@ -736,7 +733,7 @@ export function PendingApprovalsManager() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Programa *</Label>
+                    <Label>{t('common.program', 'Programa *')}</Label>
                     <Select value={newProgramId} onValueChange={setNewProgramId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Programa..." />
@@ -749,29 +746,29 @@ export function PendingApprovalsManager() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Fase</Label>
+                    <Label>{t('common.stage', 'Fase')}</Label>
                     <Select value={newStage} onValueChange={setNewStage}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ideation">Ideação</SelectItem>
-                        <SelectItem value="validation">Validação</SelectItem>
+                        <SelectItem value="ideation">{t('stages.ideation', 'Ideação')}</SelectItem>
+                        <SelectItem value="validation">{t('stages.validation', 'Validação')}</SelectItem>
                         <SelectItem value="mvp">MVP</SelectItem>
-                        <SelectItem value="growth">Crescimento</SelectItem>
-                        <SelectItem value="scale">Escala</SelectItem>
+                        <SelectItem value="growth">{t('stages.growth', 'Crescimento')}</SelectItem>
+                        <SelectItem value="scale">{t('stages.scale', 'Escala')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button variant="outline" onClick={resetClaimDialog}>{t('common.cancel', 'Cancelar')}</Button>
                   <Button 
                     onClick={handleCreateWorkspaceForClaim} 
                     disabled={!newStartupName.trim() || !newProgramId || isCreatingWorkspace}
                   >
                     <Rocket className="h-4 w-4 mr-1" />
-                    {isCreatingWorkspace ? 'A criar...' : 'Criar Workspace'}
+                    {isCreatingWorkspace ? t('admin.creating', 'A criar...') : t('admin.createWorkspace', 'Criar Workspace')}
                   </Button>
                 </DialogFooter>
               </TabsContent>

@@ -88,7 +88,7 @@ export default function SearchPage() {
 
   const handleSaveSearch = () => {
     if (!searchName.trim()) {
-      toast.error('Please enter a name');
+      toast.error(t('search.enterName', 'Introduza um nome'));
       return;
     }
     saveSearch.mutate({
@@ -96,7 +96,7 @@ export default function SearchPage() {
       filters: searchFilters,
     }, {
       onSuccess: () => {
-        toast.success('Search saved');
+        toast.success(t('search.saved', 'Pesquisa guardada'));
         setSaveDialogOpen(false);
         setSearchName('');
       },
@@ -112,7 +112,7 @@ export default function SearchPage() {
       tagIds: savedFilters.tagIds || [],
       dateRange: savedFilters.dateRange,
     });
-    toast.success(`Loaded: ${saved.name}`);
+    toast.success(t('search.loaded', { name: saved.name, defaultValue: `Carregada: ${saved.name}` }));
   };
 
   const getResultIcon = (type: string) => {

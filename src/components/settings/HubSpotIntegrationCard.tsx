@@ -32,11 +32,11 @@ export function HubSpotIntegrationCard() {
         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground space-y-3">
           <p className="font-medium text-foreground">{t('settings.plannedFeatures')}</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Two-way contact sync between startups and HubSpot contacts</li>
-            <li>Track investor interactions as HubSpot activities</li>
-            <li>Sync funding rounds to HubSpot deals</li>
-            <li>Import leads from HubSpot to workspace members</li>
-            <li>Log session notes as HubSpot engagements</li>
+            <li>{t('integrations.hubspot.contactSync', 'Sincronização bidirecional de contactos entre startups e HubSpot')}</li>
+            <li>{t('integrations.hubspot.investorTracking', 'Acompanhar interações com investidores como atividades HubSpot')}</li>
+            <li>{t('integrations.hubspot.fundingSync', 'Sincronizar rondas de financiamento com deals HubSpot')}</li>
+            <li>{t('integrations.hubspot.leadImport', 'Importar leads do HubSpot para membros do workspace')}</li>
+            <li>{t('integrations.hubspot.sessionNotes', 'Registar notas de sessão como engagements HubSpot')}</li>
           </ul>
         </div>
 

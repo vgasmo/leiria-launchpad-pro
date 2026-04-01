@@ -206,7 +206,7 @@ export function FirstContactPrepSheet({ open, onOpenChange, workspaceId }: First
       '6. Próximos passos (10 min)',
     ];
     navigator.clipboard.writeText(lines.join('\n'));
-    toast.success('Prep sheet copiado!');
+    toast.success(t('consultor.prepSheetCopied', 'Prep sheet copiado!'));
   };
 
   return (
