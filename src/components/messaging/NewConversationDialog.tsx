@@ -80,8 +80,8 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
       onOpenChange(false);
       onConversationCreated(conversation as Conversation);
     } catch (e: any) {
-      toast.error('Could not start conversation', {
-        description: e?.message ?? 'Please try again.',
+      toast.error(t('messaging.conversationFailed', 'Não foi possível iniciar conversa'), {
+        description: e?.message ?? t('common.tryAgain', 'Tente novamente.'),
       });
     }
   };
