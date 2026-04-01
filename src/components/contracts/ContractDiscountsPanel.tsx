@@ -23,6 +23,7 @@ interface ContractDiscountsPanelProps {
   monthlyFee?: number;
   currency?: string;
   isStaff?: boolean;
+  isAdmin?: boolean;
   compact?: boolean;
 }
 
