@@ -122,18 +122,18 @@ export function AdminTeamsTestPanel() {
     onSuccess: (result) => {
       setLastResult(result);
       if (result.sent) {
-        toast.success('Test message sent to Teams!', {
-          description: `Used ${result.settings_source === 'global_fallback' ? 'global settings' : 'workspace settings'}`,
+        toast.success(t('admin.teamsTestSuccess', 'Mensagem de teste enviada!'), {
+          description: `${t('admin.teams.usedSettings', 'Usou')} ${result.settings_source === 'global_fallback' ? t('admin.teams.globalSettings', 'definições globais') : t('admin.teams.workspaceSettings', 'definições do workspace')}`,
         });
       } else {
-        toast.info('Message not sent', {
-          description: result.reason || 'Unknown reason',
+        toast.info(t('admin.teamsTestNotSent', 'Mensagem não enviada'), {
+          description: result.reason || t('common.unknownReason', 'Razão desconhecida'),
         });
       }
     },
     onError: (error: Error) => {
       setLastResult({ success: false, error: error.message });
-      toast.error('Test failed', { description: error.message });
+      toast.error(t('admin.teamsTestFailed', 'Teste falhou'), { description: error.message });
     },
   });
 
