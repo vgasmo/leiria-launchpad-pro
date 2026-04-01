@@ -716,7 +716,7 @@ export function PendingApprovalsManager() {
 
               <TabsContent value="create" className="space-y-3 mt-3">
                 <div className="space-y-2">
-                  <Label htmlFor="new-startup-name">Nome da Startup *</Label>
+                  <Label htmlFor="new-startup-name">{t('admin.startupName', 'Nome da Startup *')}</Label>
                   <Input
                     id="new-startup-name"
                     value={newStartupName}
