@@ -152,7 +152,7 @@ export default function SharedWorkspace() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Key Metrics
+                {t('shared.keyMetrics', 'Métricas Chave')}
               </CardTitle>
             </CardHeader>
             <CardContent>
