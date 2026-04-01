@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { ConsultorRiskPanel, type RiskItem } from './consultor/ConsultorRiskPanel';
 import { ConsultorStatsBar } from './consultor/ConsultorStatsBar';
 import { ConsultorPipelineSnapshot } from './consultor/ConsultorPipelineSnapshot';
