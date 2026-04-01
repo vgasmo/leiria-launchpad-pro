@@ -138,8 +138,8 @@ export function useProfiles(page: number = 0, pageSize: number = 50) {
       const to = from + pageSize - 1;
       
       const { data, error, count } = await supabase
-        .from('profiles_safe')
-        .select('id, email, full_name, avatar_url, created_at', { count: 'exact' })
+        .from('profiles')
+        .select('id, email, full_name, avatar_url, created_at, account_status', { count: 'exact' })
         .order('full_name', { ascending: true })
         .range(from, to);
       
