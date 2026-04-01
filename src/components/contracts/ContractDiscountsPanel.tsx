@@ -38,7 +38,7 @@ interface Discount {
   created_at: string;
 }
 
-export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR', isStaff = false, compact = false }: ContractDiscountsPanelProps) {
+export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR', isStaff = false, isAdmin = false, compact = false }: ContractDiscountsPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
