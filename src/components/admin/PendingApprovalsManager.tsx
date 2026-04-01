@@ -691,7 +691,7 @@ export function PendingApprovalsManager() {
 
               <TabsContent value="existing" className="space-y-3 mt-3">
                 <div>
-                  <Label className="text-sm font-medium mb-1.5 block">Selecionar Workspace</Label>
+                  <Label className="text-sm font-medium mb-1.5 block">{t('admin.selectWorkspace', 'Selecionar Workspace')}</Label>
                   <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Escolher workspace..." />
