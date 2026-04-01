@@ -529,17 +529,14 @@ export function PendingApprovalsManager() {
                         onClick={() => handleRejectClaim(claim.id)}
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Rejeitar
+                        {t('admin.reject', 'Rejeitar')}
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          setAssignClaimTarget(claim);
-                          setSelectedWorkspaceId('');
-                        }}
+                        onClick={() => { setAssignClaimTarget(claim); setSelectedWorkspaceId(''); }}
                       >
                         <Link2 className="h-4 w-4 mr-1" />
-                        Associar a Workspace
+                        {t('admin.assignToWorkspace', 'Associar a Workspace')}
                       </Button>
                     </div>
                   </div>
