@@ -11,7 +11,7 @@ export interface WorkspaceTab {
   /** Show in primary tab bar (max 5) vs overflow "More" menu */
   primary: boolean;
   /** Permission gate: which roles can see this tab */
-  visibleTo: ('all' | 'founder' | 'admin' | 'consultor' | 'mentor')[];
+  visibleTo: ('all' | 'founder' | 'admin' | 'consultor' | 'mentor' | 'backoffice')[];
   /** If true, requires startup data to render */
   requiresStartup?: boolean;
   /** Minimum stage required to show this tab (progressive disclosure) */
@@ -41,7 +41,7 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'], minStage: 'validation' },
   { id: 'team',       labelKey: 'workspace.team',         icon: Users,           primary: false, visibleTo: ['founder'], requiresStartup: true },
   { id: 'funding',    labelKey: 'workspace.funding',      icon: DollarSign,      primary: false, visibleTo: ['founder'], requiresStartup: true, minStage: 'mvp' },
-  { id: 'notes',      labelKey: 'workspace.notesAndTasks', icon: StickyNote,     primary: false, visibleTo: ['admin', 'consultor', 'mentor'] },
+  { id: 'notes',      labelKey: 'workspace.notesAndTasks', icon: StickyNote,     primary: false, visibleTo: ['admin', 'consultor', 'mentor', 'backoffice'] },
   { id: 'time',       labelKey: 'workspace.time',         icon: Clock,           primary: false, visibleTo: ['admin', 'consultor'] },
   { id: 'settings',   labelKey: 'workspace.settings',     icon: Settings,        primary: false, visibleTo: ['all'] },
 ];
@@ -63,7 +63,7 @@ function meetsStageRequirement(currentStage: string, minStage?: string): boolean
  * Filter tabs based on user roles, available data, and startup stage.
  */
 export function getVisibleTabs(
-  roles: { isAdmin: boolean; isConsultor: boolean; isMentor: boolean; isFounder: boolean },
+  roles: { isAdmin: boolean; isConsultor: boolean; isMentor: boolean; isFounder: boolean; isBackoffice?: boolean },
   hasStartup: boolean,
   currentStage?: string
 ): { primaryTabs: WorkspaceTab[]; overflowTabs: WorkspaceTab[] } {
@@ -82,6 +82,7 @@ export function getVisibleTabs(
     if (tab.visibleTo.includes('admin') && roles.isAdmin) return true;
     if (tab.visibleTo.includes('consultor') && roles.isConsultor) return true;
     if (tab.visibleTo.includes('mentor') && roles.isMentor) return true;
+    if (tab.visibleTo.includes('backoffice') && roles.isBackoffice) return true;
     
     return false;
   });

@@ -31,6 +31,9 @@ import {
   BookOpenCheck,
   HelpCircle,
   FolderOpen,
+  Globe2,
+  DollarSign,
+  Clock,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -116,9 +119,9 @@ export function AppSidebar() {
     { name: t('nav.consultor.actionsFollowups', { defaultValue: 'Ações & Follow-ups' }), href: '/consultor-tools?tab=actions', icon: CheckSquare },
     { name: t('nav.consultor.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
     { name: t('nav.consultor.crmPipeline', { defaultValue: 'CRM & Pipeline' }), href: '/crm', icon: Contact },
+    { name: t('nav.consultor.ecosystem', { defaultValue: 'Ecossistema' }), href: '/ecosystem', icon: Globe2 },
     { name: t('nav.consultor.programs', { defaultValue: 'Programas' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.consultor.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
-    { name: t('nav.consultor.dataQuality', { defaultValue: 'Qualidade de Dados' }), href: '/admin?tab=data-quality', icon: Database },
     { name: t('nav.consultor.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
   ];
 
@@ -130,10 +133,21 @@ export function AppSidebar() {
     { name: t('nav.mentor.profile', { defaultValue: 'Perfil' }), href: '/settings', icon: UserCircle },
   ];
 
+  // BACKOFFICE Navigation (focused on spaces, contracts, invoices)
+  const backofficeNavigation: NavItem[] = [
+    { name: t('nav.backoffice.cockpit', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
+    { name: t('nav.backoffice.spaces', { defaultValue: 'Espaços' }), href: '/admin?tab=backoffice', icon: Building2 },
+    { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=contracts', icon: FileText },
+    { name: t('nav.backoffice.invoices', { defaultValue: 'Faturação' }), href: '/admin?tab=invoices', icon: DollarSign },
+    { name: t('nav.backoffice.approvals', { defaultValue: 'Aprovações' }), href: '/admin?tab=approvals', icon: Clock },
+    { name: t('nav.backoffice.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
+  ];
+
   // ADMIN Navigation (simplified)
   const adminNavigation: NavItem[] = [
     { name: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('ecosystemHub.navLabel', { defaultValue: 'Ecossistema & CRM' }), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('nav.admin.ecosystem', { defaultValue: 'Diretório Ecossistema' }), href: '/ecosystem', icon: Globe2 },
     { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas e Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },
     { name: t('nav.admin.usersPermissions', { defaultValue: 'Utilizadores & Permissões' }), href: '/admin?tab=users', icon: Shield },
@@ -153,9 +167,9 @@ export function AppSidebar() {
     if (isAdmin && isConsultor) {
       return adminNavigation;
     }
-    // Backoffice role sees admin nav (limited to backoffice tabs at component level)
-    if (isBackoffice) {
-      return adminNavigation;
+    // Backoffice role sees dedicated backoffice nav (spaces, contracts, invoices)
+    if (isBackoffice && !isAdmin && !isConsultor) {
+      return backofficeNavigation;
     }
     // Consultor (not admin) sees portfolio OS
     if (isConsultor) {

@@ -30,6 +30,7 @@ interface AuthContextType {
   isBackoffice: boolean;
   isStaff: boolean;
   isMentor: boolean;
+  isExternalMentor: boolean;
   isFounder: boolean;
   isAccountApproved: boolean;
   isAccountPending: boolean;
@@ -199,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isConsultor = roles.includes('consultor');
   const isBackoffice = roles.includes('backoffice');
   const isStaff = isAdmin || isConsultor || isBackoffice;
+  const isExternalMentor = roles.includes('mentor_externo') && !isConsultor && !isAdmin;
   const isMentor = roles.includes('mentor_externo') || isConsultor || isAdmin;
   const isFounder = roles.includes('founder');
   
@@ -219,6 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isBackoffice,
       isStaff,
       isMentor,
+      isExternalMentor,
       isFounder,
       isAccountApproved,
       isAccountPending,

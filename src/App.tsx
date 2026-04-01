@@ -150,7 +150,7 @@ function AppRoutes() {
         <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
-        <Route path="/consultor-tools" element={<ProtectedRoute><ConsultorTools /></ProtectedRoute>} />
+        <Route path="/consultor-tools" element={<ProtectedRoute staffOnly><ConsultorTools /></ProtectedRoute>} />
         <Route path="/workspace/:workspaceId/value-prop" element={<ProtectedRoute><ValuePropWizardPage /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
         <Route path="/integrations-setup" element={<Navigate to="/settings" replace />} />
@@ -160,7 +160,7 @@ function AppRoutes() {
         <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
         <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
-        <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
+        <Route path="/ecosystem" element={<ProtectedRoute staffOnly><Ecosystem /></ProtectedRoute>} />
         <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
         <Route path="/staff-cockpit" element={<ProtectedRoute staffOnly><StaffCockpit /></ProtectedRoute>} />
         <Route path="/system-settings" element={<ProtectedRoute adminOnly><SystemSettings /></ProtectedRoute>} />
