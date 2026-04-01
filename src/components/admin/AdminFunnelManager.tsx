@@ -225,6 +225,7 @@ function ConvertForm({
             <SelectItem value="ideation">{t('stages.ideation', 'Ideação')}</SelectItem>
             <SelectItem value="validation">{t('stages.validation', 'Validação')}</SelectItem>
             <SelectItem value="mvp">MVP</SelectItem>
+          </SelectContent>
         </Select>
       </div>
       
