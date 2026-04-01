@@ -363,10 +363,7 @@ export function AdminBackoffice() {
             <FileText className="h-4 w-4" />
             {t('admin.backoffice.contractsAndLifecycle', { defaultValue: 'Contratos' })}
           </TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-1.5">
-            <Receipt className="h-4 w-4" />
-            {t('admin.backoffice.invoicesTab', { defaultValue: 'Faturação' })}
-          </TabsTrigger>
+          {/* Invoices tab removed per user request */}
           <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
             {t('admin.backoffice.spacesAndInfra', { defaultValue: 'Espaços & Infraestrutura' })}
