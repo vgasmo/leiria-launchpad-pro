@@ -74,7 +74,7 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
     totalConsultants: 0,
   });
 
-  const signals = [
+  const signals: Array<{ key: string; label: string; value: number | string; icon: any; href: string; variant: 'default' | 'info' | 'warning' | 'destructive'; trend: 'up' | 'down' | 'neutral'; sparkData: number[] }> = [
     {
       key: 'approvals',
       label: t('admin.pendingApprovals'),
@@ -94,16 +94,6 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
       variant: 'info' as const,
       trend: 'neutral' as const,
       sparkData: [1, 2, 1, 3, 2, stats?.contractRenewals30d ?? 0],
-    },
-    {
-      key: 'overdue',
-      label: t('admin.overdueInvoices'),
-      value: stats?.overdueInvoicesCount ?? 0,
-      icon: AlertTriangle,
-      href: '/admin?tab=backoffice',
-      variant: 'destructive' as const,
-      trend: (stats?.overdueInvoicesCount ?? 0) > 0 ? 'up' as const : 'down' as const,
-      sparkData: [3, 2, 4, 1, 3, stats?.overdueInvoicesCount ?? 0],
     },
     {
       key: 'occupancy',
