@@ -144,7 +144,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       <CardContent className="space-y-4">
         {/* Webhook URL */}
         <div className="space-y-2">
-          <Label htmlFor="teams-webhook">Webhook URL</Label>
+          <Label htmlFor="teams-webhook">{t('settings.webhookUrl')}</Label>
           <div className="flex gap-2">
             <Input
               id="teams-webhook"
