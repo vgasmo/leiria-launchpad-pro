@@ -407,7 +407,7 @@ export default function Mentors() {
                           {mentor.profile?.email && (
                             <div className="flex gap-2 mt-4">
                               <Button size="sm" variant="outline" asChild>
-                                <a href={`mailto:${mentor.profile.email}`}>
+                                <a href={sanitizeUrl(`mailto:${mentor.profile.email}`)!}>
                                   <Mail className="h-4 w-4 mr-2" />
                                   {t('mentorsPage.contact')}
                                 </a>
