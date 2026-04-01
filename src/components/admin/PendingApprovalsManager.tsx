@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail, Link2, Search } from 'lucide-react';
+import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail, Link2, Search, Plus, Rocket } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
