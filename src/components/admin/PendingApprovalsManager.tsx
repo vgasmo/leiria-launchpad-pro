@@ -725,7 +725,7 @@ export function PendingApprovalsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-startup-desc">Descrição</Label>
+                  <Label htmlFor="new-startup-desc">{t('common.description', 'Descrição')}</Label>
                   <Textarea
                     id="new-startup-desc"
                     value={newStartupDesc}
