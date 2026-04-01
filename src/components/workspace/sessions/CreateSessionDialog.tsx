@@ -411,7 +411,7 @@ export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateS
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
+                <Label htmlFor="duration">{t('sessions.duration', 'Duration')}</Label>
                 <Select value={duration} onValueChange={setDuration}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
