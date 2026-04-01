@@ -470,15 +470,15 @@ export default function Settings() {
           <TabsContent value="email">
             <Card>
               <CardHeader>
-                <CardTitle>Change Email Address</CardTitle>
+                <CardTitle>{t('settingsPage.changeEmail', 'Alterar Email')}</CardTitle>
                 <CardDescription>
-                  Update the email address associated with your account
+                  {t('settingsPage.changeEmailDesc', 'Atualize o email associado à sua conta')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateEmail} className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Current Email</Label>
+                    <Label>{t('settingsPage.currentEmail', 'Email Atual')}</Label>
                     <Input
                       value={profile?.email || user?.email || ''}
                       disabled
@@ -489,7 +489,7 @@ export default function Settings() {
                   <Separator />
 
                   <div className="space-y-2">
-                    <Label htmlFor="new_email">New Email Address</Label>
+                    <Label htmlFor="new_email">{t('settingsPage.newEmail', 'Novo Email')}</Label>
                     <Input
                       id="new_email"
                       type="email"
@@ -499,7 +499,7 @@ export default function Settings() {
                       required
                     />
                     <p className="text-xs text-muted-foreground">
-                      A confirmation email will be sent to verify the new address
+                      {t('settingsPage.emailConfirmHint', 'Será enviado um email de confirmação para verificar o novo endereço')}
                     </p>
                   </div>
 
@@ -507,12 +507,12 @@ export default function Settings() {
                     {isUpdatingEmail ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Sending...
+                        {t('common.sending', 'A enviar...')}
                       </>
                     ) : (
                       <>
                         <Mail className="h-4 w-4 mr-2" />
-                        Update Email
+                        {t('settingsPage.updateEmail', 'Atualizar Email')}
                       </>
                     )}
                   </Button>
