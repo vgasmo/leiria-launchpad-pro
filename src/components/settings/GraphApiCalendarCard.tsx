@@ -141,11 +141,11 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4 text-[#0078D4]" />
-            <span>Outlook events</span>
+            <span>{t('settings.outlookEvents', 'Eventos Outlook')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Video className="h-4 w-4 text-[#6264A7]" />
-            <span>Teams meetings</span>
+            <span>{t('settings.teamsMeetings', 'Reuniões Teams')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4 text-muted-foreground" />
