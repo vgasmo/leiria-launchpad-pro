@@ -177,6 +177,8 @@ export default function ClaimStartup() {
                   {t('claimStartup.submitApplication', { defaultValue: 'Submeter Candidatura' })}
                 </Button>
               </div>
+            </div>
+          )}
 
           {/* VERIFYING — RPC in progress */}
           {displayState === 'verifying' && (
