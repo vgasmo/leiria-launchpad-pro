@@ -34,6 +34,8 @@ import { cn } from '@/lib/utils';
 import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
 import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
+import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
+import { StickyNote } from 'lucide-react';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
