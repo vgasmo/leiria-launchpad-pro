@@ -90,9 +90,9 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         enabled,
         sync_mode: 'graph',
       });
-      toast.success(enabled ? 'Graph API calendar sync enabled' : 'Graph API calendar sync disabled');
+      toast.success(enabled ? t('settings.graphSyncEnabled', 'Sincronização Graph API ativada') : t('settings.graphSyncDisabled', 'Sincronização Graph API desativada'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update settings');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
