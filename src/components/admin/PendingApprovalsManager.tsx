@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail } from 'lucide-react';
+import { Check, X, Clock, Building2, User, Calendar, ExternalLink, UserCheck, Mail, Link2, Search } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StageBadge } from '@/components/ui/StageBadge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -44,6 +46,17 @@ interface PendingUser {
   avatar_url: string | null;
   created_at: string;
   roles: string[];
+}
+
+interface PendingClaim {
+  id: string;
+  user_id: string;
+  user_email: string;
+  status: string;
+  match_method: string;
+  created_at: string;
+  user_name: string | null;
+  user_avatar: string | null;
 }
 
 function usePendingWorkspaces() {
@@ -130,6 +143,53 @@ function usePendingUsers() {
   });
 }
 
+function usePendingClaims() {
+  return useQuery({
+    queryKey: ['pending-claim-requests'],
+    queryFn: async (): Promise<PendingClaim[]> => {
+      const { data: claims, error } = await supabase
+        .from('startup_claim_requests')
+        .select('id, user_id, user_email, status, match_method, created_at')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      if (!claims?.length) return [];
+
+      const userIds = claims.map(c => c.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds);
+
+      const profileMap = new Map<string, { full_name: string | null; avatar_url: string | null }>();
+      profiles?.forEach(p => profileMap.set(p.id, p));
+
+      return claims.map(c => ({
+        ...c,
+        user_name: profileMap.get(c.user_id)?.full_name || null,
+        user_avatar: profileMap.get(c.user_id)?.avatar_url || null,
+      }));
+    },
+  });
+}
+
+function useAvailableWorkspaces() {
+  return useQuery({
+    queryKey: ['available-workspaces-for-claim'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select('id, status, startup:startups(id, name)')
+        .in('status', ['imported_unclaimed', 'active', 'claimed', 'pending'])
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
 function useApproveWorkspace() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -170,10 +230,14 @@ export function PendingApprovalsManager() {
   const queryClient = useQueryClient();
   const { data: pendingWorkspaces, isLoading: loadingWs } = usePendingWorkspaces();
   const { data: pendingUsers, isLoading: loadingUsers } = usePendingUsers();
+  const { data: pendingClaims, isLoading: loadingClaims } = usePendingClaims();
+  const { data: availableWorkspaces } = useAvailableWorkspaces();
   const approveWorkspace = useApproveWorkspace();
   const rejectWorkspace = useRejectWorkspace();
   
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [assignClaimTarget, setAssignClaimTarget] = useState<PendingClaim | null>(null);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
 
   const handleApprove = (workspaceId: string) => {
     approveWorkspace.mutate(workspaceId, {
@@ -214,10 +278,53 @@ export function PendingApprovalsManager() {
     }
   };
 
-  const isLoading = loadingWs || loadingUsers;
+  const handleAssignClaim = async () => {
+    if (!assignClaimTarget || !selectedWorkspaceId) return;
+
+    try {
+      const { error: approveError } = await supabase.rpc('approve_startup_claim', {
+        p_claim_id: assignClaimTarget.id,
+        p_workspace_id: selectedWorkspaceId,
+      });
+
+      if (approveError) throw approveError;
+
+      // Also approve account if still pending
+      await supabase
+        .from('profiles')
+        .update({ account_status: 'approved' })
+        .eq('id', assignClaimTarget.user_id);
+
+      toast.success('Claim aprovado e founder associado ao workspace');
+      queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      setAssignClaimTarget(null);
+      setSelectedWorkspaceId('');
+    } catch (e: any) {
+      toast.error(`Erro ao aprovar claim: ${e.message}`);
+    }
+  };
+
+  const handleRejectClaim = async (claimId: string) => {
+    try {
+      const { error } = await supabase.rpc('reject_startup_claim', {
+        p_claim_id: claimId,
+        p_reason: 'Rejeitado pelo staff',
+      });
+      if (error) throw error;
+      toast.success('Claim rejeitado');
+      queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+    } catch (e: any) {
+      toast.error(`Erro: ${e.message}`);
+    }
+  };
+
+  const isLoading = loadingWs || loadingUsers || loadingClaims;
   const hasWorkspaces = !!pendingWorkspaces?.length;
   const hasUsers = !!pendingUsers?.length;
-  const totalPending = (pendingWorkspaces?.length || 0) + (pendingUsers?.length || 0);
+  const hasClaims = !!pendingClaims?.length;
+  const totalPending = (pendingWorkspaces?.length || 0) + (pendingUsers?.length || 0) + (pendingClaims?.length || 0);
 
   if (isLoading) {
     return (
@@ -228,7 +335,7 @@ export function PendingApprovalsManager() {
     );
   }
 
-  if (!hasWorkspaces && !hasUsers) {
+  if (!hasWorkspaces && !hasUsers && !hasClaims) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -314,6 +421,74 @@ export function PendingApprovalsManager() {
                       >
                         <Check className="h-4 w-4 mr-1" />
                         {t('admin.approve', { defaultValue: 'Aprovar' })}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Pending Claim Requests */}
+      {hasClaims && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            Pedidos de Associação Pendentes ({pendingClaims!.length})
+          </h3>
+          {pendingClaims!.map((claim) => {
+            const initials = claim.user_name
+              ?.split(' ')
+              .map(n => n[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2) || 'U';
+
+            return (
+              <Card key={claim.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={claim.user_avatar || undefined} />
+                        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{claim.user_name || 'Sem nome'}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          {claim.user_email}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {claim.match_method === 'manual_request' ? 'Pedido manual' : claim.match_method}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(claim.created_at), { addSuffix: true })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejectClaim(claim.id)}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Rejeitar
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setAssignClaimTarget(claim);
+                          setSelectedWorkspaceId('');
+                        }}
+                      >
+                        <Link2 className="h-4 w-4 mr-1" />
+                        Associar a Workspace
                       </Button>
                     </div>
                   </div>
@@ -438,6 +613,45 @@ export function PendingApprovalsManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Claim to Workspace Dialog */}
+      <Dialog open={!!assignClaimTarget} onOpenChange={(open) => !open && setAssignClaimTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Associar Founder a Workspace</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="text-sm">
+              <span className="font-medium">{assignClaimTarget?.user_name || 'Sem nome'}</span>
+              <span className="text-muted-foreground ml-1">({assignClaimTarget?.user_email})</span>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Selecionar Workspace</label>
+              <Select value={selectedWorkspaceId} onValueChange={setSelectedWorkspaceId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolher workspace..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableWorkspaces?.map((ws: any) => (
+                    <SelectItem key={ws.id} value={ws.id}>
+                      {(ws.startup as any)?.name || 'Sem nome'} ({ws.status})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignClaimTarget(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAssignClaim} disabled={!selectedWorkspaceId}>
+              <Check className="h-4 w-4 mr-1" />
+              Confirmar Associação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
