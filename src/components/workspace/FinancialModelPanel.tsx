@@ -23,7 +23,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useUploadDocument, useGetDocumentUrl, Document } from '@/hooks/useDocuments';
 import {
-import { logger } from '@/lib/logger';
   useFinancialModelVersions,
   useCreateFinancialModelVersion,
   useParseFinancialModel,
@@ -38,6 +37,7 @@ import { logger } from '@/lib/logger';
   AIReview,
   FinancialInsight,
 } from '@/hooks/useFinancialModel';
+import { logger } from '@/lib/logger';
 
 interface FinancialModelPanelProps {
   workspaceId: string;

@@ -12,7 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { AppConfig } from '@/lib/appConfig';
 import { 
-import { logger } from '@/lib/logger';
   Calendar,
   Copy, 
   Check, 
@@ -22,6 +21,7 @@ import { logger } from '@/lib/logger';
   Rss,
   Key
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface CalendarFeedCardProps {
   workspaceId?: string;
