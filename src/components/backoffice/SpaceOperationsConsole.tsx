@@ -287,10 +287,10 @@ export function SpaceOperationsConsole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-operations-console'] });
-      toast.success(`${staleRoomIds.length} sala(s) libertada(s) com sucesso`);
+      toast.success(t('spaces.roomsCleared', { count: staleRoomIds.length, defaultValue: '{{count}} sala(s) libertada(s) com sucesso' }));
     },
     onError: () => {
-      toast.error('Erro ao limpar salas');
+      toast.error(t('spaces.clearError', 'Erro ao limpar salas'));
     },
   });
 
