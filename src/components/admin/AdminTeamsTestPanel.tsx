@@ -184,7 +184,7 @@ export function AdminTeamsTestPanel() {
         {/* Workspace selector */}
         <div className="flex gap-3 items-end">
           <div className="flex-1 space-y-2">
-            <label className="text-sm font-medium">Test Target</label>
+            <label className="text-sm font-medium">{t('admin.teams.testTarget', 'Alvo do Teste')}</label>
             <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
               <SelectTrigger>
                 <SelectValue placeholder="Select workspace..." />
