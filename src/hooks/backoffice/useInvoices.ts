@@ -7,6 +7,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { StartupContract } from './useContracts';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface Invoice {
   id: string;
   contract_id: string;
@@ -78,9 +81,9 @@ export function useCreateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Fatura criada');
+      toast.success(t('backoffice.invoiceCreated'));
     },
-    onError: () => toast.error('Erro ao criar fatura'),
+    onError: () => toast.error(t('backoffice.invoiceCreateError')),
   });
 }
 
@@ -99,9 +102,9 @@ export function useUpdateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Fatura atualizada');
+      toast.success(t('backoffice.invoiceUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar fatura'),
+    onError: () => toast.error(t('backoffice.invoiceUpdateError')),
   });
 }
 
@@ -139,8 +142,8 @@ export function useRecordPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Pagamento registado');
+      toast.success(t('backoffice.paymentRecorded'));
     },
-    onError: () => toast.error('Erro ao registar pagamento'),
+    onError: () => toast.error(t('backoffice.paymentRecordError')),
   });
 }
