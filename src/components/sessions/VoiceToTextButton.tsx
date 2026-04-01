@@ -162,7 +162,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       } else if (error.message?.includes('402')) {
         toast.error(t('sessions.creditsError'));
       } else {
-        toast.error(t('sessions.transcriptionFailed', 'Transcription failed. Please try again.'));
+        toast.error(t('sessions.transcriptionFailed', 'Transcription failed. Check if the AI service is configured in System Settings.'));
       }
     } finally {
       setIsProcessing(false);
