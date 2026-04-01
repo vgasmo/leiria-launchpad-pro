@@ -277,7 +277,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 2 && (
           <div className="space-y-3">
-            <Label>What happens if they don't solve this problem?</Label>
+            <Label>{t('vp.consequence', 'O que acontece se não resolverem este problema?')}</Label>
             <Textarea
               value={fields.consequence}
               onChange={(e) => updateField('consequence', e.target.value)}
@@ -285,7 +285,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Think: lost revenue, wasted time, missed opportunities
+              {t('vp.consequenceHint', 'Pensa: receita perdida, tempo desperdiçado, oportunidades perdidas')}
             </p>
           </div>
         )}
