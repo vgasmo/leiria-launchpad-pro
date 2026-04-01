@@ -124,7 +124,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           )}
         </CardTitle>
         <CardDescription>
-          Direct integration with Microsoft Graph for automatic calendar events and Teams meetings
+          {t('settings.graphApiDesc', 'Integração direta com Microsoft Graph para eventos de calendário e reuniões Teams')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
