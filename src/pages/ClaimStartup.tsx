@@ -251,6 +251,16 @@ export default function ClaimStartup() {
               <p className="text-xs text-muted-foreground/60 max-w-xs">
                 {t('claimStartup.pendingReassurance', { defaultValue: 'Não precisa de fazer mais nada. Receberá acesso assim que a equipa confirmar.' })}
               </p>
+
+              <div className="w-full border-t pt-4 mt-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('claimStartup.orSubmitNew', { defaultValue: 'Ou, se preferir, pode submeter uma candidatura de nova startup:' })}
+                </p>
+                <Button variant="outline" onClick={() => setShowCreateDialog(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  {t('claimStartup.submitApplication', { defaultValue: 'Submeter Candidatura' })}
+                </Button>
+              </div>
             </div>
           )}
 
