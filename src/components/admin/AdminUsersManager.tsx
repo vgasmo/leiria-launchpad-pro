@@ -53,6 +53,8 @@ export function AdminUsersManager() {
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
   const [wsRole, setWsRole] = useState<Role>('founder');
   const [deleteWsUserTarget, setDeleteWsUserTarget] = useState<string | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<{ userId: string; userName: string; currentStatus: string } | null>(null);
+  const queryClient = useQueryClient();
 
   const isLoading = loadingProfiles || loadingRoles || loadingWsUsers;
 
