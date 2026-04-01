@@ -311,7 +311,7 @@ export function AdminStartupsManager() {
       if (error) throw error;
       toast.success(t('invite.sentTo') + ' ' + startup.main_contact_email);
     } catch (err: any) {
-      logger.error('error', {}, 'Failed to send invite:', err);
+      logger.error('Failed to send invite', {}, err);
       toast.error(t('invite.error'));
     } finally {
       setSendingInviteFor(null);

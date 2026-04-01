@@ -46,7 +46,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
       if (error) throw error;
       setSuggestions(data);
     } catch (error: any) {
-      logger.error('error', {}, 'Error generating suggestions:', error);
+      logger.error('Error generating suggestions', {}, error);
       setAiError(true);
       toast.error(error.message || t('sessions.aiSuggestionsFailed'));
     } finally {

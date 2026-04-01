@@ -57,7 +57,7 @@ export function useGenerateTemplateCoach() {
       toast.success(t('templates.aiCoachComplete', 'AI Coach analysis complete'));
     },
     onError: (error: Error) => {
-      logger.error('error', {}, '[useGenerateTemplateCoach] Error:', error);
+      logger.error('[useGenerateTemplateCoach] Error', {}, error);
       if (error.message.includes('429') || error.message.includes('rate limit')) {
         toast.error(t('sessions.rateLimitError', 'Rate limit exceeded. Please try again later.'));
       } else if (error.message.includes('402') || error.message.includes('credits')) {

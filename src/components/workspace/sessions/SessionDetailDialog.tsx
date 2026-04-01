@@ -79,7 +79,7 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
         source: 'voice'
       });
     } catch (error) {
-      logger.error('error', {}, 'Failed to save transcript:', error);
+      logger.error('Failed to save transcript', {}, error);
     }
   };
 
@@ -132,13 +132,13 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
       });
 
       if (error) {
-        logger.error('error', {}, 'Failed to resend invites:', error);
+        logger.error('Failed to resend invites', {}, error);
         toast.error('Failed to resend invites');
       } else {
         toast.success(`Sent ${recipientEmails.length} invite(s)`);
       }
     } catch (error) {
-      logger.error('error', {}, 'Resend error:', error);
+      logger.error('Resend error', {}, error);
       toast.error('Failed to resend invites');
     } finally {
       setIsResending(false);

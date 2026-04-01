@@ -132,7 +132,7 @@ export function AdminAnnouncementsManager() {
         });
 
         if (emailError) {
-          logger.error('error', {}, 'Email send error:', emailError);
+          logger.error('Email send error', {}, emailError);
           // Don't throw - announcement was created, just email failed
           toast.warning(t('admin.announcements.emailFailed'));
         }

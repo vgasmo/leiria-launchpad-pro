@@ -237,11 +237,11 @@ export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateS
             });
 
             if (error) {
-              logger.error('error', {}, 'Failed to send invites:', error);
+              logger.error('Failed to send invites', {}, error);
             }
           }
         } catch (emailError) {
-          logger.error('error', {}, 'Email sending error:', emailError);
+          logger.error('Email sending error', {}, emailError);
         }
       }
 

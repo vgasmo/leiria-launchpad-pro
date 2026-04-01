@@ -54,7 +54,7 @@ export function ChaseActionsButton({
         description: t('triage.chaseSuccessDescription', 'The founder has been notified about overdue actions'),
       });
     } catch (error) {
-      logger.error('error', {}, 'Failed to send chase message:', error);
+      logger.error('Failed to send chase message', {}, error);
       toast({
         title: t('common.error', 'Error'),
         description: t('triage.chaseError', 'Failed to send follow-up message'),

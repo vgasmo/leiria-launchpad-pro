@@ -136,7 +136,7 @@ export function FollowupAutopilotCard({
 
       toast.success(t('followup.sent'));
     } catch (error) {
-      logger.error('error', {}, 'Failed to send follow-up:', error);
+      logger.error('Failed to send follow-up', {}, error);
       toast.error(t('followup.error'));
     } finally {
       setSending(false);

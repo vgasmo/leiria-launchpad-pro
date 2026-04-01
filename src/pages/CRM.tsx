@@ -170,7 +170,7 @@ export default function CRM() {
             .single();
           
           if (error || !data) {
-            logger.error('error', {}, 'Failed to load funnel item:', error);
+            logger.error('Failed to load funnel item', {}, error);
             toast.error(t('crm.itemNotFound'));
             searchParams.delete('open');
             setSearchParams(searchParams, { replace: true });
@@ -203,7 +203,7 @@ export default function CRM() {
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
         } catch (err) {
-          logger.error('error', {}, 'Error fetching funnel item:', err);
+          logger.error('Error fetching funnel item', {}, err);
           toast.error(t('crm.itemNotFound'));
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });

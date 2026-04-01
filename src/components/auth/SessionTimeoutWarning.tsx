@@ -39,12 +39,12 @@ export function SessionTimeoutWarning({
     try {
       const { error } = await supabase.auth.refreshSession();
       if (error) {
-        logger.error('error', {}, 'Session refresh failed:', error);
+        logger.error('Session refresh failed', {}, error);
         return false;
       }
       return true;
     } catch (err) {
-      logger.error('error', {}, 'Session refresh error:', err);
+      logger.error('Session refresh error', {}, err);
       return false;
     }
   }, []);

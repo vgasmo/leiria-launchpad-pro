@@ -97,7 +97,7 @@ export function StaffMentorAssignDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      logger.error('error', {}, 'Assignment error:', error);
+      logger.error('Assignment error', {}, error);
       toast.error(t('common.error'));
     },
   });

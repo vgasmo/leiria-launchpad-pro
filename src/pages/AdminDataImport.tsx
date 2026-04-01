@@ -499,7 +499,7 @@ export default function AdminDataImport() {
       toast.success(t('dataImport.fileParsed', 'File parsed successfully: {{count}} rows', { count: rows.length }));
       setStep(2);
     } catch (error) {
-      logger.error('error', {}, 'Error parsing file:', error);
+      logger.error('Error parsing file', {}, error);
       toast.error(t('dataImport.parseError', 'Error parsing file. Please check the format.'));
     } finally {
       setIsProcessing(false);
@@ -609,7 +609,7 @@ export default function AdminDataImport() {
       toast.success(t('dataImport.dryRunComplete', 'Dry run complete'));
       setStep(3);
     } catch (error) {
-      logger.error('error', {}, 'Dry run error:', error);
+      logger.error('Dry run error', {}, error);
       toast.error(t('dataImport.dryRunError', 'Error during dry run'));
     } finally {
       setIsProcessing(false);
@@ -879,7 +879,7 @@ export default function AdminDataImport() {
       toast.success(t('dataImport.importComplete', 'Import complete: {{inserted}} inserted, {{updated}} updated', { inserted, updated }));
       setStep(4);
     } catch (error) {
-      logger.error('error', {}, 'Import error:', error);
+      logger.error('Import error', {}, error);
       toast.error(t('dataImport.importError', 'Error during import'));
     } finally {
       setIsProcessing(false);

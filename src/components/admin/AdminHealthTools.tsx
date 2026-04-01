@@ -75,7 +75,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
       );
       toast.success(`Recalculado: ${result.updatedWorkspaces} workspaces, ${result.historySnapshots} snapshots, ${result.alertsCreated} alertas`);
     } catch (error) {
-      logger.error('error', {}, 'Recompute error:', error);
+      logger.error('Recompute error', {}, error);
       toast.error('Erro ao recalcular health scores');
     } finally {
       setRecomputeLoading(false);
@@ -101,7 +101,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
         toast.success('Relatório gerado com sucesso');
       }
     } catch (error) {
-      logger.error('error', {}, 'Export error:', error);
+      logger.error('Export error', {}, error);
       toast.error('Erro ao gerar relatório');
     } finally {
       setExportLoading(false);
@@ -118,7 +118,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
       await applyTemplate.mutateAsync({ templateId: selectedTemplate, programId });
       toast.success('Template aplicado com sucesso');
     } catch (error) {
-      logger.error('error', {}, 'Apply template error:', error);
+      logger.error('Apply template error', {}, error);
       toast.error('Erro ao aplicar template');
     }
   };
@@ -141,7 +141,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
       setNewTemplateName('');
       setNewTemplateDesc('');
     } catch (error) {
-      logger.error('error', {}, 'Save template error:', error);
+      logger.error('Save template error', {}, error);
       toast.error('Erro ao criar template');
     }
   };

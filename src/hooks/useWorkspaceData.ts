@@ -181,7 +181,7 @@ export function useStages(programId: string | undefined) {
       ];
 
       if (error) {
-        logger.error('error', {}, '[useStages] Error:', error);
+        logger.error('[useStages] Error', {}, error);
         return DEFAULT_STAGES;
       }
       

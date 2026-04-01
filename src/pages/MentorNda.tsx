@@ -74,7 +74,7 @@ export default function MentorNda() {
         
         setHasAccepted(!!data);
       } catch (error) {
-        logger.error('error', {}, 'Error checking NDA status:', error);
+        logger.error('Error checking NDA status', {}, error);
       } finally {
         setCheckingNda(false);
       }
@@ -109,7 +109,7 @@ export default function MentorNda() {
       toast.success(t('nda.acceptedSuccess'));
       navigate('/my-workspaces');
     } catch (error: any) {
-      logger.error('error', {}, 'NDA submission error:', error);
+      logger.error('NDA submission error', {}, error);
       toast.error(error.message || t('nda.failedToAccept'));
     } finally {
       setIsSubmitting(false);

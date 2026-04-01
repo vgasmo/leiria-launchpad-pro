@@ -11,7 +11,7 @@ export function useGraphConfigStatus() {
     queryFn: async (): Promise<boolean> => {
       const { data, error } = await invokeWithAuth('graph-config-status', {});
       if (error) {
-        logger.error('error', {}, '[useGraphConfigStatus] Error:', error);
+        logger.error('[useGraphConfigStatus] Error', {}, error);
         return false;
       }
       return data?.enabled ?? false;

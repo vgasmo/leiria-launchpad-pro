@@ -115,7 +115,7 @@ export function useNpsFeedback() {
 
       return true;
     } catch (error) {
-      logger.error('error', {}, 'Failed to submit NPS feedback:', error);
+      logger.error('Failed to submit NPS feedback', {}, error);
       return false;
     }
   }, [user, profile, npsState]);
