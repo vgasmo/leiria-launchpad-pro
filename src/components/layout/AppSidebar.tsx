@@ -31,6 +31,9 @@ import {
   BookOpenCheck,
   HelpCircle,
   FolderOpen,
+  Globe2,
+  DollarSign,
+  Clock,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
