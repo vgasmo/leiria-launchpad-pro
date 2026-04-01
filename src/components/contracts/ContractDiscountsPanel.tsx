@@ -162,11 +162,14 @@ export function ContractDiscountsPanel({ contractId, monthlyFee, currency = 'EUR
             <Percent className="h-4 w-4 text-amber-600" />
             {t('discounts.title')}
           </span>
-          {isStaff && !showAddForm && (
+          {isAdmin && !showAddForm && (
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => setShowAddForm(true)}>
               <Plus className="h-3 w-3" />
               {t('discounts.add')}
             </Button>
+          )}
+          {isStaff && !isAdmin && !showAddForm && (
+            <span className="text-[10px] text-muted-foreground">{t('contracts.discountApprovalRequired', { defaultValue: 'Apenas admin pode adicionar descontos' })}</span>
           )}
         </CardTitle>
       </CardHeader>
