@@ -30,6 +30,7 @@ interface AuthContextType {
   isBackoffice: boolean;
   isStaff: boolean;
   isMentor: boolean;
+  isExternalMentor: boolean;
   isFounder: boolean;
   isAccountApproved: boolean;
   isAccountPending: boolean;
