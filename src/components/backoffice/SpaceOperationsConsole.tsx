@@ -201,18 +201,18 @@ function StatusBadge({ status, type }: { status: string | null; type: 'room' | '
   };
 
   const labels: Record<string, string> = {
-    available: 'Disponível',
-    occupied: 'Ocupada',
-    maintenance: 'Manutenção',
-    reserved: 'Reservada',
-    active: 'Ativo',
-    claimed: 'Associado',
-    pending: 'Pendente',
-    imported_unclaimed: 'Importado',
-    blocked: 'Bloqueado',
-    draft: 'Rascunho',
-    pending_signature: 'Aguarda Assinatura',
-    suspended: 'Suspenso',
+    available: t('spaces.available', 'Disponível'),
+    occupied: t('spaces.occupied', 'Ocupada'),
+    maintenance: t('spaces.maintenance', 'Manutenção'),
+    reserved: t('spaces.reserved', 'Reservada'),
+    active: t('spaces.statusActive', 'Ativo'),
+    claimed: t('spaces.statusClaimed', 'Associado'),
+    pending: t('spaces.statusPending', 'Pendente'),
+    imported_unclaimed: t('spaces.statusImported', 'Importado'),
+    blocked: t('spaces.statusBlocked', 'Bloqueado'),
+    draft: t('spaces.statusDraft', 'Rascunho'),
+    pending_signature: t('spaces.statusPendingSignature', 'Aguarda Assinatura'),
+    suspended: t('spaces.statusSuspended', 'Suspenso'),
   };
 
   return (
