@@ -669,7 +669,7 @@ export function PendingApprovalsManager() {
       <Dialog open={!!assignClaimTarget} onOpenChange={(open) => !open && resetClaimDialog()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Associar Founder a Workspace</DialogTitle>
+            <DialogTitle>{t('admin.assignFounderTitle', 'Associar Founder a Workspace')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="text-sm">
