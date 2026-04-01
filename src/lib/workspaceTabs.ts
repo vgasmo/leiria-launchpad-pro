@@ -41,7 +41,7 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   { id: 'governance', labelKey: 'workspace.governance',   icon: Shield,          primary: false, visibleTo: ['all'], minStage: 'validation' },
   { id: 'team',       labelKey: 'workspace.team',         icon: Users,           primary: false, visibleTo: ['founder'], requiresStartup: true },
   { id: 'funding',    labelKey: 'workspace.funding',      icon: DollarSign,      primary: false, visibleTo: ['founder'], requiresStartup: true, minStage: 'mvp' },
-  { id: 'notes',      labelKey: 'workspace.notesAndTasks', icon: StickyNote,     primary: false, visibleTo: ['admin', 'consultor', 'mentor'] },
+  { id: 'notes',      labelKey: 'workspace.notesAndTasks', icon: StickyNote,     primary: false, visibleTo: ['admin', 'consultor', 'mentor', 'backoffice'] },
   { id: 'time',       labelKey: 'workspace.time',         icon: Clock,           primary: false, visibleTo: ['admin', 'consultor'] },
   { id: 'settings',   labelKey: 'workspace.settings',     icon: Settings,        primary: false, visibleTo: ['all'] },
 ];
