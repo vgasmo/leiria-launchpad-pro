@@ -205,7 +205,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
 
         {/* Templates Section */}
         <div className="space-y-3 p-3 rounded-lg bg-muted/50">
-          <p className="text-sm font-medium">Templates de Health Model</p>
+          <p className="text-sm font-medium">{t('admin.healthTemplates', 'Templates de Health Model')}</p>
           
           <div className="flex gap-2">
             <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
