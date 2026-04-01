@@ -194,8 +194,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
           <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
             <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
-              <strong>Client Secret</strong> is configured server-side as an environment variable (MS_GRAPH_CLIENT_SECRET) 
-              and is never stored in the database. Contact your administrator to configure it.
+              <strong>Client Secret</strong> {t('settings.clientSecretNote', 'é configurado server-side como variável de ambiente (MS_GRAPH_CLIENT_SECRET) e nunca é armazenado na base de dados. Contacte o administrador para configurar.')}
             </AlertDescription>
           </Alert>
 
