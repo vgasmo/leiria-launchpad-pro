@@ -749,7 +749,7 @@ export function PendingApprovalsManager() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Fase</Label>
+                    <Label>{t('common.stage', 'Fase')}</Label>
                     <Select value={newStage} onValueChange={setNewStage}>
                       <SelectTrigger>
                         <SelectValue />
