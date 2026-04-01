@@ -88,7 +88,7 @@ export default function SearchPage() {
 
   const handleSaveSearch = () => {
     if (!searchName.trim()) {
-      toast.error('Please enter a name');
+      toast.error(t('search.enterName', 'Introduza um nome'));
       return;
     }
     saveSearch.mutate({
@@ -96,7 +96,7 @@ export default function SearchPage() {
       filters: searchFilters,
     }, {
       onSuccess: () => {
-        toast.success('Search saved');
+        toast.success(t('search.saved', 'Pesquisa guardada'));
         setSaveDialogOpen(false);
         setSearchName('');
       },
