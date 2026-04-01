@@ -45,10 +45,10 @@ export function AdminFeatureFlagsManager() {
       { id: flagId, enabled: !currentEnabled },
       {
         onSuccess: () => {
-          toast.success(`Feature flag ${!currentEnabled ? 'enabled' : 'disabled'}`);
+          toast.success(t('admin.featureFlags.flagToggled', { state: !currentEnabled ? t('common.enabled', 'ativada') : t('common.disabled', 'desativada'), defaultValue: `Feature flag ${!currentEnabled ? 'ativada' : 'desativada'}` }));
         },
         onError: (error) => {
-          toast.error('Failed to update flag', { description: error.message });
+          toast.error(t('admin.flagUpdateFailed', 'Erro ao atualizar flag'), { description: error.message });
         },
       }
     );
