@@ -189,6 +189,11 @@ export function FounderDashboard({
         <FounderReadinessStrip workspace={workspace} />
       </WidgetErrorBoundary>
 
+      {/* ★ PROGRESS RINGS — Visual health at a glance ★ */}
+      <WidgetErrorBoundary name="ProgressRings">
+        <FounderProgressRings workspaceId={workspace.id} />
+      </WidgetErrorBoundary>
+
       {/* ★ PENDING CONTRACT — High-priority CTA for unsigned contracts ★ */}
       <WidgetErrorBoundary name="PendingContract">
         <PendingContractBanner workspaceId={workspace.id} />
