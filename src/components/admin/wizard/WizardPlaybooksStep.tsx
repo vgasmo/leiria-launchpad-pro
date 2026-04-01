@@ -137,7 +137,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                 <CardContent className="pt-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Playbook Title</Label>
+                      <Label>{t('wizard.playbooks.title')}</Label>
                       <Input
                         value={playbook.title}
                         onChange={(e) =>
