@@ -112,6 +112,25 @@ export function AdminUsersManager() {
     setDeleteWsUserTarget(null);
   };
 
+  const handleSuspendUser = async () => {
+    if (!suspendTarget) return;
+    const newStatus = suspendTarget.currentStatus === 'suspended' ? 'approved' : 'suspended';
+    const { error } = await supabase
+      .from('profiles')
+      .update({ account_status: newStatus })
+      .eq('id', suspendTarget.userId);
+    if (error) {
+      toast.error(t('admin.userManagement.suspendError', { defaultValue: 'Erro ao alterar estado da conta' }));
+    } else {
+      toast.success(newStatus === 'suspended' 
+        ? t('admin.userManagement.suspended', { defaultValue: 'Conta suspensa' })
+        : t('admin.userManagement.reactivated', { defaultValue: 'Conta reativada' })
+      );
+      queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+    }
+    setSuspendTarget(null);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
