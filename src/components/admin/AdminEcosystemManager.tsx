@@ -299,7 +299,7 @@ export function AdminEcosystemManager() {
                 {filteredData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No startups found
+                      {t('common.noStartupsFound', 'Sem startups encontradas')}
                     </TableCell>
                   </TableRow>
                 ) : (
