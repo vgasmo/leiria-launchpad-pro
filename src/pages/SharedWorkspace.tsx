@@ -227,7 +227,7 @@ export default function SharedWorkspace() {
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 {updates[0].content_json?.highlights && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">Highlights</h4>
+                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">{t('shared.highlights', 'Destaques')}</h4>
                     <ul className="space-y-1">
                       {updates[0].content_json.highlights.map((h: string, i: number) => (
                         <li key={i} className="text-sm">{h}</li>
