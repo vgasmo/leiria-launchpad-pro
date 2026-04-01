@@ -132,7 +132,7 @@ export function useSessionPrep(sessionId: string | undefined, workspaceId: strin
       ]);
 
       if (sessionResult.error || !sessionResult.data) {
-        logger.error('error', {}, 'Failed to fetch session:', sessionResult.error);
+        logger.error('Failed to fetch session', {}, sessionResult.error);
         return null;
       }
 
