@@ -269,9 +269,9 @@ export function AdminEcosystemManager() {
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span>{filteredData.length} startups</span>
           <span>•</span>
-          <span>{filteredData.filter(d => d.status === 'active').length} active</span>
+          <span>{filteredData.filter(d => d.status === 'active').length} {t('common.active', 'ativos')}</span>
           <span>•</span>
-          <span>{filteredData.filter(d => healthScoreNum(d.health_score) < 50 && d.health_score !== null).length} need attention</span>
+          <span>{filteredData.filter(d => healthScoreNum(d.health_score) < 50 && d.health_score !== null).length} {t('common.needAttention', 'precisam de atenção')}</span>
         </div>
 
         {/* Table */}
