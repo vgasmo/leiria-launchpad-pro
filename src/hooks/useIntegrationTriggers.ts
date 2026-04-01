@@ -104,7 +104,7 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
       settings_source: data?.settings_source,
     };
   } catch (err) {
-    logger.warn('teams_notify_failed', {}, err);
+    logger.warn('teams_notify_failed', { error: String(err) });
     return { success: false, reason: 'Network error' };
   }
 }

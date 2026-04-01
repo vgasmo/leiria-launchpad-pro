@@ -179,7 +179,7 @@ export function useDeleteDocument() {
           .remove([document.file_path]);
         
         if (storageError) {
-          logger.warn('storage_delete_failed', {}, storageError);
+          logger.warn('storage_delete_failed', { error: String(storageError) });
         }
       }
 
