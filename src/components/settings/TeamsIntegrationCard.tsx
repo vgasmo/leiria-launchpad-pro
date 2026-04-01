@@ -68,7 +68,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
         enabled,
         ...(webhookUrl && { webhook_url: webhookUrl })
       });
-      toast.success(enabled ? 'Teams integration enabled' : 'Teams integration disabled');
+      toast.success(enabled ? t('integrations.teamsEnabled', 'Teams integration enabled') : t('integrations.teamsDisabled', 'Teams integration disabled'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to update settings');
     }
