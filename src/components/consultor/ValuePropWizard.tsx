@@ -308,7 +308,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         {currentStep === 4 && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>What alternatives do they use today?</Label>
+              <Label>{t('vp.alternatives', 'Que alternativas usam hoje?')}</Label>
               <Textarea
                 value={fields.alternatives}
                 onChange={(e) => updateField('alternatives', e.target.value)}
@@ -317,7 +317,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               />
             </div>
             <div className="space-y-2">
-              <Label>Why do these alternatives fail?</Label>
+              <Label>{t('vp.whyAlternativesFail', 'Porque falham essas alternativas?')}</Label>
               <Textarea
                 value={fields.why_alternatives_fail}
                 onChange={(e) => updateField('why_alternatives_fail', e.target.value)}
