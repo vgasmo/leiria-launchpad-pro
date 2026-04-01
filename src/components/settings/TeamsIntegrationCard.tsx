@@ -94,7 +94,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       await updateSettings.mutateAsync({ webhook_url: webhookUrl });
       toast.success(t('integrations.webhookUrlSaved'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save webhook');
+      toast.error(error.message || t('settings.failedToSaveWebhook', 'Erro ao guardar webhook'));
     }
   };
 
