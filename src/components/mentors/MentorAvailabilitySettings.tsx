@@ -84,7 +84,7 @@ export function MentorAvailabilitySettings() {
     // Validate slots
     for (const slot of slots) {
       if (slot.start_time >= slot.end_time) {
-        toast.error('Start time must be before end time');
+        toast.error(t('mentor.startBeforeEnd', 'A hora de início deve ser anterior ao fim'));
         return;
       }
     }
