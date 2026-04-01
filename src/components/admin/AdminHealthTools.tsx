@@ -261,7 +261,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="desc">Descrição (opcional)</Label>
+                    <Label htmlFor="desc">{t('common.descriptionOptional', 'Descrição (opcional)')}</Label>
                     <Textarea
                       id="desc"
                       value={newTemplateDesc}
