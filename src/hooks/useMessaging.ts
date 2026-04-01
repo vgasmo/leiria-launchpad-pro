@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
 
 export interface Conversation {
   id: string;
