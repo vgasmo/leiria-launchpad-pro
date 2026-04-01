@@ -362,7 +362,7 @@ export function SpaceWaitingListTab() {
                           variant="secondary"
                           className={cn('text-white', typeConfig?.color)}
                         >
-                          {typeConfig?.label || item.request_type}
+                          {typeConfig ? t(typeConfig.labelKey) : item.request_type}
                         </Badge>
                       </TableCell>
                       <TableCell>
