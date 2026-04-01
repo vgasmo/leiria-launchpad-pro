@@ -92,7 +92,7 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
     });
 
     if (error) {
-      console.warn('[IntegrationTrigger] Teams notify error (non-blocking):', error.message);
+      logger.warn('teams_notify_error', { message: error.message });
       return { success: false, reason: error.message };
     }
 
