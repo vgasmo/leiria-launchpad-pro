@@ -56,6 +56,7 @@ export function SessionWorkflowCard({
   onScheduleSession,
   onSendFollowup,
 }: SessionWorkflowCardProps) {
+  const { t } = useTranslation();
   const { data: workflowData } = useSessionWorkflow(sessionId);
   const updateSessionWorkflow = useUpdateSessionWorkflow();
   const [isUpdating, setIsUpdating] = useState<string | null>(null);

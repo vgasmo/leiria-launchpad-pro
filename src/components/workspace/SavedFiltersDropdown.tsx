@@ -182,10 +182,10 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button onClick={handleSave} disabled={saveFilter.isPending}>
-              {saveFilter.isPending ? 'Saving...' : 'Save Filter'}
+              {saveFilter.isPending ? t('common.saving', 'Saving...') : t('filters.saveFilter', 'Save Filter')}
             </Button>
           </DialogFooter>
         </DialogContent>
