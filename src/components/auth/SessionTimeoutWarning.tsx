@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 interface SessionTimeoutWarningProps {
   warningTimeMs?: number; // Time before timeout to show warning (default: 10 minutes)

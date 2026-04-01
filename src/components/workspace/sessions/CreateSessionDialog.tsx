@@ -8,7 +8,7 @@ import {
   Calendar,
   AlertTriangle,
   Mail,
-  Checkbox as CheckboxIcon,
+  
   Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

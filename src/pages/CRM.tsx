@@ -45,6 +45,7 @@ import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { logger } from '@/lib/logger';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
   new: 'bg-slate-500',

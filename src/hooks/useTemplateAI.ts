@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import i18n from '@/i18n';
+import { logger } from '@/lib/logger';
 
 export interface AICoachFeedback {
   summary: string;

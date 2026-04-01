@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useBuildings } from '@/hooks/useBackoffice';
+import { logger } from '@/lib/logger';
 
 type AnnouncementCategory = 'mail' | 'package' | 'general' | 'urgent';
 

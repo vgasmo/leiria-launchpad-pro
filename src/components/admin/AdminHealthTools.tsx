@@ -31,6 +31,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface AdminHealthToolsProps {
   programId?: string;

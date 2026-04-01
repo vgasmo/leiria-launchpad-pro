@@ -87,6 +87,7 @@ import { QualityGateCard } from '@/components/consultor/QualityGateCard';
 import { useAddTranscript } from '@/hooks/useSessionArtifacts';
 import { SessionSyncStatus } from '@/components/sessions/SessionSyncStatus';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
+import { logger } from '@/lib/logger';
 
 
 interface SessionsTabProps {

@@ -17,6 +17,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 import { EnrollmentModeIndicator } from '@/components/auth/EnrollmentModeIndicator';
 import startupLeiriaLogo from '@/assets/startup-leiria.svg';
+import { logger } from '@/lib/logger';
 
 export default function Login() {
   const { t } = useTranslation();

@@ -20,6 +20,7 @@ import { NotificationSettings } from '@/components/settings/NotificationSettings
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { MentorNdaStatus } from '@/components/mentors/MentorNdaStatus';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
+import { logger } from '@/lib/logger';
 
 export default function Settings() {
   const { t } = useTranslation();

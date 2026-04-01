@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 const NPS_STORAGE_KEY = 'nps_feedback_state';
 const DAYS_BEFORE_PROMPT = 7;

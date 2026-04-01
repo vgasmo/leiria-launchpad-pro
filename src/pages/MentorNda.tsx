@@ -12,6 +12,7 @@ import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import startupLeiriaLogo from '@/assets/startup-leiria.svg';
+import { logger } from '@/lib/logger';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
 const NDA_FORUM = 'Leiria';

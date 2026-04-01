@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook to check if MS Graph client secret is configured server-side.

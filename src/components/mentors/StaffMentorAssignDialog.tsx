@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { MentorRecommendationWidget } from './MentorRecommendationWidget';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface StaffMentorAssignDialogProps {
   open: boolean;

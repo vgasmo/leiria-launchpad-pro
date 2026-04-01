@@ -6,6 +6,7 @@ import { useLogActivity } from '@/hooks/useActivityLog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import {
+import { logger } from '@/lib/logger';
   Tooltip,
   TooltipContent,
   TooltipProvider,
