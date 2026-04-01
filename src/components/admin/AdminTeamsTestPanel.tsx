@@ -240,12 +240,12 @@ export function AdminTeamsTestPanel() {
             <div className="text-sm text-muted-foreground space-y-1">
               {lastResult.settings_source && (
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Settings used:</span>
+                  <span className="text-muted-foreground">{t('admin.teams.settingsUsed', 'Definições usadas')}:</span>
                   <Badge variant="outline" className="text-xs">
                     {lastResult.settings_source === 'global_fallback' ? (
-                      <><Globe className="h-3 w-3 mr-1" /> Global Fallback</>
+                      <><Globe className="h-3 w-3 mr-1" /> {t('admin.teams.globalFallback', 'Global Fallback')}</>
                     ) : lastResult.settings_source === 'workspace' ? (
-                      <><Building2 className="h-3 w-3 mr-1" /> Workspace Specific</>
+                      <><Building2 className="h-3 w-3 mr-1" /> {t('admin.teams.workspaceSpecific', 'Específico do Workspace')}</>
                     ) : (
                       lastResult.settings_source
                     )}
