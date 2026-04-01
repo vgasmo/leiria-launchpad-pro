@@ -2767,6 +2767,13 @@
       "title": "Bem-vindo à plataforma"
     },
     "journeyMap": "Your Journey",
+    "ring": {
+      "actions": "Ações",
+      "kpis": "KPIs",
+      "milestones": "Marcos"
+    },
+    "firstAction": "🎉 Primeira ação concluída! O hábito de execução começa aqui.",
+    "firstDocument": "📁 Primeiro documento! A tua data room está a crescer.",
     "multiWorkspace": {
       "title": "Tem {{count}} startups associadas"
     },
