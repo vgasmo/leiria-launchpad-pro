@@ -420,7 +420,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <UserCheck className="h-4 w-4" />
-            Contas de Utilizador Pendentes ({pendingUsers!.length})
+            {t('admin.pendingUserAccounts', 'Contas de Utilizador Pendentes')} ({pendingUsers!.length})
           </h3>
           {pendingUsers!.map((user) => {
             const initials = user.full_name
