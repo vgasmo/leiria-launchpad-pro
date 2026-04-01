@@ -160,7 +160,7 @@ function AppRoutes() {
         <Route path="/help" element={<ProtectedRoute><HelpGlossary /></ProtectedRoute>} />
         <Route path="/guide" element={<ProtectedRoute><QuickGuide /></ProtectedRoute>} />
         <Route path="/crm" element={<ProtectedRoute staffOnly><CRM /></ProtectedRoute>} />
-        <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
+        <Route path="/ecosystem" element={<ProtectedRoute staffOnly><Ecosystem /></ProtectedRoute>} />
         <Route path="/admin/crm-diagnostics" element={<ProtectedRoute staffOnly><CrmDiagnostics /></ProtectedRoute>} />
         <Route path="/staff-cockpit" element={<ProtectedRoute staffOnly><StaffCockpit /></ProtectedRoute>} />
         <Route path="/system-settings" element={<ProtectedRoute adminOnly><SystemSettings /></ProtectedRoute>} />

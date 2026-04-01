@@ -82,6 +82,7 @@ export function getVisibleTabs(
     if (tab.visibleTo.includes('admin') && roles.isAdmin) return true;
     if (tab.visibleTo.includes('consultor') && roles.isConsultor) return true;
     if (tab.visibleTo.includes('mentor') && roles.isMentor) return true;
+    if (tab.visibleTo.includes('backoffice') && roles.isBackoffice) return true;
     
     return false;
   });
