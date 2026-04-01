@@ -31,21 +31,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow } from 'date-fns';
 
-const REQUEST_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  office: { label: 'Private Office', color: 'bg-blue-500' },
-  desk: { label: 'Dedicated Desk', color: 'bg-green-500' },
-  hotdesk: { label: 'Hot Desk', color: 'bg-yellow-500' },
-  virtual: { label: 'Virtual Incubation', color: 'bg-purple-500' },
-  meeting_room: { label: 'Meeting Room', color: 'bg-orange-500' },
+const REQUEST_TYPE_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  office: { labelKey: 'waitingList.privateOffice', color: 'bg-blue-500' },
+  desk: { labelKey: 'waitingList.dedicatedDesk', color: 'bg-green-500' },
+  hotdesk: { labelKey: 'waitingList.hotDesk', color: 'bg-yellow-500' },
+  virtual: { labelKey: 'waitingList.virtualIncubation', color: 'bg-purple-500' },
+  meeting_room: { labelKey: 'waitingList.meetingRoom', color: 'bg-orange-500' },
 };
 
-const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; color: string }> = {
-  waiting: { label: 'Waiting', icon: Clock, color: 'text-yellow-600' },
-  offered: { label: 'Offered', icon: ArrowRight, color: 'text-blue-600' },
-  accepted: { label: 'Accepted', icon: CheckCircle, color: 'text-green-600' },
-  declined: { label: 'Declined', icon: XCircle, color: 'text-red-600' },
-  fulfilled: { label: 'Fulfilled', icon: CheckCircle, color: 'text-green-600' },
-  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-muted-foreground' },
+const STATUS_CONFIG: Record<string, { labelKey: string; icon: typeof Clock; color: string }> = {
+  waiting: { labelKey: 'waitingList.statusWaiting', icon: Clock, color: 'text-yellow-600' },
+  offered: { labelKey: 'waitingList.statusOffered', icon: ArrowRight, color: 'text-blue-600' },
+  accepted: { labelKey: 'waitingList.statusAccepted', icon: CheckCircle, color: 'text-green-600' },
+  declined: { labelKey: 'waitingList.statusDeclined', icon: XCircle, color: 'text-red-600' },
+  fulfilled: { labelKey: 'waitingList.statusFulfilled', icon: CheckCircle, color: 'text-green-600' },
+  cancelled: { labelKey: 'waitingList.statusCancelled', icon: XCircle, color: 'text-muted-foreground' },
 };
 
 export function SpaceWaitingListTab() {
@@ -133,7 +133,7 @@ export function SpaceWaitingListTab() {
             <SelectContent>
               <SelectItem value="all">{t('admin.backoffice.allStatuses')}</SelectItem>
               {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                <SelectItem key={key} value={key}>{t(config.labelKey)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -160,8 +160,8 @@ export function SpaceWaitingListTab() {
                   <Label>{t('admin.backoffice.requestFor', 'Request For')}</Label>
                   <Tabs defaultValue="startup" className="w-full">
                     <TabsList className="w-full">
-                      <TabsTrigger value="startup" className="flex-1">Startup</TabsTrigger>
-                      <TabsTrigger value="lead" className="flex-1">Lead/Prospect</TabsTrigger>
+                      <TabsTrigger value="startup" className="flex-1">{t('waitingList.startup', 'Startup')}</TabsTrigger>
+                      <TabsTrigger value="lead" className="flex-1">{t('waitingList.leadProspect', 'Lead/Prospect')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="startup" className="mt-2">
                       <Select name="workspace_id">
@@ -205,7 +205,7 @@ export function SpaceWaitingListTab() {
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(REQUEST_TYPE_CONFIG).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                          <SelectItem key={key} value={key}>{t(config.labelKey)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -241,8 +241,8 @@ export function SpaceWaitingListTab() {
                     step={1}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Low</span>
-                    <span>High</span>
+                    <span>{t('priority.low', 'Low')}</span>
+                    <span>{t('priority.high', 'High')}</span>
                   </div>
                 </div>
 
@@ -273,7 +273,7 @@ export function SpaceWaitingListTab() {
               <Clock className="h-5 w-5 text-yellow-600" />
               <div>
                 <div className="text-2xl font-bold">{waitingCount}</div>
-                <p className="text-sm text-muted-foreground">Waiting</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.statusWaiting', 'Waiting')}</p>
               </div>
             </div>
           </CardContent>
@@ -284,7 +284,7 @@ export function SpaceWaitingListTab() {
               <Building2 className="h-5 w-5 text-green-600" />
               <div>
                 <div className="text-2xl font-bold">{availableRooms.length}</div>
-                <p className="text-sm text-muted-foreground">Available Rooms</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.availableRooms', 'Available Rooms')}</p>
               </div>
             </div>
           </CardContent>
@@ -297,7 +297,7 @@ export function SpaceWaitingListTab() {
                 <div className="text-2xl font-bold">
                   {waitingList?.filter(r => r.status === 'fulfilled').length || 0}
                 </div>
-                <p className="text-sm text-muted-foreground">Fulfilled</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.statusFulfilled', 'Fulfilled')}</p>
               </div>
             </div>
           </CardContent>
@@ -310,7 +310,7 @@ export function SpaceWaitingListTab() {
                 <div className="text-2xl font-bold">
                   {waitingList?.filter(r => r.priority >= 80 && r.status === 'waiting').length || 0}
                 </div>
-                <p className="text-sm text-muted-foreground">High Priority</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.highPriority', 'High Priority')}</p>
               </div>
             </div>
           </CardContent>
@@ -321,7 +321,7 @@ export function SpaceWaitingListTab() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {statusFilter === 'all' ? 'All Requests' : STATUS_CONFIG[statusFilter]?.label + ' Requests'}
+            {statusFilter === 'all' ? t('waitingList.allRequests', 'All Requests') : t(STATUS_CONFIG[statusFilter]?.labelKey) + ' ' + t('waitingList.requests', 'Requests')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -331,13 +331,13 @@ export function SpaceWaitingListTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Preference</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Requested</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('waitingList.organization', 'Organization')}</TableHead>
+                  <TableHead>{t('waitingList.type', 'Type')}</TableHead>
+                  <TableHead>{t('waitingList.preference', 'Preference')}</TableHead>
+                  <TableHead>{t('waitingList.priority', 'Priority')}</TableHead>
+                  <TableHead>{t('waitingList.requested', 'Requested')}</TableHead>
+                  <TableHead>{t('waitingList.status', 'Status')}</TableHead>
+                  <TableHead className="text-right">{t('common.actions', 'Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -353,7 +353,7 @@ export function SpaceWaitingListTab() {
                         {item.preferred_capacity && (
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            {item.preferred_capacity} people
+                            {item.preferred_capacity} {t('waitingList.people', 'people')}
                           </div>
                         )}
                       </TableCell>
@@ -362,11 +362,11 @@ export function SpaceWaitingListTab() {
                           variant="secondary"
                           className={cn('text-white', typeConfig?.color)}
                         >
-                          {typeConfig?.label || item.request_type}
+                          {typeConfig ? t(typeConfig.labelKey) : item.request_type}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {item.preferred_space?.name || 'Any'}
+                        {item.preferred_space?.name || t('waitingList.any', 'Any')}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -395,7 +395,7 @@ export function SpaceWaitingListTab() {
                       <TableCell>
                         <div className={cn('flex items-center gap-1', statusConfig?.color)}>
                           <StatusIcon className="h-4 w-4" />
-                          <span className="text-sm">{statusConfig?.label}</span>
+                          <span className="text-sm">{statusConfig ? t(statusConfig.labelKey) : item.status}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -466,8 +466,8 @@ export function SpaceWaitingListTab() {
               <div>
                 <span className="text-sm text-muted-foreground">Request:</span>
                 <span className="ml-2">
-                  {selectedRequest && REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.label}
-                  {selectedRequest?.preferred_capacity && ` for ${selectedRequest.preferred_capacity} people`}
+                  {selectedRequest && t(REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.labelKey || '')}
+                  {selectedRequest?.preferred_capacity && ` ${t('waitingList.forPeople', { count: selectedRequest.preferred_capacity, defaultValue: 'for {{count}} people' })}`}
                 </span>
               </div>
             </div>

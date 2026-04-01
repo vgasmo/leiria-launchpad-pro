@@ -86,6 +86,26 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   useEffect(() => {
     setLocalNextAction(null);
   }, [item?.id]);
+
+  // E1: Listen for lead-contracted events to suggest workspace creation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.itemId === item?.id) {
+        toast(t('crm.leadContracted', { name: detail.name, defaultValue: '{{name}} contratado! Criar workspace?' }), {
+          action: {
+            label: t('crm.createWorkspace', 'Criar Workspace'),
+            onClick: () => {
+              navigate(`/admin?tab=backoffice&subtab=contracts&action=create&funnel=${detail.itemId}&org=${encodeURIComponent(detail.name)}`);
+            }
+          },
+          duration: 10000,
+        });
+      }
+    };
+    window.addEventListener('crm:lead-contracted', handler);
+    return () => window.removeEventListener('crm:lead-contracted', handler);
+  }, [item?.id, t, navigate]);
   
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
@@ -668,10 +688,10 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                 if (result.emailSent) {
                   toast.success(t('crm.pedidoDeContrataçãoEnviadoPor'));
                 } else {
-                  toast.warning('Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.', {
+                  toast.warning(t('crm.intakeCreatedNoEmail', 'Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.'), {
                     duration: 8000,
                     action: {
-                      label: 'Reenviar',
+                      label: t('crm.resend', 'Reenviar'),
                       onClick: async () => {
                         try {
                           const { error } = await supabase.functions.invoke('send-intake-email', {

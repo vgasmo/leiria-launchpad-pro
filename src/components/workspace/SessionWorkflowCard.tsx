@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   CheckCircle2, 
   Circle, 
@@ -55,6 +56,7 @@ export function SessionWorkflowCard({
   onScheduleSession,
   onSendFollowup,
 }: SessionWorkflowCardProps) {
+  const { t } = useTranslation();
   const { data: workflowData } = useSessionWorkflow(sessionId);
   const updateSessionWorkflow = useUpdateSessionWorkflow();
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
@@ -118,7 +120,7 @@ export function SessionWorkflowCard({
         updates: { [itemId]: !currentValue },
       });
     } catch (error) {
-      toast.error('Failed to update checklist');
+      toast.error(t('sessions.checklistUpdateFailed', 'Failed to update checklist'));
     } finally {
       setIsUpdating(null);
     }

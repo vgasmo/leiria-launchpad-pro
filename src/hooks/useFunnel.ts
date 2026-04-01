@@ -196,8 +196,18 @@ export function useUpdateFunnelItem() {
       }
       toast.error(e.message);
     },
-    onSuccess: () => {
+    onSuccess: (_data, { id, ...updates }) => {
       toast.success(t('crm.updated'));
+      
+      // E1: Auto-suggest workspace creation when lead reaches "contracted"
+      if (updates.stage === 'contracted') {
+        const current = queryClient.getQueryData<FunnelItem[]>(['funnel-items'])?.find(i => i.id === id);
+        if (current && !current.linked_workspace_id) {
+          window.dispatchEvent(new CustomEvent('crm:lead-contracted', {
+            detail: { itemId: id, name: current.organization_name || current.contact_name || '' }
+          }));
+        }
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });

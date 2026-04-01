@@ -96,16 +96,16 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             <Bookmark className="h-4 w-4" />
-            Saved Filters
+            {t('filters.savedFilters', 'Saved Filters')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel>Saved Filters</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('filters.savedFilters', 'Saved Filters')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           
           {savedFilters?.length === 0 ? (
             <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-              No saved filters yet
+              {t('filters.noSavedFilters', 'No saved filters yet')}
             </div>
           ) : (
             savedFilters?.map((filter) => (
@@ -149,7 +149,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
             onClick={() => setShowSaveDialog(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Save Current Filters
+            {t('filters.saveCurrentFilters', 'Save Current Filters')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -157,16 +157,16 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Filter</DialogTitle>
+            <DialogTitle>{t('filters.saveFilter', 'Save Filter')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="filter-name">Filter Name</Label>
+              <Label htmlFor="filter-name">{t('filters.filterName', 'Filter Name')}</Label>
               <Input
                 id="filter-name"
                 value={filterName}
                 onChange={(e) => setFilterName(e.target.value)}
-                placeholder="e.g., High Priority Startups"
+                placeholder={t('filters.filterNamePlaceholder', 'e.g., High Priority Startups')}
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -176,16 +176,16 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
                 onCheckedChange={(checked) => setSetAsDefault(checked === true)}
               />
               <Label htmlFor="set-default" className="text-sm font-normal">
-                Set as default filter
+                {t('filters.setAsDefault', 'Set as default filter')}
               </Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button onClick={handleSave} disabled={saveFilter.isPending}>
-              {saveFilter.isPending ? 'Saving...' : 'Save Filter'}
+              {saveFilter.isPending ? t('common.saving', 'Saving...') : t('filters.saveFilter', 'Save Filter')}
             </Button>
           </DialogFooter>
         </DialogContent>

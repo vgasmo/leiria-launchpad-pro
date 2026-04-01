@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Activity } from 'lucide-react';
+import { Mail, Activity, Pencil, Phone } from 'lucide-react';
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -14,6 +16,7 @@ import { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { getFunnelStageLabel } from '@/lib/stageLabels';
 import { getRelationshipStatus, getRelationshipStatusConfig } from '@/lib/crmUtils';
 import { cn } from '@/lib/utils';
+import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 
 const STAGE_OPTIONS: FunnelStage[] = [
   'new', 'first_contact_booked', 'met', 'qualified', 'proposal_sent',
@@ -52,11 +55,20 @@ interface RecordDrawerHeaderProps {
 export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDrawerHeaderProps) {
   const { t } = useTranslation();
   const [localStage, setLocalStage] = useState<FunnelStage>(item.stage);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.organization_name || item.contact_name || '');
+  const [editEmail, setEditEmail] = useState(item.contact_email || '');
+  const [editPhone, setEditPhone] = useState(item.contact_phone || '');
+  const updateItem = useUpdateFunnelItem();
 
-  // Sync local state when the prop item changes (e.g. different record opened)
+  // Sync local state when the prop item changes
   useEffect(() => {
     setLocalStage(item.stage);
-  }, [item.id, item.stage]);
+    setEditName(item.organization_name || item.contact_name || '');
+    setEditEmail(item.contact_email || '');
+    setEditPhone(item.contact_phone || '');
+    setIsEditing(false);
+  }, [item.id, item.stage, item.organization_name, item.contact_name, item.contact_email, item.contact_phone]);
   
   const stageColor = STAGE_COLORS[localStage];
   const stageLabel = getFunnelStageLabel(t, localStage);
@@ -69,26 +81,81 @@ export function RecordDrawerHeader({ item, onStageChange, isUpdating }: RecordDr
   });
   const statusConfig = getRelationshipStatusConfig(relationshipStatus);
 
+  const handleSaveContact = () => {
+    updateItem.mutate({
+      id: item.id,
+      organization_name: editName || null,
+      contact_email: editEmail || null,
+      contact_phone: editPhone || null,
+    } as any);
+    setIsEditing(false);
+  };
+
   return (
     <SheetHeader className="p-4 pb-2 border-b">
       <div className="flex items-start justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <SheetTitle className="text-lg truncate">
-              {item.organization_name || item.contact_name || t('crm.unnamedLead')}
-            </SheetTitle>
-            <Badge className={cn('h-5 text-[10px] shrink-0', statusConfig.bgColor, statusConfig.color)}>
-              <Activity className="h-3 w-3 mr-1" />
-              {t(`crm.relationshipStatus.${relationshipStatus}`)}
-            </Badge>
+        {isEditing ? (
+          <div className="min-w-0 flex-1 mr-3 space-y-2">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder={t('crm.nameOrOrg', 'Name / Organization')}
+              className="h-8 text-sm"
+            />
+            <Input
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+              placeholder="email@..."
+              className="h-8 text-sm"
+            />
+            <Input
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              placeholder="+351..."
+              className="h-8 text-sm"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" className="h-7 text-xs" onClick={handleSaveContact} disabled={updateItem.isPending}>
+                {t('common.save', 'Save')}
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsEditing(false)}>
+                {t('common.cancel', 'Cancel')}
+              </Button>
+            </div>
           </div>
-          {item.contact_email && (
-            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-              <Mail className="h-3 w-3" />
-              {item.contact_email}
-            </p>
-          )}
-        </div>
+        ) : (
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <SheetTitle className="text-lg truncate">
+                {item.organization_name || item.contact_name || t('crm.unnamedLead')}
+              </SheetTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 shrink-0"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+              <Badge className={cn('h-5 text-[10px] shrink-0', statusConfig.bgColor, statusConfig.color)}>
+                <Activity className="h-3 w-3 mr-1" />
+                {t(`crm.relationshipStatus.${relationshipStatus}`)}
+              </Badge>
+            </div>
+            {item.contact_email && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                <Mail className="h-3 w-3" />
+                {item.contact_email}
+              </p>
+            )}
+            {item.contact_phone && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+                <Phone className="h-3 w-3" />
+                {item.contact_phone}
+              </p>
+            )}
+          </div>
+        )}
         <Select
           value={localStage}
           onValueChange={(value) => {

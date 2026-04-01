@@ -98,20 +98,20 @@ export function ResourceLibrary({ programId }: ResourceLibraryProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Resource Library
+              {t('resources.title', 'Resource Library')}
             </CardTitle>
-            <CardDescription>Curated resources for startups</CardDescription>
+            <CardDescription>{t('resources.curatedDesc', 'Curated resources for startups')}</CardDescription>
           </div>
           {canManage && (
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Resource
+              {t('resources.addResource', 'Add Resource')}
             </Button>
           )}
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 mb-4 flex-wrap">
-            <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('all')}>All</Button>
+            <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('all')}>{t('common.all', 'All')}</Button>
             {CATEGORIES.map(cat => (
               <Button key={cat} variant={filter === cat ? 'default' : 'outline'} size="sm" onClick={() => setFilter(cat)} className="capitalize">
                 {cat}

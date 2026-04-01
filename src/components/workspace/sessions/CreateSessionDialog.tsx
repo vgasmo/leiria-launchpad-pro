@@ -411,7 +411,7 @@ export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateS
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
+                <Label htmlFor="duration">{t('sessions.duration', 'Duration')}</Label>
                 <Select value={duration} onValueChange={setDuration}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -508,7 +508,7 @@ export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateS
                   )}
 
                   <div className="space-y-2 pt-2">
-                    <Label htmlFor="duration">Duration</Label>
+                    <Label htmlFor="duration">{t('sessions.duration', 'Duration')}</Label>
                     <Select value={duration} onValueChange={setDuration}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -524,22 +524,22 @@ export function CreateSessionDialog({ workspaceId, open, onOpenChange }: CreateS
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="agenda">Agenda</Label>
+            <Label htmlFor="agenda">{t('sessions.agenda', 'Agenda')}</Label>
             <Textarea
               id="agenda"
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
-              placeholder="Topics to discuss..."
+              placeholder={t('sessions.agendaPlaceholder', 'Topics to discuss...')}
               rows={2}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t('sessions.location', 'Location')}</Label>
             <Input
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Meeting room or address"
+              placeholder={t('sessions.locationPlaceholder', 'Meeting room or address')}
             />
           </div>
           <div className="space-y-2">

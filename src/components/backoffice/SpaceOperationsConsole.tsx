@@ -180,6 +180,7 @@ function useSpaceOperationsData() {
 }
 
 function StatusBadge({ status, type }: { status: string | null; type: 'room' | 'workspace' | 'contract' }) {
+  const { t } = useTranslation();
   if (!status) return <Badge variant="outline" className="text-[10px]">—</Badge>;
 
   const colors: Record<string, string> = {
@@ -201,18 +202,18 @@ function StatusBadge({ status, type }: { status: string | null; type: 'room' | '
   };
 
   const labels: Record<string, string> = {
-    available: 'Disponível',
-    occupied: 'Ocupada',
-    maintenance: 'Manutenção',
-    reserved: 'Reservada',
-    active: 'Ativo',
-    claimed: 'Associado',
-    pending: 'Pendente',
-    imported_unclaimed: 'Importado',
-    blocked: 'Bloqueado',
-    draft: 'Rascunho',
-    pending_signature: 'Aguarda Assinatura',
-    suspended: 'Suspenso',
+    available: t('spaces.available', 'Disponível'),
+    occupied: t('spaces.occupied', 'Ocupada'),
+    maintenance: t('spaces.maintenance', 'Manutenção'),
+    reserved: t('spaces.reserved', 'Reservada'),
+    active: t('spaces.statusActive', 'Ativo'),
+    claimed: t('spaces.statusClaimed', 'Associado'),
+    pending: t('spaces.statusPending', 'Pendente'),
+    imported_unclaimed: t('spaces.statusImported', 'Importado'),
+    blocked: t('spaces.statusBlocked', 'Bloqueado'),
+    draft: t('spaces.statusDraft', 'Rascunho'),
+    pending_signature: t('spaces.statusPendingSignature', 'Aguarda Assinatura'),
+    suspended: t('spaces.statusSuspended', 'Suspenso'),
   };
 
   return (
@@ -223,17 +224,18 @@ function StatusBadge({ status, type }: { status: string | null; type: 'room' | '
 }
 
 function WarningBadges({ warnings }: { warnings: string[] }) {
+  const { t } = useTranslation();
   if (warnings.length === 0) return null;
 
   const warningLabels: Record<string, { label: string; severity: 'warning' | 'error' | 'info' }> = {
-    occupied_no_allocation: { label: 'Sem alocação', severity: 'error' },
-    allocation_no_link: { label: 'Sem ligação', severity: 'error' },
-    active_no_contract: { label: 'Sem contrato', severity: 'warning' },
-    contract_draft: { label: 'Contrato rascunho', severity: 'info' },
-    contract_pending_signature: { label: 'Aguarda assinatura', severity: 'warning' },
-    imported_unclaimed: { label: 'Não associado', severity: 'info' },
-    claimed_no_contract: { label: 'Associado s/ contrato', severity: 'warning' },
-    allocation_expiring: { label: 'Alocação a expirar', severity: 'warning' },
+    occupied_no_allocation: { label: t('spaces.warn.noAllocation', 'Sem alocação'), severity: 'error' },
+    allocation_no_link: { label: t('spaces.warn.noLink', 'Sem ligação'), severity: 'error' },
+    active_no_contract: { label: t('spaces.warn.noContract', 'Sem contrato'), severity: 'warning' },
+    contract_draft: { label: t('spaces.warn.contractDraft', 'Contrato rascunho'), severity: 'info' },
+    contract_pending_signature: { label: t('spaces.warn.pendingSig', 'Aguarda assinatura'), severity: 'warning' },
+    imported_unclaimed: { label: t('spaces.warn.notClaimed', 'Não associado'), severity: 'info' },
+    claimed_no_contract: { label: t('spaces.warn.claimedNoContract', 'Associado s/ contrato'), severity: 'warning' },
+    allocation_expiring: { label: t('spaces.warn.allocExpiring', 'Alocação a expirar'), severity: 'warning' },
   };
 
   return (
@@ -287,10 +289,10 @@ export function SpaceOperationsConsole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-operations-console'] });
-      toast.success(`${staleRoomIds.length} sala(s) libertada(s) com sucesso`);
+      toast.success(t('spaces.roomsCleared', { count: staleRoomIds.length, defaultValue: '{{count}} sala(s) libertada(s) com sucesso' }));
     },
     onError: () => {
-      toast.error('Erro ao limpar salas');
+      toast.error(t('spaces.clearError', 'Erro ao limpar salas'));
     },
   });
 
@@ -403,19 +405,19 @@ export function SpaceOperationsConsole() {
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[160px]"><DoorOpen className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder="Estado" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os estados</SelectItem>
-            <SelectItem value="available">Disponível</SelectItem>
-            <SelectItem value="occupied">Ocupada</SelectItem>
-            <SelectItem value="maintenance">Manutenção</SelectItem>
-            <SelectItem value="reserved">Reservada</SelectItem>
+            <SelectItem value="all">{t('spaces.allStatuses', 'Todos os estados')}</SelectItem>
+            <SelectItem value="available">{t('spaces.available', 'Disponível')}</SelectItem>
+            <SelectItem value="occupied">{t('spaces.occupied', 'Ocupada')}</SelectItem>
+            <SelectItem value="maintenance">{t('spaces.maintenance', 'Manutenção')}</SelectItem>
+            <SelectItem value="reserved">{t('spaces.reserved', 'Reservada')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={warningFilter} onValueChange={setWarningFilter}>
-          <SelectTrigger className="w-[160px]"><AlertTriangle className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder="Avisos" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]"><AlertTriangle className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder={t('spaces.warnings', 'Avisos')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="warnings">Com Avisos</SelectItem>
-            <SelectItem value="clean">Sem Avisos</SelectItem>
+            <SelectItem value="all">{t('common.all', 'Todos')}</SelectItem>
+            <SelectItem value="warnings">{t('spaces.withWarnings', 'Com Avisos')}</SelectItem>
+            <SelectItem value="clean">{t('spaces.noWarnings', 'Sem Avisos')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -434,7 +436,7 @@ export function SpaceOperationsConsole() {
             onClick={() => cleanupMutation.mutate(staleRoomIds)}
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            Libertar {staleRoomIds.length} sala(s) órfã(s)
+            {t('spaces.clearStaleRooms', { count: staleRoomIds.length, defaultValue: 'Libertar {{count}} sala(s) órfã(s)' })}
           </Button>
         )}
       </div>

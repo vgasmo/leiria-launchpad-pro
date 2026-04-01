@@ -132,13 +132,13 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Approved</Badge>;
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{t('governance.approved', 'Approved')}</Badge>;
       case 'conditional':
-        return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Conditional</Badge>;
+        return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{t('governance.conditional', 'Conditional')}</Badge>;
       case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">{t('governance.rejected', 'Rejected')}</Badge>;
       case 'pending':
-        return <Badge variant="secondary">Pending Review</Badge>;
+        return <Badge variant="secondary">{t('governance.pendingReview', 'Pending Review')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -381,9 +381,9 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           <div className="space-y-4 py-4">
             {selectedReview?.evidence_json && (
               <div className="p-3 rounded bg-muted/50">
-                <p className="text-sm font-medium mb-1">Submitted Evidence:</p>
+                <p className="text-sm font-medium mb-1">{t('governance.submittedEvidence', 'Submitted Evidence:')}</p>
                 <p className="text-sm text-muted-foreground">
-                  {(selectedReview.evidence_json as { notes?: string })?.notes || 'No notes provided'}
+                  {(selectedReview.evidence_json as { notes?: string })?.notes || t('governance.noNotesProvided', 'No notes provided')}
                 </p>
               </div>
             )}

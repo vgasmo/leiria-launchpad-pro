@@ -1765,7 +1765,9 @@
     "viewAll": "Ver todas",
     "years": "anos",
     "yes": "Sim",
-    "morePages": "Mais páginas"
+    "morePages": "Mais páginas",
+    "copiedToClipboard": "Copiado para a área de transferência",
+    "copyFailed": "Falha ao copiar"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2526,7 +2528,12 @@
     "viewAll": "Ver Tudo",
     "viewSession": "Ver Sessão",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "nameOrOrg": "Nome / Organização",
+    "intakeCreatedNoEmail": "Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.",
+    "resend": "Reenviar",
+    "leadContracted": "{{name}} contratado! Criar workspace?",
+    "createWorkspace": "Criar Workspace"
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -3104,7 +3111,14 @@
     "program": "Programa",
     "searchStartups": "Pesquisar startups...",
     "sortBy": "Ordenar",
-    "stage": "Fase"
+    "stage": "Fase",
+    "savedFilters": "Filtros Guardados",
+    "noSavedFilters": "Nenhum filtro guardado ainda",
+    "saveCurrentFilters": "Guardar Filtros Atuais",
+    "saveFilter": "Guardar Filtro",
+    "filterName": "Nome do Filtro",
+    "filterNamePlaceholder": "ex: Startups Prioritárias",
+    "setAsDefault": "Definir como filtro padrão"
   },
   "financial": {
     "activeVersionUpdated": "Active version updated",
@@ -3415,7 +3429,10 @@
     "reviewRequestTitle": "Rever Pedido Stage Gate",
     "stageGateProgress": "Progresso Stage Gate",
     "stageGateProgressDesc": "Acompanhe o seu progresso nas fases do programa",
-    "submitRequest": "Submeter Pedido"
+    "submitRequest": "Submeter Pedido",
+    "pendingReview": "Em Revisão",
+    "submittedEvidence": "Evidência Submetida:",
+    "noNotesProvided": "Sem notas fornecidas"
   },
   "guide": {
     "glossary": "Glossário de Conceitos",
@@ -3975,7 +3992,10 @@
     "updateAvailability": "Atualizar Disponibilidade",
     "viewConnectionRequests": "Ver Pedidos de Ligação",
     "welcomeTitle": "Bem-vindo ao Painel de Mentor",
-    "yourImpact": "O Teu Impacto"
+    "yourImpact": "O Teu Impacto",
+    "startBeforeEnd": "A hora de início deve ser antes do fim",
+    "availabilitySaved": "Disponibilidade guardada com sucesso",
+    "ndaNotSigned": "Este mentor ainda não assinou o NDA. Será associado mas terá de assinar antes de aceder."
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Problemas ou bloqueios identificados...",
@@ -4631,7 +4651,9 @@
     "prompts": {
       "allClear": "Sem ações pendentes — tudo em ordem!",
       "title": "Ações Sugeridas"
-    }
+    },
+    "emailTemplateCopied": "Template de email copiado",
+    "checklistCopied": "Checklist copiada"
   },
   "ownership": {
     "assignedConsultor": "Consultor Atribuído",
@@ -4820,7 +4842,9 @@
     "star": "Estrela",
     "updateFailed": "Falha ao atualizar prioridade",
     "updated": "Prioridade atualizada",
-    "updatedDescription": "A prioridade do workspace foi atualizada"
+    "updatedDescription": "A prioridade do workspace foi atualizada",
+    "low": "Baixa",
+    "medium": "Média"
   },
   "programSetup": {
     "back": "Voltar",
@@ -5151,7 +5175,8 @@
     "title": "Rede & Recursos",
     "titleRequired": "Título é obrigatório",
     "url": "URL",
-    "urlRequired": "URL é obrigatório"
+    "urlRequired": "URL é obrigatório",
+    "curatedDesc": "Recursos curados para startups"
   },
   "review": {
     "addReview": "Adicionar Avaliação",
@@ -5231,7 +5256,9 @@
       "notes": "Notas",
       "sessions": "Sessões"
     },
-    "viewAllResults": "Ver todos os resultados"
+    "viewAllResults": "Ver todos os resultados",
+    "enterName": "Introduza um nome",
+    "saved": "Pesquisa guardada"
   },
   "session": {
     "inMinutes": "In minutos",
@@ -5514,7 +5541,10 @@
     "withConsultant": "Consultor",
     "withMentor": "Mentor",
     "workspaceMembers": "membros do espaço",
-    "zoomDesc": "Importar gravações e transcrições automaticamente"
+    "zoomDesc": "Importar gravações e transcrições automaticamente",
+    "facilitatorStaffOnly": "O Modo Facilitador está disponível apenas para consultores.",
+    "checklistUpdateFailed": "Erro ao atualizar checklist",
+    "enterTranscript": "Introduza o texto da transcrição"
   },
   "sessionsEmpty": {
     "description": "O seu consultor ou programa vai agendar a primeira sessão em breve.",
@@ -6862,5 +6892,70 @@
     "dimensionWeights": "Pesos das Dimensões",
     "weightsMustSum": "Os pesos devem somar 100%",
     "scoreThresholds": "Limiares de Score"
+  },
+  "spaces": {
+    "allStatuses": "Todos os estados",
+    "available": "Disponível",
+    "occupied": "Ocupada",
+    "maintenance": "Manutenção",
+    "reserved": "Reservada",
+    "withWarnings": "Com Avisos",
+    "noWarnings": "Sem Avisos",
+    "warnings": "Avisos",
+    "statusActive": "Ativo",
+    "statusClaimed": "Associado",
+    "statusPending": "Pendente",
+    "statusImported": "Importado",
+    "statusBlocked": "Bloqueado",
+    "statusDraft": "Rascunho",
+    "statusPendingSignature": "Aguarda Assinatura",
+    "statusSuspended": "Suspenso",
+    "roomsCleared": "{{count}} sala(s) libertada(s) com sucesso",
+    "clearError": "Erro ao limpar salas",
+    "clearStaleRooms": "Libertar {{count}} sala(s) órfã(s)",
+    "warn": {
+      "noAllocation": "Sem alocação",
+      "noLink": "Sem ligação",
+      "noContract": "Sem contrato",
+      "contractDraft": "Contrato rascunho",
+      "pendingSig": "Aguarda assinatura",
+      "notClaimed": "Não associado",
+      "claimedNoContract": "Associado s/ contrato",
+      "allocExpiring": "Alocação a expirar"
+    }
+  },
+  "waitingList": {
+    "startup": "Startup",
+    "leadProspect": "Lead/Prospect",
+    "privateOffice": "Gabinete Privado",
+    "dedicatedDesk": "Secretária Dedicada",
+    "hotDesk": "Hot Desk",
+    "virtualIncubation": "Incubação Virtual",
+    "meetingRoom": "Sala de Reuniões",
+    "statusWaiting": "Em Espera",
+    "statusOffered": "Oferecido",
+    "statusAccepted": "Aceite",
+    "statusDeclined": "Recusado",
+    "statusFulfilled": "Cumprido",
+    "statusCancelled": "Cancelado",
+    "allRequests": "Todos os Pedidos",
+    "requests": "Pedidos",
+    "organization": "Organização",
+    "type": "Tipo",
+    "preference": "Preferência",
+    "priority": "Prioridade",
+    "requested": "Pedido",
+    "status": "Estado",
+    "people": "pessoas",
+    "any": "Qualquer",
+    "availableRooms": "Salas Disponíveis",
+    "highPriority": "Alta Prioridade",
+    "forPeople": "para {{count}} pessoas"
+  },
+  "reports": {
+    "noWorkspaces": "Sem workspaces encontrados"
+  },
+  "messaging": {
+    "startConversationFailed": "Não foi possível iniciar conversa"
   }
 }

@@ -368,9 +368,9 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
 
           {canWrite && (
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.close', 'Close')}</Button>
               <Button onClick={handleSave} disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                {updateMutation.isPending ? t('common.saving', 'Saving...') : t('common.saveChanges', 'Save Changes')}
               </Button>
             </DialogFooter>
           )}
