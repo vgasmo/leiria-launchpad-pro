@@ -552,7 +552,7 @@ export function PendingApprovalsManager() {
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            Candidaturas de Startups Pendentes ({pendingWorkspaces!.length})
+            {t('admin.pendingStartupApplications', 'Candidaturas de Startups Pendentes')} ({pendingWorkspaces!.length})
           </h3>
           {pendingWorkspaces!.map((workspace) => (
             <Card key={workspace.id} className="overflow-hidden">
