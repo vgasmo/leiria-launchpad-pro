@@ -210,7 +210,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
           <div className="flex gap-2">
             <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
               <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Selecionar template" />
+                <SelectValue placeholder={t('admin.selectTemplate', 'Selecionar template')} />
               </SelectTrigger>
               <SelectContent>
                 {templates?.map((t) => (
