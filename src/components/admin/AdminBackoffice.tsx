@@ -382,10 +382,7 @@ export function AdminBackoffice() {
           </div>
         </TabsContent>
 
-        {/* Invoices Tab */}
-        <TabsContent value="invoices">
-          <BackofficeInvoicesTab />
-        </TabsContent>
+        {/* Invoices tab removed per user request */}
 
         {/* Overview Tab - Original Backoffice Content */}
         <TabsContent value="overview">

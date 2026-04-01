@@ -196,7 +196,8 @@ export default function QuickGuide() {
 
   // Filter which guides to show based on role
   const getVisibleGuides = (): RoleGuide[] => {
-    if (isStaff) return ROLE_GUIDES; // Staff can see all
+    if (isAdmin) return ROLE_GUIDES; // Admin sees all
+    if (isConsultor && !isAdmin) return ROLE_GUIDES.filter(g => ['consultor', 'founder'].includes(g.id)); // Consultor sees consultor + founder
     if (isFounder) return ROLE_GUIDES.filter(g => g.id === 'founder');
     if (isMentor) return ROLE_GUIDES.filter(g => g.id === 'mentor');
     return ROLE_GUIDES.filter(g => g.id === 'founder'); // fallback

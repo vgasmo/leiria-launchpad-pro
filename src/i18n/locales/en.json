@@ -4122,18 +4122,34 @@
     "title": "Account Pending Approval"
   },
   "pipeline": {
+    "simple": {
+      "lead": "Leads",
+      "qualified": "Qualified",
+      "proposal_negotiation": "Proposal / Negotiation",
+      "contracting_in_progress": "Contracting",
+      "signature_in_progress": "Signing",
+      "contracted": "Contracted",
+      "archived_or_lost": "Archived / Lost"
+    },
     "stages": {
       "accelerating": "Accelerating",
+      "approved_for_signature": "Approved for Signature",
       "archived": "Archived",
       "contracted": "Contracted",
       "first_contact_booked": "Meeting Booked",
       "incubating": "Incubating",
+      "intake_changes_requested": "Changes Requested",
+      "intake_filling": "Filling In",
+      "intake_requested": "Intake Requested",
+      "intake_review": "Under Review",
+      "intake_submitted": "Submitted",
       "met": "Met",
       "negotiating": "Negotiating",
       "new": "New",
       "proposal_sent": "Proposal Sent",
       "qualified": "Qualified",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "sent_for_signature": "Sent for Signature"
     }
   },
   "playbookProgress": {

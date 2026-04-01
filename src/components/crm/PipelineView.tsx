@@ -241,7 +241,7 @@ function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineCo
       >
         <CardHeader className="py-3 px-4">
           <CardTitle className={cn('text-sm font-semibold flex items-center justify-between', config.color)}>
-            <span>{SIMPLE_STAGE_LABELS[simpleStage]}</span>
+            <span>{t(`pipeline.simple.${simpleStage}`, simpleStage)}</span>
             <Badge 
               variant="secondary" 
               className={cn('text-xs font-medium', config.color, 'bg-background/80')}

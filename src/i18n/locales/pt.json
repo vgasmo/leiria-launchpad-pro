@@ -4122,18 +4122,34 @@
     "title": "Conta Pendente de Aprovação"
   },
   "pipeline": {
+    "simple": {
+      "lead": "Leads",
+      "qualified": "Qualificados",
+      "proposal_negotiation": "Proposta / Negociação",
+      "contracting_in_progress": "Contratação em Curso",
+      "signature_in_progress": "Em Assinatura",
+      "contracted": "Contratado",
+      "archived_or_lost": "Arquivo / Perdido"
+    },
     "stages": {
       "accelerating": "Em Aceleração",
+      "approved_for_signature": "Aprovado p/ Assinatura",
       "archived": "Arquivado",
       "contracted": "Contratado",
       "first_contact_booked": "Reunião Agendada",
       "incubating": "Em Incubação",
+      "intake_changes_requested": "Correções Pedidas",
+      "intake_filling": "Em Preenchimento",
+      "intake_requested": "Pedido Enviado",
+      "intake_review": "Em Revisão",
+      "intake_submitted": "Submetido",
       "met": "Reunido",
       "negotiating": "Em Negociação",
       "new": "Novo",
       "proposal_sent": "Proposta Enviada",
       "qualified": "Qualificado",
-      "rejected": "Rejeitado"
+      "rejected": "Rejeitado",
+      "sent_for_signature": "Enviado p/ Assinatura"
     }
   },
   "playbookProgress": {
