@@ -44,6 +44,7 @@ import { KpiSparkline } from './KpiSparkline';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { KpiCard } from './kpis/KpiCard';
 
 interface KpisTabProps {
   workspaceId: string;
