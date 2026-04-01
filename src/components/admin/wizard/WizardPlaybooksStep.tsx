@@ -187,7 +187,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'title', e.target.value)
                                   }
                                   className="h-7 text-sm"
-                                  placeholder={t('wizard.playbooks.milestoneTitle')}
+                                  placeholder={t('wizard.milestoneTitlePlaceholder')}
                                 />
                                 <Input
                                   type="number"
