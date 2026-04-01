@@ -221,6 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isBackoffice,
       isStaff,
       isMentor,
+      isExternalMentor,
       isFounder,
       isAccountApproved,
       isAccountPending,
