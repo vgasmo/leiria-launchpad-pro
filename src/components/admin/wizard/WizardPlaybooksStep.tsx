@@ -295,7 +295,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                           onClick={() => handleAddItem(stage.stage_key, 'action')}
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Add Action
+                          {t('actions.addAction')}
                         </Button>
                       </div>
                     </ScrollArea>
