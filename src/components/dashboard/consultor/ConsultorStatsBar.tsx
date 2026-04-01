@@ -30,6 +30,7 @@ export const ConsultorStatsBar = memo(function ConsultorStatsBar({ stats }: Cons
       </Card>
 
       <Card 
+        interactive
         className={`p-4 rounded-2xl border-border/60 cursor-pointer transition-all hover:shadow-sm ${
           stats.needsAttention > 0 ? 'border-health-at-risk/30' : ''
         }`}
