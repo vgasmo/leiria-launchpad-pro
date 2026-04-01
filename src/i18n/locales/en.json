@@ -3476,7 +3476,17 @@
       "title": "Precisa da Sua Atenção",
       "upcomingSession": "Sessão em {{days}} dias — preparar"
     },
-    "prepSheet": "Preparar"
+    "prepSheet": "Prepare",
+    "quickNote": "Quick Note",
+    "quickNotePlaceholder": "Write your note about this startup...",
+    "noteAdded": "Note added successfully",
+    "feedbackNeeded": "How did the session go?",
+    "giveFeedback": "Give Feedback",
+    "availability": {
+      "available": "Available",
+      "limited": "Limited",
+      "full": "Full"
+    }
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Issues or blockers identified...",
