@@ -58,6 +58,9 @@ export function CsvLeadImport() {
       }
 
       const leads: ParsedLead[] = [];
+      const seenEmails = new Set<string>();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
         const name = nameIdx >= 0 ? cols[nameIdx] : '';
@@ -68,7 +71,18 @@ export function CsvLeadImport() {
         const notes = notesIdx >= 0 ? cols[notesIdx] : '';
         const value = valueIdx >= 0 ? parseFloat(cols[valueIdx]) : undefined;
 
-        const valid = !!(name || email);
+        const hasIdentity = !!(name || email);
+        const emailValid = !email || emailRegex.test(email);
+        const isDuplicate = email && seenEmails.has(email.toLowerCase());
+        const valid = hasIdentity && emailValid && !isDuplicate;
+        
+        let error: string | undefined;
+        if (!hasIdentity) error = t('crm.import.errorNoIdentity', { defaultValue: 'Nome ou email em falta' });
+        else if (!emailValid) error = t('crm.import.errorInvalidEmail', { defaultValue: 'Email inválido' });
+        else if (isDuplicate) error = t('crm.import.errorDuplicate', { defaultValue: 'Email duplicado' });
+        
+        if (email) seenEmails.add(email.toLowerCase());
+        
         leads.push({
           contact_name: name,
           contact_email: email,
@@ -78,7 +92,7 @@ export function CsvLeadImport() {
           notes: notes || undefined,
           deal_value: value && !isNaN(value) ? value : undefined,
           valid,
-          error: valid ? undefined : 'Nome ou email em falta',
+          error,
         });
       }
 
