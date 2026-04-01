@@ -410,6 +410,38 @@ export function AdminUsersManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Suspend/Reactivate User Confirmation */}
+      <AlertDialog open={!!suspendTarget} onOpenChange={(open) => !open && setSuspendTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {suspendTarget?.currentStatus === 'suspended' 
+                ? t('admin.userManagement.reactivateTitle', { defaultValue: 'Reativar Conta' })
+                : t('admin.userManagement.suspendTitle', { defaultValue: 'Suspender Conta' })
+              }
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {suspendTarget?.currentStatus === 'suspended'
+                ? t('admin.userManagement.reactivateConfirm', { name: suspendTarget?.userName, defaultValue: `Tem a certeza que quer reativar a conta de ${suspendTarget?.userName}? O utilizador voltará a ter acesso à plataforma.` })
+                : t('admin.userManagement.suspendConfirm', { name: suspendTarget?.userName, defaultValue: `Tem a certeza que quer suspender a conta de ${suspendTarget?.userName}? O utilizador perderá acesso à plataforma.` })
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSuspendUser} 
+              className={suspendTarget?.currentStatus === 'suspended' ? '' : 'bg-destructive text-destructive-foreground'}
+            >
+              {suspendTarget?.currentStatus === 'suspended' 
+                ? t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })
+                : t('admin.userManagement.suspend', { defaultValue: 'Suspender' })
+              }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
