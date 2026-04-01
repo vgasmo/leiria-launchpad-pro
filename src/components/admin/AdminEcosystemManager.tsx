@@ -258,9 +258,9 @@ export function AdminEcosystemManager() {
           </Select>
 
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
+             <Button variant="ghost" size="sm" onClick={clearFilters}>
               <X className="h-4 w-4 mr-1" />
-              Clear
+              {t('common.clear', 'Limpar')}
             </Button>
           )}
         </div>
