@@ -157,16 +157,16 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Filter</DialogTitle>
+            <DialogTitle>{t('filters.saveFilter', 'Save Filter')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="filter-name">Filter Name</Label>
+              <Label htmlFor="filter-name">{t('filters.filterName', 'Filter Name')}</Label>
               <Input
                 id="filter-name"
                 value={filterName}
                 onChange={(e) => setFilterName(e.target.value)}
-                placeholder="e.g., High Priority Startups"
+                placeholder={t('filters.filterNamePlaceholder', 'e.g., High Priority Startups')}
               />
             </div>
             <div className="flex items-center space-x-2">
