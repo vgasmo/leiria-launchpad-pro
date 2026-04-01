@@ -6063,6 +6063,10 @@
     "youAreOffline": "Está offline. Os dados em cache continuam disponíveis.",
     "backOnline": "De volta online! A sincronizar os seus dados..."
   },
+  "app": {
+    "newVersionAvailable": "Nova versão disponível.",
+    "clickToUpdate": "Clique para atualizar."
+  },
   "smartNudges": {
     "title": "Sugestões Inteligentes",
     "kpiStale": "Os seus KPIs não foram atualizados este mês. Mantenha os dados em dia!",
