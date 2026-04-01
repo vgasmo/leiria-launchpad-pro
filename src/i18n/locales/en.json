@@ -2767,6 +2767,13 @@
       "title": "Bem-vindo à plataforma"
     },
     "journeyMap": "Your Journey",
+    "ring": {
+      "actions": "Actions",
+      "kpis": "KPIs",
+      "milestones": "Milestones"
+    },
+    "firstAction": "🎉 First action completed! The execution habit starts here.",
+    "firstDocument": "📁 First document! Your data room is growing.",
     "multiWorkspace": {
       "title": "Tem {{count}} startups associadas"
     },
