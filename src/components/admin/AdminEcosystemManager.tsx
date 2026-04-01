@@ -250,7 +250,7 @@ export function AdminEcosystemManager() {
               <SelectValue placeholder="Consultant" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Consultants</SelectItem>
+              <SelectItem value="all">{t('common.allConsultants', 'Todos os Consultores')}</SelectItem>
               {consultants?.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
