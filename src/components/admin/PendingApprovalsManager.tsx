@@ -706,10 +706,10 @@ export function PendingApprovalsManager() {
                   </Select>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button variant="outline" onClick={resetClaimDialog}>{t('common.cancel', 'Cancelar')}</Button>
                   <Button onClick={handleAssignClaim} disabled={!selectedWorkspaceId}>
                     <Check className="h-4 w-4 mr-1" />
-                    Confirmar Associação
+                    {t('admin.confirmAssociation', 'Confirmar Associação')}
                   </Button>
                 </DialogFooter>
               </TabsContent>
