@@ -1,6 +1,5 @@
 /**
- * Space Operations Console — Read-only unified view of Building → Room → Allocation → Workspace → Contract
- * ADDITIVE ONLY. No writes, no mutations, no status changes.
+ * Space Operations Console — Unified view of Building → Room → Allocation → Workspace → Contract
  */
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
