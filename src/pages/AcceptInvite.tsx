@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle, XCircle, Mail, LogIn } from 'lucide-react';
+import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -113,7 +114,10 @@ export default function AcceptInvite() {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-background p-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-background p-4">
+      <div className="absolute top-4 left-4">
+        <BackToHomeLink />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2">

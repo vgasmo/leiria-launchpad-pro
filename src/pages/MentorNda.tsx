@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Shield, FileText } from 'lucide-react';
+import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import startupLeiriaLogo from '@/assets/startup-leiria.svg';
@@ -135,7 +136,10 @@ export default function MentorNda() {
   }
   
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="relative min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="absolute top-4 left-4">
+        <BackToHomeLink />
+      </div>
       <Card className="max-w-2xl w-full">
         <CardHeader className="text-center">
           <img src={startupLeiriaLogo} alt="Startup Leiria" className="h-12 mx-auto mb-4" />

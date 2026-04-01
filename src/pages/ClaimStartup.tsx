@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, Clock, Rocket, Shield, AlertCircle, ArrowRight } from 'lucide-react';
+import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 
@@ -105,7 +106,10 @@ export default function ClaimStartup() {
   }, [user, navigate, t, queryClient]);
 
   return (
-    <main data-testid="claim-startup-page" className="flex min-h-screen items-center justify-center bg-background p-6">
+    <main data-testid="claim-startup-page" className="relative flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="absolute top-4 left-4">
+        <BackToHomeLink />
+      </div>
       <Card className="w-full max-w-md shadow-lg border-border/60">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
