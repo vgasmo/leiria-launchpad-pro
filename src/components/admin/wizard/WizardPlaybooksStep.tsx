@@ -104,7 +104,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        {t('wizard.playbooks.description')}
+        {t('wizard.configurePlaybooks')}
       </p>
 
       <Tabs defaultValue={activeStages[0]?.stage_key} className="w-full">
