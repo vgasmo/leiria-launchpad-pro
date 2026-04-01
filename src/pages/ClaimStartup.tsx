@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, Clock, Rocket, Shield, AlertCircle, ArrowRight } from 'lucide-react';
+import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 
