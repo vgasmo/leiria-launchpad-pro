@@ -156,7 +156,7 @@ function DocuSignSettingsCard() {
               <Input value={accountId} onChange={e => setAccountId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">User ID (Impersonation)</Label>
+              <Label className="text-xs">{t('integrations.userId', 'User ID (Impersonation)')}</Label>
               <Input value={userId} onChange={e => setUserId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
