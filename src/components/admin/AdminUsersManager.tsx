@@ -131,6 +131,19 @@ export function AdminUsersManager() {
     setSuspendTarget(null);
   };
 
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ account_status: 'approved' })
+      .eq('id', userId);
+    if (error) {
+      toast.error('Erro ao aprovar conta');
+    } else {
+      toast.success('Conta aprovada com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
