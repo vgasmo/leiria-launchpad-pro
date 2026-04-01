@@ -167,9 +167,9 @@ export function AppSidebar() {
     if (isAdmin && isConsultor) {
       return adminNavigation;
     }
-    // Backoffice role sees admin nav (limited to backoffice tabs at component level)
-    if (isBackoffice) {
-      return adminNavigation;
+    // Backoffice role sees dedicated backoffice nav (spaces, contracts, invoices)
+    if (isBackoffice && !isAdmin && !isConsultor) {
+      return backofficeNavigation;
     }
     // Consultor (not admin) sees portfolio OS
     if (isConsultor) {
