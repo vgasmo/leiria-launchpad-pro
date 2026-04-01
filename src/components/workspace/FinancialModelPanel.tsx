@@ -616,7 +616,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                                   </Badge>
                                   <span className="font-medium">{r.risk}</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-1">Mitigation: {r.mitigation}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{t('financial.mitigation', 'Mitigação')}: {r.mitigation}</p>
                               </div>
                             ))}
                           </CollapsibleContent>
