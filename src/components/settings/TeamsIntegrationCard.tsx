@@ -137,8 +137,8 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           )}
         </CardTitle>
         <CardDescription>
-          Receive notifications in your Teams channel when important events occur.
-          To set up, create an Incoming Webhook in your Teams channel: Channel Settings → Connectors → Incoming Webhook → paste the URL below.
+          {t('settings.teamsDesc', 'Receba notificações no seu canal Teams quando ocorrem eventos importantes. Para configurar, crie um Incoming Webhook no seu canal Teams.')}
+        </CardDescription>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
