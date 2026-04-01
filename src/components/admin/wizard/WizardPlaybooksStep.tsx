@@ -32,7 +32,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
     return activeStages.map((stage) => ({
       stage_key: stage.stage_key,
       title: `${stage.name} Playbook`,
-      description: `Default playbook for ${stage.name} stage`,
+      description: '',
       items: [],
     }));
   });
