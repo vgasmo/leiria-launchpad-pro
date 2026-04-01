@@ -100,7 +100,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel>Saved Filters</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('filters.savedFilters', 'Saved Filters')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           
           {savedFilters?.length === 0 ? (
