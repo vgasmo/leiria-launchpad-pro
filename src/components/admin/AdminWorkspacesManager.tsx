@@ -317,9 +317,9 @@ export function AdminWorkspacesManager() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Startup *</Label>
+                <Label>{t('common.startup', 'Startup')} *</Label>
                 <Select value={selectedStartup} onValueChange={setSelectedStartup}>
-                  <SelectTrigger><SelectValue placeholder="Select startup" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('admin.workspacesManager.selectStartup', 'Selecionar startup')} /></SelectTrigger>
                   <SelectContent>
                     {startups?.map((s) => (
                       <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
