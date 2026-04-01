@@ -303,7 +303,7 @@ export default function ContractOnboarding() {
                         additional_representatives: p.additional_representatives.filter((_, i) => i !== idx),
                       }))}
                     >
-                      {t('common.remove')}
+                      {t('contractOnboarding.remove')}
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -419,7 +419,7 @@ export default function ContractOnboarding() {
                   className="gap-2"
                 >
                   {saveCompanyData.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {t('common.continue')} <ArrowRight className="h-4 w-4" />
+                  {t('contractOnboarding.continue')} <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -451,7 +451,7 @@ export default function ContractOnboarding() {
                   <a href="/templates/V9_Minuta_Contrato_IF_e_IV_2026.docx" download>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
                       <Download className="h-3.5 w-3.5" />
-                      {t('common.download')}
+                      {t('contractOnboarding.download')}
                     </Button>
                   </a>
                 </div>
@@ -479,7 +479,7 @@ export default function ContractOnboarding() {
                   <a href="/templates/V11_Anexo_I_Regulamento_SUP_LRA_2026_2.pdf" download>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
                       <Download className="h-3.5 w-3.5" />
-                      {t('common.download')}
+                      {t('contractOnboarding.download')}
                     </Button>
                   </a>
                 </div>
@@ -507,7 +507,7 @@ export default function ContractOnboarding() {
 
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setCurrentStep('company_data')} className="gap-1.5">
-                  <ArrowLeft className="h-4 w-4" /> {t('common.back')}
+                  <ArrowLeft className="h-4 w-4" /> {t('contractOnboarding.back')}
                 </Button>
                 <Button
                   onClick={() => submitForSigning.mutate()}
@@ -553,7 +553,7 @@ export default function ContractOnboarding() {
                   <div>
                     <h3 className="text-lg font-semibold">{t('contractOnboarding.awaitingSignature')}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {t('contractOnboarding.sentTo', { email: formData.legal_representative_email, provider: getProviderLabel(sigProvider) })}
+                      {t('contractOnboarding.sentVia') + ' ' + formData.legal_representative_email + ' ' + t('contractOnboarding.via') + ' ' + getProviderLabel(sigProvider) + '.'}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {sigProvider === 'manual'
@@ -562,11 +562,11 @@ export default function ContractOnboarding() {
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
-                    {sigStatus === 'sent_for_signature' ? t('contractOnboarding.status.sentForSignature') :
-                     sigStatus === 'viewed' ? t('contractOnboarding.status.viewed') :
-                     sigStatus === 'declined' ? t('contractOnboarding.status.declined') :
-                     sigStatus === 'pending_manual' ? t('contractOnboarding.status.pendingManual') :
-                     t('contractOnboarding.status.pending')}
+                    {sigStatus === 'sent_for_signature' ? t('contractOnboarding.statusSent') :
+                     sigStatus === 'viewed' ? t('contractOnboarding.statusViewed') :
+                     sigStatus === 'declined' ? t('contractOnboarding.statusDeclined') :
+                     sigStatus === 'pending_manual' ? t('contractOnboarding.statusPendingManual') :
+                     t('contractOnboarding.statusPending')}
                   </Badge>
                   <div className="flex justify-center gap-3 mt-4">
                     <Button variant="outline" onClick={() => navigate('/my-workspaces')}>
