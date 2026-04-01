@@ -649,8 +649,10 @@ function TaskGroup({
       <CardContent className="p-0">
         <ScrollArea className="h-[300px]">
           {tasks.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {t('crm.noItems')}
+            <div className="p-6 text-center text-muted-foreground">
+              <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-20" />
+              <p className="text-sm font-medium">{t('crm.noTasks', { defaultValue: 'Sem tarefas' })}</p>
+              <p className="text-xs mt-1 opacity-70">{t('crm.noTasksHint', { defaultValue: 'Nenhuma tarefa nesta categoria.' })}</p>
             </div>
           ) : (
             <div className="divide-y">
