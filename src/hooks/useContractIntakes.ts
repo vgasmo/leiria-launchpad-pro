@@ -214,7 +214,7 @@ export function useCreateIntake() {
           });
           if (emailErr) {
             emailError = typeof emailErr === 'string' ? emailErr : 'Erro ao enviar email';
-            console.warn('Failed to send intake email:', emailErr);
+            logger.warn('intake_email_send_failed', { error: String(emailErr) });
           } else {
             emailSent = true;
           }
