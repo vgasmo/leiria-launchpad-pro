@@ -176,7 +176,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
                 onCheckedChange={(checked) => setSetAsDefault(checked === true)}
               />
               <Label htmlFor="set-default" className="text-sm font-normal">
-                Set as default filter
+                {t('filters.setAsDefault', 'Set as default filter')}
               </Label>
             </div>
           </div>
