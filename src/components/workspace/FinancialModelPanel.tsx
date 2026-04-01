@@ -89,6 +89,7 @@ function MetricCard({
 }
 
 function InsightCard({ insight, onCreateAction, createActionLabel }: { insight: FinancialInsight; onCreateAction?: () => void; createActionLabel?: string }) {
+  const { t } = useTranslation();
   const severityConfig = {
     critical: { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', icon: XCircle, color: 'text-red-600' },
     warning: { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', icon: AlertTriangle, color: 'text-amber-600' },
@@ -108,7 +109,7 @@ function InsightCard({ insight, onCreateAction, createActionLabel }: { insight: 
           {insight.suggested_action && onCreateAction && (
             <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={onCreateAction}>
               <ArrowRight className="h-3 w-3 mr-1" />
-              {createActionLabel || 'Create Action'}
+              {createActionLabel || t('actions.createAction', 'Criar Ação')}
             </Button>
           )}
         </div>
@@ -616,7 +617,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
                                   </Badge>
                                   <span className="font-medium">{r.risk}</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-1">Mitigation: {r.mitigation}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{t('financial.mitigation', 'Mitigação')}: {r.mitigation}</p>
                               </div>
                             ))}
                           </CollapsibleContent>

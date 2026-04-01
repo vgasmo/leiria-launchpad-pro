@@ -70,7 +70,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       });
       toast.success(enabled ? t('integrations.teamsEnabled', 'Teams integration enabled') : t('integrations.teamsDisabled', 'Teams integration disabled'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update settings');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
@@ -94,7 +94,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       await updateSettings.mutateAsync({ webhook_url: webhookUrl });
       toast.success(t('integrations.webhookUrlSaved'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save webhook');
+      toast.error(error.message || t('settings.failedToSaveWebhook', 'Erro ao guardar webhook'));
     }
   };
 
@@ -110,7 +110,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
     try {
       await updateSettings.mutateAsync({ [eventKey]: enabled });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update setting');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
@@ -132,13 +132,12 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           {isEnabled && hasWebhook && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Connected
+              {t('settings.connected', 'Ligado')}
             </Badge>
           )}
         </CardTitle>
         <CardDescription>
-          Receive notifications in your Teams channel when important events occur.
-          To set up, create an Incoming Webhook in your Teams channel: Channel Settings → Connectors → Incoming Webhook → paste the URL below.
+          {t('settings.teamsDesc', 'Receba notificações no seu canal Teams quando ocorrem eventos importantes. Para configurar, crie um Incoming Webhook no seu canal Teams.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -176,7 +175,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           <CollapsibleContent className="mt-3">
             <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
               <div>
-                <h4 className="font-medium mb-2">Option 1: Teams Workflows (Recommended)</h4>
+                <h4 className="font-medium mb-2">{t('settings.teamsWorkflows', 'Opção 1: Teams Workflows (Recomendado)')}</h4>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
                   <li>In Teams, go to your channel → ⋯ → Workflows</li>
                   <li>Search for "Post to a channel when a webhook request is received"</li>
@@ -184,7 +183,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
                 </ol>
               </div>
               <div>
-                <h4 className="font-medium mb-2">Option 2: Power Automate</h4>
+                <h4 className="font-medium mb-2">{t('settings.powerAutomate', 'Opção 2: Power Automate')}</h4>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1 text-xs">
                   <li>Go to <a href="https://make.powerautomate.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Power Automate</a></li>
                   <li>Create a new Instant flow with "When an HTTP request is received" trigger</li>

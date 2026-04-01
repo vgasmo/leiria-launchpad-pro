@@ -126,7 +126,7 @@ function DocuSignSettingsCard() {
           </div>
           <div className="flex items-center gap-3">
             <Badge variant={isConfigured && settings?.is_enabled ? 'default' : 'secondary'} className="text-[10px]">
-              {isConfigured && settings?.is_enabled ? 'Ativo' : isConfigured ? 'Configurado' : 'Não configurado'}
+              {isConfigured && settings?.is_enabled ? t('common.active', 'Ativo') : isConfigured ? t('settings.configured', 'Configurado') : t('settings.notConfigured', 'Não configurado')}
             </Badge>
             <Switch
               checked={!!settings?.is_enabled}
@@ -152,15 +152,15 @@ function DocuSignSettingsCard() {
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-3 space-y-3">
             <div className="space-y-2">
-              <Label className="text-xs">Account ID</Label>
+              <Label className="text-xs">{t('integrations.accountId', 'Account ID')}</Label>
               <Input value={accountId} onChange={e => setAccountId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">User ID (Impersonation)</Label>
+              <Label className="text-xs">{t('integrations.userId', 'User ID (Impersonation)')}</Label>
               <Input value={userId} onChange={e => setUserId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">Base URL</Label>
+              <Label className="text-xs">{t('integrations.baseUrl', 'Base URL')}</Label>
               <Input value={baseUrl} onChange={e => setBaseUrl(e.target.value)} placeholder="https://demo.docusign.net/restapi" className="text-xs h-8" />
             </div>
             <Alert>
@@ -232,7 +232,7 @@ function PandaDocSettingsCard() {
           </div>
           <div className="flex items-center gap-3">
             <Badge variant={isConfigured && settings?.is_enabled ? 'default' : 'secondary'} className="text-[10px]">
-              {isConfigured && settings?.is_enabled ? 'Ativo' : isConfigured ? 'Configurado' : 'Não configurado'}
+              {isConfigured && settings?.is_enabled ? t('common.active', 'Ativo') : isConfigured ? t('settings.configured', 'Configurado') : t('settings.notConfigured', 'Não configurado')}
             </Badge>
             <Switch
               checked={!!settings?.is_enabled}
@@ -268,7 +268,7 @@ function PandaDocSettingsCard() {
 
             {pandadocWebhookEndpoint && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Webhook URL (configurar no PandaDoc)</Label>
+                <Label className="text-xs">{t('integrations.pandadocWebhookLabel', 'Webhook URL (configurar no PandaDoc)')}</Label>
                 <div className="flex items-center gap-2">
                   <Input value={pandadocWebhookEndpoint} readOnly className="text-[10px] h-8 font-mono bg-muted/50" />
                   <Button
@@ -280,7 +280,7 @@ function PandaDocSettingsCard() {
                       toast.success(t('admin.urlCopiado'));
                     }}
                   >
-                    Copiar
+                    {t('common.copy', 'Copiar')}
                   </Button>
                 </div>
               </div>
@@ -289,7 +289,7 @@ function PandaDocSettingsCard() {
             <Alert variant="default" className="bg-muted/30">
               <Info className="h-3.5 w-3.5" />
               <AlertDescription className="text-[10px] space-y-1">
-                <p><strong>Para configurar:</strong></p>
+                <p><strong>{t('integrations.setupInstructions', 'Para configurar:')}</strong></p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Aceda ao <a href="https://app.pandadoc.com/a/#/settings/integrations/api" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">PandaDoc Dashboard <ExternalLink className="h-2.5 w-2.5" /></a></li>
                   <li>Copie a API Key e adicione como secret <code className="text-[9px] bg-muted px-1 rounded">PANDADOC_API_KEY</code></li>
@@ -366,10 +366,10 @@ function DefaultProviderSelector() {
             <SelectContent>
               <SelectItem value="manual" className="text-xs">Manual</SelectItem>
               <SelectItem value="docusign" className="text-xs" disabled={!docusign?.is_enabled}>
-                DocuSign {!docusign?.is_enabled && '(desativado)'}
+                DocuSign {!docusign?.is_enabled && `(${t('common.disabled', 'desativado')})`}
               </SelectItem>
               <SelectItem value="pandadoc" className="text-xs" disabled={!pandadoc?.is_enabled}>
-                PandaDoc {!pandadoc?.is_enabled && '(desativado)'}
+                PandaDoc {!pandadoc?.is_enabled && `(${t('common.disabled', 'desativado')})`}
               </SelectItem>
             </SelectContent>
           </Select>

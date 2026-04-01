@@ -60,9 +60,9 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         enabled,
         ...(webhookUrl && { webhook_url: webhookUrl })
       });
-      toast.success(enabled ? 'Outlook calendar sync enabled' : 'Outlook calendar sync disabled');
+      toast.success(enabled ? t('settings.outlookSyncEnabled', 'Sincronização Outlook ativada') : t('settings.outlookSyncDisabled', 'Sincronização Outlook desativada'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update settings');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
@@ -75,7 +75,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
       await updateSettings.mutateAsync({ webhook_url: webhookUrl, sync_mode: 'webhook' });
       toast.success(t('integrations.webhookUrlSaved'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save webhook');
+      toast.error(error.message || t('settings.failedToSaveWebhook', 'Erro ao guardar webhook'));
     }
   };
 
@@ -83,7 +83,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
     try {
       await updateSettings.mutateAsync({ sync_mode: mode as 'webhook' | 'graph' });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update sync mode');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
@@ -113,7 +113,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
           )}
         </CardTitle>
         <CardDescription>
-          Automatically create Outlook calendar events with Teams meeting links for sessions
+          {t('settings.outlookDesc', 'Cria automaticamente eventos Outlook com links Teams para sessões')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -121,15 +121,14 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This is configured per workspace in each workspace's Settings → Integrations tab.
-              Below are the setup instructions for reference.
+              {t('settings.graphPerWorkspace', 'Configurado por workspace em Definições → Integrações. Abaixo estão as instruções de referência.')}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Sync Mode Selection */}
         <div className="space-y-3">
-          <Label>Sync method</Label>
+          <Label>{t('settings.syncMethod', 'Método de sincronização')}</Label>
           <RadioGroup 
             value={syncMode} 
             onValueChange={handleModeChange}
@@ -192,7 +191,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
                   onClick={handleSaveWebhook} 
                   disabled={!webhookUrl || updateSettings.isPending || !canEdit}
                 >
-                  Save
+                  {t('common.save', 'Guardar')}
                 </Button>
               </div>
             </div>
@@ -202,7 +201,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
                   <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
-                  How to set up Power Automate
+                  {t('settings.howToSetupPowerAutomate', 'Como configurar Power Automate')}
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-3">
@@ -250,9 +249,9 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         {/* Enable Toggle */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="space-y-0.5">
-            <Label>Enable automatic calendar sync</Label>
+            <Label>{t('settings.enableAutoCalendar', 'Ativar sincronização automática do calendário')}</Label>
             <p className="text-sm text-muted-foreground">
-              Create Outlook events when sessions are scheduled
+              {t('settings.createOutlookOnSchedule', 'Criar eventos Outlook quando sessões são agendadas')}
             </p>
           </div>
           <Switch
@@ -265,12 +264,12 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         {/* Features info */}
         {isEnabled && (
           <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 space-y-1">
-            <p className="font-medium text-foreground">When enabled:</p>
+            <p className="font-medium text-foreground">{t('settings.whenEnabled', 'Quando ativado:')}</p>
             <ul className="list-disc list-inside space-y-0.5">
-              <li>New sessions automatically create Outlook calendar events</li>
-              <li>Events include Teams meeting links for online meetings</li>
-              <li>Rescheduled sessions update the calendar event</li>
-              <li>Cancelled sessions remove the calendar event</li>
+              <li>{t('settings.newSessionsCreate', 'Novas sessões criam automaticamente eventos Outlook')}</li>
+              <li>{t('settings.eventsIncludeTeams', 'Eventos incluem links Teams para reuniões online')}</li>
+              <li>{t('settings.rescheduledUpdate', 'Sessões reagendadas atualizam o evento')}</li>
+              <li>{t('settings.cancelledRemove', 'Sessões canceladas removem o evento')}</li>
             </ul>
           </div>
         )}

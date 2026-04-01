@@ -1855,7 +1855,8 @@
     "unknownReason": "Unknown reason",
     "expired": "Expired",
     "inactive": "Inactive",
-    "errors": "Errors"
+    "errors": "Errors",
+    "updating": "Updating..."
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3219,7 +3220,8 @@
     "failedToParse": "Failed to parse:{{ message }}",
     "failedToSync": "Failed to sync:{{ message }}",
     "financialModelParsedSuccessfully": "Financial model parsed successfully",
-    "synced": "Synced{{ length }} KPIs"
+    "synced": "Synced{{ length }} KPIs",
+    "mitigation": "Mitigation"
   },
   "financialPanel": {
     "aiFinancialReview": "AI Financial Review",
@@ -3697,7 +3699,12 @@
       "fundingSync": "Sync funding rounds to HubSpot deals",
       "leadImport": "Import leads from HubSpot to workspace members",
       "sessionNotes": "Log session notes as HubSpot engagements"
-    }
+    },
+    "accountId": "Account ID",
+    "userId": "User ID (Impersonation)",
+    "baseUrl": "Base URL",
+    "pandadocWebhookLabel": "Webhook URL (configure in PandaDoc)",
+    "setupInstructions": "To configure:"
   },
   "investorReadiness": {
     "createLink": "Create Link",
@@ -5758,7 +5765,32 @@
     "calendarSyncDesc": "Sessions will create Outlook events + Teams links",
     "calendarSyncActive": "✓ Calendar sync active",
     "graphApiNotConfigured": "Global Microsoft Graph API is not configured. Contact an admin to set it up in Admin → Integrations.",
-    "noConsultantWarning": "No consultant assigned to this workspace. Assign a consultant in Settings or use a custom calendar email."
+    "noConsultantWarning": "No consultant assigned to this workspace. Assign a consultant in Settings or use a custom calendar email.",
+    "notConfigured": "Not configured",
+    "graphSyncEnabled": "Graph API sync enabled",
+    "graphSyncDisabled": "Graph API sync disabled",
+    "failedToUpdate": "Failed to update",
+    "graphApiDesc": "Direct integration with Microsoft Graph for calendar events and Teams meetings",
+    "graphPerWorkspace": "Configured per workspace in Settings → Integrations.",
+    "graphSyncDesc": "Create calendar events and Teams meetings via Graph API",
+    "whenScheduleSession": "When you schedule a session, the system will automatically:",
+    "createOutlookEvent": "Create an Outlook calendar event",
+    "generateTeamsLink": "Generate a Teams meeting link",
+    "inviteMentorsFounders": "Invite mentors and founders",
+    "saveJoinUrl": "Save the join URL to the session record",
+    "outlookSyncEnabled": "Outlook calendar sync enabled",
+    "outlookSyncDisabled": "Outlook calendar sync disabled",
+    "failedToSaveWebhook": "Failed to save webhook",
+    "outlookDesc": "Automatically create Outlook calendar events with Teams meeting links",
+    "enableAutoCalendar": "Enable automatic calendar sync",
+    "createOutlookOnSchedule": "Create Outlook events when sessions are scheduled",
+    "newSessionsCreate": "New sessions automatically create Outlook events",
+    "eventsIncludeTeams": "Events include Teams meeting links for online meetings",
+    "rescheduledUpdate": "Rescheduled sessions update the calendar event",
+    "cancelledRemove": "Cancelled sessions remove the event",
+    "teamsDesc": "Receive notifications in your Teams channel when important events occur.",
+    "teamsWorkflows": "Option 1: Teams Workflows (Recommended)",
+    "powerAutomate": "Option 2: Power Automate"
   },
   "settingsPage": {
     "areasOfExpertise": "Areas of Expertise",
@@ -5821,7 +5853,11 @@
     "updating": "Updating...",
     "uploadImageFile": "Please upload an image file",
     "uploadPhoto": "Upload Photo",
-    "wednesday": "Wednesday"
+    "wednesday": "Wednesday",
+    "emailConfirmHint": "A confirmation email will be sent to verify the new address",
+    "enterNewPassword": "Enter new password",
+    "minChars": "Minimum 6 characters",
+    "confirmPassword": "Confirm New Password"
   },
   "shortcuts": {
     "actions": "Actions",
@@ -7128,5 +7164,56 @@
     "incomplete": "Incomplete",
     "recalculate": "Recalculate",
     "blockingWarning": "This {{entityType}} cannot be marked as ready until the score reaches 70+"
+  },
+  "vp": {
+    "step_segment": "Customer Segment",
+    "step_segment_desc": "Who are you solving for?",
+    "step_problem": "Problem & Evidence",
+    "step_problem_desc": "What pain have you observed?",
+    "step_consequence": "Consequence",
+    "step_consequence_desc": "What happens if unsolved?",
+    "step_jobs": "Jobs to be Done",
+    "step_jobs_desc": "What do they need to accomplish?",
+    "step_alternatives": "Alternatives",
+    "step_alternatives_desc": "What do they use today?",
+    "step_value": "Value Proposition",
+    "step_value_desc": "Your unique solution",
+    "step_proof": "Proof",
+    "step_proof_desc": "Evidence & credentials",
+    "title": "Your Value Proposition",
+    "review": "Review and use your generated VP",
+    "fullStatement": "Full Statement",
+    "oneLiner": "One-liner",
+    "bulletPoints": "Bullet Points for Proposals",
+    "copyAll": "Copy All",
+    "editInputs": "Edit Inputs",
+    "saveVp": "Save Value Proposition",
+    "donePractice": "Done (Practice Mode)",
+    "generate": "Generate",
+    "targetSegment": "Who is your target customer segment?",
+    "segmentHint": "Be specific: decision maker role, company size, industry",
+    "problem": "What problem do they face?",
+    "evidence": "What evidence do you have? (interviews, data)",
+    "consequence": "What happens if they don't solve this problem?",
+    "consequenceHint": "Think: lost revenue, wasted time, missed opportunities",
+    "jobsToBeDone": "What jobs are they trying to get done?",
+    "jobsHint": "Focus on outcomes, not features",
+    "alternatives": "What alternatives do they use today?",
+    "whyAlternativesFail": "Why do these alternatives fail?",
+    "valueProp": "What's your value proposition?",
+    "valueHint": "How do you uniquely solve their problem better than alternatives?",
+    "proof": "What proof or credentials do you have?",
+    "proofHint": "KPIs, testimonials, benchmarks, case studies (optional but powerful)"
+  },
+  "shared": {
+    "accessDenied": "Access Denied",
+    "readOnly": "Read-only view",
+    "expires": "Expires",
+    "keyMetrics": "Key Metrics",
+    "milestones": "Milestones",
+    "latestUpdate": "Latest Update",
+    "highlights": "Highlights",
+    "nextPriorities": "Next Priorities",
+    "sharedVia": "Shared via Startup Leiria"
   }
 }

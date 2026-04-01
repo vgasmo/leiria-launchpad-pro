@@ -34,14 +34,14 @@ interface ValuePropWizardProps {
   onComplete?: () => void;
 }
 
-const STEPS = [
-  { key: 'segment', icon: Users, title: 'Customer Segment', description: 'Who are you solving for?' },
-  { key: 'problem', icon: AlertTriangle, title: 'Problem & Evidence', description: 'What pain have you observed?' },
-  { key: 'consequence', icon: Target, title: 'Consequence', description: 'What happens if unsolved?' },
-  { key: 'jobs', icon: Lightbulb, title: 'Jobs to be Done', description: 'What do they need to accomplish?' },
-  { key: 'alternatives', icon: Users, title: 'Alternatives', description: 'What do they use today?' },
-  { key: 'value', icon: Sparkles, title: 'Value Proposition', description: 'Your unique solution' },
-  { key: 'proof', icon: Check, title: 'Proof', description: 'Evidence & credentials' },
+const STEP_KEYS = [
+  { key: 'segment', icon: Users },
+  { key: 'problem', icon: AlertTriangle },
+  { key: 'consequence', icon: Target },
+  { key: 'jobs', icon: Lightbulb },
+  { key: 'alternatives', icon: Users },
+  { key: 'value', icon: Sparkles },
+  { key: 'proof', icon: Check },
 ];
 
 const EXAMPLES: Record<string, string> = {
@@ -56,8 +56,23 @@ const EXAMPLES: Record<string, string> = {
   proof: 'e.g., "Beta users saved 10hrs/week; 3 paying pilots at $500/mo"',
 };
 
+const STEP_I18N: Record<string, { title: string; desc: string }> = {
+  segment: { title: 'Segmento de Clientes', desc: 'Para quem estás a resolver?' },
+  problem: { title: 'Problema & Evidência', desc: 'Que dor observaste?' },
+  consequence: { title: 'Consequência', desc: 'O que acontece se não resolver?' },
+  jobs: { title: 'Jobs to be Done', desc: 'O que precisam de conseguir?' },
+  alternatives: { title: 'Alternativas', desc: 'O que usam hoje?' },
+  value: { title: 'Proposta de Valor', desc: 'A tua solução única' },
+  proof: { title: 'Prova', desc: 'Evidência & credenciais' },
+};
+
 export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProps) {
   const { t } = useTranslation();
+  const STEPS = STEP_KEYS.map(s => ({
+    ...s,
+    title: t(`vp.step_${s.key}`, STEP_I18N[s.key]?.title || s.key),
+    description: t(`vp.step_${s.key}_desc`, STEP_I18N[s.key]?.desc || ''),
+  }));
   const [currentStep, setCurrentStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [fields, setFields] = useState<ValuePropFields>({
@@ -149,54 +164,39 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <CardTitle>Your Value Proposition</CardTitle>
+            <CardTitle>{t('vp.title', 'A Tua Proposta de Valor')}</CardTitle>
           </div>
-          <CardDescription>Review and use your generated value proposition</CardDescription>
+          <CardDescription>{t('vp.review', 'Revê e usa a proposta gerada')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* VP Statement */}
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">Full Statement</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.vp_statement)}
-              >
+              <Label className="text-sm font-medium">{t('vp.fullStatement', 'Declaração Completa')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.vp_statement)}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy
+                {t('common.copy', 'Copiar')}
               </Button>
             </div>
             <p className="text-sm">{outputs.vp_statement}</p>
           </div>
 
-          {/* Short Version */}
           <div className="p-4 rounded-lg bg-muted">
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">One-liner</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.short_version)}
-              >
+              <Label className="text-sm font-medium">{t('vp.oneLiner', 'Frase-Chave')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.short_version)}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy
+                {t('common.copy', 'Copiar')}
               </Button>
             </div>
             <p className="text-sm">{outputs.short_version}</p>
           </div>
 
-          {/* Bullet Points */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">Bullet Points for Proposals</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyToClipboard(outputs.bullet_points.join('\n• '))}
-              >
+              <Label className="text-sm font-medium">{t('vp.bulletPoints', 'Pontos-Chave para Propostas')}</Label>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(outputs.bullet_points.join('\n• '))}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy All
+                {t('common.copyAll', 'Copiar Tudo')}
               </Button>
             </div>
             <ul className="space-y-1">
@@ -214,16 +214,16 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
           <div className="flex justify-between">
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Edit Inputs
+              {t('vp.editInputs', 'Editar Respostas')}
             </Button>
             {canSave ? (
               <Button onClick={handleSave} disabled={createMutation.isPending}>
                 <Check className="h-4 w-4 mr-2" />
-                Save Value Proposition
+                {t('vp.saveVp', 'Guardar Proposta de Valor')}
               </Button>
             ) : (
               <Button variant="outline" onClick={() => onComplete?.()}>
-                Done (Practice Mode)
+                {t('vp.donePractice', 'Concluído (Modo Prática)')}
               </Button>
             )}
           </div>
@@ -253,7 +253,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         {/* Step Content */}
         {currentStep === 0 && (
           <div className="space-y-3">
-            <Label>Who is your target customer segment?</Label>
+            <Label>{t('vp.targetSegment', 'Qual é o teu segmento-alvo?')}</Label>
             <Textarea
               value={fields.segment}
               onChange={(e) => updateField('segment', e.target.value)}
@@ -261,7 +261,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Be specific: decision maker role, company size, industry
+              {t('vp.segmentHint', 'Sê específico: decisor, dimensão da empresa, indústria')}
             </p>
           </div>
         )}
@@ -269,7 +269,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         {currentStep === 1 && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>What problem do they face?</Label>
+              <Label>{t('vp.problem', 'Que problema enfrentam?')}</Label>
               <Textarea
                 value={fields.problem}
                 onChange={(e) => updateField('problem', e.target.value)}
@@ -278,7 +278,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               />
             </div>
             <div className="space-y-2">
-              <Label>What evidence do you have? (interviews, data)</Label>
+              <Label>{t('vp.evidence', 'Que evidência tens? (entrevistas, dados)')}</Label>
               <Textarea
                 value={fields.evidence}
                 onChange={(e) => updateField('evidence', e.target.value)}
@@ -291,7 +291,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 2 && (
           <div className="space-y-3">
-            <Label>What happens if they don't solve this problem?</Label>
+            <Label>{t('vp.consequence', 'O que acontece se não resolverem este problema?')}</Label>
             <Textarea
               value={fields.consequence}
               onChange={(e) => updateField('consequence', e.target.value)}
@@ -299,14 +299,14 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Think: lost revenue, wasted time, missed opportunities
+              {t('vp.consequenceHint', 'Pensa: receita perdida, tempo desperdiçado, oportunidades perdidas')}
             </p>
           </div>
         )}
 
         {currentStep === 3 && (
           <div className="space-y-3">
-            <Label>What jobs are they trying to get done?</Label>
+            <Label>{t('vp.jobsToBeDone', 'Que jobs tentam cumprir?')}</Label>
             <Textarea
               value={fields.jobs_to_be_done}
               onChange={(e) => updateField('jobs_to_be_done', e.target.value)}
@@ -314,7 +314,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Focus on outcomes, not features
+              {t('vp.jobsHint', 'Foca em resultados, não em funcionalidades')}
             </p>
           </div>
         )}
@@ -322,7 +322,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         {currentStep === 4 && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>What alternatives do they use today?</Label>
+              <Label>{t('vp.alternatives', 'Que alternativas usam hoje?')}</Label>
               <Textarea
                 value={fields.alternatives}
                 onChange={(e) => updateField('alternatives', e.target.value)}
@@ -331,7 +331,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               />
             </div>
             <div className="space-y-2">
-              <Label>Why do these alternatives fail?</Label>
+              <Label>{t('vp.whyAlternativesFail', 'Porque falham essas alternativas?')}</Label>
               <Textarea
                 value={fields.why_alternatives_fail}
                 onChange={(e) => updateField('why_alternatives_fail', e.target.value)}
@@ -344,7 +344,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 5 && (
           <div className="space-y-3">
-            <Label>What's your value proposition?</Label>
+            <Label>{t('vp.valueProp', 'Qual é a tua proposta de valor?')}</Label>
             <Textarea
               value={fields.value_prop}
               onChange={(e) => updateField('value_prop', e.target.value)}
@@ -352,14 +352,14 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              How do you uniquely solve their problem better than alternatives?
+              {t('vp.valueHint', 'Como resolves o problema melhor que as alternativas?')}
             </p>
           </div>
         )}
 
         {currentStep === 6 && (
           <div className="space-y-3">
-            <Label>What proof or credentials do you have?</Label>
+            <Label>{t('vp.proof', 'Que prova ou credenciais tens?')}</Label>
             <Textarea
               value={fields.proof}
               onChange={(e) => updateField('proof', e.target.value)}
@@ -367,7 +367,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              KPIs, testimonials, benchmarks, case studies (optional but powerful)
+              {t('vp.proofHint', 'KPIs, testemunhos, benchmarks, case studies (opcional mas poderoso)')}
             </p>
           </div>
         )}
@@ -380,10 +380,10 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
             disabled={currentStep === 0}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t('common.back', 'Voltar')}
           </Button>
           <Button onClick={handleNext} disabled={!canProceed()}>
-            {currentStep === STEPS.length - 1 ? 'Generate' : 'Next'}
+            {currentStep === STEPS.length - 1 ? t('vp.generate', 'Gerar') : t('common.next', 'Seguinte')}
             {currentStep === STEPS.length - 1 ? (
               <Sparkles className="h-4 w-4 ml-2" />
             ) : (

@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { 
   TrendingUp, 
@@ -50,6 +51,7 @@ interface SharedData {
 
 export default function SharedWorkspace() {
   const { token } = useParams<{ token: string }>();
+  const { t } = useTranslation();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['shared-workspace', token],
@@ -87,7 +89,7 @@ export default function SharedWorkspace() {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h1 className="text-xl font-semibold mb-2">Access Denied</h1>
+            <h1 className="text-xl font-semibold mb-2">{t('shared.accessDenied', 'Acesso Negado')}</h1>
             <p className="text-muted-foreground">
               {error instanceof Error ? error.message : 'This link is invalid or has expired.'}
             </p>
@@ -126,7 +128,7 @@ export default function SharedWorkspace() {
           {/* Shared link notice */}
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <Lock className="h-3 w-3" />
-            <span>Read-only view • Expires {format(new Date(expires_at), 'MMM d, yyyy')}</span>
+            <span>{t('shared.readOnly', 'Vista apenas de leitura')} • {t('shared.expires', 'Expira')} {format(new Date(expires_at), 'MMM d, yyyy')}</span>
             <Badge variant="outline" className="text-xs">{scope.replace('_', ' ')}</Badge>
           </div>
         </div>
@@ -149,7 +151,7 @@ export default function SharedWorkspace() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Key Metrics
+                {t('shared.keyMetrics', 'Métricas Chave')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -179,7 +181,7 @@ export default function SharedWorkspace() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-primary" />
-                Milestones
+                {t('shared.milestones', 'Marcos')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -217,14 +219,14 @@ export default function SharedWorkspace() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                Latest Update - {format(new Date(updates[0].month), 'MMMM yyyy')}
+                {t('shared.latestUpdate', 'Última Atualização')} - {format(new Date(updates[0].month), 'MMMM yyyy')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 {updates[0].content_json?.highlights && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">Highlights</h4>
+                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">{t('shared.highlights', 'Destaques')}</h4>
                     <ul className="space-y-1">
                       {updates[0].content_json.highlights.map((h: string, i: number) => (
                         <li key={i} className="text-sm">{h}</li>
@@ -234,7 +236,7 @@ export default function SharedWorkspace() {
                 )}
                 {updates[0].content_json?.priorities && (
                   <div>
-                    <h4 className="text-sm font-medium text-blue-600 mb-2">Next Priorities</h4>
+                    <h4 className="text-sm font-medium text-blue-600 mb-2">{t('shared.nextPriorities', 'Próximas Prioridades')}</h4>
                     <ul className="space-y-1">
                       {updates[0].content_json.priorities.map((p: string, i: number) => (
                         <li key={i} className="text-sm">{p}</li>
@@ -251,7 +253,7 @@ export default function SharedWorkspace() {
       {/* Footer */}
       <div className="border-t bg-muted/30 py-4">
         <div className="max-w-4xl mx-auto px-6 text-center text-sm text-muted-foreground">
-          <p>Shared via Startup Leiria</p>
+          <p>{t('shared.sharedVia', 'Partilhado via Startup Leiria')}</p>
         </div>
       </div>
     </div>
