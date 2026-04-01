@@ -22,7 +22,6 @@ import { useUpdateFunnelItem } from '@/hooks/useFunnel';
 import { useState, useMemo } from 'react';
 import {
   SIMPLE_PIPELINE_STAGES,
-  SIMPLE_STAGE_LABELS,
   SIMPLE_STAGE_SOURCES,
   STAGE_TO_SIMPLE,
   STAGE_LABELS,
