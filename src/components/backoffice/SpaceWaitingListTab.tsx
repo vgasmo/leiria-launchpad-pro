@@ -466,8 +466,8 @@ export function SpaceWaitingListTab() {
               <div>
                 <span className="text-sm text-muted-foreground">Request:</span>
                 <span className="ml-2">
-                  {selectedRequest && REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.label}
-                  {selectedRequest?.preferred_capacity && ` for ${selectedRequest.preferred_capacity} people`}
+                  {selectedRequest && t(REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.labelKey || '')}
+                  {selectedRequest?.preferred_capacity && ` ${t('waitingList.forPeople', { count: selectedRequest.preferred_capacity, defaultValue: 'for {{count}} people' })}`}
                 </span>
               </div>
             </div>
