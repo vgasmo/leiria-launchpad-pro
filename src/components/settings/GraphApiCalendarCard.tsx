@@ -161,7 +161,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         <div className="space-y-3 pt-3 border-t">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-amber-500" />
-            <Label className="font-medium">Azure AD App Registration</Label>
+            <Label className="font-medium">{t('settings.azureAdAppRegistration', 'Registo de App Azure AD')}</Label>
           </div>
           
           <div className="space-y-2">
