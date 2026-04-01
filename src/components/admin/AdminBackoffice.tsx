@@ -341,10 +341,18 @@ export function AdminBackoffice() {
     return 'text-red-600';
   };
 
+  const setActiveSubTabAndUrl = (subtab: string) => {
+    setActiveSubTab(subtab);
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', 'backoffice');
+    params.set('subtab', subtab);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Simplified sub-tabs: 4 clear sections */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+      {/* Simplified sub-tabs: 5 clear sections */}
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTabAndUrl}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="dashboard" className="gap-1.5">
             <Building2 className="h-4 w-4" />
@@ -353,6 +361,10 @@ export function AdminBackoffice() {
           <TabsTrigger value="contracts" className="gap-1.5">
             <FileText className="h-4 w-4" />
             {t('admin.backoffice.contractsAndLifecycle', { defaultValue: 'Contratos' })}
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1.5">
+            <Receipt className="h-4 w-4" />
+            {t('admin.backoffice.invoicesTab', { defaultValue: 'Faturação' })}
           </TabsTrigger>
           <TabsTrigger value="spaces" className="gap-1.5">
             <MapPin className="h-4 w-4" />
@@ -370,6 +382,11 @@ export function AdminBackoffice() {
             <OpsActionPrompts />
             <BackofficeDashboard />
           </div>
+        </TabsContent>
+
+        {/* Invoices Tab */}
+        <TabsContent value="invoices">
+          <BackofficeInvoicesTab />
         </TabsContent>
 
         {/* Overview Tab - Original Backoffice Content */}
