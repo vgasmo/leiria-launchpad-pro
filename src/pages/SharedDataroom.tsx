@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
