@@ -90,7 +90,7 @@ export default function SharedWorkspace() {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h1 className="text-xl font-semibold mb-2">Access Denied</h1>
+            <h1 className="text-xl font-semibold mb-2">{t('shared.accessDenied', 'Acesso Negado')}</h1>
             <p className="text-muted-foreground">
               {error instanceof Error ? error.message : 'This link is invalid or has expired.'}
             </p>
