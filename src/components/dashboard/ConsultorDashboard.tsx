@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WorkspaceWithDetails } from '@/hooks/useWorkspaces';
 import { FirstContactPrepSheet } from '@/components/consultor/FirstContactPrepSheet';
 
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { ConsultorRiskPanel, type RiskItem } from './consultor/ConsultorRiskPanel';
 import { ConsultorStatsBar } from './consultor/ConsultorStatsBar';
 import { ConsultorPipelineSnapshot } from './consultor/ConsultorPipelineSnapshot';
@@ -162,30 +163,46 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
       <UnifiedSmartInbox overdueCount={stats.overdueActionsCount} missingKpiCount={stats.missingKpiCount} />
       <WorkQueuePanel compact={false} />
 
-      <ConsultorRiskPanel riskItems={riskItems} onPrepSheet={setPrepSheetWorkspaceId} />
-      <ConsultorStatsBar stats={stats} />
-      <ConsultorHealthMatrix workspaces={workspaces} healthCounts={stats.healthCounts} total={stats.total} />
+      <WidgetErrorBoundary name="ConsultorRiskPanel">
+        <ConsultorRiskPanel riskItems={riskItems} onPrepSheet={setPrepSheetWorkspaceId} />
+      </WidgetErrorBoundary>
+      <WidgetErrorBoundary name="ConsultorStatsBar">
+        <ConsultorStatsBar stats={stats} />
+      </WidgetErrorBoundary>
+      <WidgetErrorBoundary name="ConsultorHealthMatrix">
+        <ConsultorHealthMatrix workspaces={workspaces} healthCounts={stats.healthCounts} total={stats.total} />
+      </WidgetErrorBoundary>
 
-      <PortfolioPerformanceTable workspaces={workspaces} />
+      <WidgetErrorBoundary name="PortfolioPerformanceTable">
+        <PortfolioPerformanceTable workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
         {t('consultor.portfolioSection', { defaultValue: 'Gestão de Portefólio' })}
       </p>
       <div className="grid gap-6 lg:grid-cols-3">
-        <ConsultorPipelineSnapshot pipelineSnapshot={pipelineSnapshot} />
-        <ConsultorSessionsToday upcomingSessions={upcomingSessions} />
-        <ConsultorCriticalActions criticalActions={criticalActions} />
+        <WidgetErrorBoundary name="ConsultorPipelineSnapshot">
+          <ConsultorPipelineSnapshot pipelineSnapshot={pipelineSnapshot} />
+        </WidgetErrorBoundary>
+        <WidgetErrorBoundary name="ConsultorSessionsToday">
+          <ConsultorSessionsToday upcomingSessions={upcomingSessions} />
+        </WidgetErrorBoundary>
+        <WidgetErrorBoundary name="ConsultorCriticalActions">
+          <ConsultorCriticalActions criticalActions={criticalActions} />
+        </WidgetErrorBoundary>
       </div>
 
       {!isFocused && (
-        <ConsultorWeeklyImpact
-          sessionsCount={upcomingSessions.length}
-          overdueCount={criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}
-          contractedCount={pipelineSnapshot?.contracted || 0}
-        />
+        <WidgetErrorBoundary name="ConsultorWeeklyImpact">
+          <ConsultorWeeklyImpact
+            sessionsCount={upcomingSessions.length}
+            overdueCount={criticalActions.reduce((sum, w) => sum + w.overdueActionsCount, 0)}
+            contractedCount={pipelineSnapshot?.contracted || 0}
+          />
+        </WidgetErrorBoundary>
       )}
 
-      {!isFocused && <ConsultorDataAlerts dataAlerts={dataAlerts} />}
+      {!isFocused && <WidgetErrorBoundary name="ConsultorDataAlerts"><ConsultorDataAlerts dataAlerts={dataAlerts} /></WidgetErrorBoundary>}
       {!isFocused && <CalendarWidget />}
 
       {prepSheetWorkspaceId && (
