@@ -140,8 +140,9 @@ export function PipelineView({
         id: itemId,
         stage: newStage,
       });
+      const stageLabel = t(`pipeline.simple.${targetSimple}`, targetSimple);
       toast.success(
-        t('crm.movedTo', { stage: SIMPLE_STAGE_LABELS[targetSimple], defaultValue: `Movido para ${SIMPLE_STAGE_LABELS[targetSimple]}` }),
+        t('crm.movedTo', { stage: stageLabel, defaultValue: `Movido para ${stageLabel}` }),
         {
           action: {
             label: t('common.undo', { defaultValue: 'Desfazer' }),
