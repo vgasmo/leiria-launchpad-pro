@@ -112,7 +112,7 @@ export default function SearchPage() {
       tagIds: savedFilters.tagIds || [],
       dateRange: savedFilters.dateRange,
     });
-    toast.success(`Loaded: ${saved.name}`);
+    toast.success(t('search.loaded', { name: saved.name, defaultValue: `Carregada: ${saved.name}` }));
   };
 
   const getResultIcon = (type: string) => {
