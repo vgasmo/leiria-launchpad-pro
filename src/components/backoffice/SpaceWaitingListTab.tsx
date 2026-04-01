@@ -31,21 +31,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow } from 'date-fns';
 
-const REQUEST_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  office: { label: 'Private Office', color: 'bg-blue-500' },
-  desk: { label: 'Dedicated Desk', color: 'bg-green-500' },
-  hotdesk: { label: 'Hot Desk', color: 'bg-yellow-500' },
-  virtual: { label: 'Virtual Incubation', color: 'bg-purple-500' },
-  meeting_room: { label: 'Meeting Room', color: 'bg-orange-500' },
+const REQUEST_TYPE_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  office: { labelKey: 'waitingList.privateOffice', color: 'bg-blue-500' },
+  desk: { labelKey: 'waitingList.dedicatedDesk', color: 'bg-green-500' },
+  hotdesk: { labelKey: 'waitingList.hotDesk', color: 'bg-yellow-500' },
+  virtual: { labelKey: 'waitingList.virtualIncubation', color: 'bg-purple-500' },
+  meeting_room: { labelKey: 'waitingList.meetingRoom', color: 'bg-orange-500' },
 };
 
-const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; color: string }> = {
-  waiting: { label: 'Waiting', icon: Clock, color: 'text-yellow-600' },
-  offered: { label: 'Offered', icon: ArrowRight, color: 'text-blue-600' },
-  accepted: { label: 'Accepted', icon: CheckCircle, color: 'text-green-600' },
-  declined: { label: 'Declined', icon: XCircle, color: 'text-red-600' },
-  fulfilled: { label: 'Fulfilled', icon: CheckCircle, color: 'text-green-600' },
-  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-muted-foreground' },
+const STATUS_CONFIG: Record<string, { labelKey: string; icon: typeof Clock; color: string }> = {
+  waiting: { labelKey: 'waitingList.statusWaiting', icon: Clock, color: 'text-yellow-600' },
+  offered: { labelKey: 'waitingList.statusOffered', icon: ArrowRight, color: 'text-blue-600' },
+  accepted: { labelKey: 'waitingList.statusAccepted', icon: CheckCircle, color: 'text-green-600' },
+  declined: { labelKey: 'waitingList.statusDeclined', icon: XCircle, color: 'text-red-600' },
+  fulfilled: { labelKey: 'waitingList.statusFulfilled', icon: CheckCircle, color: 'text-green-600' },
+  cancelled: { labelKey: 'waitingList.statusCancelled', icon: XCircle, color: 'text-muted-foreground' },
 };
 
 export function SpaceWaitingListTab() {
