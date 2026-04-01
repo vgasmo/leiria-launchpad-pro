@@ -36,13 +36,13 @@ interface TeamsIntegrationCardProps {
   canEdit: boolean;
 }
 
-const EVENT_OPTIONS = [
-  { key: 'notify_checkin_submitted', icon: ClipboardList, label: 'Check-in submitted', description: 'When a startup submits their monthly check-in' },
-  { key: 'notify_action_assigned', icon: Bell, label: 'Action assigned', description: 'When an action item is assigned to someone' },
-  { key: 'notify_action_overdue', icon: AlertTriangle, label: 'Action overdue', description: 'When an action item becomes overdue' },
-  { key: 'notify_session_created', icon: Calendar, label: 'Session created', description: 'When a new session/meeting is scheduled' },
-  { key: 'notify_session_rescheduled', icon: Calendar, label: 'Session rescheduled', description: 'When a session time is changed' },
-  { key: 'notify_health_alert', icon: Activity, label: 'Health alert', description: 'When a startup health score drops significantly' },
+const EVENT_OPTIONS_KEYS = [
+  { key: 'notify_checkin_submitted', icon: ClipboardList, labelKey: 'settings.checkinSubmitted', descKey: 'settings.checkinSubmittedDesc' },
+  { key: 'notify_action_assigned', icon: Bell, labelKey: 'settings.actionAssigned', descKey: 'settings.actionAssignedDesc' },
+  { key: 'notify_action_overdue', icon: AlertTriangle, labelKey: 'settings.actionOverdue', descKey: 'settings.actionOverdueDesc' },
+  { key: 'notify_session_created', icon: Calendar, labelKey: 'settings.sessionCreated', descKey: 'settings.sessionCreatedDesc' },
+  { key: 'notify_session_rescheduled', icon: Calendar, labelKey: 'settings.sessionRescheduled', descKey: 'settings.sessionRescheduledDesc' },
+  { key: 'notify_health_alert', icon: Activity, labelKey: 'settings.healthAlert', descKey: 'settings.healthAlertDesc' },
 ] as const;
 
 export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsIntegrationCardProps) {
