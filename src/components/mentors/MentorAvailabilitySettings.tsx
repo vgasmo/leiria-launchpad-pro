@@ -36,6 +36,7 @@ interface AvailabilitySlot {
 }
 
 export function MentorAvailabilitySettings() {
+  const { t } = useTranslation();
   const { data: savedAvailability, isLoading } = useMyAvailability();
   const setAvailability = useSetAvailability();
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
