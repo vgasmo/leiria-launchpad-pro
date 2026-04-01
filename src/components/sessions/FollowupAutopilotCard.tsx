@@ -233,5 +233,3 @@ export function FollowupAutopilotCard({
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

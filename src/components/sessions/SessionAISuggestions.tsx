@@ -227,5 +227,3 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

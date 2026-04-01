@@ -690,5 +690,3 @@ function TaskGroup({
     </Card>
   );
 }
-import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
-import { logger } from '@/lib/logger';

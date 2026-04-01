@@ -688,5 +688,3 @@ export function AdminStartupsManager() {
     </Card>
   );
 }
-import { startupSchema } from '@/lib/validations';
-import { logger } from '@/lib/logger';

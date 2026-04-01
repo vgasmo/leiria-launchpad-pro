@@ -240,5 +240,3 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

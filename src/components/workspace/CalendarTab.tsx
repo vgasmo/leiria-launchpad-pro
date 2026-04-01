@@ -911,5 +911,3 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     </div>
   );
 }
-import { useTranslation } from 'react-i18next';
-import { logger } from '@/lib/logger';

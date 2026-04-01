@@ -151,5 +151,3 @@ export function useNpsFeedback() {
     dismissPermanently,
   };
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

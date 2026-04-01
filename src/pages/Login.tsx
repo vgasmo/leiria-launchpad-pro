@@ -536,5 +536,3 @@ export default function Login() {
     </div>
   );
 }
-import startupLeiriaLogo from '@/assets/startup-leiria.svg';
-import { logger } from '@/lib/logger';

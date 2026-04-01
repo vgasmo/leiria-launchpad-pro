@@ -185,5 +185,3 @@ export default function MentorNda() {
     </div>
   );
 }
-import startupLeiriaLogo from '@/assets/startup-leiria.svg';
-import { logger } from '@/lib/logger';

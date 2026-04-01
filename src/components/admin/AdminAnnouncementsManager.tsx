@@ -436,5 +436,3 @@ export function AdminAnnouncementsManager() {
     </Card>
   );
 }
-import { useBuildings } from '@/hooks/useBackoffice';
-import { logger } from '@/lib/logger';

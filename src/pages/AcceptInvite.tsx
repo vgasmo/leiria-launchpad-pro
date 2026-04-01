@@ -200,5 +200,3 @@ export default function AcceptInvite() {
     </div>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

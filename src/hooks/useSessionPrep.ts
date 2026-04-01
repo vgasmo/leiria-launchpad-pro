@@ -196,5 +196,3 @@ export function useSessionPrep(sessionId: string | undefined, workspaceId: strin
     staleTime: 60000, // 1 minute
   });
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

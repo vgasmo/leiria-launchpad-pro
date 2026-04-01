@@ -149,5 +149,3 @@ export function useSaveAIFeedback() {
     },
   });
 }
-import i18n from '@/i18n';
-import { logger } from '@/lib/logger';

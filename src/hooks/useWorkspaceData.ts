@@ -194,5 +194,3 @@ export function useStages(programId: string | undefined) {
     enabled: !!programId,
   });
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

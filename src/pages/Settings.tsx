@@ -592,5 +592,3 @@ export default function Settings() {
     </AppLayout>
   );
 }
-import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
-import { logger } from '@/lib/logger';

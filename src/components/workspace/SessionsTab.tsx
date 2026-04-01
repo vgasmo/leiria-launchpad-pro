@@ -1486,5 +1486,3 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
     </Dialog>
   );
 }
-import { useMentorAvailability } from '@/hooks/useMentorAvailability';
-import { logger } from '@/lib/logger';
