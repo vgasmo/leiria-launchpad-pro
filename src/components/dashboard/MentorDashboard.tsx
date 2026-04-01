@@ -35,6 +35,7 @@ import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
 import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
 import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
+import { useMyAvailability } from '@/hooks/useMentorAvailability';
 import { StickyNote } from 'lucide-react';
 
 interface MentorDashboardProps {
@@ -47,6 +48,16 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
   const { t } = useTranslation();
   const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
   const [quickNoteWorkspaceId, setQuickNoteWorkspaceId] = useState<string | null>(null);
+  const { data: mySlots } = useMyAvailability();
+  
+  const slotsThisWeek = mySlots?.filter(s => s.is_active).length ?? 0;
+  const availabilityStatus = slotsThisWeek > 2 ? 'available' : slotsThisWeek > 0 ? 'limited' : 'full';
+  const statusColors = { available: 'bg-green-500', limited: 'bg-amber-500', full: 'bg-red-500' };
+  const statusLabels = {
+    available: t('mentor.availability.available', { defaultValue: 'Disponível' }),
+    limited: t('mentor.availability.limited', { defaultValue: 'Limitado' }),
+    full: t('mentor.availability.full', { defaultValue: 'Sem vagas' }),
+  };
 
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
@@ -157,6 +168,12 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Availability badge */}
+      <div className="flex items-center gap-2">
+        <span className={cn('h-2.5 w-2.5 rounded-full', statusColors[availabilityStatus])} />
+        <span className="text-sm text-muted-foreground">{statusLabels[availabilityStatus]}</span>
+      </div>
+
       {/* P0 HERO: Enhanced Session Prep */}
       <MentorSessionPrepEnhanced workspaces={workspaces} />
 

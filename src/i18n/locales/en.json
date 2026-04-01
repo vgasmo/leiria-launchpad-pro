@@ -1990,6 +1990,10 @@
     "noInteractionsYet": "No interactions yet",
     "noItems": "No items",
     "emptyColumnHint": "No leads in this category.",
+    "inboxZero": {
+      "title": "Inbox clear!",
+      "description": "All tasks are up to date. Great work!"
+    },
     "noTasks": "No tasks",
     "noTasksHint": "No tasks in this category.",
     "noNextAction": "No Next Action",
@@ -3465,6 +3469,11 @@
     "postSession": {
       "title": "Log your session notes",
       "subtitle": "You have recent sessions without notes — log them while fresh."
+    },
+    "availability": {
+      "available": "Available",
+      "limited": "Limited",
+      "full": "Fully booked"
     },
     "actionsPending": "ações",
     "kpiMissing": "KPIs por atualizar",
