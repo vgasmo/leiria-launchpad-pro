@@ -304,6 +304,11 @@ export default function ClaimStartup() {
 
         </CardContent>
       </Card>
+
+      <CreateStartupDialog 
+        open={showCreateDialog} 
+        onOpenChange={setShowCreateDialog} 
+      />
     </main>
   );
 }
