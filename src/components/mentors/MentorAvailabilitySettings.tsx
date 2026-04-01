@@ -148,7 +148,7 @@ export function MentorAvailabilitySettings() {
                     checked={slot.is_active}
                     onCheckedChange={(checked) => updateSlot(slot.id, 'is_active', checked)}
                   />
-                  <span className="text-sm text-muted-foreground">Active</span>
+                  <span className="text-sm text-muted-foreground">{t('common.active', 'Ativo')}</span>
                 </div>
 
                 <div className="flex-1 min-w-[200px]">
