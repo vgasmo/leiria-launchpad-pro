@@ -3434,12 +3434,21 @@
     "actionsFollowups": "Ações & Follow-ups",
     "admin": {
       "crm": "CRM",
+      "ecosystem": "Diretório Ecossistema",
       "operations": "Operações",
       "programsCohorts": "Programas e Coortes",
       "quickGuide": "Guia Rápido",
       "reports": "Relatórios",
       "systemConfig": "Configuração do Sistema",
       "usersPermissions": "Utilizadores & Permissões"
+    },
+    "backoffice": {
+      "approvals": "Aprovações",
+      "cockpit": "Centro de Comando",
+      "contracts": "Contratos",
+      "invoices": "Faturação",
+      "quickGuide": "Guia Rápido",
+      "spaces": "Espaços"
     },
     "adminPanel": "Painel de Admin",
     "consultor": {
