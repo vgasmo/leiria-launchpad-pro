@@ -57,7 +57,7 @@ export const ConsultorStatsBar = memo(function ConsultorStatsBar({ stats }: Cons
         </div>
       </Card>
 
-      <Card className="p-4 rounded-2xl border-border/60">
+      <Card interactive className="p-4 rounded-2xl border-border/60">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('dashboard.overdueActions')}</p>

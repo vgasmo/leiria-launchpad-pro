@@ -3466,6 +3466,11 @@
       "title": "Log your session notes",
       "subtitle": "You have recent sessions without notes — log them while fresh."
     },
+    "availability": {
+      "available": "Available",
+      "limited": "Limited",
+      "full": "Fully booked"
+    },
     "actionsPending": "ações",
     "kpiMissing": "KPIs por atualizar",
     "kpiUpToDate": "KPIs atualizados",
