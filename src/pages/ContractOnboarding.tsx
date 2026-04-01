@@ -23,7 +23,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
 
-// Steps are defined inside the component to access t() - see getSteps()
+// Steps defined inside component - see STEPS useMemo below
 
 interface RepresentativeEntry {
   name: string;
