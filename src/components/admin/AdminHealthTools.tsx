@@ -240,19 +240,19 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-full">
                   <FileText className="h-4 w-4 mr-2" />
-                  Guardar modelo atual como template
+                  {t('admin.saveCurrentAsTemplate', 'Guardar modelo atual como template')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Guardar como Template</DialogTitle>
+                  <DialogTitle>{t('admin.saveAsTemplate', 'Guardar como Template')}</DialogTitle>
                   <DialogDescription>
-                    Crie um template reutilizável a partir do modelo atual.
+                    {t('admin.createReusableTemplate', 'Crie um template reutilizável a partir do modelo atual.')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="name">{t('common.name', 'Nome')}</Label>
                     <Input
                       id="name"
                       value={newTemplateName}
