@@ -123,10 +123,10 @@ export function MentorAvailabilitySettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Availability Settings
+          {t('mentor.availabilitySettings', 'Definições de Disponibilidade')}
         </CardTitle>
         <CardDescription>
-          Configure your weekly availability for mentor sessions. Founders will be able to book sessions during these time slots.
+          {t('mentor.availabilityDescription', 'Configure a sua disponibilidade semanal para sessões de mentoria. Os founders poderão agendar sessões durante estes horários.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
