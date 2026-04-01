@@ -99,10 +99,10 @@ export function MentorAvailabilitySettings() {
           is_active: s.is_active,
         }))
       );
-      toast.success('Availability saved successfully');
+      toast.success(t('mentor.availabilitySaved', 'Disponibilidade guardada'));
       setHasChanges(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save availability');
+      toast.error(error.message || t('mentor.saveFailed', 'Falha ao guardar disponibilidade'));
     }
   };
 
