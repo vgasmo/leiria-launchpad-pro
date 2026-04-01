@@ -256,7 +256,7 @@ function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineCo
                 <div className="h-8 w-8 mx-auto mb-2 rounded-full bg-muted/50 flex items-center justify-center">
                   <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
                 </div>
-                <p className="text-xs text-muted-foreground">Arraste leads para aqui</p>
+                <p className="text-xs text-muted-foreground">{t('crm.dragLeadsHere', { defaultValue: 'Arraste leads para aqui' })}</p>
               </div>
             ) : (
               <div className="space-y-2">
