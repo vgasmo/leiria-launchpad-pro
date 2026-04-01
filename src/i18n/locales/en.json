@@ -1282,7 +1282,27 @@
     "selectTemplate": "Select template",
     "saveCurrentAsTemplate": "Save current model as template",
     "saveAsTemplate": "Save as Template",
-    "createReusableTemplate": "Create a reusable template from the current model."
+    "createReusableTemplate": "Create a reusable template from the current model.",
+    "bookingLinkCreatedCopied": "Booking link created and copied!",
+    "anyProgram": "Any program",
+    "generating": "Generating...",
+    "generateAndCopy": "Generate & Copy Link",
+    "deactivate": "Deactivate",
+    "days": "{{count}} days",
+    "integrationTestHarness": "Integration Test Harness",
+    "integrationTestDesc": "Verify Microsoft Graph API, Calendar, and Teams integrations are working correctly",
+    "assignFounderTitle": "Assign Founder to Workspace",
+    "existingWorkspace": "Existing Workspace",
+    "createNew": "Create New",
+    "selectWorkspace": "Select Workspace",
+    "confirmAssociation": "Confirm Association",
+    "startupName": "Startup Name *",
+    "creating": "Creating...",
+    "createWorkspace": "Create Workspace",
+    "pendingUserAccounts": "Pending User Accounts",
+    "pendingClaimRequests": "Pending Claim Requests",
+    "pendingStartupApplications": "Pending Startup Applications",
+    "assignToWorkspace": "Assign to Workspace"
   },
   "adminKpis": {
     "cancel": "Cancel",
@@ -1832,7 +1852,10 @@
     "unassigned": "Unassigned",
     "never": "Never",
     "descriptionOptional": "Description (optional)",
-    "unknownReason": "Unknown reason"
+    "unknownReason": "Unknown reason",
+    "expired": "Expired",
+    "inactive": "Inactive",
+    "errors": "Errors"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -1910,7 +1933,8 @@
     "reviewMilestone": "Review",
     "titleIsRequired": "Title is required",
     "valuePropositionSaved": "Value proposition saved!",
-    "weekSummary": "This week: {{sessions}} sessions · {{actions}} actions closed · {{health}} startups improved"
+    "weekSummary": "This week: {{sessions}} sessions · {{actions}} actions closed · {{health}} startups improved",
+    "prepSheetCopied": "Prep sheet copied!"
   },
   "consultorTools": {
     "agenda": "Agenda",
@@ -3666,7 +3690,14 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint."
+    "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint.",
+    "hubspot": {
+      "contactSync": "Two-way contact sync between startups and HubSpot contacts",
+      "investorTracking": "Track investor interactions as HubSpot activities",
+      "fundingSync": "Sync funding rounds to HubSpot deals",
+      "leadImport": "Import leads from HubSpot to workspace members",
+      "sessionNotes": "Log session notes as HubSpot engagements"
+    }
   },
   "investorReadiness": {
     "createLink": "Create Link",
@@ -5330,7 +5361,8 @@
     },
     "viewAllResults": "View all results",
     "enterName": "Please enter a name",
-    "saved": "Search saved"
+    "saved": "Search saved",
+    "loaded": "Loaded: {{name}}"
   },
   "session": {
     "inMinutes": "In Minutes",
@@ -7040,5 +7072,61 @@
     "adjustSearch": "Try adjusting search or check if user is registered.",
     "usersSelected": "{{count}} user(s) selected",
     "startConversation": "Start Conversation"
+  },
+  "tests": {
+    "pass": "Pass",
+    "fail": "Fail",
+    "skipped": "Skipped",
+    "partial": "Partial",
+    "noRuns": "No previous test runs. Click \"Run All\" to validate integrations.",
+    "running": "Running...",
+    "runAll": "Run All Tests",
+    "lastRun": "Last run"
+  },
+  "exercises": {
+    "editExercise": "Edit Exercise",
+    "createNew": "Create New Exercise",
+    "formDesc": "Define the exercise details, steps, and facilitation guidelines.",
+    "title": "Title *",
+    "purpose": "Purpose",
+    "purposePlaceholder": "When and why to use this exercise",
+    "duration": "Duration (minutes)",
+    "groupSize": "Group Size",
+    "smallGroup": "Small Group (2-5)",
+    "cohort": "Cohort (6+)",
+    "tags": "Context Tags",
+    "materials": "Materials Needed",
+    "materialPlaceholder": "e.g., Whiteboard, sticky notes",
+    "addMaterial": "Add material",
+    "stepByStep": "Step-by-Step Instructions",
+    "step": "Step",
+    "stepTitlePlaceholder": "Step title",
+    "stepDescPlaceholder": "What happens in this step",
+    "addStep": "Add step",
+    "facilitatorTips": "Facilitator Tips",
+    "facilitatorTipsPlaceholder": "What to watch for, how to redirect, key observations",
+    "successCriteria": "Success Criteria",
+    "successCriteriaPlaceholder": "How do you know the exercise went well?",
+    "commonPitfalls": "Common Pitfalls",
+    "commonPitfallsPlaceholder": "Mistakes to avoid, things that often go wrong",
+    "variations": "Variations (optional)",
+    "variationsPlaceholder": "Alternative ways to run this exercise",
+    "approved": "Approved",
+    "approvedDesc": "Approved exercises are visible to all consultors",
+    "saveChanges": "Save Changes",
+    "createExercise": "Create Exercise"
+  },
+  "quality": {
+    "checking": "Checking quality...",
+    "title": "Quality Check",
+    "strictMode": "Strict Mode",
+    "missing": "Missing:",
+    "completed": "Completed:",
+    "coachTips": "Coach Tips",
+    "good": "Good",
+    "needsWork": "Needs work",
+    "incomplete": "Incomplete",
+    "recalculate": "Recalculate",
+    "blockingWarning": "This {{entityType}} cannot be marked as ready until the score reaches 70+"
   }
 }

@@ -1282,7 +1282,27 @@
     "selectTemplate": "Selecionar template",
     "saveCurrentAsTemplate": "Guardar modelo atual como template",
     "saveAsTemplate": "Guardar como Template",
-    "createReusableTemplate": "Crie um template reutilizável a partir do modelo atual."
+    "createReusableTemplate": "Crie um template reutilizável a partir do modelo atual.",
+    "bookingLinkCreatedCopied": "Link de reserva criado e copiado!",
+    "anyProgram": "Qualquer programa",
+    "generating": "A gerar...",
+    "generateAndCopy": "Gerar e Copiar Link",
+    "deactivate": "Desativar",
+    "days": "{{count}} dias",
+    "integrationTestHarness": "Teste de Integrações",
+    "integrationTestDesc": "Verificar se as integrações Microsoft Graph API, Calendar e Teams estão a funcionar",
+    "assignFounderTitle": "Associar Founder a Workspace",
+    "existingWorkspace": "Workspace Existente",
+    "createNew": "Criar Novo",
+    "selectWorkspace": "Selecionar Workspace",
+    "confirmAssociation": "Confirmar Associação",
+    "startupName": "Nome da Startup *",
+    "creating": "A criar...",
+    "createWorkspace": "Criar Workspace",
+    "pendingUserAccounts": "Contas de Utilizador Pendentes",
+    "pendingClaimRequests": "Pedidos de Associação Pendentes",
+    "pendingStartupApplications": "Candidaturas de Startups Pendentes",
+    "assignToWorkspace": "Associar a Workspace"
   },
   "adminKpis": {
     "cancel": "Cancelar",
@@ -1832,7 +1852,10 @@
     "unassigned": "Não atribuído",
     "never": "Nunca",
     "descriptionOptional": "Descrição (opcional)",
-    "unknownReason": "Razão desconhecida"
+    "unknownReason": "Razão desconhecida",
+    "expired": "Expirado",
+    "inactive": "Inativo",
+    "errors": "Erros"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -1910,7 +1933,8 @@
     "reviewMilestone": "Rever",
     "titleIsRequired": "Title is required",
     "valuePropositionSaved": "Value proposition saved!",
-    "weekSummary": "Esta semana: {{sessions}} sessões · {{actions}} ações fechadas · {{health}} startups melhoraram"
+    "weekSummary": "Esta semana: {{sessions}} sessões · {{actions}} ações fechadas · {{health}} startups melhoraram",
+    "prepSheetCopied": "Prep sheet copiado!"
   },
   "consultorTools": {
     "agenda": "Agenda",
@@ -3666,7 +3690,14 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook."
+    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
+    "hubspot": {
+      "contactSync": "Sincronização bidirecional de contactos entre startups e HubSpot",
+      "investorTracking": "Acompanhar interações com investidores como atividades HubSpot",
+      "fundingSync": "Sincronizar rondas de financiamento com deals HubSpot",
+      "leadImport": "Importar leads do HubSpot para membros do workspace",
+      "sessionNotes": "Registar notas de sessão como engagements HubSpot"
+    }
   },
   "investorReadiness": {
     "createLink": "Criar Link",
@@ -5330,7 +5361,8 @@
     },
     "viewAllResults": "Ver todos os resultados",
     "enterName": "Introduza um nome",
-    "saved": "Pesquisa guardada"
+    "saved": "Pesquisa guardada",
+    "loaded": "Carregada: {{name}}"
   },
   "session": {
     "inMinutes": "In minutos",
@@ -7040,5 +7072,61 @@
     "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
     "usersSelected": "{{count}} utilizador(es) selecionado(s)",
     "startConversation": "Iniciar Conversa"
+  },
+  "tests": {
+    "pass": "Passou",
+    "fail": "Falhou",
+    "skipped": "Ignorado",
+    "partial": "Parcial",
+    "noRuns": "Sem execuções anteriores. Clique em \"Executar Todos\" para validar as integrações.",
+    "running": "A executar...",
+    "runAll": "Executar Todos",
+    "lastRun": "Última execução"
+  },
+  "exercises": {
+    "editExercise": "Editar Exercício",
+    "createNew": "Criar Novo Exercício",
+    "formDesc": "Defina os detalhes do exercício, passos e orientações de facilitação.",
+    "title": "Título *",
+    "purpose": "Objetivo",
+    "purposePlaceholder": "Quando e porquê usar este exercício",
+    "duration": "Duração (minutos)",
+    "groupSize": "Tamanho do Grupo",
+    "smallGroup": "Grupo Pequeno (2-5)",
+    "cohort": "Coorte (6+)",
+    "tags": "Tags de Contexto",
+    "materials": "Materiais Necessários",
+    "materialPlaceholder": "ex: Quadro branco, post-its",
+    "addMaterial": "Adicionar material",
+    "stepByStep": "Instruções Passo a Passo",
+    "step": "Passo",
+    "stepTitlePlaceholder": "Título do passo",
+    "stepDescPlaceholder": "O que acontece neste passo",
+    "addStep": "Adicionar passo",
+    "facilitatorTips": "Dicas de Facilitador",
+    "facilitatorTipsPlaceholder": "O que observar, como redirecionar, observações-chave",
+    "successCriteria": "Critérios de Sucesso",
+    "successCriteriaPlaceholder": "Como saber se o exercício correu bem?",
+    "commonPitfalls": "Erros Comuns",
+    "commonPitfallsPlaceholder": "Erros a evitar, coisas que costumam correr mal",
+    "variations": "Variações (opcional)",
+    "variationsPlaceholder": "Formas alternativas de realizar este exercício",
+    "approved": "Aprovado",
+    "approvedDesc": "Exercícios aprovados ficam visíveis para todos os consultores",
+    "saveChanges": "Guardar Alterações",
+    "createExercise": "Criar Exercício"
+  },
+  "quality": {
+    "checking": "A verificar qualidade...",
+    "title": "Verificação de Qualidade",
+    "strictMode": "Modo Estrito",
+    "missing": "Em falta:",
+    "completed": "Concluído:",
+    "coachTips": "Dicas de Coach",
+    "good": "Bom",
+    "needsWork": "Precisa de trabalho",
+    "incomplete": "Incompleto",
+    "recalculate": "Recalcular",
+    "blockingWarning": "Este {{entityType}} não pode ser marcado como pronto até a pontuação atingir 70+"
   }
 }
