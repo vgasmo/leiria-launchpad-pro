@@ -1,10 +1,9 @@
 /**
- * Space Operations Console — Read-only unified view of Building → Room → Allocation → Workspace → Contract
- * ADDITIVE ONLY. No writes, no mutations, no status changes.
+ * Space Operations Console — Unified view of Building → Room → Allocation → Workspace → Contract
  */
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -261,6 +260,7 @@ function WarningBadges({ warnings }: { warnings: string[] }) {
 export function SpaceOperationsConsole() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: records, isLoading } = useSpaceOperationsData();
   const [search, setSearch] = useState('');
   const [buildingFilter, setBuildingFilter] = useState('all');
@@ -268,6 +268,31 @@ export function SpaceOperationsConsole() {
   const [warningFilter, setWarningFilter] = useState('all');
   const [selectedRecord, setSelectedRecord] = useState<UnifiedRecord | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Count stale rooms (occupied but no allocation)
+  const staleRoomIds = useMemo(() => {
+    if (!records) return [];
+    return records
+      .filter(r => r.room_status === 'occupied' && !r.allocation_id)
+      .map(r => r.room_id);
+  }, [records]);
+
+  const cleanupMutation = useMutation({
+    mutationFn: async (roomIds: string[]) => {
+      const { error } = await supabase
+        .from('rooms')
+        .update({ status: 'available' })
+        .in('id', roomIds);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['space-operations-console'] });
+      toast.success(`${staleRoomIds.length} sala(s) libertada(s) com sucesso`);
+    },
+    onError: () => {
+      toast.error('Erro ao limpar salas');
+    },
+  });
 
   const buildings = useMemo(() => {
     if (!records) return [];
@@ -395,10 +420,24 @@ export function SpaceOperationsConsole() {
         </Select>
       </div>
 
-      {/* Results count */}
-      <p className="text-xs text-muted-foreground">
-        {filtered.length} de {records?.length || 0} {t('ops.console.roomsShown', { defaultValue: 'salas apresentadas' })}
-      </p>
+      {/* Results count + cleanup */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {filtered.length} de {records?.length || 0} {t('ops.console.roomsShown', { defaultValue: 'salas apresentadas' })}
+        </p>
+        {staleRoomIds.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-amber-700 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-900/20"
+            disabled={cleanupMutation.isPending}
+            onClick={() => cleanupMutation.mutate(staleRoomIds)}
+          >
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Libertar {staleRoomIds.length} sala(s) órfã(s)
+          </Button>
+        )}
+      </div>
 
       {/* Table */}
       <Card className="rounded-xl overflow-hidden">

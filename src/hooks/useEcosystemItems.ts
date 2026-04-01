@@ -155,8 +155,10 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
         profiles?.forEach(p => { ownerNames[p.id] = p.full_name || 'Unknown'; });
       }
 
-      // Map workspaces to ecosystem items
-      const wsItems: EcosystemItem[] = (workspaces || []).map(w => ({
+      // Filter out workspaces whose startup was deleted (name is null from join)
+      const wsItems: EcosystemItem[] = (workspaces || [])
+        .filter(w => (w.startup as any)?.name)
+        .map(w => ({
         id: w.id,
         item_type: 'workspace' as const,
         workspace_id: w.id,
