@@ -48,6 +48,16 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
   const { t } = useTranslation();
   const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
   const [quickNoteWorkspaceId, setQuickNoteWorkspaceId] = useState<string | null>(null);
+  const { data: mySlots } = useMyAvailability();
+  
+  const slotsThisWeek = mySlots?.filter(s => s.is_active).length ?? 0;
+  const availabilityStatus = slotsThisWeek > 2 ? 'available' : slotsThisWeek > 0 ? 'limited' : 'full';
+  const statusColors = { available: 'bg-green-500', limited: 'bg-amber-500', full: 'bg-red-500' };
+  const statusLabels = {
+    available: t('mentor.availability.available', { defaultValue: 'Disponível' }),
+    limited: t('mentor.availability.limited', { defaultValue: 'Limitado' }),
+    full: t('mentor.availability.full', { defaultValue: 'Sem vagas' }),
+  };
 
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
