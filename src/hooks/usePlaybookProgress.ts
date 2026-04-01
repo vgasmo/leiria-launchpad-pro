@@ -24,7 +24,8 @@ export interface PlaybookProgress {
  * Tracks actions and milestones created by playbooks.
  */
 export function usePlaybookProgress(workspaceId: string | undefined) {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     queryKey: ['playbook-progress', workspaceId],
     queryFn: async (): Promise<PlaybookProgress> => {
       if (!workspaceId) {
