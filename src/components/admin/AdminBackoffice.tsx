@@ -28,6 +28,7 @@ import type { StartupStage, WorkspacePriority } from '@/types/database';
 // Backoffice sub-tab components
 import { BackofficeDashboard } from '@/components/backoffice/BackofficeDashboard';
 import { BackofficeContractsTab } from '@/components/backoffice/BackofficeContractsTab';
+import { BackofficeInvoicesTab } from '@/components/backoffice/BackofficeInvoicesTab';
 import { BackofficeIncubationTypesTab } from '@/components/backoffice/BackofficeIncubationTypesTab';
 import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
