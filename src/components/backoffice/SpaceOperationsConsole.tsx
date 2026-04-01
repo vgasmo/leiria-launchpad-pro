@@ -224,6 +224,7 @@ function StatusBadge({ status, type }: { status: string | null; type: 'room' | '
 }
 
 function WarningBadges({ warnings }: { warnings: string[] }) {
+  const { t } = useTranslation();
   if (warnings.length === 0) return null;
 
   const warningLabels: Record<string, { label: string; severity: 'warning' | 'error' | 'info' }> = {
