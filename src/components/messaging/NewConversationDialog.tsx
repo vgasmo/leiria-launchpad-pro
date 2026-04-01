@@ -116,9 +116,9 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center text-center py-8 px-4">
-                <p className="text-sm font-medium text-foreground mb-0.5">Nenhum utilizador encontrado</p>
+                <p className="text-sm font-medium text-foreground mb-0.5">{t('messaging.noUsersFound', 'Nenhum utilizador encontrado')}</p>
                 <p className="text-xs text-muted-foreground max-w-[220px]">
-                  Tente ajustar a pesquisa ou verifique se o utilizador já está registado.
+                  {t('messaging.adjustSearch', 'Tente ajustar a pesquisa ou verifique se o utilizador já está registado.')}
                 </p>
               </div>
             ) : (
