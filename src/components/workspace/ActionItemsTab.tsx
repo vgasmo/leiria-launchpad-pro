@@ -25,6 +25,9 @@ import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
+import { ActionItemCard } from './actions/ActionItemCard';
+import { MilestoneActionGroup } from './actions/MilestoneActionGroup';
+import { KanbanColumn } from './actions/KanbanColumn';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
