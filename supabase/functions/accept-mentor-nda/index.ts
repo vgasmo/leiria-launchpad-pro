@@ -23,13 +23,12 @@ Deno.serve(async (req: Request) => {
     });
 
     // Verify caller identity
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return corsJsonResponse({ error: 'Invalid token' }, req, 401);
     }
 
-    const userId = claimsData.claims.sub as string;
+    const userId = user.id;
 
     // Get user agent and hash IP for privacy
     const userAgent = req.headers.get('User-Agent') || null;

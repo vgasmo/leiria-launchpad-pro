@@ -7052,6 +7052,7 @@ export type Database = {
       }
       workspace_playbook_instances: {
         Row: {
+          completed_at: string | null
           created_at: string
           id: string
           instantiated_at: string | null
@@ -7061,6 +7062,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           id?: string
           instantiated_at?: string | null
@@ -7070,6 +7072,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           id?: string
           instantiated_at?: string | null

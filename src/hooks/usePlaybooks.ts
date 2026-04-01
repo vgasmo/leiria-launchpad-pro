@@ -38,9 +38,10 @@ export interface WorkspacePlaybookInstance {
   id: string;
   workspace_id: string;
   playbook_id: string;
-  status: 'suggested' | 'instantiated' | 'dismissed';
+  status: 'suggested' | 'instantiated' | 'dismissed' | 'completed';
   instantiated_by: string | null;
   instantiated_at: string | null;
+  completed_at: string | null;
   created_at: string;
   playbook?: Playbook;
 }
