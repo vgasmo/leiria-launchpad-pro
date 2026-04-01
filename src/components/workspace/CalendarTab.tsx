@@ -61,6 +61,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SessionFormFields, type SessionFormData } from './calendar/SessionFormFields';
 import { cn } from '@/lib/utils';
 import { useCalendarSessions, useCreateSession, useUpdateSession, useDeleteSession, useWorkspaceMembers, Session } from '@/hooks/useSessions';
 import { useSessionTemplates } from '@/hooks/useSessionTemplates';
