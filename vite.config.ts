@@ -1,8 +1,22 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+
+function versionJsonPlugin(): Plugin {
+  return {
+    name: 'version-json',
+    closeBundle() {
+      const version = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '.'));
+      fs.writeFileSync(
+        path.resolve(__dirname, 'dist/version.json'),
+        JSON.stringify({ version }),
+      );
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
