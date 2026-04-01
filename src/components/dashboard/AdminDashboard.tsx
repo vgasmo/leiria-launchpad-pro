@@ -96,16 +96,6 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
       sparkData: [1, 2, 1, 3, 2, stats?.contractRenewals30d ?? 0],
     },
     {
-      key: 'overdue',
-      label: t('admin.overdueInvoices'),
-      value: stats?.overdueInvoicesCount ?? 0,
-      icon: AlertTriangle,
-      href: '/admin?tab=backoffice',
-      variant: 'destructive' as const,
-      trend: (stats?.overdueInvoicesCount ?? 0) > 0 ? 'up' as const : 'down' as const,
-      sparkData: [3, 2, 4, 1, 3, stats?.overdueInvoicesCount ?? 0],
-    },
-    {
       key: 'occupancy',
       label: t('admin.occupancy'),
       value: stats ? `${stats.occupiedSpaces}/${stats.totalSpaces}` : '—',

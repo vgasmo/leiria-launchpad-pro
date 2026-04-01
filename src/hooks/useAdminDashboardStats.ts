@@ -11,7 +11,6 @@ import { supabase } from '@/lib/supabaseClient';
 export interface AdminDashboardStats {
   pendingApprovalsCount: number;
   contractRenewals30d: number;
-  overdueInvoicesCount: number;
   occupiedSpaces: number;
   totalSpaces: number;
 }
@@ -20,15 +19,12 @@ export function useAdminDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<AdminDashboardStats> => {
-      // Run all queries in parallel
-      const [pendingRes, renewalsRes, overdueRes, spacesRes, occupiedRes] = await Promise.all([
-        // 1. Pending user approvals
+      const [pendingRes, renewalsRes, spacesRes, occupiedRes] = await Promise.all([
         supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
           .eq('account_status', 'pending'),
 
-        // 2. Contracts expiring within 30 days
         supabase
           .from('startup_contracts' as any)
           .select('id', { count: 'exact', head: true })
@@ -36,18 +32,10 @@ export function useAdminDashboardStats() {
           .lte('end_date', new Date(Date.now() + 30 * 86400000).toISOString())
           .gte('end_date', new Date().toISOString()),
 
-        // 3. Overdue invoices
-        supabase
-          .from('invoices')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'overdue'),
-
-        // 4. Total rooms (office spaces)
         supabase
           .from('rooms')
           .select('id', { count: 'exact', head: true }),
 
-        // 5. Occupied rooms
         supabase
           .from('rooms')
           .select('id', { count: 'exact', head: true })
@@ -57,7 +45,6 @@ export function useAdminDashboardStats() {
       return {
         pendingApprovalsCount: pendingRes.count ?? 0,
         contractRenewals30d: renewalsRes.count ?? 0,
-        overdueInvoicesCount: overdueRes.count ?? 0,
         totalSpaces: spacesRes.count ?? 0,
         occupiedSpaces: occupiedRes.count ?? 0,
       };
