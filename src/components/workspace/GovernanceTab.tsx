@@ -245,7 +245,7 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
           )}
 
           {/* Request Review Button */}
-          {!pendingReview && nextStage && canWrite && (
+          {!pendingReview && nextStage && canWrite && isFounder && !isStaff && (
             <Button 
               onClick={() => setShowRequestDialog(true)}
               className="w-full"
