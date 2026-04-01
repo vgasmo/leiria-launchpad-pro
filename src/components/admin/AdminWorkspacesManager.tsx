@@ -328,9 +328,9 @@ export function AdminWorkspacesManager() {
                 </Select>
               </div>
               <div>
-                <Label>Program *</Label>
+                <Label>{t('common.program', 'Programa')} *</Label>
                 <Select value={selectedProgram} onValueChange={setSelectedProgram}>
-                  <SelectTrigger><SelectValue placeholder="Select program" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('admin.workspacesManager.selectProgram', 'Selecionar programa')} /></SelectTrigger>
                   <SelectContent>
                     {programs?.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
