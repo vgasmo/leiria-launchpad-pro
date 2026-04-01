@@ -78,12 +78,12 @@
     "unassigned": "Unassigned",
     "unassignedActions": "Unassigned Actions",
     "updatedCount": "Updated {{count}} actions",
-    "addActionFromSession": "Criar uma ação a partir desta sessão",
-    "descriptionPlaceholder": "Detalhes adicionais...",
-    "description": "Descrição",
-    "priorityUrgent": "Urgente",
-    "selectMember": "Selecionar membro",
-    "titlePlaceholder": "O que precisa ser feito?"
+    "addActionFromSession": "Create an action from this session",
+    "descriptionPlaceholder": "Additional details...",
+    "description": "Description",
+    "priorityUrgent": "Urgent",
+    "selectMember": "Select member",
+    "titlePlaceholder": "What needs to be done?"
   },
   "activityLog": {
     "action": "Action",
@@ -1083,7 +1083,7 @@
       "reactivateTitle": "Reativar Conta",
       "reactivated": "Conta reativada",
       "reactivate": "Reactivate",
-      "statusPending": "Pendente",
+      "statusPending": "Pending",
       "statusSuspended": "Suspensa",
       "suspendError": "Erro ao alterar estado da conta",
       "suspendTitle": "Suspender Conta",
@@ -1436,7 +1436,7 @@
     "actions": "Actions",
     "add": "Add",
     "adding": "Adding",
-    "all": "Todos",
+    "all": "All",
     "approved": "Approved",
     "back": "Back",
     "cancel": "Cancel",
@@ -1545,14 +1545,14 @@
     "langCode": "en",
     "month": "month",
     "moreActions": "More actions",
-    "no": "Não",
+    "no": "No",
     "open": "Abrir",
     "other": "Outro",
     "phone": "Phone",
     "retry": "Tentar novamente",
     "select": "Select",
     "verify": "Verificar",
-    "yes": "Sim"
+    "yes": "Yes"
   },
   "cockpit": {
     "actionTitle": "Action Title",
@@ -2788,8 +2788,8 @@
       "descDefault": "A equipa está a preparar o seu espaço. Receberá uma notificação quando estiver pronto.",
       "descOnboarding": "O seu espaço de trabalho está a ser configurado. Em breve terá acesso a todas as ferramentas.",
       "descPending": "A sua candidatura foi recebida e está a aguardar análise. Contacte a equipa se tiver questões.",
-      "goResources": "Recursos",
-      "goSettings": "Definições",
+      "goResources": "Resources",
+      "goSettings": "Settings",
       "goWorkspace": "Ver espaço",
       "step1": "A equipa do programa analisa a sua candidatura",
       "step2": "Receberá uma notificação quando for aprovada",
@@ -4831,7 +4831,7 @@
     "sourceManual": "Manual",
     "sourceMeeting": "Meeting",
     "sourceVoice": "Voice",
-    "startLabel": "Início",
+    "startLabel": "Home",
     "stopRecording": "Stop",
     "summary": "Summary",
     "syncFailed": "Sync failed",
@@ -4843,7 +4843,7 @@
     "syncSuccess": "Session synced to Outlook",
     "teamsDesc": "Connect your Teams meetings",
     "title": "Sessions",
-    "titleLabel": "Título",
+    "titleLabel": "Title",
     "titlePlaceholder": "Título da sessão",
     "titleRequired": "Title *",
     "transcriptAdded": "Transcript added",
@@ -4876,7 +4876,7 @@
       "checkIn": "Check-in",
       "discovery": "Discovery",
       "followUp": "Follow-up",
-      "general": "Geral",
+      "general": "General",
       "mentoring": "Mentoria",
       "pitchPractice": "Pitch Practice",
       "problemSolving": "Problem-Solving",
@@ -6044,7 +6044,7 @@
     "portfolioDesc": "Gestão aprofundada das startups que acompanha. Para triagem diária, use a Fila de Trabalho.",
     "quickAccess": {
       "contractsDesc": "Gestão e renovações",
-      "contracts": "Contratos",
+      "contracts": "Contracts",
       "infrastructureDesc": "Edifícios, salas e plantas",
       "infrastructure": "Infraestrutura",
       "spaceOpsDesc": "Alocações, startups e espaços",
@@ -6272,7 +6272,7 @@
     "schedule": "Agendar",
     "session": "Sessão recente",
     "title": "Prontidão do Projeto",
-    "updateKpis": "Atualizar"
+    "updateKpis": "Update"
   },
   "inbox": {
     "empty": {
@@ -6304,7 +6304,7 @@
   },
   "ops": {
     "console": {
-      "available": "Disponíveis",
+      "available": "Available",
       "dataWarnings": "Avisos de Dados",
       "missingContract": "Sem Contrato",
       "noResults": "Nenhuma sala encontrada com esses filtros.",
