@@ -182,7 +182,7 @@ export default function SharedWorkspace() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-primary" />
-                Milestones
+                {t('shared.milestones', 'Marcos')}
               </CardTitle>
             </CardHeader>
             <CardContent>
