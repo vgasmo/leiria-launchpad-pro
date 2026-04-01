@@ -27,7 +27,6 @@ export default function ClaimStartup() {
   const [claimedStartupName, setClaimedStartupName] = useState<string | null>(null);
   const [claimedWorkspaceId, setClaimedWorkspaceId] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [claimedWorkspaceId, setClaimedWorkspaceId] = useState<string | null>(null);
 
   // Determine the effective display state based on founderState + pageState
   const getDisplayState = () => {
