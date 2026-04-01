@@ -167,8 +167,16 @@ export default function ClaimStartup() {
                 <Rocket className="h-5 w-5" />
                 {t('claimStartup.verifyCta', { defaultValue: 'Verificar Agora' })}
               </Button>
-            </div>
-          )}
+
+              <div className="w-full border-t pt-4 mt-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('claimStartup.newStartupHint', { defaultValue: 'Tem uma startup nova que ainda não está no sistema?' })}
+                </p>
+                <Button variant="outline" onClick={() => setShowCreateDialog(true)} className="gap-2 w-full max-w-xs">
+                  <Plus className="h-4 w-4" />
+                  {t('claimStartup.submitApplication', { defaultValue: 'Submeter Candidatura' })}
+                </Button>
+              </div>
 
           {/* VERIFYING — RPC in progress */}
           {displayState === 'verifying' && (
