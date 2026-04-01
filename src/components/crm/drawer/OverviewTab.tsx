@@ -18,6 +18,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useIncubationTypes } from '@/hooks/backoffice/useIncubationTypes';
 
 interface OverviewTabProps {
   item: FunnelItem;
@@ -47,6 +48,7 @@ export function OverviewTab({
   const stageColor = STAGE_COLORS[item.stage];
   const stageLabel = getFunnelStageLabel(t, item.stage);
   const updateItem = useUpdateFunnelItem();
+  const { data: incubationTypes } = useIncubationTypes();
 
   const [editingDeal, setEditingDeal] = useState(false);
   const [dealValue, setDealValue] = useState(item.deal_value?.toString() || '');
@@ -55,6 +57,21 @@ export function OverviewTab({
   const [winProb, setWinProb] = useState(
     (item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0).toString()
   );
+  const [proposedFee, setProposedFee] = useState('');
+  const [proposedDiscount, setProposedDiscount] = useState('');
+  const [proposedIncubationTypeId, setProposedIncubationTypeId] = useState('');
+  const [commercialNotes, setCommercialNotes] = useState('');
+
+  useEffect(() => {
+    const metadata = ((item as any).metadata_json && typeof (item as any).metadata_json === 'object')
+      ? (item as any).metadata_json
+      : {};
+
+    setProposedFee(metadata?.proposed_fee != null ? String(metadata.proposed_fee) : '');
+    setProposedDiscount(metadata?.proposed_discount != null ? String(metadata.proposed_discount) : '');
+    setProposedIncubationTypeId(typeof metadata?.proposed_incubation_type_id === 'string' ? metadata.proposed_incubation_type_id : '');
+    setCommercialNotes(typeof metadata?.commercial_notes === 'string' ? metadata.commercial_notes : '');
+  }, [item.id]);
 
   const handleSaveDeal = () => {
     updateItem.mutate({
@@ -65,6 +82,25 @@ export function OverviewTab({
       win_probability: winProb ? parseInt(winProb) : null,
     } as any);
     setEditingDeal(false);
+  };
+
+  const handleSaveCommercialProposal = () => {
+    const baseMetadata = ((item as any).metadata_json && typeof (item as any).metadata_json === 'object')
+      ? (item as any).metadata_json
+      : {};
+
+    const nextMetadata = {
+      ...baseMetadata,
+      proposed_fee: proposedFee === '' ? null : Number(proposedFee),
+      proposed_discount: proposedDiscount === '' ? null : Number(proposedDiscount),
+      proposed_incubation_type_id: proposedIncubationTypeId || null,
+      commercial_notes: commercialNotes.trim() || null,
+    };
+
+    updateItem.mutate({
+      id: item.id,
+      metadata_json: nextMetadata,
+    } as any);
   };
 
   const weightedValue = (item.deal_value || 0) * ((item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0) / 100);
@@ -263,13 +299,35 @@ export function OverviewTab({
         </h4>
         
         <div className="grid gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-xs text-muted-foreground">{t('crm.proposedIncubationType', { defaultValue: 'Tipo de Incubação Proposto' })}</Label>
+            <Select
+              value={proposedIncubationTypeId || '__none__'}
+              onValueChange={(value) => setProposedIncubationTypeId(value === '__none__' ? '' : value)}
+            >
+              <SelectTrigger className="w-52 h-8 text-xs">
+                <SelectValue placeholder={t('crm.selectIncubationType', { defaultValue: 'Selecionar tipo' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t('common.none', { defaultValue: 'Nenhum' })}</SelectItem>
+                {(incubationTypes || [])
+                  .filter(type => type.is_active)
+                  .map(type => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">{t('crm.proposedMonthlyFee', { defaultValue: 'Mensalidade Proposta (€)' })}</Label>
             <Input 
               type="number" 
               className="w-32 h-8 text-xs" 
-              value={(item as any).metadata_json?.proposed_fee || ''} 
-              onChange={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), proposed_fee: e.target.value } } as any)}
+              value={proposedFee}
+              onChange={(e) => setProposedFee(e.target.value)}
               placeholder="0"
             />
           </div>
@@ -280,8 +338,8 @@ export function OverviewTab({
               type="number" 
               className="w-24 h-8 text-xs" 
               min="0" max="100"
-              value={(item as any).metadata_json?.proposed_discount || ''} 
-              onChange={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), proposed_discount: e.target.value } } as any)}
+              value={proposedDiscount}
+              onChange={(e) => setProposedDiscount(e.target.value)}
               placeholder="0"
             />
           </div>
@@ -291,12 +349,20 @@ export function OverviewTab({
             <Textarea 
               className="mt-1 text-xs" 
               rows={2}
-              value={(item as any).metadata_json?.commercial_notes || ''} 
-              onBlur={(e) => updateItem.mutate({ id: item.id, metadata_json: { ...((item as any).metadata_json || {}), commercial_notes: e.target.value } } as any)}
-              defaultValue={(item as any).metadata_json?.commercial_notes || ''}
+              value={commercialNotes}
+              onChange={(e) => setCommercialNotes(e.target.value)}
               placeholder={t('crm.commercialNotesPlaceholder', { defaultValue: 'Tipo de contrato, condições especiais...' })}
             />
           </div>
+
+          <Button
+            size="sm"
+            className="w-full h-8 text-xs"
+            onClick={handleSaveCommercialProposal}
+            disabled={updateItem.isPending}
+          >
+            {t('crm.saveCommercialProposal', { defaultValue: 'Guardar proposta comercial' })}
+          </Button>
         </div>
       </div>
 

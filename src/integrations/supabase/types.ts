@@ -2173,6 +2173,7 @@ export type Database = {
           linked_startup_id: string | null
           linked_workspace_id: string | null
           loss_reason: string | null
+          metadata_json: Json
           next_action_at: string | null
           next_action_description: string | null
           notes: string | null
@@ -2203,6 +2204,7 @@ export type Database = {
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
           loss_reason?: string | null
+          metadata_json?: Json
           next_action_at?: string | null
           next_action_description?: string | null
           notes?: string | null
@@ -2233,6 +2235,7 @@ export type Database = {
           linked_startup_id?: string | null
           linked_workspace_id?: string | null
           loss_reason?: string | null
+          metadata_json?: Json
           next_action_at?: string | null
           next_action_description?: string | null
           notes?: string | null
