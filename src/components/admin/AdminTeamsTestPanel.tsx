@@ -176,7 +176,7 @@ export function AdminTeamsTestPanel() {
           <Alert className="border-green-500/50 bg-green-50/50 dark:bg-green-900/10">
             <Globe className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700 dark:text-green-400">
-              Global Teams settings are active. Workspaces without specific settings will use these.
+              {t('admin.teams.globalActive', 'As definições globais do Teams estão ativas. Workspaces sem definições específicas usarão estas.')}
             </AlertDescription>
           </Alert>
         )}
