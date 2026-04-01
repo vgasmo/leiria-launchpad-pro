@@ -372,7 +372,7 @@ export default function Mentors() {
                                   className="h-8 w-8"
                                 >
                                   <a
-                                    href={mentor.profile.linkedin_url}
+                                    href={sanitizeUrl(mentor.profile.linkedin_url)!}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
