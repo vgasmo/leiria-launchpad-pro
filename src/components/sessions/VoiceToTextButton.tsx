@@ -38,7 +38,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       if (type === '' || MediaRecorder.isTypeSupported(type)) {
         // Dev-only logging for mimeType debugging
         if (import.meta.env.DEV) {
-          console.log('Using mimeType:', type || 'browser default');
+          logger.debug('voice_mime_type', { type: type || 'browser default' });
         }
         return type;
       }
