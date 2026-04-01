@@ -160,8 +160,8 @@ export function SpaceWaitingListTab() {
                   <Label>{t('admin.backoffice.requestFor', 'Request For')}</Label>
                   <Tabs defaultValue="startup" className="w-full">
                     <TabsList className="w-full">
-                      <TabsTrigger value="startup" className="flex-1">Startup</TabsTrigger>
-                      <TabsTrigger value="lead" className="flex-1">Lead/Prospect</TabsTrigger>
+                      <TabsTrigger value="startup" className="flex-1">{t('waitingList.startup', 'Startup')}</TabsTrigger>
+                      <TabsTrigger value="lead" className="flex-1">{t('waitingList.leadProspect', 'Lead/Prospect')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="startup" className="mt-2">
                       <Select name="workspace_id">
