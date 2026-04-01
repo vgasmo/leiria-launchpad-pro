@@ -255,8 +255,8 @@ export function useCreateConversation() {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
     onError: (err: any) => {
-      toast.error('Could not start conversation', {
-        description: err?.message ?? 'Please try again.',
+      toast.error(t('messaging.conversationFailed', 'Não foi possível iniciar conversa'), {
+        description: err?.message ?? t('common.tryAgain', 'Tente novamente.'),
       });
     },
   });

@@ -156,13 +156,13 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel', 'Cancelar')}
             </Button>
             <Button 
               onClick={handleCreate} 
               disabled={selectedUsers.length === 0 || createConversation.isPending}
             >
-              Start Conversation
+              {t('messaging.startConversation', 'Iniciar Conversa')}
             </Button>
           </div>
         </div>
