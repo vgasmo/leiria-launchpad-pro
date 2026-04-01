@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
-const t = i18n.t.bind(i18n);
 import {
   Lightbulb,
   Plus,
@@ -43,6 +42,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const t = i18n.t.bind(i18n);
 interface SessionExercisesPickerProps {
   sessionId: string;
   canEdit: boolean;
