@@ -239,7 +239,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
         {/* Step Content */}
         {currentStep === 0 && (
           <div className="space-y-3">
-            <Label>Who is your target customer segment?</Label>
+            <Label>{t('vp.targetSegment', 'Qual é o teu segmento-alvo?')}</Label>
             <Textarea
               value={fields.segment}
               onChange={(e) => updateField('segment', e.target.value)}
@@ -247,7 +247,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Be specific: decision maker role, company size, industry
+              {t('vp.segmentHint', 'Sê específico: decisor, dimensão da empresa, indústria')}
             </p>
           </div>
         )}
