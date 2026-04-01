@@ -736,7 +736,7 @@ export function PendingApprovalsManager() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>Programa *</Label>
+                    <Label>{t('common.program', 'Programa *')}</Label>
                     <Select value={newProgramId} onValueChange={setNewProgramId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Programa..." />
