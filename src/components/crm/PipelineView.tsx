@@ -135,14 +135,25 @@ export function PipelineView({
     if (!targetFineStages?.length) return;
     const newStage = targetFineStages[0] as FunnelStage;
 
+    const previousStage = currentItem.stage;
     try {
       await updateFunnelItem.mutateAsync({
         id: itemId,
         stage: newStage,
       });
-      toast.success(`Movido para ${SIMPLE_STAGE_LABELS[targetSimple]}`);
+      toast.success(
+        t('crm.movedTo', { stage: SIMPLE_STAGE_LABELS[targetSimple], defaultValue: `Movido para ${SIMPLE_STAGE_LABELS[targetSimple]}` }),
+        {
+          action: {
+            label: t('common.undo', { defaultValue: 'Desfazer' }),
+            onClick: () => {
+              updateFunnelItem.mutate({ id: itemId, stage: previousStage as FunnelStage });
+            },
+          },
+        }
+      );
     } catch (error) {
-      toast.error('Erro ao mover lead');
+      toast.error(t('crm.moveError', { defaultValue: 'Erro ao mover lead' }));
     }
   };
 
