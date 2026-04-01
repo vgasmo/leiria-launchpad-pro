@@ -139,7 +139,7 @@ export function NewConversationDialog({ open, onOpenChange, onConversationCreate
                       <AvatarFallback>{user.full_name?.[0] || user.email[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{user.full_name || 'Unnamed'}</p>
+                      <p className="font-medium truncate">{user.full_name || t('common.unnamed', 'Sem nome')}</p>
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </div>
