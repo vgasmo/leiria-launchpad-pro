@@ -139,7 +139,6 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
         <CardDescription>
           {t('settings.teamsDesc', 'Receba notificações no seu canal Teams quando ocorrem eventos importantes. Para configurar, crie um Incoming Webhook no seu canal Teams.')}
         </CardDescription>
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Webhook URL */}
