@@ -35,6 +35,7 @@ import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
 import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
 import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
+import { useMyAvailability } from '@/hooks/useMentorAvailability';
 import { StickyNote } from 'lucide-react';
 
 interface MentorDashboardProps {
