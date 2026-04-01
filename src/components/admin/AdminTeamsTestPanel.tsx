@@ -187,7 +187,7 @@ export function AdminTeamsTestPanel() {
             <label className="text-sm font-medium">{t('admin.teams.testTarget', 'Alvo do Teste')}</label>
             <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
               <SelectTrigger>
-                <SelectValue placeholder="Select workspace..." />
+                <SelectValue placeholder={t('admin.teams.selectWorkspace', 'Selecionar workspace...')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="global">
