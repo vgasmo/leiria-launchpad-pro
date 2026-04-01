@@ -23,8 +23,6 @@ import { AppLayout } from '@/components/layout/AppLayout';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
 
-// Steps defined inside component - see STEPS useMemo below
-
 interface RepresentativeEntry {
   name: string;
   email: string;
@@ -44,13 +42,16 @@ interface CompanyFormData {
 }
 
 /** Human-readable provider label */
-function providerLabel(provider: string | null): string {
-  switch (provider) {
-    case 'docusign': return 'DocuSign';
-    case 'pandadoc': return 'PandaDoc';
-    case 'manual': return 'Assinatura Manual';
-    default: return 'Assinatura Digital';
-  }
+function useProviderLabel() {
+  const { t } = useTranslation();
+  return (provider: string | null): string => {
+    switch (provider) {
+      case 'docusign': return 'DocuSign';
+      case 'pandadoc': return 'PandaDoc';
+      case 'manual': return t('contractOnboarding.manualSignature');
+      default: return t('contractOnboarding.digitalSignature');
+    }
+  };
 }
 
 export default function ContractOnboarding() {
@@ -59,14 +60,15 @@ export default function ContractOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const getProviderLabel = useProviderLabel();
   const [currentStep, setCurrentStep] = useState<WizardStep>('company_data');
   const [regulationAccepted, setRegulationAccepted] = useState(false);
   const [contractAccepted, setContractAccepted] = useState(false);
 
   const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
-    { key: 'company_data', icon: Building2, label: t('contractOnboarding.step.companyData', 'Dados da Empresa') },
-    { key: 'review_contract', icon: FileText, label: t('contractOnboarding.step.reviewContract', 'Rever Contrato') },
-    { key: 'signing', icon: PenTool, label: t('contractOnboarding.step.signing', 'Assinatura Digital') },
+    { key: 'company_data', icon: Building2, label: t('contractOnboarding.step.companyData') },
+    { key: 'review_contract', icon: FileText, label: t('contractOnboarding.step.reviewContract') },
+    { key: 'signing', icon: PenTool, label: t('contractOnboarding.step.signing') },
   ];
 
   const [formData, setFormData] = useState<CompanyFormData>({
@@ -81,7 +83,6 @@ export default function ContractOnboarding() {
     company_postal_code: '',
   });
 
-  // Fetch contract with workspace + startup data
   const { data: contract, isLoading } = useQuery({
     queryKey: ['contract-onboarding', contractId],
     enabled: !!contractId,
@@ -104,7 +105,6 @@ export default function ContractOnboarding() {
     },
   });
 
-  // Pre-fill from startup data
   useEffect(() => {
     if (contract) {
       const startup = (contract as any).workspace?.startup;
@@ -122,7 +122,6 @@ export default function ContractOnboarding() {
     }
   }, [contract]);
 
-  // Save company data
   const saveCompanyData = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -140,15 +139,13 @@ export default function ContractOnboarding() {
     },
     onSuccess: () => {
       setCurrentStep('review_contract');
-      toast.success('Dados guardados');
+      toast.success(t('contractOnboarding.dataSaved'));
     },
-    onError: () => toast.error('Erro ao guardar dados'),
+    onError: () => toast.error(t('contractOnboarding.dataSaveError')),
   });
 
-  // Accept regulation + send for signing (provider-agnostic via edge function)
   const submitForSigning = useMutation({
     mutationFn: async () => {
-      // 1. Mark regulation as accepted
       await supabase
         .from('startup_contracts')
         .update({
@@ -159,11 +156,10 @@ export default function ContractOnboarding() {
         } as any)
         .eq('id', contractId!);
 
-      // 2. Call provider-agnostic onboarding function (it dispatches by signature_provider)
       const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
         body: {
           action: 'submit_signing',
-          token: null, // Authenticated flow — the edge function also accepts contractId
+          token: null,
           contractId,
           formData: {
             legal_representative_email: formData.legal_representative_email,
@@ -179,10 +175,10 @@ export default function ContractOnboarding() {
     onSuccess: () => {
       setCurrentStep('signing');
       queryClient.invalidateQueries({ queryKey: ['contract-onboarding', contractId] });
-      toast.success('Contrato enviado para assinatura digital!');
+      toast.success(t('contractOnboarding.sentForSignature'));
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Erro ao enviar para assinatura. A equipa foi notificada.');
+      toast.error(err?.message || t('contractOnboarding.signingError'));
       setCurrentStep('signing');
     },
   });
@@ -212,8 +208,8 @@ export default function ContractOnboarding() {
       <AppLayout>
         <div className="max-w-2xl mx-auto py-12 text-center">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-          <h2 className="text-lg font-semibold">Contrato não encontrado</h2>
-          <p className="text-muted-foreground text-sm mt-1">Este contrato pode não existir ou não ter permissão de acesso.</p>
+          <h2 className="text-lg font-semibold">{t('contractOnboarding.notFound')}</h2>
+          <p className="text-muted-foreground text-sm mt-1">{t('contractOnboarding.notFoundDesc')}</p>
         </div>
       </AppLayout>
     );
@@ -225,15 +221,13 @@ export default function ContractOnboarding() {
   return (
     <AppLayout>
       <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
-        {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Onboarding Contratual</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('contractOnboarding.pageTitle')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {(contract as any).workspace?.startup?.name || 'Startup'} — {(contract as any).contract_number || 'Novo Contrato'}
+            {(contract as any).workspace?.startup?.name || 'Startup'} — {(contract as any).contract_number || t('contractOnboarding.newContract')}
           </p>
         </div>
 
-        {/* Progress */}
         <div className="space-y-3">
           <Progress value={progress} className="h-2" />
           <div className="flex justify-between">
@@ -257,24 +251,24 @@ export default function ContractOnboarding() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                Dados da Empresa e Representante Legal
+                {t('contractOnboarding.companyDataTitle')}
               </CardTitle>
               <CardDescription>
-                Estes dados serão utilizados para a geração automática do contrato de incubação.
+                {t('contractOnboarding.companyDataDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>Nome do Representante Legal / Gerente(s) / Promotor *</Label>
+                  <Label>{t('contractOnboarding.legalRepName')} *</Label>
                   <Input
                     value={formData.legal_representative_name}
                     onChange={e => setFormData(prev => ({ ...prev, legal_representative_name: e.target.value }))}
-                    placeholder="Nome completo"
+                    placeholder={t('contractOnboarding.fullNamePlaceholder')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Email do Representante *</Label>
+                  <Label>{t('contractOnboarding.repEmail')} *</Label>
                   <Input
                     type="email"
                     value={formData.legal_representative_email}
@@ -283,7 +277,7 @@ export default function ContractOnboarding() {
                   />
                 </div>
                <div className="space-y-1.5">
-                  <Label>Telefone do Representante</Label>
+                  <Label>{t('contractOnboarding.repPhone')}</Label>
                   <Input
                     type="tel"
                     value={formData.legal_representative_phone}
@@ -293,12 +287,11 @@ export default function ContractOnboarding() {
                 </div>
               </div>
 
-              {/* Additional representatives */}
               {formData.additional_representatives.map((rep, idx) => (
                 <div key={idx} className="border border-border/50 rounded-lg p-3 space-y-3 bg-muted/20">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-muted-foreground">
-                      Representante/Gerente adicional {idx + 2}
+                      {t('contractOnboarding.additionalRep')} {idx + 2}
                     </p>
                     <Button
                       type="button"
@@ -310,7 +303,7 @@ export default function ContractOnboarding() {
                         additional_representatives: p.additional_representatives.filter((_, i) => i !== idx),
                       }))}
                     >
-                      Remover
+                      {t('common.remove')}
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -321,7 +314,7 @@ export default function ContractOnboarding() {
                         updated[idx] = { ...updated[idx], name: e.target.value };
                         setFormData(p => ({ ...p, additional_representatives: updated }));
                       }}
-                      placeholder="Nome completo"
+                      placeholder={t('contractOnboarding.fullNamePlaceholder')}
                     />
                     <Input
                       type="email"
@@ -341,7 +334,7 @@ export default function ContractOnboarding() {
                         updated[idx] = { ...updated[idx], phone: e.target.value };
                         setFormData(p => ({ ...p, additional_representatives: updated }));
                       }}
-                      placeholder="Telefone"
+                      placeholder={t('contractOnboarding.phonePlaceholder')}
                     />
                   </div>
                 </div>
@@ -356,14 +349,14 @@ export default function ContractOnboarding() {
                   additional_representatives: [...p.additional_representatives, { name: '', email: '', phone: '' }],
                 }))}
               >
-                + Adicionar Representante/Gerente
+                + {t('contractOnboarding.addRepresentative')}
               </Button>
 
               <Separator />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>NIF (Empresa ou Pessoa) *</Label>
+                  <Label>{t('contractOnboarding.nif')} *</Label>
                   <Input
                     value={formData.company_nif}
                     onChange={e => setFormData(prev => ({ ...prev, company_nif: e.target.value }))}
@@ -372,23 +365,23 @@ export default function ContractOnboarding() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Código da Certidão Permanente</Label>
+                  <Label>{t('contractOnboarding.certidaoPermanente')}</Label>
                   <Input
                     value={formData.certidao_permanente_code}
                     onChange={e => setFormData(prev => ({ ...prev, certidao_permanente_code: e.target.value }))}
-                    placeholder="Código de acesso online"
+                    placeholder={t('contractOnboarding.certidaoPlaceholder')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Morada Fiscal *</Label>
+                  <Label>{t('contractOnboarding.fiscalAddress')} *</Label>
                   <Input
                     value={formData.company_address}
                     onChange={e => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
-                    placeholder="Rua, número, andar"
+                    placeholder={t('contractOnboarding.addressPlaceholder')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Cidade *</Label>
+                  <Label>{t('contractOnboarding.city')} *</Label>
                   <Input
                     value={formData.company_city}
                     onChange={e => setFormData(prev => ({ ...prev, company_city: e.target.value }))}
@@ -396,7 +389,7 @@ export default function ContractOnboarding() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Código Postal *</Label>
+                  <Label>{t('contractOnboarding.postalCode')} *</Label>
                   <Input
                     value={formData.company_postal_code}
                     onChange={e => setFormData(prev => ({ ...prev, company_postal_code: e.target.value }))}
@@ -405,17 +398,16 @@ export default function ContractOnboarding() {
                 </div>
               </div>
 
-              {/* Contract summary */}
               <Separator />
               <div className="bg-muted/40 rounded-lg p-4 space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resumo do Contrato</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('contractOnboarding.contractSummary')}</p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">Tipo:</span> {(contract as any).incubation_type?.name || '—'}</div>
-                  <div><span className="text-muted-foreground">Edifício:</span> {(contract as any).building?.name || '—'}</div>
-                  <div><span className="text-muted-foreground">Mensalidade:</span> {(contract as any).monthly_fee}€/{(contract as any).currency || 'EUR'}</div>
-                  <div><span className="text-muted-foreground">Início:</span> {new Date((contract as any).start_date).toLocaleDateString('pt-PT')}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.type')}:</span> {(contract as any).incubation_type?.name || '—'}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.building')}:</span> {(contract as any).building?.name || '—'}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.monthlyFee')}:</span> {(contract as any).monthly_fee}€/{(contract as any).currency || 'EUR'}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.startDate')}:</span> {new Date((contract as any).start_date).toLocaleDateString('pt-PT')}</div>
                   {(contract as any).square_meters && (
-                    <div><span className="text-muted-foreground">Área:</span> {(contract as any).square_meters} m²</div>
+                    <div><span className="text-muted-foreground">{t('contractOnboarding.area')}:</span> {(contract as any).square_meters} m²</div>
                   )}
                 </div>
               </div>
@@ -427,7 +419,7 @@ export default function ContractOnboarding() {
                   className="gap-2"
                 >
                   {saveCompanyData.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Continuar <ArrowRight className="h-4 w-4" />
+                  {t('common.continue')} <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -440,27 +432,26 @@ export default function ContractOnboarding() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Rever Contrato e Regulamento
+                {t('contractOnboarding.reviewTitle')}
               </CardTitle>
               <CardDescription>
-                Reveja os documentos antes de enviar para assinatura digital.
+                {t('contractOnboarding.reviewDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              {/* Contract Document */}
               <div className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm font-medium">Minuta de Contrato de Incubação</p>
-                      <p className="text-xs text-muted-foreground">Minuta Oficial — 2026</p>
+                      <p className="text-sm font-medium">{t('contractOnboarding.contractTemplate')}</p>
+                      <p className="text-xs text-muted-foreground">{t('contractOnboarding.officialTemplate')} — 2026</p>
                     </div>
                   </div>
                   <a href="/templates/V9_Minuta_Contrato_IF_e_IV_2026.docx" download>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
                       <Download className="h-3.5 w-3.5" />
-                      Descarregar
+                      {t('common.download')}
                     </Button>
                   </a>
                 </div>
@@ -471,25 +462,24 @@ export default function ContractOnboarding() {
                     onCheckedChange={(v) => setContractAccepted(v === true)}
                   />
                   <label htmlFor="accept-contract" className="text-xs leading-tight cursor-pointer">
-                    Li e aceito os termos do Contrato de Incubação, incluindo as condições de prestação de serviços, obrigações e direitos das partes.
+                    {t('contractOnboarding.acceptContractTerms')}
                   </label>
                 </div>
               </div>
 
-              {/* Regulation Document */}
               <div className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-amber-600" />
                     <div>
-                      <p className="text-sm font-medium">Regulamento Startup Leiria</p>
-                      <p className="text-xs text-muted-foreground">V11 — Anexo I — 2026</p>
+                      <p className="text-sm font-medium">{t('contractOnboarding.regulation')}</p>
+                      <p className="text-xs text-muted-foreground">V11 — {t('contractOnboarding.annex')} I — 2026</p>
                     </div>
                   </div>
                   <a href="/templates/V11_Anexo_I_Regulamento_SUP_LRA_2026_2.pdf" download>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
                       <Download className="h-3.5 w-3.5" />
-                      Descarregar
+                      {t('common.download')}
                     </Button>
                   </a>
                 </div>
@@ -500,25 +490,24 @@ export default function ContractOnboarding() {
                     onCheckedChange={(v) => setRegulationAccepted(v === true)}
                   />
                   <label htmlFor="accept-regulation" className="text-xs leading-tight cursor-pointer">
-                    Li e aceito o Regulamento da Startup Leiria, comprometendo-me a cumprir as normas e procedimentos nele estabelecidos.
+                    {t('contractOnboarding.acceptRegulationTerms')}
                   </label>
                 </div>
               </div>
 
-              {/* Company data summary */}
               <div className="bg-muted/40 rounded-lg p-4 space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Dados Confirmados</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('contractOnboarding.confirmedData')}</p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">Representante:</span> {formData.legal_representative_name}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.representative')}:</span> {formData.legal_representative_name}</div>
                   <div><span className="text-muted-foreground">Email:</span> {formData.legal_representative_email}</div>
                   <div><span className="text-muted-foreground">NIF:</span> {formData.company_nif}</div>
-                  <div><span className="text-muted-foreground">Morada:</span> {formData.company_address}, {formData.company_city}</div>
+                  <div><span className="text-muted-foreground">{t('contractOnboarding.address')}:</span> {formData.company_address}, {formData.company_city}</div>
                 </div>
               </div>
 
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setCurrentStep('company_data')} className="gap-1.5">
-                  <ArrowLeft className="h-4 w-4" /> Voltar
+                  <ArrowLeft className="h-4 w-4" /> {t('common.back')}
                 </Button>
                 <Button
                   onClick={() => submitForSigning.mutate()}
@@ -526,7 +515,7 @@ export default function ContractOnboarding() {
                   className="gap-2"
                 >
                   {submitForSigning.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PenTool className="h-4 w-4" />}
-                  Enviar para Assinatura
+                  {t('contractOnboarding.sendForSignature')}
                 </Button>
               </div>
             </CardContent>
@@ -539,19 +528,19 @@ export default function ContractOnboarding() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PenTool className="h-5 w-5 text-primary" />
-                Assinatura Digital
+                {t('contractOnboarding.digitalSignature')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {sigStatus === 'completed' ? (
                 <div className="text-center py-8 space-y-3">
                   <CheckCircle2 className="h-16 w-16 mx-auto text-primary" />
-                  <h3 className="text-lg font-semibold text-primary">Contrato Assinado!</h3>
+                  <h3 className="text-lg font-semibold text-primary">{t('contractOnboarding.signed')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    O contrato foi assinado digitalmente com sucesso. Os dados foram registados automaticamente.
+                    {t('contractOnboarding.signedDesc')}
                   </p>
                   <Button onClick={() => navigate('/my-workspaces')} className="mt-4">
-                    Ir para o meu Workspace
+                    {t('contractOnboarding.goToWorkspace')}
                   </Button>
                 </div>
               ) : (
@@ -562,26 +551,26 @@ export default function ContractOnboarding() {
                     <PenTool className="absolute inset-0 m-auto h-8 w-8 text-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Aguardando Assinatura</h3>
+                    <h3 className="text-lg font-semibold">{t('contractOnboarding.awaitingSignature')}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      O contrato foi enviado para <strong>{formData.legal_representative_email}</strong> via {providerLabel(sigProvider)}.
+                      {t('contractOnboarding.sentTo', { email: formData.legal_representative_email, provider: getProviderLabel(sigProvider) })}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {sigProvider === 'manual'
-                        ? 'A equipa da Startup Leiria irá coordenar a assinatura presencial.'
-                        : 'Verifique a sua caixa de email (incluindo spam) para assinar digitalmente.'}
+                        ? t('contractOnboarding.manualSignatureDesc')
+                        : t('contractOnboarding.checkEmailDesc')}
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
-                    {sigStatus === 'sent_for_signature' ? 'Enviado para assinatura' :
-                     sigStatus === 'viewed' ? 'Documento visualizado' :
-                     sigStatus === 'declined' ? 'Assinatura recusada' :
-                     sigStatus === 'pending_manual' ? 'Assinatura manual pendente' :
-                     'Pendente'}
+                    {sigStatus === 'sent_for_signature' ? t('contractOnboarding.status.sentForSignature') :
+                     sigStatus === 'viewed' ? t('contractOnboarding.status.viewed') :
+                     sigStatus === 'declined' ? t('contractOnboarding.status.declined') :
+                     sigStatus === 'pending_manual' ? t('contractOnboarding.status.pendingManual') :
+                     t('contractOnboarding.status.pending')}
                   </Badge>
                   <div className="flex justify-center gap-3 mt-4">
                     <Button variant="outline" onClick={() => navigate('/my-workspaces')}>
-                      Voltar mais tarde
+                      {t('contractOnboarding.comeBackLater')}
                     </Button>
                   </div>
                 </div>
