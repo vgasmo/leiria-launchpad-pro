@@ -4894,8 +4894,7 @@ export type Database = {
           last_viewed_at: string | null
           revoked_at: string | null
           scope: string
-          token: string
-          token_hash: string | null
+          token_hash: string
           views_count: number | null
           workspace_id: string
         }
@@ -4907,8 +4906,7 @@ export type Database = {
           last_viewed_at?: string | null
           revoked_at?: string | null
           scope?: string
-          token?: string
-          token_hash?: string | null
+          token_hash: string
           views_count?: number | null
           workspace_id: string
         }
@@ -4920,8 +4918,7 @@ export type Database = {
           last_viewed_at?: string | null
           revoked_at?: string | null
           scope?: string
-          token?: string
-          token_hash?: string | null
+          token_hash?: string
           views_count?: number | null
           workspace_id?: string
         }
