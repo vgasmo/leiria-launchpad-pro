@@ -249,9 +249,9 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         {/* Enable Toggle */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="space-y-0.5">
-            <Label>Enable automatic calendar sync</Label>
+            <Label>{t('settings.enableAutoCalendar', 'Ativar sincronização automática do calendário')}</Label>
             <p className="text-sm text-muted-foreground">
-              Create Outlook events when sessions are scheduled
+              {t('settings.createOutlookOnSchedule', 'Criar eventos Outlook quando sessões são agendadas')}
             </p>
           </div>
           <Switch
