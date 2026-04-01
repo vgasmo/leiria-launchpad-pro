@@ -434,7 +434,7 @@ export function SpaceOperationsConsole() {
             onClick={() => cleanupMutation.mutate(staleRoomIds)}
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            Libertar {staleRoomIds.length} sala(s) órfã(s)
+            {t('spaces.clearStaleRooms', { count: staleRoomIds.length, defaultValue: 'Libertar {{count}} sala(s) órfã(s)' })}
           </Button>
         )}
       </div>

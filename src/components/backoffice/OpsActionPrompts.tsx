@@ -205,12 +205,12 @@ export function OpsActionPrompts() {
 
   const handleCopyTemplate = () => {
     navigator.clipboard.writeText(CONTRACT_EMAIL_TEMPLATE);
-    toast.success('Template de email copiado');
+    toast.success(t('ops.emailTemplateCopied', 'Template de email copiado'));
   };
 
   const handleCopyChecklist = () => {
     navigator.clipboard.writeText(ACTIVATION_CHECKLIST);
-    toast.success('Checklist copiada');
+    toast.success(t('ops.checklistCopied', 'Checklist copiada'));
   };
 
   if (isLoading) {

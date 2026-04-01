@@ -668,10 +668,10 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                 if (result.emailSent) {
                   toast.success(t('crm.pedidoDeContrataçãoEnviadoPor'));
                 } else {
-                  toast.warning('Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.', {
+                  toast.warning(t('crm.intakeCreatedNoEmail', 'Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.'), {
                     duration: 8000,
                     action: {
-                      label: 'Reenviar',
+                      label: t('crm.resend', 'Reenviar'),
                       onClick: async () => {
                         try {
                           const { error } = await supabase.functions.invoke('send-intake-email', {
