@@ -83,7 +83,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
     try {
       await updateSettings.mutateAsync({ sync_mode: mode as 'webhook' | 'graph' });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update sync mode');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
