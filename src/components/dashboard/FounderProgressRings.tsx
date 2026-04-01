@@ -26,10 +26,10 @@ export function FounderProgressRings({ workspaceId, className }: FounderProgress
     ).length ?? 0;
     const actionsPct = totalActions > 0 ? Math.round((completedActions / totalActions) * 100) : 0;
 
-    // KPIs reported
-    const totalKpis = kpiData?.required ?? 0;
-    const filledKpis = kpiData?.filled ?? 0;
-    const kpiPct = totalKpis > 0 ? Math.round((filledKpis / totalKpis) * 100) : 0;
+    // KPIs reported this month
+    const totalKpis = kpiData?.current?.length ?? 0;
+    // Consider "reported" if there are any current month entries
+    const kpiPct = totalKpis > 0 ? 100 : 0;
 
     // Milestones on track
     const totalMilestones = milestones?.length ?? 0;
