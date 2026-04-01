@@ -579,11 +579,11 @@ function CreateSessionDialog({ workspaceId, open, onOpenChange }: {
             });
 
             if (error) {
-              console.error('Failed to send invites:', error);
+              logger.error('error', {}, 'Failed to send invites:', error);
             }
           }
         } catch (emailError) {
-          console.error('Email sending error:', emailError);
+          logger.error('error', {}, 'Email sending error:', emailError);
         }
       }
 
@@ -994,7 +994,7 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
         source: 'voice'
       });
     } catch (error) {
-      console.error('Failed to save transcript:', error);
+      logger.error('error', {}, 'Failed to save transcript:', error);
     }
   };
 
@@ -1049,13 +1049,13 @@ function SessionDetailDialog({ workspaceId, session, canWrite, open, onOpenChang
       });
 
       if (error) {
-        console.error('Failed to resend invites:', error);
+        logger.error('error', {}, 'Failed to resend invites:', error);
         toast.error('Failed to resend invites');
       } else {
         toast.success(`Sent ${recipientEmails.length} invite(s)`);
       }
     } catch (error) {
-      console.error('Resend error:', error);
+      logger.error('error', {}, 'Resend error:', error);
       toast.error('Failed to resend invites');
     } finally {
       setIsResending(false);
@@ -1486,3 +1486,5 @@ function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange }: {
     </Dialog>
   );
 }
+import { useMentorAvailability } from '@/hooks/useMentorAvailability';
+import { logger } from '@/lib/logger';

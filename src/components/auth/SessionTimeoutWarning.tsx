@@ -39,12 +39,12 @@ export function SessionTimeoutWarning({
     try {
       const { error } = await supabase.auth.refreshSession();
       if (error) {
-        console.error('Session refresh failed:', error);
+        logger.error('error', {}, 'Session refresh failed:', error);
         return false;
       }
       return true;
     } catch (err) {
-      console.error('Session refresh error:', err);
+      logger.error('error', {}, 'Session refresh error:', err);
       return false;
     }
   }, []);
@@ -149,3 +149,5 @@ export function SessionTimeoutWarning({
     </AlertDialog>
   );
 }
+import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';

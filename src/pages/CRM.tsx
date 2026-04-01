@@ -170,7 +170,7 @@ export default function CRM() {
             .single();
           
           if (error || !data) {
-            console.error('Failed to load funnel item:', error);
+            logger.error('error', {}, 'Failed to load funnel item:', error);
             toast.error(t('crm.itemNotFound'));
             searchParams.delete('open');
             setSearchParams(searchParams, { replace: true });
@@ -203,7 +203,7 @@ export default function CRM() {
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
         } catch (err) {
-          console.error('Error fetching funnel item:', err);
+          logger.error('error', {}, 'Error fetching funnel item:', err);
           toast.error(t('crm.itemNotFound'));
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
@@ -690,3 +690,5 @@ function TaskGroup({
     </Card>
   );
 }
+import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { logger } from '@/lib/logger';

@@ -132,7 +132,7 @@ export function AdminAnnouncementsManager() {
         });
 
         if (emailError) {
-          console.error('Email send error:', emailError);
+          logger.error('error', {}, 'Email send error:', emailError);
           // Don't throw - announcement was created, just email failed
           toast.warning(t('admin.announcements.emailFailed'));
         }
@@ -436,3 +436,5 @@ export function AdminAnnouncementsManager() {
     </Card>
   );
 }
+import { useBuildings } from '@/hooks/useBackoffice';
+import { logger } from '@/lib/logger';
