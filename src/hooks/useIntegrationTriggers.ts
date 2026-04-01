@@ -8,6 +8,7 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 import { useLogActivity } from '@/hooks/useActivityLog';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
