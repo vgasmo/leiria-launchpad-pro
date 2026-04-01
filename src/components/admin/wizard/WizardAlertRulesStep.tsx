@@ -50,6 +50,14 @@ const RULE_ICONS: Record<string, React.ElementType> = {
   milestone_overdue_count: Target,
 };
 
+const RULE_I18N: Record<string, { label: string; description: string }> = {
+  no_session_days: { label: 'wizard.noSessions', description: 'wizard.noSessionsDesc' },
+  overdue_actions_count: { label: 'wizard.overdueActions', description: 'wizard.overdueActionsDesc' },
+  missing_kpis_current_month: { label: 'wizard.missingKpis', description: 'wizard.missingKpisDesc' },
+  checkin_overdue_days: { label: 'wizard.checkinOverdue', description: 'wizard.checkinOverdueDesc' },
+  milestone_overdue_count: { label: 'wizard.overdueMilestones', description: 'wizard.overdueMilestonesDesc' },
+};
+
 export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: WizardAlertRulesStepProps) {
   const { t } = useTranslation();
   const [localRules, setLocalRules] = useState<DraftAlertRule[]>(
@@ -88,21 +96,38 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
 
   const weightsSum = Object.values(localHealthModel.weights_json).reduce((a, b) => a + b, 0);
 
+  const DIMENSION_LABELS: Record<string, string> = {
+    actions: t('actions.title'),
+    sessions: t('sessions.title'),
+    kpis: t('kpis.title'),
+    checkins: t('checkins.title', 'Check-ins'),
+    milestones: t('milestones.title'),
+  };
+
+  const THRESHOLD_LABELS: Record<string, string> = {
+    thriving: t('health.thriving', 'A Prosperar'),
+    on_track: t('health.onTrack', 'No Caminho'),
+    needs_attention: t('health.needsAttention', 'Precisa Atenção'),
+    at_risk: t('health.atRisk', 'Em Risco'),
+    critical: t('wizard.critical'),
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            {t('wizard.alertRules.title')}
+            {t('wizard.alertRules')}
           </CardTitle>
           <CardDescription>
-            {t('wizard.alertRules.description')}
+            {t('wizard.alertRulesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {localRules.map((rule) => {
             const Icon = RULE_ICONS[rule.rule_type] || AlertTriangle;
+            const i18nKeys = RULE_I18N[rule.rule_type];
             return (
               <div
                 key={rule.rule_type}
@@ -118,12 +143,12 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <Icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">{t(`wizard.alertRules.rules.${rule.rule_type}.label`)}</span>
+                      <span className="font-medium text-sm">{i18nKeys ? t(i18nKeys.label) : rule.rule_type}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-3">{t(`wizard.alertRules.rules.${rule.rule_type}.description`)}</p>
+                    <p className="text-xs text-muted-foreground mb-3">{i18nKeys ? t(i18nKeys.description) : ''}</p>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs">{t('wizard.alertRules.threshold')}:</Label>
+                        <Label className="text-xs">{t('wizard.threshold')}</Label>
                         <Input
                           type="number"
                           value={rule.threshold}
@@ -136,7 +161,7 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs">{t('wizard.alertRules.severity')}:</Label>
+                        <Label className="text-xs">{t('wizard.severity')}</Label>
                         <Select
                           value={rule.severity}
                           onValueChange={(v) => handleRuleChange(rule.rule_type, 'severity', v)}
@@ -146,9 +171,9 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="info">{t('common.info')}</SelectItem>
-                            <SelectItem value="warning">{t('common.warning')}</SelectItem>
-                            <SelectItem value="critical">{t('common.critical')}</SelectItem>
+                            <SelectItem value="info">{t('wizard.info')}</SelectItem>
+                            <SelectItem value="warning">{t('wizard.warning')}</SelectItem>
+                            <SelectItem value="critical">{t('wizard.critical')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -167,9 +192,9 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <Activity className="h-4 w-4" />
-                {t('wizard.healthModel.title')}
+                {t('wizard.healthScoreModel')}
               </CardTitle>
-              <CardDescription>{t('wizard.healthModel.description')}</CardDescription>
+              <CardDescription>{t('wizard.healthModelDesc')}</CardDescription>
             </div>
             <Switch
               checked={localHealthModel.is_enabled}
@@ -183,7 +208,7 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">{t('wizard.healthModel.dimensionWeights')}</h4>
+                <h4 className="text-sm font-medium">{t('wizard.dimensionWeights')}</h4>
                 <Badge variant={weightsSum === 100 ? 'default' : 'destructive'}>
                   Total: {weightsSum}%
                 </Badge>
@@ -191,7 +216,7 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
               {Object.entries(localHealthModel.weights_json).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm capitalize">{t(`wizard.healthModel.dimensions.${key}`)}</Label>
+                    <Label className="text-sm">{DIMENSION_LABELS[key] || key}</Label>
                     <span className="text-sm font-medium">{value}%</span>
                   </div>
                   <Slider
@@ -203,18 +228,18 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                 </div>
               ))}
               {weightsSum !== 100 && (
-                <p className="text-xs text-destructive">{t('wizard.healthModel.weightsMustSum')}</p>
+                <p className="text-xs text-destructive">{t('wizard.weightsMustSum')}</p>
               )}
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">{t('wizard.healthModel.scoreThresholds')}</h4>
+              <h4 className="text-sm font-medium">{t('wizard.scoreThresholds')}</h4>
               <div className="grid gap-3 md:grid-cols-5">
                 {Object.entries(localHealthModel.thresholds_json)
                   .sort(([, a], [, b]) => b - a)
                   .map(([key, value]) => (
                     <div key={key} className="space-y-1">
-                      <Label className="text-xs">{t(`wizard.healthModel.thresholds.${key}`)}</Label>
+                      <Label className="text-xs">{THRESHOLD_LABELS[key] || key}</Label>
                       <Input
                         type="number"
                         value={value}
