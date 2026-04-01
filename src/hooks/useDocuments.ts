@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 export interface Document {
   id: string;
@@ -178,7 +179,7 @@ export function useDeleteDocument() {
           .remove([document.file_path]);
         
         if (storageError) {
-          console.warn('Failed to delete file from storage:', storageError);
+          logger.warn('storage_delete_failed', { error: String(storageError) });
         }
       }
 

@@ -44,7 +44,7 @@ export default function WorkspaceDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const { data: workspace, isLoading, error } = useWorkspace(id);
-  const { isAdmin, isConsultor, isMentor, isFounder } = useAuth();
+  const { isAdmin, isConsultor, isMentor, isFounder, isBackoffice } = useAuth();
   
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
@@ -65,8 +65,8 @@ export default function WorkspaceDetail() {
 
   // Compute visible tabs
   const { primaryTabs, overflowTabs } = useMemo(
-    () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder }, !!startup, workspace?.stage),
-    [isAdmin, isConsultor, isMentor, isFounder, !!startup, workspace?.stage]
+    () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder, isBackoffice }, !!startup, workspace?.stage),
+    [isAdmin, isConsultor, isMentor, isFounder, isBackoffice, !!startup, workspace?.stage]
   );
   const allVisibleIds = useMemo(
     () => new Set([...primaryTabs, ...overflowTabs].map(t => t.id)),
@@ -375,7 +375,7 @@ export default function WorkspaceDetail() {
               <FundingTrackerTab startupId={startup.id} />
             </div>
           )}
-          {activeTab === 'notes' && (isAdmin || isConsultor || isMentor) && (
+          {activeTab === 'notes' && (isAdmin || isConsultor || isMentor || isBackoffice) && (
             <div role="tabpanel" id="tabpanel-notes" aria-labelledby="tab-notes">
               <NotesAndTasksTab workspaceId={workspace.id} startupId={startup?.id} />
             </div>

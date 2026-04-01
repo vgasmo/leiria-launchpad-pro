@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useTranslation } from 'react-i18next';
 import { Bot, Send, Sparkles, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -212,7 +213,7 @@ export function GlobalEcosystemCopilot() {
         }
         return;
       }
-      console.warn('Copilot stream error:', err?.message);
+      logger.warn('copilot_stream_error', { message: err?.message });
       setMessages(prev => [
         ...prev,
         {

@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   type IntakeState,
@@ -213,13 +214,13 @@ export function useCreateIntake() {
           });
           if (emailErr) {
             emailError = typeof emailErr === 'string' ? emailErr : 'Erro ao enviar email';
-            console.warn('Failed to send intake email:', emailErr);
+            logger.warn('intake_email_send_failed', { error: String(emailErr) });
           } else {
             emailSent = true;
           }
         } catch (err: any) {
           emailError = err?.message || 'Erro ao enviar email';
-          console.warn('Failed to send intake email (non-blocking):', err);
+          logger.warn('intake_email_send_error', { error: err?.message });
         }
       }
 
@@ -354,7 +355,7 @@ export function useTransitionIntakeStatus() {
               },
             });
           } catch (emailErr) {
-            console.warn('Failed to send changes_requested email (non-blocking):', emailErr);
+            logger.warn('changes_requested_email_failed', { error: String(emailErr) });
           }
         }
       }

@@ -34,6 +34,8 @@ import { cn } from '@/lib/utils';
 import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 import { MentorImpactPanel } from '@/components/mentor/MentorImpactPanel';
 import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrepEnhanced';
+import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
+import { StickyNote } from 'lucide-react';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -44,6 +46,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [prepSheetWorkspaceId, setPrepSheetWorkspaceId] = useState<string | null>(null);
+  const [quickNoteWorkspaceId, setQuickNoteWorkspaceId] = useState<string | null>(null);
 
   const sortedWorkspaces = useMemo(() => {
     if (!workspaces) return [];
@@ -353,6 +356,19 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                           <ClipboardList className="h-3 w-3" />
                           {t('mentor.prepSheet', { defaultValue: 'Preparar' })}
                         </Button>
+                        {/* Quick Note button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[11px] h-6 px-2 gap-1 opacity-50 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickNoteWorkspaceId(workspace.id);
+                          }}
+                        >
+                          <StickyNote className="h-3 w-3" />
+                          {t('mentor.quickNote', { defaultValue: 'Nota Rápida' })}
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -376,6 +392,16 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           open={!!prepSheetWorkspaceId}
           onOpenChange={(open) => { if (!open) setPrepSheetWorkspaceId(null); }}
           workspaceId={prepSheetWorkspaceId}
+        />
+      )}
+
+      {/* Quick Note Dialog */}
+      {quickNoteWorkspaceId && (
+        <QuickNoteDialog
+          open={!!quickNoteWorkspaceId}
+          onOpenChange={(open) => { if (!open) setQuickNoteWorkspaceId(null); }}
+          workspaceId={quickNoteWorkspaceId}
+          startupName={workspaces.find(w => w.id === quickNoteWorkspaceId)?.startup?.name || undefined}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
 import { MessageSquare, Send, User, MoreVertical, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -64,7 +65,7 @@ export function ActionComments({ actionId, canWrite }: ActionCommentsProps) {
       
       if (error) {
         // Table might not exist yet
-        console.warn('Comments table not available:', error.message);
+        logger.warn('comments_table_unavailable', { message: error.message });
         return [];
       }
       return data as unknown as Comment[];

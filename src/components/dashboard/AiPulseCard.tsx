@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, X, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -153,7 +154,7 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
         }
       } catch (err: any) {
         if (err?.name !== 'AbortError') {
-          console.warn('AI Pulse unavailable, using fallback.');
+          logger.warn('ai_pulse_unavailable', { reason: 'fallback' });
         }
         setSuggestion(getStaticTip(healthScore, overdueCount, t));
         setIsFallback(true);

@@ -8,6 +8,7 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 import { useLogActivity } from '@/hooks/useActivityLog';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
@@ -53,7 +54,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
     });
 
     if (error) {
-      console.warn('[IntegrationTrigger] Outlook sync error (non-blocking):', error.message);
+      logger.warn('outlook_sync_error', { message: error.message });
       return { success: false, reason: error.message };
     }
 
@@ -64,7 +65,7 @@ export async function syncOutlookCalendar(params: SyncOutlookParams): Promise<In
       teamsMeetingUrl: data?.teams_meeting_url,
     };
   } catch (err) {
-    console.warn('[IntegrationTrigger] Outlook sync failed (non-blocking):', err);
+    logger.warn('outlook_sync_failed', { error: String(err) });
     return { success: false, reason: 'Network error' };
   }
 }
@@ -92,7 +93,7 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
     });
 
     if (error) {
-      console.warn('[IntegrationTrigger] Teams notify error (non-blocking):', error.message);
+      logger.warn('teams_notify_error', { message: error.message });
       return { success: false, reason: error.message };
     }
 
@@ -103,7 +104,7 @@ export async function sendTeamsNotification(params: TeamsNotifyParams): Promise<
       settings_source: data?.settings_source,
     };
   } catch (err) {
-    console.warn('[IntegrationTrigger] Teams notify failed (non-blocking):', err);
+    logger.warn('teams_notify_failed', { error: String(err) });
     return { success: false, reason: 'Network error' };
   }
 }

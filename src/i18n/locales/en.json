@@ -1630,7 +1630,8 @@
       "strength": "Força",
       "title": "Portfolio Performance",
       "trend": "Trend"
-    }
+    },
+    "weekSummary": "This week: {{sessions}} sessions · {{actions}} actions closed · {{health}} startups improved"
   },
   "consultorTools": {
     "allCategories": "All",
@@ -2767,6 +2768,13 @@
       "title": "Bem-vindo à plataforma"
     },
     "journeyMap": "Your Journey",
+    "ring": {
+      "actions": "Actions",
+      "kpis": "KPIs",
+      "milestones": "Milestones"
+    },
+    "firstAction": "🎉 First action completed! The execution habit starts here.",
+    "firstDocument": "📁 First document! Your data room is growing.",
     "multiWorkspace": {
       "title": "Tem {{count}} startups associadas"
     },
@@ -3235,6 +3243,7 @@
     "askAdminToSetup": "Ask an admin to set up KPIs for tracking.",
     "belowTarget": "Below target",
     "checkinComplete": "Check-in marked as complete",
+    "savedSuccess": "KPIs updated! Keep it up 💪",
     "configure": "Configure",
     "configureKpis": "Configure KPIs",
     "configureManually": "Configure Manually",
@@ -3469,7 +3478,17 @@
       "title": "Precisa da Sua Atenção",
       "upcomingSession": "Sessão em {{days}} dias — preparar"
     },
-    "prepSheet": "Preparar"
+    "prepSheet": "Prepare",
+    "quickNote": "Quick Note",
+    "quickNotePlaceholder": "Write your note about this startup...",
+    "noteAdded": "Note added successfully",
+    "feedbackNeeded": "How did the session go?",
+    "giveFeedback": "Give Feedback",
+    "availability": {
+      "available": "Available",
+      "limited": "Limited",
+      "full": "Full"
+    }
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Issues or blockers identified...",

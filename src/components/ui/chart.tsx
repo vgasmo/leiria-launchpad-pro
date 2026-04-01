@@ -2,6 +2,7 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -92,7 +93,7 @@ function isValidCssColor(color: string | undefined): boolean {
 function sanitizeCssColor(color: string | undefined): string | undefined {
   if (!color) return undefined;
   if (!isValidCssColor(color)) {
-    console.warn(`[chart] Invalid CSS color value blocked: ${color.slice(0, 50)}`);
+    logger.warn('chart_invalid_css_color', { color: color.slice(0, 50) });
     return undefined;
   }
   return color;

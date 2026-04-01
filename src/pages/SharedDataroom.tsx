@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -164,7 +165,7 @@ export default function SharedDataroom() {
                           </Badge>
                           {dataroom?.allow_download && item.document.download_url && (
                             <Button asChild variant="outline" size="sm" className="ml-2">
-                              <a href={item.document.download_url} target="_blank" rel="noopener noreferrer">
+                              <a href={sanitizeUrl(item.document.download_url)!} target="_blank" rel="noopener noreferrer">
                                 <Download className="h-4 w-4 mr-2" />
                                 {t('dataroom.download')}
                               </a>
@@ -192,10 +193,10 @@ export default function SharedDataroom() {
                         </div>
                       )}
                       
-                      {item.type === 'link' && item.url && (
+                      {item.type === 'link' && sanitizeUrl(item.url) && (
                         <div className="mt-3">
                           <Button asChild variant="outline" size="sm">
-                            <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            <a href={sanitizeUrl(item.url)!} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-4 w-4 mr-2" />
                               {t('dataroom.openLink')}
                             </a>

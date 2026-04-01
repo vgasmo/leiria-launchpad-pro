@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useTranslation } from 'react-i18next';
 import { Mail, User, GraduationCap, Linkedin, CalendarPlus, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -212,7 +213,7 @@ const ProfileDialog = React.forwardRef<HTMLDivElement, ProfileDialogProps>(
 
               {profile.linkedin_url && (
                 <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                  <a href={sanitizeUrl(profile.linkedin_url)!} target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-4 w-4 mr-2" />
                     LinkedIn
                   </a>

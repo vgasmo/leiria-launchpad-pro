@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -371,7 +372,7 @@ export default function Mentors() {
                                   className="h-8 w-8"
                                 >
                                   <a
-                                    href={mentor.profile.linkedin_url}
+                                    href={sanitizeUrl(mentor.profile.linkedin_url)!}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
@@ -406,7 +407,7 @@ export default function Mentors() {
                           {mentor.profile?.email && (
                             <div className="flex gap-2 mt-4">
                               <Button size="sm" variant="outline" asChild>
-                                <a href={`mailto:${mentor.profile.email}`}>
+                                <a href={sanitizeUrl(`mailto:${mentor.profile.email}`)!}>
                                   <Mail className="h-4 w-4 mr-2" />
                                   {t('mentorsPage.contact')}
                                 </a>
@@ -582,7 +583,7 @@ export default function Mentors() {
                               </div>
                               {conn.founder?.linkedin_url && (
                                 <a
-                                  href={conn.founder.linkedin_url}
+                                  href={sanitizeUrl(conn.founder.linkedin_url)!}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-muted-foreground hover:text-primary"

@@ -1088,7 +1088,8 @@
       "suspendError": "Erro ao alterar estado da conta",
       "suspendTitle": "Suspender Conta",
       "suspended": "Conta suspensa",
-      "suspend": "Suspender"
+      "suspend": "Suspender",
+      "reactivateConfirm": "Tem a certeza que deseja reativar este utilizador?"
     },
     "userSuspended": "Utilizador suspenso",
     "users": "Utilizadores",
@@ -1629,7 +1630,8 @@
       "strength": "Força",
       "title": "Portfolio Performance",
       "trend": "Trend"
-    }
+    },
+    "weekSummary": "Esta semana: {{sessions}} sessões · {{actions}} ações fechadas · {{health}} startups melhoraram"
   },
   "consultorTools": {
     "allCategories": "Todas",
@@ -2766,6 +2768,13 @@
       "title": "Bem-vindo à plataforma"
     },
     "journeyMap": "Your Journey",
+    "ring": {
+      "actions": "Ações",
+      "kpis": "KPIs",
+      "milestones": "Marcos"
+    },
+    "firstAction": "🎉 Primeira ação concluída! O hábito de execução começa aqui.",
+    "firstDocument": "📁 Primeiro documento! A tua data room está a crescer.",
     "multiWorkspace": {
       "title": "Tem {{count}} startups associadas"
     },
@@ -3234,6 +3243,7 @@
     "askAdminToSetup": "Peça a um admin para configurar KPIs para acompanhamento.",
     "belowTarget": "Abaixo da meta",
     "checkinComplete": "Check-in marcado como completo",
+    "savedSuccess": "KPIs atualizados! Continue assim 💪",
     "configure": "Configurar",
     "configureKpis": "Configurar KPIs",
     "configureManually": "Configurar Manualmente",
@@ -3468,7 +3478,17 @@
       "title": "Precisa da Sua Atenção",
       "upcomingSession": "Sessão em {{days}} dias — preparar"
     },
-    "prepSheet": "Preparar"
+    "prepSheet": "Preparar",
+    "quickNote": "Nota Rápida",
+    "quickNotePlaceholder": "Escreva a sua nota sobre esta startup...",
+    "noteAdded": "Nota adicionada com sucesso",
+    "feedbackNeeded": "Como correu a sessão?",
+    "giveFeedback": "Dar Feedback",
+    "availability": {
+      "available": "Disponível",
+      "limited": "Limitado",
+      "full": "Lotado"
+    }
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Problemas ou bloqueios identificados...",
