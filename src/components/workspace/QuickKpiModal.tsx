@@ -116,7 +116,8 @@ export function QuickKpiModal({ open, onOpenChange, workspaceId, programId }: Qu
         setCurrentIndex(0);
         onOpenChange(false);
         queryClient.invalidateQueries({ queryKey: ['kpi-values', workspaceId] });
-        return t('quickKpi.saved', { defaultValue: 'KPIs guardados com sucesso' });
+        triggerKpiCelebration();
+        return t('kpis.savedSuccess', { defaultValue: 'KPIs atualizados! Continue assim 💪' });
       },
       error: () => {
         // Rollback
