@@ -226,14 +226,14 @@ function WarningBadges({ warnings }: { warnings: string[] }) {
   if (warnings.length === 0) return null;
 
   const warningLabels: Record<string, { label: string; severity: 'warning' | 'error' | 'info' }> = {
-    occupied_no_allocation: { label: 'Sem alocação', severity: 'error' },
-    allocation_no_link: { label: 'Sem ligação', severity: 'error' },
-    active_no_contract: { label: 'Sem contrato', severity: 'warning' },
-    contract_draft: { label: 'Contrato rascunho', severity: 'info' },
-    contract_pending_signature: { label: 'Aguarda assinatura', severity: 'warning' },
-    imported_unclaimed: { label: 'Não associado', severity: 'info' },
-    claimed_no_contract: { label: 'Associado s/ contrato', severity: 'warning' },
-    allocation_expiring: { label: 'Alocação a expirar', severity: 'warning' },
+    occupied_no_allocation: { label: t('spaces.warn.noAllocation', 'Sem alocação'), severity: 'error' },
+    allocation_no_link: { label: t('spaces.warn.noLink', 'Sem ligação'), severity: 'error' },
+    active_no_contract: { label: t('spaces.warn.noContract', 'Sem contrato'), severity: 'warning' },
+    contract_draft: { label: t('spaces.warn.contractDraft', 'Contrato rascunho'), severity: 'info' },
+    contract_pending_signature: { label: t('spaces.warn.pendingSig', 'Aguarda assinatura'), severity: 'warning' },
+    imported_unclaimed: { label: t('spaces.warn.notClaimed', 'Não associado'), severity: 'info' },
+    claimed_no_contract: { label: t('spaces.warn.claimedNoContract', 'Associado s/ contrato'), severity: 'warning' },
+    allocation_expiring: { label: t('spaces.warn.allocExpiring', 'Alocação a expirar'), severity: 'warning' },
   };
 
   return (
