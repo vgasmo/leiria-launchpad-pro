@@ -316,12 +316,12 @@ export function InteractiveFloorMapViewer({
                             )}>
                               <MapPin
                                 className={cn(
-                                  'h-8 w-8 drop-shadow-lg',
+                                  'h-5 w-5 drop-shadow-md',
                                   isOccupied ? 'text-primary fill-primary/20' : 'text-accent-foreground fill-accent/20'
                                 )}
                               />
                               <span className={cn(
-                                'text-xs font-medium px-1.5 py-0.5 rounded bg-background/90 shadow-sm -mt-1',
+                                'text-[10px] font-medium px-1 py-px rounded bg-background/90 shadow-sm -mt-0.5',
                                 isOccupied ? 'text-primary' : 'text-accent-foreground'
                               )}>
                                 {room.name}

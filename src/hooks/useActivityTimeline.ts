@@ -257,6 +257,9 @@ export function useAddActivity() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['activity-timeline', variables.workspace_id, variables.funnel_item_id] });
+      if (variables.funnel_item_id) {
+        queryClient.invalidateQueries({ queryKey: ['funnel-events', variables.funnel_item_id] });
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });

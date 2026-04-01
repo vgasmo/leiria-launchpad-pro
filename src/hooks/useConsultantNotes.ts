@@ -32,10 +32,10 @@ export function useConsultantNotes(workspaceId: string | undefined) {
       if (error) throw error;
       if (!data?.length) return [];
 
-      // Get author profiles
+      // Get author profiles using profiles table directly (profiles_safe may block cross-staff visibility)
       const authorIds = [...new Set(data.map(n => n.author_id))];
       const { data: profiles } = await supabase
-        .from('profiles_safe')
+        .from('profiles')
         .select('id, full_name, email, avatar_url')
         .in('id', authorIds);
 
