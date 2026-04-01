@@ -257,25 +257,8 @@ export function BackofficeDashboard() {
           </CardContent>
         </Card>
 
-        {/* Pending Invoices Value */}
-        <Card className={cn('rounded-2xl', data.pendingInvoicesValue > 0 && 'border-amber-500/50')}>
-          <CardContent className="pt-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-bold tracking-tight">€{data.pendingInvoicesValue.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {t('admin.backoffice.opsHub.pendingInvoices', { defaultValue: 'Pending Invoices' })}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {data.pendingInvoices.length} {t('admin.backoffice.opsHub.invoicesAwait', { defaultValue: 'awaiting payment' })}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Receipt className="h-6 w-6 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
+
 
         {/* Expiring Contracts (30 days) */}
         <Card className={cn('rounded-2xl', data.expiringContractsCount > 0 && 'border-red-500/50')}>
