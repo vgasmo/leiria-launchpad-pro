@@ -193,10 +193,10 @@ export default function SharedDataroom() {
                         </div>
                       )}
                       
-                      {item.type === 'link' && item.url && (
+                      {item.type === 'link' && sanitizeUrl(item.url) && (
                         <div className="mt-3">
                           <Button asChild variant="outline" size="sm">
-                            <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            <a href={sanitizeUrl(item.url)!} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-4 w-4 mr-2" />
                               {t('dataroom.openLink')}
                             </a>

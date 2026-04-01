@@ -111,7 +111,7 @@ export function FounderBookingCTA({ workspaceId, className }: FounderBookingCTAP
                 <div className="flex gap-2">
                    {sanitizeUrl(nextSession.join_url) && (
                     <Button asChild variant="default" size="sm">
-                      <a href={nextSession.join_url} target="_blank" rel="noopener noreferrer">
+                      <a href={sanitizeUrl(nextSession.join_url)!} target="_blank" rel="noopener noreferrer">
                         <Video className="h-4 w-4 mr-1" />
                         Join
                       </a>
