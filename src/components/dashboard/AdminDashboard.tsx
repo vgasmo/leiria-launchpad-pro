@@ -74,7 +74,7 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
     totalConsultants: 0,
   });
 
-  const signals = [
+  const signals: Array<{ key: string; label: string; value: number | string; icon: any; href: string; variant: 'default' | 'info' | 'warning' | 'destructive'; trend: 'up' | 'down' | 'neutral'; sparkData: number[] }> = [
     {
       key: 'approvals',
       label: t('admin.pendingApprovals'),
