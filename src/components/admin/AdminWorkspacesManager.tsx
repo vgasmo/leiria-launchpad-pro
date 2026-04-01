@@ -369,7 +369,7 @@ export function AdminWorkspacesManager() {
                       )}
                     </div>
                     <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedFounder('')}>
-                      Remove
+                      {t('common.remove', 'Remover')}
                     </Button>
                   </div>
                 ) : (
