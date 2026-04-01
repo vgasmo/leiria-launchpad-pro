@@ -137,8 +137,8 @@ export function AppSidebar() {
   const backofficeNavigation: NavItem[] = [
     { name: t('nav.backoffice.cockpit', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('nav.backoffice.spaces', { defaultValue: 'Espaços' }), href: '/admin?tab=backoffice', icon: Building2 },
-    { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=contracts', icon: FileText },
-    { name: t('nav.backoffice.invoices', { defaultValue: 'Faturação' }), href: '/admin?tab=invoices', icon: DollarSign },
+    { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=backoffice&subtab=contracts', icon: FileText },
+    { name: t('nav.backoffice.invoices', { defaultValue: 'Faturação' }), href: '/admin?tab=backoffice&subtab=invoices', icon: DollarSign },
     { name: t('nav.backoffice.approvals', { defaultValue: 'Aprovações' }), href: '/admin?tab=approvals', icon: Clock },
     { name: t('nav.backoffice.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
   ];
