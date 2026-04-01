@@ -289,7 +289,7 @@ function PandaDocSettingsCard() {
             <Alert variant="default" className="bg-muted/30">
               <Info className="h-3.5 w-3.5" />
               <AlertDescription className="text-[10px] space-y-1">
-                <p><strong>Para configurar:</strong></p>
+                <p><strong>{t('integrations.setupInstructions', 'Para configurar:')}</strong></p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Aceda ao <a href="https://app.pandadoc.com/a/#/settings/integrations/api" target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-0.5">PandaDoc Dashboard <ExternalLink className="h-2.5 w-2.5" /></a></li>
                   <li>Copie a API Key e adicione como secret <code className="text-[9px] bg-muted px-1 rounded">PANDADOC_API_KEY</code></li>
