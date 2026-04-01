@@ -403,19 +403,19 @@ export function SpaceOperationsConsole() {
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[160px]"><DoorOpen className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder="Estado" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os estados</SelectItem>
-            <SelectItem value="available">Disponível</SelectItem>
-            <SelectItem value="occupied">Ocupada</SelectItem>
-            <SelectItem value="maintenance">Manutenção</SelectItem>
-            <SelectItem value="reserved">Reservada</SelectItem>
+            <SelectItem value="all">{t('spaces.allStatuses', 'Todos os estados')}</SelectItem>
+            <SelectItem value="available">{t('spaces.available', 'Disponível')}</SelectItem>
+            <SelectItem value="occupied">{t('spaces.occupied', 'Ocupada')}</SelectItem>
+            <SelectItem value="maintenance">{t('spaces.maintenance', 'Manutenção')}</SelectItem>
+            <SelectItem value="reserved">{t('spaces.reserved', 'Reservada')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={warningFilter} onValueChange={setWarningFilter}>
-          <SelectTrigger className="w-[160px]"><AlertTriangle className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder="Avisos" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]"><AlertTriangle className="h-4 w-4 mr-1.5 text-muted-foreground" /><SelectValue placeholder={t('spaces.warnings', 'Avisos')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="warnings">Com Avisos</SelectItem>
-            <SelectItem value="clean">Sem Avisos</SelectItem>
+            <SelectItem value="all">{t('common.all', 'Todos')}</SelectItem>
+            <SelectItem value="warnings">{t('spaces.withWarnings', 'Com Avisos')}</SelectItem>
+            <SelectItem value="clean">{t('spaces.noWarnings', 'Sem Avisos')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
