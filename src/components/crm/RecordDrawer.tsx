@@ -86,6 +86,26 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
   useEffect(() => {
     setLocalNextAction(null);
   }, [item?.id]);
+
+  // E1: Listen for lead-contracted events to suggest workspace creation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.itemId === item?.id) {
+        toast(t('crm.leadContracted', { name: detail.name, defaultValue: '{{name}} contratado! Criar workspace?' }), {
+          action: {
+            label: t('crm.createWorkspace', 'Criar Workspace'),
+            onClick: () => {
+              navigate(`/admin?tab=backoffice&subtab=contracts&action=create&funnel=${detail.itemId}&org=${encodeURIComponent(detail.name)}`);
+            }
+          },
+          duration: 10000,
+        });
+      }
+    };
+    window.addEventListener('crm:lead-contracted', handler);
+    return () => window.removeEventListener('crm:lead-contracted', handler);
+  }, [item?.id, t, navigate]);
   
   const emailSyncEnabled = useFeatureFlag('crm_graph_email_sync');
   const aiRecapEnabled = useFeatureFlag('crm_ai_recap');
