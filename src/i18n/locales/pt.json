@@ -1726,6 +1726,7 @@
     }
   },
   "contracts": {
+    "discountApprovalRequired": "Apenas administradores podem adicionar descontos",
     "aiAnalysis": "Análise IA",
     "aiInsights": "Insights de Contrato IA",
     "analyze": "Analisar",
