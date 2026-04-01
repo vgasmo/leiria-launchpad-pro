@@ -257,25 +257,8 @@ export function BackofficeDashboard() {
           </CardContent>
         </Card>
 
-        {/* Pending Invoices Value */}
-        <Card className={cn('rounded-2xl', data.pendingInvoicesValue > 0 && 'border-amber-500/50')}>
-          <CardContent className="pt-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-bold tracking-tight">€{data.pendingInvoicesValue.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {t('admin.backoffice.opsHub.pendingInvoices', { defaultValue: 'Pending Invoices' })}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {data.pendingInvoices.length} {t('admin.backoffice.opsHub.invoicesAwait', { defaultValue: 'awaiting payment' })}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Receipt className="h-6 w-6 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
+
 
         {/* Expiring Contracts (30 days) */}
         <Card className={cn('rounded-2xl', data.expiringContractsCount > 0 && 'border-red-500/50')}>
@@ -432,76 +415,17 @@ export function BackofficeDashboard() {
         </div>
       </div>
 
-      {/* ═══════════════════ FINANCIAL HEALTH ═══════════════════ */}
+      {/* ═══════════════════ CONTRACTS HEALTH ═══════════════════ */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-lg font-semibold">
-            {t('admin.backoffice.opsHub.financialHealth', { defaultValue: 'Financial Health' })}
+            {t('admin.backoffice.opsHub.contractsHealth', { defaultValue: 'Contracts Health' })}
           </h2>
           <Separator className="flex-1" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent / Pending Invoices */}
-          <WidgetErrorBoundary name={t('admin.backoffice.opsHub.pendingInvoices', 'Pending Invoices')}>
-            <Card className="rounded-2xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Receipt className="h-5 w-5" />
-                  {t('admin.backoffice.opsHub.recentInvoices', { defaultValue: 'Recent & Pending Invoices' })}
-                  <Badge variant="secondary" className="ml-auto">{data.pendingInvoices.length}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {data.pendingInvoices.length === 0 ? (
-                  <div className="flex items-center gap-2 text-muted-foreground py-6 justify-center">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">{t('admin.backoffice.opsHub.allPaid', { defaultValue: 'All invoices paid' })}</span>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[280px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-xs">{t('admin.backoffice.startup')}</TableHead>
-                          <TableHead className="text-xs">{t('admin.backoffice.dueDate')}</TableHead>
-                          <TableHead className="text-xs text-right">{t('admin.backoffice.total')}</TableHead>
-                          <TableHead className="text-xs">{t('admin.backoffice.status')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {data.pendingInvoices.map((invoice: any) => {
-                          const dueDate = new Date(invoice.due_date);
-                          const isOverdue = invoice.status === 'sent' && dueDate < new Date();
-                          const daysOverdue = isOverdue ? differenceInDays(new Date(), dueDate) : 0;
-                          return (
-                            <TableRow key={invoice.id} className={cn(isOverdue && 'bg-amber-50/30 dark:bg-amber-900/5')}>
-                              <TableCell className="text-sm font-medium truncate max-w-[140px]">
-                                {invoice.workspace?.startup?.name || '—'}
-                              </TableCell>
-                              <TableCell className={cn('text-xs', isOverdue && 'text-amber-600 font-medium')}>
-                                {format(dueDate, 'dd MMM')}
-                                {isOverdue && ` (+${daysOverdue}d)`}
-                              </TableCell>
-                              <TableCell className="text-sm font-medium text-right">
-                                €{invoice.total?.toFixed(0)}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={isOverdue ? 'destructive' : 'secondary'} className="text-[10px]">
-                                  {isOverdue ? 'Overdue' : invoice.status}
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-          </WidgetErrorBoundary>
 
           {/* Contracts Requiring Attention */}
           <WidgetErrorBoundary name={t('admin.backoffice.opsHub.contractsAttention', 'Contracts Requiring Attention')}>
