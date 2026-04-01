@@ -375,7 +375,7 @@ export function AdminWorkspacesManager() {
                 ) : (
                   <div className="space-y-2">
                     <Input 
-                      placeholder="Search by email or name..." 
+                      placeholder={t('admin.workspacesManager.searchByEmailOrName', 'Pesquisar por email ou nome...')} 
                       value={founderSearch}
                       onChange={(e) => setFounderSearch(e.target.value)}
                     />
