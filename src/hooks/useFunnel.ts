@@ -41,6 +41,7 @@ export interface FunnelItem {
   updated_at: string;
   owner?: { id: string; full_name: string | null; email: string } | null;
   program?: { id: string; name: string } | null;
+  metadata_json?: Record<string, unknown> | null;
 }
 
 export function useFunnelItems(filters?: { stage?: FunnelStage; consultantId?: string }) {
@@ -49,7 +50,7 @@ export function useFunnelItems(filters?: { stage?: FunnelStage; consultantId?: s
     queryFn: async (): Promise<FunnelItem[]> => {
       let query = supabase
         .from('funnel_items')
-        .select('id, type, stage, organization_name, contact_name, contact_email, contact_phone, source, notes, tags, owner_consultant_id, program_id, linked_startup_id, linked_workspace_id, linked_contract_id, first_contact_at, qualified_at, converted_at, next_action_at, next_action_description, last_activity_at, deal_value, deal_currency, expected_close_date, win_probability, loss_reason, created_at, updated_at')
+        .select('id, type, stage, organization_name, contact_name, contact_email, contact_phone, source, notes, tags, owner_consultant_id, program_id, linked_startup_id, linked_workspace_id, linked_contract_id, first_contact_at, qualified_at, converted_at, next_action_at, next_action_description, last_activity_at, deal_value, deal_currency, expected_close_date, win_probability, loss_reason, metadata_json, created_at, updated_at')
         .order('updated_at', { ascending: false });
 
       if (filters?.stage) {
