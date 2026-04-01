@@ -408,7 +408,7 @@ export function AdminWorkspacesManager() {
               </div>
 
               <Button type="submit" className="w-full" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Creating...' : 'Create Workspace'}
+                {createMutation.isPending ? t('common.creating', 'A criar...') : t('admin.workspacesManager.create', 'Criar Workspace')}
               </Button>
             </form>
           </DialogContent>

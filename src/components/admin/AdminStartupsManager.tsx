@@ -342,7 +342,7 @@ export function AdminStartupsManager() {
       setIsBulkStageOpen(false);
       queryClient.invalidateQueries({ queryKey: ['admin-startups'] });
     } catch (err: any) {
-      toast.error('Failed to update stages');
+      toast.error(t('admin.stageUpdateFailed', 'Erro ao atualizar estágios'));
     } finally {
       setIsBulkProcessing(false);
     }
