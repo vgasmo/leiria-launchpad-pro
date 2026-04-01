@@ -217,7 +217,7 @@ export function AdminTeamsTestPanel() {
             className="gap-2"
           >
             <Send className="h-4 w-4" />
-            {testMutation.isPending ? 'Sending...' : 'Send Test'}
+            {testMutation.isPending ? t('common.sending', 'A enviar...') : t('admin.teams.sendTest', 'Enviar Teste')}
           </Button>
         </div>
 
