@@ -265,9 +265,9 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         {/* Enable Toggle */}
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="space-y-0.5">
-            <Label>Enable Graph API sync</Label>
+            <Label>{t('settings.enableGraphSync', 'Ativar sincronização Graph API')}</Label>
             <p className="text-sm text-muted-foreground">
-              Create calendar events and Teams meetings via Graph API
+              {t('settings.graphSyncDesc', 'Criar eventos de calendário e reuniões Teams via Graph API')}
             </p>
           </div>
           <Switch
