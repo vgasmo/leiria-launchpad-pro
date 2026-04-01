@@ -38,18 +38,7 @@ interface ActionItemsTabProps {
   canWrite: boolean;
 }
 
-const STATUS_CONFIG: Record<ActionStatus, { labelKey: string; color: string }> = {
-  pending: { labelKey: 'actions.statusOpen', color: 'bg-muted text-muted-foreground' },
-  in_progress: { labelKey: 'actions.statusDoing', color: 'bg-primary/20 text-primary' },
-  completed: { labelKey: 'actions.statusDone', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  cancelled: { labelKey: 'actions.statusCancelled', color: 'bg-muted text-muted-foreground line-through' },
-};
-
-const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
-  low: { labelKey: 'actions.priorityLow', color: 'text-muted-foreground' },
-  medium: { labelKey: 'actions.priorityMedium', color: 'text-yellow-600 dark:text-yellow-400' },
-  high: { labelKey: 'actions.priorityHigh', color: 'text-destructive' },
-};
+// STATUS_CONFIG and PRIORITY_CONFIG moved to ./actions/ActionItemCard.tsx
 
 export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { t } = useTranslation();
