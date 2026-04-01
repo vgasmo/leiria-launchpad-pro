@@ -268,7 +268,7 @@ function PandaDocSettingsCard() {
 
             {pandadocWebhookEndpoint && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Webhook URL (configurar no PandaDoc)</Label>
+                <Label className="text-xs">{t('integrations.pandadocWebhookLabel', 'Webhook URL (configurar no PandaDoc)')}</Label>
                 <div className="flex items-center gap-2">
                   <Input value={pandadocWebhookEndpoint} readOnly className="text-[10px] h-8 font-mono bg-muted/50" />
                   <Button
