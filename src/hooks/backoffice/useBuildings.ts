@@ -6,6 +6,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface Building {
   id: string;
   name: string;
@@ -47,9 +50,9 @@ export function useCreateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Edifício criado');
+      toast.success(t('backoffice.edifícioCriado'));
     },
-    onError: () => toast.error('Erro ao criar edifício'),
+    onError: () => toast.error(t('backoffice.erroAoCriarEdifício')),
   });
 }
 
@@ -68,8 +71,8 @@ export function useUpdateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Edifício atualizado');
+      toast.success(t('backoffice.edifícioAtualizado'));
     },
-    onError: () => toast.error('Erro ao atualizar edifício'),
+    onError: () => toast.error(t('backoffice.erroAoAtualizarEdifício')),
   });
 }

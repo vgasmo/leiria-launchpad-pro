@@ -5,6 +5,8 @@
  */
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -73,7 +75,7 @@ function useSaveSignatureProvider() {
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ['global-integration-settings', vars.integration_type] });
-      toast.success('Configuração guardada');
+      toast.success(t('admin.configuraçãoGuardada'));
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Erro ao guardar');
@@ -129,7 +131,7 @@ function DocuSignSettingsCard() {
               checked={!!settings?.is_enabled}
               onCheckedChange={(enabled) => {
                 if (enabled && !isConfigured) {
-                  toast.error('Configure as credenciais primeiro');
+                  toast.error(t('admin.configureAsCredenciaisPrimeiro'));
                   return;
                 }
                 save.mutate({ integration_type: 'docusign', settings_json: json, is_enabled: enabled });
@@ -235,7 +237,7 @@ function PandaDocSettingsCard() {
               checked={!!settings?.is_enabled}
               onCheckedChange={(enabled) => {
                 if (enabled && !isConfigured) {
-                  toast.error('Configure as credenciais primeiro');
+                  toast.error(t('admin.configureAsCredenciaisPrimeiro'));
                   return;
                 }
                 save.mutate({ integration_type: 'pandadoc', settings_json: json, is_enabled: enabled });
@@ -274,7 +276,7 @@ function PandaDocSettingsCard() {
                     className="h-8 text-[10px] shrink-0"
                     onClick={() => {
                       navigator.clipboard.writeText(pandadocWebhookEndpoint);
-                      toast.success('URL copiado');
+                      toast.success(t('admin.urlCopiado'));
                     }}
                   >
                     Copiar

@@ -29,6 +29,10 @@ import { formatRelativeTime } from '@/lib/dateUtils';
 import { toast } from 'sonner';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
+
 interface IntakeReviewPanelProps {
   intake: ContractIntake;
   onClose?: () => void;
@@ -71,11 +75,11 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
   /** Send to signature — staff-authenticated action via edge function */
   const handleSendToSignature = async () => {
     if (!intake.contract_id) {
-      toast.error('Nenhum contrato associado a este intake. Crie o contrato primeiro.');
+      toast.error(t('crm.nenhumContratoAssociadoAEste'));
       return;
     }
     if (!selectedProvider) {
-      toast.error('Selecione um provider de assinatura.');
+      toast.error(t('crm.selecioneUmProviderDeAssinatura'));
       return;
     }
     setSendingSignature(true);
@@ -102,7 +106,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
         metadata: { provider: selectedProvider, signing_result: data },
       });
 
-      toast.success('Contrato enviado para assinatura!');
+      toast.success(t('crm.contratoEnviadoParaAssinatura'));
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao enviar para assinatura');
     } finally {

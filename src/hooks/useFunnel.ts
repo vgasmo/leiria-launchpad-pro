@@ -4,6 +4,9 @@ import { toast } from 'sonner';
 import { type FunnelStage, type FunnelType } from '@/constants/funnelStages';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 // Re-export for backward compatibility
 export type { FunnelStage, FunnelType };
 
@@ -107,7 +110,7 @@ export function useCreateFunnelItem() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
-      toast.success('Lead created');
+      toast.success(t('crm.leadCreated'));
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -194,7 +197,7 @@ export function useUpdateFunnelItem() {
       toast.error(e.message);
     },
     onSuccess: () => {
-      toast.success('Updated');
+      toast.success(t('crm.updated'));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
@@ -332,7 +335,7 @@ export function useConvertToStartup() {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Converted to startup');
+      toast.success(t('crm.convertedToStartup'));
     },
     onError: (e: Error) => toast.error(e.message),
   });

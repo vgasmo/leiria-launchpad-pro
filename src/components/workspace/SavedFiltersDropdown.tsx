@@ -23,6 +23,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Bookmark, Star, Trash2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
+
 interface SavedFiltersDropdownProps {
   currentFilters: WorkspaceFilters;
   onApplyFilter: (filters: WorkspaceFilters) => void;
@@ -40,7 +44,7 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
 
   const handleSave = async () => {
     if (!filterName.trim()) {
-      toast.error('Please enter a filter name');
+      toast.error(t('workspace.pleaseEnterAFilterName'));
       return;
     }
 
@@ -50,12 +54,12 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
         filters: currentFilters,
         isDefault: setAsDefault,
       });
-      toast.success('Filter saved');
+      toast.success(t('workspace.filterSaved'));
       setShowSaveDialog(false);
       setFilterName('');
       setSetAsDefault(false);
     } catch {
-      toast.error('Failed to save filter');
+      toast.error(t('workspace.failedToSaveFilter'));
     }
   };
 
@@ -63,9 +67,9 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
     e.stopPropagation();
     try {
       await deleteFilter.mutateAsync(id);
-      toast.success('Filter deleted');
+      toast.success(t('workspace.filterDeleted'));
     } catch {
-      toast.error('Failed to delete filter');
+      toast.error(t('workspace.failedToDeleteFilter'));
     }
   };
 
@@ -73,9 +77,9 @@ export function SavedFiltersDropdown({ currentFilters, onApplyFilter }: SavedFil
     e.stopPropagation();
     try {
       await setDefaultFilter.mutateAsync(id);
-      toast.success('Default filter updated');
+      toast.success(t('workspace.defaultFilterUpdated'));
     } catch {
-      toast.error('Failed to set default');
+      toast.error(t('workspace.failedToSetDefault'));
     }
   };
 

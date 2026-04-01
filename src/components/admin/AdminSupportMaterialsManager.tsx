@@ -73,10 +73,10 @@ export function AdminSupportMaterialsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-support-materials'] });
       queryClient.invalidateQueries({ queryKey: ['support-materials'] });
-      toast.success('Material created');
+      toast.success(t('admin.materialCreated'));
       setIsCreating(false);
     },
-    onError: () => toast.error('Failed to create material'),
+    onError: () => toast.error(t('admin.failedToCreateMaterial')),
   });
 
   const updateMutation = useMutation({
@@ -90,10 +90,10 @@ export function AdminSupportMaterialsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-support-materials'] });
       queryClient.invalidateQueries({ queryKey: ['support-materials'] });
-      toast.success('Material updated');
+      toast.success(t('admin.materialUpdated'));
       setEditingMaterial(null);
     },
-    onError: () => toast.error('Failed to update material'),
+    onError: () => toast.error(t('admin.failedToUpdateMaterial')),
   });
 
   const deleteMutation = useMutation({
@@ -107,10 +107,10 @@ export function AdminSupportMaterialsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-support-materials'] });
       queryClient.invalidateQueries({ queryKey: ['support-materials'] });
-      toast.success('Material deleted');
+      toast.success(t('admin.materialDeleted'));
       setDeleteTarget(null);
     },
-    onError: () => toast.error('Failed to delete material'),
+    onError: () => toast.error(t('admin.failedToDeleteMaterial')),
   });
 
   const handleCreate = () => {
@@ -143,7 +143,7 @@ export function AdminSupportMaterialsManager() {
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('admin.titleIsRequired'));
       return;
     }
 

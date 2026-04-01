@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
 import {
   Lightbulb,
   Plus,
@@ -63,9 +65,9 @@ export function SessionExercisesPicker({ sessionId, canEdit }: SessionExercisesP
   const handleRemove = async (id: string) => {
     try {
       await removeMutation.mutateAsync(id);
-      toast.success('Exercise removed');
+      toast.success(t('sessions.exerciseRemoved'));
     } catch (error) {
-      toast.error('Failed to remove exercise');
+      toast.error(t('sessions.failedToRemoveExercise'));
     }
   };
 
@@ -217,13 +219,13 @@ function AddExerciseDialog({
     if (!selectedId) return;
     try {
       await addMutation.mutateAsync({ exerciseId: selectedId, notes: notes.trim() || undefined });
-      toast.success('Exercise added');
+      toast.success(t('sessions.exerciseAdded'));
       onOpenChange(false);
       setSelectedId(null);
       setNotes('');
       setSearch('');
     } catch (error) {
-      toast.error('Failed to add exercise');
+      toast.error(t('sessions.failedToAddExercise'));
     }
   };
 

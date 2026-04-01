@@ -43,7 +43,7 @@ export function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error('Please enter a title');
+      toast.error(t('sessions.pleaseEnterATitle'));
       return;
     }
 
@@ -56,11 +56,11 @@ export function AddActionItemDialog({ workspaceId, sessionId, open, onOpenChange
         session_id: sessionId,
         owner_user_id: ownerId || undefined,
       });
-      toast.success('Action item created');
+      toast.success(t('sessions.actionItemCreated'));
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      toast.error('Failed to create action item');
+      toast.error(t('sessions.failedToCreateActionItem'));
     }
   };
 

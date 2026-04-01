@@ -6,6 +6,9 @@ import { Json } from '@/integrations/supabase/types';
 import { triggerMiniCelebration } from '@/lib/confetti';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 type ActionStatus = Database['public']['Enums']['action_status'];
 
 // P1.2: Helper to log activity
@@ -172,7 +175,7 @@ export function useUpdateActionItem(workspaceId: string) {
 
           if (count === 1) {
             const { toast } = await import('sonner');
-            toast.success('🎉 Primeira ação concluída! O hábito de execução começa aqui.');
+            toast.success(t('actions.primeiraAçãoConcluídaOHábito'));
           }
         } catch {
           // Silent - celebration check is non-critical

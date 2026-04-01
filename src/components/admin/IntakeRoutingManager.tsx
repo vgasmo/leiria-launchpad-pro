@@ -76,10 +76,10 @@ export function IntakeRoutingManager() {
       queryClient.invalidateQueries({ queryKey: ['booking-links'] });
       const link = `${window.location.origin}/book/${data.plainToken}`;
       navigator.clipboard.writeText(link);
-      toast.success('Link created and copied to clipboard');
+      toast.success(t('admin.linkCreatedAndCopiedTo'));
     },
     onError: (error) => {
-      toast.error(`Failed to create link: ${error.message}`);
+      toast.error(t('admin.failedToCreateLink', { message: error.message }));
     },
   });
   
@@ -94,7 +94,7 @@ export function IntakeRoutingManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking-links'] });
-      toast.success('Link deactivated');
+      toast.success(t('admin.linkDeactivated'));
     },
   });
   
@@ -128,7 +128,7 @@ export function IntakeRoutingManager() {
   
   const handleSave = async () => {
     if (selectedConsultants.length === 0) {
-      toast.error('Please select at least one consultant');
+      toast.error(t('admin.pleaseSelectAtLeastOne'));
       return;
     }
     
@@ -146,7 +146,7 @@ export function IntakeRoutingManager() {
   const handleCopyLink = (tokenHash: string) => {
     const link = `${window.location.origin}/book/${tokenHash}`;
     navigator.clipboard.writeText(link);
-    toast.success('Link copied to clipboard');
+    toast.success(t('admin.linkCopiedToClipboard'));
   };
   
   if (loadingRoutes || loadingConsultants) {

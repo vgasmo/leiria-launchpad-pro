@@ -90,7 +90,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
 
   const handleSaveCustomEmail = async () => {
     if (!email || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
+      toast.error(t('settings.pleaseEnterAValidEmail'));
       return;
     }
     try {
@@ -99,7 +99,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
         use_custom_calendar_email: true,
         sync_mode: 'graph',
       });
-      toast.success('Custom calendar email saved');
+      toast.success(t('settings.customCalendarEmailSaved'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to save');
     }
@@ -115,7 +115,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
           use_custom_calendar_email: false,
           sync_mode: 'graph',
         });
-        toast.success('Using assigned consultant calendar');
+        toast.success(t('settings.usingAssignedConsultantCalendar'));
       } catch (error: any) {
         toast.error(error.message || 'Failed to update');
       }
@@ -124,11 +124,11 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
 
   const handleToggleSync = async (enabled: boolean) => {
     if (enabled && !hasEffectiveEmail) {
-      toast.error('No calendar email available. Assign a consultant or set a custom email.');
+      toast.error(t('settings.noCalendarEmailAvailableAssign'));
       return;
     }
     if (enabled && !globalEnabled) {
-      toast.error('Global Graph API is not enabled. Ask an admin to configure it.');
+      toast.error(t('settings.globalGraphApiIsNot'));
       return;
     }
     try {

@@ -8,6 +8,9 @@ import { toast } from 'sonner';
 import type { IncubationType } from './useIncubationTypes';
 import type { Building } from './useBuildings';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface StartupContract {
   id: string;
   workspace_id: string | null;
@@ -91,9 +94,9 @@ export function useCreateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contrato criado');
+      toast.success(t('backoffice.contratoCriado'));
     },
-    onError: () => toast.error('Erro ao criar contrato'),
+    onError: () => toast.error(t('backoffice.erroAoCriarContrato')),
   });
 }
 
@@ -112,8 +115,8 @@ export function useUpdateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contrato atualizado');
+      toast.success(t('backoffice.contratoAtualizado'));
     },
-    onError: () => toast.error('Erro ao atualizar contrato'),
+    onError: () => toast.error(t('backoffice.erroAoAtualizarContrato')),
   });
 }

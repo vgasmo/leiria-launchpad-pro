@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface SearchResult {
   type: 'session' | 'action' | 'note' | 'document' | 'message' | 'milestone';
   id: string;
@@ -590,7 +593,7 @@ export function useSaveSearch() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-filters'] });
-      toast.success('Pesquisa guardada');
+      toast.success(t('integrations.pesquisaGuardada'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -633,7 +636,7 @@ export function useDeleteSavedSearch() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-searches'] });
-      toast.success('Pesquisa removida');
+      toast.success(t('integrations.pesquisaRemovida'));
     },
     onError: (error: Error) => {
       toast.error(error.message);

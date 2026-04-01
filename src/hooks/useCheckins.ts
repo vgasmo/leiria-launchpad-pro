@@ -5,6 +5,9 @@ import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers
 import { Json } from '@/integrations/supabase/types';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 // P1.2: Helper to log activity
 async function logActivity(action: string, entityType: string, entityId: string, workspaceId: string, metadata?: Record<string, unknown>) {
   try {
@@ -206,7 +209,7 @@ export function useSubmitCheckin() {
       return { instanceId, workspaceId };
     },
     onSuccess: (result) => {
-      toast.success('Check-in submitted successfully!');
+      toast.success(t('checkins.submitted'));
       queryClient.invalidateQueries({ queryKey: ['pending-checkin'] });
       queryClient.invalidateQueries({ queryKey: ['checkin-history'] });
       queryClient.invalidateQueries({ queryKey: ['all-pending-checkins'] });
@@ -247,7 +250,7 @@ export function useSubmitCheckin() {
        }
     },
     onError: (error: any) => {
-      toast.error('Failed to submit check-in', {
+      toast.error(t('checkins.submitError'), {
         description: error.message,
       });
     },
@@ -300,11 +303,11 @@ export function useManageCheckinDefinition() {
       }
     },
     onSuccess: () => {
-      toast.success('Check-in definition saved');
+      toast.success(t('checkins.definitionSaved'));
       queryClient.invalidateQueries({ queryKey: ['checkin-definitions'] });
     },
     onError: (error: any) => {
-      toast.error('Failed to save definition', {
+      toast.error(t('checkins.definitionSaveError'), {
         description: error.message,
       });
     },
@@ -355,7 +358,7 @@ export function useSkipCheckin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.info('Check-in skipped');
+      toast.info(t('checkins.skipped'));
       queryClient.invalidateQueries({ queryKey: ['pending-checkin'] });
       queryClient.invalidateQueries({ queryKey: ['all-pending-checkins'] });
     },

@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface SurveyQuestion {
   id: string;
   section: string;
@@ -279,7 +282,7 @@ export function useLaunchCampaign() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["survey-campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["survey-instances"] });
-      toast.success(`Campaign launched! ${data.instancesCreated} surveys created.`);
+      toast.success(t('surveys.campaignLaunched', { instancesCreated: data.instancesCreated }));
     },
     onError: (error) => {
       toast.error("Failed to launch campaign");

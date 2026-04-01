@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 // ============================================
 // TYPES
 // ============================================
@@ -179,9 +182,9 @@ export function useCreateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Tipo de incubação criado');
+      toast.success(t('backoffice.incubationTypeCreated'));
     },
-    onError: () => toast.error('Erro ao criar tipo de incubação'),
+    onError: () => toast.error(t('backoffice.incubationTypeCreateError')),
   });
 }
 
@@ -200,9 +203,9 @@ export function useUpdateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Tipo de incubação atualizado');
+      toast.success(t('backoffice.incubationTypeUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar tipo de incubação'),
+    onError: () => toast.error(t('backoffice.incubationTypeUpdateError')),
   });
 }
 
@@ -238,9 +241,9 @@ export function useCreateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Edifício criado');
+      toast.success(t('backoffice.buildingCreated'));
     },
-    onError: () => toast.error('Erro ao criar edifício'),
+    onError: () => toast.error(t('backoffice.buildingCreateError')),
   });
 }
 
@@ -259,9 +262,9 @@ export function useUpdateBuilding() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
-      toast.success('Edifício atualizado');
+      toast.success(t('backoffice.buildingUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar edifício'),
+    onError: () => toast.error(t('backoffice.buildingUpdateError')),
   });
 }
 
@@ -311,9 +314,9 @@ export function useCreateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contrato criado');
+      toast.success(t('backoffice.contractCreated'));
     },
-    onError: () => toast.error('Erro ao criar contrato'),
+    onError: () => toast.error(t('backoffice.contractCreateError')),
   });
 }
 
@@ -332,9 +335,9 @@ export function useUpdateContract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success('Contrato atualizado');
+      toast.success(t('backoffice.contractUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar contrato'),
+    onError: () => toast.error(t('backoffice.contractUpdateError')),
   });
 }
 
@@ -383,9 +386,9 @@ export function useCreateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Fatura criada');
+      toast.success(t('backoffice.invoiceCreated'));
     },
-    onError: () => toast.error('Erro ao criar fatura'),
+    onError: () => toast.error(t('backoffice.invoiceCreateError')),
   });
 }
 
@@ -404,9 +407,9 @@ export function useUpdateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Fatura atualizada');
+      toast.success(t('backoffice.invoiceUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar fatura'),
+    onError: () => toast.error(t('backoffice.invoiceUpdateError')),
   });
 }
 
@@ -453,9 +456,9 @@ export function useRecordPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Pagamento registado');
+      toast.success(t('backoffice.paymentRecorded'));
     },
-    onError: () => toast.error('Erro ao registar pagamento'),
+    onError: () => toast.error(t('backoffice.paymentRecordError')),
   });
 }
 
@@ -491,9 +494,9 @@ export function useCreateOfficeSpace() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Espaço criado');
+      toast.success(t('backoffice.spaceCreated'));
     },
-    onError: () => toast.error('Erro ao criar espaço'),
+    onError: () => toast.error(t('backoffice.spaceCreateError')),
   });
 }
 
@@ -512,9 +515,9 @@ export function useUpdateOfficeSpace() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Espaço atualizado');
+      toast.success(t('backoffice.spaceUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar espaço'),
+    onError: () => toast.error(t('backoffice.spaceUpdateError')),
   });
 }
 
@@ -564,9 +567,9 @@ export function useCreateSpaceAllocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['office-spaces'] });
-      toast.success('Espaço atribuído');
+      toast.success(t('backoffice.spaceAllocated'));
     },
-    onError: () => toast.error('Erro ao atribuir espaço'),
+    onError: () => toast.error(t('backoffice.spaceAllocateError')),
   });
 }
 
@@ -803,9 +806,9 @@ export function useCreateRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Sala criada');
+      toast.success(t('backoffice.roomCreated'));
     },
-    onError: () => toast.error('Erro ao criar sala'),
+    onError: () => toast.error(t('backoffice.roomCreateError')),
   });
 }
 
@@ -825,9 +828,9 @@ export function useUpdateRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Sala atualizada');
+      toast.success(t('backoffice.roomUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar sala'),
+    onError: () => toast.error(t('backoffice.roomUpdateError')),
   });
 }
 
@@ -841,9 +844,9 @@ export function useDeleteRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Sala eliminada');
+      toast.success(t('backoffice.roomDeleted'));
     },
-    onError: () => toast.error('Erro ao eliminar sala'),
+    onError: () => toast.error(t('backoffice.roomDeleteError')),
   });
 }
 
@@ -898,9 +901,9 @@ export function useCreateRoomAllocation() {
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Sala atribuída');
+      toast.success(t('backoffice.roomAllocated'));
     },
-    onError: () => toast.error('Erro ao atribuir sala'),
+    onError: () => toast.error(t('backoffice.roomAllocateError')),
   });
 }
 
@@ -932,9 +935,9 @@ export function useEndRoomAllocation() {
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
-      toast.success('Atribuição terminada');
+      toast.success(t('backoffice.allocationEnded'));
     },
-    onError: () => toast.error('Erro ao terminar atribuição'),
+    onError: () => toast.error(t('backoffice.allocationEndError')),
   });
 }
 
@@ -976,9 +979,9 @@ export function useCreateFloorMap() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floor-maps'] });
-      toast.success('Mapa carregado');
+      toast.success(t('backoffice.floorMapUploaded'));
     },
-    onError: () => toast.error('Erro ao carregar mapa'),
+    onError: () => toast.error(t('backoffice.floorMapUploadError')),
   });
 }
 
@@ -994,9 +997,9 @@ export function useDeleteFloorMap() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['floor-maps'] });
-      toast.success('Mapa eliminado');
+      toast.success(t('backoffice.floorMapDeleted'));
     },
-    onError: () => toast.error('Erro ao eliminar mapa'),
+    onError: () => toast.error(t('backoffice.floorMapDeleteError')),
   });
 }
 
@@ -1045,9 +1048,9 @@ export function useCreateWaitingListRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-waiting-list'] });
-      toast.success('Pedido adicionado à lista de espera');
+      toast.success(t('backoffice.waitingListAdded'));
     },
-    onError: () => toast.error('Erro ao adicionar pedido'),
+    onError: () => toast.error(t('backoffice.waitingListAddError')),
   });
 }
 
@@ -1066,9 +1069,9 @@ export function useUpdateWaitingListRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['space-waiting-list'] });
-      toast.success('Pedido atualizado');
+      toast.success(t('backoffice.waitingListUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar pedido'),
+    onError: () => toast.error(t('backoffice.waitingListUpdateError')),
   });
 }
 
@@ -1126,8 +1129,8 @@ export function useFulfillWaitingListRequest() {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms-with-allocations'] });
       queryClient.invalidateQueries({ queryKey: ['room-allocations'] });
-      toast.success('Pedido satisfeito');
+      toast.success(t('backoffice.waitingListFulfilled'));
     },
-    onError: () => toast.error('Erro ao satisfazer pedido'),
+    onError: () => toast.error(t('backoffice.waitingListFulfillError')),
   });
 }

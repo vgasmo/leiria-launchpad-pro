@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface CommunicationEntry {
   id: string;
   workspace_id: string;
@@ -79,7 +82,7 @@ export function useCreateEmailAlias() {
     },
     onSuccess: (_, workspaceId) => {
       queryClient.invalidateQueries({ queryKey: ['email-alias', workspaceId] });
-      toast.success('Email alias created');
+      toast.success(t('communication.emailAliasCreated'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -110,7 +113,7 @@ export function useAddCommunication() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['communication-log', variables.workspace_id] });
-      toast.success('Communication logged');
+      toast.success(t('communication.communicationLogged'));
     },
     onError: (error: Error) => {
       toast.error(error.message);

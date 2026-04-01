@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface WorkspaceAlert {
   id: string;
   workspace_id: string;
@@ -136,7 +139,7 @@ export function useResolveAlert() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alert resolved');
+      toast.success(t('alerts.resolved'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -168,7 +171,7 @@ export function useIgnoreAlert() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alert ignored');
+      toast.success(t('alerts.ignored'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -224,7 +227,7 @@ export function useUpdateAlertRule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['program-alert-rules'] });
-      toast.success('Rule updated');
+      toast.success(t('alerts.ruleUpdated'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -246,7 +249,7 @@ export function useRecomputeAlerts() {
       queryClient.invalidateQueries({ queryKey: ['workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['all-workspace-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['alert-counts'] });
-      toast.success('Alerts recalculated');
+      toast.success(t('alerts.recalculated'));
     },
     onError: (error: Error) => {
       toast.error(error.message);

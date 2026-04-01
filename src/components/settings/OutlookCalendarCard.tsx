@@ -52,7 +52,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && syncMode === 'webhook' && !hasWebhook) {
-      toast.error('Please configure a webhook URL first');
+      toast.error(t('integrations.pleaseConfigureAWebhookUrl'));
       return;
     }
     try {
@@ -68,12 +68,12 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
 
   const handleSaveWebhook = async () => {
     if (!webhookUrl) {
-      toast.error('Please enter a webhook URL');
+      toast.error(t('integrations.pleaseEnterAWebhookUrl'));
       return;
     }
     try {
       await updateSettings.mutateAsync({ webhook_url: webhookUrl, sync_mode: 'webhook' });
-      toast.success('Webhook URL saved');
+      toast.success(t('integrations.webhookUrlSaved'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to save webhook');
     }

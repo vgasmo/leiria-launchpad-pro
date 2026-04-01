@@ -40,19 +40,19 @@ export function HealthScorePanel({
     try {
       const result = await recomputeHealth.mutateAsync();
       setLastComputation(result.computation);
-      toast.success('Health score recomputed');
+      toast.success(t('workspace.healthScoreRecomputed'));
     } catch {
-      toast.error('Failed to recompute health score');
+      toast.error(t('workspace.failedToRecomputeHealthScore'));
     }
   };
 
   const handleSaveNotes = async () => {
     try {
       await updateHealthNotes.mutateAsync(editedNotes || null);
-      toast.success('Health notes saved');
+      toast.success(t('workspace.healthNotesSaved'));
       setShowNotesEditor(false);
     } catch {
-      toast.error('Failed to save notes');
+      toast.error(t('workspace.failedToSaveNotes'));
     }
   };
 

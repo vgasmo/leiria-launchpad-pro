@@ -4,6 +4,9 @@ import { toast } from 'sonner';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface GraphApiGlobalSettings {
   tenant_id: string;
   client_id: string;
@@ -81,10 +84,10 @@ export function useUpdateGlobalGraphSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['global-integration-settings', 'graph_api'] });
-      toast.success('Global Graph API settings saved');
+      toast.success(t('integrations.globalGraphApiSettingsSaved'));
     },
     onError: (error: Error) => {
-      toast.error(`Failed to save settings: ${error.message}`);
+      toast.error(t('integrations.failedToSaveSettings', { message: error.message }));
     },
   });
 }
@@ -130,7 +133,7 @@ export function useToggleGlobalGraph() {
       toast.success(enabled ? 'Graph API enabled globally' : 'Graph API disabled');
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update: ${error.message}`);
+      toast.error(t('integrations.failedToUpdate', { message: error.message }));
     },
   });
 }

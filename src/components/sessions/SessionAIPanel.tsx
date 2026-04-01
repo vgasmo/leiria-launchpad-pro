@@ -159,16 +159,16 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
 
       if (data?.success && data?.status === 'ok' && data?.transcript_text) {
         setTranscript(data.transcript_text);
-        toast.success('Transcrição importada e guardada com sucesso');
+        toast.success(t('sessions.transcriçãoImportadaEGuardadaCom'));
         onRefresh?.();
       } else if (data?.status === 'not_ready') {
-        toast.info('Ainda não há transcrição disponível. Tenta novamente ~10 min após a reunião terminar.');
+        toast.info(t('sessions.aindaNãoHáTranscriçãoDisponível'));
       } else if (data?.status === 'no_meeting_url') {
-        toast.warning('Esta sessão não tem link do Teams associado.');
+        toast.warning(t('sessions.estaSessãoNãoTemLink'));
       } else if (data?.status === 'not_found') {
-        toast.warning('Reunião não encontrada no Teams. Verifica se o organizador corresponde ao consultor.');
+        toast.warning(t('sessions.reuniãoNãoEncontradaNoTeams'));
       } else if (data?.status === 'forbidden_policy') {
-        toast.error('Falta Application Access Policy no Teams. Contacte o administrador M365.');
+        toast.error(t('sessions.faltaApplicationAccessPolicyNo'));
       } else {
         toast.error(data?.error || 'Erro ao importar transcrição');
       }

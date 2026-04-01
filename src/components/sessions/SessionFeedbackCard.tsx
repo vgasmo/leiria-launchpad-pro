@@ -28,7 +28,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast.error('Please select a rating');
+      toast.error(t('sessions.pleaseSelectARating'));
       return;
     }
     try {
@@ -38,7 +38,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
         feedback: feedback.trim() || undefined,
         is_public: true,
       });
-      toast.success('Feedback submitted');
+      toast.success(t('sessions.feedbackSubmitted'));
       setDialogOpen(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit feedback');

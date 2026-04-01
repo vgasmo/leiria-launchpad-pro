@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface KeyMetrics {
   runway_months: number | null;
   burn_rate_monthly: number | null;
@@ -322,7 +325,7 @@ export function useCreateFinancialModelVersion(workspaceId: string) {
       queryClient.invalidateQueries({ queryKey: ['financial-model-versions', workspaceId] });
     },
     onError: (error) => {
-      toast.error(`Failed to create version: ${error.message}`);
+      toast.error(t('financial.failedToCreateVersion', { message: error.message }));
     },
   });
 }
@@ -343,10 +346,10 @@ export function useParseFinancialModel() {
     },
     onSuccess: (_, versionId) => {
       queryClient.invalidateQueries({ queryKey: ['financial-model-versions'] });
-      toast.success('Financial model parsed successfully');
+      toast.success(t('financial.financialModelParsedSuccessfully'));
     },
     onError: (error) => {
-      toast.error(`Failed to parse: ${error.message}`);
+      toast.error(t('financial.failedToParse', { message: error.message }));
     },
   });
 }
@@ -368,10 +371,10 @@ export function useSyncFinancialKpis(workspaceId: string) {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['kpi-values', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-kpis', workspaceId] });
-      toast.success(`Synced ${result.synced.length} KPIs`);
+      toast.success(t('financial.synced', { length: result.synced.length }));
     },
     onError: (error) => {
-      toast.error(`Failed to sync: ${error.message}`);
+      toast.error(t('financial.failedToSync', { message: error.message }));
     },
   });
 }
@@ -392,10 +395,10 @@ export function useGenerateFinancialModelReview() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-model-versions'] });
-      toast.success('AI review generated');
+      toast.success(t('financial.aiReviewGenerated'));
     },
     onError: (error) => {
-      toast.error(`AI review failed: ${error.message}`);
+      toast.error(t('financial.aiReviewFailed', { message: error.message }));
     },
   });
 }
@@ -441,10 +444,10 @@ export function useCreateActionsFromInsights(workspaceId: string) {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
-      toast.success(`Created ${result.count} actions`);
+      toast.success(t('financial.created', { count: result.count }));
     },
     onError: (error) => {
-      toast.error(`Failed to create actions: ${error.message}`);
+      toast.error(t('financial.failedToCreateActions', { message: error.message }));
     },
   });
 }
@@ -487,10 +490,10 @@ export function useCreateActionsFromAIReview(workspaceId: string) {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
-      toast.success(`Created ${result.count} actions from AI`);
+      toast.success(t('financial.created', { count: result.count }));
     },
     onError: (error) => {
-      toast.error(`Failed to create actions: ${error.message}`);
+      toast.error(t('financial.failedToCreateActions', { message: error.message }));
     },
   });
 }
@@ -510,7 +513,7 @@ export function useSetActiveFinancialVersion(workspaceId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
-      toast.success('Active version updated');
+      toast.success(t('financial.activeVersionUpdated'));
     },
   });
 }

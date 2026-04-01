@@ -33,6 +33,10 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
+
 interface AdminHealthToolsProps {
   programId?: string;
   className?: string;
@@ -74,10 +78,10 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
       const result = await recomputeHealth.mutateAsync(
         programId ? { program_id: programId } : undefined
       );
-      toast.success(`Recalculado: ${result.updatedWorkspaces} workspaces, ${result.historySnapshots} snapshots, ${result.alertsCreated} alertas`);
+      toast.success(t('admin.recalculadoResultupdatedworkspacesWorkspacesResulthistorysnapshotsSnapshots', { alertsCreated: result.alertsCreated }));
     } catch (error) {
       logger.error('Recompute error', {}, error);
-      toast.error('Erro ao recalcular health scores');
+      toast.error(t('admin.erroAoRecalcularHealthScores'));
     } finally {
       setRecomputeLoading(false);
     }
@@ -85,7 +89,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
 
   const handleExportPdf = async () => {
     if (!programId) {
-      toast.error('Selecione um programa');
+      toast.error(t('admin.selecioneUmPrograma'));
       return;
     }
 
@@ -99,11 +103,11 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
 
       if (data.report_url) {
         window.open(data.report_url, '_blank');
-        toast.success('Relatório gerado com sucesso');
+        toast.success(t('admin.relatórioGeradoComSucesso'));
       }
     } catch (error) {
       logger.error('Export error', {}, error);
-      toast.error('Erro ao gerar relatório');
+      toast.error(t('admin.erroAoGerarRelatório'));
     } finally {
       setExportLoading(false);
     }
@@ -111,22 +115,22 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
 
   const handleApplyTemplate = async () => {
     if (!selectedTemplate || !programId) {
-      toast.error('Selecione um template e um programa');
+      toast.error(t('admin.selecioneUmTemplateEUm'));
       return;
     }
 
     try {
       await applyTemplate.mutateAsync({ templateId: selectedTemplate, programId });
-      toast.success('Template aplicado com sucesso');
+      toast.success(t('admin.templateAplicadoComSucesso'));
     } catch (error) {
       logger.error('Apply template error', {}, error);
-      toast.error('Erro ao aplicar template');
+      toast.error(t('admin.erroAoAplicarTemplate'));
     }
   };
 
   const handleSaveAsTemplate = async () => {
     if (!currentModel || !newTemplateName) {
-      toast.error('Nome é obrigatório');
+      toast.error(t('admin.nomeÉObrigatório'));
       return;
     }
 
@@ -137,13 +141,13 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
         weights_json: currentModel.weights_json,
         thresholds_json: currentModel.thresholds_json,
       });
-      toast.success('Template criado com sucesso');
+      toast.success(t('admin.templateCriadoComSucesso'));
       setShowSaveDialog(false);
       setNewTemplateName('');
       setNewTemplateDesc('');
     } catch (error) {
       logger.error('Save template error', {}, error);
-      toast.error('Erro ao criar template');
+      toast.error(t('admin.erroAoCriarTemplate'));
     }
   };
 

@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface WorkflowRule {
   id: string;
   program_id: string | null;
@@ -60,7 +63,7 @@ export function useUpdateWorkflowRule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflow-rules'] });
-      toast.success('Rule updated');
+      toast.success(t('workflow.ruleUpdated'));
     },
     onError: (error: Error) => {
       toast.error(error.message);

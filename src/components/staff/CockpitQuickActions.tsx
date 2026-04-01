@@ -73,7 +73,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
 
   const handleCreateQuickSession = async () => {
     if (!sessionWorkspaceId || !sessionTitle || !sessionDate) {
-      toast.error('Please fill all fields');
+      toast.error(t('staff.pleaseFillAllFields'));
       return;
     }
 
@@ -92,11 +92,11 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
         });
 
       if (error) throw error;
-      toast.success('Session scheduled successfully');
+      toast.success(t('staff.sessionScheduledSuccessfully'));
       setShowQuickSession(false);
       resetSessionForm();
     } catch (error) {
-      toast.error('Failed to create session');
+      toast.error(t('staff.failedToCreateSession'));
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +104,7 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
 
   const handleCreateQuickAction = async () => {
     if (!actionWorkspaceId || !actionTitle) {
-      toast.error('Please fill required fields');
+      toast.error(t('staff.pleaseFillRequiredFields'));
       return;
     }
 
@@ -123,11 +123,11 @@ export function CockpitQuickActions({ workspaces, compact = false }: CockpitQuic
         });
 
       if (error) throw error;
-      toast.success('Action item created');
+      toast.success(t('staff.actionItemCreated'));
       setShowQuickAction(false);
       resetActionForm();
     } catch (error) {
-      toast.error('Failed to create action');
+      toast.error(t('staff.failedToCreateAction'));
     } finally {
       setIsLoading(false);
     }

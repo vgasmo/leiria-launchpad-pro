@@ -6,6 +6,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface IncubationType {
   id: string;
   name: string;
@@ -54,9 +57,9 @@ export function useCreateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Tipo de incubação criado');
+      toast.success(t('backoffice.incubationTypeCreated'));
     },
-    onError: () => toast.error('Erro ao criar tipo de incubação'),
+    onError: () => toast.error(t('backoffice.incubationTypeCreateError')),
   });
 }
 
@@ -75,8 +78,8 @@ export function useUpdateIncubationType() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incubation-types'] });
-      toast.success('Tipo de incubação atualizado');
+      toast.success(t('backoffice.incubationTypeUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar tipo de incubação'),
+    onError: () => toast.error(t('backoffice.incubationTypeUpdateError')),
   });
 }

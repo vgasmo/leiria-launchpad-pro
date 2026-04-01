@@ -28,6 +28,10 @@ import { useGlobalGraphSettings, useUpdateGlobalGraphSettings, useToggleGlobalGr
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
+
 export function GlobalGraphApiCard() {
   const { data: settings, isLoading } = useGlobalGraphSettings();
   const updateSettings = useUpdateGlobalGraphSettings();
@@ -56,17 +60,17 @@ export function GlobalGraphApiCard() {
 
   const handleSaveCredentials = async () => {
     if (!tenantId || !clientId) {
-      toast.error('Tenant ID and Client ID are required');
+      toast.error(t('settings.tenantIdAndClientId'));
       return;
     }
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(tenantId)) {
-      toast.error('Invalid Tenant ID format (should be a GUID)');
+      toast.error(t('settings.invalidTenantIdFormatShould'));
       return;
     }
     if (!uuidRegex.test(clientId)) {
-      toast.error('Invalid Client ID format (should be a GUID)');
+      toast.error(t('settings.invalidClientIdFormatShould'));
       return;
     }
 
@@ -78,7 +82,7 @@ export function GlobalGraphApiCard() {
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && !isConfigured) {
-      toast.error('Please configure Azure AD credentials first');
+      toast.error(t('settings.pleaseConfigureAzureAdCredentials'));
       return;
     }
     await toggleEnabled.mutateAsync(enabled);
@@ -86,7 +90,7 @@ export function GlobalGraphApiCard() {
 
   const handleTestGraph = async () => {
     if (!testEmail || !testEmail.includes('@')) {
-      toast.error('Enter a valid consultant email to test');
+      toast.error(t('settings.enterAValidConsultantEmail'));
       return;
     }
 

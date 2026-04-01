@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface OutlookCalendarSettings {
   id: string;
   workspace_id: string;
@@ -87,16 +90,16 @@ export function useSyncSessionToOutlook() {
     },
     onSuccess: (data) => {
       if (data.success) {
-        toast.success('Sessão sincronizada com o calendário Outlook');
+        toast.success(t('integrations.sessãoSincronizadaComOCalendário'));
       } else if (data.reason === 'not_configured') {
-        toast.info('Sincronização Outlook não configurada para este workspace');
+        toast.info(t('integrations.sincronizaçãoOutlookNãoConfiguradaPara'));
       } else {
         toast.warning(data.message || 'Sincronização concluída com avisos');
       }
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     },
     onError: (error: Error) => {
-      toast.error(`Erro na sincronização Outlook: ${error.message}`);
+      toast.error(t('integrations.erroNaSincronizaçãoOutlook', { message: error.message }));
     },
   });
 }
