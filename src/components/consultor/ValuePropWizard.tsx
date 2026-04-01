@@ -330,7 +330,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
         {currentStep === 5 && (
           <div className="space-y-3">
-            <Label>What's your value proposition?</Label>
+            <Label>{t('vp.valueProp', 'Qual é a tua proposta de valor?')}</Label>
             <Textarea
               value={fields.value_prop}
               onChange={(e) => updateField('value_prop', e.target.value)}
@@ -338,7 +338,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              How do you uniquely solve their problem better than alternatives?
+              {t('vp.valueHint', 'Como resolves o problema melhor que as alternativas?')}
             </p>
           </div>
         )}
