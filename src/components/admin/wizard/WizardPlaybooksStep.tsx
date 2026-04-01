@@ -250,7 +250,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'title', e.target.value)
                                   }
                                   className="h-7 text-sm flex-1"
-                                  placeholder="Action title"
+                                  placeholder={t('wizard.playbooks.actionTitle')}
                                 />
                                 <Select
                                   value={item.priority || 'medium'}
