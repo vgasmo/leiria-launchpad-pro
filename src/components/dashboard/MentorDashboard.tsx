@@ -168,6 +168,12 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Availability badge */}
+      <div className="flex items-center gap-2">
+        <span className={cn('h-2.5 w-2.5 rounded-full', statusColors[availabilityStatus])} />
+        <span className="text-sm text-muted-foreground">{statusLabels[availabilityStatus]}</span>
+      </div>
+
       {/* P0 HERO: Enhanced Session Prep */}
       <MentorSessionPrepEnhanced workspaces={workspaces} />
 

@@ -294,6 +294,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
       });
       
       toast.success(t('kpis.kpiSaved'));
+      triggerKpiCelebration();
     } catch {
       toast.error(t('kpis.failedToSave'));
     }

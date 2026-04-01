@@ -464,6 +464,15 @@ export default function CRM() {
               </Card>
             ) : (
               // Normal View - grouped columns
+              inboxTotal === 0 ? (
+                <div className="text-center py-12">
+                  <div className="h-16 w-16 mx-auto rounded-2xl bg-success/10 flex items-center justify-center mb-4">
+                    <CheckSquare className="h-8 w-8 text-success" />
+                  </div>
+                  <p className="text-lg font-semibold">{t('crm.inboxZero.title', { defaultValue: 'Inbox limpo!' })}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('crm.inboxZero.description', { defaultValue: 'Todas as tarefas estão em dia. Bom trabalho!' })}</p>
+                </div>
+              ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <InboxGroup 
                   title={t('crm.overdue')} 
@@ -501,6 +510,7 @@ export default function CRM() {
                   onOpenDrawer={handleOpenDrawer}
                 />
               </div>
+              )
             )}
           </TabsContent>
 

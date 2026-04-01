@@ -110,9 +110,23 @@ export function useUploadDocument() {
 
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['documents', variables.workspaceId] });
       toast.success('Document uploaded successfully');
+
+      // Check if this was their first ever document upload
+      try {
+        const { count } = await supabase
+          .from('documents')
+          .select('id', { count: 'exact', head: true })
+          .eq('workspace_id', variables.workspaceId);
+
+        if (count === 1) {
+          toast.success('📁 Primeiro documento carregado! A tua data room está a crescer.');
+        }
+      } catch {
+        // Silent - celebration check is non-critical
+      }
     },
     onError: (error) => {
       toast.error(`Failed to upload document: ${error.message}`);

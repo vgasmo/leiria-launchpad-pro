@@ -151,7 +151,7 @@ export function useUpdateActionItem(workspaceId: string) {
         queryClient.setQueryData(['action-items', workspaceId], context.previousItems);
       }
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
 
@@ -161,6 +161,22 @@ export function useUpdateActionItem(workspaceId: string) {
       // 🎉 Mini celebration when marking action as completed
       if (result.data.status === 'completed') {
         triggerMiniCelebration();
+
+        // Check if this was their first ever completion
+        try {
+          const { count } = await supabase
+            .from('action_items')
+            .select('id', { count: 'exact', head: true })
+            .eq('workspace_id', workspaceId)
+            .eq('status', 'completed');
+
+          if (count === 1) {
+            const { toast } = await import('sonner');
+            toast.success('🎉 Primeira ação concluída! O hábito de execução começa aqui.');
+          }
+        } catch {
+          // Silent - celebration check is non-critical
+        }
       }
 
        // P0.1: Trigger Teams notification when action is assigned to someone
