@@ -2060,7 +2060,12 @@
     "statusPendingManual": "Assinatura manual pendente",
     "statusPending": "Pendente",
     "backLater": "Voltar mais tarde",
-    "manualSignature": "Assinatura Manual"
+    "manualSignature": "Assinatura Manual",
+    "annex": "Anexo",
+    "fullNamePlaceholder": "Nome completo",
+    "phonePlaceholder": "Telefone",
+    "certidaoPlaceholder": "Código de acesso online",
+    "addressPlaceholder": "Rua, número, andar"
   },
   "contracts": {
     "aiAnalysis": "Análise IA",

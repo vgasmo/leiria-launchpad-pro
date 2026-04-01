@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -41,35 +42,24 @@ const DEFAULT_HEALTH_MODEL: DraftHealthModel = {
   is_enabled: true,
 };
 
-const RULE_INFO: Record<string, { label: string; description: string; icon: React.ElementType }> = {
-  no_session_days: {
-    label: 'No Sessions',
-    description: 'Alert when workspace has no sessions for X days',
-    icon: Clock,
-  },
-  overdue_actions_count: {
-    label: 'Overdue Actions',
-    description: 'Alert when X or more actions are overdue',
-    icon: Target,
-  },
-  missing_kpis_current_month: {
-    label: 'Missing KPIs',
-    description: 'Alert when current month KPIs are not reported',
-    icon: AlertTriangle,
-  },
-  checkin_overdue_days: {
-    label: 'Check-in Overdue',
-    description: 'Alert when check-in is X days overdue',
-    icon: CheckCircle,
-  },
-  milestone_overdue_count: {
-    label: 'Overdue Milestones',
-    description: 'Alert when X or more milestones are overdue',
-    icon: Target,
-  },
+const RULE_ICONS: Record<string, React.ElementType> = {
+  no_session_days: Clock,
+  overdue_actions_count: Target,
+  missing_kpis_current_month: AlertTriangle,
+  checkin_overdue_days: CheckCircle,
+  milestone_overdue_count: Target,
+};
+
+const RULE_I18N: Record<string, { label: string; description: string }> = {
+  no_session_days: { label: 'wizard.noSessions', description: 'wizard.noSessionsDesc' },
+  overdue_actions_count: { label: 'wizard.overdueActions', description: 'wizard.overdueActionsDesc' },
+  missing_kpis_current_month: { label: 'wizard.missingKpis', description: 'wizard.missingKpisDesc' },
+  checkin_overdue_days: { label: 'wizard.checkinOverdue', description: 'wizard.checkinOverdueDesc' },
+  milestone_overdue_count: { label: 'wizard.overdueMilestones', description: 'wizard.overdueMilestonesDesc' },
 };
 
 export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: WizardAlertRulesStepProps) {
+  const { t } = useTranslation();
   const [localRules, setLocalRules] = useState<DraftAlertRule[]>(
     alertRules?.length > 0 ? alertRules : DEFAULT_ALERT_RULES
   );
@@ -77,7 +67,6 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
     healthModel || DEFAULT_HEALTH_MODEL
   );
 
-  // Debounced update
   useEffect(() => {
     const timer = setTimeout(() => {
       onUpdate(localRules, localHealthModel);
@@ -107,23 +96,38 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
 
   const weightsSum = Object.values(localHealthModel.weights_json).reduce((a, b) => a + b, 0);
 
+  const DIMENSION_LABELS: Record<string, string> = {
+    actions: t('actions.title'),
+    sessions: t('sessions.title'),
+    kpis: t('kpis.title'),
+    checkins: t('checkins.title', 'Check-ins'),
+    milestones: t('milestones.title'),
+  };
+
+  const THRESHOLD_LABELS: Record<string, string> = {
+    thriving: t('health.thriving', 'A Prosperar'),
+    on_track: t('health.onTrack', 'No Caminho'),
+    needs_attention: t('health.needsAttention', 'Precisa Atenção'),
+    at_risk: t('health.atRisk', 'Em Risco'),
+    critical: t('wizard.critical'),
+  };
+
   return (
     <div className="space-y-6">
-      {/* Alert Rules */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            Alert Rules
+            {t('wizard.alertRules')}
           </CardTitle>
           <CardDescription>
-            Configure when alerts should be triggered for workspaces
+            {t('wizard.alertRulesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {localRules.map((rule) => {
-            const info = RULE_INFO[rule.rule_type];
-            const Icon = info?.icon || AlertTriangle;
+            const Icon = RULE_ICONS[rule.rule_type] || AlertTriangle;
+            const i18nKeys = RULE_I18N[rule.rule_type];
             return (
               <div
                 key={rule.rule_type}
@@ -139,12 +143,12 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <Icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">{info?.label || rule.rule_type}</span>
+                      <span className="font-medium text-sm">{i18nKeys ? t(i18nKeys.label) : rule.rule_type}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-3">{info?.description}</p>
+                    <p className="text-xs text-muted-foreground mb-3">{i18nKeys ? t(i18nKeys.description) : ''}</p>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs">Threshold:</Label>
+                        <Label className="text-xs">{t('wizard.threshold')}</Label>
                         <Input
                           type="number"
                           value={rule.threshold}
@@ -157,7 +161,7 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs">Severity:</Label>
+                        <Label className="text-xs">{t('wizard.severity')}</Label>
                         <Select
                           value={rule.severity}
                           onValueChange={(v) => handleRuleChange(rule.rule_type, 'severity', v)}
@@ -167,9 +171,9 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="info">Info</SelectItem>
-                            <SelectItem value="warning">Warning</SelectItem>
-                            <SelectItem value="critical">Critical</SelectItem>
+                            <SelectItem value="info">{t('wizard.info')}</SelectItem>
+                            <SelectItem value="warning">{t('wizard.warning')}</SelectItem>
+                            <SelectItem value="critical">{t('wizard.critical')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -182,16 +186,15 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
         </CardContent>
       </Card>
 
-      {/* Health Model */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <Activity className="h-4 w-4" />
-                Health Score Model
+                {t('wizard.healthScoreModel')}
               </CardTitle>
-              <CardDescription>Configure how workspace health is calculated</CardDescription>
+              <CardDescription>{t('wizard.healthModelDesc')}</CardDescription>
             </div>
             <Switch
               checked={localHealthModel.is_enabled}
@@ -203,10 +206,9 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
         </CardHeader>
         {localHealthModel.is_enabled && (
           <CardContent className="space-y-6">
-            {/* Weights */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Dimension Weights</h4>
+                <h4 className="text-sm font-medium">{t('wizard.dimensionWeights')}</h4>
                 <Badge variant={weightsSum === 100 ? 'default' : 'destructive'}>
                   Total: {weightsSum}%
                 </Badge>
@@ -214,7 +216,7 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
               {Object.entries(localHealthModel.weights_json).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm capitalize">{key}</Label>
+                    <Label className="text-sm">{DIMENSION_LABELS[key] || key}</Label>
                     <span className="text-sm font-medium">{value}%</span>
                   </div>
                   <Slider
@@ -226,19 +228,18 @@ export function WizardAlertRulesStep({ alertRules, healthModel, onUpdate }: Wiza
                 </div>
               ))}
               {weightsSum !== 100 && (
-                <p className="text-xs text-destructive">Weights must sum to 100%</p>
+                <p className="text-xs text-destructive">{t('wizard.weightsMustSum')}</p>
               )}
             </div>
 
-            {/* Thresholds */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Score Thresholds</h4>
+              <h4 className="text-sm font-medium">{t('wizard.scoreThresholds')}</h4>
               <div className="grid gap-3 md:grid-cols-5">
                 {Object.entries(localHealthModel.thresholds_json)
                   .sort(([, a], [, b]) => b - a)
                   .map(([key, value]) => (
                     <div key={key} className="space-y-1">
-                      <Label className="text-xs capitalize">{key.replace('_', ' ')}</Label>
+                      <Label className="text-xs">{THRESHOLD_LABELS[key] || key}</Label>
                       <Input
                         type="number"
                         value={value}

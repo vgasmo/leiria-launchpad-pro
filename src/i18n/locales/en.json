@@ -2060,7 +2060,12 @@
     "statusPendingManual": "Manual signature pending",
     "statusPending": "Pending",
     "backLater": "Come back later",
-    "manualSignature": "Manual Signature"
+    "manualSignature": "Manual Signature",
+    "annex": "Annex",
+    "fullNamePlaceholder": "Full name",
+    "phonePlaceholder": "Phone",
+    "certidaoPlaceholder": "Online access code",
+    "addressPlaceholder": "Street, number, floor"
   },
   "contracts": {
     "aiAnalysis": "AI Analysis",

@@ -32,7 +32,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
     return activeStages.map((stage) => ({
       stage_key: stage.stage_key,
       title: `${stage.name} Playbook`,
-      description: `Default playbook for ${stage.name} stage`,
+      description: '',
       items: [],
     }));
   });
@@ -57,7 +57,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
     const playbook = localPlaybooks.find((p) => p.stage_key === stageKey);
     const newItem: DraftPlaybookItem = {
       item_type: type,
-      title: type === 'milestone' ? 'New Milestone' : 'New Action',
+      title: '',
       description: '',
       relative_due_days: type === 'milestone' ? 14 : 7,
       priority: 'medium',
@@ -104,8 +104,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        Configure playbooks with milestones and actions for each stage. These will be available for 
-        founders to instantiate in their workspaces.
+        {t('wizard.configurePlaybooks')}
       </p>
 
       <Tabs defaultValue={activeStages[0]?.stage_key} className="w-full">
@@ -138,7 +137,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                 <CardContent className="pt-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Playbook Title</Label>
+                      <Label>{t('wizard.playbookTitle')}</Label>
                       <Input
                         value={playbook.title}
                         onChange={(e) =>
@@ -147,7 +146,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Description</Label>
+                      <Label>{t('wizard.description')}</Label>
                       <Textarea
                         value={playbook.description || ''}
                         onChange={(e) =>
@@ -167,7 +166,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Target className="h-4 w-4 text-primary" />
-                      Milestones ({milestones.length})
+                      {t('milestones.title')} ({milestones.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -188,7 +187,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'title', e.target.value)
                                   }
                                   className="h-7 text-sm"
-                                  placeholder="Milestone title"
+                                  placeholder={t('wizard.milestoneTitlePlaceholder')}
                                 />
                                 <Input
                                   type="number"
@@ -197,7 +196,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'relative_due_days', Number(e.target.value))
                                   }
                                   className="h-7 w-16 text-sm"
-                                  placeholder="Days"
+                                  placeholder={t('wizard.daysPlaceholder')}
                                 />
                                 <Button
                                   variant="ghost"
@@ -230,7 +229,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <ListTodo className="h-4 w-4 text-muted-foreground" />
-                      Actions ({actions.length})
+                      {t('actions.title')} ({actions.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -251,7 +250,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'title', e.target.value)
                                   }
                                   className="h-7 text-sm flex-1"
-                                  placeholder="Action title"
+                                  placeholder={t('wizard.actionTitlePlaceholder')}
                                 />
                                 <Select
                                   value={item.priority || 'medium'}
@@ -263,9 +262,9 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="low">Low</SelectItem>
-                                    <SelectItem value="medium">Med</SelectItem>
-                                    <SelectItem value="high">High</SelectItem>
+                                    <SelectItem value="low">{t('wizard.low')}</SelectItem>
+                                    <SelectItem value="medium">{t('wizard.med')}</SelectItem>
+                                    <SelectItem value="high">{t('wizard.high')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <Input
@@ -275,8 +274,8 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     handleItemChange(stage.stage_key, idx, 'relative_due_days', Number(e.target.value))
                                   }
                                   className="h-7 w-14 text-sm"
-                                  placeholder="Days"
-                                />
+                                   placeholder={t('wizard.daysPlaceholder')}
+                                 />
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -296,7 +295,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                           onClick={() => handleAddItem(stage.stage_key, 'action')}
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Add Action
+                          {t('actions.addAction')}
                         </Button>
                       </div>
                     </ScrollArea>
