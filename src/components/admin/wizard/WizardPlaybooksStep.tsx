@@ -229,7 +229,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <ListTodo className="h-4 w-4 text-muted-foreground" />
-                      Actions ({actions.length})
+                      {t('actions.title')} ({actions.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
