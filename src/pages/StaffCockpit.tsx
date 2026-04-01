@@ -23,7 +23,8 @@ export default function StaffCockpit() {
   const { data: workspaces = [] } = useWorkspaces();
 
   const isAdmin = roles?.includes('admin');
-
+  const isConsultor = roles?.includes('consultor');
+  const isBackoffice = roles?.includes('backoffice');
   const greeting = profile?.full_name
     ? t('staffCockpit.greeting', { defaultValue: 'Olá, {{name}}', name: profile.full_name.split(' ')[0] })
     : t('staffCockpit.greetingGeneric', { defaultValue: 'Bem-vindo ao Centro de Comando' });
@@ -49,58 +50,64 @@ export default function StaffCockpit() {
           </div>
         )}
 
-        {/* Portfolio Overview */}
-        <CockpitPortfolioOverview workspaces={workspaces} />
+        {/* Portfolio Overview - Admin and Consultor */}
+        {(isAdmin || isConsultor) && (
+          <CockpitPortfolioOverview workspaces={workspaces} />
+        )}
 
-        {/* Silent Disengagement Alerts */}
-        <SilentDisengagementCard workspaces={workspaces} />
+        {/* Silent Disengagement Alerts - Admin and Consultor */}
+        {(isAdmin || isConsultor) && (
+          <SilentDisengagementCard workspaces={workspaces} />
+        )}
 
         {/* Main Grid: Triage + Daily Work */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* LEFT: Smart Triage & Intake */}
-          <div className="space-y-0">
-            <Card className="overflow-hidden">
-              <div className="px-6 pt-5 pb-3">
-                <div className="flex items-center gap-2">
-                  <Inbox className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold font-heading">
-                    {t('staffCockpit.triage', { defaultValue: 'Triagem & Intake' })}
-                  </h2>
+          {/* LEFT: Smart Triage & Intake - Admin and Consultor */}
+          {(isAdmin || isConsultor) && (
+            <div className="space-y-0">
+              <Card className="overflow-hidden">
+                <div className="px-6 pt-5 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Inbox className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold font-heading">
+                      {t('staffCockpit.triage', { defaultValue: 'Triagem & Intake' })}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5 ml-7">
+                    {t('staffCockpit.triageDesc', { defaultValue: 'O que precisa de decisão agora: aprovações, associações e encaminhamento.' })}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5 ml-7">
-                  {t('staffCockpit.triageDesc', { defaultValue: 'O que precisa de decisão agora: aprovações, associações e encaminhamento.' })}
-                </p>
-              </div>
-              <CardContent className="p-0">
-                <Tabs defaultValue="approvals" className="w-full">
-                  <div className="px-6">
-                    <TabsList className="w-full grid grid-cols-3">
-                      <TabsTrigger value="approvals" className="text-xs">
-                        {t('staffCockpit.pendingApprovals', { defaultValue: 'Aprovações Pendentes' })}
-                      </TabsTrigger>
-                      <TabsTrigger value="claims" className="text-xs">
-                        {t('staffCockpit.claimRequests', { defaultValue: 'Associações' })}
-                      </TabsTrigger>
-                      <TabsTrigger value="routing" className="text-xs">
-                        {t('staffCockpit.intakeRouting', { defaultValue: 'Encaminhamento' })}
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-                  <div className="px-6 pb-6 pt-4 max-h-[600px] overflow-y-auto">
-                    <TabsContent value="approvals" className="mt-0">
-                      <PendingApprovalsManager />
-                    </TabsContent>
-                    <TabsContent value="claims" className="mt-0">
-                      <ClaimRequestsQueue />
-                    </TabsContent>
-                    <TabsContent value="routing" className="mt-0">
-                      <IntakeRoutingManager />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
+                <CardContent className="p-0">
+                  <Tabs defaultValue="approvals" className="w-full">
+                    <div className="px-6">
+                      <TabsList className="w-full grid grid-cols-3">
+                        <TabsTrigger value="approvals" className="text-xs">
+                          {t('staffCockpit.pendingApprovals', { defaultValue: 'Aprovações Pendentes' })}
+                        </TabsTrigger>
+                        <TabsTrigger value="claims" className="text-xs">
+                          {t('staffCockpit.claimRequests', { defaultValue: 'Associações' })}
+                        </TabsTrigger>
+                        <TabsTrigger value="routing" className="text-xs">
+                          {t('staffCockpit.intakeRouting', { defaultValue: 'Encaminhamento' })}
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <div className="px-6 pb-6 pt-4 max-h-[600px] overflow-y-auto">
+                      <TabsContent value="approvals" className="mt-0">
+                        <PendingApprovalsManager />
+                      </TabsContent>
+                      <TabsContent value="claims" className="mt-0">
+                        <ClaimRequestsQueue />
+                      </TabsContent>
+                      <TabsContent value="routing" className="mt-0">
+                        <IntakeRoutingManager />
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* RIGHT: Daily Work Queue & Tasks */}
           <div className="space-y-6">

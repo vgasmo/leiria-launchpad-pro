@@ -113,7 +113,7 @@ export default function Login() {
     try {
       const { data: allowed, error: rpcError } = await supabase.rpc('check_signup_allowed', { p_email: email });
       if (rpcError) {
-        console.error('[Login] check_signup_allowed error:', rpcError);
+        logger.error('error', {}, '[Login] check_signup_allowed error:', rpcError);
         setError(t('login.signupCheckError', 'Unable to verify signup eligibility. Please try again.'));
         setIsSubmitting(false);
         return;
@@ -124,7 +124,7 @@ export default function Login() {
         return;
       }
     } catch (err) {
-      console.error('[Login] Allowlist check failed:', err);
+      logger.error('error', {}, '[Login] Allowlist check failed:', err);
       setError(t('login.signupCheckError', 'Unable to verify signup eligibility. Please try again.'));
       setIsSubmitting(false);
       return;
@@ -536,3 +536,5 @@ export default function Login() {
     </div>
   );
 }
+import startupLeiriaLogo from '@/assets/startup-leiria.svg';
+import { logger } from '@/lib/logger';

@@ -46,7 +46,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
       if (error) throw error;
       setSuggestions(data);
     } catch (error: any) {
-      console.error('Error generating suggestions:', error);
+      logger.error('error', {}, 'Error generating suggestions:', error);
       setAiError(true);
       toast.error(error.message || t('sessions.aiSuggestionsFailed'));
     } finally {
@@ -227,3 +227,5 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
     </Card>
   );
 }
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';

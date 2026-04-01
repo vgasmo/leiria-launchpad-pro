@@ -10,7 +10,7 @@ const NotFound = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    logger.error('error', {}, "404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
   return (
@@ -66,3 +66,5 @@ const NotFound = () => {
 };
 
 export default NotFound;
+import startupLeiriaLogo from "@/assets/startup-leiria.svg";
+import { logger } from '@/lib/logger';

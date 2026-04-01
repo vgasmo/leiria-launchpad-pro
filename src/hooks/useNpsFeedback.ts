@@ -115,7 +115,7 @@ export function useNpsFeedback() {
 
       return true;
     } catch (error) {
-      console.error('Failed to submit NPS feedback:', error);
+      logger.error('error', {}, 'Failed to submit NPS feedback:', error);
       return false;
     }
   }, [user, profile, npsState]);
@@ -151,3 +151,5 @@ export function useNpsFeedback() {
     dismissPermanently,
   };
 }
+import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';

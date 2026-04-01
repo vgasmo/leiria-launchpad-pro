@@ -136,7 +136,7 @@ export function FollowupAutopilotCard({
 
       toast.success(t('followup.sent'));
     } catch (error) {
-      console.error('Failed to send follow-up:', error);
+      logger.error('error', {}, 'Failed to send follow-up:', error);
       toast.error(t('followup.error'));
     } finally {
       setSending(false);
@@ -233,3 +233,5 @@ export function FollowupAutopilotCard({
     </Card>
   );
 }
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';

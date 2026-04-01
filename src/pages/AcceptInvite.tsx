@@ -53,7 +53,7 @@ export default function AcceptInvite() {
       });
       
       if (error) {
-        console.error('Error accepting invite:', error);
+        logger.error('error', {}, 'Error accepting invite:', error);
         setStatus('error');
         setError(error.message || t('invite.acceptFailed'));
         return;
@@ -89,7 +89,7 @@ export default function AcceptInvite() {
       }, 2000);
       
     } catch (err) {
-      console.error('Failed to accept invitation:', err);
+      logger.error('error', {}, 'Failed to accept invitation:', err);
       setStatus('error');
       setError(t('invite.acceptFailed'));
     }
@@ -200,3 +200,5 @@ export default function AcceptInvite() {
     </div>
   );
 }
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';

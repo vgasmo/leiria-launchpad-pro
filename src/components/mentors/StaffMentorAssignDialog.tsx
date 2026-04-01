@@ -97,7 +97,7 @@ export function StaffMentorAssignDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      console.error('Assignment error:', error);
+      logger.error('error', {}, 'Assignment error:', error);
       toast.error(t('common.error'));
     },
   });
@@ -144,3 +144,5 @@ export function StaffMentorAssignDialog({
     </Dialog>
   );
 }
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
