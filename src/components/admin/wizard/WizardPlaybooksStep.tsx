@@ -166,7 +166,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Target className="h-4 w-4 text-primary" />
-                      Milestones ({milestones.length})
+                      {t('milestones.title')} ({milestones.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
