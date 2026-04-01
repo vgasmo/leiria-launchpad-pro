@@ -1512,10 +1512,26 @@
     "overdueCheckins": "Check-ins Atrasados"
   },
   "consultor": {
+    "aiBriefing": {
+      "cta": "Briefing",
+      "error": "Briefing indisponível neste momento. Tente mais tarde.",
+      "nextActions": "Próximas Ações",
+      "retry": "Tentar",
+      "title": "Briefing 30 Dias",
+      "unavailableHint": "Briefing IA indisponível — clique para tentar novamente"
+    },
+    "healthMatrix": {
+      "title": "Matriz de Saúde do Portfólio"
+    },
+    "hero": {
+      "triageHint": "Triage diária — foque-se no que precisa de atenção hoje. Para gestão aprofundada, use o portefólio."
+    },
+    "nudgeFounder": "Nudge",
     "prepSheet": {
       "button": "Preparar reunião",
       "title": "Preparação 1.ª Reunião"
-    }
+    },
+    "reviewMilestone": "Rever"
   },
   "consultorTools": {
     "allCategories": "Todas",

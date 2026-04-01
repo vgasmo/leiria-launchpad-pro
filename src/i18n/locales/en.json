@@ -1512,10 +1512,26 @@
     "overdueCheckins": "Overdue Check-ins"
   },
   "consultor": {
+    "aiBriefing": {
+      "cta": "Briefing",
+      "error": "Briefing unavailable at the moment. Try again later.",
+      "nextActions": "Next Actions",
+      "retry": "Retry",
+      "title": "30-Day Briefing",
+      "unavailableHint": "AI Briefing unavailable — click to retry"
+    },
+    "healthMatrix": {
+      "title": "Portfolio Health Matrix"
+    },
+    "hero": {
+      "triageHint": "Daily triage — focus on what needs attention today. For deep management, use the portfolio."
+    },
+    "nudgeFounder": "Nudge",
     "prepSheet": {
       "button": "Prep meeting",
       "title": "First Contact Prep"
-    }
+    },
+    "reviewMilestone": "Review"
   },
   "consultorTools": {
     "allCategories": "All",
