@@ -306,14 +306,14 @@ export function AdminWorkspacesManager() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Workspaces</CardTitle>
+        <CardTitle>{t('admin.workspacesManager.title', 'Workspaces')}</CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-2" />Create Workspace</Button>
+            <Button size="sm"><Plus className="h-4 w-4 mr-2" />{t('admin.workspacesManager.create', 'Criar Workspace')}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create Workspace</DialogTitle>
+              <DialogTitle>{t('admin.workspacesManager.create', 'Criar Workspace')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
