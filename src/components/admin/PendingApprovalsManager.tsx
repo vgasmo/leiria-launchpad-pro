@@ -681,7 +681,7 @@ export function PendingApprovalsManager() {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="existing" className="gap-1.5">
                   <Link2 className="h-3.5 w-3.5" />
-                  Workspace Existente
+                  {t('admin.existingWorkspace', 'Workspace Existente')}
                 </TabsTrigger>
                 <TabsTrigger value="create" className="gap-1.5">
                   <Plus className="h-3.5 w-3.5" />
