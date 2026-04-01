@@ -110,7 +110,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
     try {
       await updateSettings.mutateAsync({ [eventKey]: enabled });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update setting');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
