@@ -133,8 +133,8 @@ export function MentorAvailabilitySettings() {
         {slots.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No availability configured yet.</p>
-            <p className="text-sm">Add time slots to let founders book sessions with you.</p>
+            <p>{t('mentor.noAvailability', 'Sem disponibilidade configurada.')}</p>
+            <p className="text-sm">{t('mentor.addSlots', 'Adicione horários para permitir que founders agendem sessões.')}</p>
           </div>
         ) : (
           <div className="space-y-4">
