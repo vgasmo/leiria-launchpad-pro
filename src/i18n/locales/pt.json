@@ -1630,7 +1630,8 @@
       "strength": "Força",
       "title": "Portfolio Performance",
       "trend": "Trend"
-    }
+    },
+    "weekSummary": "Esta semana: {{sessions}} sessões · {{actions}} ações fechadas · {{health}} startups melhoraram"
   },
   "consultorTools": {
     "allCategories": "Todas",
