@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, UserCheck, Building2, Ban, UserX, RotateCcw } from 'lucide-react';
+import { Plus, Trash2, UserCheck, Building2, Ban, UserX, RotateCcw, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -131,6 +131,19 @@ export function AdminUsersManager() {
     setSuspendTarget(null);
   };
 
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ account_status: 'approved' })
+      .eq('id', userId);
+    if (error) {
+      toast.error('Erro ao aprovar conta');
+    } else {
+      toast.success('Conta aprovada com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -188,22 +201,35 @@ export function AdminUsersManager() {
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">{profile.email}</p>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={isSuspended ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
-                          onClick={() => setSuspendTarget({ 
-                            userId: profile.id, 
-                            userName: profile.full_name || profile.email,
-                            currentStatus: profile.account_status || 'approved'
-                          })}
-                        >
-                          {isSuspended ? (
-                            <><RotateCcw className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })}</>
-                          ) : (
-                            <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
+                        <div className="flex items-center gap-1">
+                          {isPending && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-emerald-600 hover:text-emerald-700"
+                              onClick={() => handleApproveUser(profile.id)}
+                            >
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                              Aprovar
+                            </Button>
                           )}
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={isSuspended ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
+                            onClick={() => setSuspendTarget({ 
+                              userId: profile.id, 
+                              userName: profile.full_name || profile.email,
+                              currentStatus: profile.account_status || 'approved'
+                            })}
+                          >
+                            {isSuspended ? (
+                              <><RotateCcw className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })}</>
+                            ) : (
+                              <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
+                            )}
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Global Roles */}
