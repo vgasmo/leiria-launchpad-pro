@@ -9,7 +9,7 @@ function versionJsonPlugin(): Plugin {
   return {
     name: 'version-json',
     closeBundle() {
-      const version = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '.'));
+      const version = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '.');
       fs.writeFileSync(
         path.resolve(__dirname, 'dist/version.json'),
         JSON.stringify({ version }),
