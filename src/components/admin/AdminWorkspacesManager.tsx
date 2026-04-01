@@ -169,7 +169,7 @@ export function AdminWorkspacesManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-workspaces'] });
-      toast.success('Workspace created');
+      toast.success(t('admin.workspaceCreated', 'Workspace criado'));
       resetForm();
     },
     onError: (error) => toast.error(`Error: ${error.message}`),
