@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils';
 import type { CrmInboxItem } from '@/hooks/useCrmInbox';
 import { PIPELINE_STAGES, type FunnelStage } from '@/constants/funnelStages';
 import { getFunnelStageLabel, getFunnelStageOptions } from '@/lib/stageLabels';
+import { logger } from '@/lib/logger';
 
 interface CrmBulkActionsProps {
   items: CrmInboxItem[];
@@ -128,7 +129,7 @@ export function CrmBulkActions({
           onClearSelection();
         } catch (error) {
           toast.error(t('crm.bulk.moveFailed'));
-          console.error(error);
+          logger.error('operation_error', {}, error);
         } finally {
           setIsProcessing(false);
         }
@@ -159,7 +160,7 @@ export function CrmBulkActions({
           onClearSelection();
         } catch (error) {
           toast.error(t('crm.bulk.assignFailed'));
-          console.error(error);
+          logger.error('operation_error', {}, error);
         } finally {
           setIsProcessing(false);
         }
@@ -198,7 +199,7 @@ export function CrmBulkActions({
           onClearSelection();
         } catch (error) {
           toast.error(t('crm.bulk.nextActionFailed'));
-          console.error(error);
+          logger.error('operation_error', {}, error);
         } finally {
           setIsProcessing(false);
         }
@@ -228,7 +229,7 @@ export function CrmBulkActions({
           onClearSelection();
         } catch (error) {
           toast.error(t('crm.bulk.archiveFailed'));
-          console.error(error);
+          logger.error('operation_error', {}, error);
         } finally {
           setIsProcessing(false);
         }

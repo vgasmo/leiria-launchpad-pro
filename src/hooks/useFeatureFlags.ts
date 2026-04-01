@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 export type FeatureFlagKey =
   | 'public_first_contact_booking'
@@ -55,7 +56,7 @@ export function useFeatureFlags() {
         .order('key');
       
       if (error) {
-        console.error('[useFeatureFlags] Error fetching flags:', error);
+        logger.error('[useFeatureFlags] Error fetching flags', {}, error);
         return [];
       }
       

@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface KpiEntry {
   id: string;
@@ -86,7 +87,7 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
       });
       setValues(initialValues);
     } catch (error) {
-      logger.error('error', {}, 'Error loading KPIs:', error);
+      logger.error('Error loading KPIs', {}, error);
       toast.error('Erro ao carregar KPIs');
     } finally {
       setLoading(false);
@@ -125,7 +126,7 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
       queryClient.invalidateQueries({ queryKey: ['workspace-kpis', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['health-score', workspaceId] });
     } catch (error) {
-      logger.error('error', {}, 'Error saving KPI:', error);
+      logger.error('Error saving KPI', {}, error);
       toast.error('Erro ao guardar KPI');
     } finally {
       setSaving(prev => ({ ...prev, [kpiDefId]: false }));
@@ -240,5 +241,3 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

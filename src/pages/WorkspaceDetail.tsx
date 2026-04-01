@@ -37,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getVisibleTabs, type WorkspaceTab } from '@/lib/workspaceTabs';
+import { useWorkspaceTabBadges } from '@/hooks/useWorkspaceTabBadges';
 
 export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +49,7 @@ export default function WorkspaceDetail() {
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
+  const tabBadges = useWorkspaceTabBadges(id);
   
   useEffect(() => {
     if (shouldShowOnboarding && workspace && isFounder) {
@@ -232,6 +234,11 @@ export default function WorkspaceDetail() {
               )}
             >
               {t(tab.labelKey)}
+              {tabBadges[tab.id] ? (
+                <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none">
+                  {tabBadges[tab.id] > 99 ? '99+' : tabBadges[tab.id]}
+                </span>
+              ) : null}
             </button>
           ))}
 

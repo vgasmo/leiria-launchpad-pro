@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 export function useWorkspaceActions(workspaceId: string | undefined) {
   return useQuery({
@@ -181,7 +182,7 @@ export function useStages(programId: string | undefined) {
       ];
 
       if (error) {
-        logger.error('error', {}, '[useStages] Error:', error);
+        logger.error('[useStages] Error', {}, error);
         return DEFAULT_STAGES;
       }
       
@@ -194,5 +195,3 @@ export function useStages(programId: string | undefined) {
     enabled: !!programId,
   });
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

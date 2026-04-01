@@ -20,6 +20,7 @@ import { NotificationSettings } from '@/components/settings/NotificationSettings
 import { WorkflowIntegrations } from '@/components/settings/WorkflowIntegrations';
 import { MentorNdaStatus } from '@/components/mentors/MentorNdaStatus';
 import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
+import { logger } from '@/lib/logger';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -101,7 +102,7 @@ export default function Settings() {
       setAvatarUrl(urlWithCacheBuster);
       toast.success(t('settingsPage.avatarUploaded'));
     } catch (error: any) {
-      logger.error('error', {}, 'Error uploading avatar:', error);
+      logger.error('Error uploading avatar', {}, error);
       toast.error(error.message || 'Failed to upload avatar');
     } finally {
       setIsUploadingAvatar(false);
@@ -157,7 +158,7 @@ export default function Settings() {
       if (error) throw error;
       toast.success(t('settingsPage.profileUpdated'));
     } catch (error: any) {
-      logger.error('error', {}, 'Error updating profile:', error);
+      logger.error('Error updating profile', {}, error);
       toast.error(error.message || 'Failed to update profile');
     } finally {
       setIsUpdatingProfile(false);
@@ -181,7 +182,7 @@ export default function Settings() {
       toast.success(t('settingsPage.emailConfirmationSent'));
       setNewEmail('');
     } catch (error: any) {
-      logger.error('error', {}, 'Error updating email:', error);
+      logger.error('Error updating email', {}, error);
       toast.error(error.message || 'Failed to update email');
     } finally {
       setIsUpdatingEmail(false);
@@ -213,7 +214,7 @@ export default function Settings() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
-      logger.error('error', {}, 'Error updating password:', error);
+      logger.error('Error updating password', {}, error);
       toast.error(error.message || 'Failed to update password');
     } finally {
       setIsUpdatingPassword(false);
@@ -592,5 +593,3 @@ export default function Settings() {
     </AppLayout>
   );
 }
-import { useChecklistRecovery } from '@/hooks/useChecklistRecovery';
-import { logger } from '@/lib/logger';

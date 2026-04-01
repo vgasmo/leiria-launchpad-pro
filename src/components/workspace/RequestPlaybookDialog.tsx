@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 
 interface RequestPlaybookDialogProps {
   workspaceId: string;
@@ -83,7 +84,7 @@ export function RequestPlaybookDialog({
       setContext('');
       setUrgency('this_month');
     } catch (error: unknown) {
-      logger.error('error', {}, 'Failed to submit playbook request:', error);
+      logger.error('Failed to submit playbook request', {}, error);
       // Keep dialog open on failure so user can retry
       toast.error(t('requestPlaybook.failed'), {
         description: t('requestPlaybook.failedHint'),
@@ -180,5 +181,3 @@ export function RequestPlaybookDialog({
     </Dialog>
   );
 }
-import { useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';

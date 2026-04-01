@@ -37,6 +37,7 @@ import {
   AIReview,
   FinancialInsight,
 } from '@/hooks/useFinancialModel';
+import { logger } from '@/lib/logger';
 
 interface FinancialModelPanelProps {
   workspaceId: string;
@@ -219,7 +220,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
       // Auto-parse
       await parseModel.mutateAsync(version.id);
     } catch (error) {
-      console.error('Upload failed:', error);
+      logger.error('Upload failed', {}, error);
     }
   };
 

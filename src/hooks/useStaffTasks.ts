@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Json } from '@/integrations/supabase/types';
+import { logger } from '@/lib/logger';
 
 export interface StaffTask {
   id: string;
@@ -172,7 +173,7 @@ export function useCreateStaffTask() {
       if (result && data.assignee_id !== user?.id) {
         supabase.functions.invoke('send-task-notification', {
           body: { type: 'assigned', taskId: result.id }
-        }).catch(err => console.error('Failed to send task notification:', err));
+        }).catch(err => logger.error('Failed to send task notification', {}, err));
       }
       
       return result;

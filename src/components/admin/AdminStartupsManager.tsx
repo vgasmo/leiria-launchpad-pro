@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Plus, Pencil, Trash2, Download, Search, Phone, CheckCircle, Upload, FileText, Loader2, AlertTriangle, Mail, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { startupSchema } from '@/lib/validations';
+import { logger } from '@/lib/logger';
 
 interface FormState {
   name: string;
@@ -311,7 +312,7 @@ export function AdminStartupsManager() {
       if (error) throw error;
       toast.success(t('invite.sentTo') + ' ' + startup.main_contact_email);
     } catch (err: any) {
-      logger.error('error', {}, 'Failed to send invite:', err);
+      logger.error('Failed to send invite', {}, err);
       toast.error(t('invite.error'));
     } finally {
       setSendingInviteFor(null);
@@ -688,5 +689,3 @@ export function AdminStartupsManager() {
     </Card>
   );
 }
-import { startupSchema } from '@/lib/validations';
-import { logger } from '@/lib/logger';

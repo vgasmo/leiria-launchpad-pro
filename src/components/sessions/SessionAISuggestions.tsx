@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface AISuggestionsProps {
   sessionNotes: string;
@@ -46,7 +47,7 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
       if (error) throw error;
       setSuggestions(data);
     } catch (error: any) {
-      logger.error('error', {}, 'Error generating suggestions:', error);
+      logger.error('Error generating suggestions', {}, error);
       setAiError(true);
       toast.error(error.message || t('sessions.aiSuggestionsFailed'));
     } finally {
@@ -227,5 +228,3 @@ export function SessionAISuggestions({ sessionNotes, workspaceId, onApplySuggest
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

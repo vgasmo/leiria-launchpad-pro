@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import startupLeiriaLogo from "@/assets/startup-leiria.svg";
+import { logger } from '@/lib/logger';
 
 const NotFound = () => {
   const location = useLocation();
   const { t } = useTranslation();
 
   useEffect(() => {
-    logger.error('error', {}, "404 Error: User attempted to access non-existent route:", location.pathname);
+    logger.error('404 Error: non-existent route', { path: location.pathname });
   }, [location.pathname]);
 
   return (
@@ -66,5 +67,3 @@ const NotFound = () => {
 };
 
 export default NotFound;
-import startupLeiriaLogo from "@/assets/startup-leiria.svg";
-import { logger } from '@/lib/logger';

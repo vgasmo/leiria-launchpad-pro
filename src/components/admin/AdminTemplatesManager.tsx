@@ -24,6 +24,7 @@ import { INITIAL_TEMPLATES } from '@/data/initialTemplates';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 const FINANCIAL_MODEL_TEMPLATE_PATH = 'templates/Template_Avaliacao_Startup_Ecossistema.xlsm';
 const FINANCIAL_MODEL_BUCKET = 'public-assets';
@@ -109,7 +110,7 @@ export function AdminTemplatesManager() {
       setAssetUrl(publicUrl);
       toast.success(t('adminTemplates.uploadSuccess', { defaultValue: 'Template uploaded successfully' }));
     } catch (error: any) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', {}, error);
       toast.error(error.message || t('adminTemplates.uploadFailed', { defaultValue: 'Failed to upload template' }));
     } finally {
       setIsUploadingAsset(false);

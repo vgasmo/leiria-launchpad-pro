@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 const NPS_STORAGE_KEY = 'nps_feedback_state';
 const DAYS_BEFORE_PROMPT = 7;
@@ -115,7 +116,7 @@ export function useNpsFeedback() {
 
       return true;
     } catch (error) {
-      logger.error('error', {}, 'Failed to submit NPS feedback:', error);
+      logger.error('Failed to submit NPS feedback', {}, error);
       return false;
     }
   }, [user, profile, npsState]);
@@ -151,5 +152,3 @@ export function useNpsFeedback() {
     dismissPermanently,
   };
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

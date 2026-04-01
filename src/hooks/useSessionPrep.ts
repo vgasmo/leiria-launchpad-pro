@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 export interface SessionPrepData {
   session: {
@@ -131,7 +132,7 @@ export function useSessionPrep(sessionId: string | undefined, workspaceId: strin
       ]);
 
       if (sessionResult.error || !sessionResult.data) {
-        logger.error('error', {}, 'Failed to fetch session:', sessionResult.error);
+        logger.error('Failed to fetch session', {}, sessionResult.error);
         return null;
       }
 
@@ -196,5 +197,3 @@ export function useSessionPrep(sessionId: string | undefined, workspaceId: strin
     staleTime: 60000, // 1 minute
   });
 }
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';

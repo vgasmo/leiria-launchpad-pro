@@ -14,6 +14,7 @@ import {
 import { PriorityBadge, type WorkspacePriority } from '@/components/ui/PriorityBadge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface PrioritySelectorProps {
   workspaceId: string;
@@ -98,7 +99,7 @@ export function PrioritySelector({
       toast.success(t('priority.updated'));
       setIsOpen(false);
     } catch (error) {
-      console.error('Failed to update priority:', error);
+      logger.error('Failed to update priority', {}, error);
       toast.error(t('priority.updateFailed'));
     } finally {
       setIsSaving(false);

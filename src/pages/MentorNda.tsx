@@ -12,6 +12,7 @@ import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import startupLeiriaLogo from '@/assets/startup-leiria.svg';
+import { logger } from '@/lib/logger';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
 const NDA_FORUM = 'Leiria';
@@ -74,7 +75,7 @@ export default function MentorNda() {
         
         setHasAccepted(!!data);
       } catch (error) {
-        logger.error('error', {}, 'Error checking NDA status:', error);
+        logger.error('Error checking NDA status', {}, error);
       } finally {
         setCheckingNda(false);
       }
@@ -109,7 +110,7 @@ export default function MentorNda() {
       toast.success(t('nda.acceptedSuccess'));
       navigate('/my-workspaces');
     } catch (error: any) {
-      logger.error('error', {}, 'NDA submission error:', error);
+      logger.error('NDA submission error', {}, error);
       toast.error(error.message || t('nda.failedToAccept'));
     } finally {
       setIsSubmitting(false);
@@ -185,5 +186,3 @@ export default function MentorNda() {
     </div>
   );
 }
-import startupLeiriaLogo from '@/assets/startup-leiria.svg';
-import { logger } from '@/lib/logger';

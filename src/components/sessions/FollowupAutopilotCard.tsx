@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface FollowupAutopilotCardProps {
   sessionId: string;
@@ -136,7 +137,7 @@ export function FollowupAutopilotCard({
 
       toast.success(t('followup.sent'));
     } catch (error) {
-      logger.error('error', {}, 'Failed to send follow-up:', error);
+      logger.error('Failed to send follow-up', {}, error);
       toast.error(t('followup.error'));
     } finally {
       setSending(false);
@@ -233,5 +234,3 @@ export function FollowupAutopilotCard({
     </Card>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

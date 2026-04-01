@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useBuildings } from '@/hooks/useBackoffice';
+import { logger } from '@/lib/logger';
 
 type AnnouncementCategory = 'mail' | 'package' | 'general' | 'urgent';
 
@@ -132,7 +133,7 @@ export function AdminAnnouncementsManager() {
         });
 
         if (emailError) {
-          logger.error('error', {}, 'Email send error:', emailError);
+          logger.error('Email send error', {}, emailError);
           // Don't throw - announcement was created, just email failed
           toast.warning(t('admin.announcements.emailFailed'));
         }
@@ -436,5 +437,3 @@ export function AdminAnnouncementsManager() {
     </Card>
   );
 }
-import { useBuildings } from '@/hooks/useBackoffice';
-import { logger } from '@/lib/logger';

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { type FunnelStage, type FunnelType } from '@/constants/funnelStages';
+import { logger } from '@/lib/logger';
 
 // Re-export for backward compatibility
 export type { FunnelStage, FunnelType };
@@ -275,7 +276,7 @@ export function useConvertToStartup() {
         .update({ status: 'active' })
         .eq('id', workspace.id);
       if (activateError) {
-        console.error('Workspace activation error:', activateError);
+        logger.error('Workspace activation error', {}, activateError);
         // Still proceed — workspace is usable in 'pending' state
       }
 
@@ -298,7 +299,7 @@ export function useConvertToStartup() {
           .select()
           .single();
         if (contractError) {
-          console.error('Contract creation error:', contractError);
+          logger.error('Contract creation error', {}, contractError);
         } else {
           contract = contractData;
         }

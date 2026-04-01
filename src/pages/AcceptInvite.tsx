@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 type InviteStatus = 'loading' | 'needs_login' | 'processing' | 'success' | 'error';
 
@@ -53,7 +54,7 @@ export default function AcceptInvite() {
       });
       
       if (error) {
-        logger.error('error', {}, 'Error accepting invite:', error);
+        logger.error('Error accepting invite', {}, error);
         setStatus('error');
         setError(error.message || t('invite.acceptFailed'));
         return;
@@ -89,7 +90,7 @@ export default function AcceptInvite() {
       }, 2000);
       
     } catch (err) {
-      logger.error('error', {}, 'Failed to accept invitation:', err);
+      logger.error('Failed to accept invitation', {}, err);
       setStatus('error');
       setError(t('invite.acceptFailed'));
     }
@@ -200,5 +201,3 @@ export default function AcceptInvite() {
     </div>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

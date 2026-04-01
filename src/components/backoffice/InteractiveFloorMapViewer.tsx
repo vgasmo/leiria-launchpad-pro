@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { renderPdfToImage, isPdfFile } from '@/lib/pdfRenderer';
+import { logger } from '@/lib/logger';
 
 
 interface InteractiveFloorMapViewerProps {
@@ -75,7 +76,7 @@ export function InteractiveFloorMapViewer({
               const result = await renderPdfToImage(data.signedUrl);
               setDisplayImageUrl(result.dataUrl);
             } catch (pdfError) {
-              console.error('Failed to render PDF:', pdfError);
+              logger.error('Failed to render PDF', {}, pdfError);
               toast.error(t('admin.backoffice.pdfRenderError', 'Erro ao renderizar PDF'));
               setDisplayImageUrl('');
             }
@@ -84,7 +85,7 @@ export function InteractiveFloorMapViewer({
           }
         }
       } catch (err) {
-        console.error('Failed to load floor map:', err);
+        logger.error('Failed to load floor map', {}, err);
       }
       setLoading(false);
     };

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { sendTeamsNotification, getAppUrl } from '@/hooks/useIntegrationTriggers';
 import { Json } from '@/integrations/supabase/types';
+import { logger } from '@/lib/logger';
 
 // P1.2: Helper to log activity
 async function logActivity(action: string, entityType: string, entityId: string, workspaceId: string, metadata?: Record<string, unknown>) {
@@ -19,7 +20,7 @@ async function logActivity(action: string, entityType: string, entityId: string,
       metadata: (metadata || {}) as Json,
     });
   } catch (e) {
-    console.error('Failed to log activity:', e);
+    logger.error('Failed to log activity', {}, e);
   }
 }
 

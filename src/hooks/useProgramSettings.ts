@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/logger';
 
 export interface ProgramSettings {
   enable_kpis: boolean;
@@ -34,7 +35,7 @@ export function useProgramSettings(programId: string | undefined) {
         .single();
 
       if (error) {
-        console.error('Failed to fetch program settings:', error);
+        logger.error('Failed to fetch program settings', {}, error);
         return DEFAULT_SETTINGS;
       }
 

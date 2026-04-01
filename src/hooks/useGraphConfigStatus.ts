@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook to check if MS Graph client secret is configured server-side.
@@ -11,7 +12,7 @@ export function useGraphConfigStatus() {
     queryFn: async (): Promise<boolean> => {
       const { data, error } = await invokeWithAuth('graph-config-status', {});
       if (error) {
-        logger.error('error', {}, '[useGraphConfigStatus] Error:', error);
+        logger.error('[useGraphConfigStatus] Error', {}, error);
         return false;
       }
       return data?.enabled ?? false;
@@ -20,5 +21,3 @@ export function useGraphConfigStatus() {
     retry: 1,
   });
 }
-import { invokeWithAuth } from '@/lib/invokeWithAuth';
-import { logger } from '@/lib/logger';

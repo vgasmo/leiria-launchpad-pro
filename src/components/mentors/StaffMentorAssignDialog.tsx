@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { MentorRecommendationWidget } from './MentorRecommendationWidget';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface StaffMentorAssignDialogProps {
   open: boolean;
@@ -97,7 +98,7 @@ export function StaffMentorAssignDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      logger.error('error', {}, 'Assignment error:', error);
+      logger.error('Assignment error', {}, error);
       toast.error(t('common.error'));
     },
   });
@@ -144,5 +145,3 @@ export function StaffMentorAssignDialog({
     </Dialog>
   );
 }
-import { toast } from 'sonner';
-import { logger } from '@/lib/logger';

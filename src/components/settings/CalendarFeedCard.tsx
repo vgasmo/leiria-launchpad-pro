@@ -21,6 +21,7 @@ import {
   Rss,
   Key
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface CalendarFeedCardProps {
   workspaceId?: string;
@@ -128,7 +129,7 @@ export function CalendarFeedCard({ workspaceId }: CalendarFeedCardProps) {
       setNeedsRegeneration(false);
       toast.success(t('calendarFeed.tokenGenerated', { defaultValue: 'Token de calendário gerado com sucesso (válido por 90 dias)' }));
     } catch (err) {
-      console.error('Error generating token:', err);
+      logger.error('Error generating token', {}, err);
       toast.error(t('calendarFeed.generateFailed', { defaultValue: 'Falha ao gerar token de calendário' }));
     } finally {
       setIsGenerating(false);

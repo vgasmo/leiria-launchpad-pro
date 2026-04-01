@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface VoiceToTextButtonProps {
   onTranscript: (text: string) => void;
@@ -98,7 +99,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
       }, 1000);
 
     } catch (error: any) {
-      console.error('Error accessing microphone:', error);
+      logger.error('Error accessing microphone', {}, error);
       if (error.name === 'NotAllowedError') {
         toast.error(t('sessions.microphonePermissionDenied', 'Microphone permission denied. Please allow access.'));
       } else if (error.name === 'NotFoundError') {
@@ -154,7 +155,7 @@ export function VoiceToTextButton({ onTranscript, disabled = false }: VoiceToTex
         toast.error(t('sessions.noSpeechDetected'));
       }
     } catch (error: any) {
-      console.error('Transcription error:', error);
+      logger.error('Transcription error', {}, error);
       
       if (error.message?.includes('429')) {
         toast.error(t('sessions.rateLimitError'));

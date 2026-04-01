@@ -45,6 +45,7 @@ import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
+import { logger } from '@/lib/logger';
 
 const STAGE_COLORS: Record<FunnelStage, string> = {
   new: 'bg-slate-500',
@@ -170,7 +171,7 @@ export default function CRM() {
             .single();
           
           if (error || !data) {
-            logger.error('error', {}, 'Failed to load funnel item:', error);
+            logger.error('Failed to load funnel item', {}, error);
             toast.error(t('crm.itemNotFound'));
             searchParams.delete('open');
             setSearchParams(searchParams, { replace: true });
@@ -203,7 +204,7 @@ export default function CRM() {
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
         } catch (err) {
-          logger.error('error', {}, 'Error fetching funnel item:', err);
+          logger.error('Error fetching funnel item', {}, err);
           toast.error(t('crm.itemNotFound'));
           searchParams.delete('open');
           setSearchParams(searchParams, { replace: true });
@@ -690,5 +691,3 @@ function TaskGroup({
     </Card>
   );
 }
-import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
-import { logger } from '@/lib/logger';

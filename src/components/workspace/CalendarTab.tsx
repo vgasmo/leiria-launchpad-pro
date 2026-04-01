@@ -68,6 +68,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/lib/logger';
 
 interface CalendarTabProps {
   workspaceId: string;
@@ -198,7 +199,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       toast.success(t('sessions.invitesSent', { defaultValue: 'Convites de calendário enviados para {{count}} destinatário(s)', count: emails.length }));
       return data;
     } catch (error) {
-      logger.error('error', {}, 'Error sending session invite:', error);
+      logger.error('Error sending session invite', {}, error);
       toast.error(t('sessions.inviteSendError', { defaultValue: 'Erro ao enviar convites de calendário' }));
       throw error;
     } finally {
@@ -236,7 +237,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
           try {
             await sendSessionInvite(newSession, emails);
           } catch (inviteError) {
-            logger.error('error', {}, 'Failed to send invites but session was created:', inviteError);
+            logger.error('Failed to send invites but session was created', {}, inviteError);
           }
         }
       }
@@ -245,7 +246,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       resetForm();
       setIsAddDialogOpen(false);
     } catch (error) {
-      logger.error('error', {}, 'Error creating session:', error);
+      logger.error('Error creating session', {}, error);
       toast.error(t('sessions.createSession') + ' ' + t('common.error').toLowerCase());
     }
   };
@@ -272,7 +273,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       setEditingSession(null);
       setIsEditDialogOpen(false);
     } catch (error) {
-      logger.error('error', {}, 'Error updating session:', error);
+      logger.error('Error updating session', {}, error);
       toast.error(t('sessions.editSession') + ' ' + t('common.error').toLowerCase());
     }
   };
@@ -283,7 +284,7 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
       toast.success(t('sessions.sessionDeleted'));
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('error', {}, 'Error deleting session:', error);
+      logger.error('Error deleting session', {}, error);
       toast.error(t('sessions.deleteSession') + ' ' + t('common.error').toLowerCase());
     }
   };
@@ -911,5 +912,3 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
     </div>
   );
 }
-import { useTranslation } from 'react-i18next';
-import { logger } from '@/lib/logger';
