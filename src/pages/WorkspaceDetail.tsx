@@ -239,6 +239,7 @@ export default function WorkspaceDetail() {
                   {tabBadges[tab.id] > 99 ? '99+' : tabBadges[tab.id]}
                 </span>
               ) : null}
+            </button>
           ))}
 
           {/* Overflow "More" dropdown - only if there are overflow tabs */}
