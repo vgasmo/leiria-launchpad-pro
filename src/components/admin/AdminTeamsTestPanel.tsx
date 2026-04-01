@@ -169,7 +169,7 @@ export function AdminTeamsTestPanel() {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Global Teams integration is not configured. Configure it in Workflow Integrations below.
+              {t('admin.teams.notConfiguredWarning', 'A integração global com o Teams não está configurada. Configure em Workflow Integrations abaixo.')}
             </AlertDescription>
           </Alert>
         ) : (
