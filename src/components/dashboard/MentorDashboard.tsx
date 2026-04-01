@@ -177,13 +177,19 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
       </div>
 
       {/* P0 HERO: Enhanced Session Prep */}
-      <MentorSessionPrepEnhanced workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorSessionPrep">
+        <MentorSessionPrepEnhanced workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* P0 HERO: Next Session Prep (fallback) */}
-      <MentorNextSessionPrep workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorNextSessionPrep">
+        <MentorNextSessionPrep workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* Open Loops — what needs attention */}
-      <MentorOpenLoops workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorOpenLoops">
+        <MentorOpenLoops workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* Post-session feedback CTA */}
       {recentUnloggedSessions.length > 0 && (
