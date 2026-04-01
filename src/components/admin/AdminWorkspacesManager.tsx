@@ -290,7 +290,7 @@ export function AdminWorkspacesManager() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStartup || !selectedProgram) {
-      toast.error('Please select a startup and program');
+      toast.error(t('admin.selectStartupProgram', 'Selecione uma startup e um programa'));
       return;
     }
     createMutation.mutate({
