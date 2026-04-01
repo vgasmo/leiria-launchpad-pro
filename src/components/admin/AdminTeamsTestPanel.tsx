@@ -253,7 +253,7 @@ export function AdminTeamsTestPanel() {
                 </div>
               )}
               {lastResult.reason && (
-                <div><span className="text-muted-foreground">Reason:</span> {lastResult.reason}</div>
+                <div><span className="text-muted-foreground">{t('admin.teams.reason', 'Razão')}:</span> {lastResult.reason}</div>
               )}
               {lastResult.error && (
                 <div className="text-red-600"><span>Error:</span> {lastResult.error}</div>
