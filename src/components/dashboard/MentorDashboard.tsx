@@ -394,7 +394,6 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           workspaceId={prepSheetWorkspaceId}
         />
       )}
-    </div>
 
       {/* Quick Note Dialog */}
       {quickNoteWorkspaceId && (
