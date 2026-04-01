@@ -230,7 +230,7 @@ export function useAddActivity() {
       // If no workspace_id available, log as funnel_event instead
       if (!insertData.workspace_id) {
         if (insertData.funnel_item_id) {
-          const { error: feError } = await supabase.from('funnel_events').insert({
+          const { error: feError } = await supabase.from('funnel_events').insert([{
             funnel_item_id: insertData.funnel_item_id as string,
             event_type: (insertData.activity_type as string) || 'note',
             metadata: {
@@ -238,8 +238,8 @@ export function useAddActivity() {
               preview: insertData.preview,
               body: insertData.body,
               direction: insertData.direction,
-            },
-          });
+            } as any,
+          }]);
           if (feError) throw feError;
           return { id: 'funnel-event', ...insertData } as any;
         }
