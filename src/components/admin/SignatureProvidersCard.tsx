@@ -46,7 +46,11 @@ function useSignatureProviderSettings(type: 'docusign' | 'pandadoc') {
       const { data, error } = await invokeWithAuth('get-global-integrations', {
         body: { integration_type: type },
       });
-      if (error) throw error;
+      if (error) {
+        const msg = typeof error === 'object' && error !== null ? (error as any).message || JSON.stringify(error) : String(error);
+        if (msg.includes('403') || msg.includes('Access denied')) return null;
+        throw error;
+      }
       return (data?.settings?.[0] as ProviderSettings) || null;
     },
   });
