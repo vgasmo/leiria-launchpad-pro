@@ -1088,7 +1088,8 @@
       "suspendError": "Erro ao alterar estado da conta",
       "suspendTitle": "Suspender Conta",
       "suspended": "Conta suspensa",
-      "suspend": "Suspender"
+      "suspend": "Suspender",
+      "reactivateConfirm": "Tem a certeza que deseja reativar este utilizador?"
     },
     "userSuspended": "Utilizador suspenso",
     "users": "Utilizadores",
