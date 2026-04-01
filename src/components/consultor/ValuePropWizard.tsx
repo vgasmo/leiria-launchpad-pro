@@ -34,14 +34,14 @@ interface ValuePropWizardProps {
   onComplete?: () => void;
 }
 
-const STEPS = [
-  { key: 'segment', icon: Users, title: 'Customer Segment', description: 'Who are you solving for?' },
-  { key: 'problem', icon: AlertTriangle, title: 'Problem & Evidence', description: 'What pain have you observed?' },
-  { key: 'consequence', icon: Target, title: 'Consequence', description: 'What happens if unsolved?' },
-  { key: 'jobs', icon: Lightbulb, title: 'Jobs to be Done', description: 'What do they need to accomplish?' },
-  { key: 'alternatives', icon: Users, title: 'Alternatives', description: 'What do they use today?' },
-  { key: 'value', icon: Sparkles, title: 'Value Proposition', description: 'Your unique solution' },
-  { key: 'proof', icon: Check, title: 'Proof', description: 'Evidence & credentials' },
+const STEP_KEYS = [
+  { key: 'segment', icon: Users },
+  { key: 'problem', icon: AlertTriangle },
+  { key: 'consequence', icon: Target },
+  { key: 'jobs', icon: Lightbulb },
+  { key: 'alternatives', icon: Users },
+  { key: 'value', icon: Sparkles },
+  { key: 'proof', icon: Check },
 ];
 
 const EXAMPLES: Record<string, string> = {
@@ -56,9 +56,23 @@ const EXAMPLES: Record<string, string> = {
   proof: 'e.g., "Beta users saved 10hrs/week; 3 paying pilots at $500/mo"',
 };
 
+const STEP_I18N: Record<string, { title: string; desc: string }> = {
+  segment: { title: 'Segmento de Clientes', desc: 'Para quem estás a resolver?' },
+  problem: { title: 'Problema & Evidência', desc: 'Que dor observaste?' },
+  consequence: { title: 'Consequência', desc: 'O que acontece se não resolver?' },
+  jobs: { title: 'Jobs to be Done', desc: 'O que precisam de conseguir?' },
+  alternatives: { title: 'Alternativas', desc: 'O que usam hoje?' },
+  value: { title: 'Proposta de Valor', desc: 'A tua solução única' },
+  proof: { title: 'Prova', desc: 'Evidência & credenciais' },
+};
+
 export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProps) {
   const { t } = useTranslation();
-  const STEPS = useSteps();
+  const STEPS = STEP_KEYS.map(s => ({
+    ...s,
+    title: t(`vp.step_${s.key}`, STEP_I18N[s.key]?.title || s.key),
+    description: t(`vp.step_${s.key}_desc`, STEP_I18N[s.key]?.desc || ''),
+  }));
   const [currentStep, setCurrentStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [fields, setFields] = useState<ValuePropFields>({

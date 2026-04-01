@@ -108,7 +108,7 @@ function InsightCard({ insight, onCreateAction, createActionLabel }: { insight: 
           {insight.suggested_action && onCreateAction && (
             <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={onCreateAction}>
               <ArrowRight className="h-3 w-3 mr-1" />
-              {createActionLabel || 'Create Action'}
+              {createActionLabel || t('actions.createAction', 'Criar Ação')}
             </Button>
           )}
         </div>

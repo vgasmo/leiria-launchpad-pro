@@ -254,7 +254,7 @@ export default function SharedWorkspace() {
       {/* Footer */}
       <div className="border-t bg-muted/30 py-4">
         <div className="max-w-4xl mx-auto px-6 text-center text-sm text-muted-foreground">
-          <p>Shared via Startup Leiria</p>
+          <p>{t('shared.sharedVia', 'Partilhado via Startup Leiria')}</p>
         </div>
       </div>
     </div>

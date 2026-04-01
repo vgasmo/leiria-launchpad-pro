@@ -525,37 +525,37 @@ export default function Settings() {
           <TabsContent value="password">
             <Card>
               <CardHeader>
-                <CardTitle>Change Password</CardTitle>
+                <CardTitle>{t('settingsPage.changePassword', 'Alterar Palavra-passe')}</CardTitle>
                 <CardDescription>
-                  Update your password to keep your account secure
+                  {t('settingsPage.changePasswordDesc', 'Atualize a sua palavra-passe para manter a conta segura')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdatePassword} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="new_password">New Password</Label>
+                    <Label htmlFor="new_password">{t('settingsPage.newPassword', 'Nova Palavra-passe')}</Label>
                     <Input
                       id="new_password"
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password"
+                      placeholder={t('settingsPage.enterNewPassword', 'Introduza nova palavra-passe')}
                       required
                       minLength={6}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Minimum 6 characters
+                      {t('settingsPage.minChars', 'Mínimo 6 caracteres')}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirm_password">Confirm New Password</Label>
+                    <Label htmlFor="confirm_password">{t('settingsPage.confirmPassword', 'Confirmar Nova Palavra-passe')}</Label>
                     <Input
                       id="confirm_password"
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm new password"
+                      placeholder={t('settingsPage.confirmNewPassword', 'Confirme nova palavra-passe')}
                       required
                       minLength={6}
                     />
@@ -565,12 +565,12 @@ export default function Settings() {
                     {isUpdatingPassword ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Updating...
+                        {t('common.updating', 'A atualizar...')}
                       </>
                     ) : (
                       <>
                         <Lock className="h-4 w-4 mr-2" />
-                        Update Password
+                        {t('settingsPage.updatePassword', 'Atualizar Palavra-passe')}
                       </>
                     )}
                   </Button>
