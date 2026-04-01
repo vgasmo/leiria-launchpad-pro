@@ -781,7 +781,11 @@
     "featureFlags": {
       "description": "Controlar quais funcionalidades estão ativas. Todas as flags estão desativadas por defeito por segurança.",
       "tab": "Flags",
-      "title": "Feature Flags"
+      "title": "Feature Flags",
+      "flagToggled": "Feature flag {{state}}",
+      "globalFlags": "Flags Globais",
+      "noGlobalFlags": "Sem flags globais configuradas",
+      "programOverrides": "Overrides de Programa"
     },
     "funnel": {
       "addLead": "Adicionar Lead",
@@ -1155,7 +1159,23 @@
       "title": "Tags"
     },
     "teams": {
-      "globalSettings": "Global Definições (no Workspace)"
+      "globalSettings": "Global Definições (no Workspace)",
+      "testTitle": "Teste de Notificações Teams",
+      "globalConfigured": "Global Configurado",
+      "testDescription": "Testar notificações Teams para workspaces específicos",
+      "notConfiguredWarning": "A integração global com o Teams não está configurada.",
+      "globalActive": "As definições globais do Teams estão ativas.",
+      "testTarget": "Alvo do Teste",
+      "selectWorkspace": "Selecionar workspace...",
+      "sendTest": "Enviar Teste",
+      "messageSent": "Mensagem Enviada",
+      "notSent": "Não Enviada",
+      "settingsUsed": "Definições usadas",
+      "globalFallback": "Global Fallback",
+      "workspaceSpecific": "Específico do Workspace",
+      "reason": "Razão",
+      "usedSettings": "Usou",
+      "workspaceSettings": "definições do workspace"
     },
     "templateAplicadoComSucesso": "Template aplicado com sucesso",
     "templateCriadoComSucesso": "Template criado com sucesso",
@@ -1233,8 +1253,36 @@
       "startup": "Startup",
       "status": "Estado",
       "unblock": "Desbloquear",
-      "unblocked": "Workspace desbloqueado"
-    }
+      "unblocked": "Workspace desbloqueado",
+      "title": "Workspaces",
+      "create": "Criar Workspace",
+      "selectStartup": "Selecionar startup",
+      "selectProgram": "Selecionar programa",
+      "assignFounder": "Associar Founder (opcional)",
+      "searchByEmailOrName": "Pesquisar por email ou nome..."
+    },
+    "stageUpdateFailed": "Erro ao atualizar estágios",
+    "stageUpdateSuccess": "{{count}} workspaces atualizados",
+    "approveError": "Erro ao aprovar conta",
+    "approveSuccess": "Conta aprovada com sucesso",
+    "workspaceCreated": "Workspace criado",
+    "selectStartupProgram": "Selecione uma startup e um programa",
+    "teamsTestSuccess": "Mensagem de teste enviada!",
+    "teamsTestNotSent": "Mensagem não enviada",
+    "teamsTestFailed": "Teste falhou",
+    "flagUpdateFailed": "Erro ao atualizar flag",
+    "healthTools": "Ferramentas de Health",
+    "recomputeHealth": "Recalcular Health Scores",
+    "recalculate": "Recalcular",
+    "healthThisProgram": "Workspaces deste programa",
+    "healthAllActive": "Todos os workspaces ativos",
+    "exportReport": "Exportar Relatório",
+    "cohortHealthPdf": "Health do cohort em PDF",
+    "healthTemplates": "Templates de Health Model",
+    "selectTemplate": "Selecionar template",
+    "saveCurrentAsTemplate": "Guardar modelo atual como template",
+    "saveAsTemplate": "Guardar como Template",
+    "createReusableTemplate": "Crie um template reutilizável a partir do modelo atual."
   },
   "adminKpis": {
     "cancel": "Cancelar",
@@ -1562,7 +1610,8 @@
     "definitionSaved": "Definição de check-in guardada",
     "skipped": "Check-in ignorado",
     "submitError": "Erro ao submeter check-in",
-    "submitted": "Check-in submetido com sucesso!"
+    "submitted": "Check-in submetido com sucesso!",
+    "lastCheckin": "Último Check-in"
   },
   "checklistRecovery": {
     "restoreChecklist": "Mostrar checklist de onboarding",
@@ -1767,7 +1816,23 @@
     "yes": "Sim",
     "morePages": "Mais páginas",
     "copiedToClipboard": "Copiado para a área de transferência",
-    "copyFailed": "Falha ao copiar"
+    "copyFailed": "Falha ao copiar",
+    "enabled": "ativada",
+    "disabled": "desativada",
+    "allStages": "Todos os Estágios",
+    "allPrograms": "Todos os Programas",
+    "allConsultants": "Todos os Consultores",
+    "health": "Saúde",
+    "consultant": "Consultor",
+    "contract": "Contrato",
+    "workspace": "Workspace",
+    "active": "Ativo",
+    "needAttention": "precisam de atenção",
+    "noStartupsFound": "Sem startups encontradas",
+    "unassigned": "Não atribuído",
+    "never": "Nunca",
+    "descriptionOptional": "Descrição (opcional)",
+    "unknownReason": "Razão desconhecida"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3995,7 +4060,14 @@
     "yourImpact": "O Teu Impacto",
     "startBeforeEnd": "A hora de início deve ser antes do fim",
     "availabilitySaved": "Disponibilidade guardada com sucesso",
-    "ndaNotSigned": "Este mentor ainda não assinou o NDA. Será associado mas terá de assinar antes de aceder."
+    "ndaNotSigned": "Este mentor ainda não assinou o NDA. Será associado mas terá de assinar antes de aceder.",
+    "saveFailed": "Falha ao guardar disponibilidade",
+    "availabilitySettings": "Definições de Disponibilidade",
+    "availabilityDescription": "Configure a sua disponibilidade semanal para sessões de mentoria.",
+    "noAvailability": "Sem disponibilidade configurada.",
+    "addSlots": "Adicione horários para permitir que founders agendem sessões.",
+    "to": "a",
+    "addTimeSlot": "Adicionar Horário"
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Problemas ou bloqueios identificados...",
@@ -5544,7 +5616,8 @@
     "zoomDesc": "Importar gravações e transcrições automaticamente",
     "facilitatorStaffOnly": "O Modo Facilitador está disponível apenas para consultores.",
     "checklistUpdateFailed": "Erro ao atualizar checklist",
-    "enterTranscript": "Introduza o texto da transcrição"
+    "enterTranscript": "Introduza o texto da transcrição",
+    "nextSession": "Próxima Sessão"
   },
   "sessionsEmpty": {
     "description": "O seu consultor ou programa vai agendar a primeira sessão em breve.",
@@ -6922,7 +6995,10 @@
       "notClaimed": "Não associado",
       "claimedNoContract": "Associado s/ contrato",
       "allocExpiring": "Alocação a expirar"
-    }
+    },
+    "room": "Sala",
+    "status": "Estado",
+    "occupant": "Startup / Ocupante"
   },
   "waitingList": {
     "startup": "Startup",
@@ -6956,6 +7032,13 @@
     "noWorkspaces": "Sem workspaces encontrados"
   },
   "messaging": {
-    "startConversationFailed": "Não foi possível iniciar conversa"
+    "startConversationFailed": "Não foi possível iniciar conversa",
+    "conversationFailed": "Não foi possível iniciar conversa",
+    "newConversation": "Nova Conversa",
+    "searchUsers": "Pesquisar utilizadores...",
+    "noUsersFound": "Nenhum utilizador encontrado",
+    "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
+    "usersSelected": "{{count}} utilizador(es) selecionado(s)",
+    "startConversation": "Iniciar Conversa"
   }
 }
