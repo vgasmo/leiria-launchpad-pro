@@ -311,11 +311,47 @@ export function PendingApprovalsManager() {
       queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      setAssignClaimTarget(null);
-      setSelectedWorkspaceId('');
+      resetClaimDialog();
     } catch (e: any) {
       toast.error(`Erro ao aprovar claim: ${e.message}`);
     }
+  };
+
+  const handleCreateWorkspaceForClaim = async () => {
+    if (!assignClaimTarget || !newStartupName.trim() || !newProgramId) return;
+    setIsCreatingWorkspace(true);
+
+    try {
+      const { data, error } = await supabase.rpc('staff_create_workspace_for_claim', {
+        p_claim_id: assignClaimTarget.id,
+        p_startup_name: newStartupName.trim(),
+        p_program_id: newProgramId,
+        p_stage: newStage,
+        p_description: newStartupDesc.trim() || null,
+      });
+
+      if (error) throw error;
+
+      toast.success('Workspace criado e founder associado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      resetClaimDialog();
+    } catch (e: any) {
+      toast.error(`Erro ao criar workspace: ${e.message}`);
+    } finally {
+      setIsCreatingWorkspace(false);
+    }
+  };
+
+  const resetClaimDialog = () => {
+    setAssignClaimTarget(null);
+    setSelectedWorkspaceId('');
+    setClaimDialogTab('existing');
+    setNewStartupName('');
+    setNewStartupDesc('');
+    setNewProgramId('');
+    setNewStage('ideation');
   };
 
   const handleRejectClaim = async (claimId: string) => {
