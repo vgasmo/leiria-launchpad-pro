@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useTranslation } from 'react-i18next';
 import { Mail, User, GraduationCap, Linkedin, CalendarPlus, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
