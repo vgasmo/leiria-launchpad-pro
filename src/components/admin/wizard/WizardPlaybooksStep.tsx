@@ -262,9 +262,9 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                     <SelectItem value="low">{t('common.low')}</SelectItem>
-                                    <SelectItem value="medium">{t('common.medium')}</SelectItem>
-                                    <SelectItem value="high">{t('common.high')}</SelectItem>
+                                    <SelectItem value="low">{t('wizard.low')}</SelectItem>
+                                    <SelectItem value="medium">{t('wizard.med')}</SelectItem>
+                                    <SelectItem value="high">{t('wizard.high')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <Input
