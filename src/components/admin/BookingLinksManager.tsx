@@ -137,6 +137,24 @@ export function BookingLinksManager() {
     },
   });
 
+  // Delete link permanently
+  const deleteLink = useMutation({
+    mutationFn: async (linkId: string) => {
+      const { error } = await supabase
+        .from('public_booking_links')
+        .delete()
+        .eq('id', linkId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['public-booking-links'] });
+      toast.success(t('admin.bookingLinkDeleted', 'Link apagado'));
+    },
+    onError: (error: Error) => {
+      toast.error(t('admin.failedToDelete', { message: error.message }));
+    },
+  });
+
   const getProgramName = (programId: string | null) => {
     if (!programId) return t('admin.anyProgram', 'Qualquer programa');
     return programs?.find(p => p.id === programId)?.name || t('common.unknown', 'Desconhecido');
@@ -273,6 +291,20 @@ export function BookingLinksManager() {
                           title={t('admin.deactivate', 'Desativar')}
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      )}
+                      {!link.active && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (window.confirm(t('admin.confirmDeleteLink', 'Tem a certeza que quer apagar este link?'))) {
+                              deleteLink.mutate(link.id);
+                            }
+                          }}
+                          title={t('common.delete', 'Apagar')}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       )}
                     </div>
