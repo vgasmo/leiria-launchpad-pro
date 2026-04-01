@@ -60,9 +60,9 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
         enabled,
         ...(webhookUrl && { webhook_url: webhookUrl })
       });
-      toast.success(enabled ? 'Outlook calendar sync enabled' : 'Outlook calendar sync disabled');
+      toast.success(enabled ? t('settings.outlookSyncEnabled', 'Sincronização Outlook ativada') : t('settings.outlookSyncDisabled', 'Sincronização Outlook desativada'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update settings');
+      toast.error(error.message || t('settings.failedToUpdate', 'Erro ao atualizar'));
     }
   };
 
