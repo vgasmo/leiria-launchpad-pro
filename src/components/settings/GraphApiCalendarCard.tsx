@@ -204,7 +204,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
             size="sm"
             className="w-full"
           >
-            {isSaving ? 'Saving...' : isConfigured ? 'Update Identifiers' : 'Save Identifiers'}
+            {isSaving ? t('common.saving', 'A guardar...') : isConfigured ? t('settings.updateIdentifiers', 'Atualizar Identificadores') : t('settings.saveIdentifiers', 'Guardar Identificadores')}
           </Button>
         </div>
 
