@@ -352,7 +352,7 @@ export function AdminEcosystemManager() {
                         {item.last_checkin_date ? (
                           format(new Date(item.last_checkin_date), 'MMM d')
                         ) : (
-                          <span className="text-muted-foreground">Never</span>
+                          <span className="text-muted-foreground">{t('common.never', 'Nunca')}</span>
                         )}
                       </TableCell>
                     </TableRow>

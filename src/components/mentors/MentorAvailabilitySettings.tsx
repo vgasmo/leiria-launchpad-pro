@@ -234,12 +234,12 @@ export function MentorAvailabilitySettings() {
               {setAvailability.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  {t('common.saving', 'A guardar...')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  {t('common.saveChanges', 'Guardar Alterações')}
                 </>
               )}
             </Button>

@@ -447,12 +447,12 @@ export function SpaceOperationsConsole() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
-                <TableHead className="text-xs font-semibold">Sala</TableHead>
-                <TableHead className="text-xs font-semibold">Estado</TableHead>
-                <TableHead className="text-xs font-semibold">Startup / Ocupante</TableHead>
-                <TableHead className="text-xs font-semibold">Workspace</TableHead>
-                <TableHead className="text-xs font-semibold">Contrato</TableHead>
-                <TableHead className="text-xs font-semibold">Avisos</TableHead>
+                <TableHead className="text-xs font-semibold">{t('spaces.room', 'Sala')}</TableHead>
+                <TableHead className="text-xs font-semibold">{t('spaces.status', 'Estado')}</TableHead>
+                <TableHead className="text-xs font-semibold">{t('spaces.occupant', 'Startup / Ocupante')}</TableHead>
+                <TableHead className="text-xs font-semibold">{t('common.workspace', 'Workspace')}</TableHead>
+                <TableHead className="text-xs font-semibold">{t('common.contract', 'Contrato')}</TableHead>
+                <TableHead className="text-xs font-semibold">{t('spaces.warnings', 'Avisos')}</TableHead>
                 <TableHead className="text-xs font-semibold w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>

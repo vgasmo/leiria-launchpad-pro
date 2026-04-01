@@ -272,7 +272,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                    Cancelar
+                    {t('common.cancel', 'Cancelar')}
                   </Button>
                   <Button 
                     onClick={handleSaveAsTemplate}
@@ -281,7 +281,7 @@ export function AdminHealthTools({ programId, className }: AdminHealthToolsProps
                     {createTemplate.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    Guardar
+                    {t('common.save', 'Guardar')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
