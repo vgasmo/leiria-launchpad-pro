@@ -146,7 +146,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('common.description')}</Label>
+                      <Label>{t('wizard.description')}</Label>
                       <Textarea
                         value={playbook.description || ''}
                         onChange={(e) =>
