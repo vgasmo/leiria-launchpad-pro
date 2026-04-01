@@ -152,7 +152,7 @@ function DocuSignSettingsCard() {
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-3 space-y-3">
             <div className="space-y-2">
-              <Label className="text-xs">Account ID</Label>
+              <Label className="text-xs">{t('integrations.accountId', 'Account ID')}</Label>
               <Input value={accountId} onChange={e => setAccountId(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="text-xs h-8" />
             </div>
             <div className="space-y-2">
