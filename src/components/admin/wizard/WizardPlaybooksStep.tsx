@@ -57,7 +57,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
     const playbook = localPlaybooks.find((p) => p.stage_key === stageKey);
     const newItem: DraftPlaybookItem = {
       item_type: type,
-      title: type === 'milestone' ? 'New Milestone' : 'New Action',
+      title: '',
       description: '',
       relative_due_days: type === 'milestone' ? 14 : 7,
       priority: 'medium',
