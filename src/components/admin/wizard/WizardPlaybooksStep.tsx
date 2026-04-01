@@ -104,8 +104,7 @@ export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlayb
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">
-        Configure playbooks with milestones and actions for each stage. These will be available for 
-        founders to instantiate in their workspaces.
+        {t('wizard.playbooks.description')}
       </p>
 
       <Tabs defaultValue={activeStages[0]?.stage_key} className="w-full">
