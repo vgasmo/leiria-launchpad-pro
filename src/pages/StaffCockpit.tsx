@@ -65,7 +65,7 @@ export default function StaffCockpit() {
         )}
 
         {/* Backoffice-specific: Contracts expiring + Overdue invoices */}
-        {isBackoffice && (
+        {(isBackoffice || isAdmin) && (
           <div className="grid gap-4 lg:grid-cols-2">
             <WidgetErrorBoundary name="ContractsExpiring">
               <BackofficeContractsExpiringCard />

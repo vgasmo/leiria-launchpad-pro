@@ -63,7 +63,7 @@ export function AdminBackoffice() {
   // Support deep-linking via ?subtab= URL param (fallback to legacy ?tab=)
   const urlParams = new URLSearchParams(window.location.search);
   const urlSubTab = urlParams.get('subtab') || urlParams.get('tab');
-  const [activeSubTab, setActiveSubTab] = useState(urlSubTab && ['dashboard', 'overview', 'contracts', 'incubation', 'spaces', 'operations', 'infrastructure'].includes(urlSubTab) ? (urlSubTab === 'operations' || urlSubTab === 'infrastructure' ? 'spaces' : urlSubTab) : 'dashboard');
+  const [activeSubTab, setActiveSubTab] = useState(urlSubTab && ['dashboard', 'overview', 'contracts', 'invoices', 'incubation', 'spaces', 'operations', 'infrastructure'].includes(urlSubTab) ? (urlSubTab === 'operations' || urlSubTab === 'infrastructure' ? 'spaces' : urlSubTab) : 'dashboard');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');

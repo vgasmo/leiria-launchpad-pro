@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { FileText, Lightbulb, Sparkles, Shield, MessageSquare, Wrench, BarChart3 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,9 +13,22 @@ import { ValuePropWizard } from '@/components/consultor/ValuePropWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
+const VALID_TABS = ['frameworks', 'coaching', 'exercises', 'materials', 'analytics'];
+
 export default function ConsultorTools() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('frameworks');
+  const [searchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(
+    urlTab && VALID_TABS.includes(urlTab) ? urlTab : 'frameworks'
+  );
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && VALID_TABS.includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
   const [showVPWizard, setShowVPWizard] = useState(false);
 
   return (

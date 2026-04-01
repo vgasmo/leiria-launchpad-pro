@@ -138,7 +138,7 @@ function MobileBottomNav() {
       return [
         { href: '/staff-cockpit', icon: Home, label: t('nav.mobile.cockpit', { defaultValue: 'Cockpit' }) },
         { href: '/admin?tab=backoffice', icon: Building2, label: t('nav.mobile.spaces', { defaultValue: 'Espaços' }) },
-        { href: '/admin?tab=contracts', icon: FileText, label: t('nav.mobile.contracts', { defaultValue: 'Contratos' }) },
+        { href: '/admin?tab=backoffice&subtab=contracts', icon: FileText, label: t('nav.mobile.contracts', { defaultValue: 'Contratos' }) },
         { href: '/settings', icon: Settings, label: t('nav.settings') },
       ];
     }

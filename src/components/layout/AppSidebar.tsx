@@ -201,14 +201,26 @@ export function AppSidebar() {
     .slice(0, 2) || 'U';
 
   const isActiveRoute = (item: NavItem): boolean => {
-    // Handle query params in href
     if (item.href.includes('?')) {
       const [path, query] = item.href.split('?');
-      return location.pathname === path && location.search.includes(query);
+      if (location.pathname !== path) return false;
+      
+      const itemParams = new URLSearchParams(query);
+      const locationParams = new URLSearchParams(location.search);
+      
+      for (const [key, value] of itemParams.entries()) {
+        if (locationParams.get(key) !== value) return false;
+      }
+      
+      // Don't highlight parent when a more specific child is active
+      if (!itemParams.has('subtab') && locationParams.has('subtab')) {
+        return false;
+      }
+      
+      return true;
     }
 
     if (item.exact) {
-      // Exact match should not light up when query params are present (e.g., /admin?tab=...)
       return location.pathname === item.href && location.search === '';
     }
     return location.pathname.startsWith(item.href);
