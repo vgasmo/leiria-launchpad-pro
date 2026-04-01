@@ -224,6 +224,7 @@ interface PipelineColumnProps {
 }
 
 function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineColumnProps) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({
     id: simpleStage,
   });
