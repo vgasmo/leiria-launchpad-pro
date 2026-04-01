@@ -121,8 +121,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This is configured per workspace in each workspace's Settings → Integrations tab.
-              Below are the setup instructions for reference.
+              {t('settings.graphPerWorkspace', 'Configurado por workspace em Definições → Integrações. Abaixo estão as instruções de referência.')}
             </AlertDescription>
           </Alert>
         )}
