@@ -116,7 +116,7 @@ export function AppSidebar() {
   const consultorNavigation: NavItem[] = [
     { name: t('nav.consultor.portfolio', { defaultValue: 'Portefólio' }), href: '/my-workspaces', icon: Briefcase, exact: true },
     { name: t('nav.consultor.sessions', { defaultValue: 'Sessões' }), href: '/consultor-tools', icon: Calendar },
-    { name: t('nav.consultor.actionsFollowups', { defaultValue: 'Ações & Follow-ups' }), href: '/consultor-tools?tab=actions', icon: CheckSquare },
+    { name: t('nav.consultor.actionsFollowups', { defaultValue: 'Ações & Follow-ups' }), href: '/staff-cockpit', icon: CheckSquare },
     { name: t('nav.consultor.documents', { defaultValue: 'Documentos' }), href: '/documents', icon: FolderOpen },
     { name: t('nav.consultor.crmPipeline', { defaultValue: 'CRM & Pipeline' }), href: '/crm', icon: Contact },
     { name: t('nav.consultor.ecosystem', { defaultValue: 'Ecossistema' }), href: '/ecosystem', icon: Globe2 },
@@ -137,8 +137,8 @@ export function AppSidebar() {
   const backofficeNavigation: NavItem[] = [
     { name: t('nav.backoffice.cockpit', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('nav.backoffice.spaces', { defaultValue: 'Espaços' }), href: '/admin?tab=backoffice', icon: Building2 },
-    { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=contracts', icon: FileText },
-    { name: t('nav.backoffice.invoices', { defaultValue: 'Faturação' }), href: '/admin?tab=invoices', icon: DollarSign },
+    { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=backoffice&subtab=contracts', icon: FileText },
+    { name: t('nav.backoffice.invoices', { defaultValue: 'Faturação' }), href: '/admin?tab=backoffice&subtab=invoices', icon: DollarSign },
     { name: t('nav.backoffice.approvals', { defaultValue: 'Aprovações' }), href: '/admin?tab=approvals', icon: Clock },
     { name: t('nav.backoffice.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
   ];
@@ -201,14 +201,26 @@ export function AppSidebar() {
     .slice(0, 2) || 'U';
 
   const isActiveRoute = (item: NavItem): boolean => {
-    // Handle query params in href
     if (item.href.includes('?')) {
       const [path, query] = item.href.split('?');
-      return location.pathname === path && location.search.includes(query);
+      if (location.pathname !== path) return false;
+      
+      const itemParams = new URLSearchParams(query);
+      const locationParams = new URLSearchParams(location.search);
+      
+      for (const [key, value] of itemParams.entries()) {
+        if (locationParams.get(key) !== value) return false;
+      }
+      
+      // Don't highlight parent when a more specific child is active
+      if (!itemParams.has('subtab') && locationParams.has('subtab')) {
+        return false;
+      }
+      
+      return true;
     }
 
     if (item.exact) {
-      // Exact match should not light up when query params are present (e.g., /admin?tab=...)
       return location.pathname === item.href && location.search === '';
     }
     return location.pathname.startsWith(item.href);

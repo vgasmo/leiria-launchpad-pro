@@ -251,6 +251,7 @@
         "virtualIncubation": "Virtual Incubation"
       },
       "contracts": "Contracts",
+      "contractsAndLifecycle": "Contracts",
       "createContractsCount": "Create {{count}} Contracts",
       "createdAt": "Created",
       "currentOccupant": "Current Occupant",
@@ -282,28 +283,13 @@
         "waitingList": "Waiting List",
         "yearAnniversary": "Year {{year}} anniversary"
       },
-      "opsHub": {
-        "rooms": "rooms",
-        "pendingInvoices": "Pending Invoices",
-        "invoicesAwait": "awaiting payment",
-        "expiringContracts": "Expiring Contracts",
-        "next30Days": "next 30 days",
-        "availableRooms": "Available Rooms",
-        "inWaitlist": "in waitlist",
-        "floorMaps": "Floor Maps",
-        "noFloorMaps": "No floor maps uploaded yet",
-        "financialHealth": "Financial Health",
-        "recentInvoices": "Recent & Pending Invoices",
-        "allPaid": "All invoices paid",
-        "contractsAttention": "Contracts Requiring Attention",
-        "allContractsGood": "All contracts in good standing"
-      },
       "days": "days",
       "deallocate": "Deallocate",
       "description": "Description",
       "discount": "Discount",
       "discountReason": "Discount Reason",
       "discountReasonPlaceholder": "Reason for discount (e.g. CRM promotion)",
+      "discounts": "Discounts",
       "dueDate": "Due Date",
       "duration": "Duration",
       "durationMonths": "Duration (months)",
@@ -340,6 +326,7 @@
       "infrastructure": "Infrastructure",
       "invoiceNumber": "Invoice Number",
       "invoices": "Invoices",
+      "invoicesTab": "Billing",
       "isVirtual": "Virtual (no physical space)",
       "issueDate": "Issue Date",
       "lastCheckin": "Last Check-in",
@@ -410,6 +397,22 @@
       "officeSpaces": "Office Spaces",
       "openPdf": "Open PDF",
       "openStartup": "Open Startup",
+      "opsHub": {
+        "rooms": "rooms",
+        "pendingInvoices": "Pending Invoices",
+        "invoicesAwait": "awaiting payment",
+        "expiringContracts": "Expiring Contracts",
+        "next30Days": "next 30 days",
+        "availableRooms": "Available Rooms",
+        "inWaitlist": "in waitlist",
+        "floorMaps": "Floor Maps",
+        "noFloorMaps": "No floor maps uploaded yet",
+        "financialHealth": "Financial Health",
+        "recentInvoices": "Recent & Pending Invoices",
+        "allPaid": "All invoices paid",
+        "contractsAttention": "Contracts Requiring Attention",
+        "allContractsGood": "All contracts in good standing"
+      },
       "other": "Other",
       "overdueInvoices": "Overdue",
       "overview": "Overview",
@@ -520,6 +523,7 @@
       },
       "spaceVacated": "Space vacated successfully",
       "spaces": "Spaces",
+      "spacesAndInfra": "Spaces & Infrastructure",
       "squareMeters": "Square Meters",
       "stage": "Stage",
       "stageUpdated": "Stage updated",
@@ -562,10 +566,7 @@
       "waitlistSuggestions": "Waitlist Suggestions",
       "workspaceBlocked": "Workspace blocked",
       "workspaceUnblocked": "Workspace unblocked",
-      "workspacesWithoutContracts": "Workspaces Without Contracts",
-      "discounts": "Discounts",
-      "contractsAndLifecycle": "Contracts",
-      "spacesAndInfra": "Spaces & Infrastructure"
+      "workspacesWithoutContracts": "Workspaces Without Contracts"
     },
     "backofficeExtended": {
       "addSpace": "Add Space",
@@ -3473,7 +3474,7 @@
     "availability": {
       "available": "Available",
       "limited": "Limited",
-      "full": "Fully booked"
+      "full": "Full"
     },
     "actionsPending": "ações",
     "kpiMissing": "KPIs por atualizar",
@@ -3492,12 +3493,7 @@
     "quickNotePlaceholder": "Write your note about this startup...",
     "noteAdded": "Note added successfully",
     "feedbackNeeded": "How did the session go?",
-    "giveFeedback": "Give Feedback",
-    "availability": {
-      "available": "Available",
-      "limited": "Limited",
-      "full": "Full"
-    }
+    "giveFeedback": "Give Feedback"
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Issues or blockers identified...",
