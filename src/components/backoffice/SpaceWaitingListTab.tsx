@@ -297,7 +297,7 @@ export function SpaceWaitingListTab() {
                 <div className="text-2xl font-bold">
                   {waitingList?.filter(r => r.status === 'fulfilled').length || 0}
                 </div>
-                <p className="text-sm text-muted-foreground">Fulfilled</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.statusFulfilled', 'Fulfilled')}</p>
               </div>
             </div>
           </CardContent>
