@@ -737,20 +737,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
   );
 }
 
-interface KpiCardProps {
-  workspaceKpi: WorkspaceKpi;
-  currentValue: KpiValue | undefined;
-  editedValue: { value: string; notes: string } | undefined;
-  chartData: { month: string; value: number | null; label: string }[];
-  canEdit: boolean;
-  isSaving: boolean;
-  isSaved: boolean;
-  onValueChange: (field: 'value' | 'notes', val: string) => void;
-  onSave: () => void;
-  onUnlock?: (kpiValueId: string) => void;
-}
-
-function KpiCard({
+// KpiCard extracted to ./kpis/KpiCard.tsx
   workspaceKpi,
   currentValue,
   editedValue,
