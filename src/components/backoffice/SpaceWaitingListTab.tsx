@@ -205,7 +205,7 @@ export function SpaceWaitingListTab() {
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(REQUEST_TYPE_CONFIG).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                          <SelectItem key={key} value={key}>{t(config.labelKey)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
