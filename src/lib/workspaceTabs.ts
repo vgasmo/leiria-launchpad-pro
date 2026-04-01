@@ -11,7 +11,7 @@ export interface WorkspaceTab {
   /** Show in primary tab bar (max 5) vs overflow "More" menu */
   primary: boolean;
   /** Permission gate: which roles can see this tab */
-  visibleTo: ('all' | 'founder' | 'admin' | 'consultor' | 'mentor')[];
+  visibleTo: ('all' | 'founder' | 'admin' | 'consultor' | 'mentor' | 'backoffice')[];
   /** If true, requires startup data to render */
   requiresStartup?: boolean;
   /** Minimum stage required to show this tab (progressive disclosure) */
