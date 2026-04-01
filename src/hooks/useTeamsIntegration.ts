@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { toast } from 'sonner';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export interface TeamsIntegrationSettings {
   id: string;
   workspace_id: string | null;
@@ -163,10 +166,10 @@ export function useTestTeamsWebhook() {
       return data;
     },
     onSuccess: () => {
-      toast.success('Test message queued/sent to Teams.');
+      toast.success(t('integrations.testMessageQueuedsentToTeams'));
     },
     onError: (error: Error) => {
-      toast.error(`Test failed: ${error.message}`);
+      toast.error(t('integrations.testFailed', { message: error.message }));
     },
   });
 }

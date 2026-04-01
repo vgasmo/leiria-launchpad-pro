@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 export type ActivityType = 'note' | 'email' | 'call' | 'task' | 'meeting' | 'system';
 export type VisibilityType = 'staff' | 'shared';
 
@@ -144,7 +147,7 @@ export function useGenerateRecap() {
     },
     onSuccess: (_, params) => {
       queryClient.invalidateQueries({ queryKey: ['relationship-recap', params.workspaceId, params.funnelItemId] });
-      toast.success('Resumo gerado');
+      toast.success(t('common.resumoGerado'));
     },
     onError: (e: Error) => toast.error(e.message),
   });

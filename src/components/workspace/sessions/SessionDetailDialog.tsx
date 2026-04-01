@@ -94,7 +94,7 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
       .map(m => m.profile!.email) || [];
 
     if (recipientEmails.length === 0) {
-      toast.error('No workspace members with email addresses');
+      toast.error(t('sessions.noWorkspaceMembersWithEmail'));
       return;
     }
 
@@ -133,13 +133,13 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
 
       if (error) {
         logger.error('Failed to resend invites', {}, error);
-        toast.error('Failed to resend invites');
+        toast.error(t('sessions.failedToResendInvites'));
       } else {
-        toast.success(`Sent ${recipientEmails.length} invite(s)`);
+        toast.success(t('sessions.sent', { length: recipientEmails.length }));
       }
     } catch (error) {
       logger.error('Resend error', {}, error);
-      toast.error('Failed to resend invites');
+      toast.error(t('sessions.failedToResendInvites'));
     } finally {
       setIsResending(false);
     }
@@ -152,9 +152,9 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
         notes: notes.trim() || null,
         decisions: decisions.trim() || null,
       });
-      toast.success('Session updated');
+      toast.success(t('sessions.sessionUpdated'));
     } catch (error) {
-      toast.error('Failed to update session');
+      toast.error(t('sessions.failedToUpdateSession'));
     }
   };
 

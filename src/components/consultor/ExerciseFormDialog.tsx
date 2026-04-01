@@ -124,7 +124,7 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise }: ExerciseFor
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('consultor.titleIsRequired'));
       return;
     }
 
@@ -148,14 +148,14 @@ export function ExerciseFormDialog({ open, onOpenChange, exercise }: ExerciseFor
     try {
       if (exercise) {
         await updateMutation.mutateAsync({ id: exercise.id, ...data });
-        toast.success('Exercise updated');
+        toast.success(t('consultor.exerciseUpdated'));
       } else {
         await createMutation.mutateAsync(data);
-        toast.success('Exercise created');
+        toast.success(t('consultor.exerciseCreated'));
       }
       onOpenChange(false);
     } catch (error) {
-      toast.error('Failed to save exercise');
+      toast.error(t('consultor.failedToSaveExercise'));
     }
   };
 

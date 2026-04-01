@@ -77,11 +77,11 @@ export function WorkspaceBulkActionsBar({
         .in('id', Array.from(selectedIds));
 
       if (error) throw error;
-      toast.success(`Priority set to ${priority} for ${selectedCount} workspaces`);
+      toast.success(t('staff.prioritySetToPriorityFor', { selectedCount: selectedCount }));
       onDeselectAll();
       onActionComplete?.();
     } catch (error) {
-      toast.error('Failed to update priority');
+      toast.error(t('staff.failedToUpdatePriority'));
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +99,7 @@ export function WorkspaceBulkActionsBar({
       onDeselectAll();
       onActionComplete?.();
     } catch (error) {
-      toast.error('Failed to request check-ins');
+      toast.error(t('staff.failedToRequestCheckins'));
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +108,7 @@ export function WorkspaceBulkActionsBar({
   // Bulk create staff task
   const handleCreateBulkTask = async () => {
     if (!taskTitle.trim()) {
-      toast.error('Task title is required');
+      toast.error(t('staff.taskTitleIsRequired'));
       return;
     }
 
@@ -133,14 +133,14 @@ export function WorkspaceBulkActionsBar({
 
       if (error) throw error;
       
-      toast.success(`Created ${selectedCount} staff tasks`);
+      toast.success(t('staff.created', { selectedCount: selectedCount }));
       setShowTaskDialog(false);
       setTaskTitle('');
       setTaskDescription('');
       onDeselectAll();
       onActionComplete?.();
     } catch (error) {
-      toast.error('Failed to create tasks');
+      toast.error(t('staff.failedToCreateTasks'));
     } finally {
       setIsLoading(false);
     }

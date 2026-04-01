@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 type StartupStage = Database['public']['Enums']['startup_stage'];
 
 export interface ProgramModeSettings {
@@ -240,7 +243,7 @@ export function useDiscardProgramDraft() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['program-setup-drafts'] });
-      toast.success('Draft discarded');
+      toast.success(t('programs.draftDiscarded'));
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -265,7 +268,7 @@ export function usePublishProgramDraft() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['program-setup-drafts'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
-      toast.success('Program published successfully');
+      toast.success(t('programs.programPublishedSuccessfully'));
     },
     onError: (error: Error) => {
       toast.error(error.message);

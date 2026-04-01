@@ -96,11 +96,11 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
         toStage: nextStage,
         evidence: evidence.trim() || undefined,
       });
-      toast.success('Stage gate review requested');
+      toast.success(t('workspace.stageGateReviewRequested'));
       setShowRequestDialog(false);
       setEvidence('');
     } catch (error) {
-      toast.error('Failed to request review');
+      toast.error(t('workspace.failedToRequestReview'));
     } finally {
       setIsSubmitting(false);
     }
@@ -117,13 +117,13 @@ export function GovernanceTab({ workspaceId, programId, currentStage, canWrite }
         status: decision,
         conditions: decision === 'conditional' ? conditions.trim() : undefined,
       });
-      toast.success(`Review ${decision}`);
+      toast.success(t('workspace.review', { decision: decision }));
       setShowApproveDialog(false);
       setSelectedReview(null);
       setDecision('approved');
       setConditions('');
     } catch (error) {
-      toast.error('Failed to update review');
+      toast.error(t('workspace.failedToUpdateReview'));
     } finally {
       setIsSubmitting(false);
     }

@@ -3,6 +3,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import {
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
   MasterDataset,
   MasterOrganization,
   ImportConfig,
@@ -100,7 +103,7 @@ export function useMasterDatasetImport() {
     },
     onSuccess: (result) => {
       setDryRunResult(result);
-      toast.success(`Dry run complete: ${result.summary.would_insert} to insert, ${result.summary.would_update} to update`);
+      toast.success(t('common.dryRunCompleteResultsummarywould_insertTo', { would_update: result.summary.would_update }));
     },
     onError: (e: Error) => {
       toast.error(e.message);
@@ -193,7 +196,7 @@ export function useMasterDatasetImport() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
-      toast.success(`Import complete: ${result.inserted} inserted, ${result.updated} updated`);
+      toast.success(t('common.importCompleteResultinsertedInserted', { updated: result.updated }));
     },
     onError: (e: Error) => {
       toast.error(e.message);

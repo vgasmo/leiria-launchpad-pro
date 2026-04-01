@@ -178,10 +178,10 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
       if (response.ok) {
         window.open(url, '_blank');
       } else {
-        toast.error('Template not available yet. Ask an admin to upload it in Admin > Templates.');
+        toast.error(t('workspace.templateNotAvailableYetAsk'));
       }
     } catch {
-      toast.error('Template not available yet. Ask an admin to upload it in Admin > Templates.');
+      toast.error(t('workspace.templateNotAvailableYetAsk'));
     }
   };
 
@@ -194,7 +194,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
     const isValidExtension = /\.(xlsx|xlsm|xls|csv)$/i.test(fileName);
     
     if (!isValidExtension) {
-      toast.error('Please upload an Excel (.xlsx, .xlsm, .xls) or CSV file');
+      toast.error(t('workspace.pleaseUploadAnExcelXlsx'));
       return;
     }
 
@@ -246,7 +246,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
   const handleCreateAllInsightActions = async () => {
     const actionsToCreate = insights.filter(i => i.suggested_action);
     if (actionsToCreate.length === 0) {
-      toast.info('No actionable insights');
+      toast.info(t('workspace.noActionableInsights'));
       return;
     }
     await createActionsFromInsights.mutateAsync(actionsToCreate);
@@ -263,7 +263,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
       const url = await getDocumentUrl(activeVersion.document.file_path);
       window.open(url, '_blank');
     } catch {
-      toast.error('Failed to download');
+      toast.error(t('workspace.failedToDownload'));
     }
   };
 
@@ -279,7 +279,7 @@ export function FinancialModelPanel({ workspaceId, canWrite }: FinancialModelPan
   const copyInvestorNarrative = () => {
     if (!aiReview?.investor_narrative) return;
     navigator.clipboard.writeText(aiReview.investor_narrative);
-    toast.success('Copied to clipboard');
+    toast.success(t('workspace.copiedToClipboard'));
   };
 
   if (isLoading) {

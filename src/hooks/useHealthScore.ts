@@ -4,6 +4,9 @@ import { startOfMonth, subMonths, format, isPast, isToday, parseISO } from 'date
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 type HealthScore = Database['public']['Enums']['health_score'];
 
 export interface HealthExplanationFactor {
@@ -118,7 +121,7 @@ export function useRecomputeHealthScores() {
       queryClient.invalidateQueries({ queryKey: ['workspace-health'] });
       queryClient.invalidateQueries({ queryKey: ['health-distribution'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-      toast.success('Health scores recalculados');
+      toast.success(t('health.healthScoresRecalculados'));
     },
     onError: (error: Error) => toast.error(error.message),
   });

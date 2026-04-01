@@ -60,7 +60,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && !hasWebhook) {
-      toast.error('Please configure a webhook URL first');
+      toast.error(t('integrations.pleaseConfigureAWebhookUrl'));
       return;
     }
     try {
@@ -76,7 +76,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
 
   const handleSaveWebhook = async () => {
     if (!webhookUrl) {
-      toast.error('Please enter a webhook URL');
+      toast.error(t('integrations.pleaseEnterAWebhookUrl'));
       return;
     }
     // Basic validation for Teams webhook URL patterns (Office 365, Power Automate, Azure Logic Apps)
@@ -87,12 +87,12 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
       'flow.microsoft.com'
     ];
     if (!validPatterns.some(pattern => webhookUrl.includes(pattern))) {
-      toast.error('Please enter a valid Microsoft Teams or Power Automate webhook URL');
+      toast.error(t('integrations.pleaseEnterAValidMicrosoft'));
       return;
     }
     try {
       await updateSettings.mutateAsync({ webhook_url: webhookUrl });
-      toast.success('Webhook URL saved');
+      toast.success(t('integrations.webhookUrlSaved'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to save webhook');
     }
@@ -100,7 +100,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
 
   const handleTestWebhook = async () => {
     if (!currentWebhookUrl) {
-      toast.error('Please save a webhook URL first');
+      toast.error(t('integrations.pleaseSaveAWebhookUrl'));
       return;
     }
     testWebhook.mutate();

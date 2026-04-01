@@ -1,6 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { checkRateLimit, getRemainingRequests } from '@/hooks/useRateLimiter';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
 interface UseAICooldownOptions {
   /** Cooldown in milliseconds after a successful invocation (default: 60000 = 60s) */
   cooldownMs?: number;
@@ -59,13 +62,13 @@ export function useAICooldown({
       if (isCoolingDown) {
         // Import dynamically to avoid hook rules - toast is not a hook
         const { toast } = await import('sonner');
-        toast.info(`Please wait ${remainingSeconds}s before trying again.`);
+        toast.info(t('common.pleaseWait', { remainingSeconds: remainingSeconds }));
         return false;
       }
 
       if (!checkRateLimit(rateLimitKey, maxRequests, windowMs)) {
         const { toast } = await import('sonner');
-        toast.error('Rate limit reached. Please wait a few minutes.');
+        toast.error(t('common.rateLimitReachedPleaseWait'));
         return false;
       }
 

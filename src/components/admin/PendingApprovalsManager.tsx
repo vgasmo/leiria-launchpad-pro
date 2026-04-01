@@ -210,7 +210,7 @@ function useApproveWorkspace() {
       queryClient.invalidateQueries({ queryKey: ['pending-workspaces'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
     },
-    onError: (e) => toast.error(`Failed to approve: ${e.message}`),
+    onError: (e) => toast.error(t('admin.failedToApprove', { message: e.message })),
   });
 }
 
@@ -227,7 +227,7 @@ function useRejectWorkspace() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-workspaces'] });
     },
-    onError: (e) => toast.error(`Failed to reject: ${e.message}`),
+    onError: (e) => toast.error(t('admin.failedToReject', { message: e.message })),
   });
 }
 
@@ -270,9 +270,9 @@ export function PendingApprovalsManager() {
       .update({ account_status: 'approved' })
       .eq('id', userId);
     if (error) {
-      toast.error('Erro ao aprovar conta');
+      toast.error(t('admin.erroAoAprovarConta'));
     } else {
-      toast.success('Conta aprovada com sucesso');
+      toast.success(t('admin.contaAprovadaComSucesso'));
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
     }
   };
@@ -283,9 +283,9 @@ export function PendingApprovalsManager() {
       .update({ account_status: 'suspended' })
       .eq('id', userId);
     if (error) {
-      toast.error('Erro ao suspender conta');
+      toast.error(t('admin.erroAoSuspenderConta'));
     } else {
-      toast.success('Conta suspensa');
+      toast.success(t('admin.contaSuspensa'));
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
     }
   };
@@ -307,13 +307,13 @@ export function PendingApprovalsManager() {
         .update({ account_status: 'approved' })
         .eq('id', assignClaimTarget.user_id);
 
-      toast.success('Claim aprovado e founder associado ao workspace');
+      toast.success(t('admin.claimAprovadoEFounderAssociado'));
       queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       resetClaimDialog();
     } catch (e: any) {
-      toast.error(`Erro ao aprovar claim: ${e.message}`);
+      toast.error(t('admin.erroAoAprovarClaim', { message: e.message }));
     }
   };
 
@@ -332,13 +332,13 @@ export function PendingApprovalsManager() {
 
       if (error) throw error;
 
-      toast.success('Workspace criado e founder associado com sucesso!');
+      toast.success(t('admin.workspaceCriadoEFounderAssociado'));
       queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
       queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       resetClaimDialog();
     } catch (e: any) {
-      toast.error(`Erro ao criar workspace: ${e.message}`);
+      toast.error(t('admin.erroAoCriarWorkspace', { message: e.message }));
     } finally {
       setIsCreatingWorkspace(false);
     }
@@ -361,10 +361,10 @@ export function PendingApprovalsManager() {
         p_reason: 'Rejeitado pelo staff',
       });
       if (error) throw error;
-      toast.success('Claim rejeitado');
+      toast.success(t('admin.claimRejeitado'));
       queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
     } catch (e: any) {
-      toast.error(`Erro: ${e.message}`);
+      toast.error(t('admin.erro', { message: e.message }));
     }
   };
 

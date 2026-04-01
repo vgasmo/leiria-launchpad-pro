@@ -51,17 +51,17 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
 
   const handleSaveCredentials = async () => {
     if (!tenantId || !clientId) {
-      toast.error('Tenant ID and Client ID are required');
+      toast.error(t('settings.tenantIdAndClientId'));
       return;
     }
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(tenantId)) {
-      toast.error('Invalid Tenant ID format (should be a GUID)');
+      toast.error(t('settings.invalidTenantIdFormatShould'));
       return;
     }
     if (!uuidRegex.test(clientId)) {
-      toast.error('Invalid Client ID format (should be a GUID)');
+      toast.error(t('settings.invalidClientIdFormatShould'));
       return;
     }
 
@@ -72,7 +72,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
         graph_client_id: clientId,
         sync_mode: 'graph',
       });
-      toast.success('Azure AD identifiers saved');
+      toast.success(t('settings.azureAdIdentifiersSaved'));
     } catch (error: any) {
       toast.error(error.message || 'Failed to save identifiers');
     } finally {
@@ -82,7 +82,7 @@ export function GraphApiCalendarCard({ workspaceId, canEdit = true }: GraphApiCa
 
   const handleToggle = async (enabled: boolean) => {
     if (enabled && !isConfigured) {
-      toast.error('Please configure Azure AD identifiers first');
+      toast.error(t('settings.pleaseConfigureAzureAdIdentifiers'));
       return;
     }
     try {

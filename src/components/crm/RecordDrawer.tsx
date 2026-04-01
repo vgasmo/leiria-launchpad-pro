@@ -666,7 +666,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                 });
                 await navigator.clipboard.writeText(result.publicUrl);
                 if (result.emailSent) {
-                  toast.success('Pedido de contratação enviado por email! Link também copiado.');
+                  toast.success(t('crm.pedidoDeContrataçãoEnviadoPor'));
                 } else {
                   toast.warning('Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.', {
                     duration: 8000,
@@ -685,9 +685,9 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                             },
                           });
                           if (error) throw error;
-                          toast.success('Email reenviado com sucesso!');
+                          toast.success(t('crm.emailReenviadoComSucesso'));
                         } catch {
-                          toast.error('Falha ao reenviar. Use o link copiado como alternativa.');
+                          toast.error(t('crm.falhaAoReenviarUseO'));
                         }
                       },
                     },
@@ -729,7 +729,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
                 onClick={async () => {
                   const url = `${window.location.origin}/contract-intake/${intake.intake_token}`;
                   await navigator.clipboard.writeText(url);
-                  toast.success('Link copiado!');
+                  toast.success(t('crm.linkCopiado'));
                 }}
               >
                 <Copy className="h-3 w-3" />

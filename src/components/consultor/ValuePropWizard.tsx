@@ -124,15 +124,15 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
   const handleSave = async () => {
     if (!outputs) return;
     if (!workspaceId) {
-      toast.info('Practice mode - copy the outputs to use them. Open from a workspace to save.');
+      toast.info(t('consultor.practiceModeCopyTheOutputs'));
       return;
     }
     try {
       await createMutation.mutateAsync({ fields, outputs });
-      toast.success('Value proposition saved!');
+      toast.success(t('consultor.valuePropositionSaved'));
       onComplete?.();
     } catch (error) {
-      toast.error('Failed to save');
+      toast.error(t('consultor.failedToSave'));
     }
   };
 
@@ -140,7 +140,7 @@ export function ValuePropWizard({ workspaceId, onComplete }: ValuePropWizardProp
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+    toast.success(t('consultor.copiedToClipboard'));
   };
 
   if (showResults && outputs) {

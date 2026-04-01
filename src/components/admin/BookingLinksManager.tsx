@@ -126,7 +126,7 @@ export function BookingLinksManager() {
       setSelectedProgram('');
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create link: ${error.message}`);
+      toast.error(t('admin.failedToCreateLink', { message: error.message }));
     },
   });
 
@@ -142,10 +142,10 @@ export function BookingLinksManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['public-booking-links'] });
-      toast.success('Booking link deactivated');
+      toast.success(t('admin.bookingLinkDeactivated'));
     },
     onError: (error: Error) => {
-      toast.error(`Failed to deactivate: ${error.message}`);
+      toast.error(t('admin.failedToDeactivate', { message: error.message }));
     },
   });
 

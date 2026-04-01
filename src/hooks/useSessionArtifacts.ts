@@ -39,7 +39,7 @@ export function useGenerateSessionArtifacts() {
     onSuccess: (data, sessionId) => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] });
       queryClient.invalidateQueries({ queryKey: ['action-items'] });
-      toast.success(`Generated summary and ${data.actions_created.length} action items`);
+      toast.success(t('sessions.generatedSummaryAnd', { length: data.actions_created.length }));
     },
     onError: (error: Error) => {
       toast.error(i18n.t('errors.aiGenerateFailed'));
@@ -90,7 +90,7 @@ export function useAddTranscript() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['session-transcripts', variables.sessionId] });
-      toast.success('Transcript added');
+      toast.success(t('sessions.transcriptAdded'));
     },
     onError: (error: Error) => {
       toast.error(i18n.t('errors.aiTranscriptFailed'));

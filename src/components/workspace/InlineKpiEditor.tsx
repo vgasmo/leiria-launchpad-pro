@@ -11,6 +11,10 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
+import i18n from '@/i18n';
+const t = i18n.t.bind(i18n);
+
+
 interface KpiEntry {
   id: string;
   kpi_definition_id: string;
@@ -88,7 +92,7 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
       setValues(initialValues);
     } catch (error) {
       logger.error('Error loading KPIs', {}, error);
-      toast.error('Erro ao carregar KPIs');
+      toast.error(t('workspace.erroAoCarregarKpis'));
     } finally {
       setLoading(false);
     }
@@ -99,7 +103,7 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
     const value = valueStr ? parseFloat(valueStr) : null;
 
     if (valueStr && isNaN(value as number)) {
-      toast.error('Valor inválido');
+      toast.error(t('workspace.valorInválido'));
       return;
     }
 
@@ -122,12 +126,12 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
 
       if (error) throw error;
 
-      toast.success('KPI atualizado');
+      toast.success(t('workspace.kpiAtualizado'));
       queryClient.invalidateQueries({ queryKey: ['workspace-kpis', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['health-score', workspaceId] });
     } catch (error) {
       logger.error('Error saving KPI', {}, error);
-      toast.error('Erro ao guardar KPI');
+      toast.error(t('workspace.erroAoGuardarKpi'));
     } finally {
       setSaving(prev => ({ ...prev, [kpiDefId]: false }));
     }
