@@ -366,7 +366,7 @@ export function SpaceWaitingListTab() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {item.preferred_space?.name || 'Any'}
+                        {item.preferred_space?.name || t('waitingList.any', 'Any')}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
