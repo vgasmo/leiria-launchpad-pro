@@ -128,7 +128,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
 
         {/* Sync Mode Selection */}
         <div className="space-y-3">
-          <Label>Sync method</Label>
+          <Label>{t('settings.syncMethod', 'Método de sincronização')}</Label>
           <RadioGroup 
             value={syncMode} 
             onValueChange={handleModeChange}
