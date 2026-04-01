@@ -2,10 +2,8 @@ import { useState, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
-import {
 import i18n from '@/i18n';
-const t = i18n.t.bind(i18n);
-
+import {
   MasterDataset,
   MasterOrganization,
   ImportConfig,
@@ -14,6 +12,8 @@ const t = i18n.t.bind(i18n);
   DatasetBuildOptions,
   formatAttributesAsNotes,
 } from '@/lib/masterDataset';
+
+const t = i18n.t.bind(i18n);
 
 export interface FileParseResult {
   fileName: string;
