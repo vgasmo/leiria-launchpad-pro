@@ -189,7 +189,7 @@ export function MentorAvailabilitySettings() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <span className="text-muted-foreground">to</span>
+                  <span className="text-muted-foreground">{t('mentor.to', 'a')}</span>
                   <div className="w-28">
                     <Label className="sr-only">End Time</Label>
                     <Select
