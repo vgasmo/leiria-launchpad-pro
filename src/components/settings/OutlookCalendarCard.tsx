@@ -113,7 +113,7 @@ export function OutlookCalendarCard({ workspaceId, canEdit = true }: OutlookCale
           )}
         </CardTitle>
         <CardDescription>
-          Automatically create Outlook calendar events with Teams meeting links for sessions
+          {t('settings.outlookDesc', 'Cria automaticamente eventos Outlook com links Teams para sessões')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
