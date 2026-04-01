@@ -239,7 +239,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           <div className="space-y-3 pt-4 border-t">
             <Label>{t('settings.notificationEvents')}</Label>
             <div className="space-y-2">
-              {EVENT_OPTIONS.map(({ key, icon: Icon, label, description }) => (
+              {EVENT_OPTIONS_KEYS.map(({ key, icon: Icon, labelKey, descKey }) => (
                 <div key={key} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50">
                   <Checkbox
                     id={key}
@@ -250,9 +250,9 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
                   <div className="flex-1 grid gap-0.5">
                     <label htmlFor={key} className="text-sm font-medium flex items-center gap-2 cursor-pointer">
                       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      {label}
+                      {t(labelKey)}
                     </label>
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    <p className="text-xs text-muted-foreground">{t(descKey)}</p>
                   </div>
                 </div>
               ))}
