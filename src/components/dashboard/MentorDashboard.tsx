@@ -1,4 +1,5 @@
 import { memo, useMemo, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -37,6 +38,7 @@ import { MentorSessionPrepEnhanced } from '@/components/mentor/MentorSessionPrep
 import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
 import { useMyAvailability } from '@/hooks/useMentorAvailability';
 import { StickyNote } from 'lucide-react';
+import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -175,13 +177,19 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
       </div>
 
       {/* P0 HERO: Enhanced Session Prep */}
-      <MentorSessionPrepEnhanced workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorSessionPrep">
+        <MentorSessionPrepEnhanced workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* P0 HERO: Next Session Prep (fallback) */}
-      <MentorNextSessionPrep workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorNextSessionPrep">
+        <MentorNextSessionPrep workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* Open Loops — what needs attention */}
-      <MentorOpenLoops workspaces={workspaces} />
+      <WidgetErrorBoundary name="MentorOpenLoops">
+        <MentorOpenLoops workspaces={workspaces} />
+      </WidgetErrorBoundary>
 
       {/* Post-session feedback CTA */}
       {recentUnloggedSessions.length > 0 && (
@@ -396,10 +404,14 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
         </div>
 
         <div className="space-y-4">
-          <CalendarWidget />
+          <WidgetErrorBoundary name="CalendarWidget">
+            <CalendarWidget />
+          </WidgetErrorBoundary>
           
           {/* Your Impact - Enhanced */}
-          <MentorImpactPanel workspaces={workspaces} />
+          <WidgetErrorBoundary name="MentorImpactPanel">
+            <MentorImpactPanel workspaces={workspaces} />
+          </WidgetErrorBoundary>
         </div>
       </div>
 
