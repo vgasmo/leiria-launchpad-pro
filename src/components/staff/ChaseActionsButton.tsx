@@ -5,8 +5,8 @@ import { Bell, Loader2 } from 'lucide-react';
 import { useLogActivity } from '@/hooks/useActivityLog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
 import { logger } from '@/lib/logger';
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
