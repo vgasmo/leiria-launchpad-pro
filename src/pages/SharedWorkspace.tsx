@@ -1,5 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
 import { format } from 'date-fns';
 import { 
   TrendingUp, 
