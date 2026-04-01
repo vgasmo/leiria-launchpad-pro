@@ -664,11 +664,33 @@ export function CalendarTab({ workspaceId, canWrite, startupName }: CalendarTabP
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {renderInviteRecipients(
-              quickInviteEmails,
-              setQuickInviteEmails,
-              'quickEmails'
-            )}
+            <div className="grid gap-2">
+              <Label htmlFor="quickEmails">{t('sessions.recipientEmails', { defaultValue: 'Emails dos destinatários' })}</Label>
+              {memberEmails.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const allEmails = memberEmails.map(m => m.email).join(', ');
+                      setQuickInviteEmails(quickInviteEmails ? `${quickInviteEmails}, ${allEmails}` : allEmails);
+                    }}
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    {t('sessions.addAll', { defaultValue: 'Adicionar todos ({{count}})', count: memberEmails.length })}
+                  </Button>
+                </div>
+              )}
+              <Textarea
+                id="quickEmails"
+                value={quickInviteEmails}
+                onChange={(e) => setQuickInviteEmails(e.target.value)}
+                placeholder={t('sessions.enterEmails', { defaultValue: 'Introduza emails (separados por vírgulas ou linhas)' })}
+                rows={2}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setSendInviteSession(null); setQuickInviteEmails(''); }}>
