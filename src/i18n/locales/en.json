@@ -3493,6 +3493,19 @@
       "upcomingSessions": "Upcoming Sessions"
     },
     "mentors": "Mentors",
+    "mobile": {
+      "cockpit": "Cockpit",
+      "contracts": "Contracts",
+      "crm": "CRM",
+      "ecosystem": "Ecosystem",
+      "home": "Home",
+      "portfolio": "Portfolio",
+      "resources": "Resources",
+      "sessions": "Sessions",
+      "spaces": "Spaces",
+      "startup": "Startup",
+      "startups": "Startups"
+    },
     "myWorkspaces": "My Workspaces",
     "opsCompliance": "Operations & Compliance",
     "portfolio": "Portfolio",

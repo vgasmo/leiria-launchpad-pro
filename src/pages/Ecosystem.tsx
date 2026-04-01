@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EcosystemTable } from '@/components/ecosystem/EcosystemTable';
 import { EcosystemFilters, type EcosystemFiltersState } from '@/components/ecosystem/EcosystemFilters';
 import { CommunityFeed } from '@/components/ecosystem/CommunityFeed';
 import { useEcosystemItems } from '@/hooks/useEcosystemItems';
-import { AccessDenied } from '@/components/ui/AccessDenied';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe2, Users, Building2 } from 'lucide-react';
 
 export default function Ecosystem() {
   const { t } = useTranslation();
-  const { isAdmin, isConsultor, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [filters, setFilters] = useState<EcosystemFiltersState>({

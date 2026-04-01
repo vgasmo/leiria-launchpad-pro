@@ -23,11 +23,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
 
-const STEPS: { key: WizardStep; icon: typeof Building2; label: string }[] = [
-  { key: 'company_data', icon: Building2, label: 'Dados da Empresa' },
-  { key: 'review_contract', icon: FileText, label: 'Rever Contrato' },
-  { key: 'signing', icon: PenTool, label: 'Assinatura Digital' },
-];
+// Steps are defined inside the component to access t() - see getSteps()
 
 interface RepresentativeEntry {
   name: string;
