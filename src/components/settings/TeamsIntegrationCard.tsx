@@ -170,7 +170,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-xs p-0 h-auto">
               <ChevronDown className={`h-3 w-3 transition-transform ${showSetup ? 'rotate-180' : ''}`} />
-              How to get a webhook URL
+              {t('settings.howToGetWebhook')}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
