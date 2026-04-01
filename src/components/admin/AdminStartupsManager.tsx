@@ -336,7 +336,7 @@ export function AdminStartupsManager() {
           .eq('id', workspaceId);
       }
       
-      toast.success(`Updated ${workspaceIds.length} workspaces to ${bulkStage} stage`);
+      toast.success(t('admin.stageUpdateSuccess', { count: workspaceIds.length, stage: bulkStage, defaultValue: `${workspaceIds.length} workspaces atualizados para ${bulkStage}` }));
       setSelectedStartups(new Set());
       setBulkStage('');
       setIsBulkStageOpen(false);
