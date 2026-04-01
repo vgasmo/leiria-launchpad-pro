@@ -153,7 +153,7 @@ export function AiPulseCard({ workspaceId, healthScore, overdueCount = 0, classN
         }
       } catch (err: any) {
         if (err?.name !== 'AbortError') {
-          console.warn('AI Pulse unavailable, using fallback.');
+          logger.warn('ai_pulse_unavailable', { reason: 'fallback' });
         }
         setSuggestion(getStaticTip(healthScore, overdueCount, t));
         setIsFallback(true);

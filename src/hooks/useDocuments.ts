@@ -178,7 +178,7 @@ export function useDeleteDocument() {
           .remove([document.file_path]);
         
         if (storageError) {
-          console.warn('Failed to delete file from storage:', storageError);
+          logger.warn('storage_delete_failed', {}, storageError);
         }
       }
 

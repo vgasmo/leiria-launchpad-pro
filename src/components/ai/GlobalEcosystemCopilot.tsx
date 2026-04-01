@@ -212,7 +212,7 @@ export function GlobalEcosystemCopilot() {
         }
         return;
       }
-      console.warn('Copilot stream error:', err?.message);
+      logger.warn('copilot_stream_error', { message: err?.message });
       setMessages(prev => [
         ...prev,
         {

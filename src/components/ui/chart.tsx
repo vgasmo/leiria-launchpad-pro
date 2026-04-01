@@ -92,7 +92,7 @@ function isValidCssColor(color: string | undefined): boolean {
 function sanitizeCssColor(color: string | undefined): string | undefined {
   if (!color) return undefined;
   if (!isValidCssColor(color)) {
-    console.warn(`[chart] Invalid CSS color value blocked: ${color.slice(0, 50)}`);
+    logger.warn('chart_invalid_css_color', { color: color.slice(0, 50) });
     return undefined;
   }
   return color;
