@@ -765,13 +765,13 @@ export function PendingApprovalsManager() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={resetClaimDialog}>Cancelar</Button>
+                  <Button variant="outline" onClick={resetClaimDialog}>{t('common.cancel', 'Cancelar')}</Button>
                   <Button 
                     onClick={handleCreateWorkspaceForClaim} 
                     disabled={!newStartupName.trim() || !newProgramId || isCreatingWorkspace}
                   >
                     <Rocket className="h-4 w-4 mr-1" />
-                    {isCreatingWorkspace ? 'A criar...' : 'Criar Workspace'}
+                    {isCreatingWorkspace ? t('admin.creating', 'A criar...') : t('admin.createWorkspace', 'Criar Workspace')}
                   </Button>
                 </DialogFooter>
               </TabsContent>
