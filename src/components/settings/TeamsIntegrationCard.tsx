@@ -160,7 +160,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
               onClick={handleSaveWebhook} 
               disabled={!webhookUrl || updateSettings.isPending || !canEdit}
             >
-              Save
+              {t('settings.save')}
             </Button>
           </div>
         </div>
