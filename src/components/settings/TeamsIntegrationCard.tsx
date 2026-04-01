@@ -237,7 +237,7 @@ export function TeamsIntegrationCard({ workspaceId, programId, canEdit }: TeamsI
         {/* Event Toggles */}
         {isEnabled && (
           <div className="space-y-3 pt-4 border-t">
-            <Label>Notification events</Label>
+            <Label>{t('settings.notificationEvents')}</Label>
             <div className="space-y-2">
               {EVENT_OPTIONS.map(({ key, icon: Icon, label, description }) => (
                 <div key={key} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50">
