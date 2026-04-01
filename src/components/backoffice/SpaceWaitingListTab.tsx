@@ -310,7 +310,7 @@ export function SpaceWaitingListTab() {
                 <div className="text-2xl font-bold">
                   {waitingList?.filter(r => r.priority >= 80 && r.status === 'waiting').length || 0}
                 </div>
-                <p className="text-sm text-muted-foreground">High Priority</p>
+                <p className="text-sm text-muted-foreground">{t('waitingList.highPriority', 'High Priority')}</p>
               </div>
             </div>
           </CardContent>
