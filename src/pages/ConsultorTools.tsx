@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { FileText, Lightbulb, Sparkles, Shield, MessageSquare, Wrench, BarChart3 } from 'lucide-react';
@@ -17,18 +17,14 @@ const VALID_TABS = ['frameworks', 'coaching', 'exercises', 'materials', 'analyti
 
 export default function ConsultorTools() {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(
-    urlTab && VALID_TABS.includes(urlTab) ? urlTab : 'frameworks'
-  );
+  const activeTab = urlTab && VALID_TABS.includes(urlTab) ? urlTab : 'frameworks';
 
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab && VALID_TABS.includes(tab)) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
+  const handleTabChange = (tab: string) => {
+    setSearchParams({ tab }, { replace: false });
+  };
+
   const [showVPWizard, setShowVPWizard] = useState(false);
 
   return (
@@ -84,7 +80,7 @@ export default function ConsultorTools() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="frameworks" className="gap-2">
               <MessageSquare className="h-4 w-4" />

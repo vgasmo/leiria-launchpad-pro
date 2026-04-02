@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
@@ -342,12 +343,14 @@ export function AdminBackoffice() {
     return 'text-red-600';
   };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const setActiveSubTabAndUrl = (subtab: string) => {
     setActiveSubTab(subtab);
-    const params = new URLSearchParams(window.location.search);
-    params.set('tab', 'backoffice');
-    params.set('subtab', subtab);
-    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', 'backoffice');
+    next.set('subtab', subtab);
+    setSearchParams(next, { replace: false });
   };
 
   return (

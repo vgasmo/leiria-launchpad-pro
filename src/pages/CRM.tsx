@@ -102,7 +102,17 @@ export default function CRM() {
 
   const completeTask = useCompleteTask();
 
-  const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
+  const crmView = searchParams.get('view') || 'pipeline';
+
+  const handleViewChange = (view: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('view', view);
+    next.delete('open');
+    setSearchParams(next, { replace: false });
+  };
+
+  // Internal: open drawer without URL push (used by deep-link)
+  const openDrawerDirect = useCallback((item: CrmInboxItem) => {
     const funnelItem: FunnelItem = {
       id: item.id,
       stage: item.stage,
@@ -139,13 +149,29 @@ export default function CRM() {
     setDrawerOpen(true);
   }, []);
 
+  const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
+    openDrawerDirect(item);
+    // Push to URL so back button closes drawer
+    const next = new URLSearchParams(searchParams);
+    next.set('open', item.id);
+    setSearchParams(next, { replace: false });
+  }, [searchParams, setSearchParams, openDrawerDirect]);
+
   // Deep-link support: ?open=<funnel_item_id>
   useEffect(() => {
     const openId = searchParams.get('open');
-    if (!openId) return;
-    if (loadingInbox) return; // Wait for data to load
+    if (!openId) {
+      // Back button removed ?open → close drawer
+      if (drawerOpen) {
+        setDrawerOpen(false);
+        setSelectedItem(null);
+      }
+      return;
+    }
+    if (loadingInbox) return;
+    // Already showing this item
+    if (selectedItem?.id === openId && drawerOpen) return;
 
-    // Try to find item in loaded inbox groups
     const allItems = [
       ...(inbox?.overdue || []),
       ...(inbox?.today || []),
@@ -157,12 +183,8 @@ export default function CRM() {
     const foundItem = allItems.find(item => item.id === openId);
     
     if (foundItem) {
-      handleOpenDrawer(foundItem);
-      // Clear the param to prevent re-open
-      searchParams.delete('open');
-      setSearchParams(searchParams, { replace: true });
+      openDrawerDirect(foundItem);
     } else {
-      // Item not in loaded data - fetch directly
       const fetchAndOpen = async () => {
         try {
           const { data, error } = await supabase
@@ -174,16 +196,15 @@ export default function CRM() {
           if (error || !data) {
             logger.error('Failed to load funnel item', {}, error);
             toast.error(t('crm.itemNotFound'));
-            searchParams.delete('open');
-            setSearchParams(searchParams, { replace: true });
+            const next = new URLSearchParams(searchParams);
+            next.delete('open');
+            setSearchParams(next, { replace: true });
             return;
           }
           
-          // Handle owner which might be returned as array from FK join
           const ownerData = Array.isArray(data.owner) ? data.owner[0] : data.owner;
           const programData = Array.isArray(data.program) ? data.program[0] : data.program;
           
-          // Create minimal CrmInboxItem
           const crmItem: CrmInboxItem = {
             id: data.id,
             stage: data.stage as FunnelStage,
@@ -201,19 +222,19 @@ export default function CRM() {
             program: programData || null,
           };
           
-          handleOpenDrawer(crmItem);
-          searchParams.delete('open');
-          setSearchParams(searchParams, { replace: true });
+          openDrawerDirect(crmItem);
         } catch (err) {
           logger.error('Error fetching funnel item', {}, err);
           toast.error(t('crm.itemNotFound'));
-          searchParams.delete('open');
-          setSearchParams(searchParams, { replace: true });
+          const next = new URLSearchParams(searchParams);
+          next.delete('open');
+          setSearchParams(next, { replace: true });
         }
       };
       fetchAndOpen();
     }
-  }, [searchParams, setSearchParams, inbox, loadingInbox, handleOpenDrawer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, inbox, loadingInbox]);
 
   // Compute Focus Mode items - only urgent items needing attention
   const focusItems = useMemo(() => {
@@ -356,7 +377,7 @@ export default function CRM() {
             <CsvLeadImport />
           </div>
         </div>
-        <Tabs defaultValue="pipeline" className="space-y-4">
+        <Tabs value={crmView} onValueChange={handleViewChange} className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="pipeline" className="gap-2">
               <LayoutGrid className="h-4 w-4" />
@@ -558,7 +579,15 @@ export default function CRM() {
         <RecordDrawer
           item={selectedItem}
           open={drawerOpen}
-          onOpenChange={setDrawerOpen}
+          onOpenChange={(open) => {
+            setDrawerOpen(open);
+            if (!open) {
+              setSelectedItem(null);
+              const next = new URLSearchParams(searchParams);
+              next.delete('open');
+              setSearchParams(next, { replace: true });
+            }
+          }}
         />
       </div>
     </AppLayout>

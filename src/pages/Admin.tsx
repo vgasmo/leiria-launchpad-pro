@@ -81,7 +81,7 @@ export default function Admin() {
     setActiveTab(tab);
     const next = new URLSearchParams(searchParams);
     next.set('tab', tab);
-    setSearchParams(next, { replace: true });
+    setSearchParams(next, { replace: false });
   };
   
   const getTabIcon = (tab: string) => {

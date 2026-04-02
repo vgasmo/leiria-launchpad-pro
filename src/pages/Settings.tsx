@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, User, Lock, Mail, Save, Loader2, Phone, Upload, Linkedin, X, Briefcase, Bell, Zap, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +25,8 @@ import { logger } from '@/lib/logger';
 export default function Settings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [settingsParams, setSettingsParams] = useSearchParams();
+  const settingsTab = settingsParams.get('tab') || 'profile';
   const { user, profile, roles } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -237,7 +239,7 @@ export default function Settings() {
       </div>
 
       <div className="max-w-2xl">
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs value={settingsTab} onValueChange={(v) => setSettingsParams({ tab: v }, { replace: false })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" aria-hidden="true" />
