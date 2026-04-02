@@ -164,7 +164,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Program</Label>
+          <Label>{t('common.program', 'Programa')}</Label>
           <Select value={selectedProgram} onValueChange={setSelectedProgram}>
             <SelectTrigger>
               <SelectValue placeholder="Select program" />
