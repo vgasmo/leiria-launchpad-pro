@@ -104,7 +104,7 @@ export function HealthScorePanel({
         {/* Last Computation Results */}
         {lastComputation && (
           <div className="text-xs space-y-1 p-2 bg-muted/50 rounded-lg">
-            <div className="font-medium">Latest computation ({lastComputation.score}/100 points):</div>
+            <div className="font-medium">{t('health.latestComputation', { score: lastComputation.score, defaultValue: 'Última computação ({{score}}/100):' })}</div>
             <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
               {lastComputation.reasons.map((reason, idx) => (
                 <li key={idx}>{reason}</li>
