@@ -682,26 +682,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
     }
   };
 
-  const handleSendPandaDoc = async () => {
-    setSending(true);
-    try {
-      const result = await invokeWithAuth('pandadoc-send-document', {
-        body: {
-          contractId: contract.id,
-          signerEmail: (contract as any).legal_representative_email || '',
-          signerName: (contract as any).legal_representative_name || 'Founder',
-        },
-      });
-      if (result.error) throw result.error;
-      if (result.data?.error) throw new Error(result.data.error);
-      queryClient.invalidateQueries({ queryKey: ['contracts'] });
-      toast.success(t('contractDetail.sentViaPandaDoc', { defaultValue: 'Contrato enviado via PandaDoc' }));
-    } catch (err: any) {
-      toast.error(err?.message || 'Erro ao enviar via PandaDoc');
-    } finally {
-      setSending(false);
-    }
-  };
+  // Removed: handleSendPandaDoc (old API flow)
 
   const handleSendDocuSign = async () => {
     setSending(true);
