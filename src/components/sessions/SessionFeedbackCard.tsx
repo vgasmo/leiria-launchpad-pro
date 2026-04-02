@@ -105,7 +105,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
           ))}
           
           {!allFeedback?.length && (
-            <p className="text-sm text-muted-foreground">No feedback yet. Be the first to share your thoughts!</p>
+            <p className="text-sm text-muted-foreground">{t('sessions.noFeedback', 'Sem feedback ainda. Seja o primeiro!')}</p>
           )}
         </CardContent>
       </Card>
