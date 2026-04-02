@@ -376,7 +376,7 @@ export function useTransitionIntakeStatus() {
           entity_id: params.intakeId,
           action: 'intake_submitted_for_review',
           metadata: { status: params.newStatus },
-        }).catch(() => {});
+        }).then(() => {});
       }
     },
   });
