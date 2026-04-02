@@ -195,10 +195,10 @@ export default function SearchPage() {
             }))}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All workspaces" />
+               <SelectValue placeholder={t('search.allWorkspaces', 'Todos os workspaces')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All workspaces</SelectItem>
+               <SelectItem value="all">{t('search.allWorkspaces', 'Todos os workspaces')}</SelectItem>
               {workspaces?.map((ws) => (
                 <SelectItem key={ws.id} value={ws.id}>
                   {(ws.startup as any)?.name || 'Workspace'}
