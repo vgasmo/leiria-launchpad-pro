@@ -102,6 +102,15 @@ export default function CRM() {
 
   const completeTask = useCompleteTask();
 
+  const crmView = searchParams.get('view') || 'pipeline';
+
+  const handleViewChange = (view: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('view', view);
+    next.delete('open');
+    setSearchParams(next, { replace: false });
+  };
+
   const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
     const funnelItem: FunnelItem = {
       id: item.id,
@@ -137,7 +146,12 @@ export default function CRM() {
     };
     setSelectedItem(funnelItem);
     setDrawerOpen(true);
-  }, []);
+
+    // Push to URL so back button closes drawer
+    const next = new URLSearchParams(searchParams);
+    next.set('open', item.id);
+    setSearchParams(next, { replace: false });
+  }, [searchParams, setSearchParams]);
 
   // Deep-link support: ?open=<funnel_item_id>
   useEffect(() => {
