@@ -237,6 +237,54 @@ export default function PublicContractSigning() {
     setUploadedDocs(prev => ({ ...prev, [docKey]: null }));
   };
 
+  // Digital signature handler
+  const handleDigitalSign = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: {
+          action: 'digital_sign',
+          token,
+          signatureData: {
+            typed_name: typedSignature,
+            signer_email: formData.legal_representative_email,
+            signer_nif: formData.company_nif,
+            accepted_terms: true,
+            accepted_eidas: true,
+            signed_at: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+          }
+        }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isPt ? 'Contrato assinado com sucesso!' : 'Contract signed successfully!');
+      // Refresh to show completed state
+      window.location.reload();
+    } catch (e: any) {
+      toast.error(e.message || (isPt ? 'Erro ao assinar' : 'Signing failed'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Download PDF handler
+  const handleDownloadPdf = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'download_pdf', token }
+      });
+      if (error) throw error;
+      if (data?.documentBase64) {
+        const blob = new Blob([Uint8Array.from(atob(data.documentBase64), c => c.charCodeAt(0))], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+    } catch {
+      toast.error(isPt ? 'Erro ao descarregar PDF' : 'Failed to download PDF');
+    }
+  };
+
   // Save company data
   const saveCompanyData = useMutation({
     mutationFn: async () => {
