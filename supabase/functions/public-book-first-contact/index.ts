@@ -394,14 +394,6 @@ serve(async (req) => {
       funnelItemId = funnelItem.id;
     }
 
-    // Log event
-    await supabase.from("funnel_events").insert({
-      funnel_item_id: funnelItem.id,
-      event_type: "created",
-      to_stage: "first_contact_booked",
-      metadata: { source: "public_booking", slot },
-    });
-
     // Create calendar event via Graph API if configured
     let teamsLink: string | null = null;
     let calendarEventId: string | null = null;
@@ -424,7 +416,7 @@ serve(async (req) => {
             .update({
               notes: `${contact.message || ''}\n\n---\nTeams Link: ${teamsLink || 'N/A'}\nCalendar Event ID: ${calendarEventId || 'N/A'}`.trim(),
             })
-            .eq("id", funnelItem.id);
+            .eq("id", funnelItemId);
         }
       } catch (graphError) {
         console.error("Graph API error (non-fatal):", graphError);
@@ -435,7 +427,7 @@ serve(async (req) => {
 
     return corsJsonResponse({ 
       success: true,
-      funnelItemId: funnelItem.id,
+      funnelItemId,
       teamsLink,
       calendarEventId,
       message: teamsLink 
