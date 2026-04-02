@@ -233,7 +233,7 @@ function AddExerciseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Exercise</DialogTitle>
+          <DialogTitle>{t('sessions.addExercise', 'Adicionar Exercício')}</DialogTitle>
           <DialogDescription>
             Select an exercise to add to this session (max 3)
           </DialogDescription>
