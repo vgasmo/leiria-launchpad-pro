@@ -100,7 +100,7 @@ function ArtifactCard({ artifact }: { artifact: ValuePropArtifact }) {
           <p className="text-sm">{artifact.outputs_text.vp_statement}</p>
         </div>
         <div className="p-3 rounded-lg bg-muted">
-          <p className="text-sm font-medium mb-1">One-liner:</p>
+          <p className="text-sm font-medium mb-1">{t('valueProp.oneLiner', 'One-liner')}:</p>
           <p className="text-sm text-muted-foreground">{artifact.outputs_text.short_version}</p>
         </div>
         {artifact.outputs_text.bullet_points.length > 0 && (
