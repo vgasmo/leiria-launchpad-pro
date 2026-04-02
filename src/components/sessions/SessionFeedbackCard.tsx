@@ -113,7 +113,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rate Session: {sessionTitle}</DialogTitle>
+            <DialogTitle>{t('sessions.rateSession', { title: sessionTitle, defaultValue: 'Avaliar Sessão: {{title}}' })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
