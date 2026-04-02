@@ -20,7 +20,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
   Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft,
-  Shield, Loader2, AlertTriangle, Upload, X, Globe, FileUp
+  Shield, Loader2, AlertTriangle, Upload, X, Globe, FileUp, Mail
 } from 'lucide-react';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
