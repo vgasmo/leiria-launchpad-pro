@@ -42,6 +42,7 @@ import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMo
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import { PipelineForecastCard } from '@/components/crm/PipelineForecastCard';
 import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
+import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
@@ -350,7 +351,10 @@ export default function CRM() {
 
         <div className="flex items-center justify-between mb-2">
           <div />
-          <CsvLeadImport />
+          <div className="flex items-center gap-2">
+            <NewLeadDialog />
+            <CsvLeadImport />
+          </div>
         </div>
         <Tabs defaultValue="pipeline" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
