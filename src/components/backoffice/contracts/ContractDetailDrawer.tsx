@@ -682,9 +682,31 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
     }
   };
 
-  // Removed: handleSendPandaDoc (old API flow)
-
-  // Removed: handleSendDocuSign (old API flow)
+  // PDF download for PandaDoc manual flow
+  const handleDownloadPdf = async () => {
+    setSending(true);
+    try {
+      const result = await invokeWithAuth<{ documentBase64?: string; fileName?: string }>('generate-contract-pdf', { body: { contractId: contract.id } });
+      if (result.error) throw result.error;
+      if (result.data?.documentBase64) {
+        const byteChars = atob(result.data.documentBase64);
+        const byteArr = new Uint8Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+        const blob = new Blob([byteArr], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.data.fileName || 'contrato.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      toast.success(t('contractDetail.pdfGenerated'));
+    } catch {
+      toast.error(t('contractDetail.pdfGenerationFailed'));
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
