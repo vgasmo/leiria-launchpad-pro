@@ -75,7 +75,7 @@ export function HealthScorePanel({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">Health Score</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('health.title', 'Health Score')}</CardTitle>
           {canWrite && (
             <Button 
               variant="ghost" 
