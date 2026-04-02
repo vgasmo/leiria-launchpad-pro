@@ -5632,6 +5632,7 @@ export type Database = {
           provider_webhook_event_id: string | null
           regulation_accepted_at: string | null
           regulation_version: string | null
+          signature_proof_json: Json | null
           signature_provider: string | null
           signature_requested_at: string | null
           signature_status: string | null
@@ -5703,6 +5704,7 @@ export type Database = {
           provider_webhook_event_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
+          signature_proof_json?: Json | null
           signature_provider?: string | null
           signature_requested_at?: string | null
           signature_status?: string | null
@@ -5774,6 +5776,7 @@ export type Database = {
           provider_webhook_event_id?: string | null
           regulation_accepted_at?: string | null
           regulation_version?: string | null
+          signature_proof_json?: Json | null
           signature_provider?: string | null
           signature_requested_at?: string | null
           signature_status?: string | null
