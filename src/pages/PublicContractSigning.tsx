@@ -1022,6 +1022,7 @@ export default function PublicContractSigning() {
                     {isPt ? 'Pendente' : 'Pending'}
                   </Badge>
                 </div>
+              )}
             </CardContent>
           </Card>
         )}
