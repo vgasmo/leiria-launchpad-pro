@@ -99,7 +99,6 @@ export default function Admin() {
       templates: <FileText className="h-4 w-4" />,
       'support-materials': <BookOpen className="h-4 w-4" />,
       surveys: <ClipboardList className="h-4 w-4" />,
-      tags: <Tag className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
       funnel: <Filter className="h-4 w-4" />,
