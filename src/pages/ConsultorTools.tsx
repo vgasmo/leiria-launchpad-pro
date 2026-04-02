@@ -17,18 +17,14 @@ const VALID_TABS = ['frameworks', 'coaching', 'exercises', 'materials', 'analyti
 
 export default function ConsultorTools() {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(
-    urlTab && VALID_TABS.includes(urlTab) ? urlTab : 'frameworks'
-  );
+  const activeTab = urlTab && VALID_TABS.includes(urlTab) ? urlTab : 'frameworks';
 
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab && VALID_TABS.includes(tab)) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
+  const handleTabChange = (tab: string) => {
+    setSearchParams({ tab }, { replace: false });
+  };
+
   const [showVPWizard, setShowVPWizard] = useState(false);
 
   return (
