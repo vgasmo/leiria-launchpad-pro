@@ -160,10 +160,18 @@ export default function CRM() {
   // Deep-link support: ?open=<funnel_item_id>
   useEffect(() => {
     const openId = searchParams.get('open');
-    if (!openId) return;
-    if (loadingInbox) return; // Wait for data to load
+    if (!openId) {
+      // Back button removed ?open → close drawer
+      if (drawerOpen) {
+        setDrawerOpen(false);
+        setSelectedItem(null);
+      }
+      return;
+    }
+    if (loadingInbox) return;
+    // Already showing this item
+    if (selectedItem?.id === openId && drawerOpen) return;
 
-    // Try to find item in loaded inbox groups
     const allItems = [
       ...(inbox?.overdue || []),
       ...(inbox?.today || []),
@@ -175,12 +183,8 @@ export default function CRM() {
     const foundItem = allItems.find(item => item.id === openId);
     
     if (foundItem) {
-      handleOpenDrawer(foundItem);
-      // Clear the param to prevent re-open
-      searchParams.delete('open');
-      setSearchParams(searchParams, { replace: true });
+      openDrawerDirect(foundItem);
     } else {
-      // Item not in loaded data - fetch directly
       const fetchAndOpen = async () => {
         try {
           const { data, error } = await supabase
@@ -192,16 +196,15 @@ export default function CRM() {
           if (error || !data) {
             logger.error('Failed to load funnel item', {}, error);
             toast.error(t('crm.itemNotFound'));
-            searchParams.delete('open');
-            setSearchParams(searchParams, { replace: true });
+            const next = new URLSearchParams(searchParams);
+            next.delete('open');
+            setSearchParams(next, { replace: true });
             return;
           }
           
-          // Handle owner which might be returned as array from FK join
           const ownerData = Array.isArray(data.owner) ? data.owner[0] : data.owner;
           const programData = Array.isArray(data.program) ? data.program[0] : data.program;
           
-          // Create minimal CrmInboxItem
           const crmItem: CrmInboxItem = {
             id: data.id,
             stage: data.stage as FunnelStage,
@@ -219,19 +222,19 @@ export default function CRM() {
             program: programData || null,
           };
           
-          handleOpenDrawer(crmItem);
-          searchParams.delete('open');
-          setSearchParams(searchParams, { replace: true });
+          openDrawerDirect(crmItem);
         } catch (err) {
           logger.error('Error fetching funnel item', {}, err);
           toast.error(t('crm.itemNotFound'));
-          searchParams.delete('open');
-          setSearchParams(searchParams, { replace: true });
+          const next = new URLSearchParams(searchParams);
+          next.delete('open');
+          setSearchParams(next, { replace: true });
         }
       };
       fetchAndOpen();
     }
-  }, [searchParams, setSearchParams, inbox, loadingInbox, handleOpenDrawer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, inbox, loadingInbox]);
 
   // Compute Focus Mode items - only urgent items needing attention
   const focusItems = useMemo(() => {
