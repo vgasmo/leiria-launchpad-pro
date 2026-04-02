@@ -1856,7 +1856,9 @@
     "expired": "Expired",
     "inactive": "Inactive",
     "errors": "Errors",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "link": "Link",
+    "emailCopied": "Email copied"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2630,7 +2632,8 @@
     "intakeCreatedNoEmail": "Intake created but the email was not sent. The link was copied — you can send it manually.",
     "resend": "Resend",
     "leadContracted": "{{name}} contracted! Create workspace?",
-    "createWorkspace": "Create Workspace"
+    "createWorkspace": "Create Workspace",
+    "clientFillingData": "Client filling data"
   },
   "dashboard": {
     "acrossPrograms": "Across {{count}} program",
@@ -3228,7 +3231,8 @@
     "failedToSync": "Failed to sync:{{ message }}",
     "financialModelParsedSuccessfully": "Financial model parsed successfully",
     "synced": "Synced{{ length }} KPIs",
-    "mitigation": "Mitigation"
+    "mitigation": "Mitigation",
+    "payback": "Payback"
   },
   "financialPanel": {
     "aiFinancialReview": "AI Financial Review",
@@ -3586,7 +3590,9 @@
     "setHealthOverride": "Set Health Score Override",
     "setOverride": "Set override",
     "title": "Health Score",
-    "whyThisScore": "Why this score?"
+    "whyThisScore": "Why this score?",
+    "latestComputation": "Latest computation ({{score}}/100):",
+    "notes": "Health Notes"
   },
   "healthScore": {
     "addContextPlaceholder": "Add context about the health score (e.g., reasons for override, action plan)...",
@@ -3632,7 +3638,11 @@
   },
   "intake": {
     "failedToUpdateIntakeRouting": "Failed to update intake routing:{{ message }}",
-    "intakeRoutingUpdated": "Intake routing updated"
+    "intakeRoutingUpdated": "Intake routing updated",
+    "submittedData": "Submitted Data",
+    "changesRequested": "Changes Requested",
+    "signatureProvider": "Signature Provider",
+    "history": "History"
   },
   "integrationErrors": {
     "allSmooth": "All integrations running smoothly",
@@ -3917,7 +3927,9 @@
     "value": "Value",
     "viewGlossary": "View glossary",
     "vsTarget": "vs target",
-    "whatAreKpis": "What are KPIs?"
+    "whatAreKpis": "What are KPIs?",
+    "noneConfigured": "No KPIs configured",
+    "configuredByStaff": "KPIs will be configured by the consultant or program administrator."
   },
   "lifecycle": {
     "activeContracts": "Active Contracts",
@@ -5376,7 +5388,10 @@
     "viewAllResults": "View all results",
     "enterName": "Please enter a name",
     "saved": "Search saved",
-    "loaded": "Loaded: {{name}}"
+    "loaded": "Loaded: {{name}}",
+    "allWorkspaces": "All workspaces",
+    "allTags": "All tags",
+    "savedLabel": "Saved"
   },
   "session": {
     "inMinutes": "In Minutes",
@@ -5663,7 +5678,14 @@
     "facilitatorStaffOnly": "Facilitator Mode is only available for consultants.",
     "checklistUpdateFailed": "Failed to update checklist",
     "enterTranscript": "Please enter transcript text",
-    "nextSession": "Next Session"
+    "nextSession": "Next Session",
+    "noFeedback": "No feedback yet. Be the first to share your thoughts!",
+    "rateSession": "Rate Session: {{title}}",
+    "rating": "Rating",
+    "commentsOptional": "Comments (optional)",
+    "outlookSync": "Outlook Sync",
+    "addExercise": "Add Exercise",
+    "notesOptional": "Notes (optional)"
   },
   "sessionsEmpty": {
     "description": "Your consultant or program will schedule your first session soon.",
@@ -7222,5 +7244,10 @@
     "highlights": "Highlights",
     "nextPriorities": "Next Priorities",
     "sharedVia": "Shared via Startup Leiria"
+  },
+  "sectors": {
+    "cleantech": "CleanTech / Sustainability",
+    "manufacturing": "Industry / Manufacturing",
+    "socialImpact": "Social Impact"
   }
 }

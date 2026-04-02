@@ -1856,7 +1856,9 @@
     "expired": "Expirado",
     "inactive": "Inativo",
     "errors": "Erros",
-    "updating": "A atualizar..."
+    "updating": "A atualizar...",
+    "link": "Link",
+    "emailCopied": "Email copiado"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2630,7 +2632,8 @@
     "intakeCreatedNoEmail": "Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.",
     "resend": "Reenviar",
     "leadContracted": "{{name}} contratado! Criar workspace?",
-    "createWorkspace": "Criar Workspace"
+    "createWorkspace": "Criar Workspace",
+    "clientFillingData": "Cliente a preencher dados"
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -3228,7 +3231,8 @@
     "failedToSync": "Failed to sync:{{ message }}",
     "financialModelParsedSuccessfully": "Financial model parsed successfully",
     "synced": "Synced{{ length }} KPIs",
-    "mitigation": "Mitigação"
+    "mitigation": "Mitigação",
+    "payback": "Payback"
   },
   "financialPanel": {
     "aiFinancialReview": "Análise Financeira IA",
@@ -3586,7 +3590,9 @@
     "setHealthOverride": "Definir Override de Health Score",
     "setOverride": "Definir override",
     "title": "Pontuação de Saúde",
-    "whyThisScore": "Porquê esta pontuação?"
+    "whyThisScore": "Porquê esta pontuação?",
+    "latestComputation": "Última computação ({{score}}/100):",
+    "notes": "Notas de Health"
   },
   "healthScore": {
     "addContextPlaceholder": "Adicionar contexto sobre a pontuação de saúde (ex: motivos de alteração, plano de ação)...",
@@ -3632,7 +3638,11 @@
   },
   "intake": {
     "failedToUpdateIntakeRouting": "Failed to update intake routing:{{ message }}",
-    "intakeRoutingUpdated": "Intake routing updated"
+    "intakeRoutingUpdated": "Intake routing updated",
+    "submittedData": "Dados Submetidos",
+    "changesRequested": "Correções Pedidas",
+    "signatureProvider": "Provider de Assinatura",
+    "history": "Histórico"
   },
   "integrationErrors": {
     "allSmooth": "Todas as integrações a funcionar corretamente",
@@ -3917,7 +3927,9 @@
     "value": "Valor",
     "viewGlossary": "Ver glossário",
     "vsTarget": "vs meta",
-    "whatAreKpis": "O que são KPIs?"
+    "whatAreKpis": "O que são KPIs?",
+    "noneConfigured": "Nenhum KPI configurado",
+    "configuredByStaff": "Os KPIs serão configurados pelo consultor ou administrador do programa."
   },
   "lifecycle": {
     "activeContracts": "Contratos Ativos",
@@ -5376,7 +5388,10 @@
     "viewAllResults": "Ver todos os resultados",
     "enterName": "Introduza um nome",
     "saved": "Pesquisa guardada",
-    "loaded": "Carregada: {{name}}"
+    "loaded": "Carregada: {{name}}",
+    "allWorkspaces": "Todos os workspaces",
+    "allTags": "Todas as tags",
+    "savedLabel": "Guardadas"
   },
   "session": {
     "inMinutes": "In minutos",
@@ -5663,7 +5678,14 @@
     "facilitatorStaffOnly": "O Modo Facilitador está disponível apenas para consultores.",
     "checklistUpdateFailed": "Erro ao atualizar checklist",
     "enterTranscript": "Introduza o texto da transcrição",
-    "nextSession": "Próxima Sessão"
+    "nextSession": "Próxima Sessão",
+    "noFeedback": "Sem feedback ainda. Seja o primeiro!",
+    "rateSession": "Avaliar Sessão: {{title}}",
+    "rating": "Avaliação",
+    "commentsOptional": "Comentários (opcional)",
+    "outlookSync": "Sync Outlook",
+    "addExercise": "Adicionar Exercício",
+    "notesOptional": "Notas (opcional)"
   },
   "sessionsEmpty": {
     "description": "O seu consultor ou programa vai agendar a primeira sessão em breve.",
@@ -7222,5 +7244,10 @@
     "highlights": "Destaques",
     "nextPriorities": "Próximas Prioridades",
     "sharedVia": "Partilhado via Startup Leiria"
+  },
+  "sectors": {
+    "cleantech": "CleanTech / Sustentabilidade",
+    "manufacturing": "Indústria / Manufacturing",
+    "socialImpact": "Impacto Social"
   }
 }
