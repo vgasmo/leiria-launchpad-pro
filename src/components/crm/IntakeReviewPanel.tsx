@@ -145,7 +145,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
       <CardContent className="space-y-4">
         {/* Customer Data Summary */}
         <div className="space-y-2 text-sm">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dados Submetidos</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('intake.submittedData', 'Dados Submetidos')}</p>
           <div className="grid gap-1.5">
             <DataRow icon={Building2} label="Organização" value={intake.organization_name} />
             <DataRow icon={CreditCard} label="NIF" value={intake.company_nif} />
