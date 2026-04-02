@@ -360,13 +360,24 @@ export function useTransitionIntakeStatus() {
         }
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, params) => {
       queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
       queryClient.invalidateQueries({ queryKey: ['contract-intake'] });
       queryClient.invalidateQueries({ queryKey: ['contract-intake-by-funnel'] });
       queryClient.invalidateQueries({ queryKey: ['intake-events'] });
       queryClient.invalidateQueries({ queryKey: ['funnel-items'] });
       queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
+
+      // Notify backoffice when intake is submitted for review
+      if (params.newStatus === 'intake_submitted' || params.newStatus === 'review_pending') {
+        supabase.from('activity_log').insert({
+          user_id: user?.id || '00000000-0000-0000-0000-000000000000',
+          entity_type: 'intake',
+          entity_id: params.intakeId,
+          action: 'intake_submitted_for_review',
+          metadata: { status: params.newStatus },
+        }).catch(() => {});
+      }
     },
   });
 }

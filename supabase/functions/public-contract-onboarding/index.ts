@@ -628,6 +628,22 @@ Deno.serve(async (req) => {
         })
       }
       
+      // AUTO-ACTIVATE: Move workspace to active when contract is signed
+      if ((contract as any).workspace_id) {
+        await supabase
+          .from('workspaces')
+          .update({ status: 'active' })
+          .eq('id', (contract as any).workspace_id)
+          .in('status', ['pending', 'claimed', 'imported_unclaimed'])
+        
+        // Also update contract status to 'active'
+        await supabase
+          .from('startup_contracts')
+          .update({ status: 'active' })
+          .eq('id', contract.id)
+          .eq('status', 'pending_signature')
+      }
+      
       // Notify staff
       const { data: staffUsers } = await supabase
         .from('user_roles')

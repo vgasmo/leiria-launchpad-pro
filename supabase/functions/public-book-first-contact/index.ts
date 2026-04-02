@@ -333,26 +333,66 @@ serve(async (req) => {
     const { data: programs } = await supabase.from("programs").select("id").limit(1);
     const programId = programs?.[0]?.id || null;
 
-    // Create funnel item
-    const { data: funnelItem, error: funnelError } = await supabase
+    // === DUPLICATE CHECK: Prevent duplicate leads from same email ===
+    const { data: existingLead } = await supabase
       .from("funnel_items")
-      .insert({
-        stage: "first_contact_booked",
-        type: "lead",
-        contact_name: contact.name,
-        contact_email: contact.email,
-        contact_phone: contact.phone || null,
-        organization_name: contact.organization || null,
-        notes: contact.message || null,
-        source: "public_booking",
-        program_id: programId,
-        owner_consultant_id: consultantId,
-        first_contact_at: `${slot.date}T${slot.time}:00`,
-      })
-      .select()
-      .single();
+      .select("id, stage, contact_name")
+      .eq("contact_email", contact.email)
+      .not("stage", "in", '("rejected","archived")')
+      .limit(1);
 
-    if (funnelError) throw funnelError;
+    let funnelItemId: string;
+
+    if (existingLead && existingLead.length > 0) {
+      // Update existing lead with new booking time
+      await supabase.from("funnel_items")
+        .update({
+          first_contact_at: `${slot.date}T${slot.time}:00`,
+          stage: existingLead[0].stage === "new" ? "first_contact_booked" : existingLead[0].stage,
+          notes: `Reagendado em ${slot.date}. ${contact.message || ""}`.trim(),
+          last_activity_at: new Date().toISOString(),
+        })
+        .eq("id", existingLead[0].id);
+
+      await supabase.from("funnel_events").insert({
+        funnel_item_id: existingLead[0].id,
+        event_type: "booking_rescheduled",
+        metadata: { date: slot.date, time: slot.time, source: "public_booking" },
+      });
+
+      funnelItemId = existingLead[0].id;
+    } else {
+      // === ORIGINAL: Create new funnel item (only if no existing lead) ===
+      const { data: funnelItem, error: funnelError } = await supabase
+        .from("funnel_items")
+        .insert({
+          stage: "first_contact_booked",
+          type: "lead",
+          contact_name: contact.name,
+          contact_email: contact.email,
+          contact_phone: contact.phone || null,
+          organization_name: contact.organization || null,
+          notes: contact.message || null,
+          source: "public_booking",
+          program_id: programId,
+          owner_consultant_id: consultantId,
+          first_contact_at: `${slot.date}T${slot.time}:00`,
+        })
+        .select()
+        .single();
+
+      if (funnelError) throw funnelError;
+
+      // Log event
+      await supabase.from("funnel_events").insert({
+        funnel_item_id: funnelItem.id,
+        event_type: "created",
+        to_stage: "first_contact_booked",
+        metadata: { source: "public_booking", slot },
+      });
+
+      funnelItemId = funnelItem.id;
+    }
 
     // Log event
     await supabase.from("funnel_events").insert({
