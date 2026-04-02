@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, Save, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface AlertRulesEditorProps {
 }
 
 export function AlertRulesEditor({ programId, programName }: AlertRulesEditorProps) {
+  const { t } = useTranslation();
   const { data: rules, isLoading } = useProgramAlertRules(programId);
   const updateRule = useUpdateAlertRule();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -109,11 +111,11 @@ export function AlertRulesEditor({ programId, programName }: AlertRulesEditorPro
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Threshold</TableHead>
-              <TableHead>Severidade</TableHead>
-              <TableHead>Ativo</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>{t('alertRules.type', 'Tipo')}</TableHead>
+              <TableHead>{t('alertRules.threshold', 'Threshold')}</TableHead>
+              <TableHead>{t('alertRules.severity', 'Severidade')}</TableHead>
+              <TableHead>{t('alertRules.active', 'Ativo')}</TableHead>
+              <TableHead className="w-[100px]">{t('common.actions', 'Ações')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -210,7 +212,7 @@ export function AlertRulesEditor({ programId, programName }: AlertRulesEditorPro
         {(!rules || rules.length === 0) && (
           <div className="text-center py-8 text-muted-foreground">
             <Settings className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p>Nenhuma regra configurada para este programa.</p>
+            <p>{t('alertRules.noRules', 'Nenhuma regra configurada para este programa.')}</p>
           </div>
         )}
       </CardContent>

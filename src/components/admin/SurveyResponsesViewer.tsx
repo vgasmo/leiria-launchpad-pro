@@ -106,10 +106,10 @@ export function SurveyResponsesViewer({ campaignId }: SurveyResponsesViewerProps
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Startup</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead>{t('common.startup', 'Startup')}</TableHead>
+              <TableHead>{t('common.status', 'Status')}</TableHead>
+              <TableHead>{t('common.submitted', 'Submetido')}</TableHead>
+              <TableHead className="w-[100px]">{t('common.actions', 'Ações')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

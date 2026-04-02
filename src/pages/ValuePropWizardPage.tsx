@@ -65,7 +65,7 @@ export default function ValuePropWizardPage() {
               <Card className="bg-muted/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <History className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground">No value propositions yet</p>
+                  <p className="text-muted-foreground">{t('valueProp.noPropositions', 'No value propositions yet')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -83,6 +83,7 @@ export default function ValuePropWizardPage() {
 }
 
 function ArtifactCard({ artifact }: { artifact: ValuePropArtifact }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -100,12 +101,12 @@ function ArtifactCard({ artifact }: { artifact: ValuePropArtifact }) {
           <p className="text-sm">{artifact.outputs_text.vp_statement}</p>
         </div>
         <div className="p-3 rounded-lg bg-muted">
-          <p className="text-sm font-medium mb-1">One-liner:</p>
+          <p className="text-sm font-medium mb-1">{t('valueProp.oneLiner', 'One-liner')}:</p>
           <p className="text-sm text-muted-foreground">{artifact.outputs_text.short_version}</p>
         </div>
         {artifact.outputs_text.bullet_points.length > 0 && (
           <div>
-            <p className="text-sm font-medium mb-1">Key Points:</p>
+            <p className="text-sm font-medium mb-1">{t('valueProp.keyPoints', 'Key Points')}:</p>
             <ul className="list-disc list-inside text-sm text-muted-foreground">
               {artifact.outputs_text.bullet_points.map((point, i) => (
                 <li key={i}>{point}</li>

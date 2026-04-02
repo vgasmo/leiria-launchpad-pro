@@ -5,7 +5,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, TrendingUp, 
   Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, Tag, GitBranch, UserPlus
+  ChevronDown, Database, GitBranch, UserPlus
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -40,7 +40,7 @@ import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCen
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
   crm: ['funnel'],
-  programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
+  programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys'],
   reports: ['analytics', 'health', 'compliance', 'data-quality'],
   users: ['users', 'mentors'],
 };
@@ -99,7 +99,6 @@ export default function Admin() {
       templates: <FileText className="h-4 w-4" />,
       'support-materials': <BookOpen className="h-4 w-4" />,
       surveys: <ClipboardList className="h-4 w-4" />,
-      tags: <Tag className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
       funnel: <Filter className="h-4 w-4" />,
@@ -122,7 +121,6 @@ export default function Admin() {
       templates: t('admin.templates'),
       'support-materials': t('admin.supportMaterials.title'),
       surveys: t('admin.surveys.title'),
-      tags: t('admin.tags.title'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
       funnel: t('admin.funnel.tab'),

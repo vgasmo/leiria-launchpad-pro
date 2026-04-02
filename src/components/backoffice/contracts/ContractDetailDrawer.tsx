@@ -983,7 +983,21 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                 signature_status: 'signed',
                 signed_at: new Date().toISOString(),
               } as any).eq('id', contract.id);
+              
+              // Auto-activate workspace
+              if (contract.workspace_id) {
+                await supabase.from('workspaces')
+                  .update({ status: 'active' } as any)
+                  .eq('id', contract.workspace_id)
+                  .in('status', ['pending', 'claimed', 'imported_unclaimed']);
+                
+                await supabase.from('startup_contracts')
+                  .update({ status: 'active' } as any)
+                  .eq('id', contract.id);
+              }
+              
               queryClient.invalidateQueries({ queryKey: ['contracts'] });
+              queryClient.invalidateQueries({ queryKey: ['workspaces'] });
               toast.success(t('contractDetail.markedAsSigned'));
             }}
           >

@@ -237,6 +237,11 @@ export function useUpdateSession(workspaceId: string) {
       // P1.2: Log activity
       logActivity('updated', 'session', result.session.id, workspaceId, { title: result.session.title });
 
+      // Auto-recompute health score after session update (fire-and-forget)
+      supabase.functions.invoke('recompute-health-scores', {
+        body: { workspaceId },
+      }).catch(() => {});
+
       // P0.1: Auto-trigger Outlook sync if date/time/duration changed
       if (result.needsSync) {
         syncOutlookCalendar({

@@ -159,12 +159,12 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
           Bulk Report Generator
         </CardTitle>
         <CardDescription>
-          Generate program-level reports for stakeholders
+          {t('analytics.generateReportDesc', 'Generate program-level reports for stakeholders')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Program</Label>
+          <Label>{t('common.program', 'Programa')}</Label>
           <Select value={selectedProgram} onValueChange={setSelectedProgram}>
             <SelectTrigger>
               <SelectValue placeholder="Select program" />
@@ -184,15 +184,15 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="milestones" checked={includeMilestones} onCheckedChange={(c) => setIncludeMilestones(!!c)} />
-              <label htmlFor="milestones" className="text-sm">Milestones</label>
+              <label htmlFor="milestones" className="text-sm">{t('common.milestones', 'Milestones')}</label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="actions" checked={includeActions} onCheckedChange={(c) => setIncludeActions(!!c)} />
-              <label htmlFor="actions" className="text-sm">Actions</label>
+              <label htmlFor="actions" className="text-sm">{t('common.actions', 'Ações')}</label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="sessions" checked={includeSessions} onCheckedChange={(c) => setIncludeSessions(!!c)} />
-              <label htmlFor="sessions" className="text-sm">Sessions</label>
+              <label htmlFor="sessions" className="text-sm">{t('common.sessions', 'Sessões')}</label>
             </div>
           </div>
         </div>

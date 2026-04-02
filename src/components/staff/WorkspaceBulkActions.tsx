@@ -233,14 +233,14 @@ export function WorkspaceBulkActionsBar({
       <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Staff Task for {selectedCount} Startups</DialogTitle>
+            <DialogTitle>{t('bulkActions.createTaskTitle', { count: selectedCount, defaultValue: `Create Staff Task for ${selectedCount} Startups` })}</DialogTitle>
             <DialogDescription>
-              This will create a work queue item for each selected startup.
+              {t('bulkActions.createTaskDesc', 'This will create a work queue item for each selected startup.')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Task Title</Label>
+              <Label>{t('bulkActions.taskTitle', 'Task Title')}</Label>
               <Input
                 placeholder="e.g., Follow up on progress"
                 value={taskTitle}
@@ -248,7 +248,7 @@ export function WorkspaceBulkActionsBar({
               />
             </div>
             <div>
-              <Label>Description (optional)</Label>
+              <Label>{t('bulkActions.descriptionOptional', 'Description (optional)')}</Label>
               <Input
                 placeholder="Additional details..."
                 value={taskDescription}
