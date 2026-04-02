@@ -111,7 +111,8 @@ export default function CRM() {
     setSearchParams(next, { replace: false });
   };
 
-  const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
+  // Internal: open drawer without URL push (used by deep-link)
+  const openDrawerDirect = useCallback((item: CrmInboxItem) => {
     const funnelItem: FunnelItem = {
       id: item.id,
       stage: item.stage,
@@ -146,12 +147,15 @@ export default function CRM() {
     };
     setSelectedItem(funnelItem);
     setDrawerOpen(true);
+  }, []);
 
+  const handleOpenDrawer = useCallback((item: CrmInboxItem) => {
+    openDrawerDirect(item);
     // Push to URL so back button closes drawer
     const next = new URLSearchParams(searchParams);
     next.set('open', item.id);
     setSearchParams(next, { replace: false });
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, openDrawerDirect]);
 
   // Deep-link support: ?open=<funnel_item_id>
   useEffect(() => {
