@@ -5,7 +5,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
   Users, Building2, FileText, BarChart3, Clock, TrendingUp, 
   Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, Tag, GitBranch, UserPlus
+  ChevronDown, Database, GitBranch, UserPlus
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import {
