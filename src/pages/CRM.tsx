@@ -572,7 +572,15 @@ export default function CRM() {
         <RecordDrawer
           item={selectedItem}
           open={drawerOpen}
-          onOpenChange={setDrawerOpen}
+          onOpenChange={(open) => {
+            setDrawerOpen(open);
+            if (!open) {
+              setSelectedItem(null);
+              const next = new URLSearchParams(searchParams);
+              next.delete('open');
+              setSearchParams(next, { replace: true });
+            }
+          }}
         />
       </div>
     </AppLayout>
