@@ -235,10 +235,10 @@ export default function SearchPage() {
               }))}
             >
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All tags" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All tags</SelectItem>
+               <SelectValue placeholder={t('search.allTags', 'Todas as tags')} />
+            </SelectTrigger>
+            <SelectContent>
+                 <SelectItem value="all">{t('search.allTags', 'Todas as tags')}</SelectItem>
                 {tags.map((tag) => (
                   <SelectItem key={tag.id} value={tag.id}>{tag.name}</SelectItem>
                 ))}
