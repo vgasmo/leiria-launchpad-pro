@@ -73,6 +73,8 @@ export default defineConfig(({ mode }) => ({
           /\/functions\/v1\//,
           // Don't fallback for asset requests
           /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/,
+          // Don't fallback for version check
+          /version\.json/,
         ],
         // Increase the size limit to 3 MB to handle large bundles
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,

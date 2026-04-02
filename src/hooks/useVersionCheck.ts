@@ -11,7 +11,7 @@ export function useVersionCheck() {
 
   const checkVersion = useCallback(async () => {
     try {
-      const res = await fetch('/version.json', { cache: 'no-store' });
+      const res = await fetch(`/version.json?_=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       const remote = data.version as string;
