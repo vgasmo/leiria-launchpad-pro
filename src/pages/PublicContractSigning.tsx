@@ -94,12 +94,14 @@ const STEPS: { key: WizardStep; icon: typeof Building2 }[] = [
   { key: 'signing', icon: PenTool },
 ];
 
-type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | string;
+type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | 'assinatura_digital' | 'pandadoc_manual' | string;
 
 const providerLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
   switch (p) {
     case 'docusign': return 'DocuSign';
     case 'pandadoc': return 'PandaDoc';
+    case 'assinatura_digital': return lang === 'pt' ? 'Assinatura Digital' : 'Digital Signature';
+    case 'pandadoc_manual': return 'PandaDoc';
     case 'manual': return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
     default: return lang === 'pt' ? 'Assinatura' : 'Signature';
   }
