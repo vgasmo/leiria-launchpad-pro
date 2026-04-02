@@ -240,7 +240,7 @@ export function WorkspaceBulkActionsBar({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Task Title</Label>
+              <Label>{t('bulkActions.taskTitle', 'Task Title')}</Label>
               <Input
                 placeholder="e.g., Follow up on progress"
                 value={taskTitle}
