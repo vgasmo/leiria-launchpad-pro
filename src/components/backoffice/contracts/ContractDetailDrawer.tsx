@@ -624,7 +624,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
   const canRetry = sigStatus === 'failed' || sigStatus === 'ready_to_send';
   const canChangeProvider = !isSent && (!contract.provider_document_id || canRetry);
 
-  const providerLabel = provider === 'pandadoc' ? 'PandaDoc' : provider === 'docusign' ? 'DocuSign' : provider === 'manual' ? t('contractDetail.manualSignature', { defaultValue: 'Manual' }) : t('contractDetail.notSelected', { defaultValue: 'Não selecionado' });
+  const providerLabel = provider === 'pandadoc' ? 'PandaDoc' : provider === 'docusign' ? 'DocuSign' : provider === 'assinatura_digital' ? t('contractDetail.digitalSignature') : provider === 'pandadoc_manual' ? t('contractDetail.pandadocManual') : provider === 'manual' ? t('contractDetail.manualSignature') : t('contractDetail.notSelected');
 
   // Bilateral signing fields
   const founderStatus = (contract as any).founder_signer_status || 'pending';
