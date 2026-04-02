@@ -181,7 +181,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
         {/* Changes Requested Notes */}
         {intake.changes_requested_notes && intake.status === 'changes_requested' && (
           <div className="rounded-md border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 p-3">
-            <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Correções Pedidas</p>
+            <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">{t('intake.changesRequested', 'Correções Pedidas')}</p>
             <p className="text-xs text-yellow-700 dark:text-yellow-300">{intake.changes_requested_notes}</p>
           </div>
         )}
