@@ -264,9 +264,18 @@ export function AdminProgramsManager() {
           <p className="text-sm text-muted-foreground">{t('adminPrograms.subtitle')}</p>
         </div>
         <div className="flex gap-2">
+          {hasNewProgramDraft && (
+            <Button variant="outline" onClick={() => {
+              const existingDraft = drafts?.find(d => !d.program_id);
+              if (existingDraft) navigate(`/admin/programs/new/${existingDraft.id}`);
+            }}>
+              <Wand2 className="h-4 w-4 mr-1" />
+              {t('adminPrograms.continueDraft')}
+            </Button>
+          )}
           <Button onClick={handleNewProgramWizard} disabled={createDraft.isPending}>
             <Wand2 className="h-4 w-4 mr-1" />
-            {hasNewProgramDraft ? t('adminPrograms.continueDraft') : t('adminPrograms.newProgramWizard')}
+            {t('adminPrograms.newProgramWizard')}
           </Button>
           <Button variant="outline" onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-1" />
