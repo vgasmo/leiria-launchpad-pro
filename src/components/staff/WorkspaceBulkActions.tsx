@@ -248,7 +248,7 @@ export function WorkspaceBulkActionsBar({
               />
             </div>
             <div>
-              <Label>Description (optional)</Label>
+              <Label>{t('bulkActions.descriptionOptional', 'Description (optional)')}</Label>
               <Input
                 placeholder="Additional details..."
                 value={taskDescription}

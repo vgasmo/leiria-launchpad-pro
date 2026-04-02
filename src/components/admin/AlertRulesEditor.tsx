@@ -212,7 +212,7 @@ export function AlertRulesEditor({ programId, programName }: AlertRulesEditorPro
         {(!rules || rules.length === 0) && (
           <div className="text-center py-8 text-muted-foreground">
             <Settings className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p>Nenhuma regra configurada para este programa.</p>
+            <p>{t('alertRules.noRules', 'Nenhuma regra configurada para este programa.')}</p>
           </div>
         )}
       </CardContent>
