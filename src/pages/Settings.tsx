@@ -25,6 +25,8 @@ import { logger } from '@/lib/logger';
 export default function Settings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [settingsParams, setSettingsParams] = useSearchParams();
+  const settingsTab = settingsParams.get('tab') || 'profile';
   const { user, profile, roles } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
