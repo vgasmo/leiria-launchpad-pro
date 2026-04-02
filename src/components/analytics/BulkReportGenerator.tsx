@@ -159,7 +159,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
           Bulk Report Generator
         </CardTitle>
         <CardDescription>
-          Generate program-level reports for stakeholders
+          {t('analytics.generateReportDesc', 'Generate program-level reports for stakeholders')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
