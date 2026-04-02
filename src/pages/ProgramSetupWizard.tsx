@@ -319,6 +319,10 @@ export default function ProgramSetupWizard() {
                     <WizardReviewStep
                       draft={draft}
                       validationErrors={getValidationErrors()}
+                      onNavigateToStep={(step) => {
+                        setPrevStep(currentStep);
+                        setCurrentStep(step as WizardStep);
+                      }}
                     />
                   )}
                 </>

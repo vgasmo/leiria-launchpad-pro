@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import {
   Building2,
   Layers,
@@ -13,15 +14,17 @@ import {
   AlertTriangle,
   XCircle,
   Star,
+  Pencil,
 } from 'lucide-react';
 import type { ProgramSetupDraft } from '@/hooks/useProgramSetup';
 
 interface WizardReviewStepProps {
   draft: ProgramSetupDraft;
   validationErrors: string[];
+  onNavigateToStep?: (step: string) => void;
 }
 
-export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepProps) {
+export function WizardReviewStep({ draft, validationErrors, onNavigateToStep }: WizardReviewStepProps) {
   const { t } = useTranslation();
   const { basics, stages, kpis, coreKpis, playbooks, alertRules, healthModel } = draft.draft_json;
 
@@ -31,6 +34,20 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
   const enabledRules = alertRules?.filter((r) => r.is_enabled).length || 0;
 
   const hasErrors = validationErrors.length > 0;
+
+  const EditButton = ({ step }: { step: string }) => (
+    onNavigateToStep ? (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 ml-auto opacity-60 hover:opacity-100"
+        onClick={() => onNavigateToStep(step)}
+        title={t('common.edit', 'Editar')}
+      >
+        <Pencil className="h-3 w-3" />
+      </Button>
+    ) : null
+  );
 
   return (
     <div className="space-y-6">
@@ -60,32 +77,34 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Basics */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('basics')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              Program Basics
+              {t('programSetup.steps.basics', 'Dados Básicos')}
+              <EditButton step="basics" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
-              <p className="font-medium">{basics?.name || 'Untitled'}</p>
+              <p className="font-medium">{basics?.name || t('common.untitled', 'Sem título')}</p>
               {basics?.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2">{basics.description}</p>
               )}
               {basics?.start_date && (
-                <p className="text-xs text-muted-foreground">Starts: {basics.start_date}</p>
+                <p className="text-xs text-muted-foreground">{t('programSetup.startsAt', 'Início')}: {basics.start_date}</p>
               )}
             </div>
           </CardContent>
         </Card>
 
         {/* Stages */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('stages')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Layers className="h-4 w-4" />
-              Stages
+              {t('programSetup.steps.stages', 'Etapas')}
+              <EditButton step="stages" />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -97,65 +116,68 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {activeStages.length} active stage{activeStages.length !== 1 ? 's' : ''}
+              {t('admin.wizard.activeStages', { count: activeStages.length, defaultValue: '{{count}} etapas ativas' })}
             </p>
           </CardContent>
         </Card>
 
         {/* KPIs */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('kpis')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               KPIs
+              <EditButton step="kpis" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{totalKpis}</p>
-            <p className="text-xs text-muted-foreground">Total across all stages</p>
+            <p className="text-xs text-muted-foreground">{t('admin.wizard.totalAcrossStages', 'Total em todas as etapas')}</p>
             <div className="flex items-center gap-1 mt-2">
               <Star className="h-3 w-3 text-yellow-500" />
               <span className="text-xs">
-                {coreKpis?.length || 0} core KPIs
+                {coreKpis?.length || 0} {t('admin.wizard.coreKpis', 'KPIs principais')}
               </span>
             </div>
           </CardContent>
         </Card>
 
         {/* Playbooks */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('playbooks')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Playbooks
+              <EditButton step="playbooks" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{playbooks?.length || 0}</p>
             <p className="text-xs text-muted-foreground">
-              {totalPlaybookItems} items (milestones + actions)
+              {totalPlaybookItems} {t('admin.wizard.playbookItems', 'itens (milestones + ações)')}
             </p>
           </CardContent>
         </Card>
 
         {/* Alert Rules */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('alerts')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Alert Rules
+              {t('admin.wizard.alertRules', 'Regras de Alerta')}
+              <EditButton step="alerts" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{enabledRules}</p>
             <p className="text-xs text-muted-foreground">
-              of {alertRules?.length || 0} rules enabled
+              {t('admin.wizard.rulesEnabled', { count: alertRules?.length || 0, defaultValue: 'de {{count}} regras ativas' })}
             </p>
           </CardContent>
         </Card>
 
         {/* Health Model */}
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onNavigateToStep?.('alerts')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               {healthModel?.is_enabled ? (
@@ -164,15 +186,16 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
                 <XCircle className="h-4 w-4 text-muted-foreground" />
               )}
               Health Scoring
+              <EditButton step="alerts" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Badge variant={healthModel?.is_enabled ? 'default' : 'secondary'}>
-              {healthModel?.is_enabled ? 'Enabled' : 'Disabled'}
+              {healthModel?.is_enabled ? t('common.enabled', 'Ativado') : t('common.disabled', 'Desativado')}
             </Badge>
             {healthModel?.is_enabled && (
               <p className="text-xs text-muted-foreground mt-2">
-                {Object.keys(healthModel.weights_json || {}).length} dimensions configured
+                {Object.keys(healthModel.weights_json || {}).length} {t('admin.wizard.dimensionsConfigured', 'dimensões configuradas')}
               </p>
             )}
           </CardContent>
@@ -182,7 +205,7 @@ export function WizardReviewStep({ draft, validationErrors }: WizardReviewStepPr
       {/* Detailed Review */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Core KPIs</CardTitle>
+          <CardTitle className="text-base">{t('admin.wizard.coreKpisTitle', 'KPIs Principais')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[100px]">
