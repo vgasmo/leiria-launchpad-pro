@@ -233,9 +233,9 @@ export function WorkspaceBulkActionsBar({
       <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Staff Task for {selectedCount} Startups</DialogTitle>
+            <DialogTitle>{t('bulkActions.createTaskTitle', { count: selectedCount, defaultValue: `Create Staff Task for ${selectedCount} Startups` })}</DialogTitle>
             <DialogDescription>
-              This will create a work queue item for each selected startup.
+              {t('bulkActions.createTaskDesc', 'This will create a work queue item for each selected startup.')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
