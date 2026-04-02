@@ -32,6 +32,7 @@ interface AlertRulesEditorProps {
 }
 
 export function AlertRulesEditor({ programId, programName }: AlertRulesEditorProps) {
+  const { t } = useTranslation();
   const { data: rules, isLoading } = useProgramAlertRules(programId);
   const updateRule = useUpdateAlertRule();
   const [editingId, setEditingId] = useState<string | null>(null);
