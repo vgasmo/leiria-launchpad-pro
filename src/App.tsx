@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SessionTimeoutWarning } from "@/components/auth/SessionTimeoutWarning";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { CommandPalette } from "@/components/command/CommandPalette";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
