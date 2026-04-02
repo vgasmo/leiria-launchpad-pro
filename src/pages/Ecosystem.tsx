@@ -6,10 +6,11 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { EcosystemTable } from '@/components/ecosystem/EcosystemTable';
 import { EcosystemFilters, type EcosystemFiltersState } from '@/components/ecosystem/EcosystemFilters';
 import { CommunityFeed } from '@/components/ecosystem/CommunityFeed';
+import { ConsultorPortfolioView } from '@/components/ecosystem/ConsultorPortfolioView';
 import { useEcosystemItems } from '@/hooks/useEcosystemItems';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Globe2, Users, Building2 } from 'lucide-react';
+import { Globe2, Users, Building2, UserCog } from 'lucide-react';
 
 export default function Ecosystem() {
   const { t } = useTranslation();
@@ -30,8 +31,6 @@ export default function Ecosystem() {
 
   const { data: items, isLoading } = useEcosystemItems(filters);
 
-  // Route-level staffOnly guard handles access control — no internal guard needed
-
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
@@ -46,6 +45,10 @@ export default function Ecosystem() {
             <TabsTrigger value="startups" className="gap-2">
               <Building2 className="h-4 w-4" />
               {t('ecosystem.startupsTab', 'Startups & Leads')}
+            </TabsTrigger>
+            <TabsTrigger value="by-consultant" className="gap-2">
+              <UserCog className="h-4 w-4" />
+              {t('ecosystem.byConsultantTab', 'Por Consultor')}
             </TabsTrigger>
             <TabsTrigger value="community" className="gap-2">
               <Users className="h-4 w-4" />
@@ -66,6 +69,15 @@ export default function Ecosystem() {
                   }
                 }}
               />
+            )}
+          </TabsContent>
+
+          <TabsContent value="by-consultant" className="space-y-6 mt-0">
+            <EcosystemFilters filters={filters} onChange={setFilters} />
+            {isLoading ? (
+              <ContentSkeleton type="list" count={6} />
+            ) : (
+              <ConsultorPortfolioView items={items || []} />
             )}
           </TabsContent>
 
