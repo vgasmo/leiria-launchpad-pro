@@ -105,7 +105,7 @@ function ArtifactCard({ artifact }: { artifact: ValuePropArtifact }) {
         </div>
         {artifact.outputs_text.bullet_points.length > 0 && (
           <div>
-            <p className="text-sm font-medium mb-1">Key Points:</p>
+            <p className="text-sm font-medium mb-1">{t('valueProp.keyPoints', 'Key Points')}:</p>
             <ul className="list-disc list-inside text-sm text-muted-foreground">
               {artifact.outputs_text.bullet_points.map((point, i) => (
                 <li key={i}>{point}</li>
