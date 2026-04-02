@@ -111,11 +111,11 @@ export function AlertRulesEditor({ programId, programName }: AlertRulesEditorPro
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Threshold</TableHead>
-              <TableHead>Severidade</TableHead>
-              <TableHead>Ativo</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>{t('alertRules.type', 'Tipo')}</TableHead>
+              <TableHead>{t('alertRules.threshold', 'Threshold')}</TableHead>
+              <TableHead>{t('alertRules.severity', 'Severidade')}</TableHead>
+              <TableHead>{t('alertRules.active', 'Ativo')}</TableHead>
+              <TableHead className="w-[100px]">{t('common.actions', 'Ações')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
