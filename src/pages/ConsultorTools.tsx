@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { FileText, Lightbulb, Sparkles, Shield, MessageSquare, Wrench, BarChart3 } from 'lucide-react';
