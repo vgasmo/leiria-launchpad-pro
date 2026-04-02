@@ -117,7 +117,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Rating</p>
+              <p className="text-sm font-medium">{t('sessions.rating', 'Avaliação')}</p>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(star => (
                   <button
