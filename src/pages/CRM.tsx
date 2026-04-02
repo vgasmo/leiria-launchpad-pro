@@ -351,7 +351,10 @@ export default function CRM() {
 
         <div className="flex items-center justify-between mb-2">
           <div />
-          <CsvLeadImport />
+          <div className="flex items-center gap-2">
+            <NewLeadDialog />
+            <CsvLeadImport />
+          </div>
         </div>
         <Tabs defaultValue="pipeline" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
