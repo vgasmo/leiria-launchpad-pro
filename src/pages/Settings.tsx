@@ -237,7 +237,7 @@ export default function Settings() {
       </div>
 
       <div className="max-w-2xl">
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs value={settingsTab} onValueChange={(v) => setSettingsParams({ tab: v }, { replace: false })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" aria-hidden="true" />

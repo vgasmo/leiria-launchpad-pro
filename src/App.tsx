@@ -188,6 +188,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
               <ErrorBoundary>
                 <AppRoutes />
