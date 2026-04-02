@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
         // Use provider from body or from contract record
         const provider: string | null = body.signatureProvider || (contract as any).signature_provider || null
 
-        if (!provider || !['docusign', 'pandadoc', 'manual'].includes(provider)) {
+        if (!provider || !['docusign', 'pandadoc', 'manual', 'assinatura_digital', 'pandadoc_manual'].includes(provider)) {
           return new Response(JSON.stringify({
             error: 'signature_provider_not_configured',
             message: 'Selecione um provider de assinatura antes de enviar.',
