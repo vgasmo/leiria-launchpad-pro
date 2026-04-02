@@ -1494,7 +1494,8 @@
     "programBreakdown": "Program Breakdown",
     "selectProgram": "Select program",
     "stageDistribution": "Stage Distribution",
-    "totalStartups": "Total Startups"
+    "totalStartups": "Total Startups",
+    "generateReportDesc": "Generate program-level reports for stakeholders"
   },
   "app": {
     "clickToUpdate": "Click to refresh.",
@@ -1883,7 +1884,10 @@
     "viewAll": "View all",
     "workspace": "Workspace",
     "years": "years",
-    "yes": "Yes"
+    "yes": "Yes",
+    "milestones": "Milestones",
+    "sessions": "Sessions",
+    "submitted": "Submitted"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -7101,7 +7105,10 @@
   },
   "valueProp": {
     "subtitle": "Create a compelling value proposition in 5-7 minutes",
-    "title": "Value Proposition Wizard"
+    "title": "Value Proposition Wizard",
+    "noPropositions": "No value propositions yet",
+    "oneLiner": "One-liner",
+    "keyPoints": "Key Points"
   },
   "vp": {
     "alternatives": "What alternatives do they use today?",
@@ -7422,5 +7429,18 @@
     "upcomingSession": "Session coming up",
     "updateKpis": "Update your KPIs",
     "viewActions": "View Actions"
+  },
+  "alertRules": {
+    "type": "Type",
+    "threshold": "Threshold",
+    "severity": "Severity",
+    "active": "Active",
+    "noRules": "No rules configured for this program."
+  },
+  "bulkActions": {
+    "createTaskTitle": "Create Staff Task for {{count}} Startups",
+    "createTaskDesc": "This will create a work queue item for each selected startup.",
+    "taskTitle": "Task Title",
+    "descriptionOptional": "Description (optional)"
   }
 }

@@ -1494,7 +1494,8 @@
     "programBreakdown": "Detalhe por Programa",
     "selectProgram": "Selecionar programa",
     "stageDistribution": "Distribuição por Fase",
-    "totalStartups": "total de Startups"
+    "totalStartups": "total de Startups",
+    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders"
   },
   "app": {
     "clickToUpdate": "Clique para atualizar.",
@@ -1883,7 +1884,10 @@
     "viewAll": "Ver todas",
     "workspace": "Workspace",
     "years": "anos",
-    "yes": "Sim"
+    "yes": "Sim",
+    "milestones": "Milestones",
+    "sessions": "Sessões",
+    "submitted": "Submetido"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -7101,7 +7105,10 @@
   },
   "valueProp": {
     "subtitle": "Crie uma proposta de valor convincente em 5-7 minutos",
-    "title": "Assistente de Proposta de Valor"
+    "title": "Assistente de Proposta de Valor",
+    "noPropositions": "Ainda sem propostas de valor",
+    "oneLiner": "Frase-chave",
+    "keyPoints": "Pontos-Chave"
   },
   "vp": {
     "alternatives": "Que alternativas usam hoje?",
@@ -7422,5 +7429,18 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
+  },
+  "alertRules": {
+    "type": "Tipo",
+    "threshold": "Threshold",
+    "severity": "Severidade",
+    "active": "Ativo",
+    "noRules": "Nenhuma regra configurada para este programa."
+  },
+  "bulkActions": {
+    "createTaskTitle": "Criar Tarefa para {{count}} Startups",
+    "createTaskDesc": "Será criado um item na fila de trabalho para cada startup selecionada.",
+    "taskTitle": "Título da Tarefa",
+    "descriptionOptional": "Descrição (opcional)"
   }
 }
