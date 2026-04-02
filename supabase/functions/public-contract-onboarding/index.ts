@@ -578,6 +578,112 @@ Deno.serve(async (req) => {
       })
     }
 
+    // === Digital Sign (simple electronic signature, eIDAS compliant) ===
+    if (action === 'digital_sign') {
+      const { signatureData } = body
+      
+      if (!signatureData?.typed_name || signatureData.typed_name.length < 3) {
+        return new Response(JSON.stringify({ error: 'Invalid signature name' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      
+      // Get client IP and hash for privacy
+      const clientIp = req.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || 
+                       req.headers.get('CF-Connecting-IP') || 'unknown'
+      const encoder = new TextEncoder()
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(clientIp + 'eidas-salt'))
+      const ipHash = Array.from(new Uint8Array(hashBuffer)).slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('')
+      
+      // Build legal proof record
+      const signatureProof = {
+        method: 'simple_electronic_signature',
+        regulation: 'eIDAS EU 910/2014',
+        typed_name: signatureData.typed_name,
+        signer_email: signatureData.signer_email,
+        signer_nif: signatureData.signer_nif,
+        accepted_terms: true,
+        accepted_eidas_disclaimer: true,
+        signed_at: new Date().toISOString(),
+        ip_hash: ipHash,
+        user_agent: signatureData.user_agent || req.headers.get('User-Agent'),
+        token_used: token,
+      }
+      
+      // Update contract: mark as signed
+      const { error: updateError } = await supabase
+        .from('startup_contracts')
+        .update({
+          signature_status: 'signed',
+          signed_at: new Date().toISOString(),
+          founder_signer_status: 'signed',
+          signature_proof_json: signatureProof,
+        })
+        .eq('id', contract.id)
+      
+      if (updateError) {
+        console.error('Signature update error:', updateError)
+        return new Response(JSON.stringify({ error: 'Failed to record signature' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      
+      // Notify staff
+      const { data: staffUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['admin', 'consultor'])
+      
+      if (staffUsers?.length) {
+        const startupName = (contract as any).workspace?.startup?.name || 'Startup'
+        await supabase.from('notifications').insert(
+          staffUsers.map((s: any) => ({
+            user_id: s.user_id,
+            type: 'contract_signed',
+            title: `Contrato assinado: ${startupName}`,
+            message: `${signatureData.typed_name} assinou digitalmente o contrato.`,
+            entity_type: 'contract',
+            entity_id: contract.id,
+            link: '/admin?tab=backoffice&subtab=contracts',
+          }))
+        ).catch(() => {})
+      }
+      
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'Contrato assinado digitalmente',
+        signedAt: signatureProof.signed_at,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // === Download PDF (public, token-validated) ===
+    if (action === 'download_pdf') {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      
+      const pdfRes = await fetch(`${supabaseUrl}/functions/v1/generate-contract-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({ contractId: contract.id }),
+      })
+      
+      if (!pdfRes.ok) {
+        return new Response(JSON.stringify({ error: 'Failed to generate PDF' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      
+      const pdfData = await pdfRes.json()
+      return new Response(JSON.stringify({ documentBase64: pdfData.documentBase64, fileName: pdfData.fileName }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     return new Response(JSON.stringify({ error: 'Unknown action' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
