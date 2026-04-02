@@ -338,7 +338,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-blue-500" />
-                        <CardTitle className="text-sm">Summary</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.summary', 'Resumo')}</CardTitle>
                       </div>
                       {expandedSections.summary ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </div>
