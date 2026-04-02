@@ -444,11 +444,11 @@ Deno.serve(async (req) => {
       // Determine the signature provider from the contract record
       const provider: string | null = (contract as any).signature_provider || null
 
-      if (!provider || !['docusign', 'pandadoc', 'manual'].includes(provider)) {
+      if (!provider || !['docusign', 'pandadoc', 'manual', 'assinatura_digital', 'pandadoc_manual'].includes(provider)) {
         // Fail safely — operator must configure a provider before sending
         return new Response(JSON.stringify({
           error: 'signature_provider_not_configured',
-          message: 'No valid signature provider configured for this contract. Staff must set signature_provider to docusign, pandadoc, or manual before sending.',
+          message: 'No valid signature provider configured for this contract.',
         }), {
           status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
