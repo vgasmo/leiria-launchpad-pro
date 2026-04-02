@@ -934,10 +934,10 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
               size="sm" 
               variant="outline"
               className="w-full gap-2"
-              onClick={() => generatePdf.mutate()}
-              disabled={generatePdf.isPending}
+              onClick={handleDownloadPdf}
+              disabled={sending}
             >
-              {generatePdf.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
+              {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
               {t('contractDetail.step1DownloadPdf')}
             </Button>
             
