@@ -20,7 +20,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
   Building2, FileText, PenTool, CheckCircle2, ArrowRight, ArrowLeft,
-  Shield, Loader2, AlertTriangle, Upload, X, Globe, FileUp
+  Shield, Loader2, AlertTriangle, Upload, X, Globe, FileUp, Mail
 } from 'lucide-react';
 
 type WizardStep = 'company_data' | 'review_contract' | 'signing';
@@ -94,12 +94,14 @@ const STEPS: { key: WizardStep; icon: typeof Building2 }[] = [
   { key: 'signing', icon: PenTool },
 ];
 
-type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | string;
+type SignatureProvider = 'docusign' | 'pandadoc' | 'manual' | 'assinatura_digital' | 'pandadoc_manual' | string;
 
 const providerLabel = (p: SignatureProvider, lang: 'pt' | 'en'): string => {
   switch (p) {
     case 'docusign': return 'DocuSign';
     case 'pandadoc': return 'PandaDoc';
+    case 'assinatura_digital': return lang === 'pt' ? 'Assinatura Digital' : 'Digital Signature';
+    case 'pandadoc_manual': return 'PandaDoc';
     case 'manual': return lang === 'pt' ? 'Assinatura Manual' : 'Manual Signature';
     default: return lang === 'pt' ? 'Assinatura' : 'Signature';
   }
@@ -129,6 +131,12 @@ export default function PublicContractSigning() {
   const [contractAccepted, setContractAccepted] = useState(false);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc | null>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+  
+  // Digital signature state
+  const [typedSignature, setTypedSignature] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedDigital, setAcceptedDigital] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState<CompanyFormData>({
@@ -227,6 +235,54 @@ export default function PublicContractSigning() {
 
   const removeDoc = (docKey: string) => {
     setUploadedDocs(prev => ({ ...prev, [docKey]: null }));
+  };
+
+  // Digital signature handler
+  const handleDigitalSign = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: {
+          action: 'digital_sign',
+          token,
+          signatureData: {
+            typed_name: typedSignature,
+            signer_email: formData.legal_representative_email,
+            signer_nif: formData.company_nif,
+            accepted_terms: true,
+            accepted_eidas: true,
+            signed_at: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+          }
+        }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isPt ? 'Contrato assinado com sucesso!' : 'Contract signed successfully!');
+      // Refresh to show completed state
+      window.location.reload();
+    } catch (e: any) {
+      toast.error(e.message || (isPt ? 'Erro ao assinar' : 'Signing failed'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Download PDF handler
+  const handleDownloadPdf = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+        body: { action: 'download_pdf', token }
+      });
+      if (error) throw error;
+      if (data?.documentBase64) {
+        const blob = new Blob([Uint8Array.from(atob(data.documentBase64), c => c.charCodeAt(0))], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+    } catch {
+      toast.error(isPt ? 'Erro ao descarregar PDF' : 'Failed to download PDF');
+    }
   };
 
   // Save company data
@@ -787,99 +843,183 @@ export default function PublicContractSigning() {
               )}
             </CardHeader>
             <CardContent className="space-y-4">
-              {sigStatus === 'completed' ? (
+              {(sigStatus === 'completed' || sigStatus === 'signed') ? (
                 <div className="text-center py-8 space-y-3">
                   <CheckCircle2 className="h-16 w-16 mx-auto text-primary" />
                   <h3 className="text-lg font-semibold text-primary">
                     {isPt ? 'Contrato Assinado!' : 'Contract Signed!'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {sigProvider === 'manual'
-                      ? (isPt
-                        ? 'O contrato foi assinado com sucesso. Receberá um email com os acessos à plataforma.'
-                        : 'The contract has been signed successfully. You will receive an email with platform access.')
-                      : (isPt
-                        ? `O contrato foi assinado via ${providerLabel(sigProvider, 'pt')} com sucesso. Receberá um email com os acessos à plataforma.`
-                        : `The contract has been signed via ${providerLabel(sigProvider, 'en')} successfully. You will receive an email with platform access.`)}
+                    {isPt
+                      ? 'O contrato foi assinado com sucesso. Receberá um email com os acessos à plataforma.'
+                      : 'The contract has been signed successfully. You will receive an email with platform access.'}
                   </p>
                 </div>
+
+              ) : sigProvider === 'assinatura_digital' ? (
+                /* ---- ASSINATURA DIGITAL SIMPLES (nacionais PT) ---- */
+                <div className="space-y-6 py-4">
+                  {/* Secção 1: Visualizar contrato */}
+                  <div className="rounded-lg border p-4 bg-muted/30">
+                    <h4 className="font-medium text-sm mb-2">
+                      {isPt ? '📄 Contrato para Assinatura' : '📄 Contract for Signature'}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {isPt 
+                        ? 'Reveja o contrato antes de assinar. Ao assinar, aceita todos os termos.'
+                        : 'Review the contract before signing. By signing, you accept all terms.'}
+                    </p>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPdf}>
+                      <FileText className="h-3.5 w-3.5" />
+                      {isPt ? 'Descarregar PDF do Contrato' : 'Download Contract PDF'}
+                    </Button>
+                  </div>
+                  
+                  {/* Secção 2: Dados do signatário */}
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <h4 className="font-medium text-sm">
+                      {isPt ? '👤 Dados do Signatário' : '👤 Signer Details'}
+                    </h4>
+                    <div className="grid gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{isPt ? 'Nome:' : 'Name:'}</span>
+                        <span className="font-medium">{formData.legal_representative_name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Email:</span>
+                        <span className="font-medium">{formData.legal_representative_email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">NIF:</span>
+                        <span className="font-medium">{formData.company_nif}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Secção 3: Assinatura */}
+                  <div className="rounded-lg border p-4 space-y-4">
+                    <h4 className="font-medium text-sm">
+                      {isPt ? '✍️ Assinatura' : '✍️ Signature'}
+                    </h4>
+                    
+                    <div>
+                      <Label className="text-xs">
+                        {isPt ? 'Escreva o seu nome completo como assinatura' : 'Type your full name as signature'}
+                      </Label>
+                      <Input 
+                        value={typedSignature}
+                        onChange={(e) => setTypedSignature(e.target.value)}
+                        placeholder={formData.legal_representative_name}
+                        className="mt-1 font-serif text-lg italic"
+                      />
+                      {typedSignature && (
+                        <div className="mt-2 p-3 bg-background border-2 border-dashed rounded text-center">
+                          <span className="font-serif text-2xl italic text-foreground">{typedSignature}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-2">
+                        <Checkbox 
+                          id="accept-terms"
+                          checked={acceptedTerms}
+                          onCheckedChange={(c) => setAcceptedTerms(c === true)}
+                        />
+                        <label htmlFor="accept-terms" className="text-xs leading-relaxed">
+                          {isPt 
+                            ? 'Li e aceito os termos do contrato de incubação e o regulamento interno da Startup Leiria.'
+                            : 'I have read and accept the terms of the incubation contract and the internal regulations of Startup Leiria.'}
+                        </label>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Checkbox 
+                          id="accept-digital"
+                          checked={acceptedDigital}
+                          onCheckedChange={(c) => setAcceptedDigital(c === true)}
+                        />
+                        <label htmlFor="accept-digital" className="text-xs leading-relaxed">
+                          {isPt 
+                            ? 'Aceito que esta assinatura eletrónica simples tem o mesmo valor legal que uma assinatura manuscrita, nos termos do Regulamento eIDAS (UE 910/2014).'
+                            : 'I accept that this simple electronic signature has the same legal value as a handwritten signature under the eIDAS Regulation (EU 910/2014).'}
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full gap-2"
+                      disabled={!typedSignature || !acceptedTerms || !acceptedDigital || typedSignature.length < 3 || isSubmitting}
+                      onClick={handleDigitalSign}
+                    >
+                      {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <PenTool className="h-4 w-4" />}
+                      {isPt ? 'Assinar Contrato Digitalmente' : 'Sign Contract Digitally'}
+                    </Button>
+                    
+                    <p className="text-[10px] text-muted-foreground text-center">
+                      {isPt 
+                        ? 'A sua assinatura, IP, data/hora e user agent serão registados como prova legal.'
+                        : 'Your signature, IP, date/time, and user agent will be recorded as legal proof.'}
+                    </p>
+                  </div>
+                </div>
+
+              ) : sigProvider === 'pandadoc_manual' ? (
+                /* ---- PANDADOC MANUAL: founder aguarda email do PandaDoc ---- */
+                <div className="text-center py-8 space-y-4">
+                  <div className="mx-auto w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+                    <Mail className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold">
+                    {isPt ? 'Assinatura via PandaDoc' : 'Signature via PandaDoc'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    {isPt 
+                      ? 'Irá receber um email do PandaDoc para assinar digitalmente o contrato. Verifique a sua caixa de entrada (e spam) em '
+                      : 'You will receive an email from PandaDoc to digitally sign the contract. Check your inbox (and spam) at '}
+                    <strong>{formData.legal_representative_email}</strong>
+                  </p>
+                  <Badge variant="outline" className="text-xs">
+                    {isPt ? 'Aguarda email do PandaDoc' : 'Awaiting PandaDoc email'}
+                  </Badge>
+                </div>
+
               ) : sigProvider === 'manual' ? (
-                /* ---- MANUAL provider: no digital redirect ---- */
+                /* ---- MANUAL: presencial ---- */
                 <div className="text-center py-8 space-y-4">
                   <div className="mx-auto w-20 h-20 rounded-full bg-muted flex items-center justify-center">
                     <FileText className="h-10 w-10 text-muted-foreground" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {isPt ? 'Assinatura Manual em Processamento' : 'Manual Signature in Progress'}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {isPt
-                        ? 'O seu contrato foi submetido para assinatura manual. A equipa da Startup Leiria irá contactá-lo para agendar a assinatura presencial do contrato.'
-                        : 'Your contract has been submitted for manual signature. The Startup Leiria team will contact you to schedule the in-person contract signing.'}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {isPt
-                        ? <>Email de contacto: <strong>{formData.legal_representative_email}</strong></>
-                        : <>Contact email: <strong>{formData.legal_representative_email}</strong></>}
-                    </p>
-                  </div>
+                  <h3 className="text-lg font-semibold">
+                    {isPt ? 'Assinatura Manual em Processamento' : 'Manual Signature in Progress'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {isPt
+                      ? 'O seu contrato foi submetido para assinatura manual. A equipa da Startup Leiria irá contactá-lo para agendar a assinatura presencial.'
+                      : 'Your contract has been submitted for manual signature. The Startup Leiria team will contact you to schedule the in-person signing.'}
+                  </p>
                   <Badge variant="outline" className="text-xs">
-                    {sigStatus === 'pending_manual'
-                      ? (isPt ? 'Aguarda contacto da equipa' : 'Awaiting team contact')
-                      : (isPt ? 'Submetido' : 'Submitted')}
+                    {isPt ? 'Aguarda contacto da equipa' : 'Awaiting team contact'}
                   </Badge>
                 </div>
+
               ) : (
-                /* ---- DIGITAL providers (DocuSign / PandaDoc): bilateral flow ---- */
+                /* ---- FALLBACK: other/legacy providers ---- */
                 <div className="text-center py-8 space-y-4">
                   <div className="relative mx-auto w-20 h-20">
                     <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
                     <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
                     <PenTool className="absolute inset-0 m-auto h-8 w-8 text-foreground" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {isPt ? 'Aguardando Assinaturas' : 'Awaiting Signatures'}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {isPt
-                        ? <>O contrato foi enviado para assinatura via <strong>{providerLabel(sigProvider, 'pt')}</strong>. Verifique o email <strong>{formData.legal_representative_email}</strong>.</>
-                        : <>The contract was sent for signature via <strong>{providerLabel(sigProvider, 'en')}</strong>. Check your email at <strong>{formData.legal_representative_email}</strong>.</>}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {isPt
-                        ? 'Após a sua assinatura, o representante da Startup Leiria irá contra-assinar o contrato.'
-                        : 'After your signature, the Startup Leiria representative will counter-sign the contract.'}
-                    </p>
-                  </div>
-
-                  {/* Bilateral progress */}
-                  <div className="max-w-sm mx-auto space-y-2 text-left">
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">1</div>
-                      <span className="flex-1">{isPt ? 'Sua assinatura (Primeiro Outorgante)' : 'Your signature (First Party)'}</span>
-                      {sigStatus === 'sent_for_signature' || sigStatus === 'viewed' ? (
-                        <Badge variant="outline" className="text-[10px]">{isPt ? 'Pendente' : 'Pending'}</Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-[10px]">{isPt ? 'Assinado' : 'Signed'}</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">2</div>
-                      <span className="flex-1">{isPt ? 'Startup Leiria (Segundo Outorgante)' : 'Startup Leiria (Second Party)'}</span>
-                      <Badge variant="outline" className="text-[10px]">{isPt ? 'Aguarda' : 'Waiting'}</Badge>
-                    </div>
-                  </div>
-
+                  <h3 className="text-lg font-semibold">
+                    {isPt ? 'Aguardando Assinaturas' : 'Awaiting Signatures'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isPt
+                      ? <>Verifique o email <strong>{formData.legal_representative_email}</strong>.</>
+                      : <>Check your email at <strong>{formData.legal_representative_email}</strong>.</>}
+                  </p>
                   <Badge variant="outline" className="text-xs">
-                    {sigStatus === 'sent_for_signature'
-                      ? (isPt ? `Enviado via ${providerLabel(sigProvider, 'pt')}` : `Sent via ${providerLabel(sigProvider, 'en')}`)
-                      : sigStatus === 'viewed'
-                      ? (isPt ? 'Documento visualizado' : 'Document viewed')
-                      : sigStatus === 'declined'
-                      ? (isPt ? 'Assinatura recusada' : 'Signature declined')
-                      : (isPt ? 'Pendente' : 'Pending')}
+                    {isPt ? 'Pendente' : 'Pending'}
                   </Badge>
                 </div>
               )}
