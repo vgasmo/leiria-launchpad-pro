@@ -311,7 +311,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
 
             {/* Provider selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Provider de Assinatura</label>
+              <label className="text-xs font-medium text-muted-foreground">{t('intake.signatureProvider', 'Provider de Assinatura')}</label>
               <Select value={selectedProvider} onValueChange={setSelectedProvider}>
                 <SelectTrigger className="h-9">
                   <SelectValue placeholder="Selecionar provider..." />
