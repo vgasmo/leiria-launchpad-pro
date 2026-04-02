@@ -75,7 +75,7 @@ export function HealthScorePanel({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">Health Score</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('health.title', 'Health Score')}</CardTitle>
           {canWrite && (
             <Button 
               variant="ghost" 
@@ -104,7 +104,7 @@ export function HealthScorePanel({
         {/* Last Computation Results */}
         {lastComputation && (
           <div className="text-xs space-y-1 p-2 bg-muted/50 rounded-lg">
-            <div className="font-medium">Latest computation ({lastComputation.score}/100 points):</div>
+            <div className="font-medium">{t('health.latestComputation', { score: lastComputation.score, defaultValue: 'Última computação ({{score}}/100):' })}</div>
             <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
               {lastComputation.reasons.map((reason, idx) => (
                 <li key={idx}>{reason}</li>
@@ -116,7 +116,7 @@ export function HealthScorePanel({
         {/* Health Notes */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Health Notes</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('health.notes', 'Notas de Health')}</span>
             {canWrite && !showNotesEditor && (
               <Button 
                 variant="ghost" 

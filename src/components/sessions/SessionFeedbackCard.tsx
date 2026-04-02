@@ -105,7 +105,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
           ))}
           
           {!allFeedback?.length && (
-            <p className="text-sm text-muted-foreground">No feedback yet. Be the first to share your thoughts!</p>
+            <p className="text-sm text-muted-foreground">{t('sessions.noFeedback', 'Sem feedback ainda. Seja o primeiro!')}</p>
           )}
         </CardContent>
       </Card>
@@ -113,11 +113,11 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rate Session: {sessionTitle}</DialogTitle>
+            <DialogTitle>{t('sessions.rateSession', { title: sessionTitle, defaultValue: 'Avaliar Sessão: {{title}}' })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Rating</p>
+              <p className="text-sm font-medium">{t('sessions.rating', 'Avaliação')}</p>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(star => (
                   <button
@@ -138,7 +138,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Comments (optional)</p>
+              <p className="text-sm font-medium">{t('sessions.commentsOptional', 'Comentários (opcional)')}</p>
               <Textarea
                 value={feedback}
                 onChange={e => setFeedback(e.target.value)}

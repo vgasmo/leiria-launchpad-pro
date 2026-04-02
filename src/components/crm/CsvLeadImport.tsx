@@ -203,7 +203,7 @@ export function CsvLeadImport() {
                     <TableRow>
                       <TableHead className="w-8">#</TableHead>
                       <TableHead>{t('crm.import.name', { defaultValue: 'Nome' })}</TableHead>
-                      <TableHead>Email</TableHead>
+                      <TableHead>{t('common.email', 'Email')}</TableHead>
                       <TableHead>{t('crm.import.org', { defaultValue: 'Org' })}</TableHead>
                       <TableHead>{t('crm.import.value', { defaultValue: 'Valor' })}</TableHead>
                       <TableHead className="w-16"></TableHead>

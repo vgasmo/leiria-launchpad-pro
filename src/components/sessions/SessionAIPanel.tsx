@@ -338,7 +338,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-blue-500" />
-                        <CardTitle className="text-sm">Summary</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.summary', 'Resumo')}</CardTitle>
                       </div>
                       {expandedSections.summary ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </div>
@@ -362,7 +362,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <CardTitle className="text-sm">Key Decisions</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.keyDecisions', 'Decisões-Chave')}</CardTitle>
                         <Badge variant="secondary" className="text-xs">{decisions.length}</Badge>
                       </div>
                       {expandedSections.decisions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -394,7 +394,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        <CardTitle className="text-sm">Risks & Concerns</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.risks', 'Riscos & Preocupações')}</CardTitle>
                         <Badge variant="secondary" className="text-xs">{risks.length}</Badge>
                       </div>
                       {expandedSections.risks ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

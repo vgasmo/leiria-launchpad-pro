@@ -46,7 +46,7 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
       if (wsError) throw wsError;
 
       if (!workspaces?.length) {
-        toast.error('No workspaces found');
+        toast.error(t('reports.noWorkspaces', 'Sem workspaces encontrados'));
         return;
       }
 

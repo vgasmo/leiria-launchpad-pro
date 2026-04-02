@@ -736,7 +736,7 @@ function IntakeActionsForDrawer({ item, user }: { item: FunnelItem; user: any })
           <Card className="border-cyan-200 bg-cyan-50/50 dark:bg-cyan-900/10">
             <CardContent className="p-3 flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium">Cliente a preencher dados</p>
+                <p className="text-xs font-medium">{t('crm.clientFillingData', 'Cliente a preencher dados')}</p>
                 <p className="text-[10px] text-muted-foreground">
                   {INTAKE_STATE_LABELS[intake.status as IntakeState]}
                   {intake.reminder_count > 0 && ` • ${intake.reminder_count}x lembrado`}

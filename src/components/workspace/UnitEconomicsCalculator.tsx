@@ -527,7 +527,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
               <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                 <div className="font-medium flex items-center gap-2">
                   <GlossaryTooltip term="paybackPeriod" showIcon={false}>
-                    <span className="cursor-help underline decoration-dotted">Payback</span>
+                    <span className="cursor-help underline decoration-dotted">{t('financial.payback', 'Payback')}</span>
                   </GlossaryTooltip>
                 </div>
                 <p className="text-xs text-muted-foreground">{t('unitEconomics.paybackExplanation')}</p>

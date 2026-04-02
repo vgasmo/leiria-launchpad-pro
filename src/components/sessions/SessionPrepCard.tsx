@@ -282,7 +282,7 @@ export function SessionPrepCard({ sessionId, workspaceId }: SessionPrepCardProps
                   )}
                   {session.decisions && (
                     <p className="text-muted-foreground line-clamp-1">
-                      <span className="font-medium">Decisions:</span> {session.decisions}
+                      <span className="font-medium">{t('sessions.decisions', 'Decisões')}:</span> {session.decisions}
                     </p>
                   )}
                 </div>

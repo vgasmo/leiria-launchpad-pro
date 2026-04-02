@@ -195,10 +195,10 @@ export default function SearchPage() {
             }))}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All workspaces" />
+               <SelectValue placeholder={t('search.allWorkspaces', 'Todos os workspaces')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All workspaces</SelectItem>
+               <SelectItem value="all">{t('search.allWorkspaces', 'Todos os workspaces')}</SelectItem>
               {workspaces?.map((ws) => (
                 <SelectItem key={ws.id} value={ws.id}>
                   {(ws.startup as any)?.name || 'Workspace'}
@@ -235,10 +235,10 @@ export default function SearchPage() {
               }))}
             >
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All tags" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All tags</SelectItem>
+               <SelectValue placeholder={t('search.allTags', 'Todas as tags')} />
+            </SelectTrigger>
+            <SelectContent>
+                 <SelectItem value="all">{t('search.allTags', 'Todas as tags')}</SelectItem>
                 {tags.map((tag) => (
                   <SelectItem key={tag.id} value={tag.id}>{tag.name}</SelectItem>
                 ))}
@@ -268,7 +268,7 @@ export default function SearchPage() {
         {/* Saved Searches */}
         {savedSearches && savedSearches.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Saved:</span>
+            <span className="text-sm text-muted-foreground">{t('search.savedLabel', 'Guardadas')}:</span>
             {savedSearches.map((saved) => (
               <Badge
                 key={saved.id}

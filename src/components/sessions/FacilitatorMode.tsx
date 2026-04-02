@@ -412,7 +412,7 @@ export function FacilitatorMode({ session, onClose, onCreateAction }: Facilitato
 
           {/* Agenda Overview */}
           <div className="flex-1 p-4 overflow-hidden">
-            <h3 className="text-sm font-medium mb-2">Agenda</h3>
+            <h3 className="text-sm font-medium mb-2">{t('sessions.agenda', 'Agenda')}</h3>
             <ScrollArea className="h-full">
               <ul className="space-y-1">
                 {agendaItems.map((item, i) => {

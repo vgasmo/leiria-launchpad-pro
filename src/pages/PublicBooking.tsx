@@ -323,10 +323,10 @@ export default function PublicBooking() {
                         <SelectItem value="fintech">Fintech</SelectItem>
                         <SelectItem value="saas">SaaS / Software</SelectItem>
                         <SelectItem value="ecommerce">E-commerce / Marketplace</SelectItem>
-                        <SelectItem value="cleantech">CleanTech / Sustentabilidade</SelectItem>
+                         <SelectItem value="cleantech">{t('sectors.cleantech', 'CleanTech / Sustainability')}</SelectItem>
                         <SelectItem value="foodtech">FoodTech / AgriTech</SelectItem>
-                        <SelectItem value="manufacturing">Indústria / Manufacturing</SelectItem>
-                        <SelectItem value="social_impact">Impacto Social</SelectItem>
+                        <SelectItem value="manufacturing">{t('sectors.manufacturing', 'Industry / Manufacturing')}</SelectItem>
+                        <SelectItem value="social_impact">{t('sectors.socialImpact', 'Social Impact')}</SelectItem>
                         <SelectItem value="other">{t('common.other', { defaultValue: 'Outro' })}</SelectItem>
                       </SelectContent>
                     </Select>
