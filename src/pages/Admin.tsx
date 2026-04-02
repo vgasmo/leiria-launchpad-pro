@@ -40,7 +40,7 @@ import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCen
 const TAB_GROUPS: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
   crm: ['funnel'],
-  programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys', 'tags'],
+  programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys'],
   reports: ['analytics', 'health', 'compliance', 'data-quality'],
   users: ['users', 'mentors'],
 };
