@@ -42,6 +42,7 @@ import { getRelationshipStatus, getRelationshipStatusConfig, shouldShowInFocusMo
 import { CrmAnalyticsDashboard } from '@/components/crm/CrmAnalyticsDashboard';
 import { PipelineForecastCard } from '@/components/crm/PipelineForecastCard';
 import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
+import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
