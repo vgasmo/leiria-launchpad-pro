@@ -138,7 +138,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Comments (optional)</p>
+              <p className="text-sm font-medium">{t('sessions.commentsOptional', 'Comentários (opcional)')}</p>
               <Textarea
                 value={feedback}
                 onChange={e => setFeedback(e.target.value)}

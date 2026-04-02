@@ -394,7 +394,7 @@ export function SessionAIPanel({ workspaceId, sessionId, session, canWrite, onRe
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        <CardTitle className="text-sm">Risks & Concerns</CardTitle>
+                        <CardTitle className="text-sm">{t('sessions.risks', 'Riscos & Preocupações')}</CardTitle>
                         <Badge variant="secondary" className="text-xs">{risks.length}</Badge>
                       </div>
                       {expandedSections.risks ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

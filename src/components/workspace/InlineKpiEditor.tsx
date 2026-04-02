@@ -172,9 +172,9 @@ export function InlineKpiEditor({ workspaceId, className }: InlineKpiEditorProps
             <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center mb-2">
               <TrendingUp className="h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-foreground mb-0.5">Nenhum KPI configurado</p>
+             <p className="text-sm font-medium text-foreground mb-0.5">{t('kpis.noneConfigured', 'Nenhum KPI configurado')}</p>
             <p className="text-xs text-muted-foreground max-w-[240px]">
-              Os KPIs serão configurados pelo consultor ou administrador do programa.
+               {t('kpis.configuredByStaff', 'Os KPIs serão configurados pelo consultor ou administrador do programa.')}
             </p>
           </div>
         </CardContent>

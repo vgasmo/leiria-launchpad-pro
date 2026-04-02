@@ -371,7 +371,7 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
         {/* Audit Trail */}
         {events && events.length > 0 && (
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Histórico</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('intake.history', 'Histórico')}</p>
             <ScrollArea className="max-h-32">
               <div className="space-y-1">
                 {events.map(ev => (

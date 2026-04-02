@@ -127,7 +127,7 @@ export function SessionSyncStatus({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <div className="space-y-1">
-            <p className="font-medium">Outlook Sync: {getStatusLabel()}</p>
+            <p className="font-medium">{t('sessions.outlookSync', 'Sync Outlook')}: {getStatusLabel()}</p>
             {syncError && (
               <p className="text-xs text-destructive">{syncError}</p>
             )}

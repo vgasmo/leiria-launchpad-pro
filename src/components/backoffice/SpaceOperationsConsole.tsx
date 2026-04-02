@@ -599,7 +599,7 @@ export function SpaceOperationsConsole() {
                             onClick={(e) => {
                               e.stopPropagation();
                               navigator.clipboard.writeText(selectedRecord.startup_contact_email!);
-                              toast.success('Email copiado');
+                              toast.success(t('common.emailCopied', 'Email copiado'));
                             }}
                           >
                             <Copy className="h-3 w-3" />

@@ -116,7 +116,7 @@ export function HealthScorePanel({
         {/* Health Notes */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Health Notes</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('health.notes', 'Notas de Health')}</span>
             {canWrite && !showNotesEditor && (
               <Button 
                 variant="ghost" 

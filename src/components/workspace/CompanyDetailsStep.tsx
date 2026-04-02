@@ -124,7 +124,7 @@ export function CompanyDetailsStep({
             />
           </div>
           <div>
-            <Label htmlFor="contact-email">Email</Label>
+            <Label htmlFor="contact-email">{t('common.email', 'Email')}</Label>
             <Input
               id="contact-email"
               type="email"

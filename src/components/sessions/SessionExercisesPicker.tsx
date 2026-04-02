@@ -296,7 +296,7 @@ function AddExerciseDialog({
 
           {selectedId && (
             <div>
-              <label className="text-sm font-medium">Notes (optional)</label>
+              <label className="text-sm font-medium">{t('sessions.notesOptional', 'Notas (opcional)')}</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

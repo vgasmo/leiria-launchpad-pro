@@ -268,7 +268,7 @@ export default function SearchPage() {
         {/* Saved Searches */}
         {savedSearches && savedSearches.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Saved:</span>
+            <span className="text-sm text-muted-foreground">{t('search.savedLabel', 'Guardadas')}:</span>
             {savedSearches.map((saved) => (
               <Badge
                 key={saved.id}

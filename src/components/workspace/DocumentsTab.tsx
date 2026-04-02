@@ -574,7 +574,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
                                       {isLink && (
                                         <>
                                           <span className="text-muted-foreground/40">•</span>
-                                          <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-normal">Link</Badge>
+                                          <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-normal">{t('common.link', 'Link')}</Badge>
                                         </>
                                       )}
                                     </div>
