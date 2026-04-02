@@ -84,7 +84,7 @@ export default function ConsultorTools() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="frameworks" className="gap-2">
               <MessageSquare className="h-4 w-4" />

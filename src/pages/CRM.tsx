@@ -370,7 +370,7 @@ export default function CRM() {
             <CsvLeadImport />
           </div>
         </div>
-        <Tabs defaultValue="pipeline" className="space-y-4">
+        <Tabs value={crmView} onValueChange={handleViewChange} className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="pipeline" className="gap-2">
               <LayoutGrid className="h-4 w-4" />
