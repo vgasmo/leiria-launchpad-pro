@@ -83,6 +83,7 @@ export default function ValuePropWizardPage() {
 }
 
 function ArtifactCard({ artifact }: { artifact: ValuePropArtifact }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="pb-2">
