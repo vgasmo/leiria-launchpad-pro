@@ -65,7 +65,7 @@ export default function ValuePropWizardPage() {
               <Card className="bg-muted/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <History className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground">No value propositions yet</p>
+                  <p className="text-muted-foreground">{t('valueProp.noPropositions', 'No value propositions yet')}</p>
                 </CardContent>
               </Card>
             ) : (
