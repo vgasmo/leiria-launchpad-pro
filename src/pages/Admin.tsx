@@ -121,7 +121,6 @@ export default function Admin() {
       templates: t('admin.templates'),
       'support-materials': t('admin.supportMaterials.title'),
       surveys: t('admin.surveys.title'),
-      tags: t('admin.tags.title'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
       funnel: t('admin.funnel.tab'),
