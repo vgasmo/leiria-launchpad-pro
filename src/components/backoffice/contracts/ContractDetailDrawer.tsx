@@ -737,9 +737,13 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
               <SelectValue placeholder={t('contractDetail.selectProvider', { defaultValue: 'Selecionar fornecedor...' })} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="pandadoc">PandaDoc</SelectItem>
-              <SelectItem value="docusign">DocuSign</SelectItem>
-              <SelectItem value="manual">{t('contractDetail.manualSignature', { defaultValue: 'Manual' })}</SelectItem>
+              <SelectItem value="assinatura_digital">
+                {t('contractDetail.digitalSignature')}
+              </SelectItem>
+              <SelectItem value="pandadoc_manual">
+                {t('contractDetail.pandadocManual')}
+              </SelectItem>
+              <SelectItem value="manual">{t('contractDetail.manualSignature')}</SelectItem>
             </SelectContent>
           </Select>
         ) : (
