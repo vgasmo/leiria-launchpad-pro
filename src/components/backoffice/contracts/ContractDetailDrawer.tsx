@@ -618,7 +618,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
   const [sending, setSending] = useState(false);
   const queryClient = useQueryClient();
 
-  const provider = contract.signature_provider;
+  const provider = contract.signature_provider as string | null;
   const sigStatus = contract.signature_status;
   const isSent = sigStatus && !['draft', 'failed', 'ready_to_send', 'pending_manual', 'pending', 'pending_signature'].includes(sigStatus);
   const canRetry = sigStatus === 'failed' || sigStatus === 'ready_to_send';
