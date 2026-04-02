@@ -846,57 +846,149 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
       <Separator />
 
       {/* Actions */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-          {t('contractDetail.signatureActions', { defaultValue: 'Ações' })}
+          {t('contractDetail.signatureActions')}
         </Label>
-        <div className="flex flex-wrap gap-2">
-          {provider === 'pandadoc' && (!isSent || canRetry) && (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={handleSendPandaDoc}
+
+        {/* ROTA 1: Assinatura Digital Simples (nacionais PT) */}
+        {provider === 'assinatura_digital' && (!isSent || canRetry) && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              {t('contractDetail.digitalSignatureDesc')}
+            </p>
+            <Button 
+              size="sm" 
+              className="w-full gap-2"
+              onClick={async () => {
+                setSending(true);
+                try {
+                  // 1. Generate PDF
+                  const pdfResult = await invokeWithAuth('generate-contract-pdf', { body: { contractId: contract.id } });
+                  if (pdfResult.error) throw new Error(t('contractDetail.pdfGenerationFailed'));
+                  
+                  // 2. Generate public signing link
+                  const tokenResult = await invokeWithAuth('public-contract-onboarding', {
+                    body: { action: 'generate_token', contractId: contract.id },
+                  });
+                  if (tokenResult.error) throw tokenResult.error;
+                  
+                  // 3. Update contract status
+                  await supabase.from('startup_contracts').update({
+                    signature_provider: 'assinatura_digital',
+                    signature_status: 'sent_for_signature',
+                    signature_requested_at: new Date().toISOString(),
+                  } as any).eq('id', contract.id);
+                  
+                  // 4. Copy link
+                  const url = tokenResult.data?.url || `${window.location.origin}/contract-signing/${tokenResult.data?.token}`;
+                  await navigator.clipboard.writeText(url);
+                  
+                  toast.success(t('contractDetail.linkCopied'));
+                  queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                } catch (e: any) {
+                  toast.error(e.message || t('contractDetail.sendFailed'));
+                } finally {
+                  setSending(false);
+                }
+              }}
               disabled={sending}
-              className="h-8 gap-1.5 text-xs"
             >
-              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              {canRetry
-                ? t('contractDetail.retrySendPandaDoc', { defaultValue: 'Reenviar via PandaDoc' })
-                : t('contractDetail.sendViaPandaDoc', { defaultValue: 'Enviar via PandaDoc' })}
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {t('contractDetail.generateAndSendLink')}
             </Button>
-          )}
-          {provider === 'docusign' && (!isSent || canRetry) && (
-            <Button
-              size="sm"
+          </div>
+        )}
+
+        {/* ROTA 2: PandaDoc Manual (Estrangeiros) */}
+        {provider === 'pandadoc_manual' && (!isSent || canRetry) && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              {t('contractDetail.pandadocManualDesc')}
+            </p>
+            
+            {/* Step 1: Generate & Download PDF */}
+            <Button 
+              size="sm" 
               variant="outline"
-              onClick={handleSendDocuSign}
-              disabled={sending}
-              className="h-8 gap-1.5 text-xs"
+              className="w-full gap-2"
+              onClick={() => generatePdf.mutate()}
+              disabled={generatePdf.isPending}
             >
-              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              {canRetry
-                ? t('contractDetail.retrySendDocuSign', { defaultValue: 'Reenviar via DocuSign' })
-                : t('contractDetail.sendViaDocuSign', { defaultValue: 'Enviar via DocuSign' })}
+              {generatePdf.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
+              {t('contractDetail.step1DownloadPdf')}
             </Button>
-          )}
-          {isSent && sigStatus !== 'completed' && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1.5 text-xs"
-              onClick={() => {
+            
+            {/* Step 2: Open PandaDoc */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => window.open('https://app.pandadoc.com/documents/', '_blank')}
+            >
+              <ExternalLink className="h-3 w-3" />
+              {t('contractDetail.step2OpenPandaDoc')}
+            </Button>
+            
+            {/* Step 3: Mark as sent */}
+            <Button 
+              size="sm" 
+              className="w-full gap-2"
+              onClick={async () => {
+                await supabase.from('startup_contracts').update({
+                  signature_provider: 'pandadoc_manual',
+                  signature_status: 'sent_for_signature',
+                  signature_requested_at: new Date().toISOString(),
+                } as any).eq('id', contract.id);
                 queryClient.invalidateQueries({ queryKey: ['contracts'] });
-                toast.info(t('contractDetail.statusRefreshed', { defaultValue: 'Estado atualizado' }));
+                toast.success(t('contractDetail.markedAsSent'));
               }}
             >
-              <RefreshCw className="h-3.5 w-3.5" />
-              {t('contractDetail.refreshStatus', { defaultValue: 'Atualizar Estado' })}
+              <CheckCircle2 className="h-3 w-3" />
+              {t('contractDetail.step3MarkSent')}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Both manual routes: Mark as signed */}
+        {(provider === 'pandadoc_manual' || provider === 'manual') && sigStatus === 'sent_for_signature' && (
+          <Button 
+            size="sm" 
+            variant="default"
+            className="w-full gap-2 mt-4 bg-green-600 hover:bg-green-700"
+            onClick={async () => {
+              await supabase.from('startup_contracts').update({
+                signature_status: 'signed',
+                signed_at: new Date().toISOString(),
+              } as any).eq('id', contract.id);
+              queryClient.invalidateQueries({ queryKey: ['contracts'] });
+              toast.success(t('contractDetail.markedAsSigned'));
+            }}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {t('contractDetail.markAsSigned')}
+          </Button>
+        )}
+
+        {/* Refresh status for any sent contract */}
+        {isSent && sigStatus !== 'completed' && sigStatus !== 'signed' && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-1.5 text-xs"
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: ['contracts'] });
+              toast.info(t('contractDetail.statusRefreshed'));
+            }}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            {t('contractDetail.refreshStatus')}
+          </Button>
+        )}
+
         {!provider && !isSent && (
           <p className="text-xs text-muted-foreground">
-            {t('contractDetail.selectProviderHint', { defaultValue: 'Selecione um fornecedor de assinatura acima antes de enviar o contrato.' })}
+            {t('contractDetail.selectProviderHint')}
           </p>
         )}
       </div>
