@@ -34,7 +34,7 @@ import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
 import { FounderMentorRequestPanel } from '@/components/mentors/FounderMentorRequestPanel';
 import { PendingMentorRequestsPanel } from '@/components/mentors/PendingMentorRequestsPanel';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
-import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CURRENT_NDA_VERSION = 'PT-NDA-2026-01';
