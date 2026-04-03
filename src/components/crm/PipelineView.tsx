@@ -242,9 +242,9 @@ function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineCo
       <Card 
         ref={setNodeRef}
         className={cn(
-          'h-full border-0 shadow-sm transition-all',
+          'h-full border-0 shadow-sm transition-all duration-200',
           config.bgColor,
-          isOver && 'ring-2 ring-primary ring-offset-2'
+          isOver && 'ring-2 ring-primary ring-offset-2 scale-[1.01]'
         )}
       >
         <CardHeader className="py-3 px-4">
