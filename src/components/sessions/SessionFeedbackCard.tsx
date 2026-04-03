@@ -41,7 +41,7 @@ export function SessionFeedbackCard({ sessionId, sessionTitle }: SessionFeedback
       toast.success(t('sessions.feedbackSubmitted'));
       setDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to submit feedback');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 

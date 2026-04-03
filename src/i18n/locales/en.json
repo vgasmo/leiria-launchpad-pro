@@ -1495,7 +1495,8 @@
     "selectProgram": "Select program",
     "stageDistribution": "Stage Distribution",
     "totalStartups": "Total Startups",
-    "generateReportDesc": "Generate program-level reports for stakeholders"
+    "generateReportDesc": "Generate program-level reports for stakeholders",
+    "exportedStartups": "Exported {{count}} startups to CSV"
   },
   "app": {
     "clickToUpdate": "Click to refresh.",
@@ -1887,7 +1888,8 @@
     "yes": "Yes",
     "milestones": "Milestones",
     "sessions": "Sessions",
-    "submitted": "Submitted"
+    "submitted": "Submitted",
+    "errorGeneric": "An error occurred. Please try again."
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3882,7 +3884,8 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint."
+    "zoomMeetNote": "Use Zapier or Make.com to connect your meetings to this webhook endpoint.",
+    "setupGuide": "Integrations Setup Guide"
   },
   "investorReadiness": {
     "createLink": "Create Link",
@@ -6052,7 +6055,8 @@
     "webhookUrl": "Webhook URL",
     "weekly": "Weekly",
     "whenEnabled": "When enabled:",
-    "whenScheduleSession": "When you schedule a session, the system will automatically:"
+    "whenScheduleSession": "When you schedule a session, the system will automatically:",
+    "useCustomCalendarDesc": "Use a different calendar instead of the assigned consultant"
   },
   "settingsPage": {
     "areasOfExpertise": "Areas of Expertise",

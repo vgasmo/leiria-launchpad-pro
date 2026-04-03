@@ -42,14 +42,14 @@ export default function IntegrationsSetup() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Copied to clipboard');
+      toast.success(t('common.copiedToClipboard'));
     } catch {
-      toast.error('Failed to copy');
+      toast.error(t('common.errorGeneric'));
     }
   };
 
   return (
-    <AppLayout title="Integrations Setup Guide">
+    <AppLayout title={t('integrations.setupGuide', 'Guia de Configuração de Integrações')}>
       <div className="mb-6">
         <Button
           variant="ghost"

@@ -1495,7 +1495,8 @@
     "selectProgram": "Selecionar programa",
     "stageDistribution": "Distribuição por Fase",
     "totalStartups": "total de Startups",
-    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders"
+    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders",
+    "exportedStartups": "Exportadas {{count}} startups para CSV"
   },
   "app": {
     "clickToUpdate": "Clique para atualizar.",
@@ -1887,7 +1888,8 @@
     "yes": "Sim",
     "milestones": "Milestones",
     "sessions": "Sessões",
-    "submitted": "Submetido"
+    "submitted": "Submetido",
+    "errorGeneric": "Ocorreu um erro. Por favor tente novamente."
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3882,7 +3884,8 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook."
+    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
+    "setupGuide": "Guia de Configuração de Integrações"
   },
   "investorReadiness": {
     "createLink": "Criar Link",
@@ -5931,7 +5934,7 @@
     "autoJoinUrl": "URL de adesão automática",
     "autoTranscripts": "Transcrições automáticas",
     "azureAdAppRegistration": "Registo de App Azure AD",
-    "azureAdIdentifiersSaved": "Azure AD identifiers saved",
+    "azureAdIdentifiersSaved": "Identificadores Azure AD guardados",
     "calendarSyncActive": "✓ Sincronização de calendário ativa",
     "calendarSyncDesc": "As sessões criarão eventos Outlook + links Teams",
     "cancelledRemove": "Sessões canceladas removem o evento",
@@ -5950,7 +5953,7 @@
     "createOutlookEvents": "Criar eventos Outlook quando sessões são agendadas",
     "createOutlookOnSchedule": "Criar eventos Outlook quando sessões são agendadas",
     "customCalendarEmail": "Email de Calendário Personalizado",
-    "customCalendarEmailSaved": "Custom calendar email saved",
+    "customCalendarEmailSaved": "Email de calendário personalizado guardado",
     "daily": "Diário",
     "dayOfWeek": "Dia da Semana",
     "digestFrequency": "Frequência do Resumo",
@@ -5962,13 +5965,13 @@
     "enableGraphGlobally": "Ativar Graph API globalmente",
     "enableGraphSync": "Ativar sincronização Graph API",
     "enableTeamsNotifications": "Ativar notificações do Teams",
-    "enterAValidConsultantEmail": "Enter a valid consultant email to test",
+    "enterAValidConsultantEmail": "Insira um email de consultor válido para testar",
     "eventsIncludeTeams": "Eventos incluem links Teams para reuniões online",
     "failedToSaveWebhook": "Erro ao guardar webhook",
     "failedToUpdate": "Erro ao atualizar",
     "generateTeamsLink": "Gerar um link de reunião Teams",
     "globalGraphApi": "Microsoft Graph API Global",
-    "globalGraphApiIsNot": "Global Graph API is not enabled. Ask an admin to configure it.",
+    "globalGraphApiIsNot": "A Graph API global não está ativada. Peça a um administrador para configurar.",
     "globalIntegrationActive": "Integração global ativa!",
     "globalIntegrationDesc": "As sessões sincronizam automaticamente com o calendário Outlook do consultor atribuído. Sem configuração por workspace necessária.",
     "graphApi": "Microsoft Graph API",
@@ -5996,7 +5999,7 @@
     "inviteMentorsFounders": "Convidar mentores e founders",
     "language": "Idioma",
     "newSessionsCreate": "Novas sessões criam automaticamente eventos Outlook",
-    "noCalendarEmailAvailableAssign": "No calendar email available. Assign a consultant or set a custom email.",
+    "noCalendarEmailAvailableAssign": "Nenhum email de calendário disponível. Atribua um consultor ou defina um email personalizado.",
     "noConsultantAssigned": "Nenhum consultor atribuído",
     "noConsultantWarning": "Nenhum consultor atribuído a este workspace. Atribua um consultor nas Definições ou use um email personalizado.",
     "notConfigured": "Não configurado",
@@ -6048,11 +6051,12 @@
     "testGraphConnection": "Testar Conexão Graph API",
     "theme": "Tema",
     "updateIdentifiers": "Atualizar Identificadores",
-    "usingAssignedConsultantCalendar": "Using assigned consultant calendar",
+    "usingAssignedConsultantCalendar": "A usar calendário do consultor atribuído",
     "webhookUrl": "URL do Webhook",
     "weekly": "Semanal",
     "whenEnabled": "Quando ativado:",
-    "whenScheduleSession": "Quando agenda uma sessão, o sistema vai automaticamente:"
+    "whenScheduleSession": "Quando agenda uma sessão, o sistema vai automaticamente:",
+    "useCustomCalendarDesc": "Usar um calendário diferente do consultor atribuído"
   },
   "settingsPage": {
     "areasOfExpertise": "Áreas de Especialização",

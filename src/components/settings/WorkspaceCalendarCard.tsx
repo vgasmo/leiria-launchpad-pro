@@ -101,7 +101,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
       });
       toast.success(t('settings.customCalendarEmailSaved'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 
@@ -117,7 +117,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
         });
         toast.success(t('settings.usingAssignedConsultantCalendar'));
       } catch (error: any) {
-        toast.error(error.message || 'Failed to update');
+        toast.error(error.message || t('common.errorGeneric'));
       }
     }
   };
@@ -138,9 +138,9 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
         use_custom_calendar_email: useCustomEmail,
         ...(useCustomEmail && email && { calendar_user_email: email }),
       });
-      toast.success(enabled ? 'Calendar sync enabled' : 'Calendar sync disabled');
+      toast.success(enabled ? t('settings.outlookSyncEnabled') : t('settings.outlookSyncDisabled'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 
@@ -158,16 +158,16 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-[#0078D4]" />
-          Outlook Calendar Sync
+          {t('settings.outlookCalendarSync')}
           {isEnabled && globalEnabled && hasEffectiveEmail && (
             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Active
+              {t('common.active')}
             </Badge>
           )}
         </CardTitle>
         <CardDescription>
-          Automatically create Outlook events with Teams meeting links for sessions
+          {t('settings.outlookCalendarDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -175,7 +175,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Global Microsoft Graph API is not configured. Contact an admin to set it up in Admin → Integrations.
+              {t('settings.graphApiNotConfigured')}
             </AlertDescription>
           </Alert>
         )}
@@ -184,7 +184,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
           <Alert variant="default" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
             <AlertTriangle className="h-4 w-4 text-amber-500" />
             <AlertDescription>
-              No consultant assigned to this workspace. Assign a consultant in Settings or use a custom calendar email.
+              {t('settings.noConsultantWarning')}
             </AlertDescription>
           </Alert>
         )}
@@ -195,19 +195,19 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
-                Assigned Consultant Calendar
+                {t('settings.assignedConsultantCalendar')}
               </Label>
               <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <span className={assignedConsultantEmail ? 'text-foreground' : 'text-muted-foreground italic'}>
-                  {assignedConsultantEmail || 'No consultant assigned'}
+                  {assignedConsultantEmail || t('settings.noConsultantAssigned')}
                 </span>
                 {assignedConsultantEmail && !useCustomEmail && (
-                  <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                  <Badge variant="secondary" className="ml-auto text-xs">{t('common.active')}</Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                Sessions will be created in this consultant's Outlook calendar by default.
+                {t('settings.sessionsCreatedInCalendar')}
               </p>
             </div>
 
@@ -216,10 +216,10 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
               <div className="space-y-0.5">
                 <Label className="flex items-center gap-2">
                   <Settings2 className="h-4 w-4" />
-                  Override with custom email
+                  {t('settings.overrideCustomEmail')}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Use a different calendar instead of the assigned consultant
+                  {t('settings.useCustomCalendarDesc', 'Usar um calendário diferente do consultor atribuído')}
                 </p>
               </div>
               <Switch
@@ -248,7 +248,7 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
                     onClick={handleSaveCustomEmail}
                     disabled={!email || updateSettings.isPending || !canEdit}
                   >
-                    Save
+                    {t('common.save')}
                   </Button>
                 </div>
               </div>
@@ -257,9 +257,9 @@ export function WorkspaceCalendarCard({ workspaceId, canEdit = true }: Workspace
             {/* Enable Sync Toggle */}
             <div className="flex items-center justify-between pt-2 border-t">
               <div className="space-y-0.5">
-                <Label>Enable calendar sync for this workspace</Label>
+                <Label>{t('settings.enableCalendarSyncWorkspace')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Sessions will create Outlook events + Teams links
+                  {t('settings.calendarSyncDesc')}
                 </p>
               </div>
               <Switch
