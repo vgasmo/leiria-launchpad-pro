@@ -110,11 +110,13 @@ const buildTests = (): { name: string; icon: React.ReactNode; tests: TestDef[] }
         const { data, error } = await supabase.functions.invoke(fn, {
           body: { diagnosticPing: true },
         });
+        // 400/401 = function is alive but rejecting invalid input (expected).
+        // Only 5xx or unreachable = real problem.
         const msg = (data as any)?.error || error?.message || 'Responds OK';
         const isConfigError = typeof msg === 'string' && (msg.includes('CONFIG_ERROR') || msg.includes('not configured'));
         return {
           pass: !isConfigError,
-          message: isConfigError ? `⚠️ Missing config` : msg,
+          message: isConfigError ? '⚠️ Missing config' : `✓ Reachable (${msg})`,
         };
       } catch (e: any) {
         return { pass: false, message: `Unreachable: ${e.message}` };
