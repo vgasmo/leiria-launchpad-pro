@@ -302,10 +302,9 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
 
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    transition: isDragging ? undefined : 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
+    zIndex: isDragging ? 50 : undefined,
   } : undefined;
-
-  // Show fine-grained sub-stage as small badge
-  const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
 
   return (
     <Card
