@@ -220,6 +220,7 @@ export default function Mentors() {
   // Fetch all mentors for the gallery (founder view)
   // Uses user_roles table so mentors appear automatically upon registration
   const [mentorSearch, setMentorSearch] = useState('');
+  const [selectedMentorForBooking, setSelectedMentorForBooking] = useState<string | null>(null);
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
