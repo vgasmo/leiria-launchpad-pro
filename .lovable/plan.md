@@ -1,19 +1,31 @@
+## Plano de implementação — 4 Features
 
-# Audit Fix Plan — 3 Batches
+### 1. Chat Direto (Founder ↔ Consultor/Mentor)
+- Já temos tabelas `conversations` e `conversation_participants` 
+- Criar componente de messaging inline no workspace
+- Realtime via Supabase channels (scoped ao workspace)
+- UI: sidebar de chat ou drawer no workspace
 
-## Batch 1: Data Integrity + Contract Lifecycle + Release Wrapper
-1. **Package.json cleanup**: Move test deps to devDependencies, rename package
-2. **Contract creation invariant**: Add DB trigger to ensure contract_id on critical intake states
-3. **Orphan contract detection**: Query and flag contracts linked to rejected leads
-4. **Transition guards**: Add validation trigger for intake status transitions
-5. **.gitignore/.env**: Report read-only constraint, document residual risk
+### 2. Playbook Evidence Upload
+- Adicionar tabela `playbook_step_evidence` (step_id, file_path, notes, submitted_by)
+- Storage bucket para evidências
+- UI: botão "Submeter Evidência" em cada step do playbook
+- Consultor pode aprovar/rejeitar
 
-## Batch 2: Founder/Staff Trust + Public UX
-6. **Public token error UX**: Replace technical errors with user-friendly messages in contract intake/signing pages
-7. **Space occupancy validation**: Check if 0/106 is real data or bug
-8. **Email failure feedback**: Ensure staff sees clear feedback on failed sends
+### 3. Benchmark Dashboard
+- Criar view agregada anónima por programa/fase
+- Métricas: KPIs médios, milestones concluídos, tempo por fase
+- UI: dashboard comparativo no workspace do founder
+- Dados 100% anonimizados
 
-## Batch 3: Code Quality + Polish
-9. **React ref warnings**: Fix ScrollToTop and EcosystemHeatmap
-10. **Tour conditioning**: Hide tour for admins, improve copy
-11. **Minor label/UX fixes**
+### 4. Twilio/WhatsApp Reminders
+- Conectar Twilio connector
+- Edge function para enviar lembretes (sessões, check-ins, deadlines)
+- Configuração por workspace (opt-in do founder)
+- Templates de mensagem em PT/EN
+
+### Ordem de implementação
+1. Chat Direto (usa infra existente)
+2. Playbook Evidence Upload (migration + storage + UI)
+3. Benchmark Dashboard (view + UI)
+4. Twilio/WhatsApp (connector + edge function)
