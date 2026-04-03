@@ -5123,6 +5123,19 @@
     },
     "undoDismiss": "Restaurar"
   },
+  "benchmark": {
+    "title": "Benchmark do Programa",
+    "description": "Comparação anónima com startups na mesma fase",
+    "noData": "Dados de benchmark ainda não disponíveis. Serão apresentados quando houver startups suficientes no programa.",
+    "healthScore": "Health Score",
+    "milestones": "Milestones Concluídos",
+    "actions": "Ações Concluídas",
+    "you": "Tu",
+    "avg": "Média",
+    "startups": "startups",
+    "stageOverview": "Visão por Fase",
+    "stageDesc": "Métricas médias de cada fase do programa"
+  },
   "prep": {
     "title": "Prep Sheet — Primeiro Contacto"
   },
