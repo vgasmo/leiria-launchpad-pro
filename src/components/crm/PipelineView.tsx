@@ -5,11 +5,13 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   closestCenter,
 } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -93,7 +95,13 @@ export function PipelineView({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
       },
     })
   );
@@ -207,7 +215,10 @@ export function PipelineView({
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={{
+        duration: 250,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+      }}>
         {activeItem && (
           <DragCard item={activeItem} />
         )}
@@ -234,9 +245,9 @@ function PipelineColumn({ simpleStage, items, config, onOpenDrawer }: PipelineCo
       <Card 
         ref={setNodeRef}
         className={cn(
-          'h-full border-0 shadow-sm transition-all',
+          'h-full border-0 shadow-sm transition-all duration-200',
           config.bgColor,
-          isOver && 'ring-2 ring-primary ring-offset-2'
+          isOver && 'ring-2 ring-primary ring-offset-2 scale-[1.01]'
         )}
       >
         <CardHeader className="py-3 px-4">
@@ -294,20 +305,23 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
 
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    transition: isDragging ? undefined : 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
+    zIndex: isDragging ? 50 : undefined,
   } : undefined;
 
-  // Show fine-grained sub-stage as small badge
-  const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
+    // Show fine-grained sub-stage as small badge
+    const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md',
-        'bg-background border shadow-sm',
+        'cursor-pointer bg-background border shadow-sm',
+        'transition-[box-shadow,border-color,opacity] duration-200 ease-out',
+        'hover:shadow-md hover:border-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500',
-        isDragging && 'opacity-50 shadow-lg'
+        isDragging && 'opacity-40 shadow-lg scale-[1.02] rotate-1'
       )}
       data-testid="crm-record"
       onClick={() => onOpenDrawer(item)}
@@ -400,8 +414,10 @@ function DragCard({ item }: { item: CrmInboxItem }) {
   return (
     <Card
       className={cn(
-        'w-72 cursor-grabbing shadow-xl rotate-2',
-        'bg-background border',
+        'w-72 cursor-grabbing rotate-[2deg] scale-105',
+        'bg-background border border-primary/30',
+        'shadow-[0_20px_40px_-12px_rgba(0,0,0,0.25)]',
+        'ring-2 ring-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500'
       )}
     >
