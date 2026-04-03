@@ -536,6 +536,17 @@ Deno.serve(async (req) => {
             signingResult = { status: 'pending_manual', provider: 'pandadoc', message: 'PandaDoc unavailable — staff notified' }
           }
 
+        } else if (provider === 'assinatura_digital') {
+          // Assinatura Digital Simples (PT nationals, eIDAS compliant)
+          // No external dispatch — the user signs directly in the browser (step 3).
+          // signature_status is already 'sent_for_signature' (set above).
+          signingResult = { status: 'ready_for_inline_signing', provider: 'assinatura_digital', message: 'Ready for digital signature in browser.' }
+
+        } else if (provider === 'pandadoc_manual') {
+          // PandaDoc Manual: staff sends via PandaDoc web interface
+          // No API dispatch — just notify staff to send manually
+          signingResult = { status: 'pending_manual', provider: 'pandadoc_manual', message: 'Contract ready for PandaDoc manual send. Staff notified.' }
+
         } else if (provider === 'manual') {
           // Manual signing: mark as pending manual, notify staff
           await supabase

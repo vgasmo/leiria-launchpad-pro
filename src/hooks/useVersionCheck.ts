@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes (was 5)
 
 export function useVersionCheck() {
   const { t } = useTranslation();
@@ -23,14 +23,53 @@ export function useVersionCheck() {
 
       if (remote !== initialVersion.current && !hasNotified.current) {
         hasNotified.current = true;
-        toast(t('app.newVersionAvailable', 'Nova versão disponível.'), {
-          description: t('app.clickToUpdate', 'Clique para atualizar.'),
-          duration: Infinity,
-          action: {
-            label: '↻',
-            onClick: () => window.location.reload(),
+
+        // Force unregister stale service workers so the new build is used
+        if ('serviceWorker' in navigator) {
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const reg of registrations) {
+              await reg.unregister();
+            }
+          } catch {
+            // ignore SW errors
+          }
+        }
+
+        // Clear all caches (Workbox / SW caches)
+        if ('caches' in window) {
+          try {
+            const names = await caches.keys();
+            await Promise.all(names.map(n => caches.delete(n)));
+          } catch {
+            // ignore cache errors
+          }
+        }
+
+        // Show persistent, unmissable toast with clear action
+        toast(
+          t('app.newVersionAvailable', 'Nova versão disponível!'),
+          {
+            description: t(
+              'app.clickToUpdate',
+              'A app foi atualizada. Clique no botão para carregar a nova versão.'
+            ),
+            duration: Infinity,
+            important: true,
+            action: {
+              label: t('app.updateNow', 'Atualizar agora'),
+              onClick: () => {
+                // Hard reload bypassing cache
+                window.location.reload();
+              },
+            },
           },
-        });
+        );
+
+        // Auto-reload after 30 seconds if user hasn't clicked
+        setTimeout(() => {
+          window.location.reload();
+        }, 30_000);
       }
     } catch {
       // silently ignore network errors
@@ -44,9 +83,19 @@ export function useVersionCheck() {
     const onFocus = () => checkVersion();
     window.addEventListener('focus', onFocus);
 
+    // Listen for SW update events (Workbox prompt)
+    const onControllerChange = () => {
+      if (!hasNotified.current) {
+        // SW updated silently — reload to pick up new assets
+        window.location.reload();
+      }
+    };
+    navigator.serviceWorker?.addEventListener('controllerchange', onControllerChange);
+
     return () => {
       clearInterval(id);
       window.removeEventListener('focus', onFocus);
+      navigator.serviceWorker?.removeEventListener('controllerchange', onControllerChange);
     };
   }, [checkVersion]);
 }
