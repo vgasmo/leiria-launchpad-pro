@@ -199,22 +199,23 @@ export default function Mentors() {
   );
 
   // Fetch all mentors for the gallery (founder view)
+  // Uses user_roles table so mentors appear automatically upon registration
   const [mentorSearch, setMentorSearch] = useState('');
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
-      // Get all users with mentor_externo role
+      // Get all users with mentor_externo role from user_roles (auto-assigned at signup)
       const { data: mentorRoles, error: rolesError } = await supabase
-        .from('workspace_users')
+        .from('user_roles')
         .select('user_id')
-        .eq('role', 'mentor_externo')
-        .eq('active', true);
+        .eq('role', 'mentor_externo');
 
       if (rolesError) throw rolesError;
       if (!mentorRoles?.length) return [];
 
       const mentorIds = [...new Set(mentorRoles.map(r => r.user_id))];
       
+      // Only show mentors with approved accounts
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
@@ -330,21 +331,16 @@ export default function Mentors() {
           </TabsContent>
         </Tabs>
       ) : isFounder ? (
-        // FOUNDER VIEW: Request mentor + assigned mentors + booking
+        // FOUNDER VIEW: My Mentors → Gallery → Book Session → Request Mentor
         <div className="space-y-6">
-          {/* Request a Mentor Section */}
-          <FounderMentorRequestPanel />
-
-          {/* Assigned Mentors */}
+          {/* 1. Assigned Mentors (My Mentors) */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 {t('mentorsPage.myMentors')}
               </CardTitle>
-              <CardDescription>
-                {t('mentorsPage.myMentorsDesc')}
-              </CardDescription>
+              <CardDescription>{t('mentorsPage.myMentorsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingAssigned ? (
@@ -366,9 +362,7 @@ export default function Mentors() {
                 <div className="text-center py-12">
                   <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">{t('mentorsPage.noMentorsAssigned')}</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    {t('mentorsPage.noMentorsAssignedDesc')}
-                  </p>
+                  <p className="text-muted-foreground max-w-md mx-auto">{t('mentorsPage.noMentorsAssignedDesc')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,54 +378,32 @@ export default function Mentors() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <h3 className="font-semibold text-lg">
-                                {mentor.profile?.full_name || t('mentorsPage.unnamedMentor')}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {mentor.profile?.email}
-                              </p>
+                              <h3 className="font-semibold text-lg">{mentor.profile?.full_name || t('mentorsPage.unnamedMentor')}</h3>
+                              <p className="text-sm text-muted-foreground">{mentor.profile?.email}</p>
                             </div>
                             <div className="flex gap-1">
                               {mentor.profile?.linkedin_url && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  asChild
-                                  className="h-8 w-8"
-                                >
-                                  <a
-                                    href={sanitizeUrl(mentor.profile.linkedin_url)!}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
+                                <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+                                  <a href={sanitizeUrl(mentor.profile.linkedin_url)!} target="_blank" rel="noopener noreferrer">
                                     <Linkedin className="h-4 w-4" />
                                   </a>
                                 </Button>
                               )}
                             </div>
                           </div>
-
                           {mentor.profile?.bio && (
-                            <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
-                              {mentor.profile.bio}
-                            </p>
+                            <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{mentor.profile.bio}</p>
                           )}
-
                           {mentor.profile?.expertise && mentor.profile.expertise.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-3">
                               {mentor.profile.expertise.slice(0, 4).map(exp => (
-                                <Badge key={exp} variant="secondary" className="text-xs">
-                                  {exp}
-                                </Badge>
+                                <Badge key={exp} variant="secondary" className="text-xs">{exp}</Badge>
                               ))}
                               {mentor.profile.expertise.length > 4 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{mentor.profile.expertise.length - 4}
-                                </Badge>
+                                <Badge variant="outline" className="text-xs">+{mentor.profile.expertise.length - 4}</Badge>
                               )}
                             </div>
                           )}
-
                           {mentor.profile?.email && (
                             <div className="flex gap-2 mt-4">
                               <Button size="sm" variant="outline" asChild>
@@ -451,32 +423,14 @@ export default function Mentors() {
             </CardContent>
           </Card>
 
-          {/* Booking section for founders */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5" />
-                {t('mentorsPage.bookSession')}
-              </CardTitle>
-              <CardDescription>
-                {t('mentorsPage.bookSessionDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <MentorBookingPanel mode="founder" />
-            </CardContent>
-          </Card>
-
-          {/* Mentor Gallery - Browse all mentors */}
+          {/* 2. Mentor Gallery */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 {t('mentorsPage.mentorGallery', 'Galeria de Mentores')}
               </CardTitle>
-              <CardDescription>
-                {t('mentorsPage.mentorGalleryDesc', 'Explore todos os mentores disponíveis no ecossistema por área de especialidade.')}
-              </CardDescription>
+              <CardDescription>{t('mentorsPage.mentorGalleryDesc', 'Explore todos os mentores disponíveis no ecossistema por área de especialidade.')}</CardDescription>
               <div className="relative mt-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
@@ -548,23 +502,19 @@ export default function Mentors() {
                                 {mentor.expertise && mentor.expertise.length > 0 && (
                                   <div className="flex flex-wrap gap-1 mt-2">
                                     {mentor.expertise.slice(0, 3).map(exp => (
-                                      <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">
-                                        {exp}
-                                      </Badge>
+                                      <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">{exp}</Badge>
                                     ))}
                                     {mentor.expertise.length > 3 && (
-                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                        +{mentor.expertise.length - 3}
-                                      </Badge>
+                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">+{mentor.expertise.length - 3}</Badge>
                                     )}
                                   </div>
                                 )}
-                                {isAlreadyAssigned ? (
-                                  <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-green-500 text-green-600">
+                                {isAlreadyAssigned && (
+                                  <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-emerald-500/50 text-emerald-600 dark:text-emerald-400">
                                     <Check className="h-3 w-3" />
                                     {t('mentorsPage.assigned', 'Atribuído')}
                                   </Badge>
-                                ) : null}
+                                )}
                               </div>
                             </div>
                           </CardContent>
@@ -575,6 +525,23 @@ export default function Mentors() {
               )}
             </CardContent>
           </Card>
+
+          {/* 3. Book Session */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5" />
+                {t('mentorsPage.bookSession')}
+              </CardTitle>
+              <CardDescription>{t('mentorsPage.bookSessionDesc')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MentorBookingPanel mode="founder" />
+            </CardContent>
+          </Card>
+
+          {/* 4. Request a Mentor (last) */}
+          <FounderMentorRequestPanel />
         </div>
       ) : isMentor ? (
         <Tabs defaultValue="requests" className="space-y-6">
