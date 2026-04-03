@@ -1495,7 +1495,8 @@
     "selectProgram": "Selecionar programa",
     "stageDistribution": "Distribuição por Fase",
     "totalStartups": "total de Startups",
-    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders"
+    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders",
+    "exportedStartups": "Exportadas {{count}} startups para CSV"
   },
   "app": {
     "clickToUpdate": "Clique para atualizar.",

@@ -1495,7 +1495,8 @@
     "selectProgram": "Select program",
     "stageDistribution": "Stage Distribution",
     "totalStartups": "Total Startups",
-    "generateReportDesc": "Generate program-level reports for stakeholders"
+    "generateReportDesc": "Generate program-level reports for stakeholders",
+    "exportedStartups": "Exported {{count}} startups to CSV"
   },
   "app": {
     "clickToUpdate": "Click to refresh.",

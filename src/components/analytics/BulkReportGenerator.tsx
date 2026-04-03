@@ -142,10 +142,10 @@ export function BulkReportGenerator({ programId }: BulkReportGeneratorProps) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success(`Exported ${workspaces.length} startups to CSV`);
+      toast.success(t('analytics.exportedStartups', { count: workspaces.length }));
     } catch (error: any) {
       logger.error('Export error', {}, error);
-      toast.error(error.message || 'Failed to generate report');
+      toast.error(error.message || t('common.errorGeneric'));
     } finally {
       setLoading(false);
     }
