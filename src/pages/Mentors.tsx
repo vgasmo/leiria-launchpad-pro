@@ -198,6 +198,24 @@ export default function Mentors() {
     isFounder ? 'founder' : 'mentor'
   );
 
+  // Get founder's primary workspace for the team card
+  const { data: founderWorkspaceId } = useQuery({
+    queryKey: ['founder-primary-workspace', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from('workspace_users')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .eq('role', 'founder')
+        .eq('active', true)
+        .limit(1)
+        .maybeSingle();
+      return data?.workspace_id || null;
+    },
+    enabled: !!user && isFounder,
+  });
+
   // Fetch all mentors for the gallery (founder view)
   // Uses user_roles table so mentors appear automatically upon registration
   const [mentorSearch, setMentorSearch] = useState('');
