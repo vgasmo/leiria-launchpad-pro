@@ -8,7 +8,6 @@ import {
   Target,
   BarChart3,
   Trophy,
-  Trophy,
   FileText,
   FolderLock,
   Calendar,
