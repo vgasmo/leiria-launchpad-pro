@@ -880,7 +880,7 @@
     "healthTemplates": "Health Model Templates",
     "healthThisProgram": "Workspaces in this program",
     "healthTools": "Health Tools",
-    "heatmapSubtitle": "Heatmap Subtitle",
+    "heatmapSubtitle": "Stage × Health distribution",
     "insights": {
       "allHealthyDesc": "All {{count}} startups are in good shape — keep it up!",
       "allHealthyTitle": "Healthy ecosystem",
