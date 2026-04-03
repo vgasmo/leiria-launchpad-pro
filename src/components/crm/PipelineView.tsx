@@ -414,8 +414,10 @@ function DragCard({ item }: { item: CrmInboxItem }) {
   return (
     <Card
       className={cn(
-        'w-72 cursor-grabbing shadow-xl rotate-2',
-        'bg-background border',
+        'w-72 cursor-grabbing rotate-[2deg] scale-105',
+        'bg-background border border-primary/30',
+        'shadow-[0_20px_40px_-12px_rgba(0,0,0,0.25)]',
+        'ring-2 ring-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500'
       )}
     >
