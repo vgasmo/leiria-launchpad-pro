@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,47 @@ type TestDef = {
   name: string;
   test: () => Promise<{ pass: boolean; message: string; details?: string }>;
 };
+
+const EDGE_FUNCTIONS_BASE_URL = import.meta.env.VITE_SUPABASE_URL
+  ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`
+  : null;
+
+async function runEdgeFunctionPreflight(functionName: string): Promise<{ pass: boolean; message: string; details?: string }> {
+  if (!EDGE_FUNCTIONS_BASE_URL) {
+    return { pass: false, message: 'Functions URL not configured' };
+  }
+
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(`${EDGE_FUNCTIONS_BASE_URL}/${functionName}`, {
+      method: 'OPTIONS',
+      signal: controller.signal,
+      headers: {
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'authorization, content-type, apikey, x-client-info',
+      },
+    });
+
+    const details = await response.text().catch(() => '');
+
+    return {
+      pass: response.ok,
+      message: response.ok
+        ? `✓ Preflight OK (${response.status})`
+        : `Preflight failed (${response.status})`,
+      details: details || undefined,
+    };
+  } catch (error: any) {
+    return {
+      pass: false,
+      message: error?.name === 'AbortError' ? 'Timeout (5s)' : `Unreachable: ${error?.message || 'Unknown error'}`,
+    };
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 const buildTests = (): { name: string; icon: React.ReactNode; tests: TestDef[] }[] => {
   const dbTables = [
@@ -104,24 +145,8 @@ const buildTests = (): { name: string; icon: React.ReactNode; tests: TestDef[] }
     'accept-mentor-nda', 'recompute-health-scores', 'recompute-work-queue',
     'generate-session-summary',
   ].map(fn => ({
-    name: `${fn} responds`,
-    test: async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke(fn, {
-          body: { diagnosticPing: true },
-        });
-        // 400/401 = function is alive but rejecting invalid input (expected).
-        // Only 5xx or unreachable = real problem.
-        const msg = (data as any)?.error || error?.message || 'Responds OK';
-        const isConfigError = typeof msg === 'string' && (msg.includes('CONFIG_ERROR') || msg.includes('not configured'));
-        return {
-          pass: !isConfigError,
-          message: isConfigError ? '⚠️ Missing config' : `✓ Reachable (${msg})`,
-        };
-      } catch (e: any) {
-        return { pass: false, message: `Unreachable: ${e.message}` };
-      }
-    },
+    name: `${fn} reachable`,
+    test: async () => runEdgeFunctionPreflight(fn),
   }));
 
   const i18nTests: TestDef[] = [
