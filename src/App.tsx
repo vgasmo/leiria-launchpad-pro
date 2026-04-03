@@ -56,6 +56,7 @@ const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
 const ContractOnboarding = lazy(() => import("./pages/ContractOnboarding"));
 const PublicContractSigning = lazy(() => import("./pages/PublicContractSigning"));
 const PublicContractIntake = lazy(() => import("./pages/PublicContractIntake"));
+const AppDiagnostics = lazy(() => import("./pages/AppDiagnostics"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
