@@ -236,9 +236,10 @@ function buildAssignedEmail(data: AssignedEmailData): string {
     ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Média Prioridade</span>'
     : '';
 
+  const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
   const workspaceUrl = data.workspaceId 
-    ? `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=notes`
-    : "https://apxzuslwhjujgrcsfzqw.lovableproject.com/my-workspaces";
+    ? `${appUrl}/workspace/${data.workspaceId}?tab=notes`
+    : `${appUrl}/my-workspaces`;
 
   return `
     <!DOCTYPE html>
