@@ -39,6 +39,10 @@ verify_jwt = true
 [functions.generate-progress-report-pdf]
 verify_jwt = true
 
+# Staff function — generates contract PDFs, runtime auth check
+[functions.generate-contract-pdf]
+verify_jwt = false
+
 [functions.export-cohort-health-pdf]
 verify_jwt = true
 
