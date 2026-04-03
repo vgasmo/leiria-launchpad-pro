@@ -5042,6 +5042,13 @@
       "sent_for_signature": "Sent for Signature"
     }
   },
+  "chat": {
+    "title": "Workspace Chat",
+    "empty": "No messages yet. Start the conversation!",
+    "placeholder": "Type a message...",
+    "sendError": "Failed to send message",
+    "unknown": "Unknown"
+  },
   "playbookProgress": {
     "activateToTrack": "Activate a playbook to track your progress",
     "activePlaybook": "Active Playbook",
