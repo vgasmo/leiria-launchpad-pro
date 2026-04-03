@@ -1,22 +1,21 @@
 import { useState } from 'react';
 import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useQuery } from '@tanstack/react-query';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  Linkedin, 
-  MessageSquare, 
-  Check, 
-  X, 
-  Clock, 
+import {
+  Linkedin,
+  MessageSquare,
+  Check,
+  X,
+  Clock,
   Users,
-  Send,
   Calendar,
   BarChart3,
   CalendarDays,
   Mail,
   UserPlus,
-  Search
+  Search,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,14 +65,12 @@ interface AssignedMentor {
   profile: MentorProfile | null;
 }
 
-// Hook to fetch assigned mentors for a founder's workspaces
 function useAssignedMentors(userId: string | undefined) {
   return useQuery({
     queryKey: ['assigned-mentors', userId],
     queryFn: async (): Promise<AssignedMentor[]> => {
       if (!userId) return [];
 
-      // Get founder's workspaces
       const { data: founderWorkspaces, error: wsError } = await supabase
         .from('workspace_users')
         .select('workspace_id')
@@ -86,7 +83,6 @@ function useAssignedMentors(userId: string | undefined) {
 
       const workspaceIds = founderWorkspaces.map(w => w.workspace_id);
 
-      // Get mentors assigned to those workspaces
       const { data: mentorAssignments, error: mentorError } = await supabase
         .from('workspace_users')
         .select('user_id, workspace_id')
@@ -99,7 +95,6 @@ function useAssignedMentors(userId: string | undefined) {
 
       const mentorIds = [...new Set(mentorAssignments.map(m => m.user_id))];
 
-      // Get mentor profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
@@ -119,7 +114,6 @@ function useAssignedMentors(userId: string | undefined) {
   });
 }
 
-// Hook to fetch user's connections (for mentors)
 function useConnections(userId: string | undefined, role: 'founder' | 'mentor') {
   return useQuery<MentorConnection[]>({
     queryKey: ['mentor-connections', userId, role],
@@ -136,10 +130,9 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
       if (error) throw error;
       if (!data) return [];
 
-      // Fetch related profiles
       const otherColumn = role === 'founder' ? 'mentor_id' : 'founder_id';
       const otherIds = data.map(c => (c as any)[otherColumn]) as string[];
-      
+
       if (otherIds.length === 0) return data as MentorConnection[];
 
       const { data: profiles } = await supabase
@@ -165,16 +158,14 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
 }
 
 export default function Mentors() {
-  const { user, roles, isLoading: authLoading, isAuthReady, isAdmin, isConsultor } = useAuth();
+  const { user, roles, isAuthReady, isAdmin, isConsultor } = useAuth();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const isFounder = roles.includes('founder');
   const isMentor = roles.includes('mentor_externo');
   const isStaff = isAdmin || isConsultor;
 
-  // Check NDA acceptance for external mentors
   const { data: ndaAcceptance, isLoading: ndaLoading } = useQuery({
     queryKey: ['mentor-nda-check', user?.id],
     queryFn: async () => {
@@ -195,16 +186,16 @@ export default function Mentors() {
     isFounder ? user?.id : undefined
   );
   const { data: connections, isLoading: loadingConnections } = useConnections(
-    user?.id, 
+    user?.id,
     isFounder ? 'founder' : 'mentor'
   );
 
-  // Get founder's primary workspace for the team card
-  const { data: founderWorkspaceId } = useQuery({
-    queryKey: ['founder-primary-workspace', user?.id],
+  const { data: founderWorkspaceContext, isLoading: loadingWorkspaceContext } = useQuery({
+    queryKey: ['founder-primary-workspace-context', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase
+
+      const { data: membership, error: membershipError } = await supabase
         .from('workspace_users')
         .select('workspace_id')
         .eq('user_id', user.id)
@@ -212,19 +203,46 @@ export default function Mentors() {
         .eq('active', true)
         .limit(1)
         .maybeSingle();
-      return data?.workspace_id || null;
+
+      if (membershipError) throw membershipError;
+      if (!membership?.workspace_id) return null;
+
+      const { data: workspace, error: workspaceError } = await (supabase as any)
+        .from('workspaces')
+        .select('id, assigned_consultor_id')
+        .eq('id', membership.workspace_id)
+        .maybeSingle();
+
+      if (workspaceError) throw workspaceError;
+
+      let consultant: MentorProfile | null = null;
+      if (workspace?.assigned_consultor_id) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles_safe')
+          .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
+          .eq('id', workspace.assigned_consultor_id)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+        consultant = (profile as MentorProfile | null) ?? null;
+      }
+
+      return {
+        workspaceId: membership.workspace_id,
+        consultant,
+      };
     },
     enabled: !!user && isFounder,
   });
 
-  // Fetch all mentors for the gallery (founder view)
-  // Uses user_roles table so mentors appear automatically upon registration
+  const founderWorkspaceId = founderWorkspaceContext?.workspaceId ?? null;
+  const assignedConsultant = founderWorkspaceContext?.consultant ?? null;
+
   const [mentorSearch, setMentorSearch] = useState('');
   const [selectedMentorForBooking, setSelectedMentorForBooking] = useState<string | null>(null);
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
-      // Get all users with mentor_externo role from user_roles (auto-assigned at signup)
       const { data: mentorRoles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id')
@@ -234,8 +252,7 @@ export default function Mentors() {
       if (!mentorRoles?.length) return [];
 
       const mentorIds = [...new Set(mentorRoles.map(r => r.user_id))];
-      
-      // Only show mentors with approved accounts
+
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
@@ -247,20 +264,18 @@ export default function Mentors() {
     enabled: isFounder,
   });
 
-  // Update connection status mutation (for mentors) — must be above early return to respect Rules of Hooks
   const updateConnectionStatus = useMutation({
     mutationFn: async ({ connectionId, status, founderId }: { connectionId: string; status: string; founderId: string }) => {
       const { error } = await supabase
         .from('mentor_connections')
-        .update({ 
-          status, 
-          responded_at: new Date().toISOString() 
+        .update({
+          status,
+          responded_at: new Date().toISOString(),
         })
         .eq('id', connectionId);
 
       if (error) throw error;
 
-      // If accepted, add mentor to the founder's workspaces
       if (status === 'accepted' && user) {
         const { data: founderWorkspaces } = await supabase
           .from('workspace_users')
@@ -279,9 +294,9 @@ export default function Mentors() {
 
           await supabase
             .from('workspace_users')
-            .upsert(workspaceInserts, { 
+            .upsert(workspaceInserts, {
               onConflict: 'workspace_id,user_id',
-              ignoreDuplicates: true 
+              ignoreDuplicates: true,
             });
         }
       }
@@ -296,7 +311,6 @@ export default function Mentors() {
     },
   });
 
-  // Redirect external mentors to NDA page if not accepted (after all hooks)
   if (isMentor && !isStaff && isAuthReady && !ndaLoading && !ndaAcceptance) {
     return <Navigate to="/mentor-nda" replace />;
   }
@@ -310,15 +324,22 @@ export default function Mentors() {
       .slice(0, 2) || 'U';
   };
 
+  const openMailTo = (email?: string | null) => {
+    if (!email) {
+      toast.error(t('mentorsPage.noEmailAvailable', 'No email available for this contact'));
+      return;
+    }
+
+    window.location.href = `mailto:${email}`;
+  };
+
   const pendingConnections = connections?.filter(c => c.status === 'pending') || [];
   const acceptedConnections = connections?.filter(c => c.status === 'accepted') || [];
 
-  // Get unique mentors for founder view
   const uniqueMentors = assignedMentors
     ? [...new Map(assignedMentors.map(m => [m.user_id, m])).values()]
     : [];
 
-  // Determine page title based on role
   const getPageTitle = () => {
     if (isStaff) return t('mentorsPage.findAndAssign');
     if (isFounder) return t('mentorsPage.myMentors');
@@ -328,7 +349,6 @@ export default function Mentors() {
 
   return (
     <AppLayout title={getPageTitle()}>
-      {/* STAFF VIEW: Find & Assign + Pending Requests */}
       {isStaff ? (
         <Tabs defaultValue="requests" className="space-y-6">
           <TabsList>
@@ -351,138 +371,166 @@ export default function Mentors() {
           </TabsContent>
         </Tabs>
       ) : isFounder ? (
-        // FOUNDER VIEW: My Mentors (with inline book) → Gallery → Request
         <div className="space-y-6">
-          {/* My Mentors + Booking side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My Mentors */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Users className="h-4 w-4 text-primary" />
-                  {t('mentorsPage.myMentors')}
-                </CardTitle>
-                <CardDescription className="text-xs">{t('mentorsPage.myMentorsDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingAssigned ? (
-                  <div className="space-y-3">
-                    {[1, 2].map(i => (
-                      <div key={i} className="flex items-center gap-3">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="flex-1 space-y-1.5">
-                          <Skeleton className="h-4 w-28" />
-                          <Skeleton className="h-3 w-20" />
-                        </div>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                {t('workspace.responsibleConsultant')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingWorkspaceContext ? (
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              ) : assignedConsultant ? (
+                <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+                  <Avatar className="h-12 w-12 border-2 border-primary/10">
+                    <AvatarImage src={assignedConsultant.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials(assignedConsultant.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">
+                      {assignedConsultant.full_name || t('mentorsPage.unnamedMentor')}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{assignedConsultant.email}</p>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    {assignedConsultant.linkedin_url && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                        <a href={sanitizeUrl(assignedConsultant.linkedin_url)!} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                          <Linkedin className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs gap-1"
+                      onClick={() => openMailTo(assignedConsultant.email)}
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                      {t('mentorsPage.contact')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t('workspace.noConsultantAssigned')}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="h-4 w-4 text-primary" />
+                {t('mentorsPage.myMentors')}
+              </CardTitle>
+              <CardDescription className="text-xs">{t('mentorsPage.myMentorsDesc')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingAssigned ? (
+                <div className="space-y-3">
+                  {[1, 2].map(i => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-3 w-20" />
                       </div>
-                    ))}
-                  </div>
-                ) : uniqueMentors.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-sm font-medium mb-1">{t('mentorsPage.noMentorsAssigned')}</p>
-                    <p className="text-xs text-muted-foreground">{t('mentorsPage.noMentorsAssignedDesc')}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {uniqueMentors.map(mentor => (
+                    </div>
+                  ))}
+                </div>
+              ) : uniqueMentors.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm font-medium mb-1">{t('mentorsPage.noMentorsAssigned')}</p>
+                  <p className="text-xs text-muted-foreground">{t('mentorsPage.noMentorsAssignedDesc')}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {uniqueMentors.map(mentor => {
+                    const isBookingOpen = selectedMentorForBooking === mentor.user_id;
+
+                    return (
                       <div
                         key={mentor.user_id}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 transition-all group"
+                        className="rounded-lg border border-border p-3 transition-all hover:border-primary/20 hover:bg-accent/50"
                       >
-                        <Avatar className="h-12 w-12 border-2 border-primary/10">
-                          <AvatarImage src={mentor.profile?.avatar_url || undefined} />
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {getInitials(mentor.profile?.full_name || null)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">
-                            {mentor.profile?.full_name || t('mentorsPage.unnamedMentor')}
-                          </p>
-                          {mentor.profile?.expertise && mentor.profile.expertise.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {mentor.profile.expertise.slice(0, 3).map(exp => (
-                                <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">{exp}</Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-1 shrink-0">
-                          {mentor.profile?.linkedin_url && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                              <a href={sanitizeUrl(mentor.profile.linkedin_url)!} target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                                <Linkedin className="h-3.5 w-3.5" />
-                              </a>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12 border-2 border-primary/10">
+                            <AvatarImage src={mentor.profile?.avatar_url || undefined} />
+                            <AvatarFallback className="bg-primary text-primary-foreground">
+                              {getInitials(mentor.profile?.full_name || null)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {mentor.profile?.full_name || t('mentorsPage.unnamedMentor')}
+                            </p>
+                            {mentor.profile?.expertise && mentor.profile.expertise.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {mentor.profile.expertise.slice(0, 3).map(exp => (
+                                  <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">{exp}</Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            {mentor.profile?.linkedin_url && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                <a href={sanitizeUrl(mentor.profile.linkedin_url)!} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                                  <Linkedin className="h-3.5 w-3.5" />
+                                </a>
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openMailTo(mentor.profile?.email)}
+                              title={t('mentorsPage.contactMentor', 'Contact mentor')}
+                            >
+                              <Mail className="h-3.5 w-3.5" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              if (mentor.profile?.email) {
-                                window.open(`mailto:${mentor.profile.email}`, '_blank');
-                                toast.success(t('mentorsPage.openingEmail', 'Opening email client...'));
-                              } else {
-                                toast.error(t('mentorsPage.noEmailAvailable', 'No email available for this mentor'));
-                              }
-                            }}
-                            title={t('mentorsPage.contactMentor', 'Contact mentor')}
-                          >
-                            <Mail className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-xs gap-1"
-                            onClick={() => setSelectedMentorForBooking(mentor.user_id)}
-                          >
-                            <CalendarDays className="h-3.5 w-3.5" />
-                            {t('mentorsPage.book', 'Agendar')}
-                          </Button>
+                            <Button
+                              variant={isBookingOpen ? 'secondary' : 'outline'}
+                              size="sm"
+                              className="h-8 text-xs gap-1"
+                              onClick={() => setSelectedMentorForBooking(current => current === mentor.user_id ? null : mentor.user_id)}
+                            >
+                              <CalendarDays className="h-3.5 w-3.5" />
+                              {t('mentorsPage.book', 'Agendar')}
+                            </Button>
+                          </div>
                         </div>
+
+                        {isBookingOpen && (
+                          <div className="mt-4 border-t border-border pt-4">
+                            <MentorBookingPanel
+                              mode="founder"
+                              mentorId={mentor.user_id}
+                              mentorName={mentor.profile?.full_name || undefined}
+                              mentorAvatar={mentor.profile?.avatar_url || undefined}
+                              workspaceId={founderWorkspaceId || undefined}
+                            />
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Book Session - shows booking for selected mentor */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <CalendarDays className="h-4 w-4 text-primary" />
-                  {t('mentorsPage.bookSession')}
-                </CardTitle>
-                <CardDescription className="text-xs">{t('mentorsPage.bookSessionDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedMentorForBooking ? (
-                  <MentorBookingPanel
-                    mode="founder"
-                    mentorId={selectedMentorForBooking}
-                    mentorName={uniqueMentors.find(m => m.user_id === selectedMentorForBooking)?.profile?.full_name || undefined}
-                    mentorAvatar={uniqueMentors.find(m => m.user_id === selectedMentorForBooking)?.profile?.avatar_url || undefined}
-                    workspaceId={founderWorkspaceId || undefined}
-                  />
-                ) : uniqueMentors.length > 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">{t('mentorsPage.selectMentorToBook', 'Selecione um mentor para agendar sessão')}</p>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">{t('mentorsPage.noMentorsToBook', 'Sem mentores atribuídos para agendar')}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 2. Mentor Gallery */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -491,19 +539,19 @@ export default function Mentors() {
               </CardTitle>
               <CardDescription>{t('mentorsPage.mentorGalleryDesc')}</CardDescription>
               <div className="relative mt-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder={t('mentorsPage.searchMentors')}
                   value={mentorSearch}
                   onChange={(e) => setMentorSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background"
+                  className="w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm"
                 />
               </div>
             </CardHeader>
             <CardContent>
               {loadingAllMentors ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {[1, 2, 3].map(i => (
                     <Card key={i} className="p-4">
                       <div className="flex items-start gap-3">
@@ -518,12 +566,12 @@ export default function Mentors() {
                   ))}
                 </div>
               ) : !allMentors?.length ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <div className="py-8 text-center">
+                  <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="text-muted-foreground">{t('mentorsPage.noMentorsAvailable')}</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {allMentors
                     .filter(m => {
                       if (!mentorSearch.trim()) return true;
@@ -537,29 +585,29 @@ export default function Mentors() {
                     .map(mentor => {
                       const isAlreadyAssigned = uniqueMentors.some(um => um.user_id === mentor.id);
                       return (
-                        <Card key={mentor.id} className="hover:shadow-md transition-shadow">
+                        <Card key={mentor.id} className="transition-shadow hover:shadow-md">
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
                               <Avatar className="h-14 w-14 border-2 border-primary/10">
                                 <AvatarImage src={mentor.avatar_url || undefined} />
-                                <AvatarFallback className="bg-primary text-primary-foreground text-base">
+                                <AvatarFallback className="bg-primary text-base text-primary-foreground">
                                   {getInitials(mentor.full_name)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h4 className="font-semibold text-sm truncate">{mentor.full_name || t('mentorsPage.unnamedMentor')}</h4>
+                                  <h4 className="truncate text-sm font-semibold">{mentor.full_name || t('mentorsPage.unnamedMentor')}</h4>
                                   {mentor.linkedin_url && (
                                     <a href={sanitizeUrl(mentor.linkedin_url)!} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                                      <Linkedin className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                                      <Linkedin className="h-4 w-4 text-muted-foreground transition-colors hover:text-primary" />
                                     </a>
                                   )}
                                 </div>
                                 {mentor.bio && (
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{mentor.bio}</p>
+                                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{mentor.bio}</p>
                                 )}
                                 {mentor.expertise && mentor.expertise.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
+                                  <div className="mt-2 flex flex-wrap gap-1">
                                     {mentor.expertise.slice(0, 3).map(exp => (
                                       <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">{exp}</Badge>
                                     ))}
@@ -569,7 +617,7 @@ export default function Mentors() {
                                   </div>
                                 )}
                                 {isAlreadyAssigned && (
-                                  <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-emerald-500/50 text-emerald-600 dark:text-emerald-400">
+                                  <Badge variant="outline" className="mt-2 gap-1 border-emerald-500/50 text-[10px] text-emerald-600 dark:text-emerald-400">
                                     <Check className="h-3 w-3" />
                                     {t('mentorsPage.assigned')}
                                   </Badge>
@@ -585,7 +633,6 @@ export default function Mentors() {
             </CardContent>
           </Card>
 
-          {/* 3. Request a Mentor (last) */}
           <FounderMentorRequestPanel />
         </div>
       ) : isMentor ? (
