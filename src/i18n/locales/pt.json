@@ -770,7 +770,7 @@
     "ecosystem": {
       "title": "Vista Unificada do Ecossistema"
     },
-    "ecosystemHeatmap": "Ecosystem Heatmap",
+    "ecosystemHeatmap": "Mapa do Ecossistema",
     "ecosystemSummary": "{{startups}} startups · {{programs}} programas",
     "erro": "Erro:{{ message }}",
     "erroAoAplicarTemplate": "Erro ao aplicar template",
