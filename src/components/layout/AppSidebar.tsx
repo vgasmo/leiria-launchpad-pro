@@ -34,6 +34,7 @@ import {
   Globe2,
   DollarSign,
   Clock,
+  Stethoscope,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -154,6 +155,7 @@ export function AppSidebar() {
     { name: t('consultorTools.title', { defaultValue: 'Ferramentas de Consultor' }), href: '/consultor-tools', icon: Briefcase },
     { name: t('nav.admin.quickGuide', { defaultValue: 'Guia Rápido' }), href: '/guide', icon: BookOpenCheck },
     { name: t('systemSettings.navLabel', { defaultValue: 'Definições do Sistema' }), href: '/system-settings', icon: Cog },
+    { name: t('nav.admin.diagnostics', { defaultValue: 'Diagnósticos' }), href: '/admin/diagnostics', icon: Stethoscope },
   ];
 
   // Determine which navigation to show based on role priority

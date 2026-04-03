@@ -56,6 +56,7 @@ const ResourceGuide = lazy(() => import("./pages/ResourceGuide"));
 const ContractOnboarding = lazy(() => import("./pages/ContractOnboarding"));
 const PublicContractSigning = lazy(() => import("./pages/PublicContractSigning"));
 const PublicContractIntake = lazy(() => import("./pages/PublicContractIntake"));
+const AppDiagnostics = lazy(() => import("./pages/AppDiagnostics"));
 
 function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { children: React.ReactNode; adminOnly?: boolean; staffOnly?: boolean }) {
   const { t } = useTranslation();
@@ -169,7 +170,8 @@ function AppRoutes() {
         <Route path="/system-settings" element={<ProtectedRoute adminOnly><SystemSettings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
         <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
-        <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
+            <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
+            <Route path="/admin/diagnostics" element={<ProtectedRoute adminOnly><AppDiagnostics /></ProtectedRoute>} />
         <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
