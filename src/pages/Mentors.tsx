@@ -199,22 +199,23 @@ export default function Mentors() {
   );
 
   // Fetch all mentors for the gallery (founder view)
+  // Uses user_roles table so mentors appear automatically upon registration
   const [mentorSearch, setMentorSearch] = useState('');
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
-      // Get all users with mentor_externo role
+      // Get all users with mentor_externo role from user_roles (auto-assigned at signup)
       const { data: mentorRoles, error: rolesError } = await supabase
-        .from('workspace_users')
+        .from('user_roles')
         .select('user_id')
-        .eq('role', 'mentor_externo')
-        .eq('active', true);
+        .eq('role', 'mentor_externo');
 
       if (rolesError) throw rolesError;
       if (!mentorRoles?.length) return [];
 
       const mentorIds = [...new Set(mentorRoles.map(r => r.user_id))];
       
+      // Only show mentors with approved accounts
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles_safe')
         .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
