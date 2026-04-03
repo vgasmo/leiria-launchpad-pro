@@ -34,7 +34,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.generate-session-summary]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-progress-report-pdf]
 verify_jwt = true
@@ -67,7 +67,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.accept-mentor-nda]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-session-artifacts]
 verify_jwt = true

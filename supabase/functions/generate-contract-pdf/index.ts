@@ -5,11 +5,7 @@
  * Source basis: Minuta Oficial de Contrato de Incubação (current approved version).
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders, handleCorsOptions } from '../_shared/cors.ts'
 
 interface ContractData {
   contractNumber: string | null;
@@ -552,10 +548,11 @@ function generateContractPdf(data: ContractData): Uint8Array {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return handleCorsOptions(req)
   }
 
   try {
+    const corsHeaders = getCorsHeaders(req)
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -713,6 +710,7 @@ Deno.serve(async (req) => {
     })
 
   } catch (err) {
+    const corsHeaders = getCorsHeaders(req)
     console.error('PDF generation error:', err)
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
