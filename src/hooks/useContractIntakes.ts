@@ -298,6 +298,38 @@ export function useTransitionIntakeStatus() {
           frozen_at: new Date().toISOString(),
           frozen_by: user?.id,
         };
+
+        // CANONICAL INVARIANT: Ensure contract exists before approving for signature.
+        // If intake has no contract_id, auto-create one from the funnel item data.
+        const { data: intakeFull } = await supabase
+          .from('contract_intakes')
+          .select('contract_id, funnel_item_id, organization_name')
+          .eq('id', params.intakeId)
+          .single();
+
+        if (!intakeFull?.contract_id) {
+          // Create a draft contract linked to this intake
+          const { data: newContract, error: contractErr } = await supabase
+            .from('startup_contracts')
+            .insert({
+              funnel_item_id: intakeFull?.funnel_item_id || current.funnel_item_id,
+              organization_name: intakeFull?.organization_name || current.organization_name,
+              status: 'draft',
+              start_date: new Date().toISOString().split('T')[0],
+              currency: 'EUR',
+              created_by: user?.id,
+            })
+            .select('id')
+            .single();
+
+          if (contractErr) {
+            logger.error('auto_contract_creation_failed', { error: contractErr.message });
+            throw new Error('Não foi possível criar o contrato automaticamente. Crie um contrato manualmente antes de aprovar.');
+          }
+
+          updateFields.contract_id = newContract.id;
+          logger.info('auto_contract_created', { contractId: newContract.id, intakeId: params.intakeId });
+        }
       }
       if (params.newStatus === 'changes_requested') {
         updateFields.changes_requested_notes = params.notes || null;

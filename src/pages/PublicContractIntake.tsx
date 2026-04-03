@@ -155,14 +155,29 @@ export default function PublicContractIntake() {
   }
 
   if (fetchError || !intake) {
+    // Never expose technical error messages to public users
+    const isExpired = (fetchError as any)?.message?.includes('expired');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-6 text-center space-y-3">
             <AlertTriangle className="h-10 w-10 mx-auto text-destructive" />
-            <p className="text-lg font-semibold">{isPt ? 'Link Inválido' : 'Invalid Link'}</p>
+            <p className="text-lg font-semibold">
+              {isExpired
+                ? (isPt ? 'Link Expirado' : 'Link Expired')
+                : (isPt ? 'Link Inválido' : 'Invalid Link')}
+            </p>
             <p className="text-sm text-muted-foreground">
-              {(fetchError as any)?.message || (isPt ? 'Este link não é válido ou expirou.' : 'This link is invalid or has expired.')}
+              {isExpired
+                ? (isPt
+                  ? 'Este link expirou. Contacte a equipa da Startup Leiria para obter um novo link.'
+                  : 'This link has expired. Contact the Startup Leiria team for a new link.')
+                : (isPt
+                  ? 'Este link não é válido ou já foi utilizado. Contacte a equipa da Startup Leiria para assistência.'
+                  : 'This link is not valid or has already been used. Contact the Startup Leiria team for assistance.')}
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              {isPt ? 'Email: info@startupleiria.com' : 'Email: info@startupleiria.com'}
             </p>
           </CardContent>
         </Card>
