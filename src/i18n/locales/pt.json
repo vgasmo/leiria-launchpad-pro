@@ -770,7 +770,7 @@
     "ecosystem": {
       "title": "Vista Unificada do Ecossistema"
     },
-    "ecosystemHeatmap": "Ecosystem Heatmap",
+    "ecosystemHeatmap": "Mapa do Ecossistema",
     "ecosystemSummary": "{{startups}} startups · {{programs}} programas",
     "erro": "Erro:{{ message }}",
     "erroAoAplicarTemplate": "Erro ao aplicar template",
@@ -880,7 +880,7 @@
     "healthTemplates": "Templates de Health Model",
     "healthThisProgram": "Workspaces deste programa",
     "healthTools": "Ferramentas de Health",
-    "heatmapSubtitle": "Stage × Health distribution",
+    "heatmapSubtitle": "Distribuição Fase × Saúde",
     "insights": {
       "allHealthyDesc": "Todas as {{count}} startups estão em bom estado — continue assim!",
       "allHealthyTitle": "Ecossistema saudável",

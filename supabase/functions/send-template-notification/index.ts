@@ -239,7 +239,8 @@ interface SubmittedEmailData {
 }
 
 function buildSubmittedEmail(data: SubmittedEmailData): string {
-  const url = `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=templates`;
+  const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
+  const url = `${appUrl}/workspace/${data.workspaceId}?tab=templates`;
 
   return `
     <!DOCTYPE html>
@@ -278,7 +279,7 @@ function buildSubmittedEmail(data: SubmittedEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${appUrl}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>
@@ -297,7 +298,8 @@ interface ReviewedEmailData {
 }
 
 function buildReviewedEmail(data: ReviewedEmailData): string {
-  const url = `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=templates`;
+  const reviewAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
+  const url = `${reviewAppUrl}/workspace/${data.workspaceId}?tab=templates`;
   
   const statusText = data.isApproved ? "foi aprovado" : "precisa de alterações";
   const statusColor = data.isApproved ? "#22c55e" : "#f59e0b";
@@ -348,7 +350,7 @@ function buildReviewedEmail(data: ReviewedEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${reviewAppUrl}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>

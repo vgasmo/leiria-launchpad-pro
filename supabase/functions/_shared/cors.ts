@@ -8,6 +8,7 @@ const DEFAULT_ALLOWED = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://lovable.dev',
+  'https://fb.startupleiria.com',
   // Lovable preview domains (dynamic subdomains)
   '*.lovable.app',
   // Backwards-compat / older preview host

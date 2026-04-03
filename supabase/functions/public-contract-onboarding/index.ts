@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
 
       if (updateErr) throw updateErr
 
-      const publicUrl = `${req.headers.get('origin') || 'https://leiria-launchpad-pro.lovable.app'}/contract-signing/${onboardingToken}`
+      const publicUrl = `${req.headers.get('origin') || Deno.env.get("PUBLIC_APP_URL") || 'https://fb.startupleiria.com'}/contract-signing/${onboardingToken}`
 
       return new Response(JSON.stringify({ 
         token: onboardingToken, 

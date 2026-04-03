@@ -138,7 +138,7 @@ serve(async (req) => {
       .sort((a, b) => a[1].delta - b[1].delta)
       .slice(0, 5);
 
-    const baseUrl = Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "";
+    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
 
     let emailsSent = 0;
 

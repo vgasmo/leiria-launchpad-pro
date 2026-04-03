@@ -288,7 +288,7 @@ async function autoCreateFounderAccount(
       type: 'recovery',
       email,
       options: {
-        redirectTo: `https://leiria-launchpad-pro.lovable.app/reset-password`,
+        redirectTo: `${Deno.env.get("PUBLIC_APP_URL") || 'https://fb.startupleiria.com'}/reset-password`,
       },
     })
   }

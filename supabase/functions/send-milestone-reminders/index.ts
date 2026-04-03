@@ -129,7 +129,7 @@ serve(async (req) => {
                 </p>
               </div>
               <p>
-                <a href="${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/workspace/${milestone.workspace_id}?tab=milestones" 
+                <a href="${Deno.env.get("PUBLIC_APP_URL") || 'https://fb.startupleiria.com'}/workspace/${milestone.workspace_id}?tab=milestones" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
                   View Milestone
                 </a>

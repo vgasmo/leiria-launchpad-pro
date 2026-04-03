@@ -236,9 +236,10 @@ function buildAssignedEmail(data: AssignedEmailData): string {
     ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Média Prioridade</span>'
     : '';
 
+  const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
   const workspaceUrl = data.workspaceId 
-    ? `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=notes`
-    : "https://apxzuslwhjujgrcsfzqw.lovableproject.com/my-workspaces";
+    ? `${appUrl}/workspace/${data.workspaceId}?tab=notes`
+    : `${appUrl}/my-workspaces`;
 
   return `
     <!DOCTYPE html>
@@ -277,7 +278,7 @@ function buildAssignedEmail(data: AssignedEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${appUrl}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>
@@ -300,8 +301,9 @@ function buildOverdueEmail(data: OverdueEmailData): string {
     const daysOverdue = Math.floor(
       (new Date().getTime() - new Date(t.dueDate).getTime()) / (1000 * 60 * 60 * 24)
     );
+    const taskAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
     const workspaceUrl = t.workspaceId 
-      ? `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${t.workspaceId}?tab=notes`
+      ? `${taskAppUrl}/workspace/${t.workspaceId}?tab=notes`
       : "#";
     
     return `
@@ -335,7 +337,7 @@ function buildOverdueEmail(data: OverdueEmailData): string {
         </ul>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/my-workspaces" 
+          <a href="${taskAppUrl ? taskAppUrl : (Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com")}/my-workspaces" 
              style="display: inline-block; background: #c03c3c; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500;">
             Ver Dashboard
           </a>
@@ -344,7 +346,7 @@ function buildOverdueEmail(data: OverdueEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${taskAppUrl ? taskAppUrl : (Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com")}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>
