@@ -346,7 +346,7 @@ function buildOverdueEmail(data: OverdueEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${taskAppUrl ? taskAppUrl : (Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com")}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>
