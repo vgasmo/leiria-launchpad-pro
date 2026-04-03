@@ -676,6 +676,58 @@
   --tw-ring-color: hsl(var(--accent));
 }
 
+/* Smooth global defaults for interactive elements */
+button, a, [role="button"], [role="tab"], .interactive-card, [data-radix-collection-item] {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Smoother page content transitions via React Suspense / lazy */
+[data-page-transition] {
+  animation: pageIn 0.25s ease-out;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Drawer / Sheet slide-in polish */
+[data-state="open"][data-vaul-drawer] {
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+/* Tab content smooth swap */
+[role="tabpanel"] {
+  animation: tabFadeIn 0.2s ease-out;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast entrance */
+[data-sonner-toaster] [data-sonner-toast] {
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Card hover micro-interactions */
+.hover-lift {
+  @apply transition-all duration-200 ease-out;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px hsl(var(--foreground) / 0.1);
+}
+
 /* P3: Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
