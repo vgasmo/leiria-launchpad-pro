@@ -234,7 +234,6 @@ export default function AppDiagnostics() {
             new Promise<{ pass: boolean; message: string; details?: string }>((_, reject) =>
               setTimeout(() => reject(new Error('Timeout (15s)')), 15000)
             ),
-            ),
           ]);
           cats[ci].tests[ti].status = result.pass ? 'pass' : 'fail';
           cats[ci].tests[ti].message = result.message;
