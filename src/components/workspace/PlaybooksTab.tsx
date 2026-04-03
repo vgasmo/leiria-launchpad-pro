@@ -100,7 +100,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     );
   }
 
-  const availablePlaybooks = playbooks?.filter(p => getInstanceStatus(p.id) !== 'instantiated') || [];
+  const availablePlaybooks = playbooks?.filter(p => getInstanceStatus(p.id) !== 'instantiated' && (p.items?.length ?? 0) > 0) || [];
   const instantiatedPlaybooks = instances?.filter(i => i.status === 'instantiated') || [];
 
   // Extract KPI hints from playbook items metadata
@@ -460,27 +460,97 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
             <CheckCircle className="h-5 w-5 text-green-600" />
             {isStaff ? t('playbooks.staff.deployed') : t('playbooks.applied')}
           </h3>
-          <div className="space-y-2">
-            {instantiatedPlaybooks.map(instance => (
-              <div 
-                key={instance.id} 
-                className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800"
-              >
-                <div>
-                  <p className="font-medium">{instance.playbook?.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isStaff 
-                      ? t('playbooks.staff.deployedOn', { date: formatShortDate(instance.instantiated_at) })
-                      : t('playbooks.appliedOn', { date: formatShortDate(instance.instantiated_at) })
-                    }
-                  </p>
-                </div>
-                <Badge variant="outline" className="border-green-500 text-green-600 gap-1">
-                  <CheckCircle className="h-3 w-3" />
-                  {isStaff ? t('playbooks.staff.deployedBadge') : t('playbooks.appliedBadge')}
-                </Badge>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {instantiatedPlaybooks.map(instance => {
+              const progressData = progress;
+              const isActiveInstance = progressData?.activePlaybook?.instanceId === instance.id;
+
+              return (
+                <Card
+                  key={instance.id}
+                  className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20"
+                >
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="font-semibold text-base">{instance.playbook?.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {isStaff
+                            ? t('playbooks.staff.deployedOn', { date: formatShortDate(instance.instantiated_at) })
+                            : t('playbooks.appliedOn', { date: formatShortDate(instance.instantiated_at) })
+                          }
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="border-green-500 text-green-600 gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        {isStaff ? t('playbooks.staff.deployedBadge') : t('playbooks.appliedBadge')}
+                      </Badge>
+                    </div>
+
+                    {/* Progress details for the active playbook */}
+                    {isActiveInstance && progressData && (progressData.totalMilestones > 0 || progressData.totalActions > 0) && (
+                      <div className="mt-4 space-y-3">
+                        {/* Progress bar */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{t('playbooks.progress', { defaultValue: 'Progresso' })}</span>
+                            <span className="font-medium">{progressData.progressPercent}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-green-500 transition-all duration-500"
+                              style={{ width: `${progressData.progressPercent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Milestones and actions summary */}
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="flex items-center gap-1.5">
+                            <Target className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{progressData.completedMilestones}/{progressData.totalMilestones}</span>
+                            <span className="text-muted-foreground">{t('playbooks.milestones', { defaultValue: 'marcos' })}</span>
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <ListTodo className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{progressData.completedActions}/{progressData.totalActions}</span>
+                            <span className="text-muted-foreground">{t('playbooks.actions', { defaultValue: 'ações' })}</span>
+                          </span>
+                          {progressData.overdueActions > 0 && (
+                            <span className="flex items-center gap-1 text-destructive">
+                              <AlertCircle className="h-3.5 w-3.5" />
+                              {progressData.overdueActions} {t('playbooks.overdue', { defaultValue: 'atrasadas' })}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick navigation */}
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-xs"
+                            onClick={() => setSearchParams({ tab: 'milestones' })}
+                          >
+                            <Target className="h-3.5 w-3.5" />
+                            {t('playbooks.reviewMilestones')}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-xs"
+                            onClick={() => setSearchParams({ tab: 'actions' })}
+                          >
+                            <ListTodo className="h-3.5 w-3.5" />
+                            {t('playbooks.continueActions')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}

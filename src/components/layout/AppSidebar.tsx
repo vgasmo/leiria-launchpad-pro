@@ -110,6 +110,7 @@ export function AppSidebar() {
       },
     ] : []),
     { name: t('nav.founder.networkResources', { defaultValue: 'Rede & Recursos' }), href: '/resources', icon: Network },
+    { name: t('nav.founder.mentors', { defaultValue: 'Mentores' }), href: '/mentors', icon: Headphones },
     { name: t('nav.founder.glossaryFaq', { defaultValue: 'Glossário & FAQ' }), href: '/help', icon: HelpCircle },
   ];
 
