@@ -359,7 +359,7 @@ export default function WorkspaceDetail() {
                 workspaceId={workspace.id}
                 programId={workspace.program_id}
                 currentStage={workspace.stage}
-                myHealthScore={workspace.health_score_numeric}
+                myHealthScore={null}
                 myMilestonesCompleted={0}
                 myActionsCompleted={0}
               /> 
