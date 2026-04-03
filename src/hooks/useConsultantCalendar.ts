@@ -52,35 +52,6 @@ export function useConsultantAvailability(
 }
 
 /**
- * Hook to validate a specific time slot is available
- */
-export function useValidateBookingSlot() {
-  return useMutation({
-    mutationFn: async ({
-      workspaceId,
-      startTime,
-      endTime,
-    }: {
-      workspaceId: string;
-      startTime: string;
-      endTime: string;
-    }): Promise<{ available: boolean; checked: boolean; conflict?: string; reason?: string }> => {
-      const { data, error } = await supabase.functions.invoke('validate-booking-slot', {
-        body: { workspaceId, startTime, endTime },
-      });
-
-      if (error) {
-        logger.error('Validation error', {}, error);
-        // Fail open (checked=false) so UI may warn but not block in case of temporary issues
-        return { available: true, checked: false, reason: 'validation_error' };
-      }
-
-      return data;
-    },
-  });
-}
-
-/**
  * Generate available time slots for a given date based on working hours
  */
 export function generateTimeSlots(date: string, durationMinutes: number = 60): string[] {

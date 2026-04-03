@@ -6052,7 +6052,8 @@
     "webhookUrl": "Webhook URL",
     "weekly": "Weekly",
     "whenEnabled": "When enabled:",
-    "whenScheduleSession": "When you schedule a session, the system will automatically:"
+    "whenScheduleSession": "When you schedule a session, the system will automatically:",
+    "useCustomCalendarDesc": "Use a different calendar instead of the assigned consultant"
   },
   "settingsPage": {
     "areasOfExpertise": "Areas of Expertise",
