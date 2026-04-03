@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { usePlaybooksForStage, useInstantiatePlaybook, useDismissPlaybook, useRestorePlaybook, useWorkspacePlaybookInstances, Playbook, PlaybookItem } from '@/hooks/usePlaybooks';
 import { usePlaybookProgress } from '@/hooks/usePlaybookProgress';
 import { RequestPlaybookDialog } from '@/components/workspace/RequestPlaybookDialog';
+import { PlaybookEvidenceDialog } from '@/components/workspace/PlaybookEvidenceDialog';
 import { formatShortDate } from '@/lib/dateUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConsultantNotes } from '@/hooks/useConsultantNotes';
@@ -284,6 +285,12 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                               <ListTodo className="h-3 w-3 text-muted-foreground" />
                             )}
                             <span className="truncate">{item.title}</span>
+                          <PlaybookEvidenceDialog
+                            workspaceId={workspaceId}
+                            playbookItemId={item.id}
+                            playbookItemTitle={item.title}
+                            canWrite={canWrite}
+                          />
                             {item.relative_due_days && (
                               <span className="text-muted-foreground flex items-center gap-1">
                                 <Clock className="h-3 w-3" />

@@ -3577,6 +3577,66 @@ export type Database = {
           },
         ]
       }
+      playbook_step_evidence: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          notes: string | null
+          playbook_item_id: string
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_by: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          playbook_item_id: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_by: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          playbook_item_id?: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_by?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_step_evidence_playbook_item_id_fkey"
+            columns: ["playbook_item_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_step_evidence_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbook_template_assignments: {
         Row: {
           created_at: string | null
@@ -7702,6 +7762,26 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      program_benchmarks: {
+        Row: {
+          avg_actions_completed: number | null
+          avg_health_score: number | null
+          avg_kpi_entries: number | null
+          avg_milestones_completed: number | null
+          program_id: string | null
+          stage: Database["public"]["Enums"]["startup_stage"] | null
+          startup_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspaces_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_profiles: {
         Row: {

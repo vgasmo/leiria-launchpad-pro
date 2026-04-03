@@ -29,6 +29,7 @@ import { TeamTab } from '@/components/workspace/TeamTab';
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
+import { BenchmarkDashboard } from '@/components/workspace/BenchmarkDashboard';
 import { RelationshipRecapCard } from '@/components/workspace/RelationshipRecapCard';
 import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
@@ -350,6 +351,18 @@ export default function WorkspaceDetail() {
                 currentStage={workspace.stage} 
                 canWrite={canWrite} 
               />
+            </div>
+          )}
+          {activeTab === 'benchmark' && isFounder && (
+            <div role="tabpanel" id="tabpanel-benchmark" aria-labelledby="tab-benchmark">
+              <BenchmarkDashboard
+                workspaceId={workspace.id}
+                programId={workspace.program_id}
+                currentStage={workspace.stage}
+                myHealthScore={null}
+                myMilestonesCompleted={0}
+                myActionsCompleted={0}
+              /> 
             </div>
           )}
           {/* templates tab absorbed into documents sub-tabs */}
