@@ -198,6 +198,34 @@ export default function Mentors() {
     isFounder ? 'founder' : 'mentor'
   );
 
+  // Fetch all mentors for the gallery (founder view)
+  const [mentorSearch, setMentorSearch] = useState('');
+  const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
+    queryKey: ['all-mentors-gallery'],
+    queryFn: async (): Promise<MentorProfile[]> => {
+      // Get all users with mentor_externo role
+      const { data: mentorRoles, error: rolesError } = await supabase
+        .from('workspace_users')
+        .select('user_id')
+        .eq('role', 'mentor_externo')
+        .eq('active', true);
+
+      if (rolesError) throw rolesError;
+      if (!mentorRoles?.length) return [];
+
+      const mentorIds = [...new Set(mentorRoles.map(r => r.user_id))];
+      
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles_safe')
+        .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
+        .in('id', mentorIds);
+
+      if (profilesError) throw profilesError;
+      return (profiles || []) as MentorProfile[];
+    },
+    enabled: isFounder,
+  });
+
   // Update connection status mutation (for mentors) — must be above early return to respect Rules of Hooks
   const updateConnectionStatus = useMutation({
     mutationFn: async ({ connectionId, status, founderId }: { connectionId: string; status: string; founderId: string }) => {
