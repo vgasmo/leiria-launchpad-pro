@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
-};
+import { getCorsHeaders, handleCorsOptions } from "../_shared/cors.ts";
 
 /**
  * Helper to send Teams notification for health alerts (non-blocking)
@@ -91,10 +87,11 @@ function getHealthLabel(score: number, thresholds: HealthModel["thresholds_json"
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsOptions(req);
   }
 
   try {
+    const corsHeaders = getCorsHeaders(req);
     // SECURITY: Validate CRON_SECRET for system-initiated calls
     const cronSecret = req.headers.get("x-cron-secret");
     const expectedSecret = Deno.env.get("CRON_SECRET");
@@ -636,6 +633,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
+    const corsHeaders = getCorsHeaders(req);
     console.error("[recompute-health-scores] Error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
