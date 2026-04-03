@@ -34,6 +34,7 @@ import {
   Globe2,
   DollarSign,
   Clock,
+  Stethoscope,
   LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
