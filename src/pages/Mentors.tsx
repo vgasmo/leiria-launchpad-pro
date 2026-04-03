@@ -466,6 +466,115 @@ export default function Mentors() {
               <MentorBookingPanel mode="founder" />
             </CardContent>
           </Card>
+
+          {/* Mentor Gallery - Browse all mentors */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                {t('mentorsPage.mentorGallery', 'Galeria de Mentores')}
+              </CardTitle>
+              <CardDescription>
+                {t('mentorsPage.mentorGalleryDesc', 'Explore todos os mentores disponíveis no ecossistema por área de especialidade.')}
+              </CardDescription>
+              <div className="relative mt-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder={t('mentorsPage.searchMentors', 'Pesquisar por nome ou especialidade...')}
+                  value={mentorSearch}
+                  onChange={(e) => setMentorSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingAllMentors ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map(i => (
+                    <Card key={i} className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Skeleton className="h-14 w-14 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-3 w-full" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : !allMentors?.length ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">{t('mentorsPage.noMentorsAvailable', 'Nenhum mentor disponível de momento.')}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {allMentors
+                    .filter(m => {
+                      if (!mentorSearch.trim()) return true;
+                      const search = mentorSearch.toLowerCase();
+                      return (
+                        m.full_name?.toLowerCase().includes(search) ||
+                        m.expertise?.some(e => e.toLowerCase().includes(search)) ||
+                        m.bio?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map(mentor => {
+                      const isAlreadyAssigned = uniqueMentors.some(um => um.user_id === mentor.id);
+                      return (
+                        <Card key={mentor.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-14 w-14 border-2 border-primary/10">
+                                <AvatarImage src={mentor.avatar_url || undefined} />
+                                <AvatarFallback className="bg-primary text-primary-foreground text-base">
+                                  {getInitials(mentor.full_name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold text-sm truncate">{mentor.full_name || t('mentorsPage.unnamedMentor')}</h4>
+                                  {mentor.linkedin_url && (
+                                    <a href={sanitizeUrl(mentor.linkedin_url)!} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                      <Linkedin className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                                    </a>
+                                  )}
+                                </div>
+                                {mentor.bio && (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{mentor.bio}</p>
+                                )}
+                                {mentor.expertise && mentor.expertise.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {mentor.expertise.slice(0, 3).map(exp => (
+                                      <Badge key={exp} variant="secondary" className="text-[10px] px-1.5 py-0">
+                                        {exp}
+                                      </Badge>
+                                    ))}
+                                    {mentor.expertise.length > 3 && (
+                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                        +{mentor.expertise.length - 3}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                                {isAlreadyAssigned ? (
+                                  <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-green-500 text-green-600">
+                                    <Check className="h-3 w-3" />
+                                    {t('mentorsPage.assigned', 'Atribuído')}
+                                  </Badge>
+                                ) : null}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       ) : isMentor ? (
         <Tabs defaultValue="requests" className="space-y-6">
