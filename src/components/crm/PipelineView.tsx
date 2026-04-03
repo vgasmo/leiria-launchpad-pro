@@ -306,15 +306,19 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
     zIndex: isDragging ? 50 : undefined,
   } : undefined;
 
+    // Show fine-grained sub-stage as small badge
+    const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md',
-        'bg-background border shadow-sm',
+        'cursor-pointer bg-background border shadow-sm',
+        'transition-[box-shadow,border-color,opacity] duration-200 ease-out',
+        'hover:shadow-md hover:border-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500',
-        isDragging && 'opacity-50 shadow-lg'
+        isDragging && 'opacity-40 shadow-lg scale-[1.02] rotate-1'
       )}
       data-testid="crm-record"
       onClick={() => onOpenDrawer(item)}
