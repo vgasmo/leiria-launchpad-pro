@@ -4465,7 +4465,12 @@
     "technologyOptional": "Technology (opcional)",
     "unknownFounder": "Founder Desconhecido",
     "unnamedMentor": "Mentor",
-    "whatNeedsHelp": "What do you need help com?"
+    "whatNeedsHelp": "What do you need help com?",
+    "mentorGallery": "Galeria de Mentores",
+    "mentorGalleryDesc": "Explore todos os mentores disponíveis no ecossistema por área de especialidade.",
+    "searchMentors": "Pesquisar por nome ou especialidade...",
+    "noMentorsAvailable": "Nenhum mentor disponível de momento.",
+    "assigned": "Atribuído"
   },
   "messaging": {
     "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
@@ -7372,7 +7377,12 @@
     "valorInválido": "Valor inválido",
     "workspaceUpdated": "Workspace updated",
     "yourConsultant": "Seu Consultor",
-    "yourMentor": "Seu Mentor"
+    "yourMentor": "Seu Mentor",
+    "yourTeam": "A Sua Equipa",
+    "consultant": "Consultor",
+    "mentor": "Mentor",
+    "bookSession": "Agendar Sessão",
+    "requestMentor": "Pedir Mentor"
   },
   "workspaceCard": {
     "actions": "Ações",
