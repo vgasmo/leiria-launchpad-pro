@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, CheckSquare, Calendar, FileText, BarChart3, 
-  Flag, BookOpen, Users, 
+  Flag, BookOpen, Users, MessageSquare,
   DollarSign, StickyNote, Clock, Shield, Settings, LucideIcon 
 } from 'lucide-react';
 
