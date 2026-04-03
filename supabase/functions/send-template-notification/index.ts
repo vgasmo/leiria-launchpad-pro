@@ -239,7 +239,8 @@ interface SubmittedEmailData {
 }
 
 function buildSubmittedEmail(data: SubmittedEmailData): string {
-  const url = `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=templates`;
+  const appUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
+  const url = `${appUrl}/workspace/${data.workspaceId}?tab=templates`;
 
   return `
     <!DOCTYPE html>
