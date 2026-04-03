@@ -52,6 +52,50 @@ export function useConsultantAvailability(
 }
 
 /**
+ * Hook to validate a specific time slot against cached consultant availability.
+ * Uses the already-fetched check-consultant-availability data client-side.
+ */
+export function useValidateBookingSlot() {
+  return useMutation({
+    mutationFn: async ({
+      workspaceId,
+      startTime,
+      endTime,
+    }: {
+      workspaceId: string;
+      startTime: string;
+      endTime: string;
+    }): Promise<{ available: boolean; checked: boolean; conflict?: string; reason?: string }> => {
+      try {
+        const date = startTime.slice(0, 10);
+        const { data, error } = await supabase.functions.invoke('check-consultant-availability', {
+          body: { workspaceId, date },
+        });
+
+        if (error || !data?.success) {
+          return { available: true, checked: false, reason: data?.reason || 'not_checked' };
+        }
+
+        const slots = data.slots as TimeSlot[];
+        const requestedStart = new Date(startTime).getTime();
+        const requestedEnd = new Date(endTime).getTime();
+
+        const hasConflict = slots.length > 0 && !slots.some((slot) => {
+          const slotStart = new Date(slot.start).getTime();
+          const slotEnd = new Date(slot.end).getTime();
+          return slotStart <= requestedStart && slotEnd >= requestedEnd && slot.available;
+        });
+
+        return { available: !hasConflict, checked: true };
+      } catch (err) {
+        logger.error('Slot validation error', {}, err);
+        return { available: true, checked: false, reason: 'validation_error' };
+      }
+    },
+  });
+}
+
+/**
  * Generate available time slots for a given date based on working hours
  */
 export function generateTimeSlots(date: string, durationMinutes: number = 60): string[] {
