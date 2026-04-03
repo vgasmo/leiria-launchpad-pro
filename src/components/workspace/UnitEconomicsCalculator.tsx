@@ -264,7 +264,7 @@ export function UnitEconomicsCalculator({ workspaceId }: UnitEconomicsCalculator
       toast.success(t('unitEconomics.savedSuccess'));
       setHasChanges(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 

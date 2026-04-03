@@ -28,7 +28,7 @@ export function NotificationSettings() {
       await updatePrefs.mutateAsync({ email_digest_enabled: enabled });
       toast.success(enabled ? t('settingsPage.emailDigest') + ' ' + t('common.success').toLowerCase() : t('settingsPage.emailDigest') + ' disabled');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update preferences');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 
@@ -37,7 +37,7 @@ export function NotificationSettings() {
       await updatePrefs.mutateAsync({ digest_frequency: frequency });
       toast.success(t('common.success'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update preferences');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 
@@ -46,7 +46,7 @@ export function NotificationSettings() {
       await updatePrefs.mutateAsync({ digest_day: parseInt(day) });
       toast.success(t('common.success'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update preferences');
+      toast.error(error.message || t('common.errorGeneric'));
     }
   };
 
