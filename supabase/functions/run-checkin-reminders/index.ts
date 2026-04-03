@@ -191,7 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <p><strong>Due date:</strong> ${new Date(checkin.due_date).toLocaleDateString("pt-PT", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
                     <p>This monthly check-in helps us track progress and provide better support.</p>
                     <div style="margin: 24px 0;">
-                      <a href="${supabaseUrl.replace(".supabase.co", ".lovableproject.com")}/workspace/${checkin.workspace_id}?tab=overview" 
+                      <a href="${Deno.env.get("PUBLIC_APP_URL") || 'https://fb.startupleiria.com'}/workspace/${checkin.workspace_id}?tab=overview" 
                          style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                         Complete monthly check-in
                       </a>

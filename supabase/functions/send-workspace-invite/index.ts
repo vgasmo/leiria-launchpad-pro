@@ -192,7 +192,7 @@ serve(async (req) => {
     }
     
     // Build invite URL
-    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://leiria-launchpad-pro.lovable.app";
+    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
     const inviteUrl = `${baseUrl}/accept-invite?token=${rawToken}`;
     
     // Build booking URL if requested

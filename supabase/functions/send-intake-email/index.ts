@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const appUrl = 'https://leiria-launchpad-pro.lovable.app'
+    const appUrl = Deno.env.get("PUBLIC_APP_URL") || 'https://fb.startupleiria.com'
     const intakeUrl = intakeToken ? `${appUrl}/contract-intake/${intakeToken}` : ''
     const safeName = escapeHtml(recipientName || '')
     const safeOrg = escapeHtml(organizationName || '')
