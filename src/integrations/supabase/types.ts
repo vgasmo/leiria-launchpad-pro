@@ -879,6 +879,13 @@ export type Database = {
             referencedRelation: "startup_contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contract_discounts_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_intakes: {
@@ -996,6 +1003,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "contract_intakes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contract_intakes_funnel_item_id_fkey"
             columns: ["funnel_item_id"]
             isOneToOne: false
@@ -1038,6 +1052,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_lifecycle_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1090,6 +1111,13 @@ export type Database = {
             referencedRelation: "startup_contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contract_notices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_reminders: {
@@ -1123,6 +1151,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_reminders_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -2456,6 +2491,13 @@ export type Database = {
             referencedRelation: "contract_intakes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "intake_events_intake_id_fkey"
+            columns: ["intake_id"]
+            isOneToOne: false
+            referencedRelation: "contract_intakes_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       intake_routing: {
@@ -2768,6 +2810,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
             referencedColumns: ["id"]
           },
           {
@@ -7488,6 +7537,133 @@ export type Database = {
       }
     }
     Views: {
+      contract_intakes_safe: {
+        Row: {
+          approved_data_snapshot: Json | null
+          assigned_to: string | null
+          billing_email: string | null
+          changes_requested_notes: string | null
+          company_address: string | null
+          company_city: string | null
+          company_country: string | null
+          company_nif: string | null
+          company_postal_code: string | null
+          contract_id: string | null
+          created_at: string | null
+          created_by: string | null
+          documents_json: Json | null
+          funnel_item_id: string | null
+          iban: string | null
+          id: string | null
+          intake_token: string | null
+          last_reminder_sent_at: string | null
+          legal_representative_email: string | null
+          legal_representative_name: string | null
+          legal_representative_phone: string | null
+          missing_documents: string[] | null
+          organization_name: string | null
+          reminder_count: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          startup_description: string | null
+          status: Database["public"]["Enums"]["intake_status"] | null
+          submitted_at: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          approved_data_snapshot?: Json | null
+          assigned_to?: string | null
+          billing_email?: never
+          changes_requested_notes?: string | null
+          company_address?: never
+          company_city?: never
+          company_country?: never
+          company_nif?: never
+          company_postal_code?: never
+          contract_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents_json?: Json | null
+          funnel_item_id?: string | null
+          iban?: never
+          id?: string | null
+          intake_token?: never
+          last_reminder_sent_at?: string | null
+          legal_representative_email?: never
+          legal_representative_name?: never
+          legal_representative_phone?: never
+          missing_documents?: string[] | null
+          organization_name?: string | null
+          reminder_count?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_description?: string | null
+          status?: Database["public"]["Enums"]["intake_status"] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          approved_data_snapshot?: Json | null
+          assigned_to?: string | null
+          billing_email?: never
+          changes_requested_notes?: string | null
+          company_address?: never
+          company_city?: never
+          company_country?: never
+          company_nif?: never
+          company_postal_code?: never
+          contract_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents_json?: Json | null
+          funnel_item_id?: string | null
+          iban?: never
+          id?: string | null
+          intake_token?: never
+          last_reminder_sent_at?: string | null
+          legal_representative_email?: never
+          legal_representative_name?: never
+          legal_representative_phone?: never
+          missing_documents?: string[] | null
+          organization_name?: string | null
+          reminder_count?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_description?: string | null
+          status?: Database["public"]["Enums"]["intake_status"] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_intakes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_intakes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_intakes_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles_safe: {
         Row: {
           avatar_url: string | null
@@ -7556,6 +7732,259 @@ export type Database = {
           role_display?: never
         }
         Relationships: []
+      }
+      startup_contracts_safe: {
+        Row: {
+          billing_day: number | null
+          building_id: string | null
+          company_address: string | null
+          company_city: string | null
+          company_country: string | null
+          company_nif: string | null
+          company_postal_code: string | null
+          contract_number: string | null
+          contract_template_version: string | null
+          counter_signer_email: string | null
+          counter_signer_name: string | null
+          counter_signer_status: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          discount_percentage: number | null
+          discount_reason: string | null
+          document_url: string | null
+          end_date: string | null
+          equity_percentage: number | null
+          founder_signer_status: string | null
+          funnel_item_id: string | null
+          has_startup_portugal_status: boolean | null
+          iban: string | null
+          id: string | null
+          incubation_type_id: string | null
+          incubation_year: number | null
+          is_associate: boolean | null
+          is_post_incubation: boolean | null
+          last_price_review_date: string | null
+          legal_representative_email: string | null
+          legal_representative_name: string | null
+          monthly_fee: number | null
+          next_price_review_date: string | null
+          notes: string | null
+          onboarding_completed_at: string | null
+          onboarding_token: string | null
+          organization_name: string | null
+          payment_method: string | null
+          payment_terms_days: number | null
+          pricing_line_id: string | null
+          pricing_snapshot_json: Json | null
+          pricing_version_id: string | null
+          provider_completed_at: string | null
+          provider_document_id: string | null
+          provider_last_error: string | null
+          provider_last_event: string | null
+          provider_last_sync_at: string | null
+          provider_sent_at: string | null
+          provider_webhook_event_id: string | null
+          regulation_accepted_at: string | null
+          regulation_version: string | null
+          signature_proof_json: Json | null
+          signature_provider: string | null
+          signature_requested_at: string | null
+          signature_status: string | null
+          signed_at: string | null
+          square_meters: number | null
+          start_date: string | null
+          startup_category: string | null
+          status: string | null
+          terminated_at: string | null
+          termination_date: string | null
+          termination_notice_days: number | null
+          termination_reason: string | null
+          updated_at: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          billing_day?: number | null
+          building_id?: string | null
+          company_address?: never
+          company_city?: never
+          company_country?: never
+          company_nif?: never
+          company_postal_code?: never
+          contract_number?: string | null
+          contract_template_version?: string | null
+          counter_signer_email?: string | null
+          counter_signer_name?: string | null
+          counter_signer_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          founder_signer_status?: string | null
+          funnel_item_id?: string | null
+          has_startup_portugal_status?: boolean | null
+          iban?: never
+          id?: string | null
+          incubation_type_id?: string | null
+          incubation_year?: number | null
+          is_associate?: boolean | null
+          is_post_incubation?: boolean | null
+          last_price_review_date?: string | null
+          legal_representative_email?: never
+          legal_representative_name?: never
+          monthly_fee?: number | null
+          next_price_review_date?: string | null
+          notes?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_token?: never
+          organization_name?: string | null
+          payment_method?: string | null
+          payment_terms_days?: number | null
+          pricing_line_id?: string | null
+          pricing_snapshot_json?: Json | null
+          pricing_version_id?: string | null
+          provider_completed_at?: string | null
+          provider_document_id?: string | null
+          provider_last_error?: string | null
+          provider_last_event?: string | null
+          provider_last_sync_at?: string | null
+          provider_sent_at?: string | null
+          provider_webhook_event_id?: string | null
+          regulation_accepted_at?: string | null
+          regulation_version?: string | null
+          signature_proof_json?: Json | null
+          signature_provider?: string | null
+          signature_requested_at?: string | null
+          signature_status?: string | null
+          signed_at?: string | null
+          square_meters?: number | null
+          start_date?: string | null
+          startup_category?: string | null
+          status?: string | null
+          terminated_at?: string | null
+          termination_date?: string | null
+          termination_notice_days?: number | null
+          termination_reason?: string | null
+          updated_at?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          billing_day?: number | null
+          building_id?: string | null
+          company_address?: never
+          company_city?: never
+          company_country?: never
+          company_nif?: never
+          company_postal_code?: never
+          contract_number?: string | null
+          contract_template_version?: string | null
+          counter_signer_email?: string | null
+          counter_signer_name?: string | null
+          counter_signer_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          founder_signer_status?: string | null
+          funnel_item_id?: string | null
+          has_startup_portugal_status?: boolean | null
+          iban?: never
+          id?: string | null
+          incubation_type_id?: string | null
+          incubation_year?: number | null
+          is_associate?: boolean | null
+          is_post_incubation?: boolean | null
+          last_price_review_date?: string | null
+          legal_representative_email?: never
+          legal_representative_name?: never
+          monthly_fee?: number | null
+          next_price_review_date?: string | null
+          notes?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_token?: never
+          organization_name?: string | null
+          payment_method?: string | null
+          payment_terms_days?: number | null
+          pricing_line_id?: string | null
+          pricing_snapshot_json?: Json | null
+          pricing_version_id?: string | null
+          provider_completed_at?: string | null
+          provider_document_id?: string | null
+          provider_last_error?: string | null
+          provider_last_event?: string | null
+          provider_last_sync_at?: string | null
+          provider_sent_at?: string | null
+          provider_webhook_event_id?: string | null
+          regulation_accepted_at?: string | null
+          regulation_version?: string | null
+          signature_proof_json?: Json | null
+          signature_provider?: string | null
+          signature_requested_at?: string | null
+          signature_status?: string | null
+          signed_at?: string | null
+          square_meters?: number | null
+          start_date?: string | null
+          startup_category?: string | null
+          status?: string | null
+          terminated_at?: string | null
+          termination_date?: string | null
+          termination_notice_days?: number | null
+          termination_reason?: string | null
+          updated_at?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_contracts_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_funnel_item_id_fkey"
+            columns: ["funnel_item_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_incubation_type_id_fkey"
+            columns: ["incubation_type_id"]
+            isOneToOne: false
+            referencedRelation: "incubation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_pricing_line_id_fkey"
+            columns: ["pricing_line_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_pricing_version_id_fkey"
+            columns: ["pricing_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_table_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_contracts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       startups_safe: {
         Row: {
