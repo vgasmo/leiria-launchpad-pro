@@ -4470,7 +4470,13 @@
     "mentorGalleryDesc": "Browse all mentors available in the ecosystem by area of expertise.",
     "searchMentors": "Search by name or expertise...",
     "noMentorsAvailable": "No mentors available at the moment.",
-    "assigned": "Assigned"
+    "assigned": "Assigned",
+    "book": "Book",
+    "selectMentorToBook": "Select a mentor to book a session",
+    "noMentorsToBook": "No mentors assigned to book with",
+    "openingEmail": "Opening email client...",
+    "noEmailAvailable": "No email available for this mentor",
+    "contactMentor": "Contact mentor"
   },
   "messaging": {
     "adjustSearch": "Try adjusting search or check if user is registered.",
