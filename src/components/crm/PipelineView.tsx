@@ -415,16 +415,15 @@ function DragCard({ item }: { item: CrmInboxItem }) {
   return (
     <Card
       className={cn(
-        'w-72 cursor-grabbing rotate-[2deg] scale-105',
-        'bg-background border border-primary/30',
-        'shadow-[0_20px_40px_-12px_rgba(0,0,0,0.25)]',
-        'ring-2 ring-primary/20',
+        'w-68 cursor-grabbing',
+        'bg-background border shadow-lg',
+        'ring-1 ring-primary/30',
         isOverdue && 'border-l-2 border-l-amber-500'
       )}
     >
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+          <GripVertical className="h-4 w-4 text-primary/50 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium line-clamp-2">
               {item.organization_name || item.contact_name || t('crm.unnamed')}
