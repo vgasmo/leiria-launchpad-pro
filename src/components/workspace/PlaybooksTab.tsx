@@ -100,7 +100,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
     );
   }
 
-  const availablePlaybooks = playbooks?.filter(p => getInstanceStatus(p.id) !== 'instantiated') || [];
+  const availablePlaybooks = playbooks?.filter(p => getInstanceStatus(p.id) !== 'instantiated' && (p.items?.length ?? 0) > 0) || [];
   const instantiatedPlaybooks = instances?.filter(i => i.status === 'instantiated') || [];
 
   // Extract KPI hints from playbook items metadata
