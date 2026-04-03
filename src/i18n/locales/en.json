@@ -5123,6 +5123,22 @@
     },
     "undoDismiss": "Restore"
   },
+  "benchmark": {
+    "title": "Program Benchmark",
+    "description": "Anonymous comparison with startups at the same stage",
+    "noData": "Benchmark data not yet available. It will appear when there are enough startups in the program.",
+    "healthScore": "Health Score",
+    "milestones": "Milestones Completed",
+    "actions": "Actions Completed",
+    "you": "You",
+    "avg": "Average",
+    "startups": "startups",
+    "stageOverview": "Stage Overview",
+    "stageDesc": "Average metrics for each program stage",
+    "aboveAverage": "Above average",
+    "belowAverage": "Below average",
+    "onAverage": "On average"
+  },
   "prep": {
     "title": "Prep Sheet — Primeiro Contacto"
   },
