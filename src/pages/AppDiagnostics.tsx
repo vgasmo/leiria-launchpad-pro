@@ -229,7 +229,7 @@ export default function AppDiagnostics() {
         try {
           const result = await Promise.race([
             defs[ci].tests[ti].test(),
-            new Promise<{ pass: boolean; message: string }>((_, reject) =>
+            new Promise<{ pass: boolean; message: string; details?: string }>((_, reject) =>
               setTimeout(() => reject(new Error('Timeout (5s)')), 5000)
             ),
           ]);
