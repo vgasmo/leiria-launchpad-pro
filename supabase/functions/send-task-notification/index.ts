@@ -278,7 +278,7 @@ function buildAssignedEmail(data: AssignedEmailData): string {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #666; font-size: 12px; text-align: center; margin-bottom: 0;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/settings" style="color: #c03c3c;">Gerir preferências</a>
+          <a href="${appUrl}/settings" style="color: #c03c3c;">Gerir preferências</a>
         </p>
       </div>
     </body>
