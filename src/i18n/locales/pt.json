@@ -1888,7 +1888,8 @@
     "yes": "Sim",
     "milestones": "Milestones",
     "sessions": "Sessões",
-    "submitted": "Submetido"
+    "submitted": "Submetido",
+    "errorGeneric": "Ocorreu um erro. Por favor tente novamente."
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -3883,7 +3884,8 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook."
+    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
+    "setupGuide": "Guia de Configuração de Integrações"
   },
   "investorReadiness": {
     "createLink": "Criar Link",

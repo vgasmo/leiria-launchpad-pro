@@ -49,7 +49,7 @@ export default function IntegrationsSetup() {
   };
 
   return (
-    <AppLayout title="Integrations Setup Guide">
+    <AppLayout title={t('integrations.setupGuide', 'Guia de Configuração de Integrações')}>
       <div className="mb-6">
         <Button
           variant="ghost"
