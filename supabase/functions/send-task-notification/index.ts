@@ -337,7 +337,7 @@ function buildOverdueEmail(data: OverdueEmailData): string {
         </ul>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://apxzuslwhjujgrcsfzqw.lovableproject.com/my-workspaces" 
+          <a href="${taskAppUrl ? taskAppUrl : (Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com")}/my-workspaces" 
              style="display: inline-block; background: #c03c3c; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500;">
             Ver Dashboard
           </a>
