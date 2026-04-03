@@ -5042,6 +5042,13 @@
       "sent_for_signature": "Enviado p/ Assinatura"
     }
   },
+  "chat": {
+    "title": "Chat do Workspace",
+    "empty": "Sem mensagens ainda. Inicie a conversa!",
+    "placeholder": "Escreva uma mensagem...",
+    "sendError": "Erro ao enviar mensagem",
+    "unknown": "Desconhecido"
+  },
   "playbookProgress": {
     "activateToTrack": "Ative um playbook para acompanhar o progresso",
     "activePlaybook": "Playbook Ativo",
@@ -7355,6 +7362,7 @@
     "okrs": "OKRs",
     "overview": "Visão Geral",
     "playbooks": "Playbooks",
+    "chat": "Chat",
     "benchmark": "Benchmark",
     "pleaseEnterAFilterName": "Please enter a filter name",
     "pleaseUploadAnExcelXlsx": "Please upload an Excel (.xlsx, .xlsm, .xls) or CSV file",

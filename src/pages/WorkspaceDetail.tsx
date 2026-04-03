@@ -28,6 +28,7 @@ import { TeamTab } from '@/components/workspace/TeamTab';
 // DataroomTab now rendered inside DocumentsTab as sub-tab
 import { TimeTrackingTab } from '@/components/workspace/TimeTrackingTab';
 import { PlaybooksTab } from '@/components/workspace/PlaybooksTab';
+import { ChatTab } from '@/components/workspace/ChatTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
 import { BenchmarkDashboard } from '@/components/workspace/BenchmarkDashboard';
 import { RelationshipRecapCard } from '@/components/workspace/RelationshipRecapCard';
@@ -351,6 +352,11 @@ export default function WorkspaceDetail() {
                 currentStage={workspace.stage} 
                 canWrite={canWrite} 
               />
+            </div>
+          )}
+          {activeTab === 'chat' && (
+            <div role="tabpanel" id="tabpanel-chat" aria-labelledby="tab-chat">
+              <ChatTab workspaceId={workspace.id} />
             </div>
           )}
           {activeTab === 'benchmark' && isFounder && (
