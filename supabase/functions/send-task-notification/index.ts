@@ -301,8 +301,9 @@ function buildOverdueEmail(data: OverdueEmailData): string {
     const daysOverdue = Math.floor(
       (new Date().getTime() - new Date(t.dueDate).getTime()) / (1000 * 60 * 60 * 24)
     );
+    const taskAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
     const workspaceUrl = t.workspaceId 
-      ? `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${t.workspaceId}?tab=notes`
+      ? `${taskAppUrl}/workspace/${t.workspaceId}?tab=notes`
       : "#";
     
     return `
