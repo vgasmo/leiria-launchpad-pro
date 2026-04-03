@@ -34,6 +34,7 @@ export const WORKSPACE_TABS: WorkspaceTab[] = [
   { id: 'agenda',     labelKey: 'workspace.agenda',      icon: Calendar,        primary: true,  visibleTo: ['all'] },
 
   // ── Overflow tabs (inside "More" dropdown) ──
+  { id: 'chat',       labelKey: 'workspace.chat',        icon: MessageSquare,   primary: false, visibleTo: ['all'] },
   { id: 'documents',  labelKey: 'workspace.documents',   icon: FileText,        primary: false, visibleTo: ['all'] },
   { id: 'playbooks',  labelKey: 'workspace.playbooks',   icon: BookOpen,        primary: false, visibleTo: ['all'] },
   // templates absorbed into documents tab as "Ferramentas para Empreendedores" sub-tab
