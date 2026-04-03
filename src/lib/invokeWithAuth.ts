@@ -44,10 +44,24 @@ export async function invokeWithAuth<T = any>(
 
   if (error) {
     const parsed = parseApiError(error, `invokeWithAuth:${functionName}`);
+    // Preserve status code info in the error message for downstream handling
+    const rawMsg = error instanceof Error ? error.message : String(error);
+    const is403 = rawMsg.includes('403') || rawMsg.includes('non-2xx') || parsed.code === 'FORBIDDEN';
+    const errMsg = is403
+      ? `403: Access denied (${functionName})`
+      : parsed.message;
     return { 
       data: null, 
-      error: new Error(parsed.message)
+      error: new Error(errMsg)
     };
+  }
+
+  // Handle edge function returning error in the body (non-throw path)
+  if (data && typeof data === 'object' && 'error' in data && !('id' in data)) {
+    const bodyError = (data as any).error;
+    if (typeof bodyError === 'string' && bodyError.toLowerCase().includes('access denied')) {
+      return { data: null, error: new Error(`403: Access denied (${functionName})`) };
+    }
   }
 
   return { data, error: null };
