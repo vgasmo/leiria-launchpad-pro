@@ -216,8 +216,8 @@ export function PipelineView({
       </div>
 
       <DragOverlay dropAnimation={{
-        duration: 250,
-        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        duration: 200,
+        easing: 'cubic-bezier(0.2, 0, 0, 1)',
       }}>
         {activeItem && (
           <DragCard item={activeItem} />
