@@ -354,6 +354,11 @@ export default function WorkspaceDetail() {
               />
             </div>
           )}
+          {activeTab === 'chat' && (
+            <div role="tabpanel" id="tabpanel-chat" aria-labelledby="tab-chat">
+              <ChatTab workspaceId={workspace.id} />
+            </div>
+          )}
           {activeTab === 'benchmark' && isFounder && (
             <div role="tabpanel" id="tabpanel-benchmark" aria-labelledby="tab-benchmark">
               <BenchmarkDashboard
