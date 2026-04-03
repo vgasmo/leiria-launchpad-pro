@@ -271,9 +271,9 @@ export default function AppDiagnostics() {
 
   const statusIcon = (status: TestStatus) => {
     switch (status) {
-      case 'pass': return <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />;
-      case 'fail': return <XCircle className="h-5 w-5 text-red-500 shrink-0" />;
-      case 'running': return <Loader2 className="h-5 w-5 text-blue-500 animate-spin shrink-0" />;
+      case 'pass': return <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />;
+      case 'fail': return <XCircle className="h-5 w-5 text-destructive shrink-0" />;
+      case 'running': return <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />;
       default: return <Clock className="h-5 w-5 text-muted-foreground shrink-0" />;
     }
   };
