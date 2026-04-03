@@ -55,7 +55,7 @@ export function useVersionCheck() {
               'A app foi atualizada. Clique no botão para carregar a nova versão.'
             ),
             duration: Infinity,
-            important: true,
+            position: 'top-center',
             action: {
               label: t('app.updateNow', 'Atualizar agora'),
               onClick: () => {
