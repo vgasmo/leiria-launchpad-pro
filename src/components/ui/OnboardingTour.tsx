@@ -140,7 +140,7 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
       stepIndex={stepIndex}
       run={runTour}
       continuous
-      showProgress={false}
+      showProgress
       showSkipButton
       scrollToFirstStep
       spotlightClicks
