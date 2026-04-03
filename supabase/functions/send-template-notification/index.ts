@@ -298,7 +298,8 @@ interface ReviewedEmailData {
 }
 
 function buildReviewedEmail(data: ReviewedEmailData): string {
-  const url = `https://apxzuslwhjujgrcsfzqw.lovableproject.com/workspace/${data.workspaceId}?tab=templates`;
+  const reviewAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
+  const url = `${reviewAppUrl}/workspace/${data.workspaceId}?tab=templates`;
   
   const statusText = data.isApproved ? "foi aprovado" : "precisa de alterações";
   const statusColor = data.isApproved ? "#22c55e" : "#f59e0b";
