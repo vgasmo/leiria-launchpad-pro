@@ -319,10 +319,10 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
       style={style}
       className={cn(
         'cursor-pointer bg-background border shadow-sm',
-        'transition-[box-shadow,border-color,opacity] duration-200 ease-out',
+        'transition-[box-shadow,border-color,opacity] duration-150 ease-out',
         'hover:shadow-md hover:border-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500',
-        isDragging && 'opacity-40 shadow-lg scale-[1.02] rotate-1'
+        isDragging && 'opacity-0'
       )}
       data-testid="crm-record"
       onClick={() => onOpenDrawer(item)}
