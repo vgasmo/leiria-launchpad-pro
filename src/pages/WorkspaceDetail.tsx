@@ -360,7 +360,9 @@ export default function WorkspaceDetail() {
                 programId={workspace.program_id}
                 currentStage={workspace.stage}
                 myHealthScore={workspace.health_score_numeric}
-              />
+                myMilestonesCompleted={0}
+                myActionsCompleted={0}
+              /> 
             </div>
           )}
           {/* templates tab absorbed into documents sub-tabs */}
