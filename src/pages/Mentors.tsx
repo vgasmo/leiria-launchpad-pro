@@ -350,14 +350,9 @@ export default function Mentors() {
           </TabsContent>
         </Tabs>
       ) : isFounder ? (
-        // FOUNDER VIEW: Team → My Mentors + Book Session (side-by-side) → Gallery → Request
+        // FOUNDER VIEW: My Mentors (with inline book) → Gallery → Request
         <div className="space-y-6">
-          {/* 0. Your Team Card */}
-          {founderWorkspaceId && (
-            <ResponsibleConsultantCard workspaceId={founderWorkspaceId} />
-          )}
-
-          {/* 1. My Mentors + Book Session side-by-side */}
+          {/* My Mentors + Booking side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* My Mentors */}
             <Card>
@@ -390,10 +385,9 @@ export default function Mentors() {
                 ) : (
                   <div className="space-y-3">
                     {uniqueMentors.map(mentor => (
-                      <a
+                      <div
                         key={mentor.user_id}
-                        href={mentor.profile?.email ? sanitizeUrl(`mailto:${mentor.profile.email}`)! : '#'}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 transition-all cursor-pointer group"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 hover:border-primary/20 transition-all group"
                       >
                         <Avatar className="h-12 w-12 border-2 border-primary/10">
                           <AvatarImage src={mentor.profile?.avatar_url || undefined} />
@@ -402,7 +396,7 @@ export default function Mentors() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                          <p className="font-medium text-sm truncate">
                             {mentor.profile?.full_name || t('mentorsPage.unnamedMentor')}
                           </p>
                           {mentor.profile?.expertise && mentor.profile.expertise.length > 0 && (
@@ -413,24 +407,48 @@ export default function Mentors() {
                             </div>
                           )}
                         </div>
-                        <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                        <div className="flex gap-1 shrink-0">
                           {mentor.profile?.linkedin_url && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                              <a href={sanitizeUrl(mentor.profile.linkedin_url)!} target="_blank" rel="noopener noreferrer">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                              <a href={sanitizeUrl(mentor.profile.linkedin_url)!} target="_blank" rel="noopener noreferrer" title="LinkedIn">
                                 <Linkedin className="h-3.5 w-3.5" />
                               </a>
                             </Button>
                           )}
-                          <Mail className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              if (mentor.profile?.email) {
+                                window.open(`mailto:${mentor.profile.email}`, '_blank');
+                                toast.success(t('mentorsPage.openingEmail', 'Opening email client...'));
+                              } else {
+                                toast.error(t('mentorsPage.noEmailAvailable', 'No email available for this mentor'));
+                              }
+                            }}
+                            title={t('mentorsPage.contactMentor', 'Contact mentor')}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs gap-1"
+                            onClick={() => setSelectedMentorForBooking(mentor.user_id)}
+                          >
+                            <CalendarDays className="h-3.5 w-3.5" />
+                            {t('mentorsPage.book', 'Agendar')}
+                          </Button>
                         </div>
-                      </a>
+                      </div>
                     ))}
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Book Session */}
+            {/* Book Session - shows booking for selected mentor */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -440,7 +458,25 @@ export default function Mentors() {
                 <CardDescription className="text-xs">{t('mentorsPage.bookSessionDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
-                <MentorBookingPanel mode="founder" />
+                {selectedMentorForBooking ? (
+                  <MentorBookingPanel
+                    mode="founder"
+                    mentorId={selectedMentorForBooking}
+                    mentorName={uniqueMentors.find(m => m.user_id === selectedMentorForBooking)?.profile?.full_name || undefined}
+                    mentorAvatar={uniqueMentors.find(m => m.user_id === selectedMentorForBooking)?.profile?.avatar_url || undefined}
+                    workspaceId={founderWorkspaceId || undefined}
+                  />
+                ) : uniqueMentors.length > 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">{t('mentorsPage.selectMentorToBook', 'Selecione um mentor para agendar sessão')}</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">{t('mentorsPage.noMentorsToBook', 'Sem mentores atribuídos para agendar')}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
