@@ -216,8 +216,8 @@ export function PipelineView({
       </div>
 
       <DragOverlay dropAnimation={{
-        duration: 250,
-        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        duration: 200,
+        easing: 'cubic-bezier(0.2, 0, 0, 1)',
       }}>
         {activeItem && (
           <DragCard item={activeItem} />
@@ -303,11 +303,12 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
     id: item.id,
   });
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    transition: isDragging ? undefined : 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
-    zIndex: isDragging ? 50 : undefined,
-  } : undefined;
+  const style: React.CSSProperties | undefined = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: isDragging ? 50 : undefined,
+      }
+    : undefined;
 
     // Show fine-grained sub-stage as small badge
     const subStageLabel = STAGE_LABELS[item.stage as FunnelStage];
@@ -318,10 +319,10 @@ function DraggableCard({ item, onOpenDrawer }: DraggableCardProps) {
       style={style}
       className={cn(
         'cursor-pointer bg-background border shadow-sm',
-        'transition-[box-shadow,border-color,opacity] duration-200 ease-out',
+        'transition-[box-shadow,border-color,opacity] duration-150 ease-out',
         'hover:shadow-md hover:border-primary/20',
         isOverdue && 'border-l-2 border-l-amber-500',
-        isDragging && 'opacity-40 shadow-lg scale-[1.02] rotate-1'
+        isDragging && 'opacity-0'
       )}
       data-testid="crm-record"
       onClick={() => onOpenDrawer(item)}
@@ -414,16 +415,15 @@ function DragCard({ item }: { item: CrmInboxItem }) {
   return (
     <Card
       className={cn(
-        'w-72 cursor-grabbing rotate-[2deg] scale-105',
-        'bg-background border border-primary/30',
-        'shadow-[0_20px_40px_-12px_rgba(0,0,0,0.25)]',
-        'ring-2 ring-primary/20',
+        'w-68 cursor-grabbing',
+        'bg-background border shadow-lg',
+        'ring-1 ring-primary/30',
         isOverdue && 'border-l-2 border-l-amber-500'
       )}
     >
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+          <GripVertical className="h-4 w-4 text-primary/50 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium line-clamp-2">
               {item.organization_name || item.contact_name || t('crm.unnamed')}
