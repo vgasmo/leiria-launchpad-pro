@@ -8,6 +8,7 @@ import {
   Target,
   BarChart3,
   Trophy,
+  Trophy,
   FileText,
   FolderLock,
   Calendar,
@@ -77,6 +78,12 @@ export function WorkspaceTabGroups({
         { id: 'milestones', label: t('workspace.milestones'), icon: <Target className="h-4 w-4" /> },
         { id: 'actions', label: t('workspace.actions'), icon: <ClipboardCheck className="h-4 w-4" /> },
         { id: 'playbooks', label: t('workspace.playbooks'), icon: <BookOpen className="h-4 w-4" /> },
+        { 
+          id: 'benchmark', 
+          label: t('workspace.benchmark', 'Benchmark'), 
+          icon: <Trophy className="h-4 w-4" />,
+          showForRoles: ['founder'],
+        },
       ],
     },
     {
