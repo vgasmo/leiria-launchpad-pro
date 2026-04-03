@@ -170,7 +170,8 @@ function AppRoutes() {
         <Route path="/system-settings" element={<ProtectedRoute adminOnly><SystemSettings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
         <Route path="/admin/datarooms" element={<ProtectedRoute staffOnly><AdminDatarooms /></ProtectedRoute>} />
-        <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
+            <Route path="/admin/data-import" element={<ProtectedRoute adminOnly><AdminDataImport /></ProtectedRoute>} />
+            <Route path="/admin/diagnostics" element={<ProtectedRoute adminOnly><AppDiagnostics /></ProtectedRoute>} />
         <Route path="/admin/programs/new" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/new/:draftId" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
         <Route path="/admin/programs/:id/setup" element={<ProtectedRoute adminOnly><ProgramSetupWizard /></ProtectedRoute>} />
