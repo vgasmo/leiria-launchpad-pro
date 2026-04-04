@@ -1,4 +1,6 @@
-export function lazyWithRetry<TModule extends { default: React.ComponentType<any> }>(
+import type { ComponentType } from "react";
+
+export function lazyWithRetry<TModule extends { default: ComponentType<any> }>(
   importer: () => Promise<TModule>,
   storageKey: string,
 ) {
