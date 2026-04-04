@@ -64,16 +64,11 @@ export default function StaffCockpit() {
           <SilentDisengagementCard workspaces={workspaces} />
         )}
 
-        {/* Backoffice-specific: Contracts expiring + Overdue invoices */}
+        {/* Backoffice-specific: Contracts expiring */}
         {(isBackoffice || isAdmin) && (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <WidgetErrorBoundary name="ContractsExpiring">
-              <BackofficeContractsExpiringCard />
-            </WidgetErrorBoundary>
-            <WidgetErrorBoundary name="InvoicesOverdue">
-              <BackofficeInvoicesOverdueCard />
-            </WidgetErrorBoundary>
-          </div>
+          <WidgetErrorBoundary name="ContractsExpiring">
+            <BackofficeContractsExpiringCard />
+          </WidgetErrorBoundary>
         )}
 
         {/* Main Grid: Triage + Daily Work */}
