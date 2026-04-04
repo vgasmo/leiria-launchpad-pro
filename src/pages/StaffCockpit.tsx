@@ -15,7 +15,7 @@ import { PendingApprovalsManager } from '@/components/admin/PendingApprovalsMana
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
 import { ClaimRequestsQueue } from '@/components/admin/ClaimRequestsQueue';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
-import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck, FileText, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Inbox, ListTodo, Zap, Building2, UserCheck, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
@@ -64,16 +64,11 @@ export default function StaffCockpit() {
           <SilentDisengagementCard workspaces={workspaces} />
         )}
 
-        {/* Backoffice-specific: Contracts expiring + Overdue invoices */}
+        {/* Backoffice-specific: Contracts expiring */}
         {(isBackoffice || isAdmin) && (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <WidgetErrorBoundary name="ContractsExpiring">
-              <BackofficeContractsExpiringCard />
-            </WidgetErrorBoundary>
-            <WidgetErrorBoundary name="InvoicesOverdue">
-              <BackofficeInvoicesOverdueCard />
-            </WidgetErrorBoundary>
-          </div>
+          <WidgetErrorBoundary name="ContractsExpiring">
+            <BackofficeContractsExpiringCard />
+          </WidgetErrorBoundary>
         )}
 
         {/* Main Grid: Triage + Daily Work */}
@@ -210,62 +205,6 @@ function BackofficeContractsExpiringCard() {
                 </div>
                 <Badge variant="outline" className="text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-600">
                   {t('staffCockpit.expiresOn', { defaultValue: 'Expira em {{date}}', date: c.end_date ? format(new Date(c.end_date), 'dd/MM') : '-' })}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-/** Backoffice widget: overdue invoices */
-function BackofficeInvoicesOverdueCard() {
-  const { t } = useTranslation();
-
-  const { data: invoices = [] } = useQuery({
-    queryKey: ['backoffice-invoices-overdue'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('id, invoice_number, due_date, total_amount, status, contract_id, startup_contracts(contract_number, startups(name))')
-        .eq('status', 'overdue')
-        .order('due_date', { ascending: true })
-        .limit(10);
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <DollarSign className="h-4 w-4 text-destructive" />
-          {t('staffCockpit.invoicesOverdue', { defaultValue: 'Faturas em Atraso' })}
-          {invoices.length > 0 && (
-            <Badge variant="destructive" className="ml-auto">{invoices.length}</Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {invoices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t('staffCockpit.noOverdueInvoices', { defaultValue: 'Nenhuma fatura em atraso. Tudo em dia!' })}
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {invoices.map((inv: any) => (
-              <li key={inv.id} className="flex items-center justify-between text-sm border-b border-border pb-2 last:border-0">
-                <div>
-                  <span className="font-medium">{inv.invoice_number}</span>
-                  <span className="text-muted-foreground ml-2">
-                    {(inv.startup_contracts as any)?.startups?.name || (inv.startup_contracts as any)?.contract_number}
-                  </span>
-                </div>
-                <Badge variant="outline" className="text-destructive border-destructive/30">
-                  {t('staffCockpit.overdueSince', { defaultValue: 'Em atraso desde {{date}}', date: inv.due_date ? format(new Date(inv.due_date), 'dd/MM') : '-' })}
                 </Badge>
               </li>
             ))}
