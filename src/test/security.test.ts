@@ -17,9 +17,9 @@ vi.mock('@/lib/logError', () => ({
 }));
 
 // ─── Mock useRateLimiter ────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 const mockCheckRateLimit = vi.fn<any>(() => true);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 const mockGetRemainingRequests = vi.fn<any>(() => 5);
 
 vi.mock('@/hooks/useRateLimiter', () => ({

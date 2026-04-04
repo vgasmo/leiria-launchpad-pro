@@ -41,7 +41,7 @@ export function WizardStagesStep({ data, onUpdate }: WizardStagesStepProps) {
     if (JSON.stringify(incoming) !== JSON.stringify(stages)) {
       setStages(incoming);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [data]);
 
   // Debounced update

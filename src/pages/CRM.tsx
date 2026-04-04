@@ -233,7 +233,7 @@ export default function CRM() {
       };
       fetchAndOpen();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [searchParams, inbox, loadingInbox]);
 
   // Compute Focus Mode items - only urgent items needing attention
