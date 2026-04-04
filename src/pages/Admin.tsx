@@ -74,7 +74,7 @@ export default function Admin() {
     if (!fromUrl && activeTab !== 'approvals') {
       setActiveTab('approvals');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [searchParams, validTabs]);
 
   const setActiveTabAndUrl = (tab: string) => {

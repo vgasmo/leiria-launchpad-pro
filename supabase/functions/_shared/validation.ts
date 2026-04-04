@@ -269,7 +269,7 @@ export async function parseAndValidateBody<T = Record<string, unknown>>(
  */
 export function sanitizeString(value: string, maxLength?: number): string {
   // Remove control characters except newlines and tabs
-  // eslint-disable-next-line no-control-regex
+   
   let sanitized = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
   
   // Trim and optionally limit length
