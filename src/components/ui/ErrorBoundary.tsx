@@ -92,11 +92,21 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReload = () => {
+    if (typeof window !== 'undefined') {
+      Object.keys(sessionStorage)
+        .filter((key) => key.startsWith('lazy:'))
+        .forEach((key) => sessionStorage.removeItem(key));
+    }
     window.location.reload();
   };
 
   private handleGoHome = () => {
-    window.location.href = '/my-workspaces';
+    if (typeof window !== 'undefined') {
+      Object.keys(sessionStorage)
+        .filter((key) => key.startsWith('lazy:'))
+        .forEach((key) => sessionStorage.removeItem(key));
+    }
+    window.location.assign('/my-workspaces');
   };
 
   private handleCopyErrorId = async () => {
