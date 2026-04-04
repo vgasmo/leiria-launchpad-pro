@@ -347,7 +347,7 @@ export function AppSidebar() {
             src={startupLeiriaLogo} 
             alt="Startup Leiria" 
             className={cn(
-              "transition-all duration-300 pointer-events-none object-contain dark:brightness-[1.8] dark:contrast-[1.1]",
+              "transition-all duration-300 pointer-events-none object-contain brightness-0 invert",
               collapsed ? "h-8 w-8" : "h-9 w-auto max-w-[160px]"
             )}
           />
