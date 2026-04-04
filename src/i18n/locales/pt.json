@@ -1273,9 +1273,17 @@
     "users": "Utilizadores",
     "usersAwaitingApproval": "Utilizadores Aguardando Aprovação",
     "wizard": {
+      "activeStages": "{{count}} etapas ativas",
+      "alertRules": "Regras de Alerta",
       "allValidationsPassed": "Todas as validações passaram. A configuração do programa está pronta para ser publicada.",
       "cannotPublish": "Não é possível publicar",
-      "readyToPublish": "Pronto para Publicar"
+      "coreKpis": "KPIs principais",
+      "coreKpisTitle": "KPIs Principais",
+      "dimensionsConfigured": "dimensões configuradas",
+      "playbookItems": "itens (Marcos + ações)",
+      "readyToPublish": "Pronto para Publicar",
+      "rulesEnabled": "de {{count}} regras ativas",
+      "totalAcrossStages": "total em todas as etapas"
     },
     "workspaceCreated": "Workspace criado",
     "workspaceCriadoEFounderAssociado": "Workspace criado e founder associado com sucesso!",
@@ -1449,6 +1457,13 @@
     "title": "Sugestão IA",
     "titleFallback": "Sugestão"
   },
+  "alertRules": {
+    "active": "Ativo",
+    "noRules": "Nenhuma regra configurada para este programa.",
+    "severity": "Severidade",
+    "threshold": "Threshold",
+    "type": "Tipo"
+  },
   "alerts": {
     "acknowledge": "Confirmar",
     "acknowledgeFailed": "Falha ao confirmar alerta",
@@ -1485,6 +1500,8 @@
     "avgPendingActions": "Ações Pendentes (média)",
     "cohortAnalytics": "Análise de Coorte",
     "criticalAtRisk": "Crítico/Em Risco",
+    "exportedStartups": "Exportadas {{count}} startups para CSV",
+    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders",
     "healthDistribution": "Distribuição de Saúde",
     "healthyThriving": "Saudável/Excelente",
     "includeInReport": "Incluir no Relatório",
@@ -1494,13 +1511,12 @@
     "programBreakdown": "Detalhe por Programa",
     "selectProgram": "Selecionar programa",
     "stageDistribution": "Distribuição por Fase",
-    "totalStartups": "total de Startups",
-    "generateReportDesc": "Gerar relatórios ao nível do programa para stakeholders",
-    "exportedStartups": "Exportadas {{count}} startups para CSV"
+    "totalStartups": "total de Startups"
   },
   "app": {
     "clickToUpdate": "Clique para atualizar.",
-    "newVersionAvailable": "Nova versão disponível."
+    "newVersionAvailable": "Nova versão disponível.",
+    "updateNow": "Atualizar agora"
   },
   "approval": {
     "contactSupport": "Contacto: support@startupleiria.com",
@@ -1597,6 +1613,28 @@
     "waitingListUpdateError": "Erro ao atualizar pedido",
     "waitingListUpdated": "Pedido atualizado"
   },
+  "benchmark": {
+    "aboveAverage": "Above average",
+    "actions": "Ações Concluídas",
+    "avg": "Média",
+    "belowAverage": "Below average",
+    "description": "Comparação anónima com startups na mesma fase",
+    "healthScore": "Health Score",
+    "milestones": "Milestones Concluídos",
+    "noData": "Dados de benchmark ainda não disponíveis. Serão apresentados quando houver startups suficientes no programa.",
+    "onAverage": "On average",
+    "stageDesc": "Métricas médias de cada fase do programa",
+    "stageOverview": "Visão por Fase",
+    "startups": "startups",
+    "title": "Benchmark do Programa",
+    "you": "Tu"
+  },
+  "bulkActions": {
+    "createTaskDesc": "Será criado um item na fila de trabalho para cada startup selecionada.",
+    "createTaskTitle": "Criar Tarefa para {{count}} Startups",
+    "descriptionOptional": "Descrição (opcional)",
+    "taskTitle": "Título da Tarefa"
+  },
   "calendar": {
     "bookSession": "Agendar Sessão",
     "fri": "Sex",
@@ -1644,6 +1682,13 @@
     "tokenGenerated": "Token de calendário gerado com sucesso (válido por 90 dias)",
     "tokenNeedsRegeneration": "Por razões de segurança, o token precisa de ser regenerado. As subscrições de calendário terão de ser atualizadas com o novo URL.",
     "urlCopied": "URL do calendário copiado"
+  },
+  "chat": {
+    "empty": "Sem mensagens ainda. Inicie a conversa!",
+    "placeholder": "Escreva uma mensagem...",
+    "sendError": "Erro ao enviar mensagem",
+    "title": "Chat do Workspace",
+    "unknown": "Desconhecido"
   },
   "checkins": {
     "definitionSaveError": "Erro ao guardar definição",
@@ -1775,6 +1820,7 @@
     "emailCopied": "Email copiado",
     "enabled": "ativada",
     "error": "Erro",
+    "errorGeneric": "Ocorreu um erro. Por favor tente novamente.",
     "errors": "Erros",
     "expired": "Expirado",
     "expires": "Expira",
@@ -1797,6 +1843,7 @@
     "loading": "A carregar...",
     "logout": "Terminar sessão",
     "messages": "Mensagens",
+    "milestones": "Milestones",
     "month": "month",
     "months": "meses",
     "moreActions": "More actions",
@@ -1854,6 +1901,7 @@
     "sendEmail": "Enviar email",
     "sendMessage": "Enviar Mensagem",
     "sending": "A enviar...",
+    "sessions": "Sessões",
     "settings": "Definições",
     "showingResults": "A mostrar {{from}}-{{to}} de {{total}}",
     "stage": "Fase",
@@ -1861,6 +1909,7 @@
     "startup": "Startup",
     "status": "Estado",
     "submit": "Submeter",
+    "submitted": "Submetido",
     "submitting": "A submeter...",
     "success": "Sucesso",
     "thisMonth": "Este mês",
@@ -1874,6 +1923,7 @@
     "unknown": "Desconhecido",
     "unknownReason": "Razão desconhecida",
     "unnamed": "Sem nome",
+    "untitled": "Sem título",
     "upToDate": "Atualizado",
     "update": "Atualizar",
     "updated": "Atualizado",
@@ -1885,11 +1935,7 @@
     "viewAll": "Ver todas",
     "workspace": "Workspace",
     "years": "anos",
-    "yes": "Sim",
-    "milestones": "Milestones",
-    "sessions": "Sessões",
-    "submitted": "Submetido",
-    "errorGeneric": "Ocorreu um erro. Por favor tente novamente."
+    "yes": "Sim"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2122,9 +2168,12 @@
     "completedAt": "Concluído em",
     "configured": "Configurado",
     "contractTimeline": "Cronologia do Contrato",
+    "digitalSignature": "🇵🇹 Assinatura Digital (Nacionais)",
+    "digitalSignatureDesc": "O founder receberá um link para assinar digitalmente na plataforma. Assinatura eletrónica simples válida sob eIDAS.",
     "docuSignNotConfigured": "Assinatura digital não configurada",
     "docuSignPendingManual": "Pendente de assinatura manual",
     "docuSignStatus": "Estado da Assinatura",
+    "generateAndSendLink": "Gerar PDF e Copiar Link de Assinatura",
     "generateInvoice": "Gerar Fatura",
     "generateInvoices": "Gerar Faturas",
     "generatePDF": "Gerar PDF",
@@ -2134,27 +2183,20 @@
     "lastError": "Último Erro",
     "lastEvent": "Último Evento",
     "lastSync": "Última Sincronização",
+    "linkCopied": "Link de assinatura copiado! Envie ao founder por email.",
     "linkGenerated": "Link público gerado e copiado! Envie ao founder.",
     "linkedEntities": "Entidades Ligadas",
     "linksTab": "Ligações",
     "manualSignature": "📋 Presencial (Fallback)",
-    "digitalSignature": "🇵🇹 Assinatura Digital (Nacionais)",
-    "pandadocManual": "🌍 PandaDoc Web (Estrangeiros)",
-    "digitalSignatureDesc": "O founder receberá um link para assinar digitalmente na plataforma. Assinatura eletrónica simples válida sob eIDAS.",
-    "pandadocManualDesc": "Gera o PDF, faz upload no PandaDoc web, e envia para assinatura. Depois volta aqui para marcar o estado.",
-    "generateAndSendLink": "Gerar PDF e Copiar Link de Assinatura",
-    "step1DownloadPdf": "1. Descarregar PDF do Contrato",
-    "step2OpenPandaDoc": "2. Abrir PandaDoc (upload e enviar)",
-    "step3MarkSent": "3. Já enviei no PandaDoc → Marcar como Enviado",
     "markAsSigned": "Confirmar: Contrato Assinado ✓",
     "markedAsSent": "Marcado como enviado para assinatura",
     "markedAsSigned": "Contrato marcado como assinado!",
-    "linkCopied": "Link de assinatura copiado! Envie ao founder por email.",
-    "sendFailed": "Erro ao enviar contrato",
     "noInvoices": "Sem faturas ainda",
     "noWorkspace": "Sem workspace associado",
     "notConfigured": "Não Configurado",
     "notSelected": "Não selecionado",
+    "pandadocManual": "🌍 PandaDoc Web (Estrangeiros)",
+    "pandadocManualDesc": "Gera o PDF, faz upload no PandaDoc web, e envia para assinatura. Depois volta aqui para marcar o estado.",
     "pdfGenerated": "PDF do contrato gerado com sucesso",
     "pdfGenerationFailed": "Erro ao gerar PDF",
     "pricingTab": "Preços",
@@ -2168,6 +2210,7 @@
     "retrySendPandaDoc": "Reenviar via PandaDoc",
     "selectProvider": "Selecionar fornecedor...",
     "selectProviderHint": "Selecione um fornecedor de assinatura acima antes de enviar o contrato.",
+    "sendFailed": "Erro ao enviar contrato",
     "sendToDocuSign": "Enviar para Assinatura",
     "sendViaDocuSign": "Enviar via DocuSign",
     "sendViaPandaDoc": "Enviar via PandaDoc",
@@ -2191,6 +2234,9 @@
     "signatureStatus": "Estado da Assinatura",
     "signatureTab": "Assinatura",
     "statusRefreshed": "Estado atualizado",
+    "step1DownloadPdf": "1. Descarregar PDF do Contrato",
+    "step2OpenPandaDoc": "2. Abrir PandaDoc (upload e enviar)",
+    "step3MarkSent": "3. Já enviei no PandaDoc → Marcar como Enviado",
     "viewInCRM": "Ver no CRM",
     "viewInvoices": "Ver Faturas",
     "viewWorkspace": "Ver Workspace"
@@ -2407,6 +2453,7 @@
     },
     "archiveLead": "Arquivar Lead",
     "assignedTo": "Atribuído a",
+    "assignee": "Consultor Responsável",
     "attachToCrm": "Associar",
     "bulk": {
       "archiveConfirmDesc": "Isto irá mover todos os leads selecionados para arquivado. Pode restaurá-los mais tarde.",
@@ -2443,12 +2490,15 @@
     "commercialNotesPlaceholder": "Tipo de contrato, condições especiais...",
     "commercialProposal": "Proposta Comercial",
     "consultantRequest": "Pedido do seu consultor",
+    "contactName": "Nome do Contacto",
     "context": "Contexto",
     "contract": "Contrato",
     "contractLinkCopied": "Link público do contrato copiado! Envie ao founder por email.",
     "contratoEnviadoParaAssinatura": "Contrato enviado para assinatura!",
     "convertToStartup": "Converter em Startup",
     "convertedToStartup": "Converted to startup",
+    "createLead": "Criar Lead",
+    "createNewLead": "Criar Nova Lead",
     "createWorkspace": "Criar Workspace",
     "created": "Criado",
     "crmDashboard": "Dashboard CRM",
@@ -2609,6 +2659,7 @@
     "nameOrOrg": "Nome / Organização",
     "nenhumContratoAssociadoAEste": "Nenhum contrato associado a este intake. Crie o contrato primeiro.",
     "neverSynced": "Nunca sincronizado",
+    "newLead": "Nova Lead",
     "nextAction": "Próxima Ação",
     "nextActionClearError": "Falha ao limpar próxima ação",
     "nextActionCleared": "Próxima ação limpa",
@@ -2639,10 +2690,12 @@
     "noTasksYet": "Sem tarefas ainda",
     "noUnmatchedEmails": "Sem emails por resolver",
     "notes": "Notas",
+    "notesPlaceholder": "Observações iniciais sobre esta Lead...",
     "open": "Abertas",
     "openDrawer": "Abrir Detalhes",
     "openLoops": "Pendentes",
     "openTasks": "Tarefas Abertas",
+    "organizationName": "Organização",
     "overdue": "Em Atraso",
     "overdueActions": "Ações Atrasadas",
     "overview": "Visão Geral",
@@ -2665,6 +2718,7 @@
     },
     "priority": "Prioridade",
     "processed": "Processados",
+    "program": "Programa",
     "proposedDiscount": "Desconto Proposto (%)",
     "proposedIncubationType": "Tipo de Incubação Proposto",
     "proposedMonthlyFee": "Mensalidade Proposta (€)",
@@ -2689,8 +2743,10 @@
     "searchPlaceholder": "Pesquisar leads...",
     "selecioneUmProviderDeAssinatura": "Selecione um provider de assinatura.",
     "selectCategory": "Definir categoria",
+    "selectConsultor": "Selecionar...",
     "selectContract": "Selecionar contrato...",
     "selectIncubationType": "Selecionar tipo",
+    "selectProgram": "Selecionar...",
     "sendContract": "Enviar Contrato",
     "setAction": "Definir Ação",
     "setNextAction": "Definir Próxima Ação",
@@ -2699,6 +2755,7 @@
     "shared": "Partilhado",
     "sinceLast": "Desde a última vez",
     "source": "Origem",
+    "sourcePlaceholder": "Ex: Website, Evento, Referência...",
     "stage": "Fase",
     "stageMoveFailed": "Falha ao mover de fase",
     "stageMoved": "Movido para {{stage}}",
@@ -2977,6 +3034,18 @@
     "useTemplate": "Usar template",
     "viewReview": "Ver avaliação"
   },
+  "diagnostics": {
+    "allOperational": "Tudo operacional",
+    "clickToStart": "Clique para iniciar os testes",
+    "copied": "Resultados copiados",
+    "issuesFound": "problemas encontrados",
+    "ready": "Pronto para correr",
+    "runAll": "Correr Todos os Testes",
+    "running": "A correr...",
+    "subtitle": "Testes automáticos a todas as camadas",
+    "testsPassed": "testes passaram",
+    "title": "Diagnósticos da Plataforma"
+  },
   "discounts": {
     "active": "Ativo",
     "activeDiscount": "Desconto ativo",
@@ -3128,10 +3197,12 @@
     "allPrograms": "Todos os Programas",
     "allStages": "Todas as Fases",
     "allTags": "Todas as Tags",
+    "byConsultantTab": "Por Consultor",
     "communityTab": "Comunidade",
     "description": "Visão unificada de todos os workspaces e leads",
     "lastActivity": "Última Atividade",
     "lead": "Lead",
+    "leads": "Leads",
     "manageTeam": "Gerir Equipa",
     "name": "Nome",
     "needsAttention": "Apenas Precisa de Atenção",
@@ -3146,7 +3217,9 @@
     "tagCategory": "Categoria de Tag",
     "title": "Centro de Comando do Ecossistema",
     "type": "Tipo",
-    "workspace": "Workspace"
+    "unassigned": "Sem consultor atribuído",
+    "workspace": "Workspace",
+    "workspaces": "workspaces"
   },
   "ecosystemHub": {
     "navLabel": "Ecossistema & CRM",
@@ -3859,6 +3932,7 @@
     "remindersNotifyDesc": "Reminders Notify Desc",
     "sending": "Sending",
     "sessãoSincronizadaComOCalendário": "Sessão sincronizada com o calendário Outlook",
+    "setupGuide": "Guia de Configuração de Integrações",
     "setupInstructions": "Para configurar:",
     "sincronizaçãoOutlookNãoConfiguradaPara": "Sincronização Outlook não configurada para este workspace",
     "slackDesc": "Slack Desc",
@@ -3884,8 +3958,7 @@
     "webhookUrl": "Webhook Url",
     "webhookUrlSaved": "Webhook URL saved",
     "zoomMeet": "Zoom / Google Meet",
-    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook.",
-    "setupGuide": "Guia de Configuração de Integrações"
+    "zoomMeetNote": "Use Zapier ou Make.com para conectar as suas reuniões a este endpoint de webhook."
   },
   "investorReadiness": {
     "createLink": "Criar Link",
@@ -4406,9 +4479,11 @@
     "assign": "Atribuir",
     "assignMentorDesc": "Selecione um mentor para atribuir a {{startup}}",
     "assignMentorTitle": "Atribuir Mentor",
+    "assigned": "Atribuído",
     "assignmentFailed": "Falha ao atribuir mentor. Tente novamente.",
     "availability": "Disponibilidade",
     "awaitingMatch": "Em triagem",
+    "book": "Agendar",
     "bookSession": "Agendar Sessão",
     "bookSessionDesc": "Marque uma sessão de mentoria com os seus mentores atribuídos",
     "bookings": "Reservas",
@@ -4420,6 +4495,7 @@
     "connection": "Conexão",
     "connectionRequests": "Pedidos de Conexão",
     "contact": "Contactar",
+    "contactMentor": "Contactar mentor",
     "decline": "Recusar",
     "declined": "recusada",
     "describeNeed": "Descreva a sua necessidade específica (opcional)",
@@ -4434,13 +4510,19 @@
     "industryOptional": "Industry (opcional)",
     "matchingMentors": "Mentores correspondentes",
     "mentorAssigned": "Mentor atribuído com sucesso!",
+    "mentorGallery": "Galeria de Mentores",
+    "mentorGalleryDesc": "Explore todos os mentores disponíveis no ecossistema por área de especialidade.",
     "myMentors": "Os Meus Mentores",
     "myMentorsDesc": "Mentores atribuídos ao seu workspace pelo programa",
     "noCategoriesSetup": "No tag categories configured yet",
+    "noEmailAvailable": "Email não disponível para este mentor",
     "noMentorsAssigned": "Ainda não tem mentores atribuídos",
     "noMentorsAssignedDesc": "Os mentores serão atribuídos pela equipa do programa. Quando isso acontecer, verá aqui os seus perfis e poderá agendar sessões.",
+    "noMentorsAvailable": "Nenhum mentor disponível de momento.",
+    "noMentorsToBook": "Sem mentores atribuídos para agendar",
     "noPendingRequests": "Sem pedidos pendentes",
     "noRequestsYet": "Ainda não há pedidos de conexão",
+    "openingEmail": "A abrir cliente de email...",
     "pastRequests": "Pedidos Anteriores",
     "pendingMentorRequests": "Pedidos de Mentor Pendentes",
     "pendingMentorRequestsDesc": "Founders pediram mentores com experiência específica. Reveja e atribua.",
@@ -4452,10 +4534,12 @@
     "requestSubmitted": "O seu pedido de mentor foi enviado!",
     "requestedBy": "Pedido por",
     "requestedExpertise": "Experiência solicitada",
+    "searchMentors": "Pesquisar por nome ou especialidade...",
     "selectExpertise": "Que experiência precisa?",
     "selectIndustry": "Selecionar industries...",
     "selectMentor": "Selecionar mentor",
     "selectMentorPlaceholder": "Escolha um mentor...",
+    "selectMentorToBook": "Selecione um mentor para agendar sessão",
     "selectNeeds": "Selecionar needs...",
     "selectStartup": "Selecionar startup",
     "selectStartupPlaceholder": "Escolha uma startup",
@@ -4465,18 +4549,7 @@
     "technologyOptional": "Technology (opcional)",
     "unknownFounder": "Founder Desconhecido",
     "unnamedMentor": "Mentor",
-    "whatNeedsHelp": "What do you need help com?",
-    "mentorGallery": "Galeria de Mentores",
-    "mentorGalleryDesc": "Explore todos os mentores disponíveis no ecossistema por área de especialidade.",
-    "searchMentors": "Pesquisar por nome ou especialidade...",
-    "noMentorsAvailable": "Nenhum mentor disponível de momento.",
-    "assigned": "Atribuído",
-    "book": "Agendar",
-    "selectMentorToBook": "Selecione um mentor para agendar sessão",
-    "noMentorsToBook": "Sem mentores atribuídos para agendar",
-    "openingEmail": "A abrir cliente de email...",
-    "noEmailAvailable": "Email não disponível para este mentor",
-    "contactMentor": "Contactar mentor"
+    "whatNeedsHelp": "What do you need help com?"
   },
   "messaging": {
     "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
@@ -4561,6 +4634,7 @@
     "actionsFollowups": "Ações & Follow-ups",
     "admin": {
       "crm": "CRM",
+      "diagnostics": "Diagnósticos",
       "ecosystem": "Diretório Ecossistema",
       "operations": "Operações",
       "programsCohorts": "Programas e Coortes",
@@ -4601,6 +4675,7 @@
       "glossaryFaq": "Glossário & FAQ",
       "goalsKpis": "Objetivos & KPIs",
       "home": "Início",
+      "mentors": "Mentores",
       "mentorsResources": "Mentores & Recursos",
       "myStartup": "A Minha Startup",
       "networkResources": "Rede & Recursos",
@@ -5042,13 +5117,6 @@
       "sent_for_signature": "Enviado p/ Assinatura"
     }
   },
-  "chat": {
-    "title": "Chat do Workspace",
-    "empty": "Sem mensagens ainda. Inicie a conversa!",
-    "placeholder": "Escreva uma mensagem...",
-    "sendError": "Erro ao enviar mensagem",
-    "unknown": "Desconhecido"
-  },
   "playbookProgress": {
     "activateToTrack": "Ative um playbook para acompanhar o progresso",
     "activePlaybook": "Playbook Ativo",
@@ -5064,6 +5132,7 @@
     "viewPlaybooks": "Ver Playbooks"
   },
   "playbooks": {
+    "actions": "ações",
     "actionsCount": "{{count}} ação",
     "actionsCount_plural": "{{count}} ações",
     "activate": "Ativar Playbook",
@@ -5098,13 +5167,30 @@
       "restoreFailed": "Falha ao restaurar Playbook",
       "updateFailed": "Falha ao atualizar playbook"
     },
+    "evidence": {
+      "addEvidence": "Evidência",
+      "attachFile": "Anexar ficheiro",
+      "notesPlaceholder": "Descreva o que fez, resultados obtidos...",
+      "pending": "Pendente",
+      "reviewNote": "Nota de review...",
+      "submit": "Submeter",
+      "title": "Evidência",
+      "verified": "Verificado"
+    },
+    "evidenceApproved": "Evidência aprovada",
+    "evidenceError": "Erro ao submeter evidência",
+    "evidenceRejected": "Evidência rejeitada",
+    "evidenceSubmitted": "Evidência submetida com sucesso",
     "founderHint": "O seu consultor vai ativar playbooks quando forem adequados para a sua jornada.",
     "introDescription": "Playbooks criam marcos e ações com prazos inteligentes. Peça um para ter um plano estruturado alinhado com a sua fase.",
     "introTitle": "O Seu Roteiro para o Sucesso",
+    "milestones": "marcos",
     "milestonesCount": "{{count}} marco",
     "milestonesCount_plural": "{{count}} marcos",
     "moreItems": "+{{count}} mais",
+    "overdue": "atrasadas",
     "preview": "O que vai receber",
+    "progress": "Progresso",
     "recommended": "Recomendados para {{stage}}",
     "requestAdvanced": "Pedir Playbook Personalizado",
     "requestThis": "Pedir Este Playbook",
@@ -5140,19 +5226,6 @@
       "validation": "Validação"
     },
     "undoDismiss": "Restaurar"
-  },
-  "benchmark": {
-    "title": "Benchmark do Programa",
-    "description": "Comparação anónima com startups na mesma fase",
-    "noData": "Dados de benchmark ainda não disponíveis. Serão apresentados quando houver startups suficientes no programa.",
-    "healthScore": "Health Score",
-    "milestones": "Milestones Concluídos",
-    "actions": "Ações Concluídas",
-    "you": "Tu",
-    "avg": "Média",
-    "startups": "startups",
-    "stageOverview": "Visão por Fase",
-    "stageDesc": "Métricas médias de cada fase do programa"
   },
   "prep": {
     "title": "Prep Sheet — Primeiro Contacto"
@@ -5242,6 +5315,7 @@
     "standardMode": "Standard",
     "standardModeDesc": "Funcionalidades completas: KPIs, health scores, milestones, playbooks e mais.",
     "startDate": "Data de Início",
+    "startsAt": "Início",
     "stepDescriptions": {
       "alerts": "Configure regras de alerta e pontuação de saúde",
       "basics": "Introduza as informações básicas do programa",
@@ -6082,12 +6156,12 @@
     "testGraphConnection": "Testar Conexão Graph API",
     "theme": "Tema",
     "updateIdentifiers": "Atualizar Identificadores",
+    "useCustomCalendarDesc": "Usar um calendário diferente do consultor atribuído",
     "usingAssignedConsultantCalendar": "A usar calendário do consultor atribuído",
     "webhookUrl": "URL do Webhook",
     "weekly": "Semanal",
     "whenEnabled": "Quando ativado:",
-    "whenScheduleSession": "Quando agenda uma sessão, o sistema vai automaticamente:",
-    "useCustomCalendarDesc": "Usar um calendário diferente do consultor atribuído"
+    "whenScheduleSession": "Quando agenda uma sessão, o sistema vai automaticamente:"
   },
   "settingsPage": {
     "areasOfExpertise": "Áreas de Especialização",
@@ -7139,11 +7213,11 @@
     "url": "Por favor, insira um URL válido"
   },
   "valueProp": {
-    "subtitle": "Crie uma proposta de valor convincente em 5-7 minutos",
-    "title": "Assistente de Proposta de Valor",
+    "keyPoints": "Pontos-Chave",
     "noPropositions": "Ainda sem propostas de valor",
     "oneLiner": "Frase-chave",
-    "keyPoints": "Pontos-Chave"
+    "subtitle": "Crie uma proposta de valor convincente em 5-7 minutos",
+    "title": "Assistente de Proposta de Valor"
   },
   "vp": {
     "alternatives": "Que alternativas usam hoje?",
@@ -7323,8 +7397,12 @@
       "description": "Sintetiza KPIs, marcos e sessões num resumo pronto a enviar.",
       "title": "Rascunho de Atualização Mensal com IA"
     },
+    "benchmark": "Benchmark",
+    "bookSession": "Agendar Sessão",
     "calendar": "Calendário",
     "category": "Cat.",
+    "chat": "Chat",
+    "consultant": "Consultor",
     "contactLogged": "Contact logged",
     "copiedToClipboard": "Copied to clipboard",
     "defaultFilterUpdated": "Default filter updated",
@@ -7349,6 +7427,7 @@
     "kpiAtualizado": "KPI atualizado",
     "kpis": "KPIs",
     "locationContract": "Localização e Contrato",
+    "mentor": "Mentor",
     "milestones": "Marcos",
     "noActionableInsights": "No actionable insights",
     "noActionsYet": "Sem ações ainda",
@@ -7362,8 +7441,6 @@
     "okrs": "OKRs",
     "overview": "Visão Geral",
     "playbooks": "Playbooks",
-    "chat": "Chat",
-    "benchmark": "Benchmark",
     "pleaseEnterAFilterName": "Please enter a filter name",
     "pleaseUploadAnExcelXlsx": "Please upload an Excel (.xlsx, .xlsm, .xls) or CSV file",
     "program": "Programa",
@@ -7376,6 +7453,7 @@
       "vibe": "Vibe"
     },
     "reports": "Relatórios",
+    "requestMentor": "Pedir Mentor",
     "responsibleConsultant": "Consultor Responsável",
     "review": "Review{{ decision }}",
     "scheduleSession": "Agendar Sessão",
@@ -7392,11 +7470,7 @@
     "workspaceUpdated": "Workspace updated",
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor",
-    "yourTeam": "A Sua Equipa",
-    "consultant": "Consultor",
-    "mentor": "Mentor",
-    "bookSession": "Agendar Sessão",
-    "requestMentor": "Pedir Mentor"
+    "yourTeam": "A Sua Equipa"
   },
   "workspaceCard": {
     "actions": "Ações",
@@ -7471,18 +7545,5 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
-  },
-  "alertRules": {
-    "type": "Tipo",
-    "threshold": "Threshold",
-    "severity": "Severidade",
-    "active": "Ativo",
-    "noRules": "Nenhuma regra configurada para este programa."
-  },
-  "bulkActions": {
-    "createTaskTitle": "Criar Tarefa para {{count}} Startups",
-    "createTaskDesc": "Será criado um item na fila de trabalho para cada startup selecionada.",
-    "taskTitle": "Título da Tarefa",
-    "descriptionOptional": "Descrição (opcional)"
   }
 }
