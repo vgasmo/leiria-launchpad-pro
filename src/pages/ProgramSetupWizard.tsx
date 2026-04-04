@@ -108,7 +108,15 @@ export default function ProgramSetupWizard() {
     }
   }, [id, activeDraftId, createDraft]);
 
-  const currentStepIndex = STEPS.findIndex((s) => s.key === currentStep);
+  // If current step is not in the filtered STEPS (e.g. basic mode hides standard steps), reset
+  const rawStepIndex = STEPS.findIndex((s) => s.key === currentStep);
+  useEffect(() => {
+    if (rawStepIndex === -1 && STEPS.length > 0) {
+      setCurrentStep(STEPS[0].key);
+    }
+  }, [rawStepIndex, STEPS]);
+
+  const currentStepIndex = rawStepIndex === -1 ? 0 : rawStepIndex;
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
   const handleNext = () => {
