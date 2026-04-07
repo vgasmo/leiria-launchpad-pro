@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Building2, Plus, Sparkles, Search } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 
@@ -161,8 +161,10 @@ export function WorkspaceAssignmentDialog({ open, onOpenChange, user }: Workspac
 
   const invalidateAndClose = () => {
     queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
     queryClient.invalidateQueries({ queryKey: ['workspaces'] });
     queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
     onOpenChange(false);
     resetForm();
   };
