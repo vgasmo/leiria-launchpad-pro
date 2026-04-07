@@ -55,6 +55,7 @@ export function AdminUsersManager() {
   const [wsRole, setWsRole] = useState<Role>('founder');
   const [deleteWsUserTarget, setDeleteWsUserTarget] = useState<string | null>(null);
   const [suspendTarget, setSuspendTarget] = useState<{ userId: string; userName: string; currentStatus: string } | null>(null);
+  const [deleteUserTarget, setDeleteUserTarget] = useState<{ userId: string; userName: string } | null>(null);
   const queryClient = useQueryClient();
 
   const isLoading = loadingProfiles || loadingRoles || loadingWsUsers;
@@ -229,6 +230,14 @@ export function AdminUsersManager() {
                             ) : (
                               <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
                             )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteUserTarget({ userId: profile.id, userName: profile.full_name || profile.email })}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.deleteUser', { defaultValue: 'Apagar' })}
                           </Button>
                         </div>
                       </div>
@@ -476,6 +485,40 @@ export function AdminUsersManager() {
                 ? t('admin.userManagement.reactivate', { defaultValue: 'Reativar' })
                 : t('admin.userManagement.suspend', { defaultValue: 'Suspender' })
               }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete User Confirmation */}
+      <AlertDialog open={!!deleteUserTarget} onOpenChange={(open) => !open && setDeleteUserTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin.userManagement.deleteUserTitle', { defaultValue: 'Apagar Utilizador' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin.userManagement.deleteUserConfirm', { 
+                name: deleteUserTarget?.userName, 
+                defaultValue: `Tem a certeza que quer apagar permanentemente o utilizador ${deleteUserTarget?.userName}? Esta ação não pode ser revertida. Todos os dados associados (funções, workspaces) serão removidos.` 
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground"
+              onClick={async () => {
+                if (!deleteUserTarget) return;
+                const { error } = await supabase.rpc('staff_delete_user', { target_user_id: deleteUserTarget.userId });
+                if (error) {
+                  toast.error(t('admin.userManagement.deleteError', { defaultValue: 'Erro ao apagar utilizador' }));
+                } else {
+                  toast.success(t('admin.userManagement.deleteSuccess', { defaultValue: 'Utilizador apagado com sucesso' }));
+                  queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+                }
+                setDeleteUserTarget(null);
+              }}
+            >
+              {t('admin.userManagement.deleteUser', { defaultValue: 'Apagar' })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

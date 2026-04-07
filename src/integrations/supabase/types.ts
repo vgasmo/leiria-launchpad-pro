@@ -8386,6 +8386,10 @@ export type Database = {
           workspace_id: string
         }[]
       }
+      staff_delete_user: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       submit_checkin: {
         Args: { p_instance_id: string; p_responses: Json }
         Returns: string
