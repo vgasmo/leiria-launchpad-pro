@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Building2, Plus, Sparkles, Search } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { toast } from 'sonner';
 
@@ -137,13 +137,14 @@ export function WorkspaceAssignmentDialog({ open, onOpenChange, user }: Workspac
   };
 
   const handleCreate = async () => {
-    if (!newStartupName.trim()) return;
+    const nameToUse = newStartupName.trim() || suggestedName;
+    if (!nameToUse) return;
     setIsSubmitting(true);
     try {
       const { error } = await supabase.rpc('staff_assign_or_create_workspace', {
         p_user_id: user.id,
         p_mode: 'create',
-        p_startup_name: newStartupName.trim(),
+        p_startup_name: nameToUse,
         p_program_id: newProgramId || null,
         p_stage: newStage,
         p_description: newDescription.trim() || null,
@@ -161,8 +162,10 @@ export function WorkspaceAssignmentDialog({ open, onOpenChange, user }: Workspac
 
   const invalidateAndClose = () => {
     queryClient.invalidateQueries({ queryKey: ['pending-user-accounts'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
     queryClient.invalidateQueries({ queryKey: ['workspaces'] });
     queryClient.invalidateQueries({ queryKey: ['pending-claim-requests'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-workspace-users'] });
     onOpenChange(false);
     resetForm();
   };
