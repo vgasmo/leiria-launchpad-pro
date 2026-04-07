@@ -611,6 +611,71 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                 contractLabel={startup?.name || t('common.unnamed')}
               />
             </TabsContent>
+
+            {/* Lifecycle Tab */}
+            <TabsContent value="lifecycle" className="mt-4 pb-8 space-y-4">
+              <ContractLifecycleStepper
+                contractId={contract.id}
+                currentStatus={contract.status}
+                startDate={contract.start_date}
+                signedAt={contract.signed_at}
+                createdAt={contract.created_at}
+              />
+              
+              {/* Biennial Review Status */}
+              {contract.start_date && (() => {
+                const startDate = new Date(contract.start_date);
+                const now = new Date();
+                const monthsSince = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+                const yearsSince = Math.floor(monthsSince / 12);
+                const nextReviewYear = yearsSince < 2 ? 2 : yearsSince + (yearsSince % 2 === 0 ? 2 : 1);
+                const nextReviewDate = addYears(startDate, nextReviewYear);
+                const daysToReview = differenceInDays(nextReviewDate, now);
+                
+                return (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      {t('lifecycle.stepper.biennialReview')}
+                    </Label>
+                    <div className={cn(
+                      'rounded-lg p-3 text-xs',
+                      daysToReview <= 90 ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-muted/50 text-muted-foreground'
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <span>{t('lifecycle.stepper.nextPriceReview')}</span>
+                        <span className="font-medium">{format(nextReviewDate, 'dd/MM/yyyy')}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span>{t('lifecycle.stepper.noticeDeadline')}</span>
+                        <span className="font-medium">{format(addMonths(nextReviewDate, -2), 'dd/MM/yyyy')}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Incubation Year */}
+              {contract.start_date && (() => {
+                const incYear = getIncubationYear(contract.start_date);
+                return (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      {t('lifecycle.stepper.incubationStatus')}
+                    </Label>
+                    <div className={cn(
+                      'rounded-lg p-3 text-xs flex items-center justify-between',
+                      incYear > 3 ? 'bg-destructive/10 text-destructive' : 'bg-muted/50 text-muted-foreground'
+                    )}>
+                      <span>{t('lifecycle.stepper.currentYear')}</span>
+                      <Badge variant={incYear > 3 ? 'destructive' : 'secondary'}>
+                        {t('lifecycle.stepper.yearN', { n: incYear })}
+                        {incYear > 3 && ` — ${t('lifecycle.stepper.postIncubation')}`}
+                      </Badge>
+                    </div>
+                  </div>
+                );
+              })()}
+            </TabsContent>
           </Tabs>
         </div>
       </SheetContent>
