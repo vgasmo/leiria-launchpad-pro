@@ -137,13 +137,14 @@ export function WorkspaceAssignmentDialog({ open, onOpenChange, user }: Workspac
   };
 
   const handleCreate = async () => {
-    if (!newStartupName.trim()) return;
+    const nameToUse = newStartupName.trim() || suggestedName;
+    if (!nameToUse) return;
     setIsSubmitting(true);
     try {
       const { error } = await supabase.rpc('staff_assign_or_create_workspace', {
         p_user_id: user.id,
         p_mode: 'create',
-        p_startup_name: newStartupName.trim(),
+        p_startup_name: nameToUse,
         p_program_id: newProgramId || null,
         p_stage: newStage,
         p_description: newDescription.trim() || null,
