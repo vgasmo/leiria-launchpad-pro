@@ -275,7 +275,7 @@ export function AdminUsersManager() {
                             variant="ghost" 
                             size="sm" 
                             className="h-6 text-xs"
-                            onClick={() => setAssignWsDialog({ userId: profile.id, userName: profile.full_name || profile.email })}
+                            onClick={() => setAssignWsDialog({ userId: profile.id, userName: profile.full_name || profile.email, email: profile.email, isFounder: roles.some(r => r.role === 'founder') })}
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             {t('admin.userManagement.assign')}
