@@ -617,6 +617,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
               <ContractLifecycleStepper
                 contractId={contract.id}
                 currentStatus={contract.status}
+                workspaceId={contract.workspace_id || undefined}
                 startDate={contract.start_date}
                 signedAt={contract.signed_at}
                 createdAt={contract.created_at}

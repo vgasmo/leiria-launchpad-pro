@@ -4439,11 +4439,11 @@
       "suspended": "Suspended",
       "terminated": "Terminated",
       "expired": "Expired",
-      "eventHistory": "Event History",
+      "eventHistory": "Event history",
       "tab": "Lifecycle",
       "biennialReview": "Biennial Price Review",
       "nextPriceReview": "Next Price Review",
-      "noticeDeadline": "Notice Deadline (60 days)",
+      "noticeDeadline": "Notice deadline",
       "incubationStatus": "Incubation Status",
       "currentYear": "Current Incubation Year",
       "yearN": "Year {{n}}",
@@ -4463,7 +4463,22 @@
         "notice_window": "Notice Window",
         "incubation_limit": "3-Year Limit",
         "post_incubation": "Post-Incubation"
-      }
+      },
+      "draft_internal": "Internal Draft",
+      "intake_requested": "Intake Requested",
+      "intake_in_progress": "Intake In Progress",
+      "intake_submitted": "Intake Submitted",
+      "review_pending": "Under Review",
+      "approved_for_signature": "Approved for Signature",
+      "signature_sent": "Signature Sent",
+      "signed": "Signed",
+      "activated": "Activated",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected",
+      "phaseIntake": "Intake",
+      "phaseContract": "Contract",
+      "noIntake": "Contract without a recorded intake process",
+      "changesRequested": "Changes requested"
     }
   },
   "loading": {
