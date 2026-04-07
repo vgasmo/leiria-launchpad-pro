@@ -287,7 +287,45 @@ export default function ClaimStartup() {
             </div>
           )}
 
-          {/* ERROR */}
+          {/* NEEDS ONBOARDING — workspace assigned by admin, founder must complete wizard */}
+          {displayState === 'needs_onboarding' && (
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                <Rocket className="h-9 w-9 text-primary" />
+              </div>
+              <p className="text-lg font-semibold text-foreground">
+                {t('claimStartup.onboardingTitle', { defaultValue: 'Bem-vindo à Startup Leiria!' })}
+              </p>
+              {founderState.startupName && (
+                <Badge variant="default" className="text-sm px-3 py-1">{founderState.startupName}</Badge>
+              )}
+              <p className="text-sm text-muted-foreground max-w-xs">
+                {t('claimStartup.onboardingDesc', { defaultValue: 'O seu workspace foi preparado pela nossa equipa. Complete o processo de onboarding para começar a utilizar a plataforma.' })}
+              </p>
+              <Button 
+                onClick={async () => {
+                  // Mark onboarding as complete and redirect
+                  if (founderState.activeWorkspaceId) {
+                    const { error } = await supabase
+                      .from('workspaces')
+                      .update({ needs_onboarding: false })
+                      .eq('id', founderState.activeWorkspaceId);
+                    if (!error) {
+                      queryClient.invalidateQueries({ queryKey: ['founder-onboarding-state'] });
+                      navigate(`/workspace/${founderState.activeWorkspaceId}`, { replace: true });
+                    }
+                  }
+                }} 
+                size="lg" 
+                className="gap-2 w-full max-w-xs shadow-lg"
+              >
+                <ArrowRight className="h-5 w-5" />
+                {t('claimStartup.startOnboarding', { defaultValue: 'Iniciar Onboarding' })}
+              </Button>
+            </div>
+          )}
+
+
           {displayState === 'error' && (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <AlertCircle className="h-12 w-12 text-destructive" />
