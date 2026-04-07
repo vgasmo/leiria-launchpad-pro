@@ -254,6 +254,7 @@ export function PendingApprovalsManager() {
   const [newProgramId, setNewProgramId] = useState('');
   const [newStage, setNewStage] = useState('ideation');
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
+  const [assignWorkspaceTarget, setAssignWorkspaceTarget] = useState<PendingUser | null>(null);
   const { data: programs } = usePrograms();
   const handleApprove = (workspaceId: string) => {
     approveWorkspace.mutate(workspaceId, {
