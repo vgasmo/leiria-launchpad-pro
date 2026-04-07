@@ -1,40 +1,54 @@
-## Fluxo: Atribuição de Workspace pelo Admin + Onboarding Wizard
 
-### 1. UI no Admin - Aprovação de Conta com Sugestão de Workspace
-- Na lista de "Pending Approvals" (ativação de contas), ao aprovar um founder:
-  - Sistema deteta o domínio do email (ex: `@acme.pt`)
-  - Procura startups existentes com `main_contact_email` do mesmo domínio ou match direto
-  - Mostra sugestão com botão "Associar" ou opção "Criar novo workspace"
-  - Se admin escolhe associar → liga o founder ao workspace existente
-  - Se admin escolhe criar → cria startup + workspace com dados mínimos (nome da empresa sugerido pelo domínio)
+# Implementation Plan — Contract Truth Unification & Product Polish
 
-### 2. Backend - Novo RPC ou extensão do existente
-- Criar/estender RPC `staff_assign_workspace_to_user` que:
-  - Associa founder a workspace existente OU cria novo
-  - Marca workspace com flag `needs_onboarding: true` (novo campo)
-  - Garante `user_roles` com `founder`
-  - Ativa a conta (`account_status: approved`)
+## Stream 1 — Unify Contract Truth Model
 
-### 3. Migration - Adicionar campo `needs_onboarding` ao workspaces
-- `ALTER TABLE workspaces ADD COLUMN needs_onboarding boolean DEFAULT true`
-- Workspaces criados por admin ficam com `needs_onboarding = true`
-- Quando founder completa wizard, atualiza para `false`
+**Problem**: `funnel_items.linked_contract_id` has a FK to legacy `public.contracts` (0 rows), but the app writes to `public.startup_contracts`. This creates a broken linkage — CRM can never properly link to operational contracts.
 
-### 4. Frontend - Onboarding Wizard Gate
-- Quando founder faz login e tem workspace com `needs_onboarding = true`:
-  - Redireciona para onboarding wizard completo (NDA, dados empresa, programa)
-  - Wizard pré-carrega dados existentes mas founder preenche tudo
-  - Ao completar → `needs_onboarding = false`, workspace fica `active`
+**Solution**:
+1. **DB Migration**: Drop FK from `funnel_items.linked_contract_id → contracts`, add new FK to `startup_contracts`. Legacy `contracts` table stays but is marked non-canonical (no code references it).
+2. **Code**: Already writes to `startup_contracts` — no code changes needed for contract creation. Update `ContractLifecycleHub` to check `startup_contracts` linkage correctly.
+3. **Lifecycle guard**: The existing `trg_validate_intake_contract_link` trigger already enforces intake→contract linkage. No new guards needed.
+4. **Orphan detection**: Enhance `ContractLifecycleHub` to surface funnel items with broken/missing contract links.
 
-### 5. Componente de Sugestão no Admin
-- `WorkspaceAssignmentDialog` com:
-  - Lista de startups sugeridas (match por domínio de email)
-  - Campo de pesquisa para busca manual
-  - Botão "Criar nova startup" com nome pré-preenchido
-  - Confirmação antes de executar
+## Stream 2 — Translations / Localization Quality
 
-### Ordem de implementação:
-1. Migration (campo `needs_onboarding`)
-2. RPC backend
-3. UI do admin (dialog de sugestão)
-4. Gate no onboarding do founder
+**Scope**: Audit and fix critical flow translations for:
+- Contract lifecycle states and labels
+- CRM pipeline stages
+- Founder onboarding messages
+- Error/empty states
+- Ensure consistent PT-PT terminology (no BR-PT drift)
+
+## Stream 3 — Animation / Motion Polish
+
+**Scope**: Add subtle transitions to:
+- Drawer open/close (already framer-motion available)
+- Page transitions for role dashboards
+- Success/error toast feedback
+- Loading skeleton improvements
+- Keep durations ≤200ms, respect reduced-motion
+
+## Stream 4 — Speed / Performance
+
+**Scope**:
+- Lazy-load heavy admin/backoffice components
+- Optimize CRM pipeline render path
+- Improve skeleton loading states
+- Route-level code splitting for role-specific pages
+
+## Stream 5 — Founder Value Optimization
+
+**Scope**:
+- Improve founder dashboard next-step visibility
+- Clearer contract status messaging
+- Better empty state copy
+- Reduce jargon in founder-facing surfaces
+
+## Release Wrapper
+
+- `.gitignore` already has `.env` — verify and add `.env.*` patterns
+- Report any residual issues
+
+## NOT Touching
+- Auth, guards, claim flow, RLS policies, useWorkspaces, edge functions, pricing engine core
