@@ -7467,6 +7467,7 @@ export type Database = {
           id: string
           last_checkin_at: string | null
           last_contact_at: string | null
+          needs_onboarding: boolean
           next_followup_at: string | null
           priority_level: Database["public"]["Enums"]["workspace_priority"]
           priority_notes: string | null
@@ -7505,6 +7506,7 @@ export type Database = {
           id?: string
           last_checkin_at?: string | null
           last_contact_at?: string | null
+          needs_onboarding?: boolean
           next_followup_at?: string | null
           priority_level?: Database["public"]["Enums"]["workspace_priority"]
           priority_notes?: string | null
@@ -7543,6 +7545,7 @@ export type Database = {
           id?: string
           last_checkin_at?: string | null
           last_contact_at?: string | null
+          needs_onboarding?: boolean
           next_followup_at?: string | null
           priority_level?: Database["public"]["Enums"]["workspace_priority"]
           priority_notes?: string | null
@@ -8354,6 +8357,21 @@ export type Database = {
       shares_workspace_with: {
         Args: { _target_user_id: string }
         Returns: boolean
+      }
+      staff_assign_or_create_workspace: {
+        Args: {
+          p_description?: string
+          p_mode: string
+          p_program_id?: string
+          p_stage?: string
+          p_startup_name?: string
+          p_user_id: string
+          p_workspace_id?: string
+        }
+        Returns: {
+          startup_id: string
+          workspace_id: string
+        }[]
       }
       staff_create_workspace_for_claim: {
         Args: {

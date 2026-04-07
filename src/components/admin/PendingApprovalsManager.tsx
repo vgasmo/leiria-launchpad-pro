@@ -22,6 +22,7 @@ import { usePrograms } from '@/hooks/useWorkspaces';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { WorkspaceAssignmentDialog } from './WorkspaceAssignmentDialog';
 
 import { StartupStage } from '@/types/database';
 
@@ -253,6 +254,7 @@ export function PendingApprovalsManager() {
   const [newProgramId, setNewProgramId] = useState('');
   const [newStage, setNewStage] = useState('ideation');
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
+  const [assignWorkspaceTarget, setAssignWorkspaceTarget] = useState<PendingUser | null>(null);
   const { data: programs } = usePrograms();
   const handleApprove = (workspaceId: string) => {
     approveWorkspace.mutate(workspaceId, {
@@ -457,7 +459,7 @@ export function PendingApprovalsManager() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap justify-end">
                       <Button
                         size="sm"
                         variant="outline"
@@ -466,6 +468,16 @@ export function PendingApprovalsManager() {
                         <X className="h-4 w-4 mr-1" />
                         {t('admin.reject', { defaultValue: 'Rejeitar' })}
                       </Button>
+                      {user.roles.includes('founder') && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setAssignWorkspaceTarget(user)}
+                        >
+                          <Building2 className="h-4 w-4 mr-1" />
+                          {t('admin.assignWorkspace', { defaultValue: 'Atribuir Workspace' })}
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         onClick={() => handleApproveUser(user.id)}
@@ -776,6 +788,19 @@ export function PendingApprovalsManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Workspace Assignment Dialog */}
+      {assignWorkspaceTarget && (
+        <WorkspaceAssignmentDialog
+          open={!!assignWorkspaceTarget}
+          onOpenChange={(open) => { if (!open) setAssignWorkspaceTarget(null); }}
+          user={{
+            id: assignWorkspaceTarget.id,
+            email: assignWorkspaceTarget.email,
+            full_name: assignWorkspaceTarget.full_name,
+          }}
+        />
+      )}
     </div>
   );
 }

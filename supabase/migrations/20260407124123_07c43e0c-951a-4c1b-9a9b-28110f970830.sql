@@ -1,0 +1,101 @@
+
+-- Add needs_onboarding column to workspaces
+ALTER TABLE public.workspaces ADD COLUMN IF NOT EXISTS needs_onboarding boolean NOT NULL DEFAULT true;
+
+-- Set existing active/claimed workspaces as already onboarded
+UPDATE public.workspaces SET needs_onboarding = false WHERE status IN ('active', 'claimed', 'archived');
+
+-- Create staff function to assign or create workspace for a user
+CREATE OR REPLACE FUNCTION public.staff_assign_or_create_workspace(
+  p_user_id uuid,
+  p_mode text, -- 'assign' or 'create'
+  p_workspace_id uuid DEFAULT NULL, -- required for 'assign' mode
+  p_startup_name text DEFAULT NULL, -- required for 'create' mode
+  p_program_id uuid DEFAULT NULL,
+  p_stage text DEFAULT 'ideation',
+  p_description text DEFAULT NULL
+)
+RETURNS TABLE(workspace_id uuid, startup_id uuid)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  v_staff_id uuid;
+  v_workspace_id uuid;
+  v_startup_id uuid;
+BEGIN
+  v_staff_id := auth.uid();
+  
+  IF NOT public.is_staff() THEN
+    RAISE EXCEPTION 'Only staff can assign workspaces';
+  END IF;
+
+  IF p_mode = 'assign' THEN
+    -- Assign user to existing workspace
+    IF p_workspace_id IS NULL THEN
+      RAISE EXCEPTION 'workspace_id is required for assign mode';
+    END IF;
+    
+    v_workspace_id := p_workspace_id;
+    
+    -- Get the startup_id from the workspace
+    SELECT w.startup_id INTO v_startup_id FROM public.workspaces w WHERE w.id = v_workspace_id;
+    IF v_startup_id IS NULL THEN
+      RAISE EXCEPTION 'Workspace not found';
+    END IF;
+    
+    -- Add founder to workspace
+    INSERT INTO public.workspace_users (workspace_id, user_id, role, active)
+    VALUES (v_workspace_id, p_user_id, 'founder', true)
+    ON CONFLICT DO NOTHING;
+    
+    -- Mark workspace as needing onboarding and set to claimed
+    UPDATE public.workspaces 
+    SET needs_onboarding = true, 
+        status = CASE WHEN status = 'imported_unclaimed' THEN 'claimed' ELSE status END,
+        updated_at = now()
+    WHERE id = v_workspace_id;
+    
+  ELSIF p_mode = 'create' THEN
+    -- Create new startup + workspace
+    IF p_startup_name IS NULL OR trim(p_startup_name) = '' THEN
+      RAISE EXCEPTION 'startup_name is required for create mode';
+    END IF;
+    
+    INSERT INTO public.startups (name, description)
+    VALUES (trim(p_startup_name), p_description)
+    RETURNING id INTO v_startup_id;
+    
+    INSERT INTO public.workspaces (startup_id, program_id, stage, status, needs_onboarding)
+    VALUES (v_startup_id, p_program_id, p_stage::public.startup_stage, 'claimed', true)
+    RETURNING id INTO v_workspace_id;
+    
+    -- Add founder to workspace
+    INSERT INTO public.workspace_users (workspace_id, user_id, role, active)
+    VALUES (v_workspace_id, p_user_id, 'founder', true);
+    
+  ELSE
+    RAISE EXCEPTION 'Invalid mode: %. Must be "assign" or "create"', p_mode;
+  END IF;
+
+  -- Ensure founder role
+  INSERT INTO public.user_roles (user_id, role) 
+  VALUES (p_user_id, 'founder') 
+  ON CONFLICT DO NOTHING;
+  
+  -- Approve account
+  UPDATE public.profiles
+  SET account_status = 'approved', updated_at = now()
+  WHERE id = p_user_id AND account_status != 'approved';
+  
+  -- Log activity
+  INSERT INTO public.activity_log (user_id, entity_type, entity_id, action, workspace_id, metadata)
+  VALUES (v_staff_id, 'workspace', v_workspace_id, 'staff_assigned_workspace', v_workspace_id, 
+    jsonb_build_object('mode', p_mode, 'founder_id', p_user_id, 'startup_id', v_startup_id));
+  
+  workspace_id := v_workspace_id;
+  startup_id := v_startup_id;
+  RETURN NEXT;
+END;
+$$;

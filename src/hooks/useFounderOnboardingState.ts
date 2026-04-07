@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export type FounderOnboardingStatus =
   | 'loading'
   | 'has_active_workspace'       // Founder has an active/claimed workspace — normal product access
+  | 'needs_onboarding'           // Founder has workspace but needs to complete onboarding wizard
   | 'has_pending_workspace'      // Founder submitted a startup application, workspace is pending
   | 'has_pending_claim'          // Founder has a pending claim request awaiting staff review
   | 'needs_claim_verification'   // Founder has no workspace and no pending claim — should verify
@@ -47,7 +48,7 @@ export function useFounderOnboardingState(): FounderOnboardingState {
         .from('workspace_users')
         .select(`
           workspace_id,
-          workspaces!inner(id, status, startup_id, startups(name))
+          workspaces!inner(id, status, needs_onboarding, startup_id, startups(name))
         `)
         .eq('user_id', user.id)
         .eq('active', true)
@@ -60,6 +61,17 @@ export function useFounderOnboardingState(): FounderOnboardingState {
           w.workspaces?.status === 'active' || w.workspaces?.status === 'claimed'
         );
         if (activeWs) {
+          // Check if onboarding is still needed
+          const needsOnboarding = (activeWs as any).workspaces?.needs_onboarding === true;
+          if (needsOnboarding) {
+            return {
+              status: 'needs_onboarding',
+              activeWorkspaceId: (activeWs as any).workspaces?.id || activeWs.workspace_id,
+              startupName: (activeWs as any).workspaces?.startups?.name || null,
+              pendingClaimEmail: null,
+              pendingClaimCreatedAt: null,
+            };
+          }
           return {
             status: 'has_active_workspace',
             activeWorkspaceId: (activeWs as any).workspaces?.id || activeWs.workspace_id,
