@@ -17,7 +17,7 @@ import {
   FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send,
   GitBranch
 } from 'lucide-react';
-import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
+import { format, differenceInMonths, differenceInDays, addYears, addMonths } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
 import { useCurrentPricingTable, findMatchingPricingLine, getIncubationYear } from '@/hooks/backoffice/usePricingLines';
 import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
