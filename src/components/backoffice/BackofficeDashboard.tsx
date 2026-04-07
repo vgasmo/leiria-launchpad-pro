@@ -106,16 +106,7 @@ export function BackofficeDashboard() {
         .from('rooms')
         .select('id, status');
       
-      // Fetch pending/overdue invoices
-      const { data: pendingInvoices } = await supabase
-        .from('invoices')
-        .select(`
-          id, invoice_number, status, issue_date, due_date, total, currency,
-          workspace:workspaces(id, startup:startups(name))
-        `)
-        .in('status', ['sent', 'draft', 'overdue'])
-        .order('due_date', { ascending: true })
-        .limit(10);
+      // Invoice queries removed — invoicing is not part of this product
 
       // Fetch waiting list
       const { data: waitingList } = await supabase
@@ -176,9 +167,6 @@ export function BackofficeDashboard() {
       const totalRooms = rooms?.length || 0;
       const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 
-      const pendingInvoicesValue = pendingInvoices
-        ?.filter(i => i.status === 'sent' || i.status === 'overdue')
-        .reduce((sum, i) => sum + (i.total || 0), 0) || 0;
 
       return {
         totalActiveContracts: contracts?.length || 0,
@@ -193,8 +181,6 @@ export function BackofficeDashboard() {
         waitingListCount: waitingList?.length || 0,
         highPriorityWaiting: waitingList?.filter(w => w.priority >= 80).length || 0,
         expiringContractsCount,
-        pendingInvoicesValue,
-        pendingInvoices: pendingInvoices || [],
         attentionContracts: attentionContracts || [],
       };
     },
