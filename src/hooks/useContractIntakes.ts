@@ -329,6 +329,15 @@ export function useTransitionIntakeStatus() {
 
           updateFields.contract_id = newContract.id;
           logger.info('auto_contract_created', { contractId: newContract.id, intakeId: params.intakeId });
+
+          // CANONICAL BACK-LINK: Sync CRM funnel item with the new contract
+          const funnelId = intakeFull?.funnel_item_id || current.funnel_item_id;
+          if (funnelId) {
+            await supabase.from('funnel_items')
+              .update({ linked_contract_id: newContract.id })
+              .eq('id', funnelId);
+            logger.info('crm_backlink_synced', { funnelItemId: funnelId, contractId: newContract.id });
+          }
         }
       }
       if (params.newStatus === 'changes_requested') {
