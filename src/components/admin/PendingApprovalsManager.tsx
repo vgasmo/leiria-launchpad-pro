@@ -22,6 +22,7 @@ import { usePrograms } from '@/hooks/useWorkspaces';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { WorkspaceAssignmentDialog } from './WorkspaceAssignmentDialog';
 
 import { StartupStage } from '@/types/database';
 
