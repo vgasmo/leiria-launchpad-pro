@@ -788,6 +788,19 @@ export function PendingApprovalsManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Workspace Assignment Dialog */}
+      {assignWorkspaceTarget && (
+        <WorkspaceAssignmentDialog
+          open={!!assignWorkspaceTarget}
+          onOpenChange={(open) => { if (!open) setAssignWorkspaceTarget(null); }}
+          user={{
+            id: assignWorkspaceTarget.id,
+            email: assignWorkspaceTarget.email,
+            full_name: assignWorkspaceTarget.full_name,
+          }}
+        />
+      )}
     </div>
   );
 }
