@@ -459,7 +459,7 @@ export function PendingApprovalsManager() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap justify-end">
                       <Button
                         size="sm"
                         variant="outline"
@@ -468,6 +468,16 @@ export function PendingApprovalsManager() {
                         <X className="h-4 w-4 mr-1" />
                         {t('admin.reject', { defaultValue: 'Rejeitar' })}
                       </Button>
+                      {user.roles.includes('founder') && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setAssignWorkspaceTarget(user)}
+                        >
+                          <Building2 className="h-4 w-4 mr-1" />
+                          {t('admin.assignWorkspace', { defaultValue: 'Atribuir Workspace' })}
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         onClick={() => handleApproveUser(user.id)}
