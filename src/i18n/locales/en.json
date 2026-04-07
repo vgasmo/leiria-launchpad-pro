@@ -4431,7 +4431,40 @@
     "threeYearMark": "3+ Year Mark",
     "threeYearMarkDesc": "Startup has been incubating for over 3 years - review required",
     "title": "Contract Lifecycle Hub",
-    "upcomingRenewals": "Upcoming Renewals"
+    "upcomingRenewals": "Upcoming Renewals",
+    "stepper": {
+      "draft": "Draft",
+      "pending_signature": "Pending Signature",
+      "active": "Active",
+      "suspended": "Suspended",
+      "terminated": "Terminated",
+      "expired": "Expired",
+      "eventHistory": "Event History",
+      "tab": "Lifecycle",
+      "biennialReview": "Biennial Price Review",
+      "nextPriceReview": "Next Price Review",
+      "noticeDeadline": "Notice Deadline (60 days)",
+      "incubationStatus": "Incubation Status",
+      "currentYear": "Current Incubation Year",
+      "yearN": "Year {{n}}",
+      "postIncubation": "Post-Incubation",
+      "upcomingEvents": "Lifecycle Events",
+      "noEvents": "No lifecycle events in the next 90 days",
+      "daysLeft": "days left",
+      "overdue": "Overdue",
+      "reviewFees": "Review Fees",
+      "prepareReview": "Prepare Review",
+      "sendNotice": "Send Notice",
+      "planTransition": "Plan Transition",
+      "reviewPostIncubation": "Review Post-Incubation",
+      "eventType": {
+        "anniversary": "Anniversary",
+        "biennial_review": "Price Review",
+        "notice_window": "Notice Window",
+        "incubation_limit": "3-Year Limit",
+        "post_incubation": "Post-Incubation"
+      }
+    }
   },
   "loading": {
     "almostThere": "Almost there...",

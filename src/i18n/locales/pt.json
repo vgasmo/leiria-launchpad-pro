@@ -4431,7 +4431,40 @@
     "threeYearMark": "Marca de 3+ Anos",
     "threeYearMarkDesc": "Startup em incubação há mais de 3 anos — revisão necessária",
     "title": "Hub do Ciclo de Contratos",
-    "upcomingRenewals": "Próximas Renovações"
+    "upcomingRenewals": "Próximas Renovações",
+    "stepper": {
+      "draft": "Rascunho",
+      "pending_signature": "Aguarda Assinatura",
+      "active": "Ativo",
+      "suspended": "Suspenso",
+      "terminated": "Rescindido",
+      "expired": "Expirado",
+      "eventHistory": "Histórico de Eventos",
+      "tab": "Ciclo de Vida",
+      "biennialReview": "Revisão Bienal de Preço",
+      "nextPriceReview": "Próxima Revisão de Preço",
+      "noticeDeadline": "Prazo de Aviso (60 dias)",
+      "incubationStatus": "Estado de Incubação",
+      "currentYear": "Ano de Incubação Atual",
+      "yearN": "Ano {{n}}",
+      "postIncubation": "Pós-Incubação",
+      "upcomingEvents": "Eventos do Ciclo de Vida",
+      "noEvents": "Sem eventos do ciclo nos próximos 90 dias",
+      "daysLeft": "dias restantes",
+      "overdue": "Em atraso",
+      "reviewFees": "Rever Tarifas",
+      "prepareReview": "Preparar Revisão",
+      "sendNotice": "Enviar Aviso Prévio",
+      "planTransition": "Planear Transição",
+      "reviewPostIncubation": "Rever Pós-Incubação",
+      "eventType": {
+        "anniversary": "Aniversário",
+        "biennial_review": "Revisão de Preço",
+        "notice_window": "Janela de Aviso",
+        "incubation_limit": "Limite 3 Anos",
+        "post_incubation": "Pós-Incubação"
+      }
+    }
   },
   "loading": {
     "almostThere": "Quase lá...",

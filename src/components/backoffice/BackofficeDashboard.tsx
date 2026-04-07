@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { BuildingOccupancyPanel } from './BuildingOccupancyPanel';
+import { ContractLifecycleEventsCard } from './ContractLifecycleEventsCard';
 import { InteractiveFloorMapViewer } from './InteractiveFloorMapViewer';
 import { SpaceDetailDrawer } from './SpaceDetailDrawer';
 import { useBuildings, useRoomsWithAllocations } from '@/hooks/useBackoffice';
@@ -426,6 +427,11 @@ export function BackofficeDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Contract Lifecycle Events */}
+          <WidgetErrorBoundary name="Contract Lifecycle Events">
+            <ContractLifecycleEventsCard />
+          </WidgetErrorBoundary>
 
           {/* Contracts Requiring Attention */}
           <WidgetErrorBoundary name={t('admin.backoffice.opsHub.contractsAttention', 'Contracts Requiring Attention')}>
