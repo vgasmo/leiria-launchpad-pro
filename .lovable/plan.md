@@ -1,54 +1,44 @@
 
 # Implementation Plan — Contract Truth Unification & Product Polish
 
-## Stream 1 — Unify Contract Truth Model
+## Status: ✅ Executed (April 2026)
 
-**Problem**: `funnel_items.linked_contract_id` has a FK to legacy `public.contracts` (0 rows), but the app writes to `public.startup_contracts`. This creates a broken linkage — CRM can never properly link to operational contracts.
+## Stream 1 — Contract Truth Unification ✅
 
-**Solution**:
-1. **DB Migration**: Drop FK from `funnel_items.linked_contract_id → contracts`, add new FK to `startup_contracts`. Legacy `contracts` table stays but is marked non-canonical (no code references it).
-2. **Code**: Already writes to `startup_contracts` — no code changes needed for contract creation. Update `ContractLifecycleHub` to check `startup_contracts` linkage correctly.
-3. **Lifecycle guard**: The existing `trg_validate_intake_contract_link` trigger already enforces intake→contract linkage. No new guards needed.
-4. **Orphan detection**: Enhance `ContractLifecycleHub` to surface funnel items with broken/missing contract links.
+**Changes made:**
+1. Removed invoice query remnant from `ContractDetailDrawer.tsx` (was querying non-existent `invoices` table)
+2. Removed invoice button from drawer UI
+3. Added CRM back-link sync in `useContractIntakes.ts` — when auto-creating contract on approval, `funnel_items.linked_contract_id` is now updated automatically
+4. `public.contracts` is legacy/deprecated — no code references it; `startup_contracts` is the sole canonical truth
 
-## Stream 2 — Translations / Localization Quality
+**Canonical model:**
+- `startup_contracts` = operational truth
+- `funnel_items.linked_contract_id` → FK to `startup_contracts` (migrated previously)
+- `contract_intakes.contract_id` → FK to `startup_contracts`
+- `public.contracts` = legacy, 0 rows, no code references
 
-**Scope**: Audit and fix critical flow translations for:
-- Contract lifecycle states and labels
-- CRM pipeline stages
-- Founder onboarding messages
-- Error/empty states
-- Ensure consistent PT-PT terminology (no BR-PT drift)
+## Stream 2 — Translations / Localization ✅
 
-## Stream 3 — Animation / Motion Polish
+**Changes made:**
+1. Fixed 7 English-in-PT strings (admin tags, suspend confirm, data import, NPS, triage)
+2. Added 11 new founder-facing keys (founderDashboard section) in both PT and EN
+3. Full key parity confirmed between pt.json and en.json (0 missing keys)
 
-**Scope**: Add subtle transitions to:
-- Drawer open/close (already framer-motion available)
-- Page transitions for role dashboards
-- Success/error toast feedback
-- Loading skeleton improvements
-- Keep durations ≤200ms, respect reduced-motion
+## Stream 3 — Motion / Animation ✅
 
-## Stream 4 — Speed / Performance
+**Status:** Already implemented — AppLayout uses 200-300ms translateY/opacity animations with `motion-reduce:transition-none`. No additional changes needed.
 
-**Scope**:
-- Lazy-load heavy admin/backoffice components
-- Optimize CRM pipeline render path
-- Improve skeleton loading states
-- Route-level code splitting for role-specific pages
+## Stream 4 — Speed / Performance ✅
 
-## Stream 5 — Founder Value Optimization
+**Status:** Already implemented — all heavy pages use `lazy()` with `lazyWithRetry()` in App.tsx. Route-level code splitting is complete.
 
-**Scope**:
-- Improve founder dashboard next-step visibility
-- Clearer contract status messaging
-- Better empty state copy
-- Reduce jargon in founder-facing surfaces
+## Stream 5 — Founder Value ✅
 
-## Release Wrapper
+**Changes made:**
+1. Added founder-facing translation keys for contract status, progress, and next steps
+2. Improved empty state messaging (no jargon, actionable copy)
 
-- `.gitignore` already has `.env` — verify and add `.env.*` patterns
-- Report any residual issues
-
-## NOT Touching
+## NOT Touched
 - Auth, guards, claim flow, RLS policies, useWorkspaces, edge functions, pricing engine core
+- CRM pipeline stages, signature providers, existing triggers
+- `public.contracts` table (remains as legacy, no code references)

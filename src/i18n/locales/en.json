@@ -7765,5 +7765,17 @@
     "upcomingSession": "Session coming up",
     "updateKpis": "Update your KPIs",
     "viewActions": "View Actions"
+  },
+  "founderDashboard": {
+    "noContracts": "You don't have any active contracts yet. The team will reach out when the process is ready.",
+    "noMilestones": "No milestones defined yet. Your consultant will set them up soon.",
+    "nextSteps": "Next Steps",
+    "nextStepsEmpty": "No pending actions at the moment. Great job!",
+    "contractPending": "Your contract is being processed. You'll be notified when your action is needed.",
+    "contractActive": "Contract active — your incubation is underway.",
+    "intakeInProgress": "Your contracting request is under review. You'll be notified when there are updates.",
+    "welcomeBack": "Welcome back",
+    "yourProgress": "Your progress",
+    "teamSupport": "The team is here to help. Get in touch if you need anything."
   }
 }

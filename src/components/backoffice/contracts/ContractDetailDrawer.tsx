@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, 
-  TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator,
+  TrendingUp, AlertTriangle, ExternalLink, LinkIcon, Calculator,
   FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send,
   GitBranch
 } from 'lucide-react';
@@ -76,20 +76,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     enabled: !!contract?.id,
   });
 
-  // Fetch linked invoices count
-  const { data: invoiceCount } = useQuery({
-    queryKey: ['contract-invoice-count', contract?.id],
-    queryFn: async () => {
-      if (!contract?.id) return 0;
-      const { count, error } = await supabase
-        .from('invoices')
-        .select('id', { count: 'exact', head: true })
-        .eq('contract_id', contract.id);
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!contract?.id,
-  });
 
   // Fetch linked funnel item
   const { data: linkedFunnelItem } = useQuery({
@@ -337,15 +323,6 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                 {t('contractDetail.viewInCRM')}
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={() => navigate('/admin?tab=backoffice')}
-            >
-              <Receipt className="h-3 w-3" />
-              {t('contractDetail.viewInvoices')} {invoiceCount ? `(${invoiceCount})` : ''}
-            </Button>
             <Button
               variant="outline"
               size="sm"
