@@ -348,62 +348,73 @@ export function AdminUsersManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Assign Workspace Dialog */}
-      <Dialog open={!!assignWsDialog} onOpenChange={(open) => !open && setAssignWsDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('admin.userManagement.assignTitle', { name: assignWsDialog?.userName })}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>{t('admin.userManagement.workspace')}</Label>
-              <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('admin.userManagement.selectWorkspace')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {workspaces
-                    ?.filter(ws => {
-                      // Filter out workspaces the user is already assigned to
+      {/* Assign Workspace Dialog — enhanced for founders, simple for others */}
+      {assignWsDialog && assignWsDialog.isFounder ? (
+        <WorkspaceAssignmentDialog
+          open={!!assignWsDialog}
+          onOpenChange={(open) => { if (!open) setAssignWsDialog(null); }}
+          user={{
+            id: assignWsDialog.userId,
+            email: assignWsDialog.email,
+            full_name: assignWsDialog.userName,
+          }}
+        />
+      ) : (
+        <Dialog open={!!assignWsDialog && !assignWsDialog?.isFounder} onOpenChange={(open) => !open && setAssignWsDialog(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('admin.userManagement.assignTitle', { name: assignWsDialog?.userName })}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>{t('admin.userManagement.workspace')}</Label>
+                <Select value={selectedWorkspace} onValueChange={setSelectedWorkspace}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('admin.userManagement.selectWorkspace')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workspaces
+                      ?.filter(ws => {
+                        const userAssignments = getUserWorkspaces(assignWsDialog?.userId || '');
+                        return !userAssignments.some(ua => ua.workspace_id === ws.id);
+                      })
+                      .map(ws => (
+                        <SelectItem key={ws.id} value={ws.id}>
+                          {ws.startup?.name || t('admin.userManagement.noName')} ({ws.program?.name || t('admin.userManagement.noProgram')})
+                        </SelectItem>
+                      ))}
+                    {workspaces?.filter(ws => {
                       const userAssignments = getUserWorkspaces(assignWsDialog?.userId || '');
                       return !userAssignments.some(ua => ua.workspace_id === ws.id);
-                    })
-                    .map(ws => (
-                      <SelectItem key={ws.id} value={ws.id}>
-                        {ws.startup?.name || t('admin.userManagement.noName')} ({ws.program?.name || t('admin.userManagement.noProgram')})
-                      </SelectItem>
+                    }).length === 0 && (
+                      <div className="p-2 text-sm text-muted-foreground text-center">
+                        {t('admin.userManagement.alreadyAssignedAll')}
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{t('admin.userManagement.role')}</Label>
+                <Select value={wsRole} onValueChange={(v) => setWsRole(v as Role)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.filter(r => r !== 'admin').map(role => (
+                      <SelectItem key={role} value={role}>{getRoleLabel(role)}</SelectItem>
                     ))}
-                  {workspaces?.filter(ws => {
-                    const userAssignments = getUserWorkspaces(assignWsDialog?.userId || '');
-                    return !userAssignments.some(ua => ua.workspace_id === ws.id);
-                  }).length === 0 && (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      {t('admin.userManagement.alreadyAssignedAll')}
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label>{t('admin.userManagement.role')}</Label>
-              <Select value={wsRole} onValueChange={(v) => setWsRole(v as Role)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.filter(r => r !== 'admin').map(role => (
-                    <SelectItem key={role} value={role}>{getRoleLabel(role)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignWsDialog(null)}>{t('common.cancel')}</Button>
-            <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>{t('admin.userManagement.assign')}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAssignWsDialog(null)}>{t('common.cancel')}</Button>
+              <Button onClick={handleAssignWorkspace} disabled={!selectedWorkspace}>{t('admin.userManagement.assign')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Role Confirmation */}
       <AlertDialog open={!!deleteRoleTarget} onOpenChange={(open) => !open && setDeleteRoleTarget(null)}>
