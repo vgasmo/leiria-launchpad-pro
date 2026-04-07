@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export type FounderOnboardingStatus =
   | 'loading'
   | 'has_active_workspace'       // Founder has an active/claimed workspace — normal product access
+  | 'needs_onboarding'           // Founder has workspace but needs to complete onboarding wizard
   | 'has_pending_workspace'      // Founder submitted a startup application, workspace is pending
   | 'has_pending_claim'          // Founder has a pending claim request awaiting staff review
   | 'needs_claim_verification'   // Founder has no workspace and no pending claim — should verify
