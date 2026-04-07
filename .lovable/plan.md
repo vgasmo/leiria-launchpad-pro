@@ -1,31 +1,40 @@
-## Plano de implementação — 4 Features
+## Fluxo: Atribuição de Workspace pelo Admin + Onboarding Wizard
 
-### 1. Chat Direto (Founder ↔ Consultor/Mentor)
-- Já temos tabelas `conversations` e `conversation_participants` 
-- Criar componente de messaging inline no workspace
-- Realtime via Supabase channels (scoped ao workspace)
-- UI: sidebar de chat ou drawer no workspace
+### 1. UI no Admin - Aprovação de Conta com Sugestão de Workspace
+- Na lista de "Pending Approvals" (ativação de contas), ao aprovar um founder:
+  - Sistema deteta o domínio do email (ex: `@acme.pt`)
+  - Procura startups existentes com `main_contact_email` do mesmo domínio ou match direto
+  - Mostra sugestão com botão "Associar" ou opção "Criar novo workspace"
+  - Se admin escolhe associar → liga o founder ao workspace existente
+  - Se admin escolhe criar → cria startup + workspace com dados mínimos (nome da empresa sugerido pelo domínio)
 
-### 2. Playbook Evidence Upload
-- Adicionar tabela `playbook_step_evidence` (step_id, file_path, notes, submitted_by)
-- Storage bucket para evidências
-- UI: botão "Submeter Evidência" em cada step do playbook
-- Consultor pode aprovar/rejeitar
+### 2. Backend - Novo RPC ou extensão do existente
+- Criar/estender RPC `staff_assign_workspace_to_user` que:
+  - Associa founder a workspace existente OU cria novo
+  - Marca workspace com flag `needs_onboarding: true` (novo campo)
+  - Garante `user_roles` com `founder`
+  - Ativa a conta (`account_status: approved`)
 
-### 3. Benchmark Dashboard
-- Criar view agregada anónima por programa/fase
-- Métricas: KPIs médios, milestones concluídos, tempo por fase
-- UI: dashboard comparativo no workspace do founder
-- Dados 100% anonimizados
+### 3. Migration - Adicionar campo `needs_onboarding` ao workspaces
+- `ALTER TABLE workspaces ADD COLUMN needs_onboarding boolean DEFAULT true`
+- Workspaces criados por admin ficam com `needs_onboarding = true`
+- Quando founder completa wizard, atualiza para `false`
 
-### 4. Twilio/WhatsApp Reminders
-- Conectar Twilio connector
-- Edge function para enviar lembretes (sessões, check-ins, deadlines)
-- Configuração por workspace (opt-in do founder)
-- Templates de mensagem em PT/EN
+### 4. Frontend - Onboarding Wizard Gate
+- Quando founder faz login e tem workspace com `needs_onboarding = true`:
+  - Redireciona para onboarding wizard completo (NDA, dados empresa, programa)
+  - Wizard pré-carrega dados existentes mas founder preenche tudo
+  - Ao completar → `needs_onboarding = false`, workspace fica `active`
 
-### Ordem de implementação
-1. Chat Direto (usa infra existente)
-2. Playbook Evidence Upload (migration + storage + UI)
-3. Benchmark Dashboard (view + UI)
-4. Twilio/WhatsApp (connector + edge function)
+### 5. Componente de Sugestão no Admin
+- `WorkspaceAssignmentDialog` com:
+  - Lista de startups sugeridas (match por domínio de email)
+  - Campo de pesquisa para busca manual
+  - Botão "Criar nova startup" com nome pré-preenchido
+  - Confirmação antes de executar
+
+### Ordem de implementação:
+1. Migration (campo `needs_onboarding`)
+2. RPC backend
+3. UI do admin (dialog de sugestão)
+4. Gate no onboarding do founder
