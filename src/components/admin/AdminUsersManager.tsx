@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { WorkspaceAssignmentDialog } from './WorkspaceAssignmentDialog';
 import { Plus, Trash2, UserCheck, Building2, Ban, UserX, RotateCcw, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
