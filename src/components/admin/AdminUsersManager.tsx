@@ -231,6 +231,14 @@ export function AdminUsersManager() {
                               <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
                             )}
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteUserTarget({ userId: profile.id, userName: profile.full_name || profile.email })}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.deleteUser', { defaultValue: 'Apagar' })}
+                          </Button>
                         </div>
                       </div>
 
