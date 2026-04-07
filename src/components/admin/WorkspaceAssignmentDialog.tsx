@@ -355,7 +355,7 @@ export function WorkspaceAssignmentDialog({ open, onOpenChange, user }: Workspac
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {['ideation', 'validation', 'mvp', 'product_market_fit', 'growth', 'scaling'].map(s => (
+                      {['ideation', 'validation', 'mvp', 'growth', 'scale'].map(s => (
                         <SelectItem key={s} value={s}>{t(`stages.${s}`, s)}</SelectItem>
                       ))}
                     </SelectContent>
