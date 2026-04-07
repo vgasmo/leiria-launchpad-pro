@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, forwardRef, useMemo } from 'react';
+import { ReactNode, useState, useEffect, forwardRef, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -74,8 +74,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 lg:h-16 items-center justify-between gap-4 px-4 lg:px-8">
             <div className={cn(
-              "transition-all duration-500 min-w-0 overflow-hidden",
-              mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+              "transition-[opacity,transform] duration-200 ease-out min-w-0 overflow-hidden motion-reduce:transition-none",
+              mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
             )}>
               {title && (
                 <h1 className="font-heading text-lg lg:text-xl font-semibold text-foreground truncate" title={title}>
@@ -87,8 +87,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
               )}
             </div>
             <div className={cn(
-              "flex items-center gap-2 lg:gap-4 transition-all duration-500 delay-100 flex-shrink-0 ml-auto",
-              mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+              "flex items-center gap-2 lg:gap-4 transition-[opacity,transform] duration-200 delay-75 flex-shrink-0 ml-auto motion-reduce:transition-none",
+              mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
             )}>
               {actions}
               <TopBar />
@@ -96,8 +96,9 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
           </div>
         </header>
         <div className={cn(
-          "px-4 py-6 lg:px-6 lg:py-6 transition-all duration-500 delay-200 mx-auto max-w-7xl",
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          "px-4 py-6 lg:px-6 lg:py-6 mx-auto max-w-7xl",
+          "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           {children}
         </div>

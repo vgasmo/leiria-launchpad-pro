@@ -2290,7 +2290,14 @@ export type Database = {
             foreignKeyName: "funnel_items_linked_contract_id_fkey"
             columns: ["linked_contract_id"]
             isOneToOne: false
-            referencedRelation: "contracts"
+            referencedRelation: "startup_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funnel_items_linked_contract_id_fkey"
+            columns: ["linked_contract_id"]
+            isOneToOne: false
+            referencedRelation: "startup_contracts_safe"
             referencedColumns: ["id"]
           },
           {
