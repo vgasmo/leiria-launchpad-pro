@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, forwardRef, useMemo } from 'react';
+import { ReactNode, useState, useEffect, forwardRef, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -96,8 +96,9 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
           </div>
         </header>
         <div className={cn(
-          "px-4 py-6 lg:px-6 lg:py-6 transition-all duration-500 delay-200 mx-auto max-w-7xl",
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          "px-4 py-6 lg:px-6 lg:py-6 mx-auto max-w-7xl",
+          "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           {children}
         </div>
