@@ -33,11 +33,14 @@ const TERM_CATEGORIES: Record<string, { icon: typeof TrendingUp; terms: Glossary
 
 // FAQ category groups for organised display
 const FAQ_TAG_GROUPS: { key: string; label_pt: string; label_en: string; tags: string[] }[] = [
-  { key: 'onboarding', label_pt: 'Onboarding', label_en: 'Onboarding', tags: ['onboarding', 'value', 'navigation', 'permissions', 'security', 'i18n', 'settings'] },
+  { key: 'onboarding', label_pt: 'Onboarding & Registo', label_en: 'Onboarding & Registration', tags: ['onboarding', 'value', 'navigation', 'permissions', 'security', 'i18n', 'settings', 'registration', 'teams'] },
   { key: 'mentoring', label_pt: 'Mentoria & Sessões', label_en: 'Mentoring & Sessions', tags: ['mentoring', 'process', 'sessions', 'coaching'] },
-  { key: 'docs', label_pt: 'Documentos & Templates', label_en: 'Documents & Templates', tags: ['documents', 'workflow', 'feedback', 'templates', 'docs'] },
-  { key: 'execution', label_pt: 'Playbooks & KPIs', label_en: 'Playbooks & KPIs', tags: ['playbooks', 'guides', 'kpis', 'metrics', 'execution', 'planning'] },
-  { key: 'troubleshooting', label_pt: 'Problemas comuns', label_en: 'Common issues', tags: ['troubleshooting'] },
+  { key: 'docs', label_pt: 'Documentos & Dataroom', label_en: 'Documents & Dataroom', tags: ['documents', 'workflow', 'feedback', 'templates', 'docs', 'dataroom', 'fundraising', 'investors'] },
+  { key: 'execution', label_pt: 'Playbooks, KPIs & Ações', label_en: 'Playbooks, KPIs & Actions', tags: ['playbooks', 'guides', 'kpis', 'metrics', 'execution', 'planning', 'actions', 'milestones', 'checkins'] },
+  { key: 'portfolio', label_pt: 'Portefólio & CRM', label_en: 'Portfolio & CRM', tags: ['portfolio', 'crm', 'pipeline', 'reports'] },
+  { key: 'admin', label_pt: 'Administração & Sistema', label_en: 'Administration & System', tags: ['admin', 'users', 'programs', 'spaces'] },
+  { key: 'tools', label_pt: 'IA & Integrações', label_en: 'AI & Integrations', tags: ['ai', 'integrations', 'teams', 'outlook', 'tools', 'messaging'] },
+  { key: 'troubleshooting', label_pt: 'Problemas comuns', label_en: 'Common issues', tags: ['troubleshooting', 'support', 'help'] },
 ];
 
 export default function HelpGlossary() {
