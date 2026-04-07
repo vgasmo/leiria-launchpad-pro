@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WorkspaceAssignmentDialog } from './WorkspaceAssignmentDialog';
 import { Plus, Trash2, UserCheck, Building2, Ban, UserX, RotateCcw, CheckCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +35,7 @@ type Role = typeof ROLES[number];
 
 export function AdminUsersManager() {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuth();
   const { data: profiles, isLoading: loadingProfiles } = useProfiles();
   const { data: userRoles, isLoading: loadingRoles } = useUserRoles();
   const { data: workspaceUsers, isLoading: loadingWsUsers } = useWorkspaceUsers();
@@ -231,14 +233,16 @@ export function AdminUsersManager() {
                               <><Ban className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.suspend', { defaultValue: 'Suspender' })}</>
                             )}
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleteUserTarget({ userId: profile.id, userName: profile.full_name || profile.email })}
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.deleteUser', { defaultValue: 'Apagar' })}
-                          </Button>
+                          {profile.id !== currentUser?.id && !isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeleteUserTarget({ userId: profile.id, userName: profile.full_name || profile.email })}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />{t('admin.userManagement.deleteUser', { defaultValue: 'Apagar' })}
+                            </Button>
+                          )}
                         </div>
                       </div>
 
