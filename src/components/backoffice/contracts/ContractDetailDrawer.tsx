@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, Building2, FileText, Euro, Clock, Save, X, Pencil, Info, 
   TrendingUp, AlertTriangle, ExternalLink, Receipt, LinkIcon, Calculator,
-  FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send
+  FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send,
+  GitBranch
 } from 'lucide-react';
 import { format, differenceInMonths, differenceInDays, addYears } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
@@ -22,6 +23,7 @@ import { useCurrentPricingTable, findMatchingPricingLine, getIncubationYear } fr
 import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
 import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelligenceCard';
 import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
+import { ContractLifecycleStepper } from '@/components/contracts/ContractLifecycleStepper';
 import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
 import { supabase } from '@/lib/supabaseClient';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
