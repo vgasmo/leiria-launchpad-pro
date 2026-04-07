@@ -49,7 +49,7 @@ export function AdminUsersManager() {
   const [selectedRole, setSelectedRole] = useState<Role>('consultor');
   const [deleteRoleTarget, setDeleteRoleTarget] = useState<{ id: string; role: string } | null>(null);
 
-  const [assignWsDialog, setAssignWsDialog] = useState<{ userId: string; userName: string } | null>(null);
+  const [assignWsDialog, setAssignWsDialog] = useState<{ userId: string; userName: string; email: string; isFounder: boolean } | null>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
   const [wsRole, setWsRole] = useState<Role>('founder');
   const [deleteWsUserTarget, setDeleteWsUserTarget] = useState<string | null>(null);
