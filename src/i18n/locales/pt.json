@@ -1266,7 +1266,12 @@
       "suspended": "Conta suspensa",
       "title": "Gestão de Utilizadores",
       "workspace": "Workspace",
-      "workspaceAssignments": "Atribuições de Workspace"
+      "workspaceAssignments": "Atribuições de Workspace",
+      "deleteError": "Erro ao apagar utilizador",
+      "deleteSuccess": "Utilizador apagado com sucesso",
+      "deleteUser": "Apagar",
+      "deleteUserConfirm": "Tem a certeza que quer apagar permanentemente o utilizador {{name}}? Esta ação não pode ser revertida. Todos os dados associados (funções, workspaces) serão removidos.",
+      "deleteUserTitle": "Apagar Utilizador"
     },
     "userRemoved": "Utilizador removido do workspace",
     "userSuspended": "Utilizador suspenso",
@@ -1321,7 +1326,26 @@
       "title": "Workspaces",
       "unblock": "Desbloquear",
       "unblocked": "Workspace desbloqueado"
-    }
+    },
+    "assign": "Associar",
+    "assignWorkspace": "Atribuir Workspace",
+    "assignWorkspaceDesc": "Atribuir ou criar workspace para {{name}} ({{email}})",
+    "createAndAssign": "Criar e Atribuir",
+    "description": "Descrição (opcional)",
+    "descriptionPlaceholder": "Breve descrição da startup...",
+    "noSuggestionsFound": "Nenhuma startup encontrada para o domínio do email.",
+    "noWorkspacesFound": "Nenhum workspace encontrado.",
+    "program": "Programa",
+    "searchExisting": "Pesquisar",
+    "searchStartupPlaceholder": "Pesquisar por nome da startup...",
+    "selectProgram": "Selecionar...",
+    "stage": "Etapa",
+    "startupNamePlaceholder": "Nome da empresa...",
+    "suggested": "Sugerido",
+    "suggestedByDomain": "Startups com correspondência ao domínio {{domain}}:",
+    "suggestedFromEmail": "Sugerido a partir do email",
+    "trySearOrCreate": "Tente pesquisar manualmente ou criar um novo workspace.",
+    "workspaceAssigned": "Workspace atribuído e conta aprovada!"
   },
   "adminKpis": {
     "cancel": "Cancelar",
