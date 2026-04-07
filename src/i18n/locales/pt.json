@@ -4439,11 +4439,11 @@
       "suspended": "Suspenso",
       "terminated": "Rescindido",
       "expired": "Expirado",
-      "eventHistory": "Histórico de Eventos",
+      "eventHistory": "Histórico de eventos",
       "tab": "Ciclo de Vida",
       "biennialReview": "Revisão Bienal de Preço",
       "nextPriceReview": "Próxima Revisão de Preço",
-      "noticeDeadline": "Prazo de Aviso (60 dias)",
+      "noticeDeadline": "Prazo de aviso prévio",
       "incubationStatus": "Estado de Incubação",
       "currentYear": "Ano de Incubação Atual",
       "yearN": "Ano {{n}}",
@@ -4463,7 +4463,22 @@
         "notice_window": "Janela de Aviso",
         "incubation_limit": "Limite 3 Anos",
         "post_incubation": "Pós-Incubação"
-      }
+      },
+      "draft_internal": "Rascunho Interno",
+      "intake_requested": "Intake Solicitado",
+      "intake_in_progress": "Intake em Curso",
+      "intake_submitted": "Intake Submetido",
+      "review_pending": "Em Revisão",
+      "approved_for_signature": "Aprovado p/ Assinatura",
+      "signature_sent": "Assinatura Enviada",
+      "signed": "Assinado",
+      "activated": "Ativado",
+      "cancelled": "Cancelado",
+      "rejected": "Rejeitado",
+      "phaseIntake": "Intake",
+      "phaseContract": "Contrato",
+      "noIntake": "Contrato sem processo de intake registado",
+      "changesRequested": "Correções solicitadas"
     }
   },
   "loading": {
