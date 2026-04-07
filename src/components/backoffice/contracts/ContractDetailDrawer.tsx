@@ -17,7 +17,7 @@ import {
   FileDown, Loader2, Shield, RefreshCw, CheckCircle2, XCircle, Send,
   GitBranch
 } from 'lucide-react';
-import { format, differenceInMonths, differenceInDays, addYears, addMonths } from 'date-fns';
+import { format, differenceInMonths, differenceInDays, addYears, subDays } from 'date-fns';
 import { useUpdateContract, type StartupContract } from '@/hooks/useBackoffice';
 import { useCurrentPricingTable, findMatchingPricingLine, getIncubationYear } from '@/hooks/backoffice/usePricingLines';
 import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscountsPanel';
@@ -647,7 +647,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                       </div>
                       <div className="flex items-center justify-between mt-1">
                         <span>{t('lifecycle.stepper.noticeDeadline')}</span>
-                        <span className="font-medium">{format(addMonths(nextReviewDate, -2), 'dd/MM/yyyy')}</span>
+                        <span className="font-medium">{format(subDays(nextReviewDate, 60), 'dd/MM/yyyy')}</span>
                       </div>
                     </div>
                   </div>

@@ -14,7 +14,7 @@ import {
   CalendarClock, Cake, AlertTriangle, Clock, FileText, 
   CheckCircle2, RefreshCw, Bell
 } from 'lucide-react';
-import { format, differenceInDays, addYears, addMonths } from 'date-fns';
+import { format, differenceInDays, addYears, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface ContractForEvents {
@@ -109,7 +109,7 @@ export function ContractLifecycleEventsCard() {
 
       // 3. 60-day notice window (price review notice must be sent 60 days before effect)
       // The notice window opens 60 days before any biennial review
-      const noticeDeadline = addMonths(nextReviewDate, -2); // 60 days ~= 2 months
+      const noticeDeadline = subDays(nextReviewDate, 60);
       const daysToNotice = differenceInDays(noticeDeadline, today);
       if (daysToNotice >= -5 && daysToNotice <= 30 && daysToNextReview > 0) {
         result.push({
