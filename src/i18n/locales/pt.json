@@ -1168,7 +1168,7 @@
     },
     "suspend": "Suspender",
     "suspendUser": "Suspend Utilizador",
-    "suspendUserConfirm": "Tem a certeza you want to suspend this Utilizador? They will not be able to access the platform.",
+    "suspendUserConfirm": "Tem a certeza de que pretende suspender este utilizador? O utilizador não poderá aceder à plataforma.",
     "tags": {
       "addCategory": "Adicionar Categoria",
       "addTag": "Adicionar Tag",
@@ -1182,8 +1182,8 @@
       "categoryDialogDesc": "Categories help organize Etiquetas para easier filtering",
       "categoryNamePlaceholder": "ex: Indústria, Tecnologia",
       "categoryUpdated": "Categoria Updated",
-      "deleteCategoryWarning": "This will Remover the Categoria de Todos associated Etiquetas. The Etiquetas themselves will not be deleted.",
-      "deleteTagWarning": "This will Remover the tag de Todos workspaces.",
+      "deleteCategoryWarning": "Isto irá remover a categoria de todas as etiquetas associadas. As etiquetas em si serão mantidas.",
+      "deleteTagWarning": "Isto irá remover a etiqueta de todos os workspaces.",
       "editCategory": "Editar Categoria",
       "editTag": "Editar Tag",
       "filterByCategory": "Filtrar by Categoria",
@@ -2880,7 +2880,7 @@
     "duplicateOf": "Duplicar of",
     "duplicates": "Duplicates",
     "emailExists": "Email already exists in CRM",
-    "emptyFile": "The Ficheiro is empty or could not be parsed.",
+    "emptyFile": "O ficheiro está vazio ou não foi possível processá-lo.",
     "errorDetails": "Erro Detalhes",
     "errors": "Errors",
     "expectedFormat": "Expected Format",
@@ -5090,7 +5090,7 @@
     "title": "Notificações"
   },
   "nps": {
-    "description": "How likely are you to recommend FoundersBook to a fellow founder or mentor?",
+    "description": "Qual a probabilidade de recomendar o FoundersBook a outro founder ou mentor?",
     "dontAskAgain": "Dont Ask Again",
     "error": "Falhou to Submeter feedback",
     "feedbackPlaceholder": "Your feedback helps us build a better product...",
@@ -5101,7 +5101,7 @@
     "thankYouTitle": "Thanks para sharing!",
     "title": "How are we doing?",
     "veryLikely": "Very likely",
-    "whatDoYouLove": "What do you love about FoundersBook?"
+    "whatDoYouLove": "O que mais gosta no FoundersBook?"
   },
   "offline": {
     "backOnline": "De volta online! A sincronizar os seus dados...",
@@ -7359,7 +7359,7 @@
   "triage": {
     "chaseError": "Falhou to Enviar follow-up message",
     "chaseSuccess": "Follow-up sent",
-    "chaseSuccessDescription": "The founder has been notified about Atrasado Ações",
+    "chaseSuccessDescription": "O founder foi notificado sobre as ações em atraso.",
     "chaseTooltip": "Chase Tooltip",
     "filters": {
       "all": "Todas",
@@ -7765,5 +7765,17 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
+  },
+  "founderDashboard": {
+    "noContracts": "Ainda não tem contratos ativos. A equipa entrará em contacto consigo quando o processo estiver pronto.",
+    "noMilestones": "Ainda sem marcos definidos. O seu consultor irá configurá-los em breve.",
+    "nextSteps": "Próximos Passos",
+    "nextStepsEmpty": "Sem ações pendentes de momento. Bom trabalho!",
+    "contractPending": "O seu contrato está a ser processado. Receberá uma notificação quando for necessária a sua ação.",
+    "contractActive": "Contrato ativo — a sua incubação está em curso.",
+    "intakeInProgress": "O pedido de contratação está em análise. Será notificado quando houver novidades.",
+    "welcomeBack": "Bem-vindo de volta",
+    "yourProgress": "O seu progresso",
+    "teamSupport": "A equipa está aqui para ajudar. Entre em contacto se precisar de algo."
   }
 }
