@@ -1266,7 +1266,12 @@
       "suspended": "Conta suspensa",
       "title": "User Management",
       "workspace": "Workspace",
-      "workspaceAssignments": "Workspace Assignments"
+      "workspaceAssignments": "Workspace Assignments",
+      "deleteError": "Error deleting user",
+      "deleteSuccess": "User deleted successfully",
+      "deleteUser": "Delete",
+      "deleteUserConfirm": "Are you sure you want to permanently delete user {{name}}? This action cannot be undone. All associated data (roles, workspaces) will be removed.",
+      "deleteUserTitle": "Delete User"
     },
     "userRemoved": "User removed from workspace",
     "userSuspended": "User suspended",
@@ -1321,7 +1326,26 @@
       "title": "Workspaces",
       "unblock": "Unblock",
       "unblocked": "Workspace unblocked"
-    }
+    },
+    "assign": "Assign",
+    "assignWorkspace": "Assign Workspace",
+    "assignWorkspaceDesc": "Assign or create workspace for {{name}} ({{email}})",
+    "createAndAssign": "Create & Assign",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Brief startup description...",
+    "noSuggestionsFound": "No startup found matching the email domain.",
+    "noWorkspacesFound": "No workspaces found.",
+    "program": "Program",
+    "searchExisting": "Search",
+    "searchStartupPlaceholder": "Search by startup name...",
+    "selectProgram": "Select...",
+    "stage": "Stage",
+    "startupNamePlaceholder": "Company name...",
+    "suggested": "Suggested",
+    "suggestedByDomain": "Startups matching domain {{domain}}:",
+    "suggestedFromEmail": "Suggested from email",
+    "trySearOrCreate": "Try searching manually or create a new workspace.",
+    "workspaceAssigned": "Workspace assigned and account approved!"
   },
   "adminKpis": {
     "cancel": "Cancel",
