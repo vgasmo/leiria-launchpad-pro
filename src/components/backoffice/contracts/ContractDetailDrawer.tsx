@@ -408,6 +408,10 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                 <TrendingUp className="h-3.5 w-3.5" />
                 {t('contracts.aiAnalysis')}
               </TabsTrigger>
+              <TabsTrigger value="lifecycle" className="flex-1 gap-1.5 text-xs">
+                <GitBranch className="h-3.5 w-3.5" />
+                {t('lifecycle.stepper.tab')}
+              </TabsTrigger>
             </TabsList>
 
             {/* Details Tab */}
