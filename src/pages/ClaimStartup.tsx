@@ -36,6 +36,7 @@ export default function ClaimStartup() {
     }
     // Otherwise, use the read-only state
     if (founderState.isLoading) return 'loading' as const;
+    if (founderState.status === 'needs_onboarding') return 'needs_onboarding' as const;
     if (founderState.status === 'has_active_workspace') return 'already_claimed' as const;
     if (founderState.status === 'has_pending_claim') return 'pending_review' as const;
     if (founderState.status === 'has_pending_workspace') return 'pending_application' as const;
