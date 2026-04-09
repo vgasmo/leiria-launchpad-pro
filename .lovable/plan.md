@@ -1,44 +1,42 @@
 
-# Implementation Plan — Contract Truth Unification & Product Polish
+# Contract Truth Hardening Plan — GO-LIVE
 
-## Status: ✅ Executed (April 2026)
+## Previous Streams (April 2026) — ✅ Completed
+- Stream 1: Invoice remnants removed, CRM back-link synced on approval
+- Stream 2-5: Translations, motion, performance, founder value — all done
 
-## Stream 1 — Contract Truth Unification ✅
+---
 
-**Changes made:**
-1. Removed invoice query remnant from `ContractDetailDrawer.tsx` (was querying non-existent `invoices` table)
-2. Removed invoice button from drawer UI
-3. Added CRM back-link sync in `useContractIntakes.ts` — when auto-creating contract on approval, `funnel_items.linked_contract_id` is now updated automatically
-4. `public.contracts` is legacy/deprecated — no code references it; `startup_contracts` is the sole canonical truth
+## Current Phase: GO-LIVE HARDENING
 
-**Canonical model:**
-- `startup_contracts` = operational truth
-- `funnel_items.linked_contract_id` → FK to `startup_contracts` (migrated previously)
-- `contract_intakes.contract_id` → FK to `startup_contracts`
-- `public.contracts` = legacy, 0 rows, no code references
+### Canonical Truth Decision
+- `startup_contracts` = sole operational truth ✅
+- `public.contracts` = legacy inert (0 code references) ✅
+- No migration needed
 
-## Stream 2 — Translations / Localization ✅
+### 5 Bypass Paths to Close
 
-**Changes made:**
-1. Fixed 7 English-in-PT strings (admin tags, suspend confirm, data import, NPS, triage)
-2. Added 11 new founder-facing keys (founderDashboard section) in both PT and EN
-3. Full key parity confirmed between pt.json and en.json (0 missing keys)
+#### Blocker 1: ContractDetailDrawer "send" buttons bypass intake sync
+- L948-952 (assinatura_digital) and L1008-1013 (pandadoc) write `signature_status='sent_for_signature'` to `startup_contracts` without transitioning `contract_intakes.status` or syncing CRM
 
-## Stream 3 — Motion / Animation ✅
+#### Blocker 2: ContractDetailDrawer "Mark as Signed" bypasses lifecycle
+- L1030-1045: Sets contract signed + workspace active + contract active directly — no intake sync, no CRM sync
 
-**Status:** Already implemented — AppLayout uses 200-300ms translateY/opacity animations with `motion-reduce:transition-none`. No additional changes needed.
+#### Blocker 3: DocuSign webhook doesn't sync intake or CRM
+- `docusign-webhook/index.ts` L147-164: On `completed`, updates only `startup_contracts` — never transitions `contract_intakes` or `funnel_items`
 
-## Stream 4 — Speed / Performance ✅
+#### Blocker 4: useFunnel activates workspace immediately
+- `useFunnel.ts` L288-291: Sets workspace `active` before contract is signed
 
-**Status:** Already implemented — all heavy pages use `lazy()` with `lazyWithRetry()` in App.tsx. Route-level code splitting is complete.
+#### Blocker 5: No backoffice visibility for invalid/orphan states
 
-## Stream 5 — Founder Value ✅
+### Implementation Streams
 
-**Changes made:**
-1. Added founder-facing translation keys for contract status, progress, and next steps
-2. Improved empty state messaging (no jargon, actionable copy)
+**B1: `src/lib/contractLifecycleSync.ts`** — shared helper to sync intake + CRM after contract events
+**B2: Fix ContractDetailDrawer** — call sync helper after manual writes  
+**B3: Fix docusign-webhook** — sync intake to `signed` and CRM to `contracted` on completion
+**B4: Fix useFunnel** — create workspace as `pending` not `active`
+**D1: Add diagnostic queries** — detect orphan/drift states in backoffice
 
-## NOT Touched
-- Auth, guards, claim flow, RLS policies, useWorkspaces, edge functions, pricing engine core
-- CRM pipeline stages, signature providers, existing triggers
-- `public.contracts` table (remains as legacy, no code references)
+### Risk: All changes additive. No frozen areas touched.
+
