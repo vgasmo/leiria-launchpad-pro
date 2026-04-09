@@ -1007,12 +1007,14 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
               size="sm" 
               className="w-full gap-2"
               onClick={async () => {
-                await supabase.from('startup_contracts').update({
-                  signature_provider: 'pandadoc_manual',
-                  signature_status: 'sent_for_signature',
-                  signature_requested_at: new Date().toISOString(),
-                } as any).eq('id', contract.id);
+                const result = await canonicalMarkAsSent(contract.id, 'pandadoc_manual');
+                if (!result.success) {
+                  toast.error(result.error || 'Erro ao marcar como enviado');
+                  return;
+                }
                 queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
+                queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
                 toast.success(t('contractDetail.markedAsSent'));
               }}
             >
