@@ -54,6 +54,7 @@ export function ContractLifecycleHub() {
   const { data: buildings } = useBuildings();
   const createContract = useCreateContract();
   const convertToStartup = useConvertToStartup();
+  const { data: allIntakes } = useContractIntakes();
   
   // Calculate lifecycle metrics and alerts
   const lifecycleData = useMemo(() => {
