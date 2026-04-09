@@ -20,12 +20,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useContracts, useIncubationTypes, useBuildings, useCreateContract } from '@/hooks/useBackoffice';
 import { useFunnelItems, useConvertToStartup } from '@/hooks/useFunnel';
 import { usePrograms } from '@/hooks/useWorkspaces';
+import { useContractIntakes } from '@/hooks/useContractIntakes';
 import { differenceInDays, addDays, format, differenceInMonths, addYears } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type AlertSeverity = 'critical' | 'warning' | 'info';
-type AlertType = 'pending_contract' | 'renewal_due' | 'anniversary' | 'missing_contract' | 'expired';
+type AlertType = 'pending_contract' | 'renewal_due' | 'anniversary' | 'missing_contract' | 'expired' | 'integrity_drift';
 
 interface LifecycleAlert {
   id: string;
