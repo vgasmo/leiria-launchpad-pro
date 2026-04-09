@@ -20,12 +20,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useContracts, useIncubationTypes, useBuildings, useCreateContract } from '@/hooks/useBackoffice';
 import { useFunnelItems, useConvertToStartup } from '@/hooks/useFunnel';
 import { usePrograms } from '@/hooks/useWorkspaces';
+import { useContractIntakes } from '@/hooks/useContractIntakes';
 import { differenceInDays, addDays, format, differenceInMonths, addYears } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type AlertSeverity = 'critical' | 'warning' | 'info';
-type AlertType = 'pending_contract' | 'renewal_due' | 'anniversary' | 'missing_contract' | 'expired';
+type AlertType = 'pending_contract' | 'renewal_due' | 'anniversary' | 'missing_contract' | 'expired' | 'integrity_drift';
 
 interface LifecycleAlert {
   id: string;
@@ -53,6 +54,7 @@ export function ContractLifecycleHub() {
   const { data: buildings } = useBuildings();
   const createContract = useCreateContract();
   const convertToStartup = useConvertToStartup();
+  const { data: allIntakes } = useContractIntakes();
   
   // Calculate lifecycle metrics and alerts
   const lifecycleData = useMemo(() => {
@@ -190,6 +192,65 @@ export function ContractLifecycleHub() {
       }
     });
     
+    // ═══ CONTRACT INTEGRITY DIAGNOSTICS ═══
+    // Detect drift between intake, contract, signature, workspace, and CRM states
+    if (allIntakes) {
+      // 4a. Intakes in post-review states without a contract_id
+      const postReviewStates = ['approved_for_signature', 'signature_sent', 'signed', 'activated'];
+      allIntakes.filter(i => postReviewStates.includes(i.status) && !i.contract_id).forEach(intake => {
+        alerts.push({
+          id: `orphan-intake-${intake.id}`,
+          type: 'integrity_drift',
+          severity: 'critical',
+          title: 'Intake sem contrato associado',
+          description: `Intake "${intake.organization_name || 'N/A'}" está em "${intake.status}" mas não tem contrato associado.`,
+          entityId: intake.id,
+          entityName: intake.organization_name || 'Intake órfão',
+          actionLabel: 'Verificar',
+          actionType: 'review',
+        });
+      });
+
+      // 4b. Contract active but linked intake not in signed/activated
+      contracts.filter(c => c.status === 'active').forEach(contract => {
+        const linkedIntake = allIntakes.find(i => i.contract_id === contract.id);
+        if (linkedIntake && !['signed', 'activated'].includes(linkedIntake.status)) {
+          const startupName = (contract.workspace as any)?.startup?.name || contract.id.slice(0, 8);
+          alerts.push({
+            id: `drift-intake-${contract.id}`,
+            type: 'integrity_drift',
+            severity: 'warning',
+            title: 'Contrato ativo, intake desatualizado',
+            description: `Contrato de "${startupName}" está ativo mas o intake está em "${linkedIntake.status}".`,
+            entityId: contract.id,
+            entityName: startupName,
+            actionLabel: 'Verificar',
+            actionType: 'review',
+          });
+        }
+      });
+
+      // 4c. Workspace active without signed/active contract
+      contracts.filter(c => c.workspace_id && c.status !== 'active').forEach(contract => {
+        // Check if workspace is active but contract is not
+        const workspace = (contract as any).workspace;
+        if (workspace && workspace.status === 'active') {
+          const startupName = workspace?.startup?.name || contract.id.slice(0, 8);
+          alerts.push({
+            id: `premature-ws-${contract.id}`,
+            type: 'integrity_drift',
+            severity: 'warning',
+            title: 'Workspace ativo sem contrato ativo',
+            description: `Workspace de "${startupName}" está ativo mas o contrato está em "${contract.status}".`,
+            entityId: contract.id,
+            entityName: startupName,
+            actionLabel: 'Verificar',
+            actionType: 'review',
+          });
+        }
+      });
+    }
+
     // Sort alerts by severity
     const severityOrder: Record<AlertSeverity, number> = { critical: 0, warning: 1, info: 2 };
     alerts.sort((a, b) => {
@@ -199,6 +260,7 @@ export function ContractLifecycleHub() {
     });
     
     // Calculate stats
+    const integrityIssues = alerts.filter(a => a.type === 'integrity_drift').length;
     const stats = {
       totalActive: contracts.filter(c => c.status === 'active').length,
       pendingSignature: contracts.filter(c => c.status === 'pending_signature').length,
@@ -208,6 +270,7 @@ export function ContractLifecycleHub() {
       leadsReadyForContract: contractedLeadsWithoutContract.length,
       criticalAlerts: alerts.filter(a => a.severity === 'critical').length,
       warningAlerts: alerts.filter(a => a.severity === 'warning').length,
+      integrityIssues,
     };
     
     // Pipeline stages
@@ -220,7 +283,7 @@ export function ContractLifecycleHub() {
     };
     
     return { alerts, stats, pipeline, contractedLeadsWithoutContract };
-  }, [contracts, funnelItems, t]);
+  }, [contracts, funnelItems, allIntakes, t]);
   
   const handleAlertAction = (alert: LifecycleAlert) => {
     switch (alert.actionType) {

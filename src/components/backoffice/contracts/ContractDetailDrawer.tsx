@@ -26,6 +26,7 @@ import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
 import { ContractLifecycleStepper } from '@/components/contracts/ContractLifecycleStepper';
 import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
 import { supabase } from '@/lib/supabaseClient';
+import { canonicalMarkAsSent, canonicalMarkAsSigned } from '@/lib/contractLifecycleSync';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -1006,12 +1007,14 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
               size="sm" 
               className="w-full gap-2"
               onClick={async () => {
-                await supabase.from('startup_contracts').update({
-                  signature_provider: 'pandadoc_manual',
-                  signature_status: 'sent_for_signature',
-                  signature_requested_at: new Date().toISOString(),
-                } as any).eq('id', contract.id);
+                const result = await canonicalMarkAsSent(contract.id, 'pandadoc_manual');
+                if (!result.success) {
+                  toast.error(result.error || 'Erro ao marcar como enviado');
+                  return;
+                }
                 queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
+                queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
                 toast.success(t('contractDetail.markedAsSent'));
               }}
             >
@@ -1028,24 +1031,14 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
             variant="default"
             className="w-full gap-2 mt-4 bg-green-600 hover:bg-green-700"
             onClick={async () => {
-              await supabase.from('startup_contracts').update({
-                signature_status: 'signed',
-                signed_at: new Date().toISOString(),
-              } as any).eq('id', contract.id);
-              
-              // Auto-activate workspace
-              if (contract.workspace_id) {
-                await supabase.from('workspaces')
-                  .update({ status: 'active' } as any)
-                  .eq('id', contract.workspace_id)
-                  .in('status', ['pending', 'claimed', 'imported_unclaimed']);
-                
-                await supabase.from('startup_contracts')
-                  .update({ status: 'active' } as any)
-                  .eq('id', contract.id);
+              const result = await canonicalMarkAsSigned(contract.id, contract.workspace_id || null);
+              if (!result.success) {
+                toast.error(result.error || 'Erro ao marcar como assinado');
+                return;
               }
-              
               queryClient.invalidateQueries({ queryKey: ['contracts'] });
+              queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
+              queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
               queryClient.invalidateQueries({ queryKey: ['workspaces'] });
               toast.success(t('contractDetail.markedAsSigned'));
             }}

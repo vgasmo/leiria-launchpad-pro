@@ -168,6 +168,83 @@ Deno.serve(async (req) => {
       .update(updatePayload)
       .eq('id', contract.id)
 
+    // ═══ CANONICAL LIFECYCLE SYNC: Keep contract_intakes and CRM in sync ═══
+    if (status === 'completed' || status === 'sent_for_signature') {
+      try {
+        // Find the linked intake
+        const { data: intake } = await supabase
+          .from('contract_intakes')
+          .select('id, status, funnel_item_id')
+          .eq('contract_id', contract.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (intake) {
+          if (status === 'completed') {
+            // Sync intake to signed → activated
+            await supabase.from('contract_intakes')
+              .update({ status: 'signed' })
+              .eq('id', intake.id)
+
+            await supabase.from('intake_events').insert({
+              intake_id: intake.id,
+              event_type: 'lifecycle_sync_signed',
+              from_status: intake.status,
+              to_status: 'signed',
+              metadata: { source: 'docusign_webhook', envelope_id: envelopeId },
+            })
+
+            // Then activate
+            await supabase.from('contract_intakes')
+              .update({ status: 'activated' })
+              .eq('id', intake.id)
+
+            await supabase.from('intake_events').insert({
+              intake_id: intake.id,
+              event_type: 'lifecycle_sync_activated',
+              from_status: 'signed',
+              to_status: 'activated',
+              metadata: { source: 'docusign_webhook', envelope_id: envelopeId },
+            })
+
+            // Sync CRM to contracted
+            if (intake.funnel_item_id) {
+              await supabase.from('funnel_items')
+                .update({ stage: 'contracted' })
+                .eq('id', intake.funnel_item_id)
+            }
+
+            console.log(`Lifecycle sync: intake ${intake.id} → activated, CRM synced`)
+          } else if (status === 'sent_for_signature') {
+            // Sync intake to signature_sent
+            if (intake.status !== 'signature_sent' && intake.status !== 'signed' && intake.status !== 'activated') {
+              await supabase.from('contract_intakes')
+                .update({ status: 'signature_sent' })
+                .eq('id', intake.id)
+
+              await supabase.from('intake_events').insert({
+                intake_id: intake.id,
+                event_type: 'lifecycle_sync_signature_sent',
+                from_status: intake.status,
+                to_status: 'signature_sent',
+                metadata: { source: 'docusign_webhook', envelope_id: envelopeId },
+              })
+
+              if (intake.funnel_item_id) {
+                await supabase.from('funnel_items')
+                  .update({ stage: 'sent_for_signature' })
+                  .eq('id', intake.funnel_item_id)
+              }
+              console.log(`Lifecycle sync: intake ${intake.id} → signature_sent`)
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.error('Lifecycle sync error (non-fatal):', syncErr)
+      }
+    }
+
     // === AUTO-REGISTRATION on completion ===
     if (status === 'completed' && contract.legal_representative_email) {
       try {
