@@ -284,15 +284,10 @@ export function useConvertToStartup() {
         active: true,
       });
 
-      // Now activate the workspace (trigger will pass since member exists)
-      const { error: activateError } = await supabase
-        .from('workspaces')
-        .update({ status: 'active' })
-        .eq('id', workspace.id);
-      if (activateError) {
-        logger.error('Workspace activation error', {}, activateError);
-        // Still proceed — workspace is usable in 'pending' state
-      }
+      // Workspace stays as 'pending' — canonical activation happens only after
+      // contract is signed via the contract lifecycle sync flow.
+      // This prevents premature workspace activation before contract truth is established.
+      logger.info('Workspace created as pending — activation deferred to contract signing', { workspaceId: workspace.id });
 
       // Create contract if incubation type is specified
       let contract = null;
