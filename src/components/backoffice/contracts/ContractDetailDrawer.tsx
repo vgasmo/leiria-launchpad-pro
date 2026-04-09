@@ -26,6 +26,7 @@ import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
 import { ContractLifecycleStepper } from '@/components/contracts/ContractLifecycleStepper';
 import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
 import { supabase } from '@/lib/supabaseClient';
+import { canonicalMarkAsSent, canonicalMarkAsSigned } from '@/lib/contractLifecycleSync';
 import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
