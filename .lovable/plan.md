@@ -30,13 +30,14 @@
 
 #### Blocker 5: No backoffice visibility for invalid/orphan states
 
-### Implementation Streams
+### Implementation — ✅ COMPLETED
 
-**B1: `src/lib/contractLifecycleSync.ts`** — shared helper to sync intake + CRM after contract events
-**B2: Fix ContractDetailDrawer** — call sync helper after manual writes  
-**B3: Fix docusign-webhook** — sync intake to `signed` and CRM to `contracted` on completion
-**B4: Fix useFunnel** — create workspace as `pending` not `active`
-**D1: Add diagnostic queries** — detect orphan/drift states in backoffice
+**B1: `src/lib/contractLifecycleSync.ts`** ✅ — shared helper with `syncIntakeOnContractEvent`, `canonicalMarkAsSent`, `canonicalMarkAsSigned`
+**B2: Fix ContractDetailDrawer** ✅ — all 3 manual buttons now use canonical helpers
+**B3: Fix docusign-webhook** ✅ — on `completed`: syncs intake to signed→activated + CRM to contracted; on `sent_for_signature`: syncs intake
+**B4: Fix useFunnel** ✅ — workspace created as `pending`, not `active`
+**D1: ContractLifecycleHub diagnostics** ✅ — detects orphan intakes, intake/contract drift, premature workspace activation
 
-### Risk: All changes additive. No frozen areas touched.
+### Build: ✅ Clean (0 errors)
+### Frozen areas: NOT touched (auth, guards, claim flow, RLS, useWorkspaces)
 
