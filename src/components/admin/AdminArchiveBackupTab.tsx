@@ -75,16 +75,49 @@ function ContractArchiveStatus() {
 
   if (isLoading) return <Skeleton className="h-48 w-full" />;
 
+  const runAllMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await invokeWithAuth('archive-contracts-to-sharepoint', {
+        body: {},
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data: any) => {
+      const processed = data?.results?.length || 0;
+      const succeeded = data?.results?.filter((r: any) => r.success).length || 0;
+      toast.success(`Arquivo executado: ${succeeded}/${processed} contrato(s) processado(s)`);
+      queryClient.invalidateQueries({ queryKey: ['contract-archive-status'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || 'Erro ao executar arquivo');
+    },
+  });
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Archive className="h-5 w-5" />
-          {t('admin.archive.contractArchive', { defaultValue: 'Arquivo de Contratos — SharePoint' })}
-        </CardTitle>
-        <CardDescription>
-          {t('admin.archive.contractArchiveDesc', { defaultValue: 'Contratos assinados são arquivados automaticamente no SharePoint 7 dias após a assinatura.' })}
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Archive className="h-5 w-5" />
+              {t('admin.archive.contractArchive', { defaultValue: 'Arquivo de Contratos — SharePoint' })}
+            </CardTitle>
+            <CardDescription>
+              {t('admin.archive.contractArchiveDesc', { defaultValue: 'Contratos assinados são arquivados automaticamente no SharePoint 7 dias após a assinatura.' })}
+            </CardDescription>
+          </div>
+          {stats.pending > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => runAllMutation.mutate()}
+              disabled={runAllMutation.isPending}
+            >
+              {runAllMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+              Executar agora
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Stats row */}
@@ -144,14 +177,15 @@ function ContractArchiveStatus() {
                         </a>
                       </Button>
                     )}
-                    {contract.archive_status === 'failed' && (contract.archive_attempt_count || 0) < 5 && (
+                    {(contract.archive_status === 'failed' || contract.archive_status === 'pending' || !contract.archive_status) && (contract.archive_attempt_count || 0) < 5 && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => retryMutation.mutate(contract.id)}
                         disabled={retryMutation.isPending}
+                        title={contract.archive_status === 'failed' ? 'Re-tentar' : 'Arquivar agora'}
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        {retryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       </Button>
                     )}
                   </div>
