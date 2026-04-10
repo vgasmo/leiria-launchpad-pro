@@ -77,16 +77,8 @@ export function NewLeadDialog() {
       type: 'lead' as any,
     });
 
-    setForm({
-      contact_name: '',
-      organization_name: '',
-      contact_email: '',
-      contact_phone: '',
-      source: '',
-      notes: '',
-      owner_consultant_id: '',
-      program_id: '',
-    });
+    setForm(emptyForm);
+    clearDraft();
     setOpen(false);
   };
 
