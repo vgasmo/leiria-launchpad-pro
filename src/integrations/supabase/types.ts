@@ -1671,6 +1671,54 @@ export type Database = {
           },
         ]
       }
+      ecosystem_snapshots: {
+        Row: {
+          checksum: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          initiated_by: string | null
+          is_scheduled: boolean | null
+          last_error: string | null
+          record_counts: Json | null
+          retention_class: string | null
+          snapshot_type: string
+          started_at: string
+          status: string
+          storage_path: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          initiated_by?: string | null
+          is_scheduled?: boolean | null
+          last_error?: string | null
+          record_counts?: Json | null
+          retention_class?: string | null
+          snapshot_type?: string
+          started_at?: string
+          status?: string
+          storage_path?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          initiated_by?: string | null
+          is_scheduled?: boolean | null
+          last_error?: string | null
+          record_counts?: Json | null
+          retention_class?: string | null
+          snapshot_type?: string
+          started_at?: string
+          status?: string
+          storage_path?: string | null
+        }
+        Relationships: []
+      }
       email_log: {
         Row: {
           body: string | null
@@ -5693,6 +5741,13 @@ export type Database = {
       }
       startup_contracts: {
         Row: {
+          archive_attempt_count: number | null
+          archive_checksum: string | null
+          archive_filename: string | null
+          archive_location_url: string | null
+          archive_provider: string | null
+          archive_status: string | null
+          archived_at: string | null
           billing_day: number | null
           building_id: string | null
           company_address: string | null
@@ -5724,6 +5779,7 @@ export type Database = {
           incubation_year: number | null
           is_associate: boolean | null
           is_post_incubation: boolean | null
+          last_archive_error: string | null
           last_price_review_date: string | null
           legal_representative_email: string | null
           legal_representative_name: string | null
@@ -5765,6 +5821,13 @@ export type Database = {
           workspace_id: string | null
         }
         Insert: {
+          archive_attempt_count?: number | null
+          archive_checksum?: string | null
+          archive_filename?: string | null
+          archive_location_url?: string | null
+          archive_provider?: string | null
+          archive_status?: string | null
+          archived_at?: string | null
           billing_day?: number | null
           building_id?: string | null
           company_address?: string | null
@@ -5796,6 +5859,7 @@ export type Database = {
           incubation_year?: number | null
           is_associate?: boolean | null
           is_post_incubation?: boolean | null
+          last_archive_error?: string | null
           last_price_review_date?: string | null
           legal_representative_email?: string | null
           legal_representative_name?: string | null
@@ -5837,6 +5901,13 @@ export type Database = {
           workspace_id?: string | null
         }
         Update: {
+          archive_attempt_count?: number | null
+          archive_checksum?: string | null
+          archive_filename?: string | null
+          archive_location_url?: string | null
+          archive_provider?: string | null
+          archive_status?: string | null
+          archived_at?: string | null
           billing_day?: number | null
           building_id?: string | null
           company_address?: string | null
@@ -5868,6 +5939,7 @@ export type Database = {
           incubation_year?: number | null
           is_associate?: boolean | null
           is_post_incubation?: boolean | null
+          last_archive_error?: string | null
           last_price_review_date?: string | null
           legal_representative_email?: string | null
           legal_representative_name?: string | null
