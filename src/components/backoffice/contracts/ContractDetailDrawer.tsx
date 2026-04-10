@@ -955,6 +955,8 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                   
                   toast.success(t('contractDetail.linkCopied'));
                   queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                  queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
+                  queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
                 } catch (e: any) {
                   toast.error(e.message || t('contractDetail.sendFailed'));
                 } finally {
