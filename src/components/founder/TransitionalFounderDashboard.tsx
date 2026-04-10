@@ -127,7 +127,7 @@ export function TransitionalFounderDashboard({
       {/* Pending Contract Banner */}
       <PendingContractBanner workspaceId={workspace.id} />
 
-      {/* What happens next */}
+      {/* What happens next — state-grounded */}
       <Card className="rounded-2xl">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -137,21 +137,28 @@ export function TransitionalFounderDashboard({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
-            <StepItem
-              step={1}
-              text={t('founder.transitional.step1', { defaultValue: 'A equipa do programa analisa a sua candidatura' })}
-            />
-            <StepItem
-              step={2}
-              text={t('founder.transitional.step2', { defaultValue: 'Receberá uma notificação quando for aprovada' })}
-            />
-            <StepItem
-              step={3}
-              text={t('founder.transitional.step3', { defaultValue: 'O seu espaço de trabalho será totalmente ativado' })}
-            />
+            {workspaceStatus === 'pending' ? (
+              <>
+                <StepItem step={1} text={t('founder.transitional.step1Pending', { defaultValue: 'A equipa irá analisar os dados da sua candidatura.' })} />
+                <StepItem step={2} text={t('founder.transitional.step2Pending', { defaultValue: 'Se faltarem documentos, será contactado(a) por email.' })} />
+                <StepItem step={3} text={t('founder.transitional.step3Pending', { defaultValue: 'Após aprovação, receberá uma notificação para ativar o espaço.' })} />
+              </>
+            ) : workspaceStatus === 'claimed' ? (
+              <>
+                <StepItem step={1} text={t('founder.transitional.step1Claimed', { defaultValue: 'A equipa está a verificar a associação com a startup.' })} />
+                <StepItem step={2} text={t('founder.transitional.step2Claimed', { defaultValue: 'Poderá ser necessário assinar o contrato de incubação.' })} />
+                <StepItem step={3} text={t('founder.transitional.step3Claimed', { defaultValue: 'O espaço será ativado após validação e contrato assinado.' })} />
+              </>
+            ) : (
+              <>
+                <StepItem step={1} text={t('founder.transitional.step1', { defaultValue: 'A equipa do programa analisa a sua candidatura.' })} />
+                <StepItem step={2} text={t('founder.transitional.step2', { defaultValue: 'Receberá uma notificação quando for aprovada.' })} />
+                <StepItem step={3} text={t('founder.transitional.step3', { defaultValue: 'O seu espaço de trabalho será totalmente ativado.' })} />
+              </>
+            )}
           </div>
           <p className="text-xs text-muted-foreground pt-1">
-            {t('founder.transitional.timeline', { defaultValue: 'Este processo pode demorar 1-3 dias úteis.' })}
+            {t('founder.transitional.timelineNote', { defaultValue: 'Contacte a equipa se tiver questões sobre o estado atual.' })}
           </p>
         </CardContent>
       </Card>
