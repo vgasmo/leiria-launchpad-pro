@@ -50,12 +50,14 @@ interface MentorProfile {
 
 interface MentorConnection {
   id: string;
+  /** NOTE: founder_id actually stores workspace_id in this table (legacy schema naming) */
   founder_id: string;
   mentor_id: string;
   status: string;
   message: string | null;
   created_at: string;
   mentor?: MentorProfile | null;
+  /** For mentor view: the founder profile resolved from workspace_users, NOT from founder_id directly */
   founder?: MentorProfile | null;
 }
 
