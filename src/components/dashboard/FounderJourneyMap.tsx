@@ -10,11 +10,11 @@ interface FounderJourneyMapProps {
 }
 
 const JOURNEY_STAGES = [
-  { key: 'idea', icon: Lightbulb, label: 'Idea', color: 'from-violet-500 to-purple-500' },
+  { key: 'idea', icon: Lightbulb, label: 'Ideia', color: 'from-violet-500 to-purple-500' },
   { key: 'mvp', icon: Cpu, label: 'MVP', color: 'from-blue-500 to-cyan-500' },
-  { key: 'validation', icon: FlaskConical, label: 'Validation', color: 'from-emerald-500 to-green-500' },
-  { key: 'scaling', icon: TrendingUp, label: 'Scaling', color: 'from-amber-500 to-orange-500' },
-  { key: 'growth', icon: Rocket, label: 'Growth', color: 'from-rose-500 to-pink-500' },
+  { key: 'validation', icon: FlaskConical, label: 'Validação', color: 'from-emerald-500 to-green-500' },
+  { key: 'scaling', icon: TrendingUp, label: 'Escalamento', color: 'from-amber-500 to-orange-500' },
+  { key: 'growth', icon: Rocket, label: 'Crescimento', color: 'from-rose-500 to-pink-500' },
 ] as const;
 
 function getStageIndex(stage?: string | null): number {
@@ -32,7 +32,7 @@ export const FounderJourneyMap = memo(function FounderJourneyMap({ currentStage 
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Rocket className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">{t('founder.journeyMap', { defaultValue: 'Your Journey' })}</h3>
+          <h3 className="text-sm font-semibold">{t('founder.journeyMap', { defaultValue: 'O Seu Percurso' })}</h3>
         </div>
 
         {/* Journey track */}
