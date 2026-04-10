@@ -472,35 +472,8 @@ Deno.serve(async (req) => {
         })
         .eq('id', contract.id)
 
-      // === CANONICAL SYNC: Update linked intake on submit_signing ===
-      const { data: linkedIntake } = await supabase
-        .from('contract_intakes')
-        .select('id, status, funnel_item_id')
-        .eq('contract_id', contract.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      if (linkedIntake) {
-        await supabase
-          .from('contract_intakes')
-          .update({ status: 'signature_sent' })
-          .eq('id', linkedIntake.id)
-
-        await supabase.from('intake_events').insert({
-          intake_id: linkedIntake.id,
-          event_type: 'lifecycle_sync_signature_sent',
-          from_status: linkedIntake.status,
-          to_status: 'signature_sent',
-          metadata: { source: 'public_submit_signing', contract_id: contract.id },
-        })
-
-        if (linkedIntake.funnel_item_id) {
-          await supabase.from('funnel_items')
-            .update({ stage: 'proposal' })
-            .eq('id', linkedIntake.funnel_item_id)
-        }
-      }
+      // === CANONICAL SYNC (shared helper) ===
+      await syncIntakeOnSent(supabase, contract.id, null, 'public_submit_signing')
 
       let signingResult: any = { status: 'pending_manual', provider }
 
