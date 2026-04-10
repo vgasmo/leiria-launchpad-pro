@@ -141,6 +141,69 @@ Deno.serve(async (req) => {
         .update(updatePayload)
         .eq('id', contract.id)
 
+      // === CANONICAL LIFECYCLE SYNC: Sync intake + CRM + workspace ===
+      if (canonicalStatus === 'sent_for_signature' || canonicalStatus === 'completed') {
+        const { data: linkedIntake } = await supabase
+          .from('contract_intakes')
+          .select('id, status, funnel_item_id')
+          .eq('contract_id', contract.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (linkedIntake) {
+          if (canonicalStatus === 'sent_for_signature') {
+            await supabase.from('contract_intakes')
+              .update({ status: 'signature_sent' })
+              .eq('id', linkedIntake.id)
+            await supabase.from('intake_events').insert({
+              intake_id: linkedIntake.id,
+              event_type: 'lifecycle_sync_signature_sent',
+              from_status: linkedIntake.status,
+              to_status: 'signature_sent',
+              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
+            })
+          } else if (canonicalStatus === 'completed') {
+            // Transition through signed → activated
+            await supabase.from('contract_intakes')
+              .update({ status: 'signed' })
+              .eq('id', linkedIntake.id)
+            await supabase.from('intake_events').insert({
+              intake_id: linkedIntake.id,
+              event_type: 'lifecycle_sync_signed',
+              from_status: linkedIntake.status,
+              to_status: 'signed',
+              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
+            })
+            await supabase.from('contract_intakes')
+              .update({ status: 'activated' })
+              .eq('id', linkedIntake.id)
+            await supabase.from('intake_events').insert({
+              intake_id: linkedIntake.id,
+              event_type: 'lifecycle_sync_activated',
+              from_status: 'signed',
+              to_status: 'activated',
+              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
+            })
+
+            // Sync CRM macro stage
+            if (linkedIntake.funnel_item_id) {
+              await supabase.from('funnel_items')
+                .update({ stage: 'contracted' })
+                .eq('id', linkedIntake.funnel_item_id)
+            }
+          }
+        }
+
+        // Activate workspace on completion (canonical gate)
+        if (canonicalStatus === 'completed' && contract.workspace_id) {
+          await supabase.from('workspaces')
+            .update({ status: 'active' })
+            .eq('id', contract.workspace_id)
+            .in('status', ['pending', 'claimed', 'imported_unclaimed'])
+        }
+      }
+
       // ═══ AUDIT: Log lifecycle event with full payload ═══
       await supabase.from('contract_lifecycle_events').insert({
         contract_id: contract.id,
