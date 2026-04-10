@@ -1,0 +1,1 @@
+UPDATE startup_contracts SET archive_status = 'pending', archive_attempt_count = 0, last_archive_error = NULL WHERE id = '7d754944-e1d3-4da9-81bc-c3a767ac0c3f';
