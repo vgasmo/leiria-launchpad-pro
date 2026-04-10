@@ -164,12 +164,40 @@ async function archiveContract(
       throw new Error('No document_url — contract has no canonical PDF to archive');
     }
 
-    // Download the PDF
-    const pdfResponse = await fetch(contract.document_url);
-    if (!pdfResponse.ok) {
-      throw new Error(`Failed to download contract PDF: ${pdfResponse.status}`);
+    // Resolve document URL — may be a relative Storage path or a full URL
+    let documentUrl = contract.document_url;
+    if (!documentUrl.startsWith('http')) {
+      // It's a relative path in Supabase Storage (bucket: contract-documents)
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      // Try common bucket names
+      const bucketName = 'contract-documents';
+      documentUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${documentUrl}`;
+      log.info(`Resolved relative document_url to: ${documentUrl}`);
     }
-    const pdfBytes = new Uint8Array(await pdfResponse.arrayBuffer());
+
+    // Download the PDF
+    const pdfResponse = await fetch(documentUrl);
+    if (!pdfResponse.ok) {
+      // If public bucket fails, try with service role auth
+      if (pdfResponse.status === 400 || pdfResponse.status === 404) {
+        // Try downloading via Supabase Storage API with auth
+        const pathParts = contract.document_url.split('/');
+        const fileName = pathParts.pop()!;
+        const folder = pathParts.join('/');
+        const { data: fileData, error: dlError } = await supabase
+          .storage
+          .from('contract-documents')
+          .download(contract.document_url);
+        if (dlError || !fileData) {
+          throw new Error(`Failed to download contract PDF from storage: ${dlError?.message || 'unknown'}`);
+        }
+        var pdfBytes = new Uint8Array(await fileData.arrayBuffer());
+      } else {
+        throw new Error(`Failed to download contract PDF: ${pdfResponse.status}`);
+      }
+    } else {
+      var pdfBytes = new Uint8Array(await pdfResponse.arrayBuffer());
+    }
 
     // Compute SHA-256 checksum
     const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
