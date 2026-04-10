@@ -589,7 +589,8 @@
       "waitlistSuggestions": "Waitlist Suggestions",
       "workspaceBlocked": "Workspace blocked",
       "workspaceUnblocked": "Workspace unblocked",
-      "workspacesWithoutContracts": "Workspaces Without Contracts"
+      "workspacesWithoutContracts": "Workspaces Without Contracts",
+      "archiveAndBackups": "Archive & Backups"
     },
     "backofficeExtended": {
       "addSpace": "Add Space",
@@ -1345,7 +1346,14 @@
     "suggestedByDomain": "Startups matching domain {{domain}}:",
     "suggestedFromEmail": "Suggested from email",
     "trySearOrCreate": "Try searching manually or create a new workspace.",
-    "workspaceAssigned": "Workspace assigned and account approved!"
+    "workspaceAssigned": "Workspace assigned and account approved!",
+    "archive": {
+      "retryTriggered": "Archive retry triggered successfully",
+      "contractArchive": "Contract Archive — SharePoint",
+      "contractArchiveDesc": "Signed contracts are automatically archived to SharePoint 7 days after signing.",
+      "ecosystemSnapshots": "Ecosystem Snapshots",
+      "ecosystemSnapshotsDesc": "Periodic backups of the full ecosystem state for audit and recovery."
+    }
   },
   "adminKpis": {
     "cancel": "Cancel",
@@ -1764,7 +1772,10 @@
     "submitApplication": "Submeter Candidatura",
     "subtitle": "This platform is invite-only. Let's check if your startup is already set up in the system.",
     "title": "Verify your Startup",
-    "verifyCta": "Verify Now"
+    "verifyCta": "Verify Now",
+    "onboardingTitle": "Set up your workspace",
+    "onboardingDesc": "Complete the setup process to start using the platform.",
+    "startOnboarding": "Start setup"
   },
   "cockpit": {
     "actionTitle": "Action Title",
@@ -2147,7 +2158,12 @@
       "reviewPlaybook": "Review Playbook",
       "stageCoverage": "Stage Coverage",
       "stageCoverageDesc": "Playbook deployment and progress by startup stage",
-      "totalDeployments": "Total Deployments"
+      "totalDeployments": "Total Deployments",
+      "noDataTitle": "Playbook data not yet available",
+      "noDataDesc": "Playbook analytics will appear here when active deployments exist. Create and assign playbooks to startups to start collecting data.",
+      "comingSoon": "Under construction",
+      "futureFeatureTitle": "Feature under development",
+      "futureFeatureDesc": "When available, this section will show real usage metrics: completion rates, average duration, and coverage by startup stage. Data will be derived from actions and milestones linked to each playbook."
     },
     "powerfulQuestions": "Powerful Questions",
     "proTips": "Pro Tips",
@@ -2822,7 +2838,9 @@
     "viewAll": "View All",
     "viewSession": "View Session",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "bookingQuestionnaire": "Booking Questionnaire",
+    "meetingDate": "Meeting Date"
   },
   "dashboard": {
     "acrossPrograms": "Across {{count}} program",
@@ -3622,7 +3640,14 @@
       "titleDefault": "A sua startup está a ser preparada",
       "titleOnboarding": "Boas-vindas! A configurar o seu espaço",
       "titlePending": "Candidatura submetida",
-      "whatNext": "O que acontece a seguir?"
+      "whatNext": "O que acontece a seguir?",
+      "step1Pending": "The team is reviewing your application. Check your email for documentation requests.",
+      "step2Pending": "If documents are missing, you'll be contacted by email with specific instructions.",
+      "step3Pending": "After approval, you'll receive a notification to activate your workspace.",
+      "step1Claimed": "The team is verifying the association with your startup and the provided data.",
+      "step2Claimed": "You will need to sign the incubation contract before activation.",
+      "step3Claimed": "Your workspace will be activated after full validation and contract signing.",
+      "timelineNote": "Have questions? Contact the team via email or chat."
     },
     "youAreHere": "You are here"
   },
@@ -4597,7 +4622,8 @@
     "updateAvailability": "Update Availability",
     "viewConnectionRequests": "View Connection Requests",
     "welcomeTitle": "Welcome to the Mentor Panel",
-    "yourImpact": "Your Impact"
+    "yourImpact": "Your Impact",
+    "noteVisibility": "This note will be shared with the staff team."
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Issues or blockers identified...",
@@ -4689,7 +4715,9 @@
     "sendRequest": "Send Request",
     "sessions": "sessions",
     "whatToDiscuss": "What would you like to discuss?",
-    "yourBookings": "Your Bookings"
+    "yourBookings": "Your Bookings",
+    "declined": "Declined",
+    "pending": "Pending"
   },
   "mentorsPage": {
     "accept": "Accept",
