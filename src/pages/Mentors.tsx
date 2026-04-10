@@ -197,7 +197,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
               .in('id', founderUserIds)
           : { data: [] };
 
-        const profileMap = new Map(profiles?.map(p => [p.id, p as MentorProfile]));
+        const profileMap = new Map<string, MentorProfile>(profiles?.map(p => [p.id, p as MentorProfile]) || []);
 
         return data.map(conn => {
           const founderId = wsToFounder.get(conn.founder_id);
@@ -208,9 +208,9 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
             status: conn.status,
             message: conn.message,
             created_at: conn.created_at,
-            mentor: null,
-            founder: founderId ? profileMap.get(founderId) || null : null,
-          };
+            mentor: null as MentorProfile | null,
+            founder: (founderId ? profileMap.get(founderId) : null) || null,
+          } as MentorConnection;
         });
       }
     },
