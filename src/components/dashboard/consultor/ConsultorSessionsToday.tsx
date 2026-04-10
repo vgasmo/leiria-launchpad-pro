@@ -146,7 +146,7 @@ function AiBriefingButton({ workspaceId }: { workspaceId: string }) {
         )}
         {recap.next_best_actions?.length > 0 && (
           <div className="border-t pt-1.5 mt-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase">{t('consultor.aiBriefing.nextActions', { defaultValue: 'Next Actions' })}</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase">{t('consultor.aiBriefing.nextActions', { defaultValue: 'Próximas ações' })}</span>
             <ul className="text-xs space-y-0.5 mt-0.5">
               {recap.next_best_actions.slice(0, 2).map((a, i) => (
                 <li key={i} className="text-muted-foreground">→ {a}</li>
