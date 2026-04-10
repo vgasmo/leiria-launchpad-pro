@@ -64,7 +64,7 @@ export function FounderDashboard({
 
   const handleRestoreChecklist = () => {
     restoreChecklist();
-    toast.success(t('checklistRecovery.restored', { defaultValue: 'Checklist restored' }));
+    toast.success(t('checklistRecovery.restored', { defaultValue: 'Checklist reposta com sucesso' }));
   };
 
   useEffect(() => {
@@ -297,7 +297,7 @@ export function FounderDashboard({
             className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
           >
             <RotateCcw className="h-3 w-3" />
-            {t('checklistRecovery.restoreChecklist', { defaultValue: 'Show onboarding checklist' })}
+            {t('checklistRecovery.restoreChecklist', { defaultValue: 'Mostrar checklist de integração' })}
           </Button>
         </div>
       )}

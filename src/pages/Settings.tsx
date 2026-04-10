@@ -57,7 +57,7 @@ export default function Settings() {
 
   const handleRestoreChecklist = () => {
     restoreChecklist();
-    toast.success(t('checklistRecovery.restored', 'Checklist restored'));
+    toast.success(t('checklistRecovery.restored', 'Checklist reposta com sucesso'));
   };
   const initials = profile?.full_name
     ?.split(' ')
