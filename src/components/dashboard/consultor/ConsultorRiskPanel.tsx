@@ -122,7 +122,7 @@ export const ConsultorRiskPanel = memo(function ConsultorRiskPanel({ riskItems, 
                       }}
                     >
                       <Target className="h-3 w-3 mr-1" />
-                      {t('consultor.reviewMilestone', { defaultValue: 'Review' })}
+                      {t('consultor.reviewMilestone', { defaultValue: 'Rever marcos' })}
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -134,7 +134,7 @@ export const ConsultorRiskPanel = memo(function ConsultorRiskPanel({ riskItems, 
                       }}
                     >
                       <MessageSquare className="h-3 w-3 mr-1" />
-                      {t('consultor.nudgeFounder', { defaultValue: 'Nudge' })}
+                      {t('consultor.nudgeFounder', { defaultValue: 'Agendar sessão' })}
                     </Button>
                   </div>
                 </CardContent>
