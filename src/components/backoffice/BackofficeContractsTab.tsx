@@ -183,7 +183,7 @@ export function BackofficeContractsTab() {
           workspace_id: workspaceId,
           incubation_type_id: bulkIncubationType || null,
           building_id: bulkBuilding || null,
-          status: 'active',
+          status: 'draft',
           start_date: new Date().toISOString().split('T')[0],
           monthly_fee: selectedType?.base_monthly_fee || 0,
         });
