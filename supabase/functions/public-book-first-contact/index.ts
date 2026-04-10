@@ -373,6 +373,15 @@ serve(async (req) => {
       funnelItemId = existingLead[0].id;
     } else {
       // === ORIGINAL: Create new funnel item (only if no existing lead) ===
+      // Build metadata from questionnaire fields
+      const bookingMetadata: Record<string, unknown> = {};
+      if (contact.sector) bookingMetadata.sector = contact.sector;
+      if (contact.stage) bookingMetadata.startup_stage = contact.stage;
+      if (contact.referral_source) bookingMetadata.referral_source = contact.referral_source;
+      if (contact.has_team) bookingMetadata.has_team = contact.has_team;
+      bookingMetadata.booking_date = `${slot.date}T${slot.time}:00`;
+      bookingMetadata.booking_source = 'public_form';
+
       const { data: funnelItem, error: funnelError } = await supabase
         .from("funnel_items")
         .insert({
@@ -387,6 +396,7 @@ serve(async (req) => {
           program_id: programId,
           owner_consultant_id: consultantId,
           first_contact_at: `${slot.date}T${slot.time}:00`,
+          metadata_json: bookingMetadata,
         })
         .select()
         .single();
