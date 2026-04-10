@@ -36,6 +36,7 @@ import { InfrastructureTab } from '@/components/backoffice/InfrastructureTab';
 import { SpaceOperationsConsole } from '@/components/backoffice/SpaceOperationsConsole';
 import { OpsActionPrompts } from '@/components/backoffice/OpsActionPrompts';
 import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
+import { AdminArchiveBackupTab } from '@/components/admin/AdminArchiveBackupTab';
 
 const STAGES: StartupStage[] = ['ideation', 'validation', 'mvp', 'growth', 'scale'];
 const PRIORITY_LEVELS: WorkspacePriority[] = ['star', 'high', 'standard', 'maintenance'];
@@ -66,7 +67,7 @@ export function AdminBackoffice() {
   // Support deep-linking via ?subtab= URL param (fallback to legacy ?tab=)
   const urlParams = new URLSearchParams(window.location.search);
   const urlSubTab = urlParams.get('subtab') || urlParams.get('tab');
-  const [activeSubTab, setActiveSubTab] = useState(urlSubTab && ['dashboard', 'overview', 'contracts', 'invoices', 'incubation', 'spaces', 'operations', 'infrastructure'].includes(urlSubTab) ? (urlSubTab === 'operations' || urlSubTab === 'infrastructure' ? 'spaces' : urlSubTab) : 'dashboard');
+  const [activeSubTab, setActiveSubTab] = useState(urlSubTab && ['dashboard', 'overview', 'contracts', 'invoices', 'incubation', 'spaces', 'operations', 'infrastructure', 'archive'].includes(urlSubTab) ? (urlSubTab === 'operations' || urlSubTab === 'infrastructure' ? 'spaces' : urlSubTab) : 'dashboard');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -374,6 +375,10 @@ export function AdminBackoffice() {
           <TabsTrigger value="incubation" className="gap-1.5">
             <Package className="h-4 w-4" />
             {t('admin.backoffice.incubationTypes', { defaultValue: 'Tipos de Incubação' })}
+          </TabsTrigger>
+          <TabsTrigger value="archive" className="gap-1.5">
+            <Archive className="h-4 w-4" />
+            {t('admin.backoffice.archiveAndBackups', { defaultValue: 'Arquivo & Backups' })}
           </TabsTrigger>
         </TabsList>
 
@@ -786,6 +791,11 @@ export function AdminBackoffice() {
         {/* Incubation Types Tab */}
         <TabsContent value="incubation">
           <BackofficeIncubationTypesTab />
+        </TabsContent>
+
+        {/* Archive & Backups Tab */}
+        <TabsContent value="archive">
+          <AdminArchiveBackupTab />
         </TabsContent>
       </Tabs>
     </div>
