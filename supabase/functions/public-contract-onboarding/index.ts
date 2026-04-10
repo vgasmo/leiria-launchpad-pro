@@ -10,6 +10,7 @@
  * the contract's `signature_provider` field. Never assumes a default provider.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { syncIntakeOnSent, syncIntakeOnCompleted } from '../_shared/lifecycleSync.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
