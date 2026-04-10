@@ -103,12 +103,18 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
     message = contact.message.trim() || undefined;
   }
 
+  // Extract questionnaire fields (optional, no strict validation needed)
+  const sector = typeof contact.sector === 'string' ? contact.sector.trim().slice(0, 100) : undefined;
+  const stage = typeof contact.stage === 'string' ? contact.stage.trim().slice(0, 100) : undefined;
+  const referral_source = typeof contact.referral_source === 'string' ? contact.referral_source.trim().slice(0, 100) : undefined;
+  const has_team = typeof contact.has_team === 'string' ? contact.has_team.trim().slice(0, 20) : undefined;
+
   return {
     valid: true,
     data: {
       token: req.token as string,
       slot: { date: slot.date as string, time: slot.time as string },
-      contact: { name: (contact.name as string).trim(), email, phone, organization, message },
+      contact: { name: (contact.name as string).trim(), email, phone, organization, message, sector, stage, referral_source, has_team },
     },
   };
 }
