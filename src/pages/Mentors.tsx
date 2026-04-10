@@ -122,38 +122,97 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
     queryFn: async (): Promise<MentorConnection[]> => {
       if (!userId) return [];
 
-      const column = role === 'founder' ? 'founder_id' : 'mentor_id';
-      const { data, error } = await supabase
-        .from('mentor_connections')
-        .select('*')
-        .eq(column, userId)
-        .order('created_at', { ascending: false });
+      // For founders: query by founder_id (which is actually workspace_id)
+      // We need the founder's workspace IDs first
+      let column: string;
+      if (role === 'founder') {
+        // Get founder's workspace IDs, then query connections by those
+        const { data: wsData } = await supabase
+          .from('workspace_users')
+          .select('workspace_id')
+          .eq('user_id', userId)
+          .eq('role', 'founder')
+          .eq('active', true);
+        
+        const wsIds = wsData?.map(w => w.workspace_id) || [];
+        if (wsIds.length === 0) return [];
 
-      if (error) throw error;
-      if (!data) return [];
+        const { data, error } = await supabase
+          .from('mentor_connections')
+          .select('*')
+          .in('founder_id', wsIds) // founder_id = workspace_id
+          .order('created_at', { ascending: false });
 
-      const otherColumn = role === 'founder' ? 'mentor_id' : 'founder_id';
-      const otherIds = data.map(c => (c as any)[otherColumn]) as string[];
+        if (error) throw error;
+        if (!data?.length) return [];
 
-      if (otherIds.length === 0) return data as MentorConnection[];
+        // Look up mentor profiles
+        const mentorIds = [...new Set(data.map(c => c.mentor_id))];
+        const { data: profiles } = await supabase
+          .from('profiles_safe')
+          .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
+          .in('id', mentorIds);
 
-      const { data: profiles } = await supabase
-        .from('profiles_safe')
-        .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
-        .in('id', otherIds);
+        const profileMap = new Map(profiles?.map(p => [p.id, p as MentorProfile]));
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p as MentorProfile]));
+        return data.map(conn => ({
+          id: conn.id,
+          founder_id: conn.founder_id,
+          mentor_id: conn.mentor_id,
+          status: conn.status,
+          message: conn.message,
+          created_at: conn.created_at,
+          mentor: profileMap.get(conn.mentor_id) || null,
+          founder: null,
+        }));
+      } else {
+        // Mentor view: query by mentor_id
+        const { data, error } = await supabase
+          .from('mentor_connections')
+          .select('*')
+          .eq('mentor_id', userId)
+          .order('created_at', { ascending: false });
 
-      return data.map(conn => ({
-        id: conn.id,
-        founder_id: conn.founder_id,
-        mentor_id: conn.mentor_id,
-        status: conn.status,
-        message: conn.message,
-        created_at: conn.created_at,
-        mentor: role === 'founder' ? profileMap.get(conn.mentor_id) || null : null,
-        founder: role === 'mentor' ? profileMap.get(conn.founder_id) || null : null,
-      })) as MentorConnection[];
+        if (error) throw error;
+        if (!data?.length) return [];
+
+        // founder_id is actually workspace_id — resolve to founder profiles via workspace_users
+        const workspaceIds = [...new Set(data.map(c => c.founder_id))];
+        const { data: wsFounders } = await supabase
+          .from('workspace_users')
+          .select('workspace_id, user_id')
+          .in('workspace_id', workspaceIds)
+          .eq('role', 'founder')
+          .eq('active', true);
+
+        const founderUserIds = [...new Set(wsFounders?.map(f => f.user_id) || [])];
+        const wsToFounder = new Map<string, string>();
+        wsFounders?.forEach(f => {
+          if (!wsToFounder.has(f.workspace_id)) wsToFounder.set(f.workspace_id, f.user_id);
+        });
+
+        const { data: profiles } = founderUserIds.length > 0
+          ? await supabase.from('profiles_safe')
+              .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
+              .in('id', founderUserIds)
+          : { data: [] };
+
+        const profileMap = new Map(profiles?.map(p => [p.id, p as MentorProfile]));
+
+        return data.map(conn => {
+          const founderId = wsToFounder.get(conn.founder_id);
+          return {
+            id: conn.id,
+            founder_id: conn.founder_id,
+            mentor_id: conn.mentor_id,
+            status: conn.status,
+            message: conn.message,
+            created_at: conn.created_at,
+            mentor: null,
+            founder: founderId ? profileMap.get(founderId) || null : null,
+          };
+        });
+      }
     },
     enabled: !!userId,
   });
