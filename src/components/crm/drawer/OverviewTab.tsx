@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -366,12 +366,102 @@ export function OverviewTab({
         </div>
       </div>
 
+      {/* Booking Questionnaire Data */}
+      <BookingQuestionnaireSection item={item} />
+
       {item.notes && (
         <div className="pt-3 border-t">
           <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('crm.notes')}</p>
           <p className="text-sm whitespace-pre-wrap">{item.notes}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+const SECTOR_LABELS: Record<string, string> = {
+  healthtech: 'HealthTech',
+  edtech: 'EdTech',
+  fintech: 'Fintech',
+  saas: 'SaaS / Software',
+  ecommerce: 'E-commerce / Marketplace',
+  cleantech: 'CleanTech / Sustainability',
+  foodtech: 'FoodTech / AgriTech',
+  manufacturing: 'Indústria / Manufatura',
+  social_impact: 'Impacto Social',
+  other: 'Outro',
+};
+
+const STAGE_LABELS_BOOKING: Record<string, string> = {
+  idea: 'Ideia / Conceito',
+  mvp: 'MVP / Protótipo',
+  early_revenue: 'Early Revenue',
+  growth: 'Growth / Escala',
+};
+
+const REFERRAL_LABELS: Record<string, string> = {
+  referral: 'Recomendação',
+  event: 'Evento',
+  social_media: 'Redes Sociais',
+  website: 'Website',
+  press: 'Imprensa / Media',
+  other: 'Outro',
+};
+
+const TEAM_LABELS: Record<string, string> = {
+  yes: 'Sim',
+  no: 'Não',
+  forming: 'Em formação',
+};
+
+function BookingQuestionnaireSection({ item }: { item: FunnelItem }) {
+  const { t } = useTranslation();
+  const metadata = ((item as any).metadata_json && typeof (item as any).metadata_json === 'object')
+    ? (item as any).metadata_json
+    : {};
+
+  const hasBookingData = metadata.sector || metadata.startup_stage || metadata.referral_source || metadata.has_team;
+
+  if (!hasBookingData) return null;
+
+  return (
+    <div className="space-y-2 pt-3 border-t">
+      <p className="text-xs font-medium text-muted-foreground uppercase mb-2 flex items-center gap-1.5">
+        <Calendar className="h-3.5 w-3.5" />
+        {t('crm.bookingQuestionnaire', { defaultValue: 'Questionário de Primeiro Contacto' })}
+      </p>
+      <div className="grid gap-2">
+        {metadata.sector && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('publicBooking.sector', { defaultValue: 'Setor' })}</span>
+            <span>{SECTOR_LABELS[metadata.sector] || metadata.sector}</span>
+          </div>
+        )}
+        {metadata.startup_stage && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('publicBooking.stage', { defaultValue: 'Fase' })}</span>
+            <span>{STAGE_LABELS_BOOKING[metadata.startup_stage] || metadata.startup_stage}</span>
+          </div>
+        )}
+        {metadata.referral_source && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('publicBooking.referralSource', { defaultValue: 'Como nos conheceu' })}</span>
+            <span>{REFERRAL_LABELS[metadata.referral_source] || metadata.referral_source}</span>
+          </div>
+        )}
+        {metadata.has_team && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('publicBooking.hasTeam', { defaultValue: 'Tem equipa' })}</span>
+            <span>{TEAM_LABELS[metadata.has_team] || metadata.has_team}</span>
+          </div>
+        )}
+        {metadata.booking_date && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('crm.meetingDate', { defaultValue: 'Data da reunião' })}</span>
+            <span>{new Date(metadata.booking_date).toLocaleString('pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
