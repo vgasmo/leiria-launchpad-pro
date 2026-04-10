@@ -177,14 +177,15 @@ function ContractArchiveStatus() {
                         </a>
                       </Button>
                     )}
-                    {contract.archive_status === 'failed' && (contract.archive_attempt_count || 0) < 5 && (
+                    {(contract.archive_status === 'failed' || contract.archive_status === 'pending' || !contract.archive_status) && (contract.archive_attempt_count || 0) < 5 && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => retryMutation.mutate(contract.id)}
                         disabled={retryMutation.isPending}
+                        title={contract.archive_status === 'failed' ? 'Re-tentar' : 'Arquivar agora'}
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        {retryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       </Button>
                     )}
                   </div>
