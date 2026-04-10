@@ -1,5 +1,5 @@
 /**
- * PandaDoc Webhook Handler — Hardened V1 (Fail-Closed)
+ * PandaDoc Webhook Handler — Hardened V2 (Canonical Sync)
  * 
  * Security:
  * 1. REJECTS requests when PANDADOC_WEBHOOK_KEY is missing (fail-closed)
@@ -8,8 +8,10 @@
  * 4. Stores provider event payloads for auditability
  * 
  * Maps PandaDoc events → canonical internal signature states.
+ * Uses shared lifecycleSync for intake/CRM/workspace orchestration.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { syncIntakeOnSent, syncIntakeOnCompleted } from '../_shared/lifecycleSync.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,19 +39,15 @@ const PANDADOC_STATUS_MAP: Record<string, string> = {
 
 /**
  * Verify PandaDoc webhook authenticity — FAIL-CLOSED.
- * Returns { ok: true } on success, { ok: false, reason: string } on failure.
  */
 function verifyWebhookAuthenticity(body: any, req: Request): { ok: boolean; reason?: string } {
   const webhookKey = Deno.env.get('PANDADOC_WEBHOOK_KEY')
   
-  // FAIL-CLOSED: If secret is not configured, reject ALL requests
   if (!webhookKey) {
     console.error('PANDADOC_WEBHOOK_KEY not configured — REJECTING request (fail-closed policy)')
     return { ok: false, reason: 'Webhook secret not configured — cannot verify authenticity' }
   }
 
-  // PandaDoc sends the shared key in the payload as 'shared_key' field
-  // or in the Authorization header
   const payloadKey = body?.shared_key || null
   const headerKey = req.headers.get('x-pandadoc-signature') || req.headers.get('authorization')?.replace('Bearer ', '') || null
 
@@ -82,7 +80,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // PandaDoc webhook payload structure
     const events = Array.isArray(body) ? body : [body]
 
     for (const event of events) {
@@ -141,67 +138,11 @@ Deno.serve(async (req) => {
         .update(updatePayload)
         .eq('id', contract.id)
 
-      // === CANONICAL LIFECYCLE SYNC: Sync intake + CRM + workspace ===
-      if (canonicalStatus === 'sent_for_signature' || canonicalStatus === 'completed') {
-        const { data: linkedIntake } = await supabase
-          .from('contract_intakes')
-          .select('id, status, funnel_item_id')
-          .eq('contract_id', contract.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        if (linkedIntake) {
-          if (canonicalStatus === 'sent_for_signature') {
-            await supabase.from('contract_intakes')
-              .update({ status: 'signature_sent' })
-              .eq('id', linkedIntake.id)
-            await supabase.from('intake_events').insert({
-              intake_id: linkedIntake.id,
-              event_type: 'lifecycle_sync_signature_sent',
-              from_status: linkedIntake.status,
-              to_status: 'signature_sent',
-              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
-            })
-          } else if (canonicalStatus === 'completed') {
-            // Transition through signed → activated
-            await supabase.from('contract_intakes')
-              .update({ status: 'signed' })
-              .eq('id', linkedIntake.id)
-            await supabase.from('intake_events').insert({
-              intake_id: linkedIntake.id,
-              event_type: 'lifecycle_sync_signed',
-              from_status: linkedIntake.status,
-              to_status: 'signed',
-              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
-            })
-            await supabase.from('contract_intakes')
-              .update({ status: 'activated' })
-              .eq('id', linkedIntake.id)
-            await supabase.from('intake_events').insert({
-              intake_id: linkedIntake.id,
-              event_type: 'lifecycle_sync_activated',
-              from_status: 'signed',
-              to_status: 'activated',
-              metadata: { source: 'pandadoc_webhook', contract_id: contract.id, event: eventName },
-            })
-
-            // Sync CRM macro stage
-            if (linkedIntake.funnel_item_id) {
-              await supabase.from('funnel_items')
-                .update({ stage: 'contracted' })
-                .eq('id', linkedIntake.funnel_item_id)
-            }
-          }
-        }
-
-        // Activate workspace on completion (canonical gate)
-        if (canonicalStatus === 'completed' && contract.workspace_id) {
-          await supabase.from('workspaces')
-            .update({ status: 'active' })
-            .eq('id', contract.workspace_id)
-            .in('status', ['pending', 'claimed', 'imported_unclaimed'])
-        }
+      // === CANONICAL LIFECYCLE SYNC (shared helper) ===
+      if (canonicalStatus === 'sent_for_signature') {
+        await syncIntakeOnSent(supabase, contract.id, null, `pandadoc_webhook_${eventName}`)
+      } else if (canonicalStatus === 'completed') {
+        await syncIntakeOnCompleted(supabase, contract.id, contract.workspace_id, null, `pandadoc_webhook_${eventName}`)
       }
 
       // ═══ AUDIT: Log lifecycle event with full payload ═══
