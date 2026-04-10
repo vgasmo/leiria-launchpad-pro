@@ -366,6 +366,9 @@ export function OverviewTab({
         </div>
       </div>
 
+      {/* Booking Questionnaire Data */}
+      <BookingQuestionnaireSection item={item} />
+
       {item.notes && (
         <div className="pt-3 border-t">
           <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('crm.notes')}</p>
