@@ -1,7 +1,9 @@
 /**
  * FirstContactPrepSheet — Read-only prep sheet for consultant first-contact meetings.
  * Grounded in existing workspace/startup data. Degrades gracefully when data is missing.
- * No AI backend required — uses mocked/computed suggestions.
+ * 
+ * IMPORTANT: Discovery questions, risk flags, and next steps are computed heuristics
+ * based on available data — they are assistive guidance, not authoritative truth.
  */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -288,8 +290,8 @@ export function FirstContactPrepSheet({ open, onOpenChange, workspaceId }: First
 
                 <Separator />
 
-                {/* Discovery Questions */}
-                <Section icon={Lightbulb} title="Perguntas de descoberta">
+                {/* Discovery Questions — assistive, not authoritative */}
+                <Section icon={Lightbulb} title="Perguntas sugeridas (orientação)">
                   <Card className="rounded-lg">
                     <CardContent className="pt-3 pb-2">
                       <ol className="space-y-1.5">
@@ -322,9 +324,9 @@ export function FirstContactPrepSheet({ open, onOpenChange, workspaceId }: First
                   </Section>
                 )}
 
-                {/* Risks */}
+                {/* Risks — computed heuristic */}
                 {risks.length > 0 && (
-                  <Section icon={AlertTriangle} title="Riscos / Pontos cegos">
+                  <Section icon={AlertTriangle} title="Pontos de atenção (estimativa)">
                     <Card className="rounded-lg border-red-200 dark:border-red-900 bg-red-50/30 dark:bg-red-950/10">
                       <CardContent className="pt-3 pb-2">
                         <ul className="space-y-1.5">
@@ -364,7 +366,7 @@ export function FirstContactPrepSheet({ open, onOpenChange, workspaceId }: First
                 </Section>
 
                 {/* Next Steps */}
-                <Section icon={ArrowRight} title="Próximos passos recomendados">
+                <Section icon={ArrowRight} title="Sugestões de próximos passos">
                   <Card className="rounded-lg bg-primary/5 border-primary/20">
                     <CardContent className="pt-3 pb-2">
                       <ul className="space-y-1.5">

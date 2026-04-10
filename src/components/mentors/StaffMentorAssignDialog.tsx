@@ -78,11 +78,12 @@ export function StaffMentorAssignDialog({
       if (reqError) throw reqError;
 
       // Create a mentor connection record
+      // Note: mentor_connections.founder_id stores workspace_id for connection tracking
       const { error: connError } = await supabase
         .from('mentor_connections')
         .upsert({
           mentor_id: selectedMentorId,
-          founder_id: workspaceId, // Note: This is actually workspace_id, schema might need adjustment
+          founder_id: workspaceId, // workspace_id used as connection anchor
           status: 'connected',
           responded_at: new Date().toISOString(),
         }, {
@@ -112,7 +113,7 @@ export function StaffMentorAssignDialog({
             {t('mentors.assignMentor', 'Assign Mentor')}
           </DialogTitle>
           <DialogDescription>
-            {t('mentors.assignMentorDesc', 'Select a mentor to assign to this workspace. They will be added as an external mentor with full access.')}
+            {t('mentors.assignMentorDesc', 'Selecione um mentor para associar a este workspace. Será adicionado como mentor externo com acesso de leitura às notas e sessões.')}
           </DialogDescription>
         </DialogHeader>
 

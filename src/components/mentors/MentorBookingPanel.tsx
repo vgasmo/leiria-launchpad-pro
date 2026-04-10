@@ -30,6 +30,9 @@ interface MentorBookingPanelProps {
   mode: 'founder' | 'mentor';
 }
 
+const DAYS_OF_WEEK_PT: Record<number, string> = {
+  0: 'Domingo', 1: 'Segunda', 2: 'Terça', 3: 'Quarta', 4: 'Quinta', 5: 'Sexta', 6: 'Sábado'
+};
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export function MentorBookingPanel({ 
@@ -221,7 +224,7 @@ export function MentorBookingPanel({
                 <div className="flex flex-wrap gap-2">
                   {[...new Set(availability.map(a => a.day_of_week))].sort().map(day => (
                     <Badge key={day} variant="secondary">
-                      {DAYS_OF_WEEK[day]}
+                      {DAYS_OF_WEEK_PT[day] || DAYS_OF_WEEK[day]}
                     </Badge>
                   ))}
                 </div>
@@ -249,7 +252,9 @@ export function MentorBookingPanel({
                           booking.status === 'accepted' ? 'default' :
                           booking.status === 'declined' ? 'destructive' : 'secondary'
                         }>
-                          {booking.status}
+                          {booking.status === 'accepted' ? t('mentors.confirmed', 'Confirmado') :
+                           booking.status === 'declined' ? t('mentors.declined', 'Recusado') :
+                           t('mentors.pending', 'Pendente')}
                         </Badge>
                       </div>
                     ))}

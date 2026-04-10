@@ -61,6 +61,10 @@ export function QuickNoteDialog({ open, onOpenChange, workspaceId, startupName }
             {startupName && <span className="text-muted-foreground font-normal text-sm">— {startupName}</span>}
           </DialogTitle>
         </DialogHeader>
+        <div className="text-xs text-muted-foreground flex items-center gap-1 -mt-2 mb-2">
+          <StickyNote className="h-3 w-3" />
+          {t('mentor.noteVisibility', { defaultValue: 'Esta nota será visível para a equipa de staff.' })}
+        </div>
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
