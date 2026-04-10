@@ -28,6 +28,10 @@ interface BookingRequest {
     phone?: string;
     organization?: string;
     message?: string;
+    sector?: string;
+    stage?: string;
+    referral_source?: string;
+    has_team?: string;
   };
 }
 
