@@ -59,22 +59,6 @@ function ContractArchiveStatus() {
     },
   });
 
-  const statusBadge = (status: string | null, attempts: number) => {
-    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Arquivado</Badge>;
-    if (status === 'uploading') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />A enviar</Badge>;
-    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Falhou ({attempts}x)</Badge>;
-    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
-  };
-
-  const stats = {
-    total: archivedContracts?.length || 0,
-    completed: archivedContracts?.filter(c => c.archive_status === 'completed').length || 0,
-    failed: archivedContracts?.filter(c => c.archive_status === 'failed').length || 0,
-    pending: archivedContracts?.filter(c => !c.archive_status || c.archive_status === null).length || 0,
-  };
-
-  if (isLoading) return <Skeleton className="h-48 w-full" />;
-
   const runAllMutation = useMutation({
     mutationFn: async () => {
       const { data, error } = await invokeWithAuth('archive-contracts-to-sharepoint', {
@@ -93,6 +77,22 @@ function ContractArchiveStatus() {
       toast.error(err?.message || 'Erro ao executar arquivo');
     },
   });
+
+  const statusBadge = (status: string | null, attempts: number) => {
+    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Arquivado</Badge>;
+    if (status === 'uploading') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />A enviar</Badge>;
+    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Falhou ({attempts}x)</Badge>;
+    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
+  };
+
+  const stats = {
+    total: archivedContracts?.length || 0,
+    completed: archivedContracts?.filter(c => c.archive_status === 'completed').length || 0,
+    failed: archivedContracts?.filter(c => c.archive_status === 'failed').length || 0,
+    pending: archivedContracts?.filter(c => !c.archive_status || c.archive_status === null).length || 0,
+  };
+
+  if (isLoading) return <Skeleton className="h-48 w-full" />;
 
   return (
     <Card>
