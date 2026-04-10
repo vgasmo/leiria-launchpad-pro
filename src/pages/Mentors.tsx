@@ -122,7 +122,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
     queryFn: async (): Promise<MentorConnection[]> => {
       if (!userId) return [];
 
-      // For founders: query by founder_id (which is actually workspace_id)
+      // For founders: query by workspace_id (canonical column)
       // We need the founder's workspace IDs first
       let column: string;
       if (role === 'founder') {
@@ -140,7 +140,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
         const { data, error } = await supabase
           .from('mentor_connections')
           .select('*')
-          .in('founder_id', wsIds) // founder_id = workspace_id
+          .in('workspace_id', wsIds)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -176,8 +176,8 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
         if (error) throw error;
         if (!data?.length) return [];
 
-        // founder_id is actually workspace_id — resolve to founder profiles via workspace_users
-        const workspaceIds = [...new Set(data.map(c => c.founder_id))];
+        // workspace_id is the canonical column — resolve to founder profiles via workspace_users
+        const workspaceIds = [...new Set(data.map(c => c.workspace_id || c.founder_id))];
         const { data: wsFounders } = await supabase
           .from('workspace_users')
           .select('workspace_id, user_id')
@@ -200,7 +200,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
         const profileMap = new Map<string, MentorProfile>((profiles || []).map(p => [p.id, p as MentorProfile] as [string, MentorProfile]));
 
         return data.map(conn => {
-          const founderId = wsToFounder.get(conn.founder_id);
+          const founderId = wsToFounder.get(conn.workspace_id || conn.founder_id);
           return {
             id: conn.id,
             founder_id: conn.founder_id,

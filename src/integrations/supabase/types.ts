@@ -3087,6 +3087,7 @@ export type Database = {
           responded_at: string | null
           status: string
           updated_at: string
+          workspace_id: string | null
         }
         Insert: {
           created_at?: string
@@ -3097,6 +3098,7 @@ export type Database = {
           responded_at?: string | null
           status?: string
           updated_at?: string
+          workspace_id?: string | null
         }
         Update: {
           created_at?: string
@@ -3107,6 +3109,7 @@ export type Database = {
           responded_at?: string | null
           status?: string
           updated_at?: string
+          workspace_id?: string | null
         }
         Relationships: []
       }

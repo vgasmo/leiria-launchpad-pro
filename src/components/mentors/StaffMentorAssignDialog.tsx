@@ -77,13 +77,13 @@ export function StaffMentorAssignDialog({
 
       if (reqError) throw reqError;
 
-      // Create a mentor connection record
-      // Note: mentor_connections.founder_id stores workspace_id for connection tracking
+      // Create a mentor connection record with proper workspace_id semantics
       const { error: connError } = await supabase
         .from('mentor_connections')
         .upsert({
           mentor_id: selectedMentorId,
-          founder_id: workspaceId, // workspace_id used as connection anchor
+          founder_id: workspaceId, // kept for unique constraint compatibility
+          workspace_id: workspaceId, // canonical workspace reference
           status: 'connected',
           responded_at: new Date().toISOString(),
         }, {

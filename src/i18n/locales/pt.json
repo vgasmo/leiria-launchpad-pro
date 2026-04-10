@@ -589,7 +589,8 @@
       "waitlistSuggestions": "Sugestões da Lista de Espera",
       "workspaceBlocked": "Workspace bloqueado",
       "workspaceUnblocked": "Workspace desbloqueado",
-      "workspacesWithoutContracts": "Workspaces Sem Contratos"
+      "workspacesWithoutContracts": "Workspaces Sem Contratos",
+      "archiveAndBackups": "Arquivo e Backups"
     },
     "backofficeExtended": {
       "addSpace": "Adicionar Espaço",
@@ -1345,7 +1346,14 @@
     "suggestedByDomain": "Startups com correspondência ao domínio {{domain}}:",
     "suggestedFromEmail": "Sugerido a partir do email",
     "trySearOrCreate": "Tente pesquisar manualmente ou criar um novo workspace.",
-    "workspaceAssigned": "Workspace atribuído e conta aprovada!"
+    "workspaceAssigned": "Workspace atribuído e conta aprovada!",
+    "archive": {
+      "retryTriggered": "Arquivo re-tentado com sucesso",
+      "contractArchive": "Arquivo de Contratos — SharePoint",
+      "contractArchiveDesc": "Contratos assinados são arquivados automaticamente no SharePoint 7 dias após a assinatura.",
+      "ecosystemSnapshots": "Snapshots do Ecossistema",
+      "ecosystemSnapshotsDesc": "Backups periódicos do estado completo do ecossistema para auditoria e recuperação."
+    }
   },
   "adminKpis": {
     "cancel": "Cancelar",
@@ -1750,7 +1758,7 @@
     "orSubmitNew": "Ou, se preferir, pode submeter uma candidatura de nova startup:",
     "pendingDesc": "Não encontrámos uma correspondência automática, mas a sua equipa irá analisar e associá-lo manualmente. Isto é normal no modelo por convite.",
     "pendingReassurance": "Não precisa de fazer mais nada. Receberá acesso assim que a equipa confirmar.",
-    "pendingTiming": "Este processo é geralmente concluído em poucos dias úteis.",
+    "pendingTiming": "A equipa irá analisar o seu pedido e contactá-lo(a) por email com o resultado.",
     "pendingTitle": "Pedido em Análise",
     "redirecting": "A redirecionar para o seu espaço de trabalho...",
     "rejected": "Pedido rejeitado",
@@ -1764,7 +1772,10 @@
     "submitApplication": "Submeter Candidatura",
     "subtitle": "Esta plataforma é apenas por convite. Vamos verificar se a sua startup já está preparada no sistema.",
     "title": "Verificar a sua Startup",
-    "verifyCta": "Verificar Agora"
+    "verifyCta": "Verificar Agora",
+    "onboardingTitle": "Configurar o seu workspace",
+    "onboardingDesc": "Complete o processo de configuração para começar a utilizar a plataforma.",
+    "startOnboarding": "Iniciar configuração"
   },
   "cockpit": {
     "actionTitle": "Título da Ação",
@@ -2147,7 +2158,12 @@
       "reviewPlaybook": "Rever Playbook",
       "stageCoverage": "Cobertura por Fase",
       "stageCoverageDesc": "Implementação e progresso dos playbooks por fase da startup",
-      "totalDeployments": "Total de Implementações"
+      "totalDeployments": "Total de Implementações",
+      "noDataTitle": "Dados de playbooks ainda não disponíveis",
+      "noDataDesc": "As analytics de playbooks serão apresentadas aqui quando existirem deployments ativos. Crie e atribua playbooks a startups para começar a recolher dados.",
+      "comingSoon": "Em construção",
+      "futureFeatureTitle": "Funcionalidade em desenvolvimento",
+      "futureFeatureDesc": "Quando disponível, esta secção mostrará métricas reais de utilização: taxas de conclusão, duração média, e cobertura por fase de startup. Os dados serão derivados das ações e milestones associados a cada playbook."
     },
     "powerfulQuestions": "Perguntas Poderosas",
     "proTips": "Dicas Profissionais",
@@ -2822,7 +2838,9 @@
     "viewAll": "Ver Tudo",
     "viewSession": "Ver Sessão",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "bookingQuestionnaire": "Questionário de Marcação",
+    "meetingDate": "Data da Reunião"
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -3622,7 +3640,14 @@
       "titleDefault": "A sua startup está a ser preparada",
       "titleOnboarding": "Boas-vindas! A configurar o seu espaço",
       "titlePending": "Candidatura submetida",
-      "whatNext": "O que acontece a seguir?"
+      "whatNext": "O que acontece a seguir?",
+      "step1Pending": "A equipa está a analisar a sua candidatura. Verifique o seu email para pedidos de documentação.",
+      "step2Pending": "Se faltarem documentos, será contactado(a) por email com instruções específicas.",
+      "step3Pending": "Após aprovação, receberá uma notificação para ativar o seu workspace.",
+      "step1Claimed": "A equipa está a verificar a associação com a startup e os dados fornecidos.",
+      "step2Claimed": "Será necessário assinar o contrato de incubação antes da ativação.",
+      "step3Claimed": "O workspace será ativado após validação completa e contrato assinado.",
+      "timelineNote": "Tem dúvidas? Contacte a equipa pelo email ou pelo chat."
     },
     "youAreHere": "You are here"
   },
@@ -4597,7 +4622,8 @@
     "updateAvailability": "Atualizar Disponibilidade",
     "viewConnectionRequests": "Ver Pedidos de Ligação",
     "welcomeTitle": "Bem-vindo ao Painel de Mentor",
-    "yourImpact": "O Teu Impacto"
+    "yourImpact": "O Teu Impacto",
+    "noteVisibility": "Esta nota será partilhada com a equipa de staff."
   },
   "mentorFeedback": {
     "blockedPlaceholder": "Problemas ou bloqueios identificados...",
@@ -4689,7 +4715,9 @@
     "sendRequest": "Enviar Pedido",
     "sessions": "Sessões",
     "whatToDiscuss": "O que gostaria de discutir?",
-    "yourBookings": "As Suas Marcações"
+    "yourBookings": "As Suas Marcações",
+    "declined": "Recusado",
+    "pending": "Pendente"
   },
   "mentorsPage": {
     "accept": "Aceitar",
