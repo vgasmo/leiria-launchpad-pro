@@ -111,6 +111,8 @@ export const PIPELINE_STAGES: FunnelStage[] = [
   'approved_for_signature',
   'sent_for_signature',
   'contracted',
+  'rejected',
+  'archived',
 ];
 
 /** i18n label keys for each stage – resolve via t(STAGE_LABEL_KEYS[stage]) */
