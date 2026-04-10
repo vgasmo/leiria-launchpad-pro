@@ -197,7 +197,7 @@ function useConnections(userId: string | undefined, role: 'founder' | 'mentor') 
               .in('id', founderUserIds)
           : { data: [] };
 
-        const profileMap = new Map<string, MentorProfile>(profiles?.map(p => [p.id, p as MentorProfile]) || []);
+        const profileMap = new Map<string, MentorProfile>((profiles || []).map(p => [p.id, p as MentorProfile] as [string, MentorProfile]));
 
         return data.map(conn => {
           const founderId = wsToFounder.get(conn.founder_id);
