@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,42 @@ import { useConsultors } from '@/hooks/useWorkspaceOwner';
 import { usePrograms } from '@/hooks/useWorkspaces';
 import { useAuth } from '@/contexts/AuthContext';
 
+const DRAFT_KEY = 'sl-new-lead-draft';
+
+const emptyForm = {
+  contact_name: '',
+  organization_name: '',
+  contact_email: '',
+  contact_phone: '',
+  source: '',
+  notes: '',
+  owner_consultant_id: '',
+  program_id: '',
+};
+
+function loadDraft() {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (raw) return { ...emptyForm, ...JSON.parse(raw) };
+  } catch { /* ignore */ }
+  return emptyForm;
+}
+
+function saveDraft(form: typeof emptyForm) {
+  try {
+    const hasData = Object.values(form).some(v => v !== '');
+    if (hasData) {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    } else {
+      sessionStorage.removeItem(DRAFT_KEY);
+    }
+  } catch { /* ignore */ }
+}
+
+function clearDraft() {
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+}
+
 export function NewLeadDialog() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -20,16 +56,10 @@ export function NewLeadDialog() {
   const { data: consultors } = useConsultors();
   const { data: programs } = usePrograms();
 
-  const [form, setForm] = useState({
-    contact_name: '',
-    organization_name: '',
-    contact_email: '',
-    contact_phone: '',
-    source: '',
-    notes: '',
-    owner_consultant_id: '',
-    program_id: '',
-  });
+  const [form, setForm] = useState(loadDraft);
+
+  // Persist draft on every change
+  useEffect(() => { saveDraft(form); }, [form]);
 
   const handleSubmit = async () => {
     if (!form.contact_name && !form.organization_name) return;
