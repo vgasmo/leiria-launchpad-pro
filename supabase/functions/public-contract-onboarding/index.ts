@@ -10,6 +10,7 @@
  * the contract's `signature_provider` field. Never assumes a default provider.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { syncIntakeOnSent, syncIntakeOnCompleted } from '../_shared/lifecycleSync.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -122,36 +123,8 @@ Deno.serve(async (req) => {
           })
           .eq('id', contractId)
 
-        // === CANONICAL SYNC: Update linked intake and CRM on send ===
-        const { data: linkedIntake } = await supabase
-          .from('contract_intakes')
-          .select('id, status, funnel_item_id')
-          .eq('contract_id', contractId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        if (linkedIntake) {
-          await supabase
-            .from('contract_intakes')
-            .update({ status: 'signature_sent' })
-            .eq('id', linkedIntake.id)
-
-          await supabase.from('intake_events').insert({
-            intake_id: linkedIntake.id,
-            event_type: 'lifecycle_sync_signature_sent',
-            from_status: linkedIntake.status,
-            to_status: 'signature_sent',
-            performed_by: claims.user.id,
-            metadata: { source: 'staff_submit_signing', contract_id: contractId, provider },
-          })
-
-          if (linkedIntake.funnel_item_id) {
-            await supabase.from('funnel_items')
-              .update({ stage: 'proposal' })
-              .eq('id', linkedIntake.funnel_item_id)
-          }
-        }
+        // === CANONICAL SYNC (shared helper) ===
+        await syncIntakeOnSent(supabase, contractId, claims.user.id, `staff_submit_signing_${provider}`)
 
         let signingResult: any = { status: 'pending_manual', provider }
 
@@ -499,35 +472,8 @@ Deno.serve(async (req) => {
         })
         .eq('id', contract.id)
 
-      // === CANONICAL SYNC: Update linked intake on submit_signing ===
-      const { data: linkedIntake } = await supabase
-        .from('contract_intakes')
-        .select('id, status, funnel_item_id')
-        .eq('contract_id', contract.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      if (linkedIntake) {
-        await supabase
-          .from('contract_intakes')
-          .update({ status: 'signature_sent' })
-          .eq('id', linkedIntake.id)
-
-        await supabase.from('intake_events').insert({
-          intake_id: linkedIntake.id,
-          event_type: 'lifecycle_sync_signature_sent',
-          from_status: linkedIntake.status,
-          to_status: 'signature_sent',
-          metadata: { source: 'public_submit_signing', contract_id: contract.id },
-        })
-
-        if (linkedIntake.funnel_item_id) {
-          await supabase.from('funnel_items')
-            .update({ stage: 'proposal' })
-            .eq('id', linkedIntake.funnel_item_id)
-        }
-      }
+      // === CANONICAL SYNC (shared helper) ===
+      await syncIntakeOnSent(supabase, contract.id, null, 'public_submit_signing')
 
       let signingResult: any = { status: 'pending_manual', provider }
 
@@ -700,66 +646,13 @@ Deno.serve(async (req) => {
         })
       }
       
-      // === CANONICAL LIFECYCLE SYNC: Activate contract + workspace + intake + CRM ===
-      // Update contract status to active
+      // === CANONICAL LIFECYCLE SYNC (shared helper): contract + workspace + intake + CRM ===
       await supabase
         .from('startup_contracts')
         .update({ status: 'active' })
         .eq('id', contract.id)
 
-      // Activate workspace only if contract is truly signed
-      if ((contract as any).workspace_id) {
-        await supabase
-          .from('workspaces')
-          .update({ status: 'active' })
-          .eq('id', (contract as any).workspace_id)
-          .in('status', ['pending', 'claimed', 'imported_unclaimed'])
-      }
-
-      // Sync linked intake to 'signed' then 'activated' (canonical orchestration)
-      const { data: linkedIntake } = await supabase
-        .from('contract_intakes')
-        .select('id, status, funnel_item_id')
-        .eq('contract_id', contract.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      if (linkedIntake) {
-        await supabase
-          .from('contract_intakes')
-          .update({ status: 'signed' })
-          .eq('id', linkedIntake.id)
-
-        await supabase.from('intake_events').insert({
-          intake_id: linkedIntake.id,
-          event_type: 'lifecycle_sync_signed',
-          from_status: linkedIntake.status,
-          to_status: 'signed',
-          metadata: { source: 'digital_sign_onboarding', contract_id: contract.id },
-        })
-
-        // Move to activated
-        await supabase
-          .from('contract_intakes')
-          .update({ status: 'activated' })
-          .eq('id', linkedIntake.id)
-
-        await supabase.from('intake_events').insert({
-          intake_id: linkedIntake.id,
-          event_type: 'lifecycle_sync_activated',
-          from_status: 'signed',
-          to_status: 'activated',
-          metadata: { source: 'digital_sign_onboarding', contract_id: contract.id },
-        })
-
-        // Sync CRM macro stage
-        if (linkedIntake.funnel_item_id) {
-          await supabase.from('funnel_items')
-            .update({ stage: 'contracted' })
-            .eq('id', linkedIntake.funnel_item_id)
-        }
-      }
+      await syncIntakeOnCompleted(supabase, contract.id, (contract as any).workspace_id, null, 'digital_sign_onboarding')
       
       // Notify staff
       const { data: staffUsers } = await supabase

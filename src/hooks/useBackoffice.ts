@@ -304,9 +304,11 @@ export function useCreateContract() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
+      // Guard: contracts must always be born as 'draft' — canonical lifecycle handles activation
+      const safePayload = { ...payload, status: payload.status === 'active' ? 'draft' : (payload.status || 'draft') };
       const { data, error } = await supabase
         .from('startup_contracts')
-        .insert(payload as any)
+        .insert(safePayload as any)
         .select()
         .single();
       if (error) throw error;

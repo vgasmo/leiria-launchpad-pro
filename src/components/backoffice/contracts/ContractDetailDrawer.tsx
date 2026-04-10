@@ -945,12 +945,9 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                   });
                   if (tokenResult.error) throw tokenResult.error;
                   
-                  // 3. Update contract status
-                  await supabase.from('startup_contracts').update({
-                    signature_provider: 'assinatura_digital',
-                    signature_status: 'sent_for_signature',
-                    signature_requested_at: new Date().toISOString(),
-                  } as any).eq('id', contract.id);
+                  // 3. Update contract status via canonical helper
+                  const sentResult = await canonicalMarkAsSent(contract.id, 'assinatura_digital');
+                  if (!sentResult.success) throw new Error(sentResult.error || 'Erro ao marcar como enviado');
                   
                   // 4. Copy link
                   const url = tokenResult.data?.url || `${window.location.origin}/contract-signing/${tokenResult.data?.token}`;
@@ -958,6 +955,8 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                   
                   toast.success(t('contractDetail.linkCopied'));
                   queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                  queryClient.invalidateQueries({ queryKey: ['contract-intakes'] });
+                  queryClient.invalidateQueries({ queryKey: ['crm-pipeline'] });
                 } catch (e: any) {
                   toast.error(e.message || t('contractDetail.sendFailed'));
                 } finally {
