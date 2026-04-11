@@ -89,7 +89,7 @@ export function NpsFeedbackDialog({ open, onOpenChange }: NpsFeedbackDialogProps
               {t('nps.thankYouTitle', 'Thanks for sharing!')}
             </h3>
             <p className="text-muted-foreground">
-              {t('nps.thankYouMessage', 'Your feedback helps us improve FoundersBook.')}
+              {t('nps.thankYouMessage', 'O seu feedback ajuda-nos a melhorar a plataforma.')}
             </p>
           </div>
         </DialogContent>
@@ -111,7 +111,7 @@ export function NpsFeedbackDialog({ open, onOpenChange }: NpsFeedbackDialogProps
             </Button>
           </div>
           <DialogDescription>
-            {t('nps.description', 'How likely are you to recommend FoundersBook to a fellow founder or mentor?')}
+            {t('nps.description', 'Qual a probabilidade de recomendar a Startup Leiria a outro fundador ou mentor?')}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,8 +153,8 @@ export function NpsFeedbackDialog({ open, onOpenChange }: NpsFeedbackDialogProps
             <div className="space-y-2 animate-fade-in">
               <label className="text-sm font-medium">
                 {score >= 7 
-                  ? t('nps.whatDoYouLove', "What do you love about FoundersBook?")
-                  : t('nps.howCanWeImprove', "How can we improve?")}
+                  ? t('nps.whatDoYouLove', 'O que mais gosta na plataforma?')
+                  : t('nps.howCanWeImprove', 'Como podemos melhorar?')}
               </label>
               <Textarea
                 placeholder={t('nps.feedbackPlaceholder', 'Your feedback helps us build a better product...')}

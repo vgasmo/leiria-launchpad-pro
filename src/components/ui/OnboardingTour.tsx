@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-const TOUR_KEY = 'foundersbook-tour-completed';
+const TOUR_KEY = 'sl-tour-completed';
 
 /**
  * P3: Simplified onboarding tour - only 4 essential steps, role-aware.

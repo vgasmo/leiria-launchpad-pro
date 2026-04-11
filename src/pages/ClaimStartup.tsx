@@ -303,17 +303,10 @@ export default function ClaimStartup() {
                 {t('claimStartup.onboardingDesc', { defaultValue: 'O seu workspace foi preparado pela nossa equipa. Complete o processo de onboarding para começar a utilizar a plataforma.' })}
               </p>
               <Button 
-                onClick={async () => {
-                  // Mark onboarding as complete and redirect
+                onClick={() => {
+                  // Navigate to the workspace with onboarding wizard — do NOT clear needs_onboarding here
                   if (founderState.activeWorkspaceId) {
-                    const { error } = await supabase
-                      .from('workspaces')
-                      .update({ needs_onboarding: false })
-                      .eq('id', founderState.activeWorkspaceId);
-                    if (!error) {
-                      queryClient.invalidateQueries({ queryKey: ['founder-onboarding-state'] });
-                      navigate(`/workspace/${founderState.activeWorkspaceId}`, { replace: true });
-                    }
+                    navigate(`/workspace/${founderState.activeWorkspaceId}?onboarding=true`, { replace: true });
                   }
                 }} 
                 size="lg" 
