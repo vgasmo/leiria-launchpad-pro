@@ -98,13 +98,9 @@ export function IntakeReviewPanel({ intake, onClose }: IntakeReviewPanelProps) {
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
 
-      // Transition intake to signature_sent
-      await transition.mutateAsync({
-        intakeId: intake.id,
-        newStatus: 'signature_sent',
-        notes: `Enviado para assinatura via ${selectedProvider}`,
-        metadata: { provider: selectedProvider, signing_result: data },
-      });
+      // NOTE: Do NOT transition intake here — the edge function already
+      // performed syncIntakeOnSent server-side. A duplicate client-side
+      // transition would cause a false-failure or double audit event.
 
       toast.success(t('crm.contratoEnviadoParaAssinatura'));
     } catch (err: any) {

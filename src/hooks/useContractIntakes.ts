@@ -299,8 +299,8 @@ export function useTransitionIntakeStatus() {
           frozen_by: user?.id,
         };
 
-        // CANONICAL INVARIANT: Ensure contract exists before approving for signature.
-        // If intake has no contract_id, auto-create one from the funnel item data.
+        // CANONICAL INVARIANT: A semantically complete contract MUST exist before
+        // approving for signature. We do NOT auto-create skeletal contracts.
         const { data: intakeFull } = await supabase
           .from('contract_intakes')
           .select('contract_id, funnel_item_id, organization_name')
@@ -308,36 +308,25 @@ export function useTransitionIntakeStatus() {
           .single();
 
         if (!intakeFull?.contract_id) {
-          // Create a draft contract linked to this intake
-          const { data: newContract, error: contractErr } = await supabase
-            .from('startup_contracts')
-            .insert({
-              funnel_item_id: intakeFull?.funnel_item_id || current.funnel_item_id,
-              organization_name: intakeFull?.organization_name || current.organization_name,
-              status: 'draft',
-              start_date: new Date().toISOString().split('T')[0],
-              currency: 'EUR',
-              created_by: user?.id,
-            })
-            .select('id')
-            .single();
+          // Block: no contract linked — staff must create one with complete commercial truth first
+          throw new Error(
+            'Não é possível aprovar para assinatura: nenhum contrato associado. ' +
+            'Crie um contrato com modalidade, edifício e condições comerciais definidas antes de aprovar.'
+          );
+        }
 
-          if (contractErr) {
-            logger.error('auto_contract_creation_failed', { error: contractErr.message });
-            throw new Error('Não foi possível criar o contrato automaticamente. Crie um contrato manualmente antes de aprovar.');
-          }
+        // Verify the linked contract is semantically complete (has incubation type + pricing)
+        const { data: linkedContract } = await supabase
+          .from('startup_contracts')
+          .select('id, incubation_type_id, monthly_fee, status')
+          .eq('id', intakeFull.contract_id)
+          .single();
 
-          updateFields.contract_id = newContract.id;
-          logger.info('auto_contract_created', { contractId: newContract.id, intakeId: params.intakeId });
-
-          // CANONICAL BACK-LINK: Sync CRM funnel item with the new contract
-          const funnelId = intakeFull?.funnel_item_id || current.funnel_item_id;
-          if (funnelId) {
-            await supabase.from('funnel_items')
-              .update({ linked_contract_id: newContract.id })
-              .eq('id', funnelId);
-            logger.info('crm_backlink_synced', { funnelItemId: funnelId, contractId: newContract.id });
-          }
+        if (!linkedContract?.incubation_type_id) {
+          throw new Error(
+            'Contrato incompleto: a modalidade de incubação não está definida. ' +
+            'Complete os dados comerciais do contrato antes de aprovar para assinatura.'
+          );
         }
       }
       if (params.newStatus === 'changes_requested') {

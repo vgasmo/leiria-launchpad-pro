@@ -113,10 +113,11 @@ Deno.serve(async (req) => {
           })
         }
 
-        // Update contract with provider and sent status
+        // Update contract with provider and sent status (canonical: status + signature_status)
         await supabase
           .from('startup_contracts')
           .update({
+            status: 'pending_signature',
             signature_provider: provider,
             signature_status: 'sent_for_signature',
             signature_requested_at: new Date().toISOString(),
@@ -458,10 +459,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Mark regulation as accepted + update canonical status
+      // Mark regulation as accepted + update canonical status (status + signature_status)
       await supabase
         .from('startup_contracts')
         .update({
+          status: 'pending_signature',
           regulation_accepted_at: new Date().toISOString(),
           regulation_version: 'V11_2026',
           signature_status: 'sent_for_signature',

@@ -169,6 +169,7 @@ export async function canonicalMarkAsSent(
     const { error } = await supabase
       .from('startup_contracts')
       .update({
+        status: 'pending_signature',
         signature_provider: provider,
         signature_status: 'sent_for_signature',
         signature_requested_at: new Date().toISOString(),
