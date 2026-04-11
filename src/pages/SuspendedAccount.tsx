@@ -16,7 +16,7 @@ export default function SuspendedAccount() {
           <div className="flex justify-center">
             <img 
               src={startupLeiriaLogo} 
-              alt="FoundersBook" 
+              alt="Startup Leiria" 
               className="h-16 w-auto"
             />
           </div>

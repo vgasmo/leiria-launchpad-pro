@@ -3346,7 +3346,7 @@
     "tryDifferentFilters": "Tente alterar os filtros de pesquisa",
     "uploadFirst": "Carregue o primeiro documento",
     "welcomeDesc": "Your startup journey starts here.",
-    "welcomeTitle": "Welcome to FoundersBook"
+    "welcomeTitle": "Welcome to Startup Leiria"
   },
   "enrollment": {
     "claimExplainer": "O fluxo de claim é independente do modo de registo: após login, founders verificam se a sua startup já está no sistema.",
@@ -3822,7 +3822,7 @@
     "quickStart": "Getting Started",
     "subtitle": "Everything you need to know to get started",
     "title": "Quick Guide",
-    "welcome": "Welcome to FoundersBook",
+    "welcome": "Welcome to Startup Leiria",
     "founder": {
       "title": "Founder OS",
       "tagline": "For Entrepreneurs",
@@ -4548,7 +4548,7 @@
     "passwordMinLength": "Password must be at least 6 characters",
     "passwordPlaceholder": "••••••••",
     "platformSubtitle": "Your incubation & ecosystem OS. Manage programs, track KPIs, hit milestones, and connect with mentors.",
-    "platformTitle": "FoundersBook",
+    "platformTitle": "Startup Leiria",
     "sessions": "Sessions",
     "signInDescription": "Sign in to access your workspaces or create a new account",
     "signingIn": "Signing in...",
@@ -5118,18 +5118,18 @@
     "title": "Notifications"
   },
   "nps": {
-    "description": "How likely are you to recommend FoundersBook to a fellow founder or mentor?",
+    "description": "How likely are you to recommend Startup Leiria to a fellow founder or mentor?",
     "dontAskAgain": "Dont Ask Again",
     "error": "Failed to submit feedback",
     "feedbackPlaceholder": "Your feedback helps us build a better product...",
     "howCanWeImprove": "How can we improve?",
     "notLikely": "Not likely",
     "thankYou": "Thank you for your feedback!",
-    "thankYouMessage": "Your feedback helps us improve FoundersBook.",
+    "thankYouMessage": "Your feedback helps us improve Startup Leiria.",
     "thankYouTitle": "Thanks for sharing!",
     "title": "How are we doing?",
     "veryLikely": "Very likely",
-    "whatDoYouLove": "What do you love about FoundersBook?"
+    "whatDoYouLove": "What do you love about Startup Leiria?"
   },
   "offline": {
     "backOnline": "Back online! Syncing your data...",
