@@ -277,7 +277,7 @@ export default function QuickGuide() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold mb-2">
-                  {t('guide.welcome', { defaultValue: 'Welcome to FoundersBook' })}
+                  {t('guide.welcome', { defaultValue: 'Welcome to Startup Leiria' })}
                 </h2>
                 <p className="text-muted-foreground">
                   {t('guide.intro', { defaultValue: 'This platform adapts to your profile. Explore the guide below to understand how to get the most out of it.' })}

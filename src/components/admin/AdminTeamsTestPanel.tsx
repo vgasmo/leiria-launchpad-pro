@@ -102,7 +102,7 @@ export function AdminTeamsTestPanel() {
           event_type: 'test',
           payload: {
             title: 'Test Notification',
-            summary: `This is a test from FoundersBook Admin`,
+            summary: `This is a test from Startup Leiria Admin`,
             startup_name: workspaceName,
             fields: [
               { name: 'Test Type', value: workspaceId ? 'Workspace-specific' : 'Global' },
