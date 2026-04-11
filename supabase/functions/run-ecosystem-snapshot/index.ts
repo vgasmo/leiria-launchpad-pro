@@ -13,7 +13,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
-import { requireCronOrStaff, createLogger, generateRequestId } from '../_shared/security.ts';
+import { requireCronOrGovernance, createLogger, generateRequestId } from '../_shared/security.ts';
 
 const FUNCTION_NAME = 'run-ecosystem-snapshot';
 
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
   });
 
   // Auth
-  const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+  const authResult = await requireCronOrGovernance(req, supabaseUser, supabaseAdmin);
   if ('error' in authResult) {
     log.warn('Unauthorized access attempt');
     return authResult.error;
