@@ -249,3 +249,17 @@ verify_jwt = false
 
 [functions.copilot-chat]
 verify_jwt = false
+
+# ============================================
+# ARCHIVE & BACKUP FUNCTIONS
+# No JWT - requires x-cron-secret header (pg_cron)
+# Also callable manually via invokeWithAuth (runtime auth)
+# ============================================
+
+# Cron/manual — archives signed contracts to SharePoint
+[functions.archive-contracts-to-sharepoint]
+verify_jwt = false
+
+# Cron/manual — creates ecosystem data snapshots
+[functions.run-ecosystem-snapshot]
+verify_jwt = false

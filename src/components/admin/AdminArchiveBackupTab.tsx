@@ -103,8 +103,12 @@ function ContractArchiveStatus() {
               <Archive className="h-5 w-5" />
               {t('admin.archive.contractArchive', { defaultValue: 'Arquivo de Contratos — SharePoint' })}
             </CardTitle>
-            <CardDescription>
-              {t('admin.archive.contractArchiveDesc', { defaultValue: 'Contratos assinados são arquivados automaticamente no SharePoint 7 dias após a assinatura.' })}
+            <CardDescription className="space-y-1">
+              <span>{t('admin.archive.contractArchiveDesc', { defaultValue: 'Contratos assinados são arquivados no SharePoint 7 dias após a assinatura.' })}</span>
+              <span className="flex items-center gap-1.5 text-xs">
+                <Clock className="h-3 w-3" />
+                {t('admin.archive.scheduledNote', { defaultValue: 'Agendamento automático via pg_cron (02:00 UTC diário). Pode também executar manualmente.' })}
+              </span>
             </CardDescription>
           </div>
           {stats.pending > 0 && (
@@ -262,8 +266,12 @@ function EcosystemSnapshotStatus() {
               <Database className="h-5 w-5" />
               {t('admin.archive.ecosystemSnapshots', { defaultValue: 'Snapshots do Ecossistema' })}
             </CardTitle>
-            <CardDescription>
-              {t('admin.archive.ecosystemSnapshotsDesc', { defaultValue: 'Backups periódicos dos dados críticos do ecossistema para resiliência e auditoria.' })}
+            <CardDescription className="space-y-1">
+              <span>{t('admin.archive.ecosystemSnapshotsDesc', { defaultValue: 'Backups dos dados críticos do ecossistema para resiliência e auditoria.' })}</span>
+              <span className="flex items-center gap-1.5 text-xs">
+                <Clock className="h-3 w-3" />
+                {t('admin.archive.snapshotScheduledNote', { defaultValue: 'Agendamento automático via pg_cron (03:00 UTC diário). Pode também executar manualmente.' })}
+              </span>
             </CardDescription>
           </div>
           <Button

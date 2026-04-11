@@ -204,7 +204,7 @@ async function createCalendarEvent(
         <p><strong>Email:</strong> ${contact.email}</p>
         ${contact.organization ? `<p><strong>Organization:</strong> ${contact.organization}</p>` : ''}
         ${contact.message ? `<p><strong>Notes:</strong> ${contact.message}</p>` : ''}
-        <p><em>Booked via FoundersBook public booking</em></p>
+        <p><em>Booked via Startup Leiria public booking</em></p>
       `,
     },
     start: { dateTime: startDateTime, timeZone: "Europe/Lisbon" },

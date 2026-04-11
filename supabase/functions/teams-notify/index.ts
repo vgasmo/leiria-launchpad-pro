@@ -372,7 +372,7 @@ Deno.serve(async (req: Request) => {
       if (payload.link) {
         actions.push({
           type: 'Action.OpenUrl',
-          title: payload.link_text || 'Open in FoundersBook',
+          title: payload.link_text || 'Open in Startup Leiria',
           url: payload.link,
           style: 'positive',
         });
