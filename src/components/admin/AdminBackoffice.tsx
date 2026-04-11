@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -64,10 +65,20 @@ export function AdminBackoffice() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isAdmin, isBackoffice } = useAuth();
+  const isGovernance = isAdmin || isBackoffice;
   // Support deep-linking via ?subtab= URL param (fallback to legacy ?tab=)
   const urlParams = new URLSearchParams(window.location.search);
   const urlSubTab = urlParams.get('subtab') || urlParams.get('tab');
-  const [activeSubTab, setActiveSubTab] = useState(urlSubTab && ['dashboard', 'overview', 'contracts', 'invoices', 'incubation', 'spaces', 'operations', 'infrastructure', 'archive'].includes(urlSubTab) ? (urlSubTab === 'operations' || urlSubTab === 'infrastructure' ? 'spaces' : urlSubTab) : 'dashboard');
+  // Gate archive subtab: only governance roles (admin/backoffice) can access
+  const resolvedSubTab = (() => {
+    if (!urlSubTab) return 'dashboard';
+    if (urlSubTab === 'archive' && !isGovernance) return 'dashboard';
+    if (urlSubTab === 'operations' || urlSubTab === 'infrastructure') return 'spaces';
+    if (['dashboard', 'overview', 'contracts', 'invoices', 'incubation', 'spaces', 'archive'].includes(urlSubTab)) return urlSubTab;
+    return 'dashboard';
+  })();
+  const [activeSubTab, setActiveSubTab] = useState(resolvedSubTab);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
@@ -376,10 +387,12 @@ export function AdminBackoffice() {
             <Package className="h-4 w-4" />
             {t('admin.backoffice.incubationTypes', { defaultValue: 'Tipos de Incubação' })}
           </TabsTrigger>
-          <TabsTrigger value="archive" className="gap-1.5">
-            <Archive className="h-4 w-4" />
-            {t('admin.backoffice.archiveAndBackups', { defaultValue: 'Arquivo & Backups' })}
-          </TabsTrigger>
+          {isGovernance && (
+            <TabsTrigger value="archive" className="gap-1.5">
+              <Archive className="h-4 w-4" />
+              {t('admin.backoffice.archiveAndBackups', { defaultValue: 'Arquivo & Backups' })}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Dashboard Tab - KPIs + Overview + Action Prompts */}
@@ -793,10 +806,12 @@ export function AdminBackoffice() {
           <BackofficeIncubationTypesTab />
         </TabsContent>
 
-        {/* Archive & Backups Tab */}
-        <TabsContent value="archive">
-          <AdminArchiveBackupTab />
-        </TabsContent>
+        {/* Archive & Backups Tab — governance roles only */}
+        {isGovernance && (
+          <TabsContent value="archive">
+            <AdminArchiveBackupTab />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
