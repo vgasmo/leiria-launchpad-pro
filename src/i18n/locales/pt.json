@@ -3346,7 +3346,7 @@
     "tryDifferentFilters": "Tente alterar os filtros de pesquisa",
     "uploadFirst": "Carregue o primeiro documento",
     "welcomeDesc": "A sua jornada startup começa aqui.",
-    "welcomeTitle": "Bem-vindo ao FoundersBook"
+    "welcomeTitle": "Bem-vindo ao Startup Leiria"
   },
   "enrollment": {
     "claimExplainer": "O fluxo de claim é independente do modo de registo: após login, founders verificam se a sua startup já está no sistema.",
@@ -3822,7 +3822,7 @@
     "quickStart": "Para Começar",
     "subtitle": "Tudo o que precisas de saber para começar",
     "title": "Guia Rápido",
-    "welcome": "Bem-vindo ao FoundersBook",
+    "welcome": "Bem-vindo ao Startup Leiria",
     "founder": {
       "title": "Founder OS",
       "tagline": "Para Empreendedores",
@@ -4548,7 +4548,7 @@
     "passwordMinLength": "A palavra-passe deve ter pelo menos 6 caracteres",
     "passwordPlaceholder": "••••••••",
     "platformSubtitle": "O seu OS de incubação e ecossistema. Gerir programas, acompanhar KPIs, atingir milestones e conectar com mentores.",
-    "platformTitle": "FoundersBook",
+    "platformTitle": "Startup Leiria",
     "sessions": "Sessões",
     "signInDescription": "Entre para aceder aos seus workspaces ou crie uma nova conta",
     "signingIn": "A entrar...",
@@ -5118,18 +5118,18 @@
     "title": "Notificações"
   },
   "nps": {
-    "description": "Qual a probabilidade de recomendar o FoundersBook a outro founder ou mentor?",
-    "dontAskAgain": "Dont Ask Again",
-    "error": "Falhou to Submeter feedback",
-    "feedbackPlaceholder": "Your feedback helps us build a better product...",
-    "howCanWeImprove": "How can we improve?",
-    "notLikely": "Not likely",
-    "thankYou": "Thank you para your feedback!",
-    "thankYouMessage": "Your feedback helps us improve FoundersBook.",
-    "thankYouTitle": "Thanks para sharing!",
-    "title": "How are we doing?",
-    "veryLikely": "Very likely",
-    "whatDoYouLove": "O que mais gosta no FoundersBook?"
+    "description": "Qual a probabilidade de recomendar o Startup Leiria a outro founder ou mentor?",
+    "dontAskAgain": "Não perguntar novamente",
+    "error": "Não foi possível submeter o feedback",
+    "feedbackPlaceholder": "O seu feedback ajuda-nos a melhorar o produto...",
+    "howCanWeImprove": "Como podemos melhorar?",
+    "notLikely": "Pouco provável",
+    "thankYou": "Obrigado pelo seu feedback!",
+    "thankYouMessage": "O seu feedback ajuda-nos a melhorar o Startup Leiria.",
+    "thankYouTitle": "Obrigado por partilhar!",
+    "title": "Como estamos a correr?",
+    "veryLikely": "Muito provável",
+    "whatDoYouLove": "O que mais gosta no Startup Leiria?"
   },
   "offline": {
     "backOnline": "De volta online! A sincronizar os seus dados...",
@@ -7380,7 +7380,7 @@
     },
     "skip": "Saltar guia",
     "workspaces": {
-      "content": "Bem-vindo ao FoundersBook! 🚀 Os seus workspaces aparecem aqui. Cada workspace é um espaço dedicado a uma startup.",
+      "content": "Bem-vindo ao Startup Leiria! 🚀 Os seus workspaces aparecem aqui. Cada workspace é um espaço dedicado a uma startup.",
       "title": "Os Seus Workspaces"
     }
   },
