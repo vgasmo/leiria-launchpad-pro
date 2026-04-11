@@ -196,7 +196,7 @@ export async function requireCronOrStaff(
     };
   }
 
-  // Check if user is staff (admin, consultor, or administrativo)
+  // Check if user is staff (admin, consultor, or backoffice)
   const { data: roles } = await supabaseAdminClient
     .from('user_roles')
     .select('role')
@@ -209,6 +209,57 @@ export async function requireCronOrStaff(
   if (!isStaff) {
     return {
       error: errorResponse(req, 'Staff access required', ErrorCode.FORBIDDEN, 403)
+    };
+  }
+
+  return { valid: true, userId: user.id };
+}
+
+/**
+ * Require either cron secret OR governance user (admin/backoffice only)
+ * Use for compliance/governance operations like archive and backup triggers.
+ * Consultors are excluded — these are governance-level operations.
+ */
+export async function requireCronOrGovernance(
+  req: Request,
+  supabaseUserClient: SupabaseClient,
+  supabaseAdminClient: SupabaseClient
+): Promise<{ valid: true; userId?: string } | { error: Response }> {
+  const cronSecret = req.headers.get('x-cron-secret');
+  const expectedSecret = Deno.env.get('CRON_SECRET');
+  
+  if (expectedSecret && cronSecret === expectedSecret) {
+    return { valid: true };
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return {
+      error: errorResponse(req, 'Authorization or cron secret required', ErrorCode.UNAUTHORIZED, 401)
+    };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error } = await supabaseUserClient.auth.getUser(token);
+
+  if (error || !user) {
+    return {
+      error: errorResponse(req, 'Invalid token', ErrorCode.UNAUTHORIZED, 401)
+    };
+  }
+
+  const { data: roles } = await supabaseAdminClient
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id);
+
+  const isGovernance = roles?.some(r => 
+    r.role === 'admin' || r.role === 'backoffice'
+  );
+  
+  if (!isGovernance) {
+    return {
+      error: errorResponse(req, 'Governance access required (admin or backoffice)', ErrorCode.FORBIDDEN, 403)
     };
   }
 
