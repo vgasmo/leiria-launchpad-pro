@@ -38,6 +38,9 @@ interface ChecklistItem {
   icon: React.ReactNode;
 }
 
+const CHECKLIST_DISMISSED_KEY = 'founder_checklist_dismissed';
+const WELCOME_DISMISSED_KEY = 'founder_welcome_dismissed';
+
 // Scope localStorage keys to user to avoid cross-user collision
 function scopedKey(base: string, userId?: string) {
   return userId ? `${base}_${userId}` : base;
