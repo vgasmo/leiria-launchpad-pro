@@ -181,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
 
             try {
               const emailResult = await sendEmail(resendApiKey, {
-                from: "FoundersBook <noreply@startupleiria.com>",
+                from: "Startup Leiria <noreply@startupleiria.com>",
                 to: [founderEmail],
                 subject: `📋 Monthly check-in: ${startupName}`,
                 html: `
@@ -198,7 +198,7 @@ const handler = async (req: Request): Promise<Response> => {
                     </div>
                     <p style="color: #666; font-size: 14px;">If you have any questions, reach out to your assigned consultant.</p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-                    <p style="color: #999; font-size: 12px;">FoundersBook</p>
+                    <p style="color: #999; font-size: 12px;">Startup Leiria</p>
                   </div>
                 `,
               });
