@@ -25,6 +25,7 @@ interface FounderWelcomePanelProps {
   hasDocuments: boolean;
   onCreateStartup: () => void;
   workspaceId?: string;
+  userId?: string;
 }
 
 interface ChecklistItem {
@@ -37,8 +38,10 @@ interface ChecklistItem {
   icon: React.ReactNode;
 }
 
-const CHECKLIST_DISMISSED_KEY = 'founder_checklist_dismissed';
-const WELCOME_DISMISSED_KEY = 'founder_welcome_dismissed';
+// Scope localStorage keys to user to avoid cross-user collision
+function scopedKey(base: string, userId?: string) {
+  return userId ? `${base}_${userId}` : base;
+}
 
 export function FounderWelcomePanel({
   hasStartup,
@@ -48,23 +51,26 @@ export function FounderWelcomePanel({
   hasDocuments,
   onCreateStartup,
   workspaceId,
+  userId,
 }: FounderWelcomePanelProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const checklistKey = scopedKey(CHECKLIST_DISMISSED_KEY, userId);
+  const welcomeKey = scopedKey(WELCOME_DISMISSED_KEY, userId);
   const [welcomeDismissed, setWelcomeDismissed] = useState(() => 
-    localStorage.getItem(WELCOME_DISMISSED_KEY) === 'true'
+    localStorage.getItem(welcomeKey) === 'true'
   );
   const [checklistDismissed, setChecklistDismissed] = useState(() => 
-    localStorage.getItem(CHECKLIST_DISMISSED_KEY) === 'true'
+    localStorage.getItem(checklistKey) === 'true'
   );
 
   const dismissWelcome = () => {
-    localStorage.setItem(WELCOME_DISMISSED_KEY, 'true');
+    localStorage.setItem(welcomeKey, 'true');
     setWelcomeDismissed(true);
   };
 
   const dismissChecklist = () => {
-    localStorage.setItem(CHECKLIST_DISMISSED_KEY, 'true');
+    localStorage.setItem(checklistKey, 'true');
     setChecklistDismissed(true);
   };
 
