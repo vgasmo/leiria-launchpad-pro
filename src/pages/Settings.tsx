@@ -53,7 +53,7 @@ export default function Settings() {
 
   const isMentor = roles.includes('mentor_externo');
   const isFounder = roles.includes('founder');
-  const { canRestore, restoreChecklist } = useChecklistRecovery();
+  const { canRestore, restoreChecklist } = useChecklistRecovery(user?.id);
 
   const handleRestoreChecklist = () => {
     restoreChecklist();

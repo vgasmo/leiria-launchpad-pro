@@ -101,17 +101,23 @@ export function useConversations() {
         }
       });
 
-      // Count unread messages
+      // Count unread messages — batched approach instead of N+1 per-conversation loop
       const unreadCounts = new Map<string, number>();
-      for (const conv of conversations) {
-        const lastRead = lastReadMap.get(conv.id);
-        const { count } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', conv.id)
-          .neq('sender_id', user.id)
-          .gt('created_at', lastRead || '1970-01-01');
-        unreadCounts.set(conv.id, count || 0);
+      // Get all messages across conversations that could be unread
+      const { data: allUnreadMessages } = await supabase
+        .from('messages')
+        .select('conversation_id, created_at')
+        .in('conversation_id', conversationIds)
+        .neq('sender_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (allUnreadMessages) {
+        for (const msg of allUnreadMessages) {
+          const lastRead = lastReadMap.get(msg.conversation_id);
+          if (!lastRead || msg.created_at > lastRead) {
+            unreadCounts.set(msg.conversation_id, (unreadCounts.get(msg.conversation_id) || 0) + 1);
+          }
+        }
       }
 
       return conversations.map(conv => ({

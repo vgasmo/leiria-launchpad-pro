@@ -58,7 +58,7 @@ export function FounderDashboard({
   const { t } = useTranslation();
   const { profile } = useAuth();
   const { streakWeeks, recordActivity } = useProgressStreak();
-  const { canRestore, restoreChecklist } = useChecklistRecovery();
+  const { canRestore, restoreChecklist } = useChecklistRecovery(profile?.id);
   // Quick KPI modal auto-trigger state
   const [showQuickKpi, setShowQuickKpi] = useState(false);
 
@@ -228,6 +228,7 @@ export function FounderDashboard({
         hasDocuments={hasDocuments}
         onCreateStartup={onCreateStartup}
         workspaceId={workspace.id}
+        userId={profile?.id}
       />
 
       <section className="space-y-4">

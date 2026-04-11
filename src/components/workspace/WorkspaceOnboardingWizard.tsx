@@ -523,9 +523,25 @@ export function WorkspaceOnboardingWizard({
     }
   };
 
-  const handleClose = () => {
+  // Mark onboarding as complete only when wizard reaches the 'complete' step
+  const handleCompleteOnboarding = async () => {
+    if (isFounderOnboarding) {
+      try {
+        await supabase
+          .from('workspaces')
+          .update({ needs_onboarding: false })
+          .eq('id', workspaceId);
+        logger.debug('onboarding_completed', { workspaceId });
+      } catch (err) {
+        logger.error('onboarding_completion_failed', { workspaceId }, err);
+      }
+    }
     onOpenChange(false);
-    // State will be reset by useEffect when dialog reopens
+  };
+
+  const handleClose = () => {
+    // Close without marking complete — onboarding remains incomplete
+    onOpenChange(false);
   };
 
   const currentStepIndex = steps.findIndex(s => s.key === currentStep);
@@ -866,8 +882,8 @@ export function WorkspaceOnboardingWizard({
           )}
           
           {currentStep === 'complete' && (
-            <Button type="button" onClick={handleClose} className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
-              {t('onboardingWizard.goToWorkspace', { defaultValue: '🎉 Go to Workspace' })}
+            <Button type="button" onClick={handleCompleteOnboarding} className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+              {t('onboardingWizard.goToWorkspace', { defaultValue: '🎉 Ir para o Workspace' })}
             </Button>
           )}
         </DialogFooter>

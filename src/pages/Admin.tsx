@@ -8,6 +8,7 @@ import {
   ChevronDown, Database, GitBranch, UserPlus
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,8 +37,11 @@ import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
 import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCenter';
 
+// Admin-only tabs that require admin role (governance-heavy)
+const ADMIN_ONLY_TABS = new Set(['users', 'data-quality']);
+
 // Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
-const TAB_GROUPS: Record<string, string[]> = {
+const TAB_GROUPS_BASE: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
   crm: ['funnel'],
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys'],
@@ -47,7 +51,18 @@ const TAB_GROUPS: Record<string, string[]> = {
 
 export default function Admin() {
   const { t } = useTranslation();
+  const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Filter tab groups based on role — admin-only tabs hidden from non-admins
+  const TAB_GROUPS = useMemo(() => {
+    const filtered: Record<string, string[]> = {};
+    for (const [group, tabs] of Object.entries(TAB_GROUPS_BASE)) {
+      const visibleTabs = tabs.filter(tab => isAdmin || !ADMIN_ONLY_TABS.has(tab));
+      if (visibleTabs.length > 0) filtered[group] = visibleTabs;
+    }
+    return filtered;
+  }, [isAdmin]);
 
   const validTabs = useMemo(() => {
     const tabs = new Set<string>();
@@ -55,7 +70,7 @@ export default function Admin() {
       groupTabs.forEach((tab) => tabs.add(tab));
     }
     return tabs;
-  }, []);
+  }, [TAB_GROUPS]);
 
   const [activeTab, setActiveTab] = useState(() => {
     const fromUrl = searchParams.get('tab');
