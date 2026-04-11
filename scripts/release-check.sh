@@ -4,16 +4,16 @@ set -e
 echo "🚀 Starting Release Check..."
 
 echo "1️⃣  Linting..."
-npm run lint
+bun run lint
 
 echo "2️⃣  Type Checking..."
-npx tsc --noEmit -p tsconfig.typecheck.json
+bunx tsc --noEmit -p tsconfig.typecheck.json
 
 echo "3️⃣  Building..."
-npm run build
+bun run build
 
 echo "4️⃣  Running Unit Tests..."
-npx vitest run
+bunx vitest run
 
 echo "5️⃣  Syncing i18n keys..."
 node scripts/i18n-sync.cjs

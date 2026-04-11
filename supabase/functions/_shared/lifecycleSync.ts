@@ -30,7 +30,7 @@ export async function syncIntakeOnSent(
   if (!intake) return { synced: false }
 
   // Don't regress: skip if already at or past signature_sent
-  const PAST_SENT = ['signature_sent', 'signed', 'activated', 'contract_active']
+  const PAST_SENT = ['signature_sent', 'signed', 'activated']
   if (PAST_SENT.includes(intake.status)) {
     return { synced: false, intakeId: intake.id }
   }

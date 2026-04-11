@@ -89,7 +89,7 @@ function ContractArchiveStatus() {
     total: archivedContracts?.length || 0,
     completed: archivedContracts?.filter(c => c.archive_status === 'completed').length || 0,
     failed: archivedContracts?.filter(c => c.archive_status === 'failed').length || 0,
-    pending: archivedContracts?.filter(c => !c.archive_status || c.archive_status === null).length || 0,
+    pending: archivedContracts?.filter(c => !c.archive_status || c.archive_status === null || c.archive_status === 'pending').length || 0,
   };
 
   if (isLoading) return <Skeleton className="h-48 w-full" />;

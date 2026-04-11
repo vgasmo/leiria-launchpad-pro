@@ -13,7 +13,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
-import { requireCronOrStaff, createLogger, generateRequestId } from '../_shared/security.ts';
+import { requireCronOrGovernance, createLogger, generateRequestId } from '../_shared/security.ts';
 import { getGraphCredentials, getGraphAccessToken, callGraphWithRetry } from '../_shared/graphAuth.ts';
 
 const FUNCTION_NAME = 'archive-contracts-to-sharepoint';
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   });
 
   // Auth: cron secret or staff
-  const authResult = await requireCronOrStaff(req, supabaseUser, supabaseAdmin);
+  const authResult = await requireCronOrGovernance(req, supabaseUser, supabaseAdmin);
   if ('error' in authResult) {
     log.warn('Unauthorized access attempt');
     return authResult.error;
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       const eligibilityDate = new Date(Date.now() - ELIGIBILITY_DAYS * 24 * 60 * 60 * 1000).toISOString();
       query = query
         .lte('signed_at', eligibilityDate)
-        .or('archive_status.is.null,archive_status.eq.failed');
+        .or('archive_status.is.null,archive_status.eq.failed,archive_status.eq.pending');
     }
 
     const { data: contracts, error: queryError } = await query.limit(20); // Process in batches of 20
