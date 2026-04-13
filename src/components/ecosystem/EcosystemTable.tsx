@@ -45,6 +45,8 @@ interface Props {
 export function EcosystemTable({ items, onOpenItem }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState<EcosystemItem | null>(null);
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
