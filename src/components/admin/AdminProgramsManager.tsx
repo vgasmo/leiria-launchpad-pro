@@ -162,8 +162,90 @@ function StagesManager({ programId }: { programId: string }) {
     </div>
   );
 }
+function GatesWeeksManager({ programId }: { programId: string }) {
+  const { t } = useTranslation();
+  const { data: gates, isLoading: gatesLoading } = useQuery({
+    queryKey: ['program-gates', programId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('program_gates')
+        .select('*')
+        .eq('program_id', programId)
+        .order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
 
-export function AdminProgramsManager() {
+  const { data: weeks, isLoading: weeksLoading } = useQuery({
+    queryKey: ['program-weeks', programId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('program_weeks')
+        .select('*')
+        .eq('program_id', programId)
+        .order('week_number');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (gatesLoading || weeksLoading) return <Skeleton className="h-20 w-full" />;
+
+  return (
+    <div className="pl-6 border-l border-border/50 space-y-4">
+      <div>
+        <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+          <Flag className="h-3.5 w-3.5" />
+          {t('adminPrograms.gates')} ({gates?.length || 0})
+        </span>
+        {gates?.length === 0 ? (
+          <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noGates')}</p>
+        ) : (
+          <div className="space-y-1 mt-2">
+            {gates?.map(gate => (
+              <div key={gate.id} className="flex items-center gap-2 p-2 rounded bg-muted/30">
+                <Flag className="h-3 w-3 text-muted-foreground" />
+                <span className="flex-1 text-sm font-medium">{gate.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t('adminPrograms.weeksRange', { start: gate.target_start_week, end: gate.target_end_week })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+        <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5" />
+          {t('adminPrograms.weeks')} ({weeks?.length || 0})
+        </span>
+        {weeks?.length === 0 ? (
+          <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noWeeks')}</p>
+        ) : (
+          <div className="space-y-1 mt-2">
+            {weeks?.map(week => {
+              const deliverables = Array.isArray(week.deliverables_json) ? week.deliverables_json as Record<string, unknown>[] : [];
+              return (
+                <div key={week.id} className="flex items-center gap-2 p-2 rounded bg-muted/30">
+                  <span className="text-xs text-muted-foreground w-8 shrink-0">S{week.week_number}</span>
+                  <span className="flex-1 text-sm">{week.title}</span>
+                  {deliverables.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {deliverables.length} {t('adminPrograms.deliverables')}
+                    </Badge>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: programs, isLoading } = usePrograms();
