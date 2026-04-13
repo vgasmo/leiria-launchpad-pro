@@ -393,6 +393,11 @@ export function AdminProgramsManager() {
                         <Badge variant={program.is_active ? 'default' : 'secondary'}>
                           {program.is_active ? t('adminPrograms.active') : t('adminPrograms.inactive')}
                         </Badge>
+                        {program.program_type === 'acceleration' && (
+                          <Badge variant="outline" className="text-primary border-primary/30">
+                            {t('adminPrograms.acceleration')}
+                          </Badge>
+                        )}
                         {getProgramDraft(program.id) && (
                           <Badge variant="outline" className="text-orange-600 border-orange-300">
                             {t('adminPrograms.draft')}
