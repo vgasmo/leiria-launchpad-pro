@@ -64,6 +64,7 @@
     "newAction": "Novo Item de Ação",
     "noActions": "Nenhuma ação encontrada",
     "noActionsYet": "Ainda sem ações. Adicione ações para acompanhar o progresso.",
+    "noCommentsYet": "Sem comentários",
     "noItems": "Sem ações",
     "noMilestones": "Sem marcos ainda. Crie marcos primeiro para adicionar ações.",
     "open": "Aberto",
@@ -88,8 +89,7 @@
     "titleRequired": "Título é obrigatório",
     "unassigned": "Não atribuído",
     "unassignedActions": "Ações Não Atribuídas",
-    "updatedCount": "{{count}} ações atualizadas",
-    "noCommentsYet": "Sem comentários"
+    "updatedCount": "{{count}} ações atualizadas"
   },
   "activityLog": {
     "action": "Ação",
@@ -1656,6 +1656,10 @@
     "waitingListFulfilled": "Pedido satisfeito",
     "waitingListUpdateError": "Erro ao atualizar pedido",
     "waitingListUpdated": "Pedido atualizado"
+  },
+  "backup": {
+    "pending": "Pendentes",
+    "withError": "Com erro"
   },
   "benchmark": {
     "aboveAverage": "Above average",
@@ -4838,13 +4842,13 @@
     "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
     "conversationFailed": "Não foi possível iniciar conversa",
     "newConversation": "Nova Conversa",
+    "noConversations": "Sem conversas",
     "noUsersFound": "Nenhum utilizador encontrado",
     "searchUsers": "Pesquisar utilizadores...",
     "startConversation": "Iniciar Conversa",
     "startConversationFailed": "Não foi possível iniciar conversa",
-    "usersSelected": "{{count}} utilizador(es) selecionado(s)",
-    "noConversations": "Sem conversas",
-    "startConversationHint": "Inicie uma conversa com alguém do ecossistema usando o botão acima."
+    "startConversationHint": "Inicie uma conversa com alguém do ecossistema usando o botão acima.",
+    "usersSelected": "{{count}} utilizador(es) selecionado(s)"
   },
   "milestones": {
     "addMilestone": "Adicionar Marco",
@@ -5555,6 +5559,40 @@
     "updatedDescription": "A prioridade do workspace foi atualizada"
   },
   "programSetup": {
+    "acceleration": {
+      "addDeliverable": "Adicionar",
+      "addGate": "Adicionar Gate",
+      "addWeek": "Adicionar Semana",
+      "assignGate": "Gate",
+      "defaultGate1": "Discovery",
+      "defaultGate2": "Build",
+      "defaultGate3": "Launch",
+      "deliverablePlaceholder": "Título do entregável",
+      "deliverables": "entregáveis",
+      "endWeek": "Semana Fim",
+      "gateDescPlaceholder": "O que deve ser alcançado neste gate...",
+      "gateDescription": "Descrição",
+      "gateName": "Nome",
+      "gateNamePlaceholder": "ex: Discovery",
+      "gates": "Gates / Fases",
+      "gatesDesc": "Defina as fases/checkpoints principais do seu programa de aceleração.",
+      "noDeliverables": "Sem entregáveis ainda. Adicione o que as startups devem completar nesta semana.",
+      "noGate": "Sem gate",
+      "noWeeks": "Nenhuma semana configurada ainda. Adicione semanas para definir a timeline do programa.",
+      "removeWeek": "Remover Semana",
+      "startWeek": "Semana Início",
+      "untitled": "Sem título",
+      "weekDescription": "Descrição",
+      "weekN": "Semana {{n}}",
+      "weekNumber": "Semana #",
+      "weekRange": "Semanas {{start}}-{{end}}",
+      "weekTitle": "Título",
+      "weekTitlePlaceholder": "ex: Customer Discovery",
+      "weeks": "Plano Semanal",
+      "weeksDesc": "Defina cada semana com os seus entregáveis. Atribua semanas aos gates."
+    },
+    "accelerationType": "Aceleração",
+    "accelerationTypeDesc": "Programa com duração fixa, entregáveis semanais e gates. Duração fixa (ex: 12 semanas).",
     "back": "Voltar",
     "basicMode": "Básico",
     "basicModeDesc": "Leve: Foco em sessões, tarefas, templates e mentoria.",
@@ -5570,6 +5608,8 @@
     "discardDraftTitle": "Descartar rascunho?",
     "editProgram": "Editar Programa: {{name}}",
     "endDate": "Data de Fim",
+    "incubationType": "Incubação",
+    "incubationTypeDesc": "Programa baseado em estágios (ideação → escala). As startups progridem por estágios de maturidade com playbooks.",
     "loading": "A carregar...",
     "modules": {
       "alerts": "Alertas",
@@ -5590,6 +5630,8 @@
     "programModeDescription": "Escolha como as startups neste programa serão geridas",
     "programName": "Nome do Programa",
     "programNamePlaceholder": "ex: Acelerador 2024",
+    "programType": "Tipo de Programa",
+    "programTypeDescription": "Escolha o tipo de programa que pretende criar",
     "progressSaved": "Progresso guardado",
     "publishProgram": "Publicar Programa",
     "publishSuccess": "🎉 Programa publicado com sucesso!",
@@ -5618,44 +5660,6 @@
       "review": "Revisão",
       "stages": "Etapas",
       "weeksGates": "Semanas & Gates"
-    },
-    "programType": "Tipo de Programa",
-    "programTypeDescription": "Escolha o tipo de programa que pretende criar",
-    "incubationType": "Incubação",
-    "incubationTypeDesc": "Programa baseado em estágios (ideação → escala). As startups progridem por estágios de maturidade com playbooks.",
-    "accelerationType": "Aceleração",
-    "accelerationTypeDesc": "Programa com duração fixa, entregáveis semanais e gates. Duração fixa (ex: 12 semanas).",
-    "acceleration": {
-      "gates": "Gates / Fases",
-      "gatesDesc": "Defina as fases/checkpoints principais do seu programa de aceleração.",
-      "addGate": "Adicionar Gate",
-      "gateName": "Nome",
-      "gateNamePlaceholder": "ex: Discovery",
-      "startWeek": "Semana Início",
-      "endWeek": "Semana Fim",
-      "gateDescription": "Descrição",
-      "gateDescPlaceholder": "O que deve ser alcançado neste gate...",
-      "weekRange": "Semanas {{start}}-{{end}}",
-      "weeks": "Plano Semanal",
-      "weeksDesc": "Defina cada semana com os seus entregáveis. Atribua semanas aos gates.",
-      "addWeek": "Adicionar Semana",
-      "weekN": "Semana {{n}}",
-      "untitled": "Sem título",
-      "deliverables": "entregáveis",
-      "weekNumber": "Semana #",
-      "weekTitle": "Título",
-      "weekTitlePlaceholder": "ex: Customer Discovery",
-      "assignGate": "Gate",
-      "noGate": "Sem gate",
-      "weekDescription": "Descrição",
-      "addDeliverable": "Adicionar",
-      "deliverablePlaceholder": "Título do entregável",
-      "noDeliverables": "Sem entregáveis ainda. Adicione o que as startups devem completar nesta semana.",
-      "removeWeek": "Remover Semana",
-      "noWeeks": "Nenhuma semana configurada ainda. Adicione semanas para definir a timeline do programa.",
-      "defaultGate1": "Discovery",
-      "defaultGate2": "Build",
-      "defaultGate3": "Launch"
     },
     "validation": {
       "atLeastOneGate": "Pelo menos um gate é obrigatório",
@@ -7873,9 +7877,5 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
-  },
-  "backup": {
-    "withError": "Com erro",
-    "pending": "Pendentes"
   }
 }

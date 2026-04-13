@@ -64,6 +64,7 @@
     "newAction": "New Action Item",
     "noActions": "No actions found",
     "noActionsYet": "No actions yet. Add actions to track progress.",
+    "noCommentsYet": "No comments yet",
     "noItems": "No actions",
     "noMilestones": "No milestones yet. Create milestones first to add actions.",
     "open": "Open",
@@ -88,8 +89,7 @@
     "titleRequired": "Title is required",
     "unassigned": "Unassigned",
     "unassignedActions": "Unassigned Actions",
-    "updatedCount": "Updated {{count}} actions",
-    "noCommentsYet": "No comments yet"
+    "updatedCount": "Updated {{count}} actions"
   },
   "activityLog": {
     "action": "Action",
@@ -1656,6 +1656,10 @@
     "waitingListFulfilled": "Request fulfilled",
     "waitingListUpdateError": "Failed to update request",
     "waitingListUpdated": "Request updated"
+  },
+  "backup": {
+    "pending": "Pending",
+    "withError": "With error"
   },
   "benchmark": {
     "aboveAverage": "Above average",
@@ -4838,13 +4842,13 @@
     "adjustSearch": "Try adjusting search or check if user is registered.",
     "conversationFailed": "Could not start conversation",
     "newConversation": "New Conversation",
+    "noConversations": "No conversations",
     "noUsersFound": "No users found",
     "searchUsers": "Search users...",
     "startConversation": "Start Conversation",
     "startConversationFailed": "Could not start conversation",
-    "usersSelected": "{{count}} user(s) selected",
-    "noConversations": "No conversations",
-    "startConversationHint": "Start a conversation with someone from the ecosystem using the button above."
+    "startConversationHint": "Start a conversation with someone from the ecosystem using the button above.",
+    "usersSelected": "{{count}} user(s) selected"
   },
   "milestones": {
     "addMilestone": "Add Milestone",
@@ -5555,6 +5559,40 @@
     "updatedDescription": "Workspace priority has been updated"
   },
   "programSetup": {
+    "acceleration": {
+      "addDeliverable": "Add",
+      "addGate": "Add Gate",
+      "addWeek": "Add Week",
+      "assignGate": "Gate",
+      "defaultGate1": "Discovery",
+      "defaultGate2": "Build",
+      "defaultGate3": "Launch",
+      "deliverablePlaceholder": "Deliverable title",
+      "deliverables": "deliverables",
+      "endWeek": "End Week",
+      "gateDescPlaceholder": "What should be achieved by this gate...",
+      "gateDescription": "Description",
+      "gateName": "Name",
+      "gateNamePlaceholder": "e.g., Discovery",
+      "gates": "Gates / Phases",
+      "gatesDesc": "Define the major phases/checkpoints of your acceleration program.",
+      "noDeliverables": "No deliverables yet. Add what startups should complete this week.",
+      "noGate": "No gate",
+      "noWeeks": "No weeks configured yet. Add weeks to define your program timeline.",
+      "removeWeek": "Remove Week",
+      "startWeek": "Start Week",
+      "untitled": "Untitled",
+      "weekDescription": "Description",
+      "weekN": "Week {{n}}",
+      "weekNumber": "Week #",
+      "weekRange": "Weeks {{start}}-{{end}}",
+      "weekTitle": "Title",
+      "weekTitlePlaceholder": "e.g., Customer Discovery",
+      "weeks": "Weekly Plan",
+      "weeksDesc": "Define each week with its deliverables. Assign weeks to gates."
+    },
+    "accelerationType": "Acceleration",
+    "accelerationTypeDesc": "Time-bound program with weekly deliverables and gates. Fixed duration (e.g., 12 weeks).",
     "back": "Back",
     "basicMode": "Basic",
     "basicModeDesc": "Lightweight: Focus on sessions, tasks, templates, and mentoring.",
@@ -5570,6 +5608,8 @@
     "discardDraftTitle": "Discard draft?",
     "editProgram": "Edit Program: {{name}}",
     "endDate": "End Date",
+    "incubationType": "Incubation",
+    "incubationTypeDesc": "Stage-based program (ideation → scale). Startups progress through maturity stages with playbooks.",
     "loading": "Loading...",
     "modules": {
       "alerts": "Alerts",
@@ -5590,6 +5630,8 @@
     "programModeDescription": "Choose how startups in this program will be managed",
     "programName": "Program Name",
     "programNamePlaceholder": "e.g., Accelerator 2024",
+    "programType": "Program Type",
+    "programTypeDescription": "Choose the type of program you want to create",
     "progressSaved": "Progress saved",
     "publishProgram": "Publish Program",
     "publishSuccess": "🎉 Program published successfully!",
@@ -5618,44 +5660,6 @@
       "review": "Review",
       "stages": "Stages",
       "weeksGates": "Weeks & Gates"
-    },
-    "programType": "Program Type",
-    "programTypeDescription": "Choose the type of program you want to create",
-    "incubationType": "Incubation",
-    "incubationTypeDesc": "Stage-based program (ideation → scale). Startups progress through maturity stages with playbooks.",
-    "accelerationType": "Acceleration",
-    "accelerationTypeDesc": "Time-bound program with weekly deliverables and gates. Fixed duration (e.g., 12 weeks).",
-    "acceleration": {
-      "gates": "Gates / Phases",
-      "gatesDesc": "Define the major phases/checkpoints of your acceleration program.",
-      "addGate": "Add Gate",
-      "gateName": "Name",
-      "gateNamePlaceholder": "e.g., Discovery",
-      "startWeek": "Start Week",
-      "endWeek": "End Week",
-      "gateDescription": "Description",
-      "gateDescPlaceholder": "What should be achieved by this gate...",
-      "weekRange": "Weeks {{start}}-{{end}}",
-      "weeks": "Weekly Plan",
-      "weeksDesc": "Define each week with its deliverables. Assign weeks to gates.",
-      "addWeek": "Add Week",
-      "weekN": "Week {{n}}",
-      "untitled": "Untitled",
-      "deliverables": "deliverables",
-      "weekNumber": "Week #",
-      "weekTitle": "Title",
-      "weekTitlePlaceholder": "e.g., Customer Discovery",
-      "assignGate": "Gate",
-      "noGate": "No gate",
-      "weekDescription": "Description",
-      "addDeliverable": "Add",
-      "deliverablePlaceholder": "Deliverable title",
-      "noDeliverables": "No deliverables yet. Add what startups should complete this week.",
-      "removeWeek": "Remove Week",
-      "noWeeks": "No weeks configured yet. Add weeks to define your program timeline.",
-      "defaultGate1": "Discovery",
-      "defaultGate2": "Build",
-      "defaultGate3": "Launch"
     },
     "validation": {
       "atLeastOneGate": "At least one gate is required",
@@ -7873,9 +7877,5 @@
     "upcomingSession": "Session coming up",
     "updateKpis": "Update your KPIs",
     "viewActions": "View Actions"
-  },
-  "backup": {
-    "withError": "With error",
-    "pending": "Pending"
   }
 }
