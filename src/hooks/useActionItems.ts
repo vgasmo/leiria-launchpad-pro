@@ -209,8 +209,8 @@ export function useUpdateActionItem(workspaceId: string) {
                link: `${getAppUrl()}/workspace/${workspaceId}?tab=actions`,
                linkText: 'View Action',
              },
-           }).catch(() => {}); // Silent fail
-         })().catch(() => {});
+           }).catch((err) => logger.warn('action_assign_notification_failed', { error: String(err) }));
+         })().catch((err) => logger.warn('action_assign_notification_wrapper_failed', { error: String(err) }));
        }
     },
   });

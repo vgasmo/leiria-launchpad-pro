@@ -159,7 +159,7 @@ export function useCreateSession(workspaceId: string) {
         sessionId: data.id,
         action: 'create',
         workspaceId,
-      }).catch(() => {}); // Silent fail - non-blocking
+      }).catch((err) => logger.warn('session_outlook_sync_failed', { error: String(err) }));
 
       // P0.1: Auto-trigger Teams notification (graceful fail)
       (async () => {
@@ -201,8 +201,8 @@ export function useCreateSession(workspaceId: string) {
             link: `${getAppUrl()}/workspace/${workspaceId}?tab=agenda`,
             linkText: 'View Session',
           },
-        }).catch(() => {}); // Silent fail - non-blocking
-      })().catch(() => {});
+        }).catch((err) => logger.warn('session_teams_notification_failed', { error: String(err) }));
+      })().catch((err) => logger.warn('session_teams_wrapper_failed', { error: String(err) }));
     },
   });
 }

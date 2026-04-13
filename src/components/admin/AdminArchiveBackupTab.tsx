@@ -136,11 +136,11 @@ function ContractArchiveStatus() {
           </div>
           <div className="text-center p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-            <div className="text-xs text-muted-foreground">Pendentes</div>
+            <div className="text-xs text-muted-foreground">{t('backup.pending', 'Pending')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
             <div className="text-2xl font-bold text-red-600">{stats.failed}</div>
-            <div className="text-xs text-muted-foreground">Com erro</div>
+            <div className="text-xs text-muted-foreground">{t('backup.withError', 'With error')}</div>
           </div>
         </div>
 

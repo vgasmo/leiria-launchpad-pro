@@ -185,7 +185,7 @@ export function ActionComments({ actionId, canWrite }: ActionCommentsProps) {
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground text-center py-2">No comments yet</p>
+          <p className="text-xs text-muted-foreground text-center py-2">{t('actions.noCommentsYet', 'No comments yet')}</p>
         )}
 
         {canWrite && (

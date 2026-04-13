@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConversations, useMessages, useSendMessage, useMarkConversationRead, Conversation } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ interface MessagingPanelProps {
 }
 
 export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelProps>(function MessagingPanel({ open, onOpenChange }, _ref) {
+  const { t } = useTranslation();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showNewConversation, setShowNewConversation] = useState(false);
@@ -123,10 +125,10 @@ export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelPro
                   <div className="h-12 w-12 rounded-full bg-muted/60 flex items-center justify-center mb-3">
                     <MessageCircle className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground mb-1">Sem conversas</p>
-                  <p className="text-xs text-muted-foreground max-w-[220px]">
-                    Inicie uma conversa com alguém do ecossistema usando o botão acima.
-                  </p>
+                   <p className="text-sm font-medium text-foreground mb-1">{t('messaging.noConversations', 'No conversations')}</p>
+                   <p className="text-xs text-muted-foreground max-w-[220px]">
+                    {t('messaging.startConversationHint', 'Start a conversation with someone from the ecosystem using the button above.')}
+                   </p>
                 </div>
               ) : (
                 <div className="p-2 space-y-1">
