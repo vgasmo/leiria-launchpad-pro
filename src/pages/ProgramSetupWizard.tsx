@@ -277,10 +277,18 @@ export default function ProgramSetupWizard() {
               <div className="flex items-center gap-2">
                 <Rocket className="h-5 w-5 text-primary" />
                 <span className="font-medium">{t('programSetup.setupProgress')}</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-2">
               <Badge variant={draft?.status === 'draft' ? 'secondary' : 'default'}>
                 {draft?.status || 'draft'}
               </Badge>
+              {autosaveStatus === 'saving' && (
+                <span className="text-xs text-muted-foreground animate-pulse">⏳ {t('programSetup.saving', { defaultValue: 'A guardar...' })}</span>
+              )}
+              {autosaveStatus === 'saved' && (
+                <span className="text-xs text-muted-foreground">💾 {t('programSetup.autoSaved', { defaultValue: 'Guardado' })}</span>
+              )}
+            </div>
             </div>
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between mt-3">
@@ -343,20 +351,20 @@ export default function ProgramSetupWizard() {
                   {currentStep === 'basics' && (
                     <WizardBasicsStep
                       data={draft.draft_json.basics}
-                      onUpdate={(basics) => handleUpdateDraft({ basics })}
+                      onUpdate={(basics) => handleUpdateDraftWithAutosave({ basics })}
                     />
                   )}
                   {currentStep === 'stages' && (
                     <WizardStagesStep
                       data={draft.draft_json.stages}
-                      onUpdate={(stages) => handleUpdateDraft({ stages })}
+                      onUpdate={(stages) => handleUpdateDraftWithAutosave({ stages })}
                     />
                   )}
                   {currentStep === 'weeksGates' && (
                     <WizardWeeksGatesStep
                       gates={draft.draft_json.gates || []}
                       weeks={draft.draft_json.weeks || []}
-                      onUpdate={(gates, weeks) => handleUpdateDraft({ gates, weeks })}
+                      onUpdate={(gates, weeks) => handleUpdateDraftWithAutosave({ gates, weeks })}
                     />
                   )}
                   {currentStep === 'kpis' && (
@@ -364,14 +372,14 @@ export default function ProgramSetupWizard() {
                       stages={draft.draft_json.stages}
                       kpis={draft.draft_json.kpis}
                       coreKpis={draft.draft_json.coreKpis}
-                      onUpdate={(kpis, coreKpis) => handleUpdateDraft({ kpis, coreKpis })}
+                      onUpdate={(kpis, coreKpis) => handleUpdateDraftWithAutosave({ kpis, coreKpis })}
                     />
                   )}
                   {currentStep === 'playbooks' && (
                     <WizardPlaybooksStep
                       stages={draft.draft_json.stages}
                       playbooks={draft.draft_json.playbooks}
-                      onUpdate={(playbooks) => handleUpdateDraft({ playbooks })}
+                      onUpdate={(playbooks) => handleUpdateDraftWithAutosave({ playbooks })}
                     />
                   )}
                   {currentStep === 'alerts' && (
