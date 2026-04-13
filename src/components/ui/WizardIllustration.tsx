@@ -27,7 +27,8 @@ interface WizardIllustrationProps {
     | 'stages'
     | 'playbooks'
     | 'alerts'
-    | 'review';
+    | 'review'
+    | 'weeksGates';
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
