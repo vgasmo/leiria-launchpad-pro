@@ -105,7 +105,7 @@ export function WizardIllustration({
   className,
   size = 'md',
 }: WizardIllustrationProps) {
-  const config = illustrations[type];
+  const config = illustrations[type] || illustrations.welcome;
   const Icon = config.icon;
   const sizes = sizeClasses[size];
 
