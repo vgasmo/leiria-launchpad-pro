@@ -128,6 +128,31 @@ export interface ProgramSetupDraft {
   updated_at: string;
 }
 
+function mapPlaybookToDraft(playbook: {
+  stage: StartupStage;
+  title: string;
+  description: string | null;
+  items?: unknown;
+}): DraftPlaybook {
+  return {
+    stage_key: playbook.stage,
+    title: playbook.title,
+    description: playbook.description || undefined,
+    items: ((playbook.items as DraftPlaybookItem[]) || [])
+      .map((item) => ({
+        item_type: item.item_type as 'milestone' | 'action',
+        title: item.title,
+        description: item.description,
+        relative_due_days: item.relative_due_days,
+        priority: item.priority,
+        order_index: item.order_index,
+        default_owner_role: item.default_owner_role,
+        metadata_json: item.metadata_json,
+      }))
+      .sort((a, b) => a.order_index - b.order_index),
+  };
+}
+
 // Fetch all drafts
 export function useProgramSetupDrafts() {
   return useQuery({
@@ -333,6 +358,46 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
     .select('*, items:playbook_items(*)')
     .eq('program_id', programId);
 
+  const activeStageKeys = ((stages || [])
+    .filter((stage) => stage.is_active ?? true)
+    .map((stage) => stage.stage_key)
+    .filter(Boolean) || []) as StartupStage[];
+
+  const existingPlaybookStages = new Set(
+    ((playbooks || []).map((playbook) => playbook.stage).filter(Boolean) || []) as StartupStage[]
+  );
+
+  const missingPlaybookStages = activeStageKeys.filter((stageKey) => !existingPlaybookStages.has(stageKey));
+
+  let mergedPlaybooks = (playbooks || []) as Array<{
+    stage: StartupStage;
+    title: string;
+    description: string | null;
+    items?: unknown;
+  }>;
+
+  if (missingPlaybookStages.length > 0) {
+    const { data: globalPlaybooks } = await supabase
+      .from('playbooks')
+      .select('*, items:playbook_items(*)')
+      .is('program_id', null)
+      .eq('is_active', true)
+      .in('stage', missingPlaybookStages);
+
+    if (globalPlaybooks?.length) {
+      const fallbackByStage = new Map(
+        globalPlaybooks.map((playbook) => [playbook.stage as StartupStage, playbook])
+      );
+
+      mergedPlaybooks = [
+        ...mergedPlaybooks,
+        ...missingPlaybookStages
+          .map((stageKey) => fallbackByStage.get(stageKey))
+          .filter((playbook): playbook is NonNullable<typeof playbook> => !!playbook),
+      ];
+    }
+  }
+
   // Load alert rules
   const { data: alertRules } = await supabase
     .from('program_alert_rules')
@@ -405,21 +470,13 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
         order_index: c.order_index,
       };
     }),
-    playbooks: (playbooks || []).map((p) => ({
-      stage_key: p.stage as StartupStage,
-      title: p.title,
-      description: p.description || undefined,
-      items: ((p.items as unknown as DraftPlaybookItem[]) || []).map((item) => ({
-        item_type: item.item_type as 'milestone' | 'action',
-        title: item.title,
-        description: item.description,
-        relative_due_days: item.relative_due_days,
-        priority: item.priority,
-        order_index: item.order_index,
-        default_owner_role: item.default_owner_role,
-        metadata_json: item.metadata_json,
-      })),
-    })),
+    playbooks:
+      activeStageKeys.length > 0
+        ? activeStageKeys
+            .map((stageKey) => mergedPlaybooks.find((playbook) => playbook.stage === stageKey))
+            .filter((playbook): playbook is NonNullable<typeof playbook> => !!playbook)
+            .map((playbook) => mapPlaybookToDraft(playbook))
+        : mergedPlaybooks.map((playbook) => mapPlaybookToDraft(playbook)),
     alertRules: (alertRules || []).map((r) => ({
       rule_type: r.rule_type,
       threshold: Number(r.threshold),
