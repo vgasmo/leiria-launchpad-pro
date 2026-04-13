@@ -4,6 +4,7 @@ import {
   TrendingUp,
   Target,
   Calendar,
+  CalendarDays,
   CheckCircle2,
   Building2,
   Layers,
@@ -26,7 +27,8 @@ interface WizardIllustrationProps {
     | 'stages'
     | 'playbooks'
     | 'alerts'
-    | 'review';
+    | 'review'
+    | 'weeksGates';
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -85,6 +87,11 @@ const illustrations: Record<
     gradient: 'from-primary/20 via-primary/10 to-transparent',
     accent: 'text-primary',
   },
+  weeksGates: {
+    icon: CalendarDays,
+    gradient: 'from-teal-500/20 via-teal-500/10 to-transparent',
+    accent: 'text-teal-500',
+  },
 };
 
 const sizeClasses = {
@@ -98,7 +105,7 @@ export function WizardIllustration({
   className,
   size = 'md',
 }: WizardIllustrationProps) {
-  const config = illustrations[type];
+  const config = illustrations[type] || illustrations.welcome;
   const Icon = config.icon;
   const sizes = sizeClasses[size];
 
