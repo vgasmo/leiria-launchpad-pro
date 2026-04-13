@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Target, ListTodo, GripVertical } from 'lucide-react';
 import { getStageLabel } from '@/lib/kpiAutoGenerator';
+import { supabase } from '@/lib/supabaseClient';
 import type { DraftStage, DraftPlaybook, DraftPlaybookItem } from '@/hooks/useProgramSetup';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -22,20 +23,108 @@ interface WizardPlaybooksStepProps {
   onUpdate: (playbooks: DraftPlaybook[]) => void;
 }
 
+function createEmptyPlaybook(stage: DraftStage): DraftPlaybook {
+  return {
+    stage_key: stage.stage_key,
+    title: `${stage.name || getStageLabel(stage.stage_key)} Playbook`,
+    description: '',
+    items: [],
+  };
+}
+
+function mapTemplateToDraft(template: {
+  stage: StartupStage;
+  title: string;
+  description: string | null;
+  items?: unknown;
+}): DraftPlaybook {
+  return {
+    stage_key: template.stage,
+    title: template.title,
+    description: template.description || '',
+    items: ((template.items as DraftPlaybookItem[]) || [])
+      .map((item) => ({
+        item_type: item.item_type,
+        title: item.title,
+        description: item.description,
+        relative_due_days: item.relative_due_days,
+        priority: item.priority,
+        order_index: item.order_index,
+        default_owner_role: item.default_owner_role,
+        metadata_json: item.metadata_json,
+      }))
+      .sort((a, b) => a.order_index - b.order_index),
+  };
+}
+
 export function WizardPlaybooksStep({ stages, playbooks, onUpdate }: WizardPlaybooksStepProps) {
   const { t } = useTranslation();
   const activeStages = stages.filter((s) => s.is_active);
 
   // Initialize playbooks for each active stage if empty
   const [localPlaybooks, setLocalPlaybooks] = useState<DraftPlaybook[]>(() => {
-    if (playbooks && playbooks.length > 0) return playbooks;
-    return activeStages.map((stage) => ({
-      stage_key: stage.stage_key,
-      title: `${stage.name} Playbook`,
-      description: '',
-      items: [],
-    }));
+    return activeStages.map(
+      (stage) => playbooks.find((playbook) => playbook.stage_key === stage.stage_key) || createEmptyPlaybook(stage)
+    );
   });
+
+  useEffect(() => {
+    setLocalPlaybooks((prev) => {
+      const synced = activeStages.map((stage) => {
+        return (
+          prev.find((playbook) => playbook.stage_key === stage.stage_key) ||
+          playbooks.find((playbook) => playbook.stage_key === stage.stage_key) ||
+          createEmptyPlaybook(stage)
+        );
+      });
+
+      return JSON.stringify(prev) === JSON.stringify(synced) ? prev : synced;
+    });
+  }, [activeStages, playbooks]);
+
+  useEffect(() => {
+    const missingStageKeys = activeStages
+      .map((stage) => stage.stage_key)
+      .filter((stageKey) => !playbooks.some((playbook) => playbook.stage_key === stageKey));
+
+    if (missingStageKeys.length === 0) return;
+
+    let cancelled = false;
+
+    const loadMissingTemplates = async () => {
+      const { data, error } = await supabase
+        .from('playbooks')
+        .select('stage, title, description, items:playbook_items(*)')
+        .is('program_id', null)
+        .eq('is_active', true)
+        .in('stage', missingStageKeys);
+
+      if (error || cancelled || !data?.length) return;
+
+      const templatesByStage = new Map(
+        data.map((template) => [template.stage as StartupStage, mapTemplateToDraft(template as never)])
+      );
+
+      setLocalPlaybooks((prev) => {
+        const next = activeStages.map((stage) => {
+          return (
+            prev.find((playbook) => playbook.stage_key === stage.stage_key) ||
+            playbooks.find((playbook) => playbook.stage_key === stage.stage_key) ||
+            templatesByStage.get(stage.stage_key) ||
+            createEmptyPlaybook(stage)
+          );
+        });
+
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+    };
+
+    void loadMissingTemplates();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeStages, playbooks]);
 
   // Debounced update
   useEffect(() => {
