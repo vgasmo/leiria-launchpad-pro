@@ -21,10 +21,12 @@ interface DirectoryItem {
 export function AdminMissionControlDirectory() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeTab = searchParams.get('tab');
   const [isExpanded, setIsExpanded] = useState(!activeTab || activeTab === 'approvals');
 
-  const items: DirectoryItem[] = [
+  const items: (DirectoryItem & { route?: string })[] = [
+    { tab: 'ecosystem', label: t('admin.directory.ecosystemLabel', { defaultValue: 'Startups & Workspaces' }), icon: Globe2, description: t('admin.directory.ecosystemDesc', { defaultValue: 'Gestão do ecossistema' }), group: 'operations', route: '/ecosystem' },
     { tab: 'approvals', label: t('admin.approvals'), icon: Clock, description: t('admin.directory.approvalsDesc', { defaultValue: 'Pedidos pendentes de aprovação' }), group: 'operations' },
     { tab: 'enrollment', label: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }), icon: UserPlus, description: t('admin.directory.enrollmentDesc', { defaultValue: 'Controlo de inscrições e claims' }), group: 'operations' },
     { tab: 'backoffice', label: t('admin.backoffice.tab'), icon: Building2, description: t('admin.directory.backofficeDesc', { defaultValue: 'Contratos, espaços e operações' }), group: 'operations' },
@@ -43,7 +45,11 @@ export function AdminMissionControlDirectory() {
     { tab: 'health', label: t('admin.healthModels'), icon: Heart, description: t('admin.directory.healthDesc', { defaultValue: 'Modelos de saúde do ecossistema' }), group: 'reports' },
   ];
 
-  const handleNavigate = (tab: string) => {
+  const handleNavigate = (tab: string, route?: string) => {
+    if (route) {
+      navigate(route);
+      return;
+    }
     setSearchParams({ tab }, { replace: true });
     setIsExpanded(false);
   };
