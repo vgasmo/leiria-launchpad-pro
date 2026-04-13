@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit, Calendar, Flag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,6 +35,7 @@ interface Program {
   end_date: string | null;
   is_active: boolean;
   created_at: string;
+  program_type?: 'incubation' | 'acceleration';
 }
 
 interface Stage {
