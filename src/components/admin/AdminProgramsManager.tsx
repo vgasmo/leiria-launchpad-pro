@@ -411,8 +411,8 @@ export function AdminProgramsManager() {
                     <div className="flex items-center gap-2">
                       <CollapsibleTrigger asChild>
                         <Button variant="outline" size="sm">
-                          <Plus className="h-3 w-3 mr-1" />
-                          {t('adminPrograms.stages', 'Etapas')}
+                          {program.program_type === 'acceleration' ? <Calendar className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                          {program.program_type === 'acceleration' ? t('adminPrograms.gatesAndWeeks') : t('adminPrograms.stages')}
                           {expandedId === program.id ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
                         </Button>
                       </CollapsibleTrigger>
@@ -435,7 +435,11 @@ export function AdminProgramsManager() {
                     </div>
                   </div>
                   <CollapsibleContent className="mt-4">
-                    <StagesManager programId={program.id} />
+                    {program.program_type === 'acceleration' ? (
+                      <GatesWeeksManager programId={program.id} />
+                    ) : (
+                      <StagesManager programId={program.id} />
+                    )}
                   </CollapsibleContent>
                 </CardContent>
               </Card>
