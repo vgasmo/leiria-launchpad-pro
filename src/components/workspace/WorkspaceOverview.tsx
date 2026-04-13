@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
 import { 
-  Calendar, 
+  Calendar, CalendarDays, 
   CheckCircle2, 
   Target, 
   TrendingUp, 
