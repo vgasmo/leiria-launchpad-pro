@@ -179,15 +179,25 @@ Deno.serve(async (req) => {
     const validationErrors: string[] = [];
     if (!draftData.basics?.name?.trim()) validationErrors.push('Program name is required');
     
-    const activeStages = draftData.stages?.filter(s => s.is_active) || [];
-    if (activeStages.length === 0) validationErrors.push('At least one stage must be active');
+    const isAcceleration = draftData.basics?.program_type === 'acceleration';
+    
+    // Stage validation only for incubation programs
+    if (!isAcceleration) {
+      const activeStages = draftData.stages?.filter(s => s.is_active) || [];
+      if (activeStages.length === 0) validationErrors.push('At least one stage must be active');
+    } else {
+      // Acceleration: require at least one gate
+      if (!draftData.gates || draftData.gates.length === 0) {
+        validationErrors.push('At least one gate is required for acceleration programs');
+      }
+    }
     
     // Core KPI validation only for standard mode with KPIs enabled
     const settings = draftData.basics?.settings;
     const isBasicMode = settings?.program_mode === 'basic';
     const kpisEnabled = settings?.enable_kpis !== false;
     
-    if (!isBasicMode && kpisEnabled) {
+    if (!isAcceleration && !isBasicMode && kpisEnabled) {
       const coreKpiCount = draftData.coreKpis?.length || 0;
       if (coreKpiCount < 3 || coreKpiCount > 6) {
         validationErrors.push('Core KPIs must be between 3 and 6 for standard mode');
