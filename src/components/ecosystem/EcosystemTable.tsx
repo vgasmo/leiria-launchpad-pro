@@ -1,8 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { MoreHorizontal, Building2, Users, ExternalLink, Calendar, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { MoreHorizontal, Building2, Users, ExternalLink, Calendar, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive, Trash2 } from 'lucide-react';
 import { InlineConsultantSelect } from './InlineConsultantSelect';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +45,8 @@ interface Props {
 export function EcosystemTable({ items, onOpenItem }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState<EcosystemItem | null>(null);
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -46,6 +61,36 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
   const safeSetPageSize = (size: number) => {
     setPageSize(size);
     setPage(0);
+  };
+
+  const handleArchiveWorkspace = async (item: EcosystemItem) => {
+    if (!item.workspace_id) return;
+    try {
+      const { error } = await supabase
+        .from('workspaces')
+        .update({ status: 'archived' })
+        .eq('id', item.workspace_id);
+      if (error) throw error;
+      toast.success(t('ecosystem.workspaceArchived', { defaultValue: 'Workspace arquivado' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    } catch {
+      toast.error(t('common.errorSaving', { defaultValue: 'Erro ao guardar' }));
+    }
+  };
+
+  const handleDeleteLead = async (item: EcosystemItem) => {
+    if (!item.funnel_item_id) return;
+    try {
+      const { error } = await supabase
+        .from('funnel_items')
+        .delete()
+        .eq('id', item.funnel_item_id);
+      if (error) throw error;
+      toast.success(t('ecosystem.leadDeleted', { defaultValue: 'Lead eliminada' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    } catch {
+      toast.error(t('common.errorSaving', { defaultValue: 'Erro ao eliminar' }));
+    }
   };
 
   // Reset page when items change significantly
@@ -265,6 +310,24 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                           </DropdownMenuItem>
                         </>
                       )}
+                      <DropdownMenuSeparator />
+                      {item.item_type === 'workspace' ? (
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); handleArchiveWorkspace(item); }}
+                        >
+                          <Archive className="h-4 w-4 mr-2" />
+                          {t('ecosystem.archiveWorkspace', { defaultValue: 'Arquivar Workspace' })}
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(item); }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t('ecosystem.deleteLead', { defaultValue: 'Eliminar Lead' })}
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -274,6 +337,33 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
         </Table>
         {items.length > pageSize && <PaginationControls />}
       </div>
+
+      {/* Confirmation dialog for deleting leads */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('ecosystem.confirmDeleteTitle', { defaultValue: 'Eliminar Lead?' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('ecosystem.confirmDeleteDesc', { 
+                name: confirmDelete?.name,
+                defaultValue: `Tens a certeza que queres eliminar "${confirmDelete?.name}"? Esta ação não pode ser revertida.` 
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Cancelar' })}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDelete) handleDeleteLead(confirmDelete);
+                setConfirmDelete(null);
+              }}
+            >
+              {t('common.delete', { defaultValue: 'Eliminar' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
