@@ -81,17 +81,22 @@ export default function ProgramSetupWizard() {
   const discardDraft = useDiscardProgramDraft();
   const publishDraft = usePublishProgramDraft();
 
-  // Determine which steps to show based on program mode + enabled modules
+  // Determine which steps to show based on program type + mode + enabled modules
   const programSettings = draft?.draft_json.basics?.settings;
   const isBasicMode = programSettings?.program_mode === 'basic';
-  const showKpisStep = !isBasicMode || !!programSettings?.enable_kpis;
-  const showPlaybooksStep = !isBasicMode || !!programSettings?.enable_playbooks || !!programSettings?.enable_milestones;
-  const showAlertsStep = !isBasicMode || !!programSettings?.enable_alerts || !!programSettings?.enable_health;
+  const isAcceleration = draft?.draft_json.basics?.program_type === 'acceleration';
+  const showKpisStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_kpis);
+  const showPlaybooksStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_playbooks || !!programSettings?.enable_milestones);
+  const showAlertsStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_alerts || !!programSettings?.enable_health);
   const showAlertRulesCard = !isBasicMode || !!programSettings?.enable_alerts;
   const showHealthCard = !isBasicMode || !!programSettings?.enable_health;
 
   const STEPS = ALL_STEPS.filter((step) => {
     switch (step.key) {
+      case 'stages':
+        return !isAcceleration; // Incubation only
+      case 'weeksGates':
+        return isAcceleration; // Acceleration only
       case 'kpis':
         return showKpisStep;
       case 'playbooks':
