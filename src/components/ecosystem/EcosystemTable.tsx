@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Building2, Users, ExternalLink, Calendar, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { InlineConsultantSelect } from './InlineConsultantSelect';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -217,8 +218,16 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                     <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {item.owner_name || '-'}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  {item.item_type === 'workspace' && item.workspace_id ? (
+                    <InlineConsultantSelect
+                      workspaceId={item.workspace_id}
+                      currentOwnerId={item.owner_id}
+                      currentOwnerName={item.owner_name || null}
+                    />
+                  ) : (
+                    <span className="text-muted-foreground text-sm">{item.owner_name || '-'}</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {item.last_activity_at 
