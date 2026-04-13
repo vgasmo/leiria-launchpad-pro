@@ -39,7 +39,7 @@ export function useCreateProgram() {
 export function useUpdateProgram() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; start_date?: string; end_date?: string; is_active?: boolean }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; start_date?: string; end_date?: string; is_active?: boolean; program_type?: 'incubation' | 'acceleration' }) => {
       const { data, error } = await supabase.from('programs').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;

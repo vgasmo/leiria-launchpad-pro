@@ -316,6 +316,7 @@ export function AdminProgramsManager() {
         description: formData.description || undefined,
         start_date: formData.start_date || undefined,
         end_date: formData.end_date || undefined,
+        program_type: formData.program_type,
       });
     } else {
       await createProgram.mutateAsync({
