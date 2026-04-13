@@ -52,12 +52,12 @@ import { triggerConfetti } from '@/lib/confetti';
 
 type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
-const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType; standardOnly?: boolean }[] = [
+const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType }[] = [
   { key: 'basics', labelKey: 'programSetup.steps.basics', icon: Building2 },
-  { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers, standardOnly: true },
-  { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3, standardOnly: true },
-  { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen, standardOnly: true },
-  { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell, standardOnly: true },
+  { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers },
+  { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3 },
+  { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen },
+  { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell },
   { key: 'review', labelKey: 'programSetup.steps.review', icon: CheckCircle },
 ];
 
@@ -78,9 +78,27 @@ export default function ProgramSetupWizard() {
   const discardDraft = useDiscardProgramDraft();
   const publishDraft = usePublishProgramDraft();
 
-  // Determine which steps to show based on program mode
-  const isBasicMode = draft?.draft_json.basics?.settings?.program_mode === 'basic';
-  const STEPS = ALL_STEPS.filter(step => !step.standardOnly || !isBasicMode);
+  // Determine which steps to show based on program mode + enabled modules
+  const programSettings = draft?.draft_json.basics?.settings;
+  const isBasicMode = programSettings?.program_mode === 'basic';
+  const showKpisStep = !isBasicMode || !!programSettings?.enable_kpis;
+  const showPlaybooksStep = !isBasicMode || !!programSettings?.enable_playbooks || !!programSettings?.enable_milestones;
+  const showAlertsStep = !isBasicMode || !!programSettings?.enable_alerts || !!programSettings?.enable_health;
+  const showAlertRulesCard = !isBasicMode || !!programSettings?.enable_alerts;
+  const showHealthCard = !isBasicMode || !!programSettings?.enable_health;
+
+  const STEPS = ALL_STEPS.filter((step) => {
+    switch (step.key) {
+      case 'kpis':
+        return showKpisStep;
+      case 'playbooks':
+        return showPlaybooksStep;
+      case 'alerts':
+        return showAlertsStep;
+      default:
+        return true;
+    }
+  });
 
   // Helper for step transitions
   const goToStep = (step: WizardStep) => {
@@ -327,10 +345,10 @@ export default function ProgramSetupWizard() {
                     <WizardReviewStep
                       draft={draft}
                       validationErrors={getValidationErrors()}
-                      onNavigateToStep={(step) => {
-                        setPrevStep(currentStep);
-                        setCurrentStep(step as WizardStep);
-                      }}
+                      availableSteps={STEPS.map((step) => step.key)}
+                      showAlertRulesCard={showAlertRulesCard}
+                      showHealthCard={showHealthCard}
+                      onNavigateToStep={(step) => goToStep(step as WizardStep)}
                     />
                   )}
                 </>
