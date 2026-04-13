@@ -8,7 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { usePrograms } from '@/hooks/useProgramSetup';
 import type { DraftBasics, ProgramModeSettings } from '@/hooks/useProgramSetup';
-import { BarChart3, Activity, Target, Bell, BookOpen, Calculator, Zap, Settings2 } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+import { BarChart3, Activity, Target, Bell, BookOpen, Calculator, Zap, Settings2, Rocket, Building2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+type ProgramType = Database['public']['Enums']['program_type'];
 import { useTranslation } from 'react-i18next';
 
 interface WizardBasicsStepProps {
@@ -50,6 +54,7 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
   const [localData, setLocalData] = useState<DraftBasics>({
     ...data,
     settings: data.settings || DEFAULT_SETTINGS,
+    program_type: data.program_type || 'incubation',
   });
   const { data: programs } = usePrograms();
 
@@ -99,8 +104,11 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
 
   const currentSettings = localData.settings || DEFAULT_SETTINGS;
   const isBasicMode = currentSettings.program_mode === 'basic';
+  const isAcceleration = localData.program_type === 'acceleration';
 
-  return (
+  const handleProgramTypeChange = (type: ProgramType) => {
+    setLocalData((prev) => ({ ...prev, program_type: type }));
+  };
     <div className="space-y-6">
       {/* Clone from existing */}
       {programs && programs.length > 0 && !data.name && (
