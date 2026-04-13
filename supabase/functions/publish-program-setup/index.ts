@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     const isBasicMode = settings?.program_mode === 'basic';
     const kpisEnabled = settings?.enable_kpis !== false;
     
-    if (!isBasicMode && kpisEnabled) {
+    if (!isAcceleration && !isBasicMode && kpisEnabled) {
       const coreKpiCount = draftData.coreKpis?.length || 0;
       if (coreKpiCount < 3 || coreKpiCount > 6) {
         validationErrors.push('Core KPIs must be between 3 and 6 for standard mode');
