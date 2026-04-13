@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Switch } from '@/components/ui/switch';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -23,19 +23,43 @@ interface WizardKpisStepProps {
 }
 
 export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisStepProps) {
+  const { t } = useTranslation();
   const activeStages = stages.filter((s) => s.is_active).map((s) => s.stage_key);
 
-  // Auto-generate KPIs if empty
-  const initialStageKpis = (() => {
-    if (kpis && kpis.length > 0) return kpis;
-    const generated = generateKpisForStages(activeStages);
-    return generated.map(g => ({
-      stage_key: g.stage_key,
-      kpis: g.kpis.map(k => ({ ...k, unit: k.unit || '#' })),
-    }));
-  })();
+  // Auto-generate KPIs, ensuring all active stages have entries
+  const buildStageKpis = useCallback((existing: DraftStageKpis[]): DraftStageKpis[] => {
+    const result: DraftStageKpis[] = [];
+    for (const stageKey of activeStages) {
+      const existingStage = existing.find((s) => s.stage_key === stageKey);
+      if (existingStage && existingStage.kpis.length > 0) {
+        result.push(existingStage);
+      } else {
+        // Generate defaults for missing stages
+        const generated = generateKpisForStages([stageKey]);
+        if (generated.length > 0) {
+          result.push({
+            stage_key: stageKey,
+            kpis: generated[0].kpis.map(k => ({ ...k, unit: k.unit || '#' })),
+          });
+        }
+      }
+    }
+    return result;
+  }, [activeStages.join(',')]);
 
-  const [stageKpis, setStageKpis] = useState<DraftStageKpis[]>(initialStageKpis);
+  const [stageKpis, setStageKpis] = useState<DraftStageKpis[]>(() => buildStageKpis(kpis || []));
+
+  // Sync when active stages change (e.g. user activates growth/scale)
+  useEffect(() => {
+    setStageKpis((prev) => {
+      const updated = buildStageKpis(prev);
+      // Only update if there's a real change (new stages added/removed)
+      const prevKeys = prev.map(s => s.stage_key).sort().join(',');
+      const updatedKeys = updated.map(s => s.stage_key).sort().join(',');
+      if (prevKeys !== updatedKeys) return updated;
+      return prev;
+    });
+  }, [buildStageKpis]);
 
   const [localCoreKpis, setLocalCoreKpis] = useState<DraftCoreKpi[]>(() => {
     if (coreKpis && coreKpis.length > 0) return coreKpis;
