@@ -310,6 +310,24 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
                           </DropdownMenuItem>
                         </>
                       )}
+                      <DropdownMenuSeparator />
+                      {item.item_type === 'workspace' ? (
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); handleArchiveWorkspace(item); }}
+                        >
+                          <Archive className="h-4 w-4 mr-2" />
+                          {t('ecosystem.archiveWorkspace', { defaultValue: 'Arquivar Workspace' })}
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(item); }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t('ecosystem.deleteLead', { defaultValue: 'Eliminar Lead' })}
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -319,6 +337,33 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
         </Table>
         {items.length > pageSize && <PaginationControls />}
       </div>
+
+      {/* Confirmation dialog for deleting leads */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('ecosystem.confirmDeleteTitle', { defaultValue: 'Eliminar Lead?' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('ecosystem.confirmDeleteDesc', { 
+                name: confirmDelete?.name,
+                defaultValue: `Tens a certeza que queres eliminar "${confirmDelete?.name}"? Esta ação não pode ser revertida.` 
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Cancelar' })}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDelete) handleDeleteLead(confirmDelete);
+                setConfirmDelete(null);
+              }}
+            >
+              {t('common.delete', { defaultValue: 'Eliminar' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
