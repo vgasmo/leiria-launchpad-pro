@@ -22,7 +22,24 @@ interface DraftData {
     start_date?: string;
     end_date?: string;
     settings?: ProgramModeSettings;
+    program_type?: 'incubation' | 'acceleration';
   };
+  gates?: {
+    id?: string;
+    name: string;
+    description?: string;
+    sort_order: number;
+    target_start_week?: number;
+    target_end_week?: number;
+  }[];
+  weeks?: {
+    id?: string;
+    gate_id?: string;
+    week_number: number;
+    title: string;
+    description?: string;
+    deliverables_json: { title: string; description?: string }[];
+  }[];
   stages: {
     stage_key: string;
     name: string;
