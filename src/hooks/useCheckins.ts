@@ -245,8 +245,8 @@ export function useSubmitCheckin() {
                 link: `${getAppUrl()}/workspace/${result.workspaceId}?tab=kpis`,
                 linkText: 'View Check-in',
              },
-           }).catch(() => {}); // Silent fail
-         })().catch(() => {});
+           }).catch((err) => logger.warn('checkin_notification_failed', { error: String(err) }));
+         })().catch((err) => logger.warn('checkin_notification_wrapper_failed', { error: String(err) }));
        }
     },
     onError: (error: any) => {
