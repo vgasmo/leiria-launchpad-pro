@@ -63,6 +63,36 @@ export function EcosystemTable({ items, onOpenItem }: Props) {
     setPage(0);
   };
 
+  const handleArchiveWorkspace = async (item: EcosystemItem) => {
+    if (!item.workspace_id) return;
+    try {
+      const { error } = await supabase
+        .from('workspaces')
+        .update({ status: 'archived' })
+        .eq('id', item.workspace_id);
+      if (error) throw error;
+      toast.success(t('ecosystem.workspaceArchived', { defaultValue: 'Workspace arquivado' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    } catch {
+      toast.error(t('common.errorSaving', { defaultValue: 'Erro ao guardar' }));
+    }
+  };
+
+  const handleDeleteLead = async (item: EcosystemItem) => {
+    if (!item.funnel_item_id) return;
+    try {
+      const { error } = await supabase
+        .from('funnel_items')
+        .delete()
+        .eq('id', item.funnel_item_id);
+      if (error) throw error;
+      toast.success(t('ecosystem.leadDeleted', { defaultValue: 'Lead eliminada' }));
+      queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
+    } catch {
+      toast.error(t('common.errorSaving', { defaultValue: 'Erro ao eliminar' }));
+    }
+  };
+
   // Reset page when items change significantly
   const safePage = Math.min(page, totalPages - 1);
   if (safePage !== page) setPage(safePage);
