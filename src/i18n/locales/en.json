@@ -1409,6 +1409,7 @@
     "workspaceKpiTitle": "Workspace KPI Configuration"
   },
   "adminPrograms": {
+    "acceleration": "Acceleration",
     "active": "Active",
     "addStage": "Add Stage",
     "cancel": "Cancel",
@@ -1420,19 +1421,24 @@
     "deleteProgramDescription": "Delete \"{{name}}\"? This will also delete all stages. Workspaces using this program may be affected.",
     "deleteStage": "Delete Stage",
     "deleteStageDescription": "Delete \"{{name}}\"? This cannot be undone.",
+    "deliverables": "deliverables",
     "description": "Description",
     "draft": "Draft",
     "editProgram": "Edit Program",
     "editStage": "Edit Stage",
     "emptyState": "No programs yet. Create your first program to get started.",
     "endDate": "End Date",
+    "gates": "Gates",
+    "gatesAndWeeks": "Gates & Weeks",
     "inactive": "Inactive",
     "name": "Name",
     "namePlaceholder": "e.g., Accelerator 2025",
     "newProgram": "New Program",
     "newProgramWizard": "New Program (Wizard)",
     "newStage": "New Stage",
+    "noGates": "No gates configured",
     "noStages": "No stages yet",
+    "noWeeks": "No weeks configured",
     "position": "Position",
     "quickCreate": "Quick Create",
     "setup": "Setup",
@@ -1440,7 +1446,9 @@
     "startDate": "Start Date",
     "subtitle": "Manage incubation programs and their stages",
     "title": "Programs & Stages",
-    "update": "Update"
+    "update": "Update",
+    "weeks": "Weeks",
+    "weeksRange": "Weeks {{start}}-{{end}}"
   },
   "adminTemplates": {
     "basicInfo": "Basic Info",
