@@ -88,7 +88,8 @@
     "titleRequired": "Title is required",
     "unassigned": "Unassigned",
     "unassignedActions": "Unassigned Actions",
-    "updatedCount": "Updated {{count}} actions"
+    "updatedCount": "Updated {{count}} actions",
+    "noCommentsYet": "No comments yet"
   },
   "activityLog": {
     "action": "Action",
@@ -4834,7 +4835,9 @@
     "searchUsers": "Search users...",
     "startConversation": "Start Conversation",
     "startConversationFailed": "Could not start conversation",
-    "usersSelected": "{{count}} user(s) selected"
+    "usersSelected": "{{count}} user(s) selected",
+    "noConversations": "No conversations",
+    "startConversationHint": "Start a conversation with someone from the ecosystem using the button above."
   },
   "milestones": {
     "addMilestone": "Add Milestone",
@@ -7820,5 +7823,9 @@
     "upcomingSession": "Session coming up",
     "updateKpis": "Update your KPIs",
     "viewActions": "View Actions"
+  },
+  "backup": {
+    "withError": "With error",
+    "pending": "Pending"
   }
 }

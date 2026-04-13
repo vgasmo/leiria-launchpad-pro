@@ -88,7 +88,8 @@
     "titleRequired": "Título é obrigatório",
     "unassigned": "Não atribuído",
     "unassignedActions": "Ações Não Atribuídas",
-    "updatedCount": "{{count}} ações atualizadas"
+    "updatedCount": "{{count}} ações atualizadas",
+    "noCommentsYet": "Sem comentários"
   },
   "activityLog": {
     "action": "Ação",
@@ -4834,7 +4835,9 @@
     "searchUsers": "Pesquisar utilizadores...",
     "startConversation": "Iniciar Conversa",
     "startConversationFailed": "Não foi possível iniciar conversa",
-    "usersSelected": "{{count}} utilizador(es) selecionado(s)"
+    "usersSelected": "{{count}} utilizador(es) selecionado(s)",
+    "noConversations": "Sem conversas",
+    "startConversationHint": "Inicie uma conversa com alguém do ecossistema usando o botão acima."
   },
   "milestones": {
     "addMilestone": "Adicionar Marco",
@@ -7820,5 +7823,9 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
+  },
+  "backup": {
+    "withError": "Com erro",
+    "pending": "Pendentes"
   }
 }
