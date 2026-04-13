@@ -324,6 +324,13 @@ export function AdminProgramsManager() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Plus className="h-3 w-3 mr-1" />
+                          {t('adminPrograms.stages', 'Etapas')}
+                          {expandedId === program.id ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
+                        </Button>
+                      </CollapsibleTrigger>
                       <Button
                         variant="outline"
                         size="sm"
