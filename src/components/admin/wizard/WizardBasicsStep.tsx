@@ -176,6 +176,57 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
         </div>
       </div>
 
+      {/* Program Type Selection (Incubation vs Acceleration) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Rocket className="h-5 w-5 text-primary" />
+            <CardTitle className="text-base">{t('programSetup.programType', 'Program Type')}</CardTitle>
+          </div>
+          <CardDescription>
+            {t('programSetup.programTypeDescription', 'Choose the type of program to create')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleProgramTypeChange('incubation')}
+              className={`flex-1 p-4 rounded-lg border-2 transition-all text-left ${
+                !isAcceleration
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted hover:border-muted-foreground/30'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Building2 className="h-4 w-4 text-primary" />
+                <span className="font-medium">{t('programSetup.incubation', 'Incubation')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('programSetup.incubationDesc', 'Stage-based progression (ideation → scale) with playbooks, KPIs, and health scores per stage.')}
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleProgramTypeChange('acceleration')}
+              className={`flex-1 p-4 rounded-lg border-2 transition-all text-left ${
+                isAcceleration
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted hover:border-muted-foreground/30'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Rocket className="h-4 w-4 text-primary" />
+                <span className="font-medium">{t('programSetup.acceleration', 'Acceleration')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('programSetup.accelerationDesc', 'Time-bound structure with weeks, deliverables, and gates. Ideal for cohort-based programs.')}
+              </p>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Program Mode Selection */}
       <Card>
         <CardHeader className="pb-3">
