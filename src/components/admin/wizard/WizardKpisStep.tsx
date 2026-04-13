@@ -64,7 +64,8 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
   const [localCoreKpis, setLocalCoreKpis] = useState<DraftCoreKpi[]>(() => {
     if (coreKpis && coreKpis.length > 0) return coreKpis;
     // Convert to StageKpiConfig format for suggestCoreKpis
-    const stageKpiConfigs: StageKpiConfig[] = initialStageKpis.map(sk => ({
+    const initKpis = buildStageKpis(kpis || []);
+    const stageKpiConfigs: StageKpiConfig[] = initKpis.map(sk => ({
       stage_key: sk.stage_key,
       kpis: sk.kpis.map(k => ({
         name: k.name,
