@@ -164,6 +164,7 @@ function StagesManager({ programId }: { programId: string }) {
 }
 function GatesWeeksManager({ programId }: { programId: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: gates, isLoading: gatesLoading } = useQuery({
     queryKey: ['program-gates', programId],
     queryFn: async () => {
@@ -194,11 +195,16 @@ function GatesWeeksManager({ programId }: { programId: string }) {
 
   return (
     <div className="pl-6 border-l border-border/50 space-y-4">
-      <div>
+      <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
           <Flag className="h-3.5 w-3.5" />
           {t('adminPrograms.gates')} ({gates?.length || 0})
         </span>
+        <Button variant="outline" size="sm" onClick={() => navigate(`/admin/programs/${programId}/setup`)}>
+          <FileEdit className="h-3 w-3 mr-1" />
+          {t('adminPrograms.editInWizard', { defaultValue: 'Editar no Wizard' })}
+        </Button>
+      </div>
         {gates?.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noGates')}</p>
         ) : (
