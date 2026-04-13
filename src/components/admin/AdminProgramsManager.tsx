@@ -164,6 +164,7 @@ function StagesManager({ programId }: { programId: string }) {
 }
 function GatesWeeksManager({ programId }: { programId: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: gates, isLoading: gatesLoading } = useQuery({
     queryKey: ['program-gates', programId],
     queryFn: async () => {
@@ -194,11 +195,17 @@ function GatesWeeksManager({ programId }: { programId: string }) {
 
   return (
     <div className="pl-6 border-l border-border/50 space-y-4">
-      <div>
+      <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
           <Flag className="h-3.5 w-3.5" />
           {t('adminPrograms.gates')} ({gates?.length || 0})
         </span>
+        <Button variant="outline" size="sm" onClick={() => navigate(`/admin/programs/${programId}/setup`)}>
+          <FileEdit className="h-3 w-3 mr-1" />
+          {t('adminPrograms.editInWizard', { defaultValue: 'Editar no Wizard' })}
+        </Button>
+      </div>
+      <div>
         {gates?.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noGates')}</p>
         ) : (
@@ -259,7 +266,7 @@ export function AdminProgramsManager() {
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Program | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '', start_date: '', end_date: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', start_date: '', end_date: '', program_type: 'incubation' as 'incubation' | 'acceleration' });
 
   const getProgramDraft = (programId: string) => drafts?.find(d => d.program_id === programId);
   const hasNewProgramDraft = drafts?.some(d => !d.program_id);
@@ -285,7 +292,7 @@ export function AdminProgramsManager() {
   };
 
   const handleCreate = () => {
-    setFormData({ name: '', description: '', start_date: '', end_date: '' });
+    setFormData({ name: '', description: '', start_date: '', end_date: '', program_type: 'incubation' });
     setIsCreating(true);
   };
 
@@ -295,6 +302,7 @@ export function AdminProgramsManager() {
       description: program.description || '',
       start_date: program.start_date || '',
       end_date: program.end_date || '',
+      program_type: program.program_type || 'incubation',
     });
     setEditingProgram(program);
   };
@@ -315,6 +323,7 @@ export function AdminProgramsManager() {
         description: formData.description || undefined,
         start_date: formData.start_date || undefined,
         end_date: formData.end_date || undefined,
+        program_type: formData.program_type,
       });
     }
     setEditingProgram(null);
@@ -475,6 +484,27 @@ export function AdminProgramsManager() {
               <div>
                 <Label>{t('adminPrograms.endDate')}</Label>
                 <Input type="date" value={formData.end_date} onChange={e => setFormData(f => ({ ...f, end_date: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>{t('adminPrograms.programType', { defaultValue: 'Tipo de Programa' })}</Label>
+              <div className="flex gap-2 mt-1.5">
+                <Button
+                  type="button"
+                  variant={formData.program_type === 'incubation' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFormData(f => ({ ...f, program_type: 'incubation' }))}
+                >
+                  {t('adminPrograms.incubation', { defaultValue: 'Incubação' })}
+                </Button>
+                <Button
+                  type="button"
+                  variant={formData.program_type === 'acceleration' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFormData(f => ({ ...f, program_type: 'acceleration' }))}
+                >
+                  {t('adminPrograms.acceleration', { defaultValue: 'Aceleração' })}
+                </Button>
               </div>
             </div>
           </div>

@@ -532,18 +532,4 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
   };
 }
 
-// Fetch programs for template selection
-export function usePrograms() {
-  return useQuery({
-    queryKey: ['programs'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('programs')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      return data;
-    },
-  });
-}
+// usePrograms moved to useAdminData.ts — import from there

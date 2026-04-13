@@ -288,21 +288,8 @@ export function useWorkspace(id: string | undefined) {
   });
 }
 
-export function usePrograms() {
-  return useQuery({
-    queryKey: ['programs'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('programs')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
-}
+// usePrograms moved to useAdminData.ts — import from there
+export { usePrograms } from '@/hooks/useAdminData';
 
 export interface PendingWorkspace {
   id: string;

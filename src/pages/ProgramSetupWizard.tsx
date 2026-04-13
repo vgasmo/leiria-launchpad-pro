@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -73,6 +73,8 @@ export default function ProgramSetupWizard() {
   const [prevStep, setPrevStep] = useState<WizardStep>('basics');
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(draftId || null);
+  const [autosaveStatus, setAutosaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const publishedRef = useRef(false);
 
   const { data: draft, isLoading: draftLoading } = useProgramSetupDraft(activeDraftId || undefined);
@@ -165,10 +167,26 @@ export default function ProgramSetupWizard() {
     toast.success(t('programSetup.progressSaved'));
   };
 
-  const handleUpdateDraft = async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
+  const handleUpdateDraft = useCallback(async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
     if (!activeDraftId) return;
     await updateDraft.mutateAsync({ draftId: activeDraftId, draftJson: updates });
-  };
+  }, [activeDraftId, updateDraft]);
+
+  // Autosave: debounced save after 2s of inactivity
+  const handleUpdateDraftWithAutosave = useCallback((updates: Partial<ProgramSetupDraft['draft_json']>) => {
+    if (!activeDraftId) return;
+    setAutosaveStatus('saving');
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(async () => {
+      try {
+        await updateDraft.mutateAsync({ draftId: activeDraftId, draftJson: updates });
+        setAutosaveStatus('saved');
+        setTimeout(() => setAutosaveStatus('idle'), 2000);
+      } catch {
+        setAutosaveStatus('idle');
+      }
+    }, 2000);
+  }, [activeDraftId, updateDraft]);
 
   const handleDiscard = async () => {
     if (!activeDraftId) return;
@@ -259,10 +277,18 @@ export default function ProgramSetupWizard() {
               <div className="flex items-center gap-2">
                 <Rocket className="h-5 w-5 text-primary" />
                 <span className="font-medium">{t('programSetup.setupProgress')}</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-2">
               <Badge variant={draft?.status === 'draft' ? 'secondary' : 'default'}>
                 {draft?.status || 'draft'}
               </Badge>
+              {autosaveStatus === 'saving' && (
+                <span className="text-xs text-muted-foreground animate-pulse">⏳ {t('programSetup.saving', { defaultValue: 'A guardar...' })}</span>
+              )}
+              {autosaveStatus === 'saved' && (
+                <span className="text-xs text-muted-foreground">💾 {t('programSetup.autoSaved', { defaultValue: 'Guardado' })}</span>
+              )}
+            </div>
             </div>
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between mt-3">
@@ -325,20 +351,20 @@ export default function ProgramSetupWizard() {
                   {currentStep === 'basics' && (
                     <WizardBasicsStep
                       data={draft.draft_json.basics}
-                      onUpdate={(basics) => handleUpdateDraft({ basics })}
+                      onUpdate={(basics) => handleUpdateDraftWithAutosave({ basics })}
                     />
                   )}
                   {currentStep === 'stages' && (
                     <WizardStagesStep
                       data={draft.draft_json.stages}
-                      onUpdate={(stages) => handleUpdateDraft({ stages })}
+                      onUpdate={(stages) => handleUpdateDraftWithAutosave({ stages })}
                     />
                   )}
                   {currentStep === 'weeksGates' && (
                     <WizardWeeksGatesStep
                       gates={draft.draft_json.gates || []}
                       weeks={draft.draft_json.weeks || []}
-                      onUpdate={(gates, weeks) => handleUpdateDraft({ gates, weeks })}
+                      onUpdate={(gates, weeks) => handleUpdateDraftWithAutosave({ gates, weeks })}
                     />
                   )}
                   {currentStep === 'kpis' && (
@@ -346,21 +372,21 @@ export default function ProgramSetupWizard() {
                       stages={draft.draft_json.stages}
                       kpis={draft.draft_json.kpis}
                       coreKpis={draft.draft_json.coreKpis}
-                      onUpdate={(kpis, coreKpis) => handleUpdateDraft({ kpis, coreKpis })}
+                      onUpdate={(kpis, coreKpis) => handleUpdateDraftWithAutosave({ kpis, coreKpis })}
                     />
                   )}
                   {currentStep === 'playbooks' && (
                     <WizardPlaybooksStep
                       stages={draft.draft_json.stages}
                       playbooks={draft.draft_json.playbooks}
-                      onUpdate={(playbooks) => handleUpdateDraft({ playbooks })}
+                      onUpdate={(playbooks) => handleUpdateDraftWithAutosave({ playbooks })}
                     />
                   )}
                   {currentStep === 'alerts' && (
                     <WizardAlertRulesStep
                       alertRules={draft.draft_json.alertRules}
                       healthModel={draft.draft_json.healthModel}
-                      onUpdate={(alertRules, healthModel) => handleUpdateDraft({ alertRules, healthModel })}
+                      onUpdate={(alertRules, healthModel) => handleUpdateDraftWithAutosave({ alertRules, healthModel })}
                     />
                   )}
                   {currentStep === 'review' && (

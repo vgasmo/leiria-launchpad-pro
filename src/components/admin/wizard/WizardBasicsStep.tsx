@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { usePrograms } from '@/hooks/useProgramSetup';
+import { usePrograms } from '@/hooks/useAdminData';
 import type { DraftBasics, ProgramModeSettings } from '@/hooks/useProgramSetup';
 import type { Database } from '@/integrations/supabase/types';
 import { BarChart3, Activity, Target, Bell, BookOpen, Calculator, Zap, Settings2, Rocket, Building2 } from 'lucide-react';

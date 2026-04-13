@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
 import { 
-  Calendar, 
+  Calendar, CalendarDays, 
   CheckCircle2, 
   Target, 
   TrendingUp, 
@@ -77,8 +77,9 @@ interface WorkspaceOverviewProps {
     health_notes: string | null;
     priority_level?: WorkspacePriority;
     priority_notes?: string | null;
+    current_week?: number | null;
     startup: { name: string; description: string | null; logo_url?: string | null } | null;
-    program: { name: string } | null;
+    program: { name: string; program_type?: string | null } | null;
   };
   canWrite: boolean;
 }
@@ -157,6 +158,14 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         milestonesTotal={(milestoneCounts.planned + milestoneCounts.inProgress + milestoneCounts.completed + milestoneCounts.delayed)}
         canWrite={canWrite}
       />
+
+      {/* Current Week Indicator for Acceleration Programs */}
+      {workspace.current_week && workspace.program?.program_type === 'acceleration' && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+          <CalendarDays className="h-4 w-4" />
+          {t('workspace.currentWeek', { week: workspace.current_week, defaultValue: 'Semana {{week}}' })}
+        </div>
+      )}
 
       {/* Enhanced Next Steps for Founders */}
       {isFounder && (

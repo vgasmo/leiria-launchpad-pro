@@ -8,12 +8,12 @@ const t = i18n.t.bind(i18n);
 // Programs
 export function usePrograms() {
   return useQuery({
-    queryKey: ['admin-programs'],
+    queryKey: ['programs'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('programs')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('name');
       if (error) throw error;
       return data;
     },
@@ -23,13 +23,13 @@ export function usePrograms() {
 export function useCreateProgram() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (program: { name: string; description?: string; start_date?: string; end_date?: string }) => {
+    mutationFn: async (program: { name: string; description?: string; start_date?: string; end_date?: string; program_type?: 'incubation' | 'acceleration' }) => {
       const { data, error } = await supabase.from('programs').insert(program).select().single();
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
       toast.success(t('admin.programCreated'));
     },
     onError: (e) => toast.error(t('common.operationFailed', { error: e.message })),
@@ -45,7 +45,7 @@ export function useUpdateProgram() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
       toast.success(t('admin.programUpdated'));
     },
     onError: (e) => toast.error(t('common.operationFailed', { error: e.message })),
@@ -60,7 +60,7 @@ export function useDeleteProgram() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
       toast.success(t('admin.programDeleted'));
     },
     onError: (e) => toast.error(t('common.operationFailed', { error: e.message })),
