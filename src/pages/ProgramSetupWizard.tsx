@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -73,6 +73,8 @@ export default function ProgramSetupWizard() {
   const [prevStep, setPrevStep] = useState<WizardStep>('basics');
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(draftId || null);
+  const [autosaveStatus, setAutosaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const publishedRef = useRef(false);
 
   const { data: draft, isLoading: draftLoading } = useProgramSetupDraft(activeDraftId || undefined);
@@ -165,10 +167,26 @@ export default function ProgramSetupWizard() {
     toast.success(t('programSetup.progressSaved'));
   };
 
-  const handleUpdateDraft = async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
+  const handleUpdateDraft = useCallback(async (updates: Partial<ProgramSetupDraft['draft_json']>) => {
     if (!activeDraftId) return;
     await updateDraft.mutateAsync({ draftId: activeDraftId, draftJson: updates });
-  };
+  }, [activeDraftId, updateDraft]);
+
+  // Autosave: debounced save after 2s of inactivity
+  const handleUpdateDraftWithAutosave = useCallback((updates: Partial<ProgramSetupDraft['draft_json']>) => {
+    if (!activeDraftId) return;
+    setAutosaveStatus('saving');
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(async () => {
+      try {
+        await updateDraft.mutateAsync({ draftId: activeDraftId, draftJson: updates });
+        setAutosaveStatus('saved');
+        setTimeout(() => setAutosaveStatus('idle'), 2000);
+      } catch {
+        setAutosaveStatus('idle');
+      }
+    }, 2000);
+  }, [activeDraftId, updateDraft]);
 
   const handleDiscard = async () => {
     if (!activeDraftId) return;
