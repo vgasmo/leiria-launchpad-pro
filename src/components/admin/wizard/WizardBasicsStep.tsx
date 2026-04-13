@@ -109,6 +109,8 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
   const handleProgramTypeChange = (type: ProgramType) => {
     setLocalData((prev) => ({ ...prev, program_type: type }));
   };
+
+  return (
     <div className="space-y-6">
       {/* Clone from existing */}
       {programs && programs.length > 0 && !data.name && (
