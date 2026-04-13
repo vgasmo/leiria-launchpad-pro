@@ -200,10 +200,10 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
             >
               <div className="flex items-center gap-2 mb-1">
                 <Building2 className="h-4 w-4 text-primary" />
-                <span className="font-medium">{t('programSetup.incubation', 'Incubation')}</span>
+                <span className="font-medium">{t('programSetup.incubationType', 'Incubation')}</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {t('programSetup.incubationDesc', 'Stage-based progression (ideation → scale) with playbooks, KPIs, and health scores per stage.')}
+                {t('programSetup.incubationTypeDesc', 'Stage-based progression (ideation → scale) with playbooks, KPIs, and health scores per stage.')}
               </p>
             </button>
             <button
@@ -217,10 +217,10 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
             >
               <div className="flex items-center gap-2 mb-1">
                 <Rocket className="h-4 w-4 text-primary" />
-                <span className="font-medium">{t('programSetup.acceleration', 'Acceleration')}</span>
+                <span className="font-medium">{t('programSetup.accelerationType', 'Acceleration')}</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {t('programSetup.accelerationDesc', 'Time-bound structure with weeks, deliverables, and gates. Ideal for cohort-based programs.')}
+                {t('programSetup.accelerationTypeDesc', 'Time-bound structure with weeks, deliverables, and gates. Ideal for cohort-based programs.')}
               </p>
             </button>
           </div>
