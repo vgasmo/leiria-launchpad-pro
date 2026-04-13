@@ -7,6 +7,7 @@ import i18n from '@/i18n';
 const t = i18n.t.bind(i18n);
 
 type StartupStage = Database['public']['Enums']['startup_stage'];
+type ProgramType = Database['public']['Enums']['program_type'];
 
 export interface ProgramModeSettings {
   program_mode: 'standard' | 'basic';
@@ -24,6 +25,7 @@ export interface DraftBasics {
   start_date?: string;
   end_date?: string;
   settings?: ProgramModeSettings;
+  program_type?: ProgramType;
 }
 
 export interface DraftStage {
@@ -88,6 +90,24 @@ export interface DraftHealthModel {
   is_enabled: boolean;
 }
 
+export interface DraftGate {
+  id?: string;
+  name: string;
+  description?: string;
+  sort_order: number;
+  target_start_week?: number;
+  target_end_week?: number;
+}
+
+export interface DraftWeek {
+  id?: string;
+  gate_id?: string;
+  week_number: number;
+  title: string;
+  description?: string;
+  deliverables_json: { title: string; description?: string }[];
+}
+
 export interface ProgramSetupDraft {
   id: string;
   program_id: string | null;
@@ -101,6 +121,8 @@ export interface ProgramSetupDraft {
     playbooks: DraftPlaybook[];
     alertRules: DraftAlertRule[];
     healthModel?: DraftHealthModel;
+    gates?: DraftGate[];
+    weeks?: DraftWeek[];
   };
   created_at: string;
   updated_at: string;

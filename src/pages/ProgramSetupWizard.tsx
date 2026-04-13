@@ -30,6 +30,7 @@ import {
   Bell,
   CheckCircle,
   Rocket,
+  CalendarDays,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -46,15 +47,17 @@ import { WizardKpisStep } from '@/components/admin/wizard/WizardKpisStep';
 import { WizardPlaybooksStep } from '@/components/admin/wizard/WizardPlaybooksStep';
 import { WizardAlertRulesStep } from '@/components/admin/wizard/WizardAlertRulesStep';
 import { WizardReviewStep } from '@/components/admin/wizard/WizardReviewStep';
+import { WizardWeeksGatesStep } from '@/components/admin/wizard/WizardWeeksGatesStep';
 import { WizardStepTransition } from '@/components/ui/WizardStepTransition';
 import { WizardIllustration } from '@/components/ui/WizardIllustration';
 import { triggerConfetti } from '@/lib/confetti';
 
-type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
+type WizardStep = 'basics' | 'stages' | 'weeksGates' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
 const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType }[] = [
   { key: 'basics', labelKey: 'programSetup.steps.basics', icon: Building2 },
   { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers },
+  { key: 'weeksGates', labelKey: 'programSetup.steps.weeksGates', icon: CalendarDays },
   { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3 },
   { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen },
   { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell },
@@ -78,17 +81,22 @@ export default function ProgramSetupWizard() {
   const discardDraft = useDiscardProgramDraft();
   const publishDraft = usePublishProgramDraft();
 
-  // Determine which steps to show based on program mode + enabled modules
+  // Determine which steps to show based on program type + mode + enabled modules
   const programSettings = draft?.draft_json.basics?.settings;
   const isBasicMode = programSettings?.program_mode === 'basic';
-  const showKpisStep = !isBasicMode || !!programSettings?.enable_kpis;
-  const showPlaybooksStep = !isBasicMode || !!programSettings?.enable_playbooks || !!programSettings?.enable_milestones;
-  const showAlertsStep = !isBasicMode || !!programSettings?.enable_alerts || !!programSettings?.enable_health;
+  const isAcceleration = draft?.draft_json.basics?.program_type === 'acceleration';
+  const showKpisStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_kpis);
+  const showPlaybooksStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_playbooks || !!programSettings?.enable_milestones);
+  const showAlertsStep = !isAcceleration && (!isBasicMode || !!programSettings?.enable_alerts || !!programSettings?.enable_health);
   const showAlertRulesCard = !isBasicMode || !!programSettings?.enable_alerts;
   const showHealthCard = !isBasicMode || !!programSettings?.enable_health;
 
   const STEPS = ALL_STEPS.filter((step) => {
     switch (step.key) {
+      case 'stages':
+        return !isAcceleration; // Incubation only
+      case 'weeksGates':
+        return isAcceleration; // Acceleration only
       case 'kpis':
         return showKpisStep;
       case 'playbooks':
@@ -187,13 +195,20 @@ export default function ProgramSetupWizard() {
     const errors: string[] = [];
     if (!draft) return errors;
 
-    const { basics, stages, coreKpis, alertRules, healthModel } = draft.draft_json;
+    const { basics, stages, coreKpis, alertRules, healthModel, gates, weeks } = draft.draft_json;
     const programIsBasic = basics?.settings?.program_mode === 'basic';
+    const programIsAcceleration = basics?.program_type === 'acceleration';
 
     if (!basics?.name?.trim()) errors.push(t('programSetup.validation.programNameRequired'));
     
-    // Standard mode validations
-    if (!programIsBasic) {
+    if (programIsAcceleration) {
+      // Acceleration validations
+      if (!gates || gates.length === 0) errors.push(t('programSetup.validation.atLeastOneGate', 'At least one gate is required'));
+      if (!weeks || weeks.length === 0) errors.push(t('programSetup.validation.atLeastOneWeek', 'At least one week is required'));
+      const gatesWithoutNames = gates?.filter(g => !g.name?.trim()) || [];
+      if (gatesWithoutNames.length > 0) errors.push(t('programSetup.validation.gateNameRequired', 'All gates must have a name'));
+    } else if (!programIsBasic) {
+      // Incubation standard mode validations
       const activeStages = stages?.filter((s) => s.is_active) || [];
       if (activeStages.length === 0) errors.push(t('programSetup.validation.atLeastOneStage'));
 
@@ -317,6 +332,13 @@ export default function ProgramSetupWizard() {
                     <WizardStagesStep
                       data={draft.draft_json.stages}
                       onUpdate={(stages) => handleUpdateDraft({ stages })}
+                    />
+                  )}
+                  {currentStep === 'weeksGates' && (
+                    <WizardWeeksGatesStep
+                      gates={draft.draft_json.gates || []}
+                      weeks={draft.draft_json.weeks || []}
+                      onUpdate={(gates, weeks) => handleUpdateDraft({ gates, weeks })}
                     />
                   )}
                   {currentStep === 'kpis' && (

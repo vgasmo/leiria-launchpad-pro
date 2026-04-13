@@ -22,7 +22,24 @@ interface DraftData {
     start_date?: string;
     end_date?: string;
     settings?: ProgramModeSettings;
+    program_type?: 'incubation' | 'acceleration';
   };
+  gates?: {
+    id?: string;
+    name: string;
+    description?: string;
+    sort_order: number;
+    target_start_week?: number;
+    target_end_week?: number;
+  }[];
+  weeks?: {
+    id?: string;
+    gate_id?: string;
+    week_number: number;
+    title: string;
+    description?: string;
+    deliverables_json: { title: string; description?: string }[];
+  }[];
   stages: {
     stage_key: string;
     name: string;
@@ -234,6 +251,7 @@ Deno.serve(async (req) => {
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
           settings_json: settingsJson,
+          program_type: draftData.basics.program_type || 'incubation',
           status: 'active',
           updated_at: new Date().toISOString(),
         })
@@ -251,6 +269,7 @@ Deno.serve(async (req) => {
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
           settings_json: settingsJson,
+          program_type: draftData.basics.program_type || 'incubation',
           status: 'active',
           is_active: true,
         })
@@ -262,7 +281,8 @@ Deno.serve(async (req) => {
       console.log(`[publish-program-setup] Created program ${programId}`);
     }
 
-    // 2. Upsert stages metadata
+    // 2. Upsert stages metadata (incubation only)
+    if (draftData.basics.program_type !== 'acceleration') {
     for (const stage of draftData.stages || []) {
       // Check if stage exists
       const { data: existing } = await supabase
@@ -294,6 +314,52 @@ Deno.serve(async (req) => {
       }
     }
     console.log(`[publish-program-setup] Upserted ${draftData.stages?.length || 0} stages`);
+    } // end incubation-only stages block
+
+    // 2b. Upsert gates and weeks (acceleration only)
+    if (draftData.basics.program_type === 'acceleration') {
+      // Delete existing gates and weeks for this program
+      await supabase.from('program_weeks').delete().eq('program_id', programId);
+      await supabase.from('program_gates').delete().eq('program_id', programId);
+
+      // Insert gates
+      const gateIdMap: Record<string, string> = {}; // temp key -> real id
+      for (const gate of draftData.gates || []) {
+        const { data: newGate, error: gateError } = await supabase
+          .from('program_gates')
+          .insert({
+            program_id: programId,
+            name: gate.name,
+            description: gate.description || null,
+            sort_order: gate.sort_order,
+            target_start_week: gate.target_start_week || null,
+            target_end_week: gate.target_end_week || null,
+          })
+          .select('id')
+          .single();
+
+        if (gateError || !newGate) {
+          console.error('[publish-program-setup] Failed to create gate:', gateError);
+          continue;
+        }
+        gateIdMap[`gate-${gate.sort_order}`] = newGate.id;
+      }
+      console.log(`[publish-program-setup] Created ${Object.keys(gateIdMap).length} gates`);
+
+      // Insert weeks
+      for (const week of draftData.weeks || []) {
+        const resolvedGateId = week.gate_id ? gateIdMap[week.gate_id] : null;
+        await supabase.from('program_weeks').insert({
+          program_id: programId,
+          gate_id: resolvedGateId || null,
+          week_number: week.week_number,
+          title: week.title,
+          description: week.description || null,
+          deliverables_json: week.deliverables_json || [],
+        });
+      }
+      console.log(`[publish-program-setup] Created ${draftData.weeks?.length || 0} weeks`);
+    }
 
     // 3. Process KPIs - create definitions if needed, then upsert defaults
     const kpiDefinitionMap: Record<string, string> = {}; // name -> id

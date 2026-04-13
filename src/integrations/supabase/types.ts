@@ -4023,6 +4023,50 @@ export type Database = {
           },
         ]
       }
+      program_gates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          program_id: string
+          sort_order: number
+          target_end_week: number | null
+          target_start_week: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          program_id: string
+          sort_order?: number
+          target_end_week?: number | null
+          target_start_week?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          program_id?: string
+          sort_order?: number
+          target_end_week?: number | null
+          target_start_week?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_gates_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_health_model: {
         Row: {
           created_at: string
@@ -4137,6 +4181,57 @@ export type Database = {
           },
         ]
       }
+      program_weeks: {
+        Row: {
+          created_at: string
+          deliverables_json: Json
+          description: string | null
+          gate_id: string | null
+          id: string
+          program_id: string
+          title: string
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string
+          deliverables_json?: Json
+          description?: string | null
+          gate_id?: string | null
+          id?: string
+          program_id: string
+          title: string
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          created_at?: string
+          deliverables_json?: Json
+          description?: string | null
+          gate_id?: string | null
+          id?: string
+          program_id?: string
+          title?: string
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_weeks_gate_id_fkey"
+            columns: ["gate_id"]
+            isOneToOne: false
+            referencedRelation: "program_gates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_weeks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           created_at: string
@@ -4145,6 +4240,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          program_type: Database["public"]["Enums"]["program_type"]
           settings_json: Json | null
           start_date: string | null
           status: string | null
@@ -4157,6 +4253,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          program_type?: Database["public"]["Enums"]["program_type"]
           settings_json?: Json | null
           start_date?: string | null
           status?: string | null
@@ -4169,6 +4266,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          program_type?: Database["public"]["Enums"]["program_type"]
           settings_json?: Json | null
           start_date?: string | null
           status?: string | null
@@ -7532,6 +7630,7 @@ export type Database = {
           blocked_by: string | null
           blocked_reason: string | null
           created_at: string
+          current_week: number | null
           external_id: string | null
           health_confidence: string | null
           health_confidence_reason: string | null
@@ -7571,6 +7670,7 @@ export type Database = {
           blocked_by?: string | null
           blocked_reason?: string | null
           created_at?: string
+          current_week?: number | null
           external_id?: string | null
           health_confidence?: string | null
           health_confidence_reason?: string | null
@@ -7610,6 +7710,7 @@ export type Database = {
           blocked_by?: string | null
           blocked_reason?: string | null
           created_at?: string
+          current_week?: number | null
           external_id?: string | null
           health_confidence?: string | null
           health_confidence_reason?: string | null
@@ -8505,6 +8606,7 @@ export type Database = {
         | "activated"
         | "cancelled"
       milestone_status: "not_started" | "in_progress" | "completed" | "delayed"
+      program_type: "incubation" | "acceleration"
       startup_stage: "ideation" | "validation" | "mvp" | "growth" | "scale"
       workspace_priority: "star" | "high" | "standard" | "maintenance"
     }
@@ -8661,6 +8763,7 @@ export const Constants = {
         "cancelled",
       ],
       milestone_status: ["not_started", "in_progress", "completed", "delayed"],
+      program_type: ["incubation", "acceleration"],
       startup_stage: ["ideation", "validation", "mvp", "growth", "scale"],
       workspace_priority: ["star", "high", "standard", "maintenance"],
     },
