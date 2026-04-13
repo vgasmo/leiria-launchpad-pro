@@ -46,10 +46,8 @@ verify_jwt = false
 [functions.export-cohort-health-pdf]
 verify_jwt = true
 
-# NOTE: verify_jwt disabled to avoid gateway-level "Invalid JWT" failures.
-# This function validates the bearer token at runtime.
 [functions.publish-program-setup]
-verify_jwt = false
+verify_jwt = true
 
 [functions.smart-session-scheduler]
 verify_jwt = true
