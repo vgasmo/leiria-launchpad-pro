@@ -25,6 +25,7 @@ import {
   useDeleteStage,
 } from '@/hooks/useAdminData';
 import { useProgramSetupDrafts, useCreateProgramDraft } from '@/hooks/useProgramSetup';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 interface Program {
