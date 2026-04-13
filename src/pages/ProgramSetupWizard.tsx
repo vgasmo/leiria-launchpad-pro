@@ -327,6 +327,13 @@ export default function ProgramSetupWizard() {
                       onUpdate={(stages) => handleUpdateDraft({ stages })}
                     />
                   )}
+                  {currentStep === 'weeksGates' && (
+                    <WizardWeeksGatesStep
+                      gates={draft.draft_json.gates || []}
+                      weeks={draft.draft_json.weeks || []}
+                      onUpdate={(gates, weeks) => handleUpdateDraft({ gates, weeks })}
+                    />
+                  )}
                   {currentStep === 'kpis' && (
                     <WizardKpisStep
                       stages={draft.draft_json.stages}
