@@ -205,6 +205,7 @@ function GatesWeeksManager({ programId }: { programId: string }) {
           {t('adminPrograms.editInWizard', { defaultValue: 'Editar no Wizard' })}
         </Button>
       </div>
+      <div>
         {gates?.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noGates')}</p>
         ) : (
