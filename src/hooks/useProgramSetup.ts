@@ -332,6 +332,9 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
     .eq('id', programId)
     .single();
 
+  const programType = (program?.program_type as ProgramType) || 'incubation';
+  const isAcceleration = programType === 'acceleration';
+
   // Load stages
   const { data: stages } = await supabase
     .from('stages')
@@ -411,6 +414,42 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
     .eq('program_id', programId)
     .single();
 
+  // Load gates and weeks for acceleration programs
+  let draftGates: DraftGate[] = [];
+  let draftWeeks: DraftWeek[] = [];
+
+  if (isAcceleration) {
+    const { data: gates } = await supabase
+      .from('program_gates')
+      .select('*')
+      .eq('program_id', programId)
+      .order('sort_order');
+
+    const { data: weeks } = await supabase
+      .from('program_weeks')
+      .select('*')
+      .eq('program_id', programId)
+      .order('week_number');
+
+    draftGates = (gates || []).map((g) => ({
+      id: g.id,
+      name: g.name,
+      description: g.description || undefined,
+      sort_order: g.sort_order,
+      target_start_week: g.target_start_week,
+      target_end_week: g.target_end_week,
+    }));
+
+    draftWeeks = (weeks || []).map((w) => ({
+      id: w.id,
+      gate_id: w.gate_id || undefined,
+      week_number: w.week_number,
+      title: w.title,
+      description: w.description || undefined,
+      deliverables_json: (w.deliverables_json as { title: string; description?: string }[]) || [],
+    }));
+  }
+
   // Transform to draft format
   const stageKpisMap = new Map<string, DraftKpi[]>();
   for (const def of kpiDefaults || []) {
@@ -441,6 +480,7 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
       description: program?.description || undefined,
       start_date: program?.start_date || undefined,
       end_date: program?.end_date || undefined,
+      program_type: programType,
       settings: programSettings || {
         program_mode: 'standard',
         enable_kpis: true,
@@ -488,6 +528,7 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
       thresholds_json: healthModel.thresholds_json as Record<string, number>,
       is_enabled: healthModel.is_enabled,
     } : undefined,
+    ...(isAcceleration ? { gates: draftGates, weeks: draftWeeks } : {}),
   };
 }
 
