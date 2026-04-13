@@ -118,7 +118,17 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
       const workspaceIds = workspaces?.map(w => w.id) || [];
       let ownerMap: Record<string, { id: string; name: string }> = {};
       
+      // Get owner info for workspaces - combine assigned_consultor_id and workspace_users
       if (workspaceIds.length > 0) {
+        // Collect all assigned consultor IDs from workspace records
+        const assignedConsultorIds = new Set<string>();
+        workspaces?.forEach(w => {
+          if ((w as any).assigned_consultor_id) {
+            assignedConsultorIds.add((w as any).assigned_consultor_id);
+          }
+        });
+
+        // Also fetch consultors from workspace_users as fallback
         const { data: wuData } = await supabase
           .from('workspace_users')
           .select('workspace_id, user_id')
@@ -126,22 +136,34 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
           .eq('role', 'consultor')
           .eq('active', true);
 
-        // Fetch profile names separately since workspace_users has no FK to profiles
-        const consultorIds = [...new Set(wuData?.map(wu => wu.user_id) || [])];
+        // Collect all unique consultor IDs
+        const allConsultorIds = new Set<string>([...assignedConsultorIds]);
+        wuData?.forEach(wu => allConsultorIds.add(wu.user_id));
+
         let consultorNames: Record<string, string> = {};
-        if (consultorIds.length > 0) {
+        if (allConsultorIds.size > 0) {
           const { data: profiles } = await supabase
             .from('profiles_safe')
             .select('id, full_name')
-            .in('id', consultorIds);
+            .in('id', [...allConsultorIds]);
           profiles?.forEach(p => { consultorNames[p.id] = p.full_name || 'Unknown'; });
         }
 
+        // Build owner map: prefer assigned_consultor_id, fallback to workspace_users
+        workspaces?.forEach(w => {
+          const assignedId = (w as any).assigned_consultor_id;
+          if (assignedId) {
+            ownerMap[w.id] = { id: assignedId, name: consultorNames[assignedId] || 'Unknown' };
+          }
+        });
+        // Fill in from workspace_users where no assigned_consultor_id
         wuData?.forEach(wu => {
-          ownerMap[wu.workspace_id] = { 
-            id: wu.user_id, 
-            name: consultorNames[wu.user_id] || 'Unknown' 
-          };
+          if (!ownerMap[wu.workspace_id]) {
+            ownerMap[wu.workspace_id] = { 
+              id: wu.user_id, 
+              name: consultorNames[wu.user_id] || 'Unknown' 
+            };
+          }
         });
       }
 
