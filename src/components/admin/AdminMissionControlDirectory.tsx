@@ -107,7 +107,7 @@ export function AdminMissionControlDirectory() {
                       return (
                         <button
                           key={item.tab}
-                          onClick={() => handleNavigate(item.tab)}
+                          onClick={() => handleNavigate(item.tab, (item as any).route)}
                           className={cn(
                             'flex flex-col items-start gap-0.5 p-2.5 rounded-xl border text-left',
                             'hover:bg-muted/60 hover:border-border/80 transition-all duration-150',
