@@ -251,6 +251,7 @@ Deno.serve(async (req) => {
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
           settings_json: settingsJson,
+          program_type: draftData.basics.program_type || 'incubation',
           status: 'active',
           updated_at: new Date().toISOString(),
         })
@@ -268,6 +269,7 @@ Deno.serve(async (req) => {
           start_date: draftData.basics.start_date || null,
           end_date: draftData.basics.end_date || null,
           settings_json: settingsJson,
+          program_type: draftData.basics.program_type || 'incubation',
           status: 'active',
           is_active: true,
         })
@@ -279,7 +281,8 @@ Deno.serve(async (req) => {
       console.log(`[publish-program-setup] Created program ${programId}`);
     }
 
-    // 2. Upsert stages metadata
+    // 2. Upsert stages metadata (incubation only)
+    if (draftData.basics.program_type !== 'acceleration') {
     for (const stage of draftData.stages || []) {
       // Check if stage exists
       const { data: existing } = await supabase
