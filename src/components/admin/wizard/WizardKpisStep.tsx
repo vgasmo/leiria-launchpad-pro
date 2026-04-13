@@ -282,7 +282,7 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
 
                       <div className="flex-1 grid gap-2 md:grid-cols-4">
                         <div className="space-y-1">
-                          <Label className="text-xs">Name</Label>
+                          <Label className="text-xs">{t('common.name')}</Label>
                           <Input
                             value={kpi.name}
                             onChange={(e) =>
@@ -292,7 +292,7 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Unit</Label>
+                          <Label className="text-xs">{t('admin.wizard.kpiUnit')}</Label>
                           <Input
                             value={kpi.unit || ''}
                             onChange={(e) =>
@@ -303,7 +303,7 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Target</Label>
+                          <Label className="text-xs">{t('admin.wizard.kpiTarget')}</Label>
                           <Input
                             type="number"
                             value={kpi.target_value || ''}
@@ -323,7 +323,7 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
                               }
                             />
                             <Label htmlFor={`required-${stageKey}-${idx}`} className="text-xs">
-                              Required
+                              {t('admin.wizard.kpiRequired')}
                             </Label>
                           </div>
                           <Button
@@ -345,7 +345,7 @@ export function WizardKpisStep({ stages, kpis, coreKpis, onUpdate }: WizardKpisS
                     onClick={() => handleAddKpi(stageKey)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add KPI
+                    {t('admin.wizard.addKpi')}
                   </Button>
                 </div>
               </ScrollArea>
