@@ -1409,6 +1409,7 @@
     "workspaceKpiTitle": "Configuração de KPI por Workspace"
   },
   "adminPrograms": {
+    "acceleration": "Aceleração",
     "active": "Ativo",
     "addStage": "Adicionar Etapa",
     "cancel": "Cancelar",
@@ -1420,19 +1421,24 @@
     "deleteProgramDescription": "Eliminar \"{{name}}\"? Isto eliminará também todas as etapas. Workspaces que usam este programa podem ser afetados.",
     "deleteStage": "Eliminar Etapa",
     "deleteStageDescription": "Eliminar \"{{name}}\"? Esta ação não pode ser revertida.",
+    "deliverables": "entregáveis",
     "description": "Descrição",
     "draft": "Rascunho",
     "editProgram": "Editar Programa",
     "editStage": "Editar Etapa",
     "emptyState": "Ainda não existem programas. Crie o seu primeiro programa para começar.",
     "endDate": "Data de Fim",
+    "gates": "Gates",
+    "gatesAndWeeks": "Gates & Semanas",
     "inactive": "Inativo",
     "name": "Nome",
     "namePlaceholder": "ex.: Aceleradora 2025",
     "newProgram": "Novo Programa",
     "newProgramWizard": "Novo Programa (Assistente)",
     "newStage": "Nova Etapa",
+    "noGates": "Nenhum gate configurado",
     "noStages": "Ainda sem etapas",
+    "noWeeks": "Nenhuma semana configurada",
     "position": "Posição",
     "quickCreate": "Criação Rápida",
     "setup": "Configurar",
@@ -1440,7 +1446,9 @@
     "startDate": "Data de Início",
     "subtitle": "Gerir programas de incubação e respetivas etapas",
     "title": "Programas & Etapas",
-    "update": "Atualizar"
+    "update": "Atualizar",
+    "weeks": "Semanas",
+    "weeksRange": "Semanas {{start}}-{{end}}"
   },
   "adminTemplates": {
     "basicInfo": "Informação Básica",
