@@ -13,7 +13,6 @@ import { BarChart3, Activity, Target, Bell, BookOpen, Calculator, Zap, Settings2
 import { useTranslation } from 'react-i18next';
 
 type ProgramType = Database['public']['Enums']['program_type'];
-import { useTranslation } from 'react-i18next';
 
 interface WizardBasicsStepProps {
   data: DraftBasics;
