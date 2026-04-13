@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Clock, ShieldCheck, Building2, Bell, Database, Users, Users2,
   BarChart3, FileText, BookOpen, Heart, Filter, GitBranch, 
-  ClipboardList, UserPlus, ChevronDown, ChevronRight
+  ClipboardList, UserPlus, ChevronDown, ChevronRight, Globe2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -21,10 +21,12 @@ interface DirectoryItem {
 export function AdminMissionControlDirectory() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeTab = searchParams.get('tab');
   const [isExpanded, setIsExpanded] = useState(!activeTab || activeTab === 'approvals');
 
-  const items: DirectoryItem[] = [
+  const items: (DirectoryItem & { route?: string })[] = [
+    { tab: 'ecosystem', label: t('admin.directory.ecosystemLabel', { defaultValue: 'Startups & Workspaces' }), icon: Globe2, description: t('admin.directory.ecosystemDesc', { defaultValue: 'Gestão do ecossistema' }), group: 'operations', route: '/ecosystem' },
     { tab: 'approvals', label: t('admin.approvals'), icon: Clock, description: t('admin.directory.approvalsDesc', { defaultValue: 'Pedidos pendentes de aprovação' }), group: 'operations' },
     { tab: 'enrollment', label: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }), icon: UserPlus, description: t('admin.directory.enrollmentDesc', { defaultValue: 'Controlo de inscrições e claims' }), group: 'operations' },
     { tab: 'backoffice', label: t('admin.backoffice.tab'), icon: Building2, description: t('admin.directory.backofficeDesc', { defaultValue: 'Contratos, espaços e operações' }), group: 'operations' },
@@ -43,7 +45,11 @@ export function AdminMissionControlDirectory() {
     { tab: 'health', label: t('admin.healthModels'), icon: Heart, description: t('admin.directory.healthDesc', { defaultValue: 'Modelos de saúde do ecossistema' }), group: 'reports' },
   ];
 
-  const handleNavigate = (tab: string) => {
+  const handleNavigate = (tab: string, route?: string) => {
+    if (route) {
+      navigate(route);
+      return;
+    }
     setSearchParams({ tab }, { replace: true });
     setIsExpanded(false);
   };
@@ -101,7 +107,7 @@ export function AdminMissionControlDirectory() {
                       return (
                         <button
                           key={item.tab}
-                          onClick={() => handleNavigate(item.tab)}
+                          onClick={() => handleNavigate(item.tab, (item as any).route)}
                           className={cn(
                             'flex flex-col items-start gap-0.5 p-2.5 rounded-xl border text-left',
                             'hover:bg-muted/60 hover:border-border/80 transition-all duration-150',
