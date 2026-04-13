@@ -195,13 +195,20 @@ export default function ProgramSetupWizard() {
     const errors: string[] = [];
     if (!draft) return errors;
 
-    const { basics, stages, coreKpis, alertRules, healthModel } = draft.draft_json;
+    const { basics, stages, coreKpis, alertRules, healthModel, gates, weeks } = draft.draft_json;
     const programIsBasic = basics?.settings?.program_mode === 'basic';
+    const programIsAcceleration = basics?.program_type === 'acceleration';
 
     if (!basics?.name?.trim()) errors.push(t('programSetup.validation.programNameRequired'));
     
-    // Standard mode validations
-    if (!programIsBasic) {
+    if (programIsAcceleration) {
+      // Acceleration validations
+      if (!gates || gates.length === 0) errors.push(t('programSetup.validation.atLeastOneGate', 'At least one gate is required'));
+      if (!weeks || weeks.length === 0) errors.push(t('programSetup.validation.atLeastOneWeek', 'At least one week is required'));
+      const gatesWithoutNames = gates?.filter(g => !g.name?.trim()) || [];
+      if (gatesWithoutNames.length > 0) errors.push(t('programSetup.validation.gateNameRequired', 'All gates must have a name'));
+    } else if (!programIsBasic) {
+      // Incubation standard mode validations
       const activeStages = stages?.filter((s) => s.is_active) || [];
       if (activeStages.length === 0) errors.push(t('programSetup.validation.atLeastOneStage'));
 
