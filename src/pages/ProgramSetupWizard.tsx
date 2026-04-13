@@ -386,7 +386,7 @@ export default function ProgramSetupWizard() {
                     <WizardAlertRulesStep
                       alertRules={draft.draft_json.alertRules}
                       healthModel={draft.draft_json.healthModel}
-                      onUpdate={(alertRules, healthModel) => handleUpdateDraft({ alertRules, healthModel })}
+                      onUpdate={(alertRules, healthModel) => handleUpdateDraftWithAutosave({ alertRules, healthModel })}
                     />
                   )}
                   {currentStep === 'review' && (
