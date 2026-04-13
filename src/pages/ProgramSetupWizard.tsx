@@ -30,6 +30,7 @@ import {
   Bell,
   CheckCircle,
   Rocket,
+  CalendarDays,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -46,15 +47,17 @@ import { WizardKpisStep } from '@/components/admin/wizard/WizardKpisStep';
 import { WizardPlaybooksStep } from '@/components/admin/wizard/WizardPlaybooksStep';
 import { WizardAlertRulesStep } from '@/components/admin/wizard/WizardAlertRulesStep';
 import { WizardReviewStep } from '@/components/admin/wizard/WizardReviewStep';
+import { WizardWeeksGatesStep } from '@/components/admin/wizard/WizardWeeksGatesStep';
 import { WizardStepTransition } from '@/components/ui/WizardStepTransition';
 import { WizardIllustration } from '@/components/ui/WizardIllustration';
 import { triggerConfetti } from '@/lib/confetti';
 
-type WizardStep = 'basics' | 'stages' | 'kpis' | 'playbooks' | 'alerts' | 'review';
+type WizardStep = 'basics' | 'stages' | 'weeksGates' | 'kpis' | 'playbooks' | 'alerts' | 'review';
 
 const ALL_STEPS: { key: WizardStep; labelKey: string; icon: React.ElementType }[] = [
   { key: 'basics', labelKey: 'programSetup.steps.basics', icon: Building2 },
   { key: 'stages', labelKey: 'programSetup.steps.stages', icon: Layers },
+  { key: 'weeksGates', labelKey: 'programSetup.steps.weeksGates', icon: CalendarDays },
   { key: 'kpis', labelKey: 'programSetup.steps.kpis', icon: BarChart3 },
   { key: 'playbooks', labelKey: 'programSetup.steps.playbooks', icon: BookOpen },
   { key: 'alerts', labelKey: 'programSetup.steps.alerts', icon: Bell },
