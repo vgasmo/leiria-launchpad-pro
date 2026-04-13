@@ -4,6 +4,7 @@ import {
   TrendingUp,
   Target,
   Calendar,
+  CalendarDays,
   CheckCircle2,
   Building2,
   Layers,
