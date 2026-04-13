@@ -87,6 +87,11 @@ const illustrations: Record<
     gradient: 'from-primary/20 via-primary/10 to-transparent',
     accent: 'text-primary',
   },
+  weeksGates: {
+    icon: CalendarDays,
+    gradient: 'from-teal-500/20 via-teal-500/10 to-transparent',
+    accent: 'text-teal-500',
+  },
 };
 
 const sizeClasses = {
