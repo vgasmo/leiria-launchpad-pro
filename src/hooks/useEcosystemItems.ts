@@ -61,6 +61,7 @@ export function useEcosystemItems(filters: EcosystemFilters = {}) {
           health_score_override,
           priority_level,
           startup_category,
+          assigned_consultor_id,
           updated_at,
           created_at,
           startup:startups(name),
