@@ -48,6 +48,7 @@ import { JourneyHeader } from '@/components/workspace/JourneyHeader';
 import { EnhancedNextSteps } from '@/components/workspace/EnhancedNextSteps';
 import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
+import { AccelerationProgressCard } from '@/components/dashboard/AccelerationProgressCard';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
 import { OwnershipCard } from '@/components/workspace/OwnershipCard';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
@@ -159,8 +160,16 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         canWrite={canWrite}
       />
 
-      {/* Current Week Indicator for Acceleration Programs */}
-      {workspace.current_week && workspace.program?.program_type === 'acceleration' && (
+      {/* Acceleration Progress Card for acceleration programs */}
+      {workspace.program?.program_type === 'acceleration' && (
+        <AccelerationProgressCard
+          programId={workspace.program_id}
+          currentWeek={workspace.current_week ?? null}
+        />
+      )}
+
+      {/* Current Week Indicator fallback (when no gates configured) */}
+      {workspace.current_week && workspace.program?.program_type !== 'acceleration' && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
           <CalendarDays className="h-4 w-4" />
           {t('workspace.currentWeek', { week: workspace.current_week, defaultValue: 'Semana {{week}}' })}
