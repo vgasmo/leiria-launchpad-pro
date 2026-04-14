@@ -1,4 +1,4 @@
-name: "npm lockfile validation"
+name: "Bun lockfile validation"
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - 'package.json'
-      - 'package-lock.json'
+      - 'bun.lock'
 
 jobs:
   validate-lockfile:
@@ -18,11 +18,16 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Validate lockfile consistency (npm ci)
-        run: npm ci --ignore-scripts
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Validate build under npm
-        run: npm run build
+      - name: Validate lockfile consistency (bun install --frozen-lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Validate build under Bun
+        run: bun run build
         env:
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: dummy-key-for-build
