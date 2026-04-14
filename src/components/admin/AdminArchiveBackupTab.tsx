@@ -51,11 +51,11 @@ function ContractArchiveStatus() {
       return data;
     },
     onSuccess: () => {
-      toast.success(t('admin.archive.retryTriggered', { defaultValue: 'Arquivo re-tentado com sucesso' }));
+      toast.success(t('admin.archive.retryTriggered'));
       queryClient.invalidateQueries({ queryKey: ['contract-archive-status'] });
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Erro ao re-tentar arquivo');
+      toast.error(err?.message || t('admin.archive.retryError'));
     },
   });
 
@@ -70,19 +70,19 @@ function ContractArchiveStatus() {
     onSuccess: (data: any) => {
       const processed = data?.results?.length || 0;
       const succeeded = data?.results?.filter((r: any) => r.success).length || 0;
-      toast.success(`Arquivo executado: ${succeeded}/${processed} contrato(s) processado(s)`);
+      toast.success(t('admin.archive.runAllSuccess', { succeeded, processed }));
       queryClient.invalidateQueries({ queryKey: ['contract-archive-status'] });
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Erro ao executar arquivo');
+      toast.error(err?.message || t('admin.archive.runAllError'));
     },
   });
 
   const statusBadge = (status: string | null, attempts: number) => {
-    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Arquivado</Badge>;
-    if (status === 'uploading') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />A enviar</Badge>;
-    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Falhou ({attempts}x)</Badge>;
-    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
+    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />{t('admin.archive.statusArchived')}</Badge>;
+    if (status === 'uploading') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />{t('admin.archive.statusUploading')}</Badge>;
+    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{t('admin.archive.statusFailed')} ({attempts}x)</Badge>;
+    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />{t('admin.archive.statusPending')}</Badge>;
   };
 
   const stats = {
@@ -101,13 +101,13 @@ function ContractArchiveStatus() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Archive className="h-5 w-5" />
-              {t('admin.archive.contractArchive', { defaultValue: 'Arquivo de Contratos — SharePoint' })}
+              {t('admin.archive.contractArchive')}
             </CardTitle>
             <CardDescription className="space-y-1">
-              <span>{t('admin.archive.contractArchiveDesc', { defaultValue: 'Contratos assinados são arquivados no SharePoint 7 dias após a assinatura.' })}</span>
+              <span>{t('admin.archive.contractArchiveDesc')}</span>
               <span className="flex items-center gap-1.5 text-xs">
                 <Clock className="h-3 w-3" />
-                {t('admin.archive.scheduledNote', { defaultValue: 'Agendamento automático via pg_cron (02:00 UTC diário). Pode também executar manualmente.' })}
+                {t('admin.archive.scheduledNote')}
               </span>
             </CardDescription>
           </div>
@@ -118,7 +118,7 @@ function ContractArchiveStatus() {
               disabled={runAllMutation.isPending}
             >
               {runAllMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
-              Executar agora
+              {t('admin.archive.runNow')}
             </Button>
           )}
         </div>
@@ -128,19 +128,19 @@ function ContractArchiveStatus() {
         <div className="grid grid-cols-4 gap-3">
           <div className="text-center p-3 rounded-lg bg-muted/50">
             <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-xs text-muted-foreground">Contratos assinados</div>
+            <div className="text-xs text-muted-foreground">{t('admin.archive.signedContracts')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-green-50 dark:bg-green-950/20">
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <div className="text-xs text-muted-foreground">Arquivados</div>
+            <div className="text-xs text-muted-foreground">{t('admin.archive.statusArchived')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-            <div className="text-xs text-muted-foreground">{t('backup.pending', 'Pending')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.archive.statusPending')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
             <div className="text-2xl font-bold text-red-600">{stats.failed}</div>
-            <div className="text-xs text-muted-foreground">{t('backup.withError', 'With error')}</div>
+            <div className="text-xs text-muted-foreground">{t('admin.archive.statusWithError')}</div>
           </div>
         </div>
 
@@ -148,11 +148,11 @@ function ContractArchiveStatus() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Contrato</TableHead>
-              <TableHead>Organização</TableHead>
-              <TableHead>Assinado</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Arquivado em</TableHead>
+              <TableHead>{t('admin.archive.colContract')}</TableHead>
+              <TableHead>{t('admin.archive.colOrganization')}</TableHead>
+              <TableHead>{t('admin.archive.colSigned')}</TableHead>
+              <TableHead>{t('admin.archive.colStatus')}</TableHead>
+              <TableHead>{t('admin.archive.colArchivedAt')}</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -187,7 +187,7 @@ function ContractArchiveStatus() {
                         size="icon"
                         onClick={() => retryMutation.mutate(contract.id)}
                         disabled={retryMutation.isPending}
-                        title={contract.archive_status === 'failed' ? 'Re-tentar' : 'Arquivar agora'}
+                        title={contract.archive_status === 'failed' ? t('admin.archive.retry') : t('admin.archive.archiveNow')}
                       >
                         {retryMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       </Button>
@@ -202,7 +202,7 @@ function ContractArchiveStatus() {
         {stats.failed > 0 && (
           <div className="text-sm text-destructive flex items-center gap-2 p-3 rounded-lg bg-destructive/5">
             <AlertTriangle className="h-4 w-4" />
-            {stats.failed} contrato(s) com erro de arquivo. Verifique a configuração do MS Graph / SharePoint.
+            {t('admin.archive.failedContractsWarning', { count: stats.failed })}
           </div>
         )}
       </CardContent>
@@ -236,19 +236,19 @@ function EcosystemSnapshotStatus() {
       return data;
     },
     onSuccess: (data: any) => {
-      toast.success(`Snapshot concluído — ${data?.total_records || '?'} registos exportados`);
+      toast.success(t('admin.archive.snapshotSuccess', { count: data?.total_records || '?' }));
       queryClient.invalidateQueries({ queryKey: ['ecosystem-snapshots'] });
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Erro ao criar snapshot');
+      toast.error(err?.message || t('admin.archive.snapshotError'));
       queryClient.invalidateQueries({ queryKey: ['ecosystem-snapshots'] });
     },
   });
 
   const statusBadge = (status: string) => {
-    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Concluído</Badge>;
-    if (status === 'running') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />A executar</Badge>;
-    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Falhou</Badge>;
+    if (status === 'completed') return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />{t('admin.archive.snapshotCompleted')}</Badge>;
+    if (status === 'running') return <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />{t('admin.archive.snapshotRunning')}</Badge>;
+    if (status === 'failed') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{t('admin.archive.snapshotFailed')}</Badge>;
     return <Badge variant="outline">{status}</Badge>;
   };
 
@@ -264,13 +264,13 @@ function EcosystemSnapshotStatus() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
-              {t('admin.archive.ecosystemSnapshots', { defaultValue: 'Snapshots do Ecossistema' })}
+              {t('admin.archive.ecosystemSnapshots')}
             </CardTitle>
             <CardDescription className="space-y-1">
-              <span>{t('admin.archive.ecosystemSnapshotsDesc', { defaultValue: 'Backups dos dados críticos do ecossistema para resiliência e auditoria.' })}</span>
+              <span>{t('admin.archive.ecosystemSnapshotsDesc')}</span>
               <span className="flex items-center gap-1.5 text-xs">
                 <Clock className="h-3 w-3" />
-                {t('admin.archive.snapshotScheduledNote', { defaultValue: 'Agendamento automático via pg_cron (03:00 UTC diário). Pode também executar manualmente.' })}
+                {t('admin.archive.snapshotScheduledNote')}
               </span>
             </CardDescription>
           </div>
@@ -285,7 +285,7 @@ function EcosystemSnapshotStatus() {
             ) : (
               <Play className="h-4 w-4 mr-1" />
             )}
-            Executar agora
+            {t('admin.archive.runNow')}
           </Button>
         </div>
       </CardHeader>
@@ -293,21 +293,21 @@ function EcosystemSnapshotStatus() {
         {/* Health summary */}
         <div className="grid grid-cols-2 gap-4">
           <div className="p-3 rounded-lg bg-muted/50">
-            <div className="text-xs text-muted-foreground mb-1">Último snapshot bem-sucedido</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('admin.archive.lastSuccessfulSnapshot')}</div>
             {lastSuccess ? (
               <div className="text-sm font-medium">
                 {format(new Date(lastSuccess.completed_at!), 'dd/MM/yyyy HH:mm')}
                 <span className="text-muted-foreground ml-2">
-                  ({Object.values(lastSuccess.record_counts as Record<string, number> || {}).reduce((a: number, b: number) => a + b, 0)} registos)
+                  ({Object.values(lastSuccess.record_counts as Record<string, number> || {}).reduce((a: number, b: number) => a + b, 0)} {t('admin.archive.records')})
                 </span>
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground">Nenhum</div>
+              <div className="text-sm text-muted-foreground">{t('common.none')}</div>
             )}
           </div>
           {lastFailed && (
             <div className="p-3 rounded-lg bg-destructive/5">
-              <div className="text-xs text-destructive mb-1">Último erro</div>
+              <div className="text-xs text-destructive mb-1">{t('admin.archive.lastError')}</div>
               <div className="text-sm text-destructive">{lastFailed.last_error?.slice(0, 100)}</div>
             </div>
           )}
@@ -317,11 +317,11 @@ function EcosystemSnapshotStatus() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Domínios</TableHead>
-              <TableHead>Registos</TableHead>
-              <TableHead>Tipo</TableHead>
+              <TableHead>{t('admin.archive.colDate')}</TableHead>
+              <TableHead>{t('admin.archive.colStatus')}</TableHead>
+              <TableHead>{t('admin.archive.colDomains')}</TableHead>
+              <TableHead>{t('admin.archive.colRecords')}</TableHead>
+              <TableHead>{t('admin.archive.colType')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -339,7 +339,7 @@ function EcosystemSnapshotStatus() {
                   <TableCell className="text-sm font-mono">{totalRecords}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
-                      {snap.is_scheduled ? 'Agendado' : 'Manual'}
+                      {snap.is_scheduled ? t('admin.archive.typeScheduled') : t('admin.archive.typeManual')}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -348,7 +348,7 @@ function EcosystemSnapshotStatus() {
             {(!snapshots || snapshots.length === 0) && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Nenhum snapshot encontrado. Execute o primeiro acima.
+                  {t('admin.archive.noSnapshots')}
                 </TableCell>
               </TableRow>
             )}
