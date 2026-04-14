@@ -180,21 +180,30 @@ serve(async (req) => {
     let programName: string | null = null;
 
     if (token === 'demo') {
-      const { data: programs } = await supabase.from("programs").select("id, name").limit(1);
-      programId = programs?.[0]?.id || null;
-      programName = programs?.[0]?.name || null;
+      // Use intake_routing to get the configured consultant instead of random first consultor
+      const { data: routing } = await supabase
+        .from("intake_routing")
+        .select("consultant_ids, program_id")
+        .eq("active", true)
+        .limit(1)
+        .maybeSingle();
       
-      const { data: consultants } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "consultor")
-        .limit(1);
+      if (routing?.program_id) {
+        const { data: prog } = await supabase.from("programs").select("id, name").eq("id", routing.program_id).maybeSingle();
+        programId = prog?.id || null;
+        programName = prog?.name || null;
+      } else {
+        const { data: programs } = await supabase.from("programs").select("id, name").limit(1);
+        programId = programs?.[0]?.id || null;
+        programName = programs?.[0]?.name || null;
+      }
       
-      if (consultants?.[0]?.user_id) {
+      const consultantId = routing?.consultant_ids?.[0] || null;
+      if (consultantId) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("email, full_name")
-          .eq("id", consultants[0].user_id)
+          .eq("id", consultantId)
           .maybeSingle();
         
         consultantEmail = profile?.email || null;
