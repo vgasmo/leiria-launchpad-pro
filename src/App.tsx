@@ -14,7 +14,7 @@ import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
-import { SkeletonDashboard } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AccessDenied } from "@/components/ui/AccessDenied";
 import { queryClient } from "@/lib/queryClient";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -69,9 +69,11 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
   if (isLoading || !isAuthReady || ndaLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
-          <span className="animate-pulse text-muted-foreground text-sm">{t('common.loading')}</span>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+          <p className="text-sm text-muted-foreground animate-pulse">{t('common.loading')}</p>
         </div>
       </div>
     );
