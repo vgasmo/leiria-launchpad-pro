@@ -28,7 +28,7 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
     <Card 
       interactive
       className={cn(
-        'cursor-pointer transition-all duration-200 hover:shadow-lg',
+        'cursor-pointer group',
         hasOverdue && 'border-amber-200 dark:border-amber-800'
       )}
       onClick={onClick}
@@ -36,18 +36,18 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
       <CardContent className="p-4">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          <Avatar className="h-12 w-12 rounded-xl">
+          <Avatar className="h-12 w-12 rounded-xl ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
             <AvatarImage 
               src={workspace.startup?.logo_url || undefined} 
               className="object-cover"
               alt={workspace.startup?.name || 'Startup logo'}
             />
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-semibold">
+            <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-semibold text-sm">
               {workspace.startup?.name?.slice(0, 2).toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">
+            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
               {workspace.startup?.name}
             </h3>
             <p className="text-sm text-muted-foreground truncate">
@@ -63,17 +63,17 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-muted/50 rounded-lg p-2.5">
-            <p className="text-xs text-muted-foreground mb-1">{t('workspaceCard.stage')}</p>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="bg-muted/50 rounded-lg p-2.5 group-hover:bg-muted/70 transition-colors">
+            <p className="text-[11px] text-muted-foreground mb-1">{t('workspaceCard.stage')}</p>
             <StageBadge stage={workspace.stage} size="sm" />
           </div>
-          <div className="bg-muted/50 rounded-lg p-2.5">
-            <p className="text-xs text-muted-foreground mb-1">{t('workspaceCard.actions')}</p>
+          <div className="bg-muted/50 rounded-lg p-2.5 group-hover:bg-muted/70 transition-colors">
+            <p className="text-[11px] text-muted-foreground mb-1">{t('workspaceCard.actions')}</p>
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold">{workspace.pendingActionsCount}</span>
+              <span className="font-semibold text-sm">{workspace.pendingActionsCount}</span>
               {hasOverdue && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 leading-tight">
                   {workspace.overdueActionsCount} {t('workspaceCard.overdue')}
                 </Badge>
               )}
@@ -83,31 +83,31 @@ export const WorkspaceCard = memo(function WorkspaceCard({ workspace, onClick, k
 
         {/* KPI Trend */}
         {kpiTrend && kpiTrend.length >= 2 && (
-          <div className="bg-muted/30 rounded-lg p-2.5 mb-4">
+          <div className="bg-muted/30 rounded-lg p-2.5 mb-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">{t('workspaceCard.kpiTrend')}</p>
+              <p className="text-[11px] text-muted-foreground">{t('workspaceCard.kpiTrend')}</p>
               <Sparkline data={kpiTrend} width={80} height={24} />
             </div>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2.5 border-t border-border/50">
           {workspace.nextMeetingDate ? (
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{format(new Date(workspace.nextMeetingDate), 'MMM d')}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Calendar className="h-3.5 w-3.5 text-primary/60 flex-shrink-0" />
+              <span className="truncate">{format(new Date(workspace.nextMeetingDate), 'MMM d')}</span>
             </div>
           ) : (
-            <span className="text-muted-foreground/60">{t('workspaceCard.noMeetings')}</span>
+            <span className="text-muted-foreground/50 text-[11px]">{t('workspaceCard.noMeetings')}</span>
           )}
           {workspace.lastSession ? (
-            <div className="flex items-center gap-1 max-w-[120px]">
-              <FileText className="h-3 w-3 flex-shrink-0" />
+            <div className="flex items-center gap-1.5 max-w-[45%] min-w-0">
+              <FileText className="h-3.5 w-3.5 text-primary/60 flex-shrink-0" />
               <span className="truncate">{workspace.lastSession.title}</span>
             </div>
           ) : (
-            <span className="text-muted-foreground/60">{t('workspaceCard.noSessions')}</span>
+            <span className="text-muted-foreground/50 text-[11px]">{t('workspaceCard.noSessions')}</span>
           )}
         </div>
       </CardContent>

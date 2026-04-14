@@ -39,6 +39,23 @@ export default function StaffCockpit() {
       subtitle={greeting}
     >
       <div className="space-y-6">
+        {/* Hero greeting */}
+        <div className="hero-greeting flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-heading font-semibold text-foreground">
+              {greeting}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t('staffCockpit.heroSubtitle', { 
+                defaultValue: '{{count}} startups no ecossistema · {{programs}} programas', 
+                count: workspaces.length,
+                programs: new Set(workspaces.map(w => w.program_id).filter(Boolean)).size || 0
+              })}
+            </p>
+          </div>
+          <LayoutDashboard className="h-10 w-10 text-primary/20" />
+        </div>
+
         {/* Quick Actions Bar */}
         <CockpitQuickActions workspaces={workspaces} compact={false} />
 

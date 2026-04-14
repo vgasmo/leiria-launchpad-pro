@@ -95,11 +95,14 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(function App
             </div>
           </div>
         </header>
-        <div className={cn(
-          "px-4 py-6 lg:px-6 lg:py-6 mx-auto max-w-7xl",
-          "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
-          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        )}>
+        <div 
+          className={cn(
+            "px-4 py-6 lg:px-6 lg:py-6 mx-auto max-w-7xl",
+            "transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          )}
+          data-page-transition
+        >
           {children}
         </div>
       </main>
