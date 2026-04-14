@@ -1448,7 +1448,9 @@
     "title": "Programs & Stages",
     "update": "Update",
     "weeks": "Weeks",
-    "weeksRange": "Weeks {{start}}-{{end}}"
+    "weeksRange": "Weeks {{start}}-{{end}}",
+    "editInWizard": "Edit in Wizard",
+    "programType": "Program Type"
   },
   "adminTemplates": {
     "basicInfo": "Basic Info",
@@ -3422,6 +3424,8 @@
     "goHome": "Go to Home",
     "moreInfo": "More info",
     "networkError": "Network error. Check your connection.",
+    "noPermission": "No permission for this action.",
+    "duplicateEntry": "This record already exists.",
     "notFound": "The requested resource was not found.",
     "permissionError": "You do not have permission for this operation.",
     "rateLimitReached": "Rate limit reached. Please wait a few minutes.",
