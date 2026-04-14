@@ -74,18 +74,9 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
     );
     if (isE2E) return;
 
-    // Skip tour for admin and backoffice roles — it's designed for founders
-    if (user) {
-      // Check localStorage for cached role (set by AuthContext)
-      const cachedRoles = localStorage.getItem(`user-roles-${user.id}`);
-      if (cachedRoles) {
-        try {
-          const roles: string[] = JSON.parse(cachedRoles);
-          if (roles.includes('admin') || roles.includes('backoffice') || roles.includes('consultor')) {
-            return; // Don't show tour for staff/admin
-          }
-        } catch { /* ignore parse errors */ }
-      }
+    // Skip tour for staff/admin/backoffice — it's designed for founders and mentors
+    if (isStaff || roles.includes('backoffice')) {
+      return;
     }
 
     // Only run tour for logged-in users who haven't completed it
