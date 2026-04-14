@@ -545,10 +545,10 @@ export function SpaceOperationsConsole() {
                     <DoorOpen className="h-3.5 w-3.5 inline mr-1" />Sala
                   </h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{selectedRecord.room_type}</span></div>
-                    <div><span className="text-muted-foreground">Estado:</span> <StatusBadge status={selectedRecord.room_status} type="room" /></div>
-                    {selectedRecord.room_number && <div><span className="text-muted-foreground">Nº:</span> {selectedRecord.room_number}</div>}
-                    {selectedRecord.floor && <div><span className="text-muted-foreground">Piso:</span> {selectedRecord.floor}</div>}
+                    <div><span className="text-muted-foreground">{t('spaces.type', 'Tipo')}:</span> <span className="font-medium">{selectedRecord.room_type}</span></div>
+                    <div><span className="text-muted-foreground">{t('spaces.statusLabel', 'Estado')}:</span> <StatusBadge status={selectedRecord.room_status} type="room" /></div>
+                    {selectedRecord.room_number && <div><span className="text-muted-foreground">{t('spaces.roomNumber', 'Nº')}:</span> {selectedRecord.room_number}</div>}
+                    {selectedRecord.floor && <div><span className="text-muted-foreground">{t('spaces.floor', 'Piso')}:</span> {selectedRecord.floor}</div>}
                   </div>
                 </div>
 
@@ -561,10 +561,10 @@ export function SpaceOperationsConsole() {
                   </h3>
                   {selectedRecord.allocation_id ? (
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div><span className="text-muted-foreground">Tipo:</span> <span className="font-medium">{selectedRecord.allocation_type}</span></div>
-                      <div><span className="text-muted-foreground">Início:</span> {selectedRecord.allocation_start && format(new Date(selectedRecord.allocation_start), 'dd/MM/yyyy')}</div>
+                      <div><span className="text-muted-foreground">{t('spaces.type', 'Tipo')}:</span> <span className="font-medium">{selectedRecord.allocation_type}</span></div>
+                      <div><span className="text-muted-foreground">{t('common.startDate', 'Início')}:</span> {selectedRecord.allocation_start && format(new Date(selectedRecord.allocation_start), 'dd/MM/yyyy')}</div>
                       {selectedRecord.allocation_end && (
-                        <div><span className="text-muted-foreground">Fim:</span> {format(new Date(selectedRecord.allocation_end), 'dd/MM/yyyy')}</div>
+                        <div><span className="text-muted-foreground">{t('common.endDate', 'Fim')}:</span> {format(new Date(selectedRecord.allocation_end), 'dd/MM/yyyy')}</div>
                       )}
                     </div>
                   ) : (
@@ -633,17 +633,17 @@ export function SpaceOperationsConsole() {
                   </h3>
                   {selectedRecord.contract_id ? (
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div><span className="text-muted-foreground">Estado:</span> <StatusBadge status={selectedRecord.contract_status} type="contract" /></div>
-                      <div><span className="text-muted-foreground">Mensalidade:</span> <span className="font-medium">€{selectedRecord.contract_monthly_fee?.toLocaleString() || '—'}</span></div>
+                      <div><span className="text-muted-foreground">{t('spaces.statusLabel', 'Estado')}:</span> <StatusBadge status={selectedRecord.contract_status} type="contract" /></div>
+                      <div><span className="text-muted-foreground">{t('spaces.monthlyFee', 'Mensalidade')}:</span> <span className="font-medium">€{selectedRecord.contract_monthly_fee?.toLocaleString() || '—'}</span></div>
                       {selectedRecord.contract_start && (
-                        <div><span className="text-muted-foreground">Início:</span> {format(new Date(selectedRecord.contract_start), 'dd/MM/yyyy')}</div>
+                        <div><span className="text-muted-foreground">{t('common.startDate', 'Início')}:</span> {format(new Date(selectedRecord.contract_start), 'dd/MM/yyyy')}</div>
                       )}
                       {selectedRecord.contract_end && (
-                        <div><span className="text-muted-foreground">Fim:</span> {format(new Date(selectedRecord.contract_end), 'dd/MM/yyyy')}</div>
+                        <div><span className="text-muted-foreground">{t('common.endDate', 'Fim')}:</span> {format(new Date(selectedRecord.contract_end), 'dd/MM/yyyy')}</div>
                       )}
                       {selectedRecord.incubation_type_name && (
                         <div className="col-span-2">
-                          <span className="text-muted-foreground">Pacote:</span>
+                          <span className="text-muted-foreground">{t('spaces.package', 'Pacote')}:</span>
                           <Badge variant="secondary" className="ml-1.5 text-[10px]">
                             <Package className="h-2.5 w-2.5 mr-0.5" />
                             {selectedRecord.incubation_type_name}
