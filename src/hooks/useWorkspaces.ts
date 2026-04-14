@@ -29,6 +29,7 @@ export interface WorkspaceWithDetails {
   health_notes: string | null;
   priority_level: WorkspacePriority;
   priority_notes: string | null;
+  current_week: number | null;
   created_at: string;
   updated_at: string;
   startup: {
@@ -40,6 +41,7 @@ export interface WorkspaceWithDetails {
   program: {
     id: string;
     name: string;
+    program_type: string | null;
   } | null;
   pendingActionsCount: number;
   overdueActionsCount: number;
@@ -99,9 +101,9 @@ export function useWorkspaces(
         .select(`
           id, startup_id, program_id, stage, status, 
           health_score, health_score_override, health_notes,
-          priority_level, priority_notes, created_at, updated_at,
+          priority_level, priority_notes, current_week, created_at, updated_at,
           startup:startups(id, name, description, logo_url),
-          program:programs(id, name)
+          program:programs(id, name, program_type)
         `)
         .in('status', statuses) // Only include requested statuses
         .order('updated_at', { ascending: false });
