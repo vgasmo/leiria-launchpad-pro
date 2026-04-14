@@ -10,10 +10,10 @@ function versionJsonPlugin(): Plugin {
     name: 'version-json',
     closeBundle() {
       const version = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '.');
-      fs.writeFileSync(
-        path.resolve(__dirname, 'dist/version.json'),
-        JSON.stringify({ version }),
-      );
+      const content = JSON.stringify({ version });
+      // Write to dist (production) and public (source, so next dev/build starts fresh)
+      fs.writeFileSync(path.resolve(__dirname, 'dist/version.json'), content);
+      fs.writeFileSync(path.resolve(__dirname, 'public/version.json'), content);
     },
   };
 }
