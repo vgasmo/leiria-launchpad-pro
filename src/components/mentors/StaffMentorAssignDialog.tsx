@@ -31,6 +31,21 @@ export function StaffMentorAssignDialog({
   const queryClient = useQueryClient();
   const [selectedMentorId, setSelectedMentorId] = useState<string | null>(suggestedMentorId || null);
 
+  // NDA compliance check for selected mentor
+  const { data: hasNda } = useQuery({
+    queryKey: ['mentor-nda-check', selectedMentorId],
+    queryFn: async () => {
+      if (!selectedMentorId) return true;
+      const { data } = await supabase
+        .from('mentor_nda_acceptances')
+        .select('id')
+        .eq('user_id', selectedMentorId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!selectedMentorId,
+  });
+
   // Assign mentor mutation - adds to workspace_users and updates request
   const assignMentor = useMutation({
     mutationFn: async () => {
