@@ -11,8 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Building2, Plus, Sparkles, Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { usePrograms } from '@/hooks/useWorkspaces';
+import { supabase } from '@/lib/supabaseClient';
+import { usePrograms } from '@/hooks/useAdminData';
 import { toast } from 'sonner';
 
 interface WorkspaceAssignmentDialogProps {

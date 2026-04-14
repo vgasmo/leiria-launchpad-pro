@@ -3425,6 +3425,8 @@
     "goHome": "Ir para Início",
     "moreInfo": "Mais informações",
     "networkError": "Erro de rede. Verifique a sua ligação.",
+    "noPermission": "Sem permissão para esta ação.",
+    "duplicateEntry": "Este registo já existe.",
     "notFound": "O recurso solicitado não foi encontrado.",
     "permissionError": "Não tem permissões para esta operação.",
     "rateLimitReached": "Limite de pedidos atingido. Aguarde uns minutos.",

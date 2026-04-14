@@ -4,11 +4,40 @@
  * Separated from App.tsx to avoid circular imports with AuthContext.
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, MutationCache } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
+import { toast } from 'sonner';
+import i18n from '@/i18n';
+
+const t = i18n.t.bind(i18n);
 
 // --- QueryClient: shared across the app ---
 export const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (error: Error, _variables, _context, mutation) => {
+      // Skip if the mutation already has its own onError handler
+      if (mutation.options.onError) return;
+
+      logger.error('mutation_failed', {
+        error: error.message,
+        mutationKey: mutation.options.mutationKey,
+      });
+
+      const message = error.message || t('common.operationFailed', { defaultValue: 'Operação falhou. Tente novamente.' });
+
+      if (message.includes('JWT') || message.includes('401')) {
+        toast.error(t('errors.sessionExpired', { defaultValue: 'Sessão expirada. Faça login novamente.' }));
+      } else if (message.includes('permission') || message.includes('policy') || message.includes('403')) {
+        toast.error(t('errors.noPermission', { defaultValue: 'Sem permissão para esta ação.' }));
+      } else if (message.includes('duplicate') || message.includes('unique')) {
+        toast.error(t('errors.duplicateEntry', { defaultValue: 'Este registo já existe.' }));
+      } else if (message.includes('network') || message.includes('fetch') || message.includes('Failed to fetch')) {
+        toast.error(t('errors.networkError', { defaultValue: 'Erro de rede. Verifique a ligação.' }));
+      } else {
+        toast.error(message);
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: 1,

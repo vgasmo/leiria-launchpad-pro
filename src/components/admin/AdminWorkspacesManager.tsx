@@ -91,7 +91,7 @@ export function AdminWorkspacesManager() {
   });
 
   const { data: programs } = useQuery({
-    queryKey: ['admin-programs-list'],
+    queryKey: ['programs'],
     queryFn: async () => {
       const { data, error } = await supabase.from('programs').select('id, name').eq('is_active', true).order('name');
       if (error) throw error;
