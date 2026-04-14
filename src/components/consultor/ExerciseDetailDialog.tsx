@@ -76,7 +76,7 @@ export function ExerciseDetailDialog({ open, onOpenChange, exercise }: ExerciseD
             {/* Materials */}
             {exercise.materials_needed.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold mb-2">{t('exercises.materialsNeeded', 'Materials Needed')}</h3>
+                <h3 className="text-sm font-semibold mb-2">{t('exercises.materials', 'Materials Needed')}</h3>
                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                   {exercise.materials_needed.map((m, i) => (
                     <li key={i}>{m}</li>
