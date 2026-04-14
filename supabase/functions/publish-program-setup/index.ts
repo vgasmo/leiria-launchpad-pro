@@ -576,7 +576,7 @@ Deno.serve(async (req) => {
       metadata: {
         via: 'setup_wizard',
         draft_id: draft_id,
-        stages_count: activeStages.length,
+        stages_count: (draftData.stages?.filter(s => s.is_active) || []).length,
         kpi_count: Object.keys(kpiDefinitionMap).length,
       },
     });
