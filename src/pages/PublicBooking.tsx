@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, CheckCircle, AlertCircle, Building2 } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, AlertCircle, Building2, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -193,6 +193,16 @@ export default function PublicBooking() {
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
+        {/* Back link */}
+        <div className="flex justify-start">
+          <a
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('common.back', { defaultValue: 'Voltar' })}
+          </a>
+        </div>
         {/* Header */}
         <div className="text-center">
           <Building2 className="h-10 w-10 mx-auto text-primary mb-2" />
