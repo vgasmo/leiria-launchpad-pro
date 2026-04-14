@@ -293,20 +293,32 @@ serve(async (req) => {
           }
         } catch (graphError) {
           console.error("Graph API error:", graphError);
-          return corsJsonResponse({ 
-            slots: [],
-            consultantName,
-            graphEnabled: true,
-            warning: 'Unable to verify calendar availability. Please contact directly.',
-          }, req);
+          // Fallback: generate default slots when Graph fails
+          for (let day = 1; day <= 14; day++) {
+            const date = addDays(now, day);
+            const dayOfWeek = date.getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+            const dateStr = format(date, "yyyy-MM-dd");
+            const defaultTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+            for (const time of defaultTimes) {
+              slots.push({ date: dateStr, time, available: true });
+            }
+          }
         }
       } else {
-        return corsJsonResponse({ 
-          slots: [],
-          consultantName,
-          graphEnabled: false,
-          warning: 'Calendar integration not configured. Contact us to schedule.',
-        }, req);
+        // Graph not configured: generate default weekday slots as fallback
+        for (let day = 1; day <= 14; day++) {
+          const date = addDays(now, day);
+          const dayOfWeek = date.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+          const dateStr = format(date, "yyyy-MM-dd");
+          const defaultTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+          for (const time of defaultTimes) {
+            slots.push({ date: dateStr, time, available: true });
+          }
+        }
       }
 
       return corsJsonResponse({ slots, consultantName, graphEnabled: !!credentials }, req);
