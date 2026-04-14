@@ -389,8 +389,8 @@ export default function Login() {
                   {signupSuccess ? (
                     <div className="text-center space-y-4 py-6">
                       <div className="flex justify-center">
-                        <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                          <Mail className="h-8 w-8 text-green-600 dark:text-green-400" />
+                        <div className="p-3 rounded-full bg-primary/10">
+                          <Mail className="h-8 w-8 text-primary" />
                         </div>
                       </div>
                       <h3 className="text-lg font-semibold">{t('login.signupSuccessTitle', 'Conta criada com sucesso!')}</h3>
