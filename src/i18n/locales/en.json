@@ -2307,6 +2307,11 @@
     "step1DownloadPdf": "1. Download Contract PDF",
     "step2OpenPandaDoc": "2. Open PandaDoc (upload & send)",
     "step3MarkSent": "3. Already sent in PandaDoc → Mark as Sent",
+    "signerCompleted": "Signed ✓",
+    "signerDeclined": "Declined",
+    "signerPending": "Pending",
+    "signerSent": "Sent",
+    "signerSigned": "Signed ✓",
     "viewInCRM": "View in CRM",
     "viewInvoices": "View Invoices",
     "viewWorkspace": "View Workspace"
@@ -4618,6 +4623,8 @@
     "addSlots": "Add time slots to let founders book sessions.",
     "addTimeSlot": "Add Time Slot",
     "availability": {
+    },
+    "dayOfWeek": "Day",
       "available": "Available",
       "full": "Full",
       "limited": "Limited"
