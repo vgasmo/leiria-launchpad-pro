@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Loader2, Check } from 'lucide-react';
+import { UserPlus, Loader2, Check, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { MentorRecommendationWidget } from './MentorRecommendationWidget';
 import { toast } from 'sonner';
@@ -29,6 +30,21 @@ export function StaffMentorAssignDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMentorId, setSelectedMentorId] = useState<string | null>(suggestedMentorId || null);
+
+  // NDA compliance check for selected mentor
+  const { data: hasNda } = useQuery({
+    queryKey: ['mentor-nda-check', selectedMentorId],
+    queryFn: async () => {
+      if (!selectedMentorId) return true;
+      const { data } = await supabase
+        .from('mentor_nda_acceptances')
+        .select('id')
+        .eq('user_id', selectedMentorId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!selectedMentorId,
+  });
 
   // Assign mentor mutation - adds to workspace_users and updates request
   const assignMentor = useMutation({
@@ -125,6 +141,16 @@ export function StaffMentorAssignDialog({
             selectedMentorId={selectedMentorId}
           />
         </div>
+
+        {/* NDA compliance warning */}
+        {selectedMentorId && hasNda === false && (
+          <Alert variant="destructive" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {t('mentors.ndaNotSigned', 'Este mentor ainda não assinou o NDA. O acesso aos dados do workspace ficará bloqueado até que o NDA seja aceite.')}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
