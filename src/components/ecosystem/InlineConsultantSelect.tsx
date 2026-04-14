@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { UserCog } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import {
   Select,
   SelectContent,
@@ -60,7 +61,7 @@ export function InlineConsultantSelect({ workspaceId, currentOwnerId, currentOwn
       queryClient.invalidateQueries({ queryKey: ['ecosystem-items'] });
       onAssigned?.();
     } catch (err) {
-      console.error(err);
+      logger.error('consultant_assign_failed', {}, err);
       toast.error(t('common.errorSaving', { defaultValue: 'Erro ao guardar' }));
     } finally {
       setSaving(false);
