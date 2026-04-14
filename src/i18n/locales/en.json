@@ -4623,8 +4623,6 @@
     "addSlots": "Add time slots to let founders book sessions.",
     "addTimeSlot": "Add Time Slot",
     "availability": {
-    },
-    "dayOfWeek": "Day",
       "available": "Available",
       "full": "Full",
       "limited": "Limited"
