@@ -48,7 +48,7 @@ interface OnboardingTourProps {
 
 export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, roles, isStaff } = useAuth();
   const { theme } = useTheme();
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
