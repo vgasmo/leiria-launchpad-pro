@@ -188,12 +188,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    setIsAuthReady(false);
-    resetSession(queryClient, 'logout');
-    await supabase.auth.signOut();
-    setProfile(null);
-    setRoles([]);
-    setIsAuthReady(true);
+    try {
+      setIsAuthReady(false);
+      resetSession(queryClient, 'logout');
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('signOut error', e);
+    } finally {
+      setProfile(null);
+      setRoles([]);
+      setIsAuthReady(true);
+      // Force redirect to login after sign out
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
   };
 
   const isAdmin = roles.includes('admin');
