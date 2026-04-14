@@ -200,9 +200,16 @@ export function FounderDashboard({
         <PendingContractBanner workspaceId={workspace.id} />
       </WidgetErrorBoundary>
 
-      {/* ★ JOURNEY MAP — Gamified visual ★ */}
+      {/* ★ JOURNEY MAP / ACCELERATION PROGRESS — Adaptive to program type ★ */}
       <WidgetErrorBoundary name="JourneyMap">
-        <FounderJourneyMap currentStage={workspace.stage} />
+        {workspace.program?.program_type === 'acceleration' ? (
+          <AccelerationProgressCard
+            programId={workspace.program_id}
+            currentWeek={(workspace as any).current_week ?? null}
+          />
+        ) : (
+          <FounderJourneyMap currentStage={workspace.stage} />
+        )}
       </WidgetErrorBoundary>
 
       {/* ★ HERO: Next Best Actions — the ABSOLUTE FIRST thing founders see ★ */}
