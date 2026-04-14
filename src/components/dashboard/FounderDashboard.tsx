@@ -36,6 +36,7 @@ import { SmartNudgeCard } from '@/components/dashboard/SmartNudgeCard';
 import { useSmartNudges } from '@/hooks/useSmartNudges';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
+import { AccelerationProgressCard } from '@/components/dashboard/AccelerationProgressCard';
 import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
