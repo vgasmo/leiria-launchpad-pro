@@ -47,6 +47,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   
   // Check if email is from startupleiria.com domain
   const isConsultorEmail = useMemo(() => {
@@ -143,12 +144,9 @@ export default function Login() {
         setError(error.message);
       }
     } else {
-      // If there's a returnTo param, redirect there instead of default
-      if (returnTo) {
-        navigate(decodeURIComponent(returnTo));
-      } else {
-        navigate('/my-workspaces');
-      }
+      // Show confirmation message — user needs to verify email before proceeding
+      setError(null);
+      setSignupSuccess(true);
     }
   };
 
@@ -388,6 +386,25 @@ export default function Login() {
                 </TabsContent>
 
                 <TabsContent value="signup" className="animate-fade-in">
+                  {signupSuccess ? (
+                    <div className="text-center space-y-4 py-6">
+                      <div className="flex justify-center">
+                        <div className="p-3 rounded-full bg-primary/10">
+                          <Mail className="h-8 w-8 text-primary" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-semibold">{t('login.signupSuccessTitle', 'Conta criada com sucesso!')}</h3>
+                      <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                        {t('login.signupSuccessDesc', 'Enviámos um email de verificação para o seu endereço. Por favor verifique a sua caixa de correio e clique no link de confirmação.')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {email}
+                      </p>
+                      <Button variant="outline" onClick={() => { setSignupSuccess(false); setActiveTab('login'); }} className="mt-2">
+                        {t('login.backToLogin', 'Voltar ao login')}
+                      </Button>
+                    </div>
+                  ) : (
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">{t('login.fullName')}</Label>
@@ -521,6 +538,7 @@ export default function Login() {
                       ) : t('login.createAccount')}
                     </Button>
                   </form>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
