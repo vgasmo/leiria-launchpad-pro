@@ -143,12 +143,9 @@ export default function Login() {
         setError(error.message);
       }
     } else {
-      // If there's a returnTo param, redirect there instead of default
-      if (returnTo) {
-        navigate(decodeURIComponent(returnTo));
-      } else {
-        navigate('/my-workspaces');
-      }
+      // Show confirmation message — user needs to verify email before proceeding
+      setError(null);
+      setSignupSuccess(true);
     }
   };
 

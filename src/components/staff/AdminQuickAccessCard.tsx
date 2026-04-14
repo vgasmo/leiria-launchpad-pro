@@ -34,19 +34,19 @@ export function AdminQuickAccessCard() {
       label: t('staffCockpit.quickAccess.spaceOps', { defaultValue: 'Consola de Operações' }),
       description: t('staffCockpit.quickAccess.spaceOpsDesc', { defaultValue: 'Alocações, startups e espaços' }),
       icon: MapPin,
-      href: '/admin?tab=backoffice',
+      href: '/admin?tab=backoffice&section=spaces',
     },
     {
       label: t('staffCockpit.quickAccess.contracts', { defaultValue: 'Contratos' }),
       description: t('staffCockpit.quickAccess.contractsDesc', { defaultValue: 'Gestão e renovações' }),
       icon: FileText,
-      href: '/admin?tab=backoffice',
+      href: '/admin?tab=backoffice&section=contracts',
     },
     {
       label: t('staffCockpit.quickAccess.infrastructure', { defaultValue: 'Infraestrutura' }),
       description: t('staffCockpit.quickAccess.infrastructureDesc', { defaultValue: 'Edifícios, salas e plantas' }),
       icon: Building2,
-      href: '/admin?tab=backoffice',
+      href: '/admin?tab=backoffice&section=infra',
     },
     {
       label: t('staffCockpit.quickAccess.systemSettings', { defaultValue: 'Configurações Sistema' }),
