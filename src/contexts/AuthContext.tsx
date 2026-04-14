@@ -113,6 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    let initialUserId: string | null = null;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return;
@@ -125,7 +127,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setRoles([]);
           setIsAuthReady(true);
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Token refresh — no need to re-fetch profile/roles, just update session
+          return;
+        } else if (event === 'INITIAL_SESSION') {
+          // Skip — handled by initializeAuth to avoid duplicate fetch
+          initialUserId = newSession?.user?.id ?? null;
+          return;
         } else if (newSession?.user) {
+          // Real auth change (SIGNED_IN, USER_UPDATED)
+          // Skip if same user as initial session (already fetched)
+          if (newSession.user.id === initialUserId && event === 'SIGNED_IN') {
+            return;
+          }
           // Detect user switch — clear previous user's cache
           const previousUid = localStorage.getItem('sl-cache-uid');
           if (previousUid && previousUid !== newSession.user.id) {
