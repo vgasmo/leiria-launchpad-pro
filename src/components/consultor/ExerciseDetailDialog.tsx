@@ -76,7 +76,7 @@ export function ExerciseDetailDialog({ open, onOpenChange, exercise }: ExerciseD
             {/* Materials */}
             {exercise.materials_needed.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold mb-2">Materials Needed</h3>
+                <h3 className="text-sm font-semibold mb-2">{t('exercises.materialsNeeded', 'Materials Needed')}</h3>
                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                   {exercise.materials_needed.map((m, i) => (
                     <li key={i}>{m}</li>
@@ -88,7 +88,7 @@ export function ExerciseDetailDialog({ open, onOpenChange, exercise }: ExerciseD
             {/* Steps */}
             {exercise.step_by_step.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold mb-3">Step-by-Step</h3>
+                <h3 className="text-sm font-semibold mb-3">{t('exercises.stepByStep', 'Step-by-Step')}</h3>
                 <div className="space-y-3">
                   {exercise.step_by_step.map((step, index) => (
                     <div key={index} className="flex gap-3">
@@ -158,7 +158,7 @@ export function ExerciseDetailDialog({ open, onOpenChange, exercise }: ExerciseD
             {/* Variations */}
             {exercise.variations && (
               <div>
-                <h3 className="text-sm font-semibold mb-2">Variations</h3>
+                <h3 className="text-sm font-semibold mb-2">{t('exercises.variations', 'Variations')}</h3>
                 <p className="text-sm text-muted-foreground">{exercise.variations}</p>
               </div>
             )}

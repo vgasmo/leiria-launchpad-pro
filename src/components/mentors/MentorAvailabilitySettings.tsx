@@ -152,7 +152,7 @@ export function MentorAvailabilitySettings() {
                 </div>
 
                 <div className="flex-1 min-w-[200px]">
-                  <Label className="sr-only">Day</Label>
+                  <Label className="sr-only">{t('mentor.dayOfWeek', 'Day')}</Label>
                   <Select
                     value={slot.day_of_week.toString()}
                     onValueChange={(value) => updateSlot(slot.id, 'day_of_week', parseInt(value))}
