@@ -702,11 +702,11 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
 
   const signerStatusLabel = (status: string) => {
     const map: Record<string, string> = {
-      pending: 'Pendente',
-      sent: 'Enviado',
-      signed: 'Assinado ✓',
-      declined: 'Recusado',
-      completed: 'Assinado ✓',
+      pending: t('contractDetail.signerPending', 'Pendente'),
+      sent: t('contractDetail.signerSent', 'Enviado'),
+      signed: t('contractDetail.signerSigned', 'Assinado ✓'),
+      declined: t('contractDetail.signerDeclined', 'Recusado'),
+      completed: t('contractDetail.signerCompleted', 'Assinado ✓'),
     };
     return map[status] || status;
   };

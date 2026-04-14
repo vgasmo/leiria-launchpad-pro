@@ -172,7 +172,7 @@ export function MentorAvailabilitySettings() {
 
                 <div className="flex items-center gap-2">
                   <div className="w-28">
-                    <Label className="sr-only">Start Time</Label>
+                    <Label className="sr-only">{t('mentor.startTime', 'Start Time')}</Label>
                     <Select
                       value={slot.start_time}
                       onValueChange={(value) => updateSlot(slot.id, 'start_time', value)}
@@ -191,7 +191,7 @@ export function MentorAvailabilitySettings() {
                   </div>
                   <span className="text-muted-foreground">{t('mentor.to', 'a')}</span>
                   <div className="w-28">
-                    <Label className="sr-only">End Time</Label>
+                    <Label className="sr-only">{t('mentor.endTime', 'End Time')}</Label>
                     <Select
                       value={slot.end_time}
                       onValueChange={(value) => updateSlot(slot.id, 'end_time', value)}
