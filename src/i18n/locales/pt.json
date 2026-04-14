@@ -1599,7 +1599,8 @@
     "programBreakdown": "Detalhe por Programa",
     "selectProgram": "Selecionar programa",
     "stageDistribution": "Distribuição por Fase",
-    "totalStartups": "total de Startups"
+    "totalStartups": "total de Startups",
+    "weekDistribution": "Distribuição por Semana"
   },
   "app": {
     "clickToUpdate": "Clique para atualizar.",

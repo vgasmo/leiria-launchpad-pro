@@ -60,10 +60,23 @@ export function CohortAnalytics() {
     .filter(([_, count]) => count > 0)
     .map(([status, count]) => ({ name: status, value: count, fill: HEALTH_COLORS[status] })) : [];
 
-  const stageData = stats?.flatMap(s => 
+  // Determine if we're viewing an acceleration-only program
+  const hasAccelerationPrograms = stats?.some(s => s.programType === 'acceleration');
+  const hasIncubationPrograms = stats?.some(s => s.programType !== 'acceleration');
+  const isAccelerationOnly = hasAccelerationPrograms && !hasIncubationPrograms;
+
+  const stageData = stats?.filter(s => s.programType !== 'acceleration').flatMap(s => 
     Object.entries(s.stageDistribution).map(([stage, count]) => ({
       program: s.programName,
       stage,
+      count,
+    }))
+  ) || [];
+
+  const weekData = stats?.filter(s => s.programType === 'acceleration').flatMap(s =>
+    Object.entries(s.weekDistribution).map(([week, count]) => ({
+      program: s.programName,
+      week,
       count,
     }))
   ) || [];
@@ -73,6 +86,13 @@ export function CohortAnalytics() {
     stage,
     count: stageData.filter(d => d.stage === stage).reduce((sum, d) => sum + d.count, 0),
   }));
+
+  const weekChartData = Array.from(new Set(weekData.map(d => d.week)))
+    .sort((a, b) => parseInt(a.replace('S', '')) - parseInt(b.replace('S', '')))
+    .map(week => ({
+      week,
+      count: weekData.filter(d => d.week === week).reduce((sum, d) => sum + d.count, 0),
+    }));
 
   if (isLoading) {
     return (
@@ -214,30 +234,56 @@ export function CohortAnalytics() {
           </CardContent>
         </Card>
 
-        {/* Stage Distribution */}
+        {/* Stage / Week Distribution — context-aware */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">{t('analytics.stageDistribution', 'Distribuição por Fase')}</CardTitle>
+            <CardTitle className="text-lg">
+              {isAccelerationOnly
+                ? t('analytics.weekDistribution', 'Distribuição por Semana')
+                : t('analytics.stageDistribution', 'Distribuição por Fase')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {stageChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stageChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="stage" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#3b82f6">
-                    {stageChartData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={STAGE_COLORS[index % STAGE_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {isAccelerationOnly ? (
+              weekChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={weekChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#8b5cf6">
+                      {weekChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={STAGE_COLORS[index % STAGE_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  {t('common.noData', 'Sem dados')}
+                </div>
+              )
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                {t('common.noData', 'Sem dados')}
-              </div>
+              stageChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={stageChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="stage" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#3b82f6">
+                      {stageChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={STAGE_COLORS[index % STAGE_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  {t('common.noData', 'Sem dados')}
+                </div>
+              )
             )}
           </CardContent>
         </Card>
