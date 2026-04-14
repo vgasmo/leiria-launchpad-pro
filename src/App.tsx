@@ -125,9 +125,12 @@ function ProtectedRoute({ children, adminOnly = false, staffOnly = false }: { ch
 
 function SuspenseFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <div className="w-full max-w-4xl">
-        <SkeletonDashboard />
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+        <p className="text-sm text-muted-foreground animate-pulse">A carregar...</p>
       </div>
     </div>
   );
