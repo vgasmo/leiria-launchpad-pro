@@ -142,6 +142,16 @@ export function StaffMentorAssignDialog({
           />
         </div>
 
+        {/* NDA compliance warning */}
+        {selectedMentorId && hasNda === false && (
+          <Alert variant="destructive" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {t('mentors.ndaNotSigned', 'Este mentor ainda não assinou o NDA. O acesso aos dados do workspace ficará bloqueado até que o NDA seja aceite.')}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
