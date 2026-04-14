@@ -14,7 +14,7 @@ import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { useMentorNdaStatus } from "@/hooks/useMentorNdaStatus";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import { useFounderOnboardingState } from "@/hooks/useFounderOnboardingState";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { AccessDenied } from "@/components/ui/AccessDenied";
 import { queryClient } from "@/lib/queryClient";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
