@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resetSession(queryClient, 'logout');
       await supabase.auth.signOut();
     } catch (e) {
-      console.error('signOut error', e);
+      logger.error('signout_failed', {}, e);
     } finally {
       setProfile(null);
       setRoles([]);

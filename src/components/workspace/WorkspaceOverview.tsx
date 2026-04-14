@@ -168,13 +168,8 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         />
       )}
 
-      {/* Current Week Indicator fallback (when no gates configured) */}
-      {workspace.current_week && workspace.program?.program_type !== 'acceleration' && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
-          <CalendarDays className="h-4 w-4" />
-          {t('workspace.currentWeek', { week: workspace.current_week, defaultValue: 'Semana {{week}}' })}
-        </div>
-      )}
+      {/* Current Week Indicator removed — AccelerationProgressCard handles acceleration programs,
+          and incubation programs don't use current_week. */}
 
       {/* Enhanced Next Steps for Founders */}
       {isFounder && (
