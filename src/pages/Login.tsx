@@ -538,6 +538,7 @@ export default function Login() {
                       ) : t('login.createAccount')}
                     </Button>
                   </form>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
