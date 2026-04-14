@@ -130,12 +130,16 @@ export function FounderDashboard({
   // render the transitional dashboard instead of the full mature view.
   // This is additive, read-only, does NOT change useWorkspaces or useFounderOnboardingState.
   const wsStatus = (workspace as any).status as string | undefined;
+  const wsNeedsOnboarding = (workspace as any).needs_onboarding === true;
   const isTransitional = wsStatus && wsStatus !== 'active';
 
   if (isTransitional) {
-    const transitionalStatus = (['claimed', 'pending', 'onboarding'].includes(wsStatus))
-      ? wsStatus as 'claimed' | 'pending' | 'onboarding'
-      : 'claimed'; // safe fallback for imported_unclaimed or other non-active states
+    // If needs_onboarding is true, show 'onboarding' state regardless of workspace status
+    const transitionalStatus = wsNeedsOnboarding
+      ? 'onboarding'
+      : (['claimed', 'pending', 'onboarding'].includes(wsStatus!))
+        ? wsStatus as 'claimed' | 'pending' | 'onboarding'
+        : 'claimed'; // safe fallback for imported_unclaimed or other non-active states
     return (
       <TransitionalFounderDashboard
         workspace={workspace}

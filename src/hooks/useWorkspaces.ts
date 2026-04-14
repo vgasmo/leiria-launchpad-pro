@@ -99,7 +99,7 @@ export function useWorkspaces(
       let query = supabase
         .from('workspaces')
         .select(`
-          id, startup_id, program_id, stage, status, 
+          id, startup_id, program_id, stage, status, needs_onboarding,
           health_score, health_score_override, health_notes,
           priority_level, priority_notes, current_week, created_at, updated_at,
           startup:startups(id, name, description, logo_url),
