@@ -12,7 +12,7 @@ export function usePrograms() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('programs')
-        .select('*')
+        .select('id, name, description, start_date, end_date, is_active, program_type, settings_json, status, created_at, updated_at')
         .order('name');
       if (error) throw error;
       return data;

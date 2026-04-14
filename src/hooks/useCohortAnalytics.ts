@@ -5,12 +5,14 @@ import { HealthScore } from '@/types/database';
 export interface CohortStats {
   programId: string;
   programName: string;
+  programType: 'incubation' | 'acceleration' | null;
   totalStartups: number;
   healthDistribution: Record<HealthScore, number>;
   avgPendingActions: number;
   avgOverdueActions: number;
   kpiCompletionRate: number;
   stageDistribution: Record<string, number>;
+  weekDistribution: Record<string, number>;
 }
 
 export function useCohortAnalytics(programId?: string) {
@@ -20,7 +22,7 @@ export function useCohortAnalytics(programId?: string) {
       // Get all programs
       const { data: programs, error: progError } = await supabase
         .from('programs')
-        .select('id, name')
+        .select('id, name, program_type')
         .eq('is_active', true);
 
       if (progError) throw progError;
@@ -33,6 +35,7 @@ export function useCohortAnalytics(programId?: string) {
           id,
           program_id,
           stage,
+          current_week,
           health_score,
           health_score_override
         `)
@@ -75,11 +78,16 @@ export function useCohortAnalytics(programId?: string) {
           };
 
           const stageDist: Record<string, number> = {};
+          const weekDist: Record<string, number> = {};
 
           programWorkspaces.forEach(w => {
             const health = (w.health_score_override || w.health_score || 'stable') as HealthScore;
             healthDist[health]++;
             stageDist[w.stage] = (stageDist[w.stage] || 0) + 1;
+            if (w.current_week != null) {
+              const weekLabel = `S${w.current_week}`;
+              weekDist[weekLabel] = (weekDist[weekLabel] || 0) + 1;
+            }
           });
 
           const programActions = actions?.filter(a => wsIdsInProgram.includes(a.workspace_id)) || [];
@@ -91,12 +99,14 @@ export function useCohortAnalytics(programId?: string) {
           return {
             programId: program.id,
             programName: program.name,
+            programType: (program.program_type as 'incubation' | 'acceleration' | null) || null,
             totalStartups: programWorkspaces.length,
             healthDistribution: healthDist,
             avgPendingActions: programActions.length / total,
             avgOverdueActions: overdueActions.length / total,
             kpiCompletionRate: (new Set(kpisWithData.map(k => k.workspace_id)).size / total) * 100,
             stageDistribution: stageDist,
+            weekDistribution: weekDist,
           };
         });
 

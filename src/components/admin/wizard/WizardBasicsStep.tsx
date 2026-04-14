@@ -227,7 +227,8 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
         </CardContent>
       </Card>
 
-      {/* Program Mode Selection */}
+      {/* Program Mode Selection — only for incubation programs */}
+      {!isAcceleration && (
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -313,6 +314,7 @@ export function WizardBasicsStep({ data, onUpdate }: WizardBasicsStepProps) {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
