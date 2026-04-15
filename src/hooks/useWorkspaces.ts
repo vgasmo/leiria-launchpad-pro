@@ -275,10 +275,10 @@ export function useWorkspace(id: string | undefined) {
         .select(`
           id, startup_id, program_id, stage, stage_id, status,
           health_score, health_score_override, health_status, health_notes,
-          priority_level, priority_notes, created_at, updated_at,
+          priority_level, priority_notes, current_week, needs_onboarding, created_at, updated_at,
           blocked_at, blocked_reason,
           startup:startups(id, name, description, logo_url, website, nif, main_contact_name, main_contact_email, main_contact_phone, has_startup_portugal_status),
-          program:programs(id, name, description)
+          program:programs(id, name, description, program_type)
         `)
         .eq('id', id)
         .maybeSingle();

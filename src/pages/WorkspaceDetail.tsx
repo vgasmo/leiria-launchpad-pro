@@ -64,7 +64,7 @@ export default function WorkspaceDetail() {
 
   // Extract startup/program early for tab computation
   const startup = workspace?.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null; nif: string | null; main_contact_name: string | null; main_contact_email: string | null; main_contact_phone: string | null; has_startup_portugal_status: boolean | null; startup_portugal_document_path: string | null } | null ?? null;
-  const program = workspace ? (workspace.program as { name: string } | null) : null;
+  const program = workspace ? (workspace.program as { name: string; program_type?: string } | null) : null;
 
   // Compute visible tabs
   const { primaryTabs, overflowTabs } = useMemo(
@@ -308,6 +308,7 @@ export default function WorkspaceDetail() {
                   health_notes: workspace.health_notes,
                   startup: startup,
                   program: program,
+                  current_week: (workspace as any).current_week ?? null,
                 }}
                 canWrite={canWrite}
               />
