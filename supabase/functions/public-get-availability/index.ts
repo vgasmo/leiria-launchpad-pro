@@ -79,28 +79,29 @@ async function getGraphAccessToken(credentials: {
 // Get free/busy schedule from Graph API
 async function getFreeBusySchedule(
   accessToken: string,
-  userEmail: string,
+  email: string,
   startTime: string,
   endTime: string
 ): Promise<{ availabilityView: string } | null> {
-  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userEmail)}/calendar/getSchedule`;
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      schedules: [userEmail],
-      startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
-      endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
-      availabilityViewInterval: 30,
-    }),
-  });
+  const response = await fetch(
+    `https://graph.microsoft.com/v1.0/users/${email}/calendar/getSchedule`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        schedules: [email],
+        startTime: { dateTime: startTime, timeZone: 'Europe/Lisbon' },
+        endTime: { dateTime: endTime, timeZone: 'Europe/Lisbon' },
+        availabilityViewInterval: 30,
+      }),
+    }
+  );
 
   if (!response.ok) {
-    console.error("Graph API error:", await response.text());
+    console.error('Graph schedule error:', response.status);
     return null;
   }
 
@@ -108,14 +109,11 @@ async function getFreeBusySchedule(
   return data.value?.[0] || null;
 }
 
-// Generate slots from availability view
-function generateSlotsFromAvailability(
-  date: string,
-  availabilityView: string
-): TimeSlot[] {
+// Generate time slots from availability view
+function generateSlotsFromAvailability(date: string, availabilityView: string): TimeSlot[] {
   const slots: TimeSlot[] = [];
   const workStart = 9;
-  const times = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+  const times = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
   
   for (const time of times) {
     const [hour, minute] = time.split(':').map(Number);
@@ -136,20 +134,37 @@ function generateSlotsFromAvailability(
   return slots;
 }
 
+// Helper: resolve consultant email/name from a routing record
+async function resolveConsultantFromRouting(
+  supabase: any,
+  routing: { consultant_ids: string[]; mode: string; round_robin_index?: number }
+): Promise<{ email: string | null; name: string | null }> {
+  const consultantId = routing.consultant_ids?.[0] || null;
+  if (!consultantId) return { email: null, name: null };
+  
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", consultantId)
+    .maybeSingle();
+  
+  return { email: profile?.email || null, name: profile?.full_name || null };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return handleCorsOptions(req);
   }
 
   try {
-    let body: { token?: unknown; action?: unknown };
+    let body: { token?: unknown; action?: unknown; program_id?: unknown };
     try {
       body = await req.json();
     } catch {
       return corsJsonResponse({ error: "Invalid JSON body" }, req, 400);
     }
 
-    const { token, action } = body;
+    const { token, action, program_id: selectedProgramId } = body;
 
     if (!token || typeof token !== 'string' || token.length > 500) {
       return corsJsonResponse({ error: "Invalid or missing token" }, req, 400);
@@ -178,36 +193,65 @@ serve(async (req) => {
     let consultantName: string | null = null;
     let programId: string | null = null;
     let programName: string | null = null;
+    let routingOptions: Array<{ program_id: string | null; program_name: string; scope: string }> = [];
 
     if (token === 'demo') {
-      // Use intake_routing to get the configured consultant instead of random first consultor
-      const { data: routing } = await supabase
+      // Fetch ALL active routings
+      const { data: allRoutings } = await supabase
         .from("intake_routing")
-        .select("consultant_ids, program_id")
+        .select("id, scope, program_id, mode, consultant_ids, round_robin_index")
         .eq("active", true)
-        .limit(1)
-        .maybeSingle();
-      
-      if (routing?.program_id) {
-        const { data: prog } = await supabase.from("programs").select("id, name").eq("id", routing.program_id).maybeSingle();
-        programId = prog?.id || null;
-        programName = prog?.name || null;
+        .order("scope", { ascending: true });
+
+      // Build routing options with program names
+      if (allRoutings && allRoutings.length > 0) {
+        for (const r of allRoutings) {
+          if (r.scope === 'global') {
+            routingOptions.push({ program_id: null, program_name: 'Geral', scope: 'global' });
+          } else if (r.program_id) {
+            const { data: prog } = await supabase.from("programs").select("id, name").eq("id", r.program_id).maybeSingle();
+            if (prog) {
+              routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
+            }
+          }
+        }
+      }
+
+      // Determine which routing to use for slots
+      let chosenRouting = null;
+      if (typeof selectedProgramId === 'string' && selectedProgramId !== '') {
+        // User selected a specific program
+        chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId) || null;
+        if (chosenRouting?.program_id) {
+          const { data: prog } = await supabase.from("programs").select("id, name").eq("id", chosenRouting.program_id).maybeSingle();
+          programId = prog?.id || null;
+          programName = prog?.name || null;
+        }
+      } else if (selectedProgramId === 'global' || selectedProgramId === null) {
+        // User selected global or default
+        chosenRouting = allRoutings?.find(r => r.scope === 'global') || allRoutings?.[0] || null;
       } else {
+        // No selection yet — use first routing
+        chosenRouting = allRoutings?.[0] || null;
+      }
+
+      if (chosenRouting) {
+        const consultant = await resolveConsultantFromRouting(supabase, chosenRouting);
+        consultantEmail = consultant.email;
+        consultantName = consultant.name;
+        
+        if (!programId && chosenRouting.program_id) {
+          const { data: prog } = await supabase.from("programs").select("id, name").eq("id", chosenRouting.program_id).maybeSingle();
+          programId = prog?.id || null;
+          programName = prog?.name || null;
+        }
+      }
+
+      if (!programId && !selectedProgramId) {
+        // Fallback: first program
         const { data: programs } = await supabase.from("programs").select("id, name").limit(1);
         programId = programs?.[0]?.id || null;
         programName = programs?.[0]?.name || null;
-      }
-      
-      const consultantId = routing?.consultant_ids?.[0] || null;
-      if (consultantId) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("email, full_name")
-          .eq("id", consultantId)
-          .maybeSingle();
-        
-        consultantEmail = profile?.email || null;
-        consultantName = profile?.full_name || null;
       }
     } else {
       const tokenHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
@@ -270,6 +314,7 @@ serve(async (req) => {
           consultant_name: consultantName,
           expires_at: null,
         },
+        routingOptions: routingOptions.length > 1 ? routingOptions : undefined,
       }, req);
     }
 
@@ -302,7 +347,6 @@ serve(async (req) => {
           }
         } catch (graphError) {
           console.error("Graph API error:", graphError);
-          // Fallback: generate default slots when Graph fails
           for (let day = 1; day <= 14; day++) {
             const date = addDays(now, day);
             const dayOfWeek = date.getDay();
@@ -316,7 +360,6 @@ serve(async (req) => {
           }
         }
       } else {
-        // Graph not configured: generate default weekday slots as fallback
         for (let day = 1; day <= 14; day++) {
           const date = addDays(now, day);
           const dayOfWeek = date.getDay();
@@ -330,7 +373,7 @@ serve(async (req) => {
         }
       }
 
-      return corsJsonResponse({ slots, consultantName, graphEnabled: !!credentials }, req);
+      return corsJsonResponse({ slots, consultantName, programId, programName, graphEnabled: !!credentials }, req);
     }
 
     return corsJsonResponse({ error: "Invalid action" }, req, 400);
