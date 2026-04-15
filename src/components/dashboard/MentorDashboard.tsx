@@ -264,7 +264,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
       {/* Two-column layout: Startups + Calendar */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
+        <div id="mentor-startups-section" className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
