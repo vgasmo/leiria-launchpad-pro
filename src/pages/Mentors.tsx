@@ -33,6 +33,7 @@ import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
 import { FounderMentorRequestPanel } from '@/components/mentors/FounderMentorRequestPanel';
 import { PendingMentorRequestsPanel } from '@/components/mentors/PendingMentorRequestsPanel';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
+import { MentorProfileDialog } from '@/components/mentors/MentorProfileDialog';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
