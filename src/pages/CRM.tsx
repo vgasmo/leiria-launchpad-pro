@@ -580,6 +580,10 @@ export default function CRM() {
             </div>
             <CrmAnalyticsDashboard />
           </TabsContent>
+
+          <TabsContent value="booking-links" className="space-y-4">
+            <BookingLinksManager />
+          </TabsContent>
         </Tabs>
 
         <RecordDrawer
