@@ -215,15 +215,15 @@ export function BenchmarkDashboard({
                   </Badge>
                   <div className="flex-1 grid grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground text-xs">Health</span>
+                      <span className="text-muted-foreground text-xs">{t('benchmark.healthScore', 'Health Score')}</span>
                       <p className="font-medium">{stage.avg_health_score ?? '—'}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-xs">Milestones</span>
+                      <span className="text-muted-foreground text-xs">{t('benchmark.milestones', 'Milestones')}</span>
                       <p className="font-medium">{stage.avg_milestones_completed ?? '—'}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-xs">Ações</span>
+                      <span className="text-muted-foreground text-xs">{t('benchmark.actions', 'Actions')}</span>
                       <p className="font-medium">{stage.avg_actions_completed ?? '—'}</p>
                     </div>
                   </div>

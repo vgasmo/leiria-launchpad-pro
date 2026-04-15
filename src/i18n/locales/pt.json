@@ -636,7 +636,12 @@
       "waitlistSuggestions": "Sugestões da Lista de Espera",
       "workspaceBlocked": "Workspace bloqueado",
       "workspaceUnblocked": "Workspace desbloqueado",
-      "workspacesWithoutContracts": "Workspaces Sem Contratos"
+      "workspacesWithoutContracts": "Workspaces Sem Contratos",
+      "contractSigners": {
+        "firstParty": "Primeiro Outorgante",
+        "secondParty": "Segundo Outorgante",
+        "autoAssigned": "Será atribuído automaticamente ao enviar"
+      }
     },
     "backofficeExtended": {
       "addSpace": "Adicionar Espaço",
@@ -1866,7 +1871,8 @@
     "navigation": "Navegação",
     "placeholder": "Pesquisar ou escrever um comando...",
     "quickActions": "Ações Rápidas",
-    "typeToSearch": "Escreva para pesquisar..."
+    "typeToSearch": "Escreva para pesquisar...",
+    "copilotTitle": "Copiloto do Ecossistema"
   },
   "common": {
     "accessDenied": "Acesso Negado",
@@ -2034,7 +2040,11 @@
     "viewAll": "Ver todas",
     "workspace": "Workspace",
     "years": "anos",
-    "yes": "Sim"
+    "yes": "Sim",
+    "highlights": "Destaques",
+    "startups": "Startups",
+    "dataNotAvailable": "Dados não disponíveis.",
+    "preview": "Pré-visualização"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2669,9 +2679,9 @@
     "emailHistory": "Histórico de Email",
     "generateSummary": "Resumo IA",
     "aiSummary": "Resumo IA",
-    "itemsAnalyzed": "{{count}} interações analisadas",
+    "itemsAnalyzed": "{{count}} itens analisados",
     "keyPoints": "Pontos-chave",
-    "nextAction": "Próxima ação",
+    "nextAction": "Próxima Ação",
     "noSubject": "(sem assunto)",
     "emailReenviadoComSucesso": "Email reenviado com sucesso!",
     "emailReviewQueue": "Emails para Revisão",
@@ -2739,8 +2749,6 @@
     "intakeCreatedNoEmail": "Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.",
     "interactions": "Interações",
     "itemNotFound": "Lead não encontrado ou sem acesso",
-    "itemsAnalyzed": "{{count}} itens analisados",
-    "keyPoints": "Pontos-chave",
     "lastActivity": "Última Atividade",
     "lastSuccess": " ",
     "lastSync": " ",
@@ -2777,7 +2785,6 @@
     "nenhumContratoAssociadoAEste": "Nenhum contrato associado a este intake. Crie o contrato primeiro.",
     "neverSynced": "Nunca sincronizado",
     "newLead": "Nova Lead",
-    "nextAction": "Próxima Ação",
     "nextActionClearError": "Falha ao limpar próxima ação",
     "nextActionCleared": "Próxima ação limpa",
     "nextActionDate": "Data e Hora",
@@ -2915,7 +2922,13 @@
     "viewAll": "Ver Tudo",
     "viewSession": "Ver Sessão",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "stages": {
+      "new": "Novo",
+      "firstContactBooked": "Primeiro Contacto Agendado",
+      "met": "Reunião Realizada",
+      "qualified": "Qualificado"
+    }
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -7700,7 +7713,8 @@
     "statusOffered": "Oferecido",
     "statusWaiting": "Em Espera",
     "type": "Tipo",
-    "virtualIncubation": "Incubação Virtual"
+    "virtualIncubation": "Incubação Virtual",
+    "request": "Pedido"
   },
   "weeklyWins": {
     "complete": "Completar",

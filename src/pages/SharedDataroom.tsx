@@ -184,7 +184,7 @@ export default function SharedDataroom() {
                               {/* Render investor update content summary */}
                               {item.investor_update.content.highlights && (
                                 <div>
-                                  <h4 className="font-medium">Highlights</h4>
+                                  <h4 className="font-medium">{t('common.highlights', 'Highlights')}</h4>
                                   <p>{item.investor_update.content.highlights}</p>
                                 </div>
                               )}

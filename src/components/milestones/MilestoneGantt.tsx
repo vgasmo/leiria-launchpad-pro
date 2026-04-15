@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, parseISO, differenceInDays, startOfDay, addDays, isWithinInterval } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ const STATUS_COLORS = {
 };
 
 export function MilestoneGantt({ milestones, className }: MilestoneGanttProps) {
+  const { t } = useTranslation();
   const { chartData, dateRange, totalDays } = useMemo(() => {
     const milestonesWithDates = milestones.filter(m => m.target_date);
     
@@ -93,7 +95,7 @@ export function MilestoneGantt({ milestones, className }: MilestoneGanttProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Milestone Timeline</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('milestones.timeline', 'Milestone Timeline')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="relative">

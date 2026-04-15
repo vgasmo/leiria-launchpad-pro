@@ -636,7 +636,12 @@
       "waitlistSuggestions": "Waitlist Suggestions",
       "workspaceBlocked": "Workspace blocked",
       "workspaceUnblocked": "Workspace unblocked",
-      "workspacesWithoutContracts": "Workspaces Without Contracts"
+      "workspacesWithoutContracts": "Workspaces Without Contracts",
+      "contractSigners": {
+        "firstParty": "First Party",
+        "secondParty": "Second Party",
+        "autoAssigned": "Will be auto-assigned on send"
+      }
     },
     "backofficeExtended": {
       "addSpace": "Add Space",
@@ -760,7 +765,7 @@
       "title": "Public Booking Links"
     },
     "cancel": "Cancel",
-     "claimAprovadoEFounderAssociado": "Claim approved and founder linked to workspace",
+    "claimAprovadoEFounderAssociado": "Claim approved and founder linked to workspace",
     "claimRejeitado": "Claim rejected",
     "cohortHealthPdf": "Cohort health as PDF",
     "commandCenter": "Dashboard",
@@ -1866,7 +1871,8 @@
     "navigation": "Navigation",
     "placeholder": "Search or type a command...",
     "quickActions": "Quick Actions",
-    "typeToSearch": "Type to search..."
+    "typeToSearch": "Type to search...",
+    "copilotTitle": "Ecosystem Copilot"
   },
   "common": {
     "accessDenied": "Access Denied",
@@ -2034,7 +2040,11 @@
     "viewAll": "View all",
     "workspace": "Workspace",
     "years": "years",
-    "yes": "Yes"
+    "yes": "Yes",
+    "highlights": "Highlights",
+    "startups": "Startups",
+    "dataNotAvailable": "Data not available.",
+    "preview": "Preview"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2669,9 +2679,9 @@
     "emailHistory": "Email History",
     "generateSummary": "AI Summary",
     "aiSummary": "AI Summary",
-    "itemsAnalyzed": "{{count}} interactions analyzed",
-    "keyPoints": "Key points",
-    "nextAction": "Next action",
+    "itemsAnalyzed": "{{count}} items analyzed",
+    "keyPoints": "Key Points",
+    "nextAction": "Next Action",
     "noSubject": "(no subject)",
     "emailReenviadoComSucesso": "Email reenviado com sucesso!",
     "emailReviewQueue": "Emails para Revisão",
@@ -2739,8 +2749,6 @@
     "intakeCreatedNoEmail": "Intake created but the email was not sent. The link was copied — you can send it manually.",
     "interactions": "Interactions",
     "itemNotFound": "Lead not found or you don't have access",
-    "itemsAnalyzed": "{{count}} items analyzed",
-    "keyPoints": "Key Points",
     "lastActivity": "Last activity",
     "lastSuccess": " ",
     "lastSync": " ",
@@ -2777,7 +2785,6 @@
     "nenhumContratoAssociadoAEste": "Nenhum contrato associado a este intake. Crie o contrato primeiro.",
     "neverSynced": "Nunca sincronizado",
     "newLead": "Nova Lead",
-    "nextAction": "Next Action",
     "nextActionClearError": "Failed to clear next action",
     "nextActionCleared": "Next action cleared",
     "nextActionDate": "Date & Time",
@@ -2915,7 +2922,13 @@
     "viewAll": "View All",
     "viewSession": "View Session",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)"
+    "winProbability": "Probabilidade (%)",
+    "stages": {
+      "new": "New",
+      "firstContactBooked": "First Contact Booked",
+      "met": "Met",
+      "qualified": "Qualified"
+    }
   },
   "dashboard": {
     "acrossPrograms": "Across {{count}} program",
@@ -7700,7 +7713,8 @@
     "statusOffered": "Offered",
     "statusWaiting": "Waiting",
     "type": "Type",
-    "virtualIncubation": "Virtual Incubation"
+    "virtualIncubation": "Virtual Incubation",
+    "request": "Request"
   },
   "weeklyWins": {
     "complete": "Complete",

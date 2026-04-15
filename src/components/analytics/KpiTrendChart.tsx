@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, subMonths, startOfMonth } from 'date-fns';
 import { TrendingUp, TrendingDown, Minus, Target, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ interface KpiTrendChartProps {
 }
 
 export function KpiTrendChart({ data, targetValue, unit, direction = 'up', kpiName }: KpiTrendChartProps) {
+  const { t } = useTranslation();
   const chartData = useMemo(() => {
     return data.map(d => ({
       ...d,
@@ -93,7 +95,7 @@ export function KpiTrendChart({ data, targetValue, unit, direction = 'up', kpiNa
           </div>
           {previousValue !== null && (
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Previous</p>
+              <p className="text-xs text-muted-foreground">{t('common.previous', 'Previous')}</p>
               <p className="text-sm font-medium">{formatValue(previousValue)}</p>
             </div>
           )}
