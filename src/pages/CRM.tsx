@@ -399,6 +399,10 @@ export default function CRM() {
               <TrendingUp className="h-4 w-4" />
               {t('crm.analytics')}
             </TabsTrigger>
+            <TabsTrigger value="booking-links" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              {t('crm.bookingLinks', { defaultValue: 'Links de Marcação' })}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pipeline" className="space-y-4">
