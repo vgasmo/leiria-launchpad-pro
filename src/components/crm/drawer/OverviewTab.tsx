@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase, Calendar } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase, Calendar, FileText, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -459,6 +459,15 @@ function BookingQuestionnaireSection({ item }: { item: FunnelItem }) {
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">{t('crm.meetingDate', { defaultValue: 'Data da reunião' })}</span>
             <span>{new Date(metadata.booking_date).toLocaleString('pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+          </div>
+        )}
+        {metadata.pitch_deck_path && (
+          <div className="flex justify-between text-sm items-center">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <FileText className="h-3.5 w-3.5" />
+              {t('publicBooking.pitchDeck', { defaultValue: 'Pitch Deck' })}
+            </span>
+            <PitchDeckLink path={metadata.pitch_deck_path} t={t} />
           </div>
         )}
       </div>
