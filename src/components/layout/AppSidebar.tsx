@@ -137,7 +137,7 @@ export function AppSidebar() {
 
   // BACKOFFICE Navigation (focused on spaces, contracts, invoices)
   const backofficeNavigation: NavItem[] = [
-    { name: t('nav.backoffice.cockpit', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
+    { name: t('nav.backoffice.cockpit', { defaultValue: 'Painel' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('nav.backoffice.spaces', { defaultValue: 'Espaços' }), href: '/admin?tab=backoffice', icon: Building2 },
     { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=backoffice&subtab=contracts', icon: FileText },
     // Billing/Invoices removed from nav per user request
@@ -147,8 +147,8 @@ export function AppSidebar() {
 
   // ADMIN Navigation (simplified)
   const adminNavigation: NavItem[] = [
-    { name: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
-    { name: t('ecosystemHub.navLabel', { defaultValue: 'Ecossistema & CRM' }), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('staffCockpit.navLabel', { defaultValue: 'Painel' }), href: '/staff-cockpit', icon: Home, exact: true },
+    { name: t('ecosystemHub.navLabel', { defaultValue: 'Hub de Gestão' }), href: '/admin', icon: ClipboardList, exact: true },
     { name: t('nav.admin.ecosystem', { defaultValue: 'Diretório Ecossistema' }), href: '/ecosystem', icon: Globe2 },
     { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas e Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },

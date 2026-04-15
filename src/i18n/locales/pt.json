@@ -763,7 +763,7 @@
     "claimAprovadoEFounderAssociado": "Claim aprovado e founder associado ao workspace",
     "claimRejeitado": "Claim rejeitado",
     "cohortHealthPdf": "Health do cohort em PDF",
-    "commandCenter": "Centro de Comando",
+    "commandCenter": "Painel",
     "commandCenterDesc": "Triage diária e visão operacional",
     "compliance": "Conformidade",
     "configuraçãoGuardada": "Configuração guardada",
@@ -3348,9 +3348,9 @@
     "workspaces": "workspaces"
   },
   "ecosystemHub": {
-    "navLabel": "Ecossistema & CRM",
+    "navLabel": "Hub de Gestão",
     "subtitle": "Gerir startups, mentores, programas e fluxos operacionais",
-    "title": "Diretório do Ecossistema & CRM"
+    "title": "Hub de Gestão"
   },
   "emptyState": {
     "adjustFilters": "Tente ajustar os seus filtros ou termos de pesquisa para encontrar o que procura.",
@@ -6754,14 +6754,14 @@
     "emptyTriage": "Sem itens pendentes. Tudo em ordem!",
     "expiresOn": "Expira em {{date}}",
     "greeting": "Olá, {{name}}",
-    "greetingGeneric": "Bem-vindo ao Centro de Comando",
+    "greetingGeneric": "Bem-vindo ao Painel",
     "intakeRouting": "Encaminhamento",
     "invoicesOverdue": "Faturas em Atraso",
     "lastSession": "Última sessão",
     "moreStartups": "mais startups",
     "myPortfolio": "O Meu Portfólio",
     "myTasks": "As Minhas Tarefas",
-    "navLabel": "Centro de Comando",
+    "navLabel": "Painel",
     "needsAttention": "aguardam ação",
     "noExpiringContracts": "Nenhum contrato a expirar nos próximos 30 dias.",
     "noOverdueInvoices": "Nenhuma fatura em atraso. Tudo em dia!",
@@ -6792,7 +6792,7 @@
       "reach": "Contactar",
       "title": "Disengagement Silencioso"
     },
-    "title": "Centro de Comando",
+    "title": "Painel",
     "triage": "Triagem & Intake",
     "triageDesc": "O que precisa de decisão agora: aprovações, associações e encaminhamento.",
     "upToDate": "Em dia"

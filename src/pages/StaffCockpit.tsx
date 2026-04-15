@@ -31,11 +31,11 @@ export default function StaffCockpit() {
   const isBackoffice = roles?.includes('backoffice');
   const greeting = profile?.full_name
     ? t('staffCockpit.greeting', { defaultValue: 'Olá, {{name}}', name: profile.full_name.split(' ')[0] })
-    : t('staffCockpit.greetingGeneric', { defaultValue: 'Bem-vindo ao Centro de Comando' });
+    : t('staffCockpit.greetingGeneric', { defaultValue: 'Bem-vindo ao Painel' });
 
   return (
     <AppLayout
-      title={t('staffCockpit.title', { defaultValue: 'Centro de Comando' })}
+      title={t('staffCockpit.title', { defaultValue: 'Painel' })}
       subtitle={greeting}
     >
       <div className="space-y-6">

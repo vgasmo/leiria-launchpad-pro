@@ -154,7 +154,7 @@ export default function Admin() {
   };
 
   return (
-    <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Ecosystem Directory & CRM' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Manage startups, mentors, programs and operational workflows' })}>
+    <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Hub de Gestão' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Gerir startups, mentores, programas e fluxos operacionais' })}>
       <AdminMissionControlDirectory />
 
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
