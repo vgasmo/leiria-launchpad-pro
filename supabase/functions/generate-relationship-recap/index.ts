@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     const body: RecapRequest = await req.json();
-    const { funnel_item_id, workspace_id, language = 'pt', max_items = 40 } = body;
+    const { funnel_item_id, workspace_id, language = 'pt', max_items = 100 } = body;
 
     if (!funnel_item_id && !workspace_id) {
       return corsJsonResponse({ error: 'funnel_item_id or workspace_id required' }, req, 400);
