@@ -21,6 +21,12 @@ interface TimeSlot {
   available: boolean;
 }
 
+interface RoutingOption {
+  program_id: string | null;
+  program_name: string;
+  scope: string;
+}
+
 interface BookingToken {
   id: string;
   program_id: string | null;
@@ -35,8 +41,10 @@ export default function PublicBooking() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [lang, setLang] = useState(i18n.language === 'en' ? 'en' : 'pt');
-  const [step, setStep] = useState<'loading' | 'slots' | 'form' | 'success' | 'error'>('loading');
+  const [step, setStep] = useState<'loading' | 'program_select' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [routingOptions, setRoutingOptions] = useState<RoutingOption[]>([]);
   const [pitchFile, setPitchFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,26 +79,38 @@ export default function PublicBooking() {
       if (error) throw error;
       if (!data?.valid) throw new Error('Invalid or expired booking link');
       
+      // Store routing options if available
+      if (data.routingOptions) {
+        setRoutingOptions(data.routingOptions);
+      }
+      
       return data.tokenData as BookingToken;
     },
     retry: false,
   });
 
-  // Fetch available slots
-  const { data: slots, isLoading: slotsLoading } = useQuery({
-    queryKey: ['public-slots', token],
-    queryFn: async (): Promise<TimeSlot[]> => {
-      if (!token) return [];
+  // Fetch available slots - now depends on selectedProgramId
+  const { data: slotsData, isLoading: slotsLoading } = useQuery({
+    queryKey: ['public-slots', token, selectedProgramId],
+    queryFn: async () => {
+      if (!token) return { slots: [], consultantName: null, programName: null };
       
       const { data, error } = await supabase.functions.invoke('public-get-availability', {
-        body: { token, action: 'get_slots' },
+        body: { token, action: 'get_slots', program_id: selectedProgramId },
       });
       
       if (error) throw error;
-      return data?.slots || [];
+      return {
+        slots: (data?.slots || []) as TimeSlot[],
+        consultantName: data?.consultantName as string | null,
+        programName: data?.programName as string | null,
+      };
     },
-    enabled: !!tokenData,
+    enabled: !!tokenData && (routingOptions.length <= 1 || selectedProgramId !== null),
   });
+
+  const slots = slotsData?.slots;
+  const activeProgramName = slotsData?.programName || tokenData?.program_name;
 
   // Book mutation
   const bookMutation = useMutation({
@@ -102,6 +122,7 @@ export default function PublicBooking() {
           token,
           slot: selectedSlot,
           contact: { ...formData, pitch_deck_path: pitchDeckPath || undefined },
+          program_id: selectedProgramId,
         },
       });
       
@@ -122,9 +143,14 @@ export default function PublicBooking() {
     if (tokenError) {
       setStep('error');
     } else if (tokenData && !slotsLoading) {
-      setStep('slots');
+      // If multiple routing options and none selected yet, show program selector
+      if (routingOptions.length > 1 && selectedProgramId === null) {
+        setStep('program_select');
+      } else {
+        setStep('slots');
+      }
     }
-  }, [tokenData, tokenError, slotsLoading]);
+  }, [tokenData, tokenError, slotsLoading, routingOptions, selectedProgramId]);
 
   // Group slots by date, filtering out days with no available slots
   const slotsByDate = slots?.reduce((acc, slot) => {
@@ -163,6 +189,11 @@ export default function PublicBooking() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleProgramSelect = (programId: string) => {
+    setSelectedProgramId(programId);
+    setSelectedSlot(null);
   };
 
   if (step === 'loading' || tokenLoading) {
@@ -251,10 +282,62 @@ export default function PublicBooking() {
         <div className="text-center">
           <Building2 className="h-10 w-10 mx-auto text-primary mb-2" />
           <h1 className="text-2xl font-bold text-foreground">{t('publicBooking.bookFirstMeeting')}</h1>
-          {tokenData?.program_name && (
-            <p className="text-muted-foreground mt-1">{tokenData.program_name}</p>
+          {activeProgramName && step !== 'program_select' && (
+            <p className="text-muted-foreground mt-1">
+              {activeProgramName}
+              {routingOptions.length > 1 && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="p-0 h-auto ml-2 text-xs"
+                  onClick={() => {
+                    setSelectedProgramId(null);
+                    setSelectedSlot(null);
+                    setStep('program_select');
+                  }}
+                >
+                  {t('publicBooking.changeProgram', { defaultValue: 'alterar' })}
+                </Button>
+              )}
+            </p>
           )}
         </div>
+
+        {/* Program Selection Step */}
+        {step === 'program_select' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-foreground">
+                {t('publicBooking.selectProgram', { defaultValue: 'Selecione o Programa' })}
+              </CardTitle>
+              <CardDescription>
+                {t('publicBooking.selectProgramDesc', { defaultValue: 'Escolha o programa ao qual deseja candidatar-se' })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {routingOptions.map((option) => (
+                  <Button
+                    key={option.program_id || 'global'}
+                    variant="outline"
+                    className="w-full justify-start h-auto py-4 px-4"
+                    onClick={() => handleProgramSelect(option.program_id || 'global')}
+                  >
+                    <Building2 className="h-5 w-5 mr-3 text-primary shrink-0" />
+                    <div className="text-left">
+                      <div className="font-medium">{option.program_name}</div>
+                      {option.scope === 'global' && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {t('publicBooking.generalIntake', { defaultValue: 'Candidatura geral' })}
+                        </div>
+                      )}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {step === 'slots' && (
           <Card>
@@ -263,7 +346,20 @@ export default function PublicBooking() {
               <CardDescription>{t('publicBooking.selectTimeDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              {Object.keys(slotsByDate).length === 0 ? (
+              {slotsLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-40" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-16" />
+                    <Skeleton className="h-9 w-16" />
+                  </div>
+                  <Skeleton className="h-6 w-40" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-16" />
+                    <Skeleton className="h-9 w-16" />
+                  </div>
+                </div>
+              ) : Object.keys(slotsByDate).length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">
                   {t('publicBooking.noSlotsAvailable')}
                 </p>

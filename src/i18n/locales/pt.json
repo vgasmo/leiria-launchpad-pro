@@ -5813,7 +5813,11 @@
     "pitchDeck": "Apresentação / Pitch Deck",
     "uploadPitch": "Carregar apresentação (PDF, PPTX, até 10MB)",
     "fileTooLarge": "Ficheiro demasiado grande (máx. 10MB)",
-    "backToSite": "Voltar ao site"
+    "backToSite": "Voltar ao site",
+    "selectProgram": "Selecione o Programa",
+    "selectProgramDesc": "Escolha o programa ao qual deseja candidatar-se",
+    "changeProgram": "alterar",
+    "generalIntake": "Candidatura geral"
   },
   "quality": {
     "blockingWarning": "Este {{entityType}} não pode ser marcado como pronto até a pontuação atingir 70+",
