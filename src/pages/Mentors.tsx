@@ -301,6 +301,7 @@ export default function Mentors() {
 
   const [mentorSearch, setMentorSearch] = useState('');
   const [selectedMentorForBooking, setSelectedMentorForBooking] = useState<string | null>(null);
+  const [selectedGalleryMentor, setSelectedGalleryMentor] = useState<MentorProfile | null>(null);
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
