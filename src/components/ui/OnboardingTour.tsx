@@ -48,7 +48,7 @@ interface OnboardingTourProps {
 
 export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
   const { t } = useTranslation();
-  const { user, roles, isStaff } = useAuth();
+  const { user, roles, isStaff, isAuthReady } = useAuth();
   const { theme } = useTheme();
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -66,35 +66,54 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
     });
   }, [runTour, tourSteps]); // Re-check when tour starts
 
+  const markTourCompleted = () => {
+    if (user) {
+      localStorage.setItem(`${TOUR_KEY}-${user.id}`, 'true');
+    }
+  };
+
   useEffect(() => {
+    // Wait until auth/roles are fully resolved before deciding
+    if (!isAuthReady) return;
+
     // Skip tour in E2E/test environments
     const isE2E = typeof window !== 'undefined' && (
       window.localStorage.getItem('e2e-test') === 'true' ||
       new URLSearchParams(window.location.search).has('e2e')
     );
-    if (isE2E) return;
+    if (isE2E) {
+      setRunTour(false);
+      return;
+    }
 
     // Skip tour for staff/admin/backoffice — it's designed for founders and mentors
     if (isStaff || roles.includes('backoffice')) {
+      setRunTour(false);
+      setStepIndex(0);
       return;
     }
 
     // Only run tour for logged-in users who haven't completed it
     if (user && run === undefined) {
       const hasCompletedTour = localStorage.getItem(`${TOUR_KEY}-${user.id}`);
-      if (!hasCompletedTour) {
-        // Delay tour start to ensure DOM is ready
-        const timer = setTimeout(() => {
-          setStepIndex(0);
-          setRunTour(true);
-        }, 1500);
-        return () => clearTimeout(timer);
+      if (hasCompletedTour) {
+        setRunTour(false);
+        return;
       }
-    } else if (run !== undefined) {
+
+      const timer = setTimeout(() => {
+        setStepIndex(0);
+        setRunTour(true);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+
+    if (run !== undefined) {
       setStepIndex(0);
       setRunTour(run);
     }
-  }, [user, run]);
+  }, [user, run, isAuthReady, isStaff, roles]);
 
   const handleTourCallback = (data: CallBackProps) => {
     const { status, action, type, index } = data;
@@ -102,7 +121,6 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
 
     // Handle step changes
     if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
-      // Move to next step
       if (action === ACTIONS.NEXT) {
         setStepIndex(index + 1);
       } else if (action === ACTIONS.PREV) {
@@ -110,12 +128,12 @@ export function OnboardingTour({ run, onComplete }: OnboardingTourProps) {
       }
     }
 
-    if (finishedStatuses.includes(status)) {
+    const wasExplicitlyClosed = action === ACTIONS.CLOSE;
+
+    if (finishedStatuses.includes(status) || wasExplicitlyClosed) {
       setRunTour(false);
       setStepIndex(0);
-      if (user) {
-        localStorage.setItem(`${TOUR_KEY}-${user.id}`, 'true');
-      }
+      markTourCompleted();
       onComplete?.();
     }
   };
