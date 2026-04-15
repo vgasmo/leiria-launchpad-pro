@@ -184,6 +184,13 @@ export default function PublicBooking() {
                 </div>
               </div>
             )}
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => window.location.href = 'https://startupleiria.com'}
+            >
+              {t('publicBooking.backToSite', 'Voltar ao site')}
+            </Button>
           </CardContent>
         </Card>
       </div>
