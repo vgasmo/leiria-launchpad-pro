@@ -705,6 +705,12 @@ export default function Mentors() {
               )}
             </CardContent>
           </Card>
+          <MentorProfileDialog
+            mentor={selectedGalleryMentor}
+            open={!!selectedGalleryMentor}
+            onOpenChange={(open) => !open && setSelectedGalleryMentor(null)}
+            isAssigned={selectedGalleryMentor ? uniqueMentors.some(um => um.user_id === selectedGalleryMentor.id) : false}
+          />
 
           <FounderMentorRequestPanel />
         </div>
