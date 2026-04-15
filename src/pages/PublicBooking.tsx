@@ -65,10 +65,10 @@ export default function PublicBooking() {
     i18n.changeLanguage(next);
   };
 
-  // Validate token
-  const { data: tokenData, isLoading: tokenLoading, error: tokenError } = useQuery({
+  // Validate token and get routing options
+  const { data: tokenResult, isLoading: tokenLoading, error: tokenError } = useQuery({
     queryKey: ['booking-token', token],
-    queryFn: async (): Promise<BookingToken | null> => {
+    queryFn: async (): Promise<{ tokenData: BookingToken; routingOptions: RoutingOption[] } | null> => {
       if (!token) return null;
       
       const { data, error } = await supabase.functions.invoke('public-get-availability', {
@@ -78,15 +78,16 @@ export default function PublicBooking() {
       if (error) throw error;
       if (!data?.valid) throw new Error('Invalid or expired booking link');
       
-      // Store routing options if available
-      if (data.routingOptions) {
-        setRoutingOptions(data.routingOptions);
-      }
-      
-      return data.tokenData as BookingToken;
+      return {
+        tokenData: data.tokenData as BookingToken,
+        routingOptions: (data.routingOptions || []) as RoutingOption[],
+      };
     },
     retry: false,
   });
+
+  const tokenData = tokenResult?.tokenData ?? null;
+  const routingOptions = tokenResult?.routingOptions ?? [];
 
   // Fetch available slots - now depends on selectedProgramId
   const { data: slotsData, isLoading: slotsLoading } = useQuery({
