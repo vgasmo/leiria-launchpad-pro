@@ -475,7 +475,25 @@ function BookingQuestionnaireSection({ item }: { item: FunnelItem }) {
   );
 }
 
-const CATEGORIES = [
+function PitchDeckLink({ path, t }: { path: string; t: (key: string, opts?: any) => string }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.storage.from('booking-uploads').createSignedUrl(path, 3600).then(({ data }) => {
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    });
+  }, [path]);
+
+  if (!url) return <span className="text-xs text-muted-foreground">…</span>;
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs font-medium">
+      <ExternalLink className="h-3 w-3" />
+      {t('common.download', { defaultValue: 'Download' })}
+    </a>
+  );
+}
+
   { value: 'A', label: 'A — Alto Potencial', color: 'text-emerald-600' },
   { value: 'B', label: 'B — Médio Potencial', color: 'text-blue-600' },
   { value: 'C', label: 'C — Baixo Potencial', color: 'text-amber-600' },
