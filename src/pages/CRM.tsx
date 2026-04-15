@@ -46,6 +46,7 @@ import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
+import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { logger } from '@/lib/logger';
 
