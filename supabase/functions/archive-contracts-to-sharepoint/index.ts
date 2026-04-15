@@ -176,6 +176,7 @@ async function archiveContract(
     }
 
     // Download the PDF
+    let pdfBytes: Uint8Array;
     const pdfResponse = await fetch(documentUrl);
     if (!pdfResponse.ok) {
       // If public bucket fails, try with service role auth
