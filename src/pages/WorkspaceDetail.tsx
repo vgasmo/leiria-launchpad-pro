@@ -32,6 +32,7 @@ import { ChatTab } from '@/components/workspace/ChatTab';
 import { GovernanceTab } from '@/components/workspace/GovernanceTab';
 import { BenchmarkDashboard } from '@/components/workspace/BenchmarkDashboard';
 import { RelationshipRecapCard } from '@/components/workspace/RelationshipRecapCard';
+import { WorkspaceEmailHistoryPanel } from '@/components/workspace/WorkspaceEmailHistoryPanel';
 import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { useWorkspace } from '@/hooks/useWorkspaces';
@@ -289,8 +290,9 @@ export default function WorkspaceDetail() {
             <div role="tabpanel" id="tabpanel-overview" aria-labelledby="tab-overview">
               {/* AI Relationship Recap — visible to staff only */}
               {isStaff && (
-                <div className="mb-6">
+                <div className="mb-6 space-y-4">
                   <RelationshipRecapCard workspaceId={workspace.id} />
+                  <WorkspaceEmailHistoryPanel workspaceId={workspace.id} />
                 </div>
               )}
               <WorkspaceOverview 
