@@ -257,6 +257,8 @@ serve(async (req) => {
       const tokenHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
       const tokenHex = Array.from(new Uint8Array(tokenHash)).map(b => b.toString(16).padStart(2, "0")).join("");
 
+      let linkProgramId: string | null = null;
+
       try {
         const { data: linkData } = await supabase
           .from("public_booking_links")
@@ -281,6 +283,8 @@ serve(async (req) => {
             consultantName = profile?.full_name || null;
           }
           
+          linkProgramId = linkData.program_id || null;
+          
           if (linkData.program_id) {
             const { data: program } = await supabase
               .from("programs")
@@ -296,7 +300,47 @@ serve(async (req) => {
         console.log("public_booking_links table not found, using demo mode");
       }
       
-      if (!programId) {
+      // If the booking link doesn't have a fixed program, fetch routing options
+      if (!linkProgramId) {
+        const { data: allRoutings } = await supabase
+          .from("intake_routing")
+          .select("id, scope, program_id, mode, consultant_ids, round_robin_index")
+          .eq("active", true)
+          .order("scope", { ascending: true });
+
+        if (allRoutings && allRoutings.length > 0) {
+          for (const r of allRoutings) {
+            if (r.scope === 'global') {
+              routingOptions.push({ program_id: null, program_name: 'Incubação Geral', scope: 'global' });
+            } else if (r.program_id) {
+              const { data: prog } = await supabase.from("programs").select("id, name").eq("id", r.program_id).maybeSingle();
+              if (prog) {
+                routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
+              }
+            }
+          }
+        }
+
+        // Resolve consultant from selected routing
+        if (routingOptions.length > 0 && typeof selectedProgramId === 'string' && selectedProgramId !== '') {
+          const chosenRouting = selectedProgramId === 'global'
+            ? allRoutings?.find(r => r.scope === 'global')
+            : allRoutings?.find(r => r.program_id === selectedProgramId);
+          
+          if (chosenRouting) {
+            const consultant = await resolveConsultantFromRouting(supabase, chosenRouting);
+            consultantEmail = consultant.email;
+            consultantName = consultant.name;
+            if (chosenRouting.program_id) {
+              const { data: prog } = await supabase.from("programs").select("id, name").eq("id", chosenRouting.program_id).maybeSingle();
+              programId = prog?.id || null;
+              programName = prog?.name || null;
+            }
+          }
+        }
+      }
+
+      if (!programId && routingOptions.length === 0) {
         const { data: programs } = await supabase.from("programs").select("id, name").limit(1);
         programId = programs?.[0]?.id || null;
         programName = programs?.[0]?.name || null;
