@@ -5,8 +5,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Users, Building2, FileText, BarChart3, Clock, TrendingUp,
-  Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, UserPlus, ArrowRight, Inbox
+  Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell,
+  ChevronDown, Database, UserPlus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -30,8 +30,7 @@ import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
-import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
-import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
+import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
