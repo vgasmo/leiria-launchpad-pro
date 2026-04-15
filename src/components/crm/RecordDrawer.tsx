@@ -273,7 +273,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[560px] sm:max-w-[560px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
+      <SheetContent className="w-[600px] sm:max-w-[600px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
         <RecordDrawerHeader
           item={item}
           onStageChange={handleStageChange}
@@ -281,11 +281,11 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
         />
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-4 shrink-0">
-            <TabsTrigger value="overview" className="text-xs px-1">{t('crm.overview')}</TabsTrigger>
-            <TabsTrigger value="context" className="text-xs px-1">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs px-1">{t('crm.timeline', 'Timeline')}</TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs px-1">{t('crm.tasks')}</TabsTrigger>
+          <TabsList className="mx-5 mt-3 mb-1 w-auto grid grid-cols-4 shrink-0 h-10">
+            <TabsTrigger value="overview" className="text-sm">{t('crm.overview')}</TabsTrigger>
+            <TabsTrigger value="context" className="text-sm">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-sm">{t('crm.timeline', 'Timeline')}</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-sm">{t('crm.tasks')}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
