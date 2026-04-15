@@ -311,13 +311,13 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                             {recap.summary}
                           </p>
-                          <CollapsibleContent className="mt-3 space-y-3">
+                          <CollapsibleContent className="mt-4 space-y-4">
                             {recap.key_points?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                  <Target className="h-3 w-3" /> {t('crm.keyPoints')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5">
+                                  <Target className="h-3.5 w-3.5" /> {t('crm.keyPoints')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.key_points.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -326,10 +326,10 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.open_loops?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                  <Clock className="h-3 w-3" /> {t('crm.openLoops')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5">
+                                  <Clock className="h-3.5 w-3.5" /> {t('crm.openLoops')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.open_loops.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -338,10 +338,10 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.risks?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-destructive">
-                                  <AlertTriangle className="h-3 w-3" /> {t('crm.risks')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5 text-destructive">
+                                  <AlertTriangle className="h-3.5 w-3.5" /> {t('crm.risks')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.risks.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -350,17 +350,17 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.next_best_actions?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-primary">
-                                  <Lightbulb className="h-3 w-3" /> {t('crm.nextActions')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5 text-primary">
+                                  <Lightbulb className="h-3.5 w-3.5" /> {t('crm.nextActions')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.next_best_actions.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
                                 </ul>
                               </div>
                             )}
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-xs text-muted-foreground pt-1">
                               {t('crm.itemsAnalyzed', { count: recap.items_analyzed })} • {formatRelativeTime(recap.generated_at)}
                             </p>
                           </CollapsibleContent>
