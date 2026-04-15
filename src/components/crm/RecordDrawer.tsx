@@ -289,7 +289,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
-          <TabsContent value="overview" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
+          <TabsContent value="overview" className="flex-1 min-h-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
@@ -414,7 +414,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Context Tab - Linked Workspace, Contract, Emails */}
-          <TabsContent value="context" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
+          <TabsContent value="context" className="flex-1 min-h-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               <LinkedContextPanel
                 linkedWorkspaceId={item.linked_workspace_id}
@@ -501,7 +501,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="timeline">
+          <TabsContent value="timeline" className="flex-1 min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="timeline">
             {/* Quick Actions */}
             <QuickActions
               onAddActivity={(type) => setAddActivityDialog(type)}
@@ -545,7 +545,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Tasks Tab */}
-          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="task-list">
+          <TabsContent value="tasks" className="flex-1 min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="task-list">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">
