@@ -395,6 +395,8 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                           <StickyNote className="h-3 w-3" />
                           {t('mentor.quickNote', { defaultValue: 'Nota Rápida' })}
                         </Button>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                       </div>
                     </div>
                   </CardContent>
