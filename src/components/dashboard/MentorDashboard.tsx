@@ -415,7 +415,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div id="mentor-calendar-section" className="space-y-4">
           <WidgetErrorBoundary name="CalendarWidget">
             <CalendarWidget />
           </WidgetErrorBoundary>
