@@ -149,6 +149,7 @@ export function AppSidebar() {
   const adminNavigation: NavItem[] = [
     { name: t('staffCockpit.navLabel', { defaultValue: 'Painel' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('ecosystemHub.navLabel', { defaultValue: 'Hub de Gestão' }), href: '/admin', icon: ClipboardList, exact: true },
+    { name: t('admin.crmPipeline', { defaultValue: 'CRM & Leads' }), href: '/crm', icon: Contact },
     { name: t('nav.admin.ecosystem', { defaultValue: 'Diretório Ecossistema' }), href: '/ecosystem', icon: Globe2 },
     { name: t('nav.admin.programsCohorts', { defaultValue: 'Programas e Coortes' }), href: '/admin?tab=programs-setup', icon: GraduationCap },
     { name: t('nav.admin.reports', { defaultValue: 'Relatórios' }), href: '/admin?tab=analytics', icon: BarChart3 },

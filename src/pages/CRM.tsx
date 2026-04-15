@@ -47,6 +47,7 @@ import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
 import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
+import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { logger } from '@/lib/logger';
 
@@ -581,8 +582,9 @@ export default function CRM() {
             <CrmAnalyticsDashboard />
           </TabsContent>
 
-          <TabsContent value="booking-links" className="space-y-4">
-            <IntakeRoutingManager />
+          <TabsContent value="booking-links" className="space-y-6">
+            <BookingLinksManager />
+            <IntakeRoutingManager showBookingLinks={false} />
           </TabsContent>
         </Tabs>
 

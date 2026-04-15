@@ -25,7 +25,11 @@ interface BookingLink {
   intake_route_id: string | null;
 }
 
-export function IntakeRoutingManager() {
+interface IntakeRoutingManagerProps {
+  showBookingLinks?: boolean;
+}
+
+export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingManagerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: routes, isLoading: loadingRoutes } = useIntakeRouting();
@@ -264,91 +268,92 @@ export function IntakeRoutingManager() {
         </CardContent>
       </Card>
       
-      {/* Booking Links Management */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Link className="h-5 w-5" />
-                {t('admin.intakeRouting.bookingLinks', 'Booking Links')}
-              </CardTitle>
-              <CardDescription>
-                {t('admin.intakeRouting.bookingLinksDesc', 'Generate shareable links for external booking')}
-              </CardDescription>
+      {showBookingLinks && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Link className="h-5 w-5" />
+                  {t('admin.intakeRouting.bookingLinks', 'Booking Links')}
+                </CardTitle>
+                <CardDescription>
+                  {t('admin.intakeRouting.bookingLinksDesc', 'Generate shareable links for external booking')}
+                </CardDescription>
+              </div>
+              <Button onClick={() => createLinkMutation.mutate()} disabled={createLinkMutation.isPending}>
+                {createLinkMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                {t('admin.intakeRouting.generateLink', 'Generate Link')}
+              </Button>
             </div>
-            <Button onClick={() => createLinkMutation.mutate()} disabled={createLinkMutation.isPending}>
-              {createLinkMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              {t('admin.intakeRouting.generateLink', 'Generate Link')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingLinks ? (
-            <div className="py-4 flex justify-center">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : bookingLinks && bookingLinks.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('admin.intakeRouting.link', 'Link')}</TableHead>
-                  <TableHead>{t('admin.intakeRouting.createdAt', 'Created')}</TableHead>
-                  <TableHead>{t('common.actions', 'Actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookingLinks.map(link => (
-                  <TableRow key={link.id}>
-                    <TableCell className="font-mono text-sm">
-                      /book/{link.token_hash.slice(0, 8)}...
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(link.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCopyLink(link.token_hash)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <a href={`/book/${link.token_hash}`} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteLinkMutation.mutate(link.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          </CardHeader>
+          <CardContent>
+            {loadingLinks ? (
+              <div className="py-4 flex justify-center">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : bookingLinks && bookingLinks.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('admin.intakeRouting.link', 'Link')}</TableHead>
+                    <TableHead>{t('admin.intakeRouting.createdAt', 'Created')}</TableHead>
+                    <TableHead>{t('common.actions', 'Actions')}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              {t('admin.intakeRouting.noLinks', 'No booking links yet. Generate one to get started.')}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {bookingLinks.map(link => (
+                    <TableRow key={link.id}>
+                      <TableCell className="font-mono text-sm">
+                        /book/{link.token_hash.slice(0, 8)}...
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(link.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyLink(link.token_hash)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                          >
+                            <a href={`/book/${link.token_hash}`} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteLinkMutation.mutate(link.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                {t('admin.intakeRouting.noLinks', 'No booking links yet. Generate one to get started.')}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
