@@ -1,15 +1,14 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap, Download, Loader2 } from 'lucide-react';
+import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
-import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface AccelerationProgressCardProps {
   programId: string;
@@ -112,21 +111,31 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
       if (error) throw error;
       return data as { milestones_created: number; actions_created: number };
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
-      toast.success(t('founder.deliverablesImported', {
-        milestones: data?.milestones_created ?? 0,
-        actions: data?.actions_created ?? 0,
-        defaultValue: '{{milestones}} marcos e {{actions}} ações criados a partir do programa',
-      }));
     },
-    onError: () => {
-      toast.error(t('common.errorOccurred', 'Ocorreu um erro'));
+    onError: (err) => {
+      logger.warn('materialize_deliverables_failed', { workspaceId, programId });
     },
   });
+
+  // Auto-materialize deliverables when not yet done
+  const didAutoMaterialize = useRef(false);
+  useEffect(() => {
+    if (
+      workspaceId &&
+      hasMaterialized === false &&
+      gates.length > 0 &&
+      !materializeMutation.isPending &&
+      !didAutoMaterialize.current
+    ) {
+      didAutoMaterialize.current = true;
+      materializeMutation.mutate();
+    }
+  }, [workspaceId, hasMaterialized, gates.length, materializeMutation]);
 
   const week = currentWeek ?? 1;
   const totalWeeks = weeks.length > 0 ? Math.max(...weeks.map(w => w.week_number)) : 12;
@@ -159,22 +168,6 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
             </h3>
           </div>
           <div className="flex items-center gap-2">
-            {workspaceId && !hasMaterialized && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs gap-1.5 h-7"
-                onClick={() => materializeMutation.mutate()}
-                disabled={materializeMutation.isPending}
-              >
-                {materializeMutation.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Download className="h-3 w-3" />
-                )}
-                {t('founder.importDeliverables', { defaultValue: 'Importar Entregáveis' })}
-              </Button>
-            )}
             <Badge variant="secondary" className="text-xs gap-1">
               <CalendarDays className="h-3 w-3" />
               {t('workspace.currentWeek', { week, defaultValue: 'Semana {{week}}' })}
