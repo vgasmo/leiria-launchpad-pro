@@ -295,20 +295,20 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               {aiRecapEnabled && (
                 <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
                   <Card className="border-primary/20 bg-primary/5">
-                    <CardContent className="p-3">
+                    <CardContent className="p-4">
                       <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-sm">{t('crm.aiRecap')}</span>
+                          <span className="font-semibold text-sm">{t('crm.aiRecap')}</span>
                         </div>
                         {recapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </CollapsibleTrigger>
                       
                       {loadingRecap ? (
-                        <Skeleton className="h-12 w-full mt-2" />
+                        <Skeleton className="h-16 w-full mt-3" />
                       ) : recap ? (
                         <>
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                             {recap.summary}
                           </p>
                           <CollapsibleContent className="mt-3 space-y-3">
