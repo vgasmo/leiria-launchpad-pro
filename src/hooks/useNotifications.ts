@@ -11,7 +11,20 @@ export type NotificationType =
   | 'recap_ready' 
   | 'email_sync_done'
   | 'overdue_escalated'
-  | 'system';
+  | 'system'
+  // Automation types
+  | 'discount_expiring'
+  | 'contract_anniversary'
+  | 'founder_inactive'
+  | 'contract_expiring'
+  | 'checkin_overdue'
+  | 'kpi_stale'
+  | 'crm_lead_stale'
+  | 'milestone_overdue'
+  | 'pending_approval'
+  | 'intake_stale'
+  | 'session_no_notes'
+  | 'workspace_no_consultant';
 
 export interface Notification {
   id: string;
