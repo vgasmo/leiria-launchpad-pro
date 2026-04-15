@@ -384,11 +384,11 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 text-[10px] mt-2 text-muted-foreground"
+                          className="h-7 text-xs mt-3 text-muted-foreground"
                           onClick={() => generateRecap.mutate({ funnelItemId: item.id, language })}
                           disabled={generateRecap.isPending}
                         >
-                          <RefreshCw className={cn('h-3 w-3 mr-1', generateRecap.isPending && 'animate-spin')} />
+                          <RefreshCw className={cn('h-3.5 w-3.5 mr-1', generateRecap.isPending && 'animate-spin')} />
                           {t('crm.regenerate')}
                         </Button>
                       )}
