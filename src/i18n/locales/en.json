@@ -3348,9 +3348,9 @@
     "workspaces": "workspaces"
   },
   "ecosystemHub": {
-    "navLabel": "Ecosystem & CRM",
+    "navLabel": "Management Hub",
     "subtitle": "Manage startups, mentors, programs and operational workflows",
-    "title": "Ecosystem Directory & CRM"
+    "title": "Management Hub"
   },
   "emptyState": {
     "adjustFilters": "Try adjusting your filters or search terms to find what you're looking for.",
@@ -6754,14 +6754,14 @@
     "emptyTriage": "No pending items. All clear!",
     "expiresOn": "Expires on {{date}}",
     "greeting": "Hello, {{name}}",
-    "greetingGeneric": "Welcome to the Command Centre",
+    "greetingGeneric": "Welcome to the Dashboard",
     "intakeRouting": "Routing",
     "invoicesOverdue": "Overdue Invoices",
     "lastSession": "Última sessão",
     "moreStartups": "mais startups",
     "myPortfolio": "O Meu Portfólio",
     "myTasks": "My Tasks",
-    "navLabel": "Command Centre",
+    "navLabel": "Dashboard",
     "needsAttention": "aguardam ação",
     "noExpiringContracts": "No contracts expiring in the next 30 days.",
     "noOverdueInvoices": "No overdue invoices. All up to date!",
@@ -6792,7 +6792,7 @@
       "reach": "Contactar",
       "title": "Disengagement Silencioso"
     },
-    "title": "Command Centre",
+    "title": "Dashboard",
     "triage": "Smart Triage & Intake",
     "triageDesc": "What needs a decision now: approvals, claims and routing.",
     "upToDate": "Em dia"
