@@ -415,7 +415,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
           {/* Context Tab - Linked Workspace, Contract, Emails */}
           <TabsContent value="context" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
-            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
               <LinkedContextPanel
                 linkedWorkspaceId={item.linked_workspace_id}
                 linkedStartupId={item.linked_startup_id}
@@ -501,7 +501,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="timeline">
+          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="timeline">
             {/* Quick Actions */}
             <QuickActions
               onAddActivity={(type) => setAddActivityDialog(type)}
