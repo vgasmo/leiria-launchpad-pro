@@ -59,41 +59,41 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // SPA fallback: serve index.html for navigation requests to unknown routes
-        navigateFallback: '/index.html',
-        // P0 SECURITY: Do NOT cache authenticated Supabase API requests
-        // This prevents stale/leaked data between sessions
-        navigateFallbackDenylist: [
-          // Don't fallback for API/auth requests
-          /^\/api\//,
-          /\/rest\/v1\//,
-          /\/auth\/v1\//,
-          /\/storage\/v1\//,
-          /\/functions\/v1\//,
-          // Don't fallback for asset requests
-          /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$/,
-          // Don't fallback for version check
-          /version\.json/,
-        ],
-        // Increase the size limit to 3 MB to handle large bundles
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        // Skip waiting for faster updates - ensures new deploys are used immediately
+        // CRITICAL: Do NOT precache JS/CSS/HTML — Vite already content-hashes assets.
+        // Precaching causes stale bundles that persist across deploys.
+        // Only precache icons needed for PWA install prompt.
+        globPatterns: ['**/*.{ico,png}'],
+        globIgnores: ['**/version.json'],
+        // No navigateFallback — let the network serve fresh index.html every time
+        navigateFallback: null,
+        // Skip waiting for faster updates
         skipWaiting: true,
         clientsClaim: true,
-        // CRITICAL: Remove old cached bundles after deploy to prevent stale JS errors
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            // Cache only static assets from CDNs, not Supabase API
+            // Google Fonts — long-lived, safe to cache
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365
               }
+            }
+          },
+          {
+            // App JS/CSS bundles — network first, fall back to cache for offline
+            urlPattern: /\/assets\/.*\.(js|css)$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-assets',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              },
+              networkTimeoutSeconds: 5,
             }
           }
         ]
