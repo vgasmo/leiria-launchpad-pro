@@ -95,7 +95,7 @@ export function MilestoneGantt({ milestones, className }: MilestoneGanttProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Milestone Timeline</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('milestones.timeline', 'Milestone Timeline')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="relative">

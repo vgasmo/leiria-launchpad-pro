@@ -95,7 +95,7 @@ export function KpiTrendChart({ data, targetValue, unit, direction = 'up', kpiNa
           </div>
           {previousValue !== null && (
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Previous</p>
+              <p className="text-xs text-muted-foreground">{t('common.previous', 'Previous')}</p>
               <p className="text-sm font-medium">{formatValue(previousValue)}</p>
             </div>
           )}
