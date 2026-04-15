@@ -315,6 +315,42 @@ export type Database = {
           },
         ]
       }
+      automation_runs: {
+        Row: {
+          automation_type: string
+          channel: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          run_date: string
+          user_id: string
+        }
+        Insert: {
+          automation_type: string
+          channel?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          run_date?: string
+          user_id: string
+        }
+        Update: {
+          automation_type?: string
+          channel?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          run_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       buildings: {
         Row: {
           address: string | null
