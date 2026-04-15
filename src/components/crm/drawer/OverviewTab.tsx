@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase, Calendar } from 'lucide-react';
+import { Target, Clock, X, Plus, DollarSign, CalendarDays, TrendingUp, Tag, Briefcase, Calendar, FileText, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -461,8 +461,36 @@ function BookingQuestionnaireSection({ item }: { item: FunnelItem }) {
             <span>{new Date(metadata.booking_date).toLocaleString('pt-PT', { dateStyle: 'medium', timeStyle: 'short' })}</span>
           </div>
         )}
+        {metadata.pitch_deck_path && (
+          <div className="flex justify-between text-sm items-center">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <FileText className="h-3.5 w-3.5" />
+              {t('publicBooking.pitchDeck', { defaultValue: 'Pitch Deck' })}
+            </span>
+            <PitchDeckLink path={metadata.pitch_deck_path} t={t} />
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function PitchDeckLink({ path, t }: { path: string; t: (key: string, opts?: any) => string }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.storage.from('booking-uploads').createSignedUrl(path, 3600).then(({ data }) => {
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    });
+  }, [path]);
+
+  if (!url) return <span className="text-xs text-muted-foreground">…</span>;
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs font-medium">
+      <ExternalLink className="h-3 w-3" />
+      {t('common.download', { defaultValue: 'Download' })}
+    </a>
   );
 }
 
