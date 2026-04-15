@@ -31,7 +31,6 @@ import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMen
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
-import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
 import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCenter';
