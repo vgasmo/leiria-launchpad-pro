@@ -113,21 +113,31 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
       if (error) throw error;
       return data as { milestones_created: number; actions_created: number };
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
-      toast.success(t('founder.deliverablesImported', {
-        milestones: data?.milestones_created ?? 0,
-        actions: data?.actions_created ?? 0,
-        defaultValue: '{{milestones}} marcos e {{actions}} ações criados a partir do programa',
-      }));
     },
-    onError: () => {
-      toast.error(t('common.errorOccurred', 'Ocorreu um erro'));
+    onError: (err) => {
+      logger.warn('materialize_deliverables_failed', { workspaceId, programId }, err);
     },
   });
+
+  // Auto-materialize deliverables when not yet done
+  const didAutoMaterialize = useRef(false);
+  useEffect(() => {
+    if (
+      workspaceId &&
+      hasMaterialized === false &&
+      gates.length > 0 &&
+      !materializeMutation.isPending &&
+      !didAutoMaterialize.current
+    ) {
+      didAutoMaterialize.current = true;
+      materializeMutation.mutate();
+    }
+  }, [workspaceId, hasMaterialized, gates.length, materializeMutation]);
 
   const week = currentWeek ?? 1;
   const totalWeeks = weeks.length > 0 ? Math.max(...weeks.map(w => w.week_number)) : 12;
