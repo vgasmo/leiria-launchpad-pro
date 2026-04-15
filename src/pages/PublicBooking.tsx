@@ -166,7 +166,7 @@ export default function PublicBooking() {
     const path = `${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from('booking-uploads').upload(path, pitchFile);
     if (error) {
-      console.error('Upload error:', error);
+      logger.warn('booking_upload_failed', { error: error?.message });
       return null;
     }
     return path;
