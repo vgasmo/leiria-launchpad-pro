@@ -21,6 +21,27 @@ export const IncubationStatusCard = memo(function IncubationStatusCard({
   const { t } = useTranslation();
   const locale = i18n.language === 'pt' ? ptLocale : enUS;
 
+  // Fetch contract start date for this workspace
+  const { data: contractData } = useQuery({
+    queryKey: ['incubation-contract-start', workspaceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('startup_contracts')
+        .select('start_date')
+        .eq('workspace_id', workspaceId)
+        .eq('status', 'active')
+        .order('start_date', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 300_000,
+    enabled: !!workspaceId,
+  });
+
+  const startDate = contractData?.start_date ?? null;
+
   // Top 3 pending milestones
   const { data: pendingMilestones } = useQuery({
     queryKey: ['incubation-pending-milestones', workspaceId],
@@ -44,9 +65,8 @@ export const IncubationStatusCard = memo(function IncubationStatusCard({
     const start = new Date(startDate);
     const now = new Date();
     const months = differenceInMonths(now, start);
-    const days = differenceInDays(now, start) - months * 30;
     const nextReview = addYears(start, Math.ceil(differenceInMonths(now, start) / 12) || 1);
-    return { months, days, nextReview };
+    return { months, nextReview };
   }, [startDate]);
 
   if (!startDate) return null;
