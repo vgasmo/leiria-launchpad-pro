@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
-import { differenceInMonths, differenceInDays, addYears, format } from 'date-fns';
+import { differenceInMonths, addYears, format } from 'date-fns';
 import { pt as ptLocale, enUS } from 'date-fns/locale';
 import i18n from 'i18next';
 
