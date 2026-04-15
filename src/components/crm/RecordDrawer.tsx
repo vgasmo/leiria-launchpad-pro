@@ -289,8 +289,8 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
-          <TabsContent value="overview" className="flex-1 overflow-y-auto min-h-0">
-            <div className="p-4 pt-2 space-y-4">
+          <TabsContent value="overview" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
+            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
                 <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
@@ -414,87 +414,90 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Context Tab - Linked Workspace, Contract, Emails */}
-          <TabsContent value="context" className="flex-1 overflow-y-auto min-h-0 p-4 pt-2 space-y-4">
-            <LinkedContextPanel
-              linkedWorkspaceId={item.linked_workspace_id}
-              linkedStartupId={item.linked_startup_id}
-              linkedContractId={item.linked_contract_id}
-              funnelItemId={item.id}
-              onInitiateContract={() => {
-                const params = new URLSearchParams({
-                  tab: 'backoffice',
-                  subtab: 'contracts',
-                  action: 'create',
-                  funnel: item.id,
-                  contact: item.contact_name || '',
-                  email: item.contact_email || '',
-                  org: item.organization_name || '',
-                });
-                if (item.linked_workspace_id) {
-                  params.set('workspace', item.linked_workspace_id);
-                }
-                onOpenChange(false);
-                navigate(`/admin?${params.toString()}`);
-              }}
-              onSendContract={async (contractId) => {
-                try {
-                  const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
-                    body: { action: 'generate_token', contractId },
+          <TabsContent value="context" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
+            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
+              <LinkedContextPanel
+                linkedWorkspaceId={item.linked_workspace_id}
+                linkedStartupId={item.linked_startup_id}
+                linkedContractId={item.linked_contract_id}
+                funnelItemId={item.id}
+                onInitiateContract={() => {
+                  const params = new URLSearchParams({
+                    tab: 'backoffice',
+                    subtab: 'contracts',
+                    action: 'create',
+                    funnel: item.id,
+                    contact: item.contact_name || '',
+                    email: item.contact_email || '',
+                    org: item.organization_name || '',
                   });
-                  if (error) throw error;
-                  if (data?.error) throw new Error(data.error);
-                  const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
-                  await navigator.clipboard.writeText(url);
-                  toast.success(t('crm.contractLinkCopied', { defaultValue: 'Link público do contrato copiado! Envie ao founder por email.' }));
-                } catch (err: any) {
-                  toast.error(err?.message || 'Erro ao gerar link');
-                }
-              }}
-            />
+                  if (item.linked_workspace_id) {
+                    params.set('workspace', item.linked_workspace_id);
+                  }
+                  onOpenChange(false);
+                  navigate(`/admin?${params.toString()}`);
+                }}
+                onSendContract={async (contractId) => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke('public-contract-onboarding', {
+                      body: { action: 'generate_token', contractId },
+                    });
+                    if (error) throw error;
+                    if (data?.error) throw new Error(data.error);
+                    const url = data.url || `${window.location.origin}/contract-signing/${data.token}`;
+                    await navigator.clipboard.writeText(url);
+                    toast.success(t('crm.contractLinkCopied', { defaultValue: 'Link público do contrato copiado! Envie ao founder por email.' }));
+                  } catch (err: any) {
+                    toast.error(err?.message || 'Erro ao gerar link');
+                  }
+                }}
+              />
 
-            {!item.linked_workspace_id && !item.linked_startup_id && !item.linked_contract_id && (
-              <div className="text-center py-6 space-y-3">
-                <Briefcase className="h-10 w-10 mx-auto text-muted-foreground/40" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('crm.noLinkedContext', { defaultValue: 'Este lead ainda não está vinculado a um workspace ou contrato.' })}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t('crm.linkHint', { defaultValue: 'O vínculo é criado automaticamente ao converter o lead ou pode ser feito manualmente.' })}
-                  </p>
-                </div>
-                {/* Direct contract initiation for advanced-stage leads without workspace */}
-                {['qualified', 'proposal_sent', 'negotiating', 'contracted'].includes(item.stage) && (
-                  <Button
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => {
-                      const params = new URLSearchParams({
-                        tab: 'backoffice',
-                        subtab: 'contracts',
-                        action: 'create',
-                        funnel: item.id,
-                        contact: item.contact_name || '',
-                        email: item.contact_email || '',
-                        org: item.organization_name || '',
-                      });
-                      onOpenChange(false);
-                      navigate(`/admin?${params.toString()}`);
-                    }}
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
-                  </Button>
-                )}
-              </div>
-            )}
+              {!item.linked_workspace_id && !item.linked_startup_id && !item.linked_contract_id && (
+                <Card className="flex-1 border-dashed">
+                  <CardContent className="flex h-full min-h-[220px] flex-col items-center justify-center gap-3 p-6 text-center">
+                    <Briefcase className="h-10 w-10 text-muted-foreground/40" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {t('crm.noLinkedContext', { defaultValue: 'Este lead ainda não está vinculado a um workspace ou contrato.' })}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('crm.linkHint', { defaultValue: 'O vínculo é criado automaticamente ao converter o lead ou pode ser feito manualmente.' })}
+                      </p>
+                    </div>
+                    {['qualified', 'proposal_sent', 'negotiating', 'contracted'].includes(item.stage) && (
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => {
+                          const params = new URLSearchParams({
+                            tab: 'backoffice',
+                            subtab: 'contracts',
+                            action: 'create',
+                            funnel: item.id,
+                            contact: item.contact_name || '',
+                            email: item.contact_email || '',
+                            org: item.organization_name || '',
+                          });
+                          onOpenChange(false);
+                          navigate(`/admin?${params.toString()}`);
+                        }}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {t('crm.initiateContract', { defaultValue: 'Iniciar Contrato' })}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-            <EmailHistoryPanel
-              funnelItemId={item.id}
-              onSyncEmails={() => syncEmails.mutate({ funnelItemId: item.id })}
-              isSyncing={syncEmails.isPending}
-              emailSyncEnabled={emailSyncEnabled}
-            />
+              <EmailHistoryPanel
+                funnelItemId={item.id}
+                onSyncEmails={() => syncEmails.mutate({ funnelItemId: item.id })}
+                isSyncing={syncEmails.isPending}
+                emailSyncEnabled={emailSyncEnabled}
+              />
+            </div>
           </TabsContent>
 
           {/* Timeline Tab */}

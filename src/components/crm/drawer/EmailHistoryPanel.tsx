@@ -80,7 +80,7 @@ export function EmailHistoryPanel({ funnelItemId, workspaceId, onSyncEmails, isS
   const hasEmails = emails && emails.length > 0;
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-1 min-h-0 flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Mail className="h-3.5 w-3.5" />
@@ -123,7 +123,6 @@ export function EmailHistoryPanel({ funnelItemId, workspaceId, onSyncEmails, isS
         </div>
       </div>
 
-      {/* AI Recap Card */}
       {recap && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="p-3 space-y-2">
@@ -165,9 +164,9 @@ export function EmailHistoryPanel({ funnelItemId, workspaceId, onSyncEmails, isS
       )}
 
       {!hasEmails ? (
-        <Card className="border-dashed">
-          <CardContent className="p-4 text-center">
-            <Mail className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+        <Card className="flex-1 border-dashed">
+          <CardContent className="flex h-full min-h-[220px] flex-col items-center justify-center p-4 text-center">
+            <Mail className="h-8 w-8 text-muted-foreground/40 mb-2" />
             <p className="text-sm text-muted-foreground">
               {t('crm.noEmails', { defaultValue: 'Sem emails sincronizados' })}
             </p>
@@ -185,7 +184,7 @@ export function EmailHistoryPanel({ funnelItemId, workspaceId, onSyncEmails, isS
           </CardContent>
         </Card>
       ) : (
-        <ScrollArea className="max-h-[400px]">
+        <ScrollArea className="flex-1 min-h-[220px]">
           <div className="space-y-1">
             {emails.map(email => (
               <Card key={email.id} className="border-border/40 hover:bg-muted/40 transition-colors">
