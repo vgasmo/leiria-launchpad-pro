@@ -80,9 +80,53 @@ const GATE_COLORS = [
 export const AccelerationProgressCard = memo(function AccelerationProgressCard({
   programId,
   currentWeek,
+  workspaceId,
 }: AccelerationProgressCardProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { gates, weeks, isLoading } = useAccelerationStructure(programId);
+
+  // Check if milestones already exist from this program
+  const { data: hasMaterialized } = useQuery({
+    queryKey: ['acceleration-materialized', workspaceId],
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      if (!workspaceId) return false;
+      const { count } = await supabase
+        .from('milestones')
+        .select('id', { count: 'exact', head: true })
+        .eq('workspace_id', workspaceId)
+        .not('source_gate_id', 'is', null);
+      return (count ?? 0) > 0;
+    },
+  });
+
+  const materializeMutation = useMutation({
+    mutationFn: async () => {
+      if (!workspaceId) throw new Error('No workspace');
+      const { data, error } = await supabase.rpc('materialize_acceleration_deliverables', {
+        p_workspace_id: workspaceId,
+        p_program_id: programId,
+      });
+      if (error) throw error;
+      return data as { milestones_created: number; actions_created: number };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
+      toast.success(t('founder.deliverablesImported', {
+        milestones: data?.milestones_created ?? 0,
+        actions: data?.actions_created ?? 0,
+        defaultValue: '{{milestones}} marcos e {{actions}} ações criados a partir do programa',
+      }));
+    },
+    onError: () => {
+      toast.error(t('common.errorOccurred', 'Ocorreu um erro'));
+    },
+  });
 
   const week = currentWeek ?? 1;
   const totalWeeks = weeks.length > 0 ? Math.max(...weeks.map(w => w.week_number)) : 12;
