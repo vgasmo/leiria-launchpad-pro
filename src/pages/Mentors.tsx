@@ -33,6 +33,7 @@ import { MentorBookingPanel } from '@/components/mentors/MentorBookingPanel';
 import { FounderMentorRequestPanel } from '@/components/mentors/FounderMentorRequestPanel';
 import { PendingMentorRequestsPanel } from '@/components/mentors/PendingMentorRequestsPanel';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
+import { MentorProfileDialog } from '@/components/mentors/MentorProfileDialog';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -301,6 +302,7 @@ export default function Mentors() {
 
   const [mentorSearch, setMentorSearch] = useState('');
   const [selectedMentorForBooking, setSelectedMentorForBooking] = useState<string | null>(null);
+  const [selectedGalleryMentor, setSelectedGalleryMentor] = useState<MentorProfile | null>(null);
   const { data: allMentors, isLoading: loadingAllMentors } = useQuery({
     queryKey: ['all-mentors-gallery'],
     queryFn: async (): Promise<MentorProfile[]> => {
@@ -646,7 +648,11 @@ export default function Mentors() {
                     .map(mentor => {
                       const isAlreadyAssigned = uniqueMentors.some(um => um.user_id === mentor.id);
                       return (
-                        <Card key={mentor.id} className="transition-shadow hover:shadow-md">
+                        <Card 
+                          key={mentor.id} 
+                          className="transition-shadow hover:shadow-md cursor-pointer hover:border-primary/30"
+                          onClick={() => setSelectedGalleryMentor(mentor)}
+                        >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
                               <Avatar className="h-14 w-14 border-2 border-primary/10">
@@ -659,7 +665,13 @@ export default function Mentors() {
                                 <div className="flex items-center gap-2">
                                   <h4 className="truncate text-sm font-semibold">{mentor.full_name || t('mentorsPage.unnamedMentor')}</h4>
                                   {mentor.linkedin_url && (
-                                    <a href={sanitizeUrl(mentor.linkedin_url)!} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                    <a 
+                                      href={sanitizeUrl(mentor.linkedin_url)!} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="shrink-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
                                       <Linkedin className="h-4 w-4 text-muted-foreground transition-colors hover:text-primary" />
                                     </a>
                                   )}
@@ -693,6 +705,12 @@ export default function Mentors() {
               )}
             </CardContent>
           </Card>
+          <MentorProfileDialog
+            mentor={selectedGalleryMentor}
+            open={!!selectedGalleryMentor}
+            onOpenChange={(open) => !open && setSelectedGalleryMentor(null)}
+            isAssigned={selectedGalleryMentor ? uniqueMentors.some(um => um.user_id === selectedGalleryMentor.id) : false}
+          />
 
           <FounderMentorRequestPanel />
         </div>
