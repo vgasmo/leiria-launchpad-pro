@@ -25,6 +25,7 @@ import {
   Zap,
   LayoutGrid,
   TrendingUp,
+  Link2,
 } from 'lucide-react';
 import { PipelineView } from '@/components/crm/PipelineView';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
