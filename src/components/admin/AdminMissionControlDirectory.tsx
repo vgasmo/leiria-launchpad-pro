@@ -31,7 +31,7 @@ export function AdminMissionControlDirectory() {
     { tab: 'enrollment', label: t('admin.directory.enrollmentLabel', { defaultValue: 'Enrollment & Claims' }), icon: UserPlus, description: t('admin.directory.enrollmentDesc', { defaultValue: 'Controlo de inscrições e claims' }), group: 'operations' },
     { tab: 'backoffice', label: t('admin.backoffice.tab'), icon: Building2, description: t('admin.directory.backofficeDesc', { defaultValue: 'Contratos, espaços e operações' }), group: 'operations' },
     { tab: 'announcements', label: t('admin.announcements.tab'), icon: Bell, description: t('admin.directory.announcementsDesc', { defaultValue: 'Comunicados e avisos ao ecossistema' }), group: 'operations' },
-    { tab: 'funnel', label: t('admin.funnel.tab'), icon: Filter, description: t('admin.directory.funnelDesc', { defaultValue: 'Pipeline CRM e leads' }), group: 'crm' },
+    { tab: 'funnel', label: t('admin.directory.crmLabel', { defaultValue: 'CRM & Pipeline' }), icon: Filter, description: t('admin.directory.funnelDesc', { defaultValue: 'Pipeline CRM e leads' }), group: 'crm', route: '/crm' },
     { tab: 'programs-setup', label: t('admin.programsSetup'), icon: Building2, description: t('admin.directory.programsDesc', { defaultValue: 'Programas de aceleração' }), group: 'programs' },
     { tab: 'templates', label: t('admin.templates'), icon: FileText, description: t('admin.directory.templatesDesc', { defaultValue: 'Templates de sessão e documentos' }), group: 'programs' },
     { tab: 'support-materials', label: t('admin.supportMaterials.title'), icon: BookOpen, description: t('admin.directory.supportDesc', { defaultValue: 'Materiais de apoio partilhados' }), group: 'programs' },

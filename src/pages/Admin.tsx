@@ -41,7 +41,7 @@ const ADMIN_ONLY_TABS = new Set(['users', 'data-quality']);
 
 const TAB_GROUPS_BASE: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
-  crm: ['funnel'],
+  // CRM is accessed directly via /crm (no inline tab)
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys'],
   reports: ['analytics', 'health', 'compliance', 'data-quality'],
   users: ['users', 'mentors'],
@@ -263,37 +263,7 @@ export default function Admin() {
           <AdminSurveysManager />
         </TabsContent>
 
-        <TabsContent value="funnel">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">
-                  {t('admin.funnel.crmShortcutsTitle', { defaultValue: 'Atalhos do CRM' })}
-                </CardTitle>
-                <CardDescription>
-                  {t('admin.funnel.crmShortcutsDescription', { defaultValue: 'Abra rapidamente o CRM completo ou a fila de revisão de emails.' })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Button asChild>
-                  <Link to="/crm">
-                    {t('admin.funnel.openFullCrm', { defaultValue: 'Abrir CRM completo' })}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/crm?view=analytics">
-                    <Inbox className="h-4 w-4 mr-2" />
-                    {t('admin.funnel.openEmailReview', { defaultValue: 'Abrir revisão de emails' })}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <BookingLinksManager />
-            <AdminFunnelManager />
-          </div>
-        </TabsContent>
+        {/* CRM/Funnel content moved to dedicated /crm page */}
       </Tabs>
     </AppLayout>
   );
