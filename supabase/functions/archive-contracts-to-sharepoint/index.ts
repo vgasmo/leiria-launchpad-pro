@@ -176,6 +176,7 @@ async function archiveContract(
     }
 
     // Download the PDF
+    let pdfBytes: Uint8Array;
     const pdfResponse = await fetch(documentUrl);
     if (!pdfResponse.ok) {
       // If public bucket fails, try with service role auth
@@ -191,12 +192,12 @@ async function archiveContract(
         if (dlError || !fileData) {
           throw new Error(`Failed to download contract PDF from storage: ${dlError?.message || 'unknown'}`);
         }
-        var pdfBytes = new Uint8Array(await fileData.arrayBuffer());
+        pdfBytes = new Uint8Array(await fileData.arrayBuffer());
       } else {
         throw new Error(`Failed to download contract PDF: ${pdfResponse.status}`);
       }
     } else {
-      var pdfBytes = new Uint8Array(await pdfResponse.arrayBuffer());
+      pdfBytes = new Uint8Array(await pdfResponse.arrayBuffer());
     }
 
     // Compute SHA-256 checksum
