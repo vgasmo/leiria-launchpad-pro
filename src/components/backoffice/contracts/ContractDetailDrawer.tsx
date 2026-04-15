@@ -806,7 +806,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">1</div>
               <div>
-                <p className="text-sm font-medium">Primeiro Outorgante</p>
+                <p className="text-sm font-medium">{t('admin.backoffice.contractSigners.firstParty', 'Primeiro Outorgante')}</p>
                 <p className="text-xs text-muted-foreground">{founderName} {founderEmail ? `(${founderEmail})` : ''}</p>
               </div>
             </div>
@@ -822,13 +822,13 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-full bg-amber-500/10 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-300">2</div>
               <div>
-                <p className="text-sm font-medium">Segundo Outorgante</p>
+                <p className="text-sm font-medium">{t('admin.backoffice.contractSigners.secondParty', 'Segundo Outorgante')}</p>
                 {hasBilateral ? (
                   <p className="text-xs text-muted-foreground">{counterSignerName} ({counterSignerEmail})</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic">
-                    Será atribuído automaticamente ao enviar
-                  </p>
+                   <p className="text-xs text-muted-foreground italic">
+                    {t('admin.backoffice.contractSigners.autoAssigned', 'Será atribuído automaticamente ao enviar')}
+                   </p>
                 )}
               </div>
             </div>
@@ -837,7 +837,7 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                 {signerStatusLabel(counterSignerStatus)}
               </Badge>
             ) : (
-              <Badge className="text-[10px] h-5 bg-muted text-muted-foreground">Pendente</Badge>
+              <Badge className="text-[10px] h-5 bg-muted text-muted-foreground">{t('common.pending', 'Pendente')}</Badge>
             )}
           </div>
         </div>

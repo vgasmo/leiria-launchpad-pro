@@ -460,11 +460,11 @@ export function SpaceWaitingListTab() {
           >
             <div className="p-3 bg-muted rounded-lg space-y-1">
               <div>
-                <span className="text-sm text-muted-foreground">Organization:</span>
+                <span className="text-sm text-muted-foreground">{t('waitingList.organization', 'Organization')}:</span>
                 <span className="font-medium ml-2">{selectedRequest && getEntityName(selectedRequest)}</span>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Request:</span>
+                <span className="text-sm text-muted-foreground">{t('waitingList.request', 'Request')}:</span>
                 <span className="ml-2">
                   {selectedRequest && t(REQUEST_TYPE_CONFIG[selectedRequest.request_type]?.labelKey || '')}
                   {selectedRequest?.preferred_capacity && ` ${t('waitingList.forPeople', { count: selectedRequest.preferred_capacity, defaultValue: 'for {{count}} people' })}`}

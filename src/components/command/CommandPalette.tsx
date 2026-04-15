@@ -177,8 +177,8 @@ export function CommandPalette() {
               <div className="rounded-xl bg-muted/40 border border-border/50 p-3 space-y-2">
                 <div className="flex items-center gap-2">
                   <Bot className="h-4 w-4 text-violet-500" />
-                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">Ecosystem Copilot</span>
-                  <Badge variant="outline" className="text-[9px] ml-auto">Preview</Badge>
+                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">{t('commandPalette.copilotTitle', 'Ecosystem Copilot')}</span>
+                  <Badge variant="outline" className="text-[9px] ml-auto">{t('common.preview', 'Preview')}</Badge>
                 </div>
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{copilotAnswer}</p>
                 <p className="text-[10px] text-muted-foreground italic">

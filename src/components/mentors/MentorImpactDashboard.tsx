@@ -65,7 +65,7 @@ export function MentorImpactDashboard() {
                 <Users className="h-4 w-4 text-primary" />
                 <span className="text-xl font-bold">{startupsHelped}</span>
               </div>
-              <p className="text-xs text-muted-foreground">Startups</p>
+              <p className="text-xs text-muted-foreground">{t('common.startups', 'Startups')}</p>
             </div>
             
             <div className="flex-1 text-center px-3">

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, subMonths, startOfMonth } from 'date-fns';
 import { TrendingUp, TrendingDown, Minus, Target, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

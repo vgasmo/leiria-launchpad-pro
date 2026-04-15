@@ -231,7 +231,7 @@ export function FirstContactPrepSheet({ open, onOpenChange, workspaceId }: First
                 {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
               </div>
             ) : !data ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Dados não disponíveis.</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t('common.dataNotAvailable', 'Dados não disponíveis.')}</p>
             ) : (
               <>
                 {/* Copy All */}

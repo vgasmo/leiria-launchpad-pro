@@ -1191,10 +1191,10 @@ export default function AdminDataImport() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="first_contact_booked">First Contact Booked</SelectItem>
-                        <SelectItem value="met">Met</SelectItem>
-                        <SelectItem value="qualified">Qualified</SelectItem>
+                        <SelectItem value="new">{t('crm.stages.new', 'New')}</SelectItem>
+                        <SelectItem value="first_contact_booked">{t('crm.stages.firstContactBooked', 'First Contact Booked')}</SelectItem>
+                        <SelectItem value="met">{t('crm.stages.met', 'Met')}</SelectItem>
+                        <SelectItem value="qualified">{t('crm.stages.qualified', 'Qualified')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
