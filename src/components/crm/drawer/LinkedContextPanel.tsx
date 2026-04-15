@@ -140,7 +140,7 @@ export function LinkedContextPanel({
   const isLoading = loadingWs || loadingContract || loadingWsContracts;
   if (isLoading) {
     return (
-      <Card className="border-border/60">
+      <Card className="flex-1 border-border/60">
         <CardContent className="p-3 space-y-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-8 w-full" />
@@ -153,8 +153,8 @@ export function LinkedContextPanel({
   const primaryContractId = contract?.id || workspaceContracts?.[0]?.id || null;
 
   return (
-    <Card className="border-border/60 bg-muted/30">
-      <CardContent className="p-3 space-y-3">
+    <Card className="flex-1 border-border/60 bg-muted/30">
+      <CardContent className="flex h-full flex-col p-3 space-y-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Briefcase className="h-3.5 w-3.5" />
           {t('crm.linkedContext', { defaultValue: 'Contexto Vinculado' })}
