@@ -30,6 +30,19 @@ const notificationTypeIcons: Record<string, string> = {
   overdue_escalated: '🚨',
   recap_ready: '✨',
   email_sync_done: '📧',
+  // Automation types
+  discount_expiring: '💸',
+  contract_anniversary: '🎂',
+  founder_inactive: '😴',
+  contract_expiring: '📄',
+  checkin_overdue: '📝',
+  kpi_stale: '📊',
+  crm_lead_stale: '🕐',
+  milestone_overdue: '🚩',
+  pending_approval: '👤',
+  intake_stale: '📨',
+  session_no_notes: '✏️',
+  workspace_no_consultant: '🔍',
 };
 
 const notificationTypeColors: Record<string, string> = {
@@ -47,6 +60,19 @@ const notificationTypeColors: Record<string, string> = {
   overdue_escalated: 'bg-destructive/10 text-destructive',
   recap_ready: 'bg-primary/10 text-primary',
   email_sync_done: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  // Automation types
+  discount_expiring: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  contract_anniversary: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  founder_inactive: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  contract_expiring: 'bg-destructive/10 text-destructive',
+  checkin_overdue: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  kpi_stale: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  crm_lead_stale: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  milestone_overdue: 'bg-destructive/10 text-destructive',
+  pending_approval: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  intake_stale: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  session_no_notes: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  workspace_no_consultant: 'bg-destructive/10 text-destructive',
 };
 
 export function NotificationCenter() {

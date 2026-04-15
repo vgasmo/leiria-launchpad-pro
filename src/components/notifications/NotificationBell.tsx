@@ -30,6 +30,19 @@ const NOTIFICATION_ICONS: Record<string, typeof Bell> = {
   email_sync_done: Mail,
   overdue_escalated: Siren,
   system: Bell,
+  // Automation types
+  discount_expiring: Clock,
+  contract_anniversary: Sparkles,
+  founder_inactive: Clock,
+  contract_expiring: AlertTriangle,
+  checkin_overdue: Clock,
+  kpi_stale: AlertTriangle,
+  crm_lead_stale: Clock,
+  milestone_overdue: AlertTriangle,
+  pending_approval: Bell,
+  intake_stale: Mail,
+  session_no_notes: Pin,
+  workspace_no_consultant: Siren,
 };
 
 // Type-specific colors for better visual hierarchy
@@ -42,6 +55,19 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   email_sync_done: 'bg-green-500/10 text-green-600 dark:text-green-400',
   overdue_escalated: 'bg-destructive/10 text-destructive',
   system: 'bg-muted text-muted-foreground',
+  // Automation types
+  discount_expiring: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  contract_anniversary: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  founder_inactive: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  contract_expiring: 'bg-destructive/10 text-destructive',
+  checkin_overdue: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  kpi_stale: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  crm_lead_stale: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  milestone_overdue: 'bg-destructive/10 text-destructive',
+  pending_approval: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  intake_stale: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  session_no_notes: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  workspace_no_consultant: 'bg-destructive/10 text-destructive',
 };
 
 export function NotificationBell() {
