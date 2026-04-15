@@ -359,7 +359,7 @@ export const AdminDashboard = memo(function AdminDashboard({ workspaces, isLoadi
       {/* Quick Links */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
         {[
-          { label: t('staffCockpit.navLabel', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: TrendingUp, desc: t('admin.commandCenterDesc', { defaultValue: 'Triage diária e visão operacional' }) },
+          { label: t('staffCockpit.navLabel', { defaultValue: 'Painel' }), href: '/staff-cockpit', icon: TrendingUp, desc: t('admin.commandCenterDesc', { defaultValue: 'Triage diária e visão operacional' }) },
           { label: t('admin.crmPipeline'), href: '/crm', icon: Users, desc: t('admin.crmDesc', { defaultValue: 'Pipeline comercial' }) },
           { label: t('admin.spaceOps', { defaultValue: 'Operações de Espaço' }), href: '/admin?tab=backoffice', icon: Building2, desc: t('admin.spaceOpsDesc', { defaultValue: 'Contratos, faturas e infra' }) },
           { label: t('admin.programs'), href: '/admin?tab=programs-setup', icon: FileText, desc: t('admin.programsDesc', { defaultValue: 'Configuração de programas' }) },
