@@ -582,7 +582,7 @@ export default function CRM() {
           </TabsContent>
 
           <TabsContent value="booking-links" className="space-y-4">
-            <BookingLinksManager />
+            <IntakeRoutingManager />
           </TabsContent>
         </Tabs>
 
