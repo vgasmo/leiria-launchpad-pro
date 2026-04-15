@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Users, Building2, FileText, BarChart3, Clock, TrendingUp,
-  Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, UserPlus, ArrowRight, Inbox
+  Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell,
+  ChevronDown, Database, UserPlus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -30,8 +30,6 @@ import { HealthModelViewer } from '@/components/admin/HealthModelViewer';
 import { AdminExternalMentorsManager } from '@/components/admin/AdminExternalMentorsManager';
 import { AdminSupportMaterialsManager } from '@/components/admin/AdminSupportMaterialsManager';
 import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
-import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
-import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
@@ -41,7 +39,7 @@ const ADMIN_ONLY_TABS = new Set(['users', 'data-quality']);
 
 const TAB_GROUPS_BASE: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
-  crm: ['funnel'],
+  // CRM is accessed directly via /crm (no inline tab)
   programs: ['programs-setup', 'kpis', 'templates', 'support-materials', 'surveys'],
   reports: ['analytics', 'health', 'compliance', 'data-quality'],
   users: ['users', 'mentors'],
@@ -110,7 +108,7 @@ export default function Admin() {
       surveys: <ClipboardList className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
-      funnel: <Filter className="h-4 w-4" />,
+      
     };
     return icons[tab];
   };
@@ -132,7 +130,7 @@ export default function Admin() {
       surveys: t('admin.surveys.title'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
-      funnel: t('admin.funnel.tab'),
+      
     };
     return labels[tab] || tab;
   };
@@ -263,37 +261,7 @@ export default function Admin() {
           <AdminSurveysManager />
         </TabsContent>
 
-        <TabsContent value="funnel">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">
-                  {t('admin.funnel.crmShortcutsTitle', { defaultValue: 'Atalhos do CRM' })}
-                </CardTitle>
-                <CardDescription>
-                  {t('admin.funnel.crmShortcutsDescription', { defaultValue: 'Abra rapidamente o CRM completo ou a fila de revisão de emails.' })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Button asChild>
-                  <Link to="/crm">
-                    {t('admin.funnel.openFullCrm', { defaultValue: 'Abrir CRM completo' })}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/crm?view=analytics">
-                    <Inbox className="h-4 w-4 mr-2" />
-                    {t('admin.funnel.openEmailReview', { defaultValue: 'Abrir revisão de emails' })}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <BookingLinksManager />
-            <AdminFunnelManager />
-          </div>
-        </TabsContent>
+        {/* CRM/Funnel content moved to dedicated /crm page */}
       </Tabs>
     </AppLayout>
   );

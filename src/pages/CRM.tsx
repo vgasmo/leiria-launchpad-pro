@@ -25,6 +25,7 @@ import {
   Zap,
   LayoutGrid,
   TrendingUp,
+  Link2,
 } from 'lucide-react';
 import { PipelineView } from '@/components/crm/PipelineView';
 import { useCrmInbox, useCrmTasksDue, CrmInboxItem } from '@/hooks/useCrmInbox';
@@ -45,6 +46,7 @@ import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
+import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { logger } from '@/lib/logger';
 
@@ -397,6 +399,10 @@ export default function CRM() {
               <TrendingUp className="h-4 w-4" />
               {t('crm.analytics')}
             </TabsTrigger>
+            <TabsTrigger value="booking-links" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              {t('crm.bookingLinks', { defaultValue: 'Links de Marcação' })}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pipeline" className="space-y-4">
@@ -573,6 +579,10 @@ export default function CRM() {
               <EmailReviewQueue />
             </div>
             <CrmAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="booking-links" className="space-y-4">
+            <BookingLinksManager />
           </TabsContent>
         </Tabs>
 
