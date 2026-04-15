@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, CheckCircle, AlertCircle, Building2, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, AlertCircle, Building2, ArrowLeft, Upload, FileText, X, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -33,8 +34,12 @@ export default function PublicBooking() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [lang, setLang] = useState(i18n.language === 'en' ? 'en' : 'pt');
   const [step, setStep] = useState<'loading' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [pitchFile, setPitchFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,6 +51,12 @@ export default function PublicBooking() {
     has_team: '',
     message: '',
   });
+
+  const toggleLang = () => {
+    const next = lang === 'pt' ? 'en' : 'pt';
+    setLang(next);
+    i18n.changeLanguage(next);
+  };
 
   // Validate token
   const { data: tokenData, isLoading: tokenLoading, error: tokenError } = useQuery({
@@ -83,14 +94,14 @@ export default function PublicBooking() {
 
   // Book mutation
   const bookMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (pitchDeckPath?: string | null) => {
       if (!token || !selectedSlot) throw new Error('Missing data');
       
       const { data, error } = await supabase.functions.invoke('public-book-first-contact', {
         body: {
           token,
           slot: selectedSlot,
-          contact: formData,
+          contact: { ...formData, pitch_deck_path: pitchDeckPath || undefined },
         },
       });
       
@@ -123,13 +134,35 @@ export default function PublicBooking() {
     return acc;
   }, {} as Record<string, TimeSlot[]>) || {};
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadPitchDeck = async (): Promise<string | null> => {
+    if (!pitchFile) return null;
+    const ext = pitchFile.name.split('.').pop() || 'pdf';
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from('booking-uploads').upload(path, pitchFile);
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    return path;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.sector || !formData.stage) {
       toast.error(t('publicBooking.fillRequired', { defaultValue: 'Preencha os campos obrigatórios: nome, email, setor e fase' }));
       return;
     }
-    bookMutation.mutate();
+    
+    setUploading(true);
+    try {
+      const pitchPath = await uploadPitchDeck();
+      if (pitchPath) {
+        setFormData(prev => ({ ...prev, pitch_deck_path: pitchPath } as any));
+      }
+      bookMutation.mutate(pitchPath);
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (step === 'loading' || tokenLoading) {
@@ -201,7 +234,7 @@ export default function PublicBooking() {
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back link */}
-        <div className="flex justify-start">
+        <div className="flex items-center justify-between">
           <a
             href="/login"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -209,6 +242,10 @@ export default function PublicBooking() {
             <ArrowLeft className="h-4 w-4" />
             {t('common.back', { defaultValue: 'Voltar' })}
           </a>
+          <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-1.5 text-muted-foreground">
+            <Globe className="h-4 w-4" />
+            {lang === 'pt' ? 'EN' : 'PT'}
+          </Button>
         </div>
         {/* Header */}
         <div className="text-center">
@@ -400,13 +437,52 @@ export default function PublicBooking() {
                     rows={3}
                   />
                 </div>
+                {/* Pitch Deck Upload */}
+                <div className="space-y-2">
+                  <Label>{t('publicBooking.pitchDeck', { defaultValue: 'Apresentação / Pitch Deck' })}</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.pptx,.ppt,.xlsx,.xls,.png,.jpg,.jpeg"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast.error(t('publicBooking.fileTooLarge', { defaultValue: 'Ficheiro demasiado grande (máx. 10MB)' }));
+                          return;
+                        }
+                        setPitchFile(file);
+                      }
+                    }}
+                  />
+                  {pitchFile ? (
+                    <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                      <FileText className="h-4 w-4 text-primary shrink-0" />
+                      <span className="truncate flex-1">{pitchFile.name}</span>
+                      <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setPitchFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start text-muted-foreground"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {t('publicBooking.uploadPitch', { defaultValue: 'Carregar apresentação (PDF, PPTX, até 10MB)' })}
+                    </Button>
+                  )}
+                </div>
                 
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={bookMutation.isPending}
+                  disabled={bookMutation.isPending || uploading}
                 >
-                  {bookMutation.isPending ? t('publicBooking.booking') : t('publicBooking.confirmBooking')}
+                  {(bookMutation.isPending || uploading) ? t('publicBooking.booking') : t('publicBooking.confirmBooking')}
                 </Button>
               </form>
             </CardContent>

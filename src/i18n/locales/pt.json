@@ -5809,7 +5809,11 @@
     "teamForming": "Em formação",
     "title": "Marcar Reunião",
     "whatToDiscuss": "O que gostaria de discutir?",
-    "yourDetails": "Os Seus Dados"
+    "yourDetails": "Os Seus Dados",
+    "pitchDeck": "Apresentação / Pitch Deck",
+    "uploadPitch": "Carregar apresentação (PDF, PPTX, até 10MB)",
+    "fileTooLarge": "Ficheiro demasiado grande (máx. 10MB)",
+    "backToSite": "Voltar ao site"
   },
   "quality": {
     "blockingWarning": "Este {{entityType}} não pode ser marcado como pronto até a pontuação atingir 70+",

@@ -32,6 +32,7 @@ interface BookingRequest {
     stage?: string;
     referral_source?: string;
     has_team?: string;
+    pitch_deck_path?: string;
   };
 }
 
@@ -108,13 +109,14 @@ function validateBookingRequest(body: unknown): { valid: true; data: BookingRequ
   const stage = typeof contact.stage === 'string' ? contact.stage.trim().slice(0, 100) : undefined;
   const referral_source = typeof contact.referral_source === 'string' ? contact.referral_source.trim().slice(0, 100) : undefined;
   const has_team = typeof contact.has_team === 'string' ? contact.has_team.trim().slice(0, 20) : undefined;
+  const pitch_deck_path = typeof contact.pitch_deck_path === 'string' ? contact.pitch_deck_path.trim().slice(0, 500) : undefined;
 
   return {
     valid: true,
     data: {
       token: req.token as string,
       slot: { date: slot.date as string, time: slot.time as string },
-      contact: { name: (contact.name as string).trim(), email, phone, organization, message, sector, stage, referral_source, has_team },
+      contact: { name: (contact.name as string).trim(), email, phone, organization, message, sector, stage, referral_source, has_team, pitch_deck_path },
     },
   };
 }
@@ -379,6 +381,7 @@ serve(async (req) => {
       if (contact.stage) bookingMetadata.startup_stage = contact.stage;
       if (contact.referral_source) bookingMetadata.referral_source = contact.referral_source;
       if (contact.has_team) bookingMetadata.has_team = contact.has_team;
+      if (contact.pitch_deck_path) bookingMetadata.pitch_deck_path = contact.pitch_deck_path;
       bookingMetadata.booking_date = `${slot.date}T${slot.time}:00`;
       bookingMetadata.booking_source = 'public_form';
 

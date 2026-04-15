@@ -5809,7 +5809,11 @@
     "teamForming": "Forming",
     "title": "Book a Meeting",
     "whatToDiscuss": "What would you like to discuss?",
-    "yourDetails": "Your Details"
+    "yourDetails": "Your Details",
+    "pitchDeck": "Presentation / Pitch Deck",
+    "uploadPitch": "Upload presentation (PDF, PPTX, up to 10MB)",
+    "fileTooLarge": "File too large (max. 10MB)",
+    "backToSite": "Back to site"
   },
   "quality": {
     "blockingWarning": "This {{entityType}} cannot be marked as ready until the score reaches 70+",
