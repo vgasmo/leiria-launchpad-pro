@@ -64,6 +64,7 @@ export type Database = {
           priority: string | null
           search_vector: unknown
           session_id: string | null
+          source_deliverable_key: string | null
           status: Database["public"]["Enums"]["action_status"]
           title: string
           updated_at: string
@@ -83,6 +84,7 @@ export type Database = {
           priority?: string | null
           search_vector?: unknown
           session_id?: string | null
+          source_deliverable_key?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title: string
           updated_at?: string
@@ -102,6 +104,7 @@ export type Database = {
           priority?: string | null
           search_vector?: unknown
           session_id?: string | null
+          source_deliverable_key?: string | null
           status?: Database["public"]["Enums"]["action_status"]
           title?: string
           updated_at?: string
@@ -3315,6 +3318,8 @@ export type Database = {
           id: string
           position: number | null
           search_vector: unknown
+          source_gate_id: string | null
+          source_week_id: string | null
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string | null
           title: string
@@ -3329,6 +3334,8 @@ export type Database = {
           id?: string
           position?: number | null
           search_vector?: unknown
+          source_gate_id?: string | null
+          source_week_id?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title: string
@@ -3343,6 +3350,8 @@ export type Database = {
           id?: string
           position?: number | null
           search_vector?: unknown
+          source_gate_id?: string | null
+          source_week_id?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string | null
           title?: string
@@ -3350,6 +3359,20 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "milestones_source_gate_id_fkey"
+            columns: ["source_gate_id"]
+            isOneToOne: false
+            referencedRelation: "program_gates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_source_week_id_fkey"
+            columns: ["source_week_id"]
+            isOneToOne: false
+            referencedRelation: "program_weeks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "milestones_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -8567,6 +8590,10 @@ export type Database = {
       is_team_member_of_startup: {
         Args: { _startup_id: string }
         Returns: boolean
+      }
+      materialize_acceleration_deliverables: {
+        Args: { p_program_id: string; p_workspace_id: string }
+        Returns: Json
       }
       reject_startup_claim: {
         Args: { p_claim_id: string; p_reason?: string }

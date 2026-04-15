@@ -1,17 +1,20 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
+import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap, Download, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
 
 interface AccelerationProgressCardProps {
   programId: string;
   currentWeek: number | null;
+  workspaceId?: string;
 }
 
 interface ProgramGate {
@@ -77,9 +80,53 @@ const GATE_COLORS = [
 export const AccelerationProgressCard = memo(function AccelerationProgressCard({
   programId,
   currentWeek,
+  workspaceId,
 }: AccelerationProgressCardProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { gates, weeks, isLoading } = useAccelerationStructure(programId);
+
+  // Check if milestones already exist from this program
+  const { data: hasMaterialized } = useQuery({
+    queryKey: ['acceleration-materialized', workspaceId],
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      if (!workspaceId) return false;
+      const { count } = await supabase
+        .from('milestones')
+        .select('id', { count: 'exact', head: true })
+        .eq('workspace_id', workspaceId)
+        .not('source_gate_id', 'is', null);
+      return (count ?? 0) > 0;
+    },
+  });
+
+  const materializeMutation = useMutation({
+    mutationFn: async () => {
+      if (!workspaceId) throw new Error('No workspace');
+      const { data, error } = await supabase.rpc('materialize_acceleration_deliverables', {
+        p_workspace_id: workspaceId,
+        p_program_id: programId,
+      });
+      if (error) throw error;
+      return data as { milestones_created: number; actions_created: number };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
+      toast.success(t('founder.deliverablesImported', {
+        milestones: data?.milestones_created ?? 0,
+        actions: data?.actions_created ?? 0,
+        defaultValue: '{{milestones}} marcos e {{actions}} ações criados a partir do programa',
+      }));
+    },
+    onError: () => {
+      toast.error(t('common.errorOccurred', 'Ocorreu um erro'));
+    },
+  });
 
   const week = currentWeek ?? 1;
   const totalWeeks = weeks.length > 0 ? Math.max(...weeks.map(w => w.week_number)) : 12;
@@ -111,10 +158,28 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
               {t('founder.accelerationProgress', { defaultValue: 'Progresso da Aceleração' })}
             </h3>
           </div>
-          <Badge variant="secondary" className="text-xs gap-1">
-            <CalendarDays className="h-3 w-3" />
-            {t('workspace.currentWeek', { week, defaultValue: 'Semana {{week}}' })}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {workspaceId && !hasMaterialized && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs gap-1.5 h-7"
+                onClick={() => materializeMutation.mutate()}
+                disabled={materializeMutation.isPending}
+              >
+                {materializeMutation.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3" />
+                )}
+                {t('founder.importDeliverables', { defaultValue: 'Importar Entregáveis' })}
+              </Button>
+            )}
+            <Badge variant="secondary" className="text-xs gap-1">
+              <CalendarDays className="h-3 w-3" />
+              {t('workspace.currentWeek', { week, defaultValue: 'Semana {{week}}' })}
+            </Badge>
+          </div>
         </div>
 
         {/* Overall progress */}

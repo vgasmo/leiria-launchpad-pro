@@ -165,6 +165,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         <AccelerationProgressCard
           programId={workspace.program_id}
           currentWeek={workspace.current_week ?? null}
+          workspaceId={workspace.id}
         />
       )}
 

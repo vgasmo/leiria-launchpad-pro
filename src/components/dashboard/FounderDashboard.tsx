@@ -210,6 +210,7 @@ export function FounderDashboard({
           <AccelerationProgressCard
             programId={workspace.program_id}
             currentWeek={(workspace as any).current_week ?? null}
+            workspaceId={workspace.id}
           />
         ) : (
           <FounderJourneyMap currentStage={workspace.stage} />
