@@ -23,6 +23,7 @@ interface KpiTrendChartProps {
 }
 
 export function KpiTrendChart({ data, targetValue, unit, direction = 'up', kpiName }: KpiTrendChartProps) {
+  const { t } = useTranslation();
   const chartData = useMemo(() => {
     return data.map(d => ({
       ...d,

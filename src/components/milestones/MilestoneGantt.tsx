@@ -23,6 +23,7 @@ const STATUS_COLORS = {
 };
 
 export function MilestoneGantt({ milestones, className }: MilestoneGanttProps) {
+  const { t } = useTranslation();
   const { chartData, dateRange, totalDays } = useMemo(() => {
     const milestonesWithDates = milestones.filter(m => m.target_date);
     
