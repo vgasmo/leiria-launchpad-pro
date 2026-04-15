@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, CheckCircle, AlertCircle, Building2, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, AlertCircle, Building2, ArrowLeft, Upload, FileText, X, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -33,8 +34,12 @@ export default function PublicBooking() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [lang, setLang] = useState(i18n.language === 'en' ? 'en' : 'pt');
   const [step, setStep] = useState<'loading' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [pitchFile, setPitchFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,6 +51,12 @@ export default function PublicBooking() {
     has_team: '',
     message: '',
   });
+
+  const toggleLang = () => {
+    const next = lang === 'pt' ? 'en' : 'pt';
+    setLang(next);
+    i18n.changeLanguage(next);
+  };
 
   // Validate token
   const { data: tokenData, isLoading: tokenLoading, error: tokenError } = useQuery({
