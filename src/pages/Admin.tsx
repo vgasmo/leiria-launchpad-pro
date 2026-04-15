@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { 
-  Users, Building2, FileText, BarChart3, Clock, TrendingUp, 
+import {
+  Users, Building2, FileText, BarChart3, Clock, TrendingUp,
   Heart, ShieldCheck, Users2, BookOpen, ClipboardList, Bell, Filter,
-  ChevronDown, Database, GitBranch, UserPlus
+  ChevronDown, Database, UserPlus, ArrowRight, Inbox
 } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AdminTemplatesManager } from '@/components/admin/AdminTemplatesManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminKpisManager } from '@/components/admin/AdminKpisManager';
@@ -32,15 +33,12 @@ import { AdminSurveysManager } from '@/components/admin/AdminSurveysManager';
 import { AdminFunnelManager } from '@/components/admin/AdminFunnelManager';
 import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
 import { DataQualityDashboard } from '@/components/admin/DataQualityDashboard';
-import { ContractLifecycleHub } from '@/components/admin/ContractLifecycleHub';
 import { AdminProgramsManager } from '@/components/admin/AdminProgramsManager';
 import { AdminMissionControlDirectory } from '@/components/admin/AdminMissionControlDirectory';
 import { EnrollmentControlCenter } from '@/components/admin/EnrollmentControlCenter';
 
-// Admin-only tabs that require admin role (governance-heavy)
 const ADMIN_ONLY_TABS = new Set(['users', 'data-quality']);
 
-// Tab group definitions — Ecosystem CRM Hub (no IT/System tabs)
 const TAB_GROUPS_BASE: Record<string, string[]> = {
   operations: ['approvals', 'enrollment', 'backoffice', 'announcements'],
   crm: ['funnel'],
@@ -54,7 +52,6 @@ export default function Admin() {
   const { isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Filter tab groups based on role — admin-only tabs hidden from non-admins
   const TAB_GROUPS = useMemo(() => {
     const filtered: Record<string, string[]> = {};
     for (const [group, tabs] of Object.entries(TAB_GROUPS_BASE)) {
@@ -77,7 +74,6 @@ export default function Admin() {
     return fromUrl && validTabs.has(fromUrl) ? fromUrl : 'approvals';
   });
 
-  // Keep internal tab state in sync with URL (?tab=...)
   useEffect(() => {
     const fromUrl = searchParams.get('tab');
     if (fromUrl && validTabs.has(fromUrl) && fromUrl !== activeTab) {
@@ -85,11 +81,9 @@ export default function Admin() {
       return;
     }
 
-    // If URL has no tab, ensure we don't show stale deep-linked state after navigation.
     if (!fromUrl && activeTab !== 'approvals') {
       setActiveTab('approvals');
     }
-     
   }, [searchParams, validTabs]);
 
   const setActiveTabAndUrl = (tab: string) => {
@@ -98,7 +92,7 @@ export default function Admin() {
     next.set('tab', tab);
     setSearchParams(next, { replace: false });
   };
-  
+
   const getTabIcon = (tab: string) => {
     const icons: Record<string, React.ReactNode> = {
       approvals: <Clock className="h-4 w-4" />,
@@ -146,7 +140,7 @@ export default function Admin() {
   const getGroupLabel = (group: string) => {
     const labels: Record<string, string> = {
       operations: t('admin.groups.operations'),
-      crm: t('nav.crm'),
+      crm: t('nav.crm', { defaultValue: 'CRM' }),
       programs: t('admin.groups.programs'),
       reports: t('admin.groups.reports'),
       users: t('admin.groups.users'),
@@ -163,17 +157,15 @@ export default function Admin() {
 
   return (
     <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Ecosystem Directory & CRM' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Manage startups, mentors, programs and operational workflows' })}>
-      {/* Mission Control Directory */}
       <AdminMissionControlDirectory />
 
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
-        {/* Grouped Tab Navigation - Desktop: dropdowns, Mobile: horizontal scroll */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
           {Object.entries(TAB_GROUPS).map(([group, tabs]) => (
             <DropdownMenu key={group}>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant={getActiveGroup() === group ? 'secondary' : 'ghost'} 
+                <Button
+                  variant={getActiveGroup() === group ? 'secondary' : 'ghost'}
                   size="sm"
                   className="gap-1.5"
                 >
@@ -183,7 +175,7 @@ export default function Admin() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {tabs.map((tab) => (
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     key={tab}
                     onClick={() => setActiveTabAndUrl(tab)}
                     className={activeTab === tab ? 'bg-accent' : ''}
@@ -199,7 +191,6 @@ export default function Admin() {
           ))}
         </div>
 
-        {/* Active Tab Indicator */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{getTabIcon(activeTab)}</span>
           <span className="font-medium text-foreground">{getTabLabel(activeTab)}</span>
@@ -216,8 +207,6 @@ export default function Admin() {
         <TabsContent value="compliance">
           <ComplianceDashboard />
         </TabsContent>
-
-        {/* lifecycle merged into backoffice */}
 
         <TabsContent value="backoffice">
           <AdminBackoffice />
@@ -276,6 +265,31 @@ export default function Admin() {
 
         <TabsContent value="funnel">
           <div className="space-y-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">
+                  {t('admin.funnel.crmShortcutsTitle', { defaultValue: 'Atalhos do CRM' })}
+                </CardTitle>
+                <CardDescription>
+                  {t('admin.funnel.crmShortcutsDescription', { defaultValue: 'Abra rapidamente o CRM completo ou a fila de revisão de emails.' })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Button asChild>
+                  <Link to="/crm">
+                    {t('admin.funnel.openFullCrm', { defaultValue: 'Abrir CRM completo' })}
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/crm?view=analytics">
+                    <Inbox className="h-4 w-4 mr-2" />
+                    {t('admin.funnel.openEmailReview', { defaultValue: 'Abrir revisão de emails' })}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             <BookingLinksManager />
             <AdminFunnelManager />
           </div>
