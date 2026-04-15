@@ -122,7 +122,7 @@ function useAvailableWorkspaces() {
           startup:startups(name),
           program:programs(name)
         `)
-        .eq('status', 'active')
+        .in('status', ['active', 'claimed', 'pending'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
