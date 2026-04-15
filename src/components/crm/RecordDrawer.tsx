@@ -289,7 +289,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
-          <TabsContent value="overview" className="flex-1 overflow-y-auto">
+          <TabsContent value="overview" className="flex-1 overflow-y-auto min-h-0">
             <div className="p-4 pt-2 space-y-4">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
@@ -414,7 +414,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Context Tab - Linked Workspace, Contract, Emails */}
-          <TabsContent value="context" className="flex-1 overflow-y-auto p-4 pt-2 space-y-4">
+          <TabsContent value="context" className="flex-1 overflow-y-auto min-h-0 p-4 pt-2 space-y-4">
             <LinkedContextPanel
               linkedWorkspaceId={item.linked_workspace_id}
               linkedStartupId={item.linked_startup_id}
@@ -498,7 +498,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-y-auto" data-testid="timeline">
+          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="timeline">
             {/* Quick Actions */}
             <QuickActions
               onAddActivity={(type) => setAddActivityDialog(type)}
@@ -542,7 +542,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Tasks Tab */}
-          <TabsContent value="tasks" className="flex-1 flex flex-col p-4 pt-2 space-y-4 overflow-y-auto" data-testid="task-list">
+          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="task-list">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">
