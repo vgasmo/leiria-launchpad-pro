@@ -108,7 +108,7 @@ export default function Admin() {
       surveys: <ClipboardList className="h-4 w-4" />,
       analytics: <TrendingUp className="h-4 w-4" />,
       health: <Heart className="h-4 w-4" />,
-      funnel: <Filter className="h-4 w-4" />,
+      
     };
     return icons[tab];
   };
