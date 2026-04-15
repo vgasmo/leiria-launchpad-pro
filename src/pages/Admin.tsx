@@ -130,7 +130,7 @@ export default function Admin() {
       surveys: t('admin.surveys.title'),
       analytics: t('admin.analytics'),
       health: t('admin.healthModels'),
-      funnel: t('admin.funnel.tab'),
+      
     };
     return labels[tab] || tab;
   };
