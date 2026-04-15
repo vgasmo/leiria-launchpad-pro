@@ -225,15 +225,24 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
       {/* Quick Stats */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
-          { label: t('mentor.myStartups'), value: workspaces.length, icon: Briefcase, accent: false },
+          { label: t('mentor.myStartups'), value: workspaces.length, icon: Briefcase, accent: false, onClick: () => document.getElementById('mentor-startups-section')?.scrollIntoView({ behavior: 'smooth' }) },
           { label: t('mentor.upcomingMeetings'), value: upcomingMeetings.length, icon: Calendar, accent: false, 
-            extra: workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length },
+            extra: workspaces.filter(w => w.nextMeetingDate && isToday(new Date(w.nextMeetingDate))).length,
+            onClick: () => document.getElementById('mentor-calendar-section')?.scrollIntoView({ behavior: 'smooth' }) },
           { label: t('mentor.startupsHealthy'), value: impactStats.healthyCount, icon: TrendingUp, accent: true },
           { label: t('mentor.pendingActions'), value: impactStats.actionsCreated, icon: CheckCircle2, accent: false },
         ].map((stat, i) => {
           const Icon = stat.icon;
+          const isClickable = !!stat.onClick;
           return (
-            <Card key={i} className="p-4 rounded-2xl border-border/60 transition-all duration-200 hover:shadow-sm hover:border-border/80">
+            <Card 
+              key={i} 
+              className={cn(
+                "p-4 rounded-2xl border-border/60 transition-all duration-200 hover:shadow-sm hover:border-border/80",
+                isClickable && "cursor-pointer hover:border-primary/30"
+              )}
+              onClick={stat.onClick}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">{stat.label}</p>
@@ -255,7 +264,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
       {/* Two-column layout: Startups + Calendar */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
+        <div id="mentor-startups-section" className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">{t('mentor.myStartups')}</h2>
@@ -406,7 +415,7 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div id="mentor-calendar-section" className="space-y-4">
           <WidgetErrorBoundary name="CalendarWidget">
             <CalendarWidget />
           </WidgetErrorBoundary>
