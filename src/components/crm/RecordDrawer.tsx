@@ -289,7 +289,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
-          <TabsContent value="overview" className="flex-1 overflow-y-auto">
+          <TabsContent value="overview" className="flex-1 overflow-y-auto min-h-0">
             <div className="p-4 pt-2 space-y-4">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
