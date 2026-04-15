@@ -365,9 +365,9 @@ Deno.serve(async (req) => {
     // Get access token
     const accessToken = await getGraphAccessToken(credentials, log);
 
-    // Fetch recent emails (last 7 days, max 50)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const graphUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(consultantEmail)}/messages?$top=50&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${sevenDaysAgo}&$select=id,internetMessageId,conversationId,subject,bodyPreview,sentDateTime,receivedDateTime,from,toRecipients,ccRecipients,categories,importance`;
+    // Fetch recent emails (last 365 days, max 100)
+    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+    const graphUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(consultantEmail)}/messages?$top=100&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${oneYearAgo}&$select=id,internetMessageId,conversationId,subject,bodyPreview,sentDateTime,receivedDateTime,from,toRecipients,ccRecipients,categories,importance`;
 
     const graphRes = await fetch(graphUrl, {
       headers: { 'Authorization': `Bearer ${accessToken}` },
