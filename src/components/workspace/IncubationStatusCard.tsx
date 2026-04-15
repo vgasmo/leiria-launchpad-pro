@@ -13,12 +13,10 @@ import i18n from 'i18next';
 
 interface IncubationStatusCardProps {
   workspaceId: string;
-  startDate?: string | null;
 }
 
 export const IncubationStatusCard = memo(function IncubationStatusCard({
   workspaceId,
-  startDate,
 }: IncubationStatusCardProps) {
   const { t } = useTranslation();
   const locale = i18n.language === 'pt' ? ptLocale : enUS;
