@@ -46,7 +46,7 @@ import { CsvLeadImport } from '@/components/crm/CsvLeadImport';
 import { NewLeadDialog } from '@/components/crm/NewLeadDialog';
 import { EmailReviewQueue } from '@/components/crm/EmailReviewQueue';
 import { EmailSyncHealthPanel } from '@/components/crm/EmailSyncHealthPanel';
-import { BookingLinksManager } from '@/components/admin/BookingLinksManager';
+import { IntakeRoutingManager } from '@/components/admin/IntakeRoutingManager';
 import type { FunnelItem, FunnelStage } from '@/hooks/useFunnel';
 import { logger } from '@/lib/logger';
 
@@ -582,7 +582,7 @@ export default function CRM() {
           </TabsContent>
 
           <TabsContent value="booking-links" className="space-y-4">
-            <BookingLinksManager />
+            <IntakeRoutingManager />
           </TabsContent>
         </Tabs>
 
