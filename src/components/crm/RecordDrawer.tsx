@@ -545,7 +545,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Tasks Tab */}
-          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="task-list">
+          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="task-list">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">
