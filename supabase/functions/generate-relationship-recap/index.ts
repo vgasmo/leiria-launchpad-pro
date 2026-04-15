@@ -291,44 +291,50 @@ ${activities.map((a, i) => `${i + 1}. [${a.type}] ${a.date}: ${a.subject || ''} 
       }
     }
 
-    // Store recap with proper conflict handling
-    // Using separate upserts for workspace vs funnel since constraints are different
+    // Store recap — use delete + insert since partial unique indexes
+    // don't work with Supabase JS upsert's onConflict parameter
+    const recapRow = {
+      summary: recap.summary || '',
+      key_points: recap.key_points || [],
+      open_loops: recap.open_loops || [],
+      risks: recap.risks || [],
+      next_best_actions: recap.next_best_actions || [],
+      items_analyzed: activities.length,
+      generated_at: new Date().toISOString(),
+      generated_by: user.id,
+      language,
+    };
+
     if (workspace_id) {
+      // Delete existing recap for this workspace+language
       await supabase
         .from('relationship_recaps')
-        .upsert({
-          workspace_id,
-          funnel_item_id: null,
-          language,
-          summary: recap.summary || '',
-          key_points: recap.key_points || [],
-          open_loops: recap.open_loops || [],
-          risks: recap.risks || [],
-          next_best_actions: recap.next_best_actions || [],
-          items_analyzed: activities.length,
-          generated_at: new Date().toISOString(),
-          generated_by: user.id,
-        }, {
-          onConflict: 'workspace_id,language',
-        });
+        .delete()
+        .eq('workspace_id', workspace_id)
+        .eq('language', language);
+      
+      const { error: insertErr } = await supabase
+        .from('relationship_recaps')
+        .insert({ ...recapRow, workspace_id, funnel_item_id: null });
+      
+      if (insertErr) {
+        console.error('[generate-relationship-recap] Insert error (workspace):', insertErr);
+      }
     } else if (funnel_item_id) {
+      // Delete existing recap for this funnel_item+language
       await supabase
         .from('relationship_recaps')
-        .upsert({
-          workspace_id: null,
-          funnel_item_id,
-          language,
-          summary: recap.summary || '',
-          key_points: recap.key_points || [],
-          open_loops: recap.open_loops || [],
-          risks: recap.risks || [],
-          next_best_actions: recap.next_best_actions || [],
-          items_analyzed: activities.length,
-          generated_at: new Date().toISOString(),
-          generated_by: user.id,
-        }, {
-          onConflict: 'funnel_item_id,language',
-        });
+        .delete()
+        .eq('funnel_item_id', funnel_item_id)
+        .eq('language', language);
+      
+      const { error: insertErr } = await supabase
+        .from('relationship_recaps')
+        .insert({ ...recapRow, workspace_id: null, funnel_item_id });
+      
+      if (insertErr) {
+        console.error('[generate-relationship-recap] Insert error (funnel):', insertErr);
+      }
     }
 
     console.log('[generate-relationship-recap] Complete for:', funnel_item_id || workspace_id);
