@@ -273,7 +273,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[500px] sm:max-w-[500px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
+      <SheetContent className="w-[560px] sm:max-w-[560px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
         <RecordDrawerHeader
           item={item}
           onStageChange={handleStageChange}
@@ -295,29 +295,29 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
               {aiRecapEnabled && (
                 <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
                   <Card className="border-primary/20 bg-primary/5">
-                    <CardContent className="p-3">
+                    <CardContent className="p-4">
                       <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-sm">{t('crm.aiRecap')}</span>
+                          <span className="font-semibold text-sm">{t('crm.aiRecap')}</span>
                         </div>
                         {recapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </CollapsibleTrigger>
                       
                       {loadingRecap ? (
-                        <Skeleton className="h-12 w-full mt-2" />
+                        <Skeleton className="h-16 w-full mt-3" />
                       ) : recap ? (
                         <>
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                             {recap.summary}
                           </p>
-                          <CollapsibleContent className="mt-3 space-y-3">
+                          <CollapsibleContent className="mt-4 space-y-4">
                             {recap.key_points?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                  <Target className="h-3 w-3" /> {t('crm.keyPoints')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5">
+                                  <Target className="h-3.5 w-3.5" /> {t('crm.keyPoints')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.key_points.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -326,10 +326,10 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.open_loops?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                                  <Clock className="h-3 w-3" /> {t('crm.openLoops')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5">
+                                  <Clock className="h-3.5 w-3.5" /> {t('crm.openLoops')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.open_loops.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -338,10 +338,10 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.risks?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-destructive">
-                                  <AlertTriangle className="h-3 w-3" /> {t('crm.risks')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5 text-destructive">
+                                  <AlertTriangle className="h-3.5 w-3.5" /> {t('crm.risks')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.risks.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
@@ -350,17 +350,17 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                             )}
                             {recap.next_best_actions?.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium flex items-center gap-1 mb-1 text-primary">
-                                  <Lightbulb className="h-3 w-3" /> {t('crm.nextActions')}
+                                <p className="text-xs font-semibold flex items-center gap-1.5 mb-1.5 text-primary">
+                                  <Lightbulb className="h-3.5 w-3.5" /> {t('crm.nextActions')}
                                 </p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
+                                <ul className="text-sm text-muted-foreground space-y-1 leading-relaxed">
                                   {recap.next_best_actions.map((p: string, i: number) => (
                                     <li key={i}>• {p}</li>
                                   ))}
                                 </ul>
                               </div>
                             )}
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-xs text-muted-foreground pt-1">
                               {t('crm.itemsAnalyzed', { count: recap.items_analyzed })} • {formatRelativeTime(recap.generated_at)}
                             </p>
                           </CollapsibleContent>
@@ -384,11 +384,11 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 text-[10px] mt-2 text-muted-foreground"
+                          className="h-7 text-xs mt-3 text-muted-foreground"
                           onClick={() => generateRecap.mutate({ funnelItemId: item.id, language })}
                           disabled={generateRecap.isPending}
                         >
-                          <RefreshCw className={cn('h-3 w-3 mr-1', generateRecap.isPending && 'animate-spin')} />
+                          <RefreshCw className={cn('h-3.5 w-3.5 mr-1', generateRecap.isPending && 'animate-spin')} />
                           {t('crm.regenerate')}
                         </Button>
                       )}
