@@ -137,7 +137,7 @@ export function AppSidebar() {
 
   // BACKOFFICE Navigation (focused on spaces, contracts, invoices)
   const backofficeNavigation: NavItem[] = [
-    { name: t('nav.backoffice.cockpit', { defaultValue: 'Centro de Comando' }), href: '/staff-cockpit', icon: Home, exact: true },
+    { name: t('nav.backoffice.cockpit', { defaultValue: 'Painel' }), href: '/staff-cockpit', icon: Home, exact: true },
     { name: t('nav.backoffice.spaces', { defaultValue: 'Espaços' }), href: '/admin?tab=backoffice', icon: Building2 },
     { name: t('nav.backoffice.contracts', { defaultValue: 'Contratos' }), href: '/admin?tab=backoffice&subtab=contracts', icon: FileText },
     // Billing/Invoices removed from nav per user request
