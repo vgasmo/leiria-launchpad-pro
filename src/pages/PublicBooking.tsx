@@ -44,7 +44,6 @@ export default function PublicBooking() {
   const [step, setStep] = useState<'loading' | 'program_select' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
-  const [routingOptions, setRoutingOptions] = useState<RoutingOption[]>([]);
   const [pitchFile, setPitchFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
