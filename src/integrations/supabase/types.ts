@@ -617,7 +617,7 @@ export type Database = {
           sync_error: string | null
           sync_status: string | null
           visibility: string
-          workspace_id: string
+          workspace_id: string | null
         }
         Insert: {
           activity_type?: string
@@ -653,7 +653,7 @@ export type Database = {
           sync_error?: string | null
           sync_status?: string | null
           visibility?: string
-          workspace_id: string
+          workspace_id?: string | null
         }
         Update: {
           activity_type?: string
@@ -689,7 +689,7 @@ export type Database = {
           sync_error?: string | null
           sync_status?: string | null
           visibility?: string
-          workspace_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
