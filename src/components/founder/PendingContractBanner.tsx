@@ -26,7 +26,7 @@ export function PendingContractBanner({ workspaceId }: PendingContractBannerProp
         .from('startup_contracts')
         .select('id, contract_number, status, signature_status, monthly_fee, start_date, incubation_type:incubation_types(name)')
         .eq('workspace_id', workspaceId)
-        .in('status', ['draft', 'pending_signature'])
+        .in('signature_status', ['sent_for_signature', 'intake_requested'])
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];

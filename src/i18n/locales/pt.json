@@ -7900,7 +7900,15 @@
     "workspaceUpdated": "Workspace updated",
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor",
-    "yourTeam": "A Sua Equipa"
+    "yourTeam": "A Sua Equipa",
+    "incubationStatus": {
+      "title": "Estado da Incubação",
+      "ongoing": "Em curso",
+      "incubationTime": "Tempo de Incubação",
+      "monthsCount": "{{count}} meses",
+      "nextReview": "Próxima Revisão",
+      "pendingMilestones": "Marcos Pendentes"
+    }
   },
   "workspaceCard": {
     "actions": "Ações",

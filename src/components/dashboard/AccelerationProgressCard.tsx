@@ -277,8 +277,10 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                       const weekDone = week > gw.week_number;
                       const weekCurrent = week === gw.week_number;
                       return (
-                        <div
+                        <motion.div
                           key={gw.id}
+                          animate={weekCurrent ? { scale: [1, 1.08, 1] } : undefined}
+                          transition={weekCurrent ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : undefined}
                           className={cn(
                             'text-[10px] px-2 py-0.5 rounded-full border transition-all',
                             weekDone && 'bg-primary/15 border-primary/20 text-primary',
@@ -289,7 +291,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                         >
                           S{gw.week_number}
                           {weekCurrent && <ChevronRight className="inline h-2.5 w-2.5 ml-0.5" />}
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>

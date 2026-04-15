@@ -7900,7 +7900,15 @@
     "workspaceUpdated": "Workspace updated",
     "yourConsultant": "Your Consultant",
     "yourMentor": "Your Mentor",
-    "yourTeam": "Your Team"
+    "yourTeam": "Your Team",
+    "incubationStatus": {
+      "title": "Incubation Status",
+      "ongoing": "Ongoing",
+      "incubationTime": "Incubation Time",
+      "monthsCount": "{{count}} months",
+      "nextReview": "Next Review",
+      "pendingMilestones": "Pending Milestones"
+    }
   },
   "workspaceCard": {
     "actions": "Actions",
