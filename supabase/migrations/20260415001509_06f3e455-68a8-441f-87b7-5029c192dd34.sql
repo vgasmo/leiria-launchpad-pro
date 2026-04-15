@@ -1,0 +1,1 @@
+ALTER TABLE public.communication_log ALTER COLUMN workspace_id DROP NOT NULL;
