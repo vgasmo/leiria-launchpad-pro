@@ -1,17 +1,20 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
+import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap, Download, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
 
 interface AccelerationProgressCardProps {
   programId: string;
   currentWeek: number | null;
+  workspaceId?: string;
 }
 
 interface ProgramGate {
