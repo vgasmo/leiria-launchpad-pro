@@ -134,13 +134,35 @@ export default function PublicBooking() {
     return acc;
   }, {} as Record<string, TimeSlot[]>) || {};
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadPitchDeck = async (): Promise<string | null> => {
+    if (!pitchFile) return null;
+    const ext = pitchFile.name.split('.').pop() || 'pdf';
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from('booking-uploads').upload(path, pitchFile);
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    return path;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.sector || !formData.stage) {
       toast.error(t('publicBooking.fillRequired', { defaultValue: 'Preencha os campos obrigatórios: nome, email, setor e fase' }));
       return;
     }
-    bookMutation.mutate();
+    
+    setUploading(true);
+    try {
+      const pitchPath = await uploadPitchDeck();
+      if (pitchPath) {
+        setFormData(prev => ({ ...prev, pitch_deck_path: pitchPath } as any));
+      }
+      bookMutation.mutate(pitchPath);
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (step === 'loading' || tokenLoading) {
