@@ -283,78 +283,21 @@ async function matchEmailToCrm(
   };
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return handleCorsOptions(req);
-  }
-
-  const requestId = generateRequestId();
-  const log = createLogger(FUNCTION_NAME, requestId);
-  const corsHeaders = getCorsHeaders(req);
-
+/**
+ * Sync emails for a single consultant.
+ * Extracted to be reusable from both manual and auto_sync modes.
+ */
+async function syncConsultantEmails(
+  supabaseAdmin: SupabaseClient,
+  consultantUserId: string,
+  consultantEmail: string,
+  credentials: GraphCredentials,
+  log: ReturnType<typeof createLogger>
+): Promise<{ processed: number; logged: number; unmatched: number; ignored: number; duplicates: number; error?: string }> {
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-
-    // Verify user
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !user) {
-      return corsJsonResponse({ error: 'Invalid token' }, req, 401);
-    }
-
-    // Check staff role
-    const { data: roleCheck } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .in('role', ['admin', 'consultor'])
-      .limit(1)
-      .maybeSingle();
-
-    if (!roleCheck) {
-      return corsJsonResponse({ error: 'Only staff can sync emails' }, req, 403);
-    }
-
-    // Get Graph credentials
-    const credentials = await getGraphCredentials(supabaseAdmin, log);
-    if (!credentials) {
-      // Update sync status
-      await supabaseAdmin.from('email_sync_status').upsert({
-        consultant_user_id: user.id,
-        provider: 'outlook',
-        last_sync_at: new Date().toISOString(),
-        last_sync_error: 'MS Graph not configured',
-        sync_state: 'error',
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'consultant_user_id,provider' });
-
-      return corsJsonResponse({ error: 'Outlook integration not configured' }, req, 503);
-    }
-
-    // Get consultant's email
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.email) {
-      return corsJsonResponse({ error: 'Consultant profile email not found' }, req, 400);
-    }
-
-    const consultantEmail = profile.email;
-    log.info('Starting email sync', { consultant: consultantEmail });
-
     // Update sync state
     await supabaseAdmin.from('email_sync_status').upsert({
-      consultant_user_id: user.id,
+      consultant_user_id: consultantUserId,
       provider: 'outlook',
       mailbox_email: consultantEmail,
       sync_state: 'syncing',
@@ -376,21 +319,21 @@ Deno.serve(async (req) => {
     if (!graphRes.ok) {
       const errText = await graphRes.text();
       log.error('Graph API messages fetch failed', new Error(errText));
-      
+
       await supabaseAdmin.from('email_sync_status').upsert({
-        consultant_user_id: user.id,
+        consultant_user_id: consultantUserId,
         provider: 'outlook',
         sync_state: 'error',
         last_sync_error: `Graph API ${graphRes.status}: ${errText.slice(0, 200)}`,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'consultant_user_id,provider' });
 
-      return corsJsonResponse({ error: 'Failed to fetch Outlook emails' }, req, 502);
+      return { processed: 0, logged: 0, unmatched: 0, ignored: 0, duplicates: 0, error: `Graph API ${graphRes.status}` };
     }
 
     const graphData = await graphRes.json();
     const messages: GraphMessage[] = graphData.value || [];
-    log.info(`Fetched ${messages.length} messages from Outlook`);
+    log.info(`Fetched ${messages.length} messages for ${consultantEmail}`);
 
     let processed = 0, logged = 0, unmatched = 0, ignored = 0, duplicates = 0;
 
@@ -443,7 +386,6 @@ Deno.serve(async (req) => {
       const direction = isSent ? 'outbound' : 'inbound';
       const needsReview = match.confidence === 'none' || match.confidence === 'low';
 
-      // Only auto-log if confidence is high/medium OR needs_review
       const insertData = {
         workspace_id: match.workspaceId || null,
         funnel_item_id: match.funnelItemId || null,
@@ -458,7 +400,6 @@ Deno.serve(async (req) => {
         external_source: 'outlook_email',
         external_id: msg.id,
         status: 'done',
-        // New fields
         provider_thread_id: msg.conversationId || null,
         internet_message_id: msg.internetMessageId || null,
         matched_contact_email: match.contactEmail,
@@ -469,7 +410,7 @@ Deno.serve(async (req) => {
         ignored: false,
         sync_status: 'synced',
         last_synced_at: new Date().toISOString(),
-        consultant_user_id: user.id,
+        consultant_user_id: consultantUserId,
         participants_json: {
           from: msg.from?.emailAddress || null,
           to: (msg.toRecipients || []).map(r => r.emailAddress),
@@ -482,7 +423,6 @@ Deno.serve(async (req) => {
         .insert(insertData as Record<string, unknown>);
 
       if (insertError) {
-        // Likely dedup conflict, skip
         if (insertError.code === '23505') {
           duplicates++;
         } else {
@@ -500,7 +440,7 @@ Deno.serve(async (req) => {
 
     // Update sync status
     await supabaseAdmin.from('email_sync_status').upsert({
-      consultant_user_id: user.id,
+      consultant_user_id: consultantUserId,
       provider: 'outlook',
       mailbox_email: consultantEmail,
       sync_state: 'idle',
@@ -514,15 +454,169 @@ Deno.serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'consultant_user_id,provider' });
 
-    log.info('Email sync complete', { processed, logged, unmatched, ignored, duplicates });
+    log.info('Email sync complete', { consultant: consultantEmail, processed, logged, unmatched, ignored, duplicates });
+
+    return { processed, logged, unmatched, ignored, duplicates };
+  } catch (err) {
+    log.error(`Sync error for ${consultantEmail}`, err);
+
+    await supabaseAdmin.from('email_sync_status').upsert({
+      consultant_user_id: consultantUserId,
+      provider: 'outlook',
+      sync_state: 'error',
+      last_sync_error: safeErrorMessage(err),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'consultant_user_id,provider' }).catch(() => {});
+
+    return { processed: 0, logged: 0, unmatched: 0, ignored: 0, duplicates: 0, error: safeErrorMessage(err) };
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return handleCorsOptions(req);
+  }
+
+  const requestId = generateRequestId();
+  const log = createLogger(FUNCTION_NAME, requestId);
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+    // Parse body to check for auto_sync mode
+    let bodyJson: Record<string, unknown> = {};
+    try {
+      bodyJson = await req.json();
+    } catch {
+      // No body or invalid JSON, proceed with manual mode
+    }
+
+    const isAutoSync = bodyJson.auto_sync === true;
+
+    if (isAutoSync) {
+      // AUTO SYNC MODE: Sync all consultants with @startupleiria.com emails
+      log.info('Starting auto sync for all consultants');
+
+      const credentials = await getGraphCredentials(supabaseAdmin, log);
+      if (!credentials) {
+        log.warn('Auto sync skipped: MS Graph not configured');
+        return corsJsonResponse({ status: 'skipped', reason: 'Graph not configured' }, req);
+      }
+
+      // Get all consultants (admin + consultor roles)
+      const { data: staffRoles } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['admin', 'consultor']);
+
+      if (!staffRoles || staffRoles.length === 0) {
+        return corsJsonResponse({ status: 'ok', synced: 0, reason: 'No consultants found' }, req);
+      }
+
+      const staffIds = staffRoles.map(r => r.user_id);
+
+      // Get their emails
+      const { data: profiles } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email')
+        .in('id', staffIds)
+        .not('email', 'is', null);
+
+      if (!profiles || profiles.length === 0) {
+        return corsJsonResponse({ status: 'ok', synced: 0, reason: 'No consultant profiles found' }, req);
+      }
+
+      const results: Array<{ email: string; processed: number; logged: number; unmatched: number; error?: string }> = [];
+
+      for (const profile of profiles) {
+        if (!profile.email) continue;
+        log.info(`Auto syncing for ${profile.email}`);
+        const result = await syncConsultantEmails(supabaseAdmin, profile.id, profile.email, credentials, log);
+        results.push({
+          email: profile.email,
+          processed: result.processed,
+          logged: result.logged,
+          unmatched: result.unmatched,
+          error: result.error,
+        });
+      }
+
+      log.info('Auto sync complete', { consultants: results.length });
+
+      return corsJsonResponse({
+        status: 'ok',
+        auto_sync: true,
+        synced: results.length,
+        results,
+      }, req);
+    }
+
+    // MANUAL MODE: Sync for authenticated user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return corsJsonResponse({ error: 'Unauthorized' }, req, 401);
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    if (userError || !user) {
+      return corsJsonResponse({ error: 'Invalid token' }, req, 401);
+    }
+
+    // Check staff role
+    const { data: roleCheck } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'consultor'])
+      .limit(1)
+      .maybeSingle();
+
+    if (!roleCheck) {
+      return corsJsonResponse({ error: 'Only staff can sync emails' }, req, 403);
+    }
+
+    // Get Graph credentials
+    const credentials = await getGraphCredentials(supabaseAdmin, log);
+    if (!credentials) {
+      await supabaseAdmin.from('email_sync_status').upsert({
+        consultant_user_id: user.id,
+        provider: 'outlook',
+        last_sync_at: new Date().toISOString(),
+        last_sync_error: 'MS Graph not configured',
+        sync_state: 'error',
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'consultant_user_id,provider' });
+
+      return corsJsonResponse({ error: 'Outlook integration not configured' }, req, 503);
+    }
+
+    // Get consultant's email
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.email) {
+      return corsJsonResponse({ error: 'Consultant profile email not found' }, req, 400);
+    }
+
+    const result = await syncConsultantEmails(supabaseAdmin, user.id, profile.email, credentials, log);
+
+    if (result.error) {
+      return corsJsonResponse({ error: result.error }, req, 502);
+    }
 
     return corsJsonResponse({
       status: 'ok',
-      processed,
-      logged,
-      unmatched,
-      ignored,
-      duplicates,
+      processed: result.processed,
+      logged: result.logged,
+      unmatched: result.unmatched,
+      ignored: result.ignored,
+      duplicates: result.duplicates,
     }, req);
 
   } catch (err) {
