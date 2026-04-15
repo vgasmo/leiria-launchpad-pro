@@ -380,6 +380,7 @@ serve(async (req) => {
       if (contact.stage) bookingMetadata.startup_stage = contact.stage;
       if (contact.referral_source) bookingMetadata.referral_source = contact.referral_source;
       if (contact.has_team) bookingMetadata.has_team = contact.has_team;
+      if (contact.pitch_deck_path) bookingMetadata.pitch_deck_path = contact.pitch_deck_path;
       bookingMetadata.booking_date = `${slot.date}T${slot.time}:00`;
       bookingMetadata.booking_source = 'public_form';
 
