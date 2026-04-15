@@ -106,7 +106,7 @@ export function OverviewTab({
   const weightedValue = (item.deal_value || 0) * ((item.win_probability ?? DEFAULT_WIN_PROBABILITY[item.stage] ?? 0) / 100);
 
   return (
-    <div className="flex-1 p-4 space-y-4 overflow-auto">
+    <div className="space-y-4">
       {/* Deal Value Card */}
       <Card className="border-primary/20">
         <CardHeader className="py-3 px-4">

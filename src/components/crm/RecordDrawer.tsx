@@ -290,7 +290,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
           <TabsContent value="overview" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
-            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
                 <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
