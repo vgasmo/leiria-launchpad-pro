@@ -273,7 +273,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[560px] sm:max-w-[560px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
+      <SheetContent className="w-[600px] sm:max-w-[600px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
         <RecordDrawerHeader
           item={item}
           onStageChange={handleStageChange}
@@ -281,16 +281,16 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
         />
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-4 mt-2 w-auto grid grid-cols-4 shrink-0">
-            <TabsTrigger value="overview" className="text-xs px-1">{t('crm.overview')}</TabsTrigger>
-            <TabsTrigger value="context" className="text-xs px-1">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs px-1">{t('crm.timeline', 'Timeline')}</TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs px-1">{t('crm.tasks')}</TabsTrigger>
+          <TabsList className="mx-5 mt-3 mb-1 w-auto grid grid-cols-4 shrink-0 h-10">
+            <TabsTrigger value="overview" className="text-sm">{t('crm.overview')}</TabsTrigger>
+            <TabsTrigger value="context" className="text-sm">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-sm">{t('crm.timeline', 'Timeline')}</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-sm">{t('crm.tasks')}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab - Contact details + AI Recap + Next Action */}
           <TabsContent value="overview" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
-            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* AI Recap Card */}
               {aiRecapEnabled && (
                 <Collapsible open={recapExpanded} onOpenChange={setRecapExpanded}>
@@ -415,7 +415,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
           {/* Context Tab - Linked Workspace, Contract, Emails */}
           <TabsContent value="context" className="flex-1 min-h-0 data-[state=active]:flex data-[state=active]:flex-col overflow-hidden">
-            <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-2">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
               <LinkedContextPanel
                 linkedWorkspaceId={item.linked_workspace_id}
                 linkedStartupId={item.linked_startup_id}
@@ -501,7 +501,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="timeline">
+          <TabsContent value="timeline" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="timeline">
             {/* Quick Actions */}
             <QuickActions
               onAddActivity={(type) => setAddActivityDialog(type)}
@@ -545,7 +545,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           </TabsContent>
 
           {/* Tasks Tab */}
-          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-4 pt-2 space-y-4 overflow-y-auto" data-testid="task-list">
+          <TabsContent value="tasks" className="flex-1 flex flex-col min-h-0 p-5 space-y-5 overflow-y-auto" data-testid="task-list">
             <Card>
               <CardHeader className="py-2 px-3">
                 <div className="flex items-center gap-2">
