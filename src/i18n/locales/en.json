@@ -5813,7 +5813,11 @@
     "pitchDeck": "Presentation / Pitch Deck",
     "uploadPitch": "Upload presentation (PDF, PPTX, up to 10MB)",
     "fileTooLarge": "File too large (max. 10MB)",
-    "backToSite": "Back to site"
+    "backToSite": "Back to site",
+    "selectProgram": "Select Program",
+    "selectProgramDesc": "Choose the program you'd like to apply to",
+    "changeProgram": "change",
+    "generalIntake": "General application"
   },
   "quality": {
     "blockingWarning": "This {{entityType}} cannot be marked as ready until the score reaches 70+",
