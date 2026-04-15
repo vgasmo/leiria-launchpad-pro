@@ -158,10 +158,28 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
               {t('founder.accelerationProgress', { defaultValue: 'Progresso da Aceleração' })}
             </h3>
           </div>
-          <Badge variant="secondary" className="text-xs gap-1">
-            <CalendarDays className="h-3 w-3" />
-            {t('workspace.currentWeek', { week, defaultValue: 'Semana {{week}}' })}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {workspaceId && !hasMaterialized && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs gap-1.5 h-7"
+                onClick={() => materializeMutation.mutate()}
+                disabled={materializeMutation.isPending}
+              >
+                {materializeMutation.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3" />
+                )}
+                {t('founder.importDeliverables', { defaultValue: 'Importar Entregáveis' })}
+              </Button>
+            )}
+            <Badge variant="secondary" className="text-xs gap-1">
+              <CalendarDays className="h-3 w-3" />
+              {t('workspace.currentWeek', { week, defaultValue: 'Semana {{week}}' })}
+            </Badge>
+          </div>
         </div>
 
         {/* Overall progress */}
