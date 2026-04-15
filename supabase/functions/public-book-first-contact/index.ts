@@ -32,6 +32,7 @@ interface BookingRequest {
     stage?: string;
     referral_source?: string;
     has_team?: string;
+    pitch_deck_path?: string;
   };
 }
 
