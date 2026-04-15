@@ -280,7 +280,7 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
           isUpdating={updateFunnelItem.isPending}
         />
 
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <TabsList className="mx-5 mt-3 mb-1 w-auto grid grid-cols-4 shrink-0 h-10">
             <TabsTrigger value="overview" className="text-sm">{t('crm.overview')}</TabsTrigger>
             <TabsTrigger value="context" className="text-sm">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
