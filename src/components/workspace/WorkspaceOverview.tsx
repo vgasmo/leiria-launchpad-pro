@@ -50,6 +50,7 @@ import { MobileQuickActions } from '@/components/workspace/MobileQuickActions';
 import { QuickKpiModal } from '@/components/workspace/QuickKpiModal';
 import { AccelerationProgressCard } from '@/components/dashboard/AccelerationProgressCard';
 import { InvestorReadinessChecklist } from '@/components/workspace/InvestorReadinessChecklist';
+import { IncubationStatusCard } from '@/components/workspace/IncubationStatusCard';
 import { OwnershipCard } from '@/components/workspace/OwnershipCard';
 import { ResponsibleConsultantCard } from '@/components/workspace/ResponsibleConsultantCard';
 import { PlaybookProgressWidget } from '@/components/workspace/PlaybookProgressWidget';
@@ -169,8 +170,12 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         />
       )}
 
-      {/* Current Week Indicator removed — AccelerationProgressCard handles acceleration programs,
-          and incubation programs don't use current_week. */}
+      {/* Incubation Status Card for incubation programs */}
+      {workspace.program?.program_type === 'incubation' && (
+        <IncubationStatusCard
+          workspaceId={workspace.id}
+        />
+      )}
 
       {/* Enhanced Next Steps for Founders */}
       {isFounder && (
