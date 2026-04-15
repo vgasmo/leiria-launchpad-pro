@@ -94,14 +94,14 @@ export default function PublicBooking() {
 
   // Book mutation
   const bookMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (pitchDeckPath?: string | null) => {
       if (!token || !selectedSlot) throw new Error('Missing data');
       
       const { data, error } = await supabase.functions.invoke('public-book-first-contact', {
         body: {
           token,
           slot: selectedSlot,
-          contact: formData,
+          contact: { ...formData, pitch_deck_path: pitchDeckPath || undefined },
         },
       });
       
