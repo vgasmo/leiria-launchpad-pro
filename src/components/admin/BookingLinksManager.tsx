@@ -156,7 +156,7 @@ export function BookingLinksManager() {
   });
 
   const getProgramName = (programId: string | null) => {
-    if (!programId) return t('admin.anyProgram', 'Qualquer programa');
+    if (!programId) return t('admin.generalIncubation', 'Incubação Geral');
     return programs?.find(p => p.id === programId)?.name || t('common.unknown', 'Desconhecido');
   };
 
@@ -167,10 +167,10 @@ export function BookingLinksManager() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Link2 className="h-5 w-5" />
-              {t('admin.bookingLinks.title', 'Public Booking Links')}
+              {t('admin.bookingLinks.title', 'Links por Programa / Incubação Geral')}
             </CardTitle>
             <CardDescription>
-              {t('admin.bookingLinks.description', 'Generate shareable links for leads to book first contact meetings')}
+              {t('admin.bookingLinks.description', 'Gerar links de marcação por programa específico ou para incubação geral')}
             </CardDescription>
           </div>
           
@@ -178,22 +178,22 @@ export function BookingLinksManager() {
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
-                {t('admin.bookingLinks.generate', 'Generate Link')}
+                {t('admin.bookingLinks.generate', 'Gerar Link')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t('admin.bookingLinks.generateNew', 'Generate New Booking Link')}</DialogTitle>
+                <DialogTitle>{t('admin.bookingLinks.generateNew', 'Gerar Novo Link de Marcação')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label>{t('admin.bookingLinks.program', 'Program (optional)')}</Label>
+                  <Label>{t('admin.bookingLinks.program', 'Programa')}</Label>
                   <Select value={selectedProgram || '__any__'} onValueChange={(v) => setSelectedProgram(v === '__any__' ? '' : v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('admin.anyProgram', 'Qualquer programa')} />
+                      <SelectValue placeholder={t('admin.generalIncubation', 'Incubação Geral')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__any__">{t('admin.anyProgram', 'Qualquer programa')}</SelectItem>
+                      <SelectItem value="__any__">{t('admin.generalIncubation', 'Incubação Geral')}</SelectItem>
                       {programs?.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
@@ -202,7 +202,7 @@ export function BookingLinksManager() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>{t('admin.bookingLinks.expires', 'Expires in')}</Label>
+                  <Label>{t('admin.bookingLinks.expires', 'Expira em')}</Label>
                   <Select value={expiresInDays || '__never__'} onValueChange={(v) => setExpiresInDays(v === '__never__' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue />
