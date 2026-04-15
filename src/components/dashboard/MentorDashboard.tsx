@@ -339,7 +339,8 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-col items-end gap-1.5">
                         {workspace.nextMeetingDate ? (
                           <div className={hasUpcomingMeeting ? 'text-primary' : 'text-muted-foreground'}>
                             <div className="flex items-center gap-1.5 text-xs font-medium">
