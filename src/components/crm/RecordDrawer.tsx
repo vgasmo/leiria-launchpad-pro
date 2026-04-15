@@ -273,14 +273,14 @@ export function RecordDrawer({ item, open, onOpenChange }: RecordDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[500px] sm:max-w-[500px] p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
+      <SheetContent className="w-[500px] sm:max-w-[500px] h-full p-0 flex flex-col overflow-hidden" data-testid="record-drawer">
         <RecordDrawerHeader
           item={item}
           onStageChange={handleStageChange}
           isUpdating={updateFunnelItem.isPending}
         />
 
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
           <TabsList className="mx-4 mt-2 w-auto grid grid-cols-4 shrink-0">
             <TabsTrigger value="overview" className="text-xs px-1">{t('crm.overview')}</TabsTrigger>
             <TabsTrigger value="context" className="text-xs px-1">{t('crm.context', { defaultValue: 'Contexto' })}</TabsTrigger>
