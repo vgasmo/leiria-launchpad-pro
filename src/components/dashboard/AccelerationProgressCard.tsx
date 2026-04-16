@@ -144,7 +144,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                 transition={{ delay: idx * 0.1, duration: 0.3 }}
                 onClick={() => {
                   if (workspaceId) {
-                    navigate(`/workspace/${workspaceId}?tab=milestones`);
+                    navigate(`/workspace/${workspaceId}?tab=milestones-actions`);
                   }
                 }}
                 className={cn(
@@ -230,7 +230,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                           onClick={(e) => {
                             e.stopPropagation();
                             if (workspaceId) {
-                              navigate(`/workspace/${workspaceId}?tab=actions`);
+                              navigate(`/workspace/${workspaceId}?tab=milestones-actions-actions`);
                             }
                           }}
                           className={cn(

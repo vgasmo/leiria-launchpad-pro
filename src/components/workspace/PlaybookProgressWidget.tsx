@@ -115,7 +115,7 @@ export function PlaybookProgressWidget({ workspaceId }: PlaybookProgressWidgetPr
             variant="outline" 
             size="sm" 
             className="flex-1 text-xs"
-            onClick={() => setSearchParams({ tab: 'actions' })}
+            onClick={() => setSearchParams({ tab: 'milestones-actions' })}
           >
             {t('playbookProgress.viewActions')}
           </Button>
@@ -123,7 +123,7 @@ export function PlaybookProgressWidget({ workspaceId }: PlaybookProgressWidgetPr
             variant="ghost" 
             size="sm" 
             className="text-xs"
-            onClick={() => setSearchParams({ tab: 'milestones' })}
+            onClick={() => setSearchParams({ tab: 'milestones-actions' })}
           >
             {t('playbookProgress.viewMilestones')}
           </Button>

@@ -51,7 +51,7 @@ export const AppConfig = {
   
   // Build action link  
   actionLink(workspaceId: string, actionId: string): string {
-    return this.buildLink(`/workspace/${workspaceId}?tab=actions&action=${actionId}`);
+    return this.buildLink(`/workspace/${workspaceId}?tab=milestones-actions-actions&action=${actionId}`);
   },
   
   // Calendar feed URL (with secure token)

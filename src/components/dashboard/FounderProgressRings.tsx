@@ -39,9 +39,9 @@ export function FounderProgressRings({ workspaceId, className }: FounderProgress
     const milestonesPct = totalMilestones > 0 ? Math.round((onTrack / totalMilestones) * 100) : 0;
 
     return [
-      { label: t('founder.ring.actions', { defaultValue: 'Ações' }), pct: actionsPct, color: 'primary' as const, icon: CheckSquare, tab: 'actions' },
+      { label: t('founder.ring.actions', { defaultValue: 'Ações' }), pct: actionsPct, color: 'primary' as const, icon: CheckSquare, tab: 'milestones-actions' },
       { label: t('founder.ring.kpis', { defaultValue: 'KPIs' }), pct: kpiPct, color: 'success' as const, icon: BarChart3, tab: 'kpis' },
-      { label: t('founder.ring.milestones', { defaultValue: 'Marcos' }), pct: milestonesPct, color: 'warning' as const, icon: Flag, tab: 'milestones' },
+      { label: t('founder.ring.milestones', { defaultValue: 'Marcos' }), pct: milestonesPct, color: 'warning' as const, icon: Flag, tab: 'milestones-actions' },
     ];
   }, [actions, kpiData, milestones, t]);
 
