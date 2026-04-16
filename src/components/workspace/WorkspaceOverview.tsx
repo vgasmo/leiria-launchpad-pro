@@ -104,6 +104,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const addWorkspaceTag = useAddWorkspaceTag();
   const removeWorkspaceTag = useRemoveWorkspaceTag();
   
+  // Auto-materialize acceleration deliverables into workspace milestones/actions
+  useAutoMaterializeDeliverables(workspace.id, workspace.program_id, workspace.program?.program_type ?? undefined);
+
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
   const [activeSurveyId, setActiveSurveyId] = useState<string | null>(null);
