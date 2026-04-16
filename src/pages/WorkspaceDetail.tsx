@@ -35,6 +35,7 @@ import { WorkspaceEmailHistoryPanel } from '@/components/workspace/WorkspaceEmai
 import { PendingWorkspaceView } from '@/components/workspace/PendingWorkspaceView';
 import { WorkspaceOnboardingWizard } from '@/components/workspace/WorkspaceOnboardingWizard';
 import { useWorkspace } from '@/hooks/useWorkspaces';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,8 @@ export default function WorkspaceDetail() {
   const startup = workspace?.startup as { id: string; name: string; description: string | null; website: string | null; logo_url: string | null; founded_date: string | null; phone: string | null; address: string | null; nif: string | null; main_contact_name: string | null; main_contact_email: string | null; main_contact_phone: string | null; has_startup_portugal_status: boolean | null; startup_portugal_document_path: string | null } | null ?? null;
   const program = workspace ? (workspace.program as { name: string; program_type?: string } | null) : null;
 
+  useAutoMaterializeDeliverables(workspace?.id, workspace?.program_id, program?.program_type);
+
   // Compute visible tabs
   const { primaryTabs, overflowTabs } = useMemo(
     () => getVisibleTabs({ isAdmin, isConsultor, isMentor, isFounder, isBackoffice }, !!startup, workspace?.stage),
@@ -77,7 +80,7 @@ export default function WorkspaceDetail() {
 
   // URL-synced tab state
   const currentTab = searchParams.get('tab') || 'overview';
-  
+
   // Redirect legacy tabs
   useEffect(() => {
     if (currentTab === 'dataroom') {
