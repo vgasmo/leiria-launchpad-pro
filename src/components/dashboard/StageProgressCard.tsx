@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
-  Lightbulb, 
+  Lightbulb,
   Search, 
   Hammer, 
   TrendingUp, 
