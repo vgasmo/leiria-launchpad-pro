@@ -51,10 +51,12 @@ export function useAutoMaterializeDeliverables(
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
     },
     onError: (err: unknown) => {
+      // Allow retry on next mount
+      didAutoMaterialize.current = false;
       logger.warn('materialize_deliverables_failed', {
         workspaceId,
         programId,
-        error: err instanceof Error ? err.message : String(err),
+        error: err instanceof Error ? err.message : JSON.stringify(err),
       });
     },
   });
