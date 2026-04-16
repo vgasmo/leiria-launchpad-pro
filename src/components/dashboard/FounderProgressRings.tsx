@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckSquare, BarChart3, Flag } from 'lucide-react';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -11,6 +12,7 @@ interface FounderProgressRingsProps {
 }
 
 export function FounderProgressRings({ workspaceId, className }: FounderProgressRingsProps) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: actions } = useWorkspaceActions(workspaceId);
   const { data: kpiData } = useWorkspaceKpis(workspaceId);
@@ -37,9 +39,9 @@ export function FounderProgressRings({ workspaceId, className }: FounderProgress
     const milestonesPct = totalMilestones > 0 ? Math.round((onTrack / totalMilestones) * 100) : 0;
 
     return [
-      { label: t('founder.ring.actions', { defaultValue: 'Ações' }), pct: actionsPct, color: 'primary' as const, icon: CheckSquare },
-      { label: t('founder.ring.kpis', { defaultValue: 'KPIs' }), pct: kpiPct, color: 'success' as const, icon: BarChart3 },
-      { label: t('founder.ring.milestones', { defaultValue: 'Marcos' }), pct: milestonesPct, color: 'warning' as const, icon: Flag },
+      { label: t('founder.ring.actions', { defaultValue: 'Ações' }), pct: actionsPct, color: 'primary' as const, icon: CheckSquare, tab: 'actions' },
+      { label: t('founder.ring.kpis', { defaultValue: 'KPIs' }), pct: kpiPct, color: 'success' as const, icon: BarChart3, tab: 'kpis' },
+      { label: t('founder.ring.milestones', { defaultValue: 'Marcos' }), pct: milestonesPct, color: 'warning' as const, icon: Flag, tab: 'milestones' },
     ];
   }, [actions, kpiData, milestones, t]);
 
@@ -51,7 +53,11 @@ export function FounderProgressRings({ workspaceId, className }: FounderProgress
       {rings.map((ring) => {
         const Icon = ring.icon;
         return (
-          <div key={ring.label} className="flex flex-col items-center gap-1.5">
+          <div 
+            key={ring.label} 
+            className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => navigate(`/workspace/${workspaceId}?tab=${ring.tab}`)}
+          >
             <ProgressRing progress={ring.pct} size="lg" color={ring.color} />
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Icon className="h-3 w-3" />
