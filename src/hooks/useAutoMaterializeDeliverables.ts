@@ -40,7 +40,7 @@ export function useAutoMaterializeDeliverables(
         p_workspace_id: workspaceId,
         p_program_id: programId,
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message || JSON.stringify(error));
       return data as { milestones_created: number; actions_created: number };
     },
     onSuccess: (result) => {
@@ -51,10 +51,12 @@ export function useAutoMaterializeDeliverables(
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
     },
     onError: (err: unknown) => {
+      // Allow retry on next mount
+      didAutoMaterialize.current = false;
       logger.warn('materialize_deliverables_failed', {
         workspaceId,
         programId,
-        error: err instanceof Error ? err.message : String(err),
+        error: err instanceof Error ? err.message : JSON.stringify(err),
       });
     },
   });
