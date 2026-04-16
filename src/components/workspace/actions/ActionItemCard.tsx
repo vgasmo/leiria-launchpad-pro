@@ -197,8 +197,7 @@ export const ActionItemCard = memo(function ActionItemCard({
           <div className="pl-10 space-y-1 pt-1">
             {deliverables.map(d => (
               <div key={d.id} className="flex items-center gap-2 text-xs group/del">
-                {d.type === 'link' ? <Link2 className="h-3 w-3 text-muted-foreground shrink-0" /> 
-                  : d.type === 'platform_document' ? <Paperclip className="h-3 w-3 text-primary shrink-0" />
+                {d.type === 'platform_document' ? <Paperclip className="h-3 w-3 text-primary shrink-0" />
                   : <FileText className="h-3 w-3 text-muted-foreground shrink-0" />}
                 <span className={`flex-1 truncate ${d.completed_at ? 'line-through text-muted-foreground' : ''}`}>
                   {d.title}
@@ -227,7 +226,7 @@ export const ActionItemCard = memo(function ActionItemCard({
         )}
       </div>
 
-      {/* Add Deliverable Dialog */}
+      {/* Add Deliverable Dialog — platform documents only */}
       <Dialog open={addDeliverableOpen} onOpenChange={setAddDeliverableOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -235,47 +234,23 @@ export const ActionItemCard = memo(function ActionItemCard({
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('actions.deliverableType', 'Tipo')}</Label>
-              <Select value={newDeliverable.type} onValueChange={v => setNewDeliverable(d => ({ ...d, type: v, title: '', document_id: '', external_url: '' }))}>
-                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <Label className="text-xs">{t('actions.selectDocument', 'Documento')} *</Label>
+              <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable({ document_id: v })}>
+                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar documento...')} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="link"><span className="flex items-center gap-1.5"><Link2 className="h-3 w-3" /> Link</span></SelectItem>
-                  <SelectItem value="file"><span className="flex items-center gap-1.5"><FileText className="h-3 w-3" /> {t('actions.deliverableFile', 'Ficheiro')}</span></SelectItem>
-                  <SelectItem value="platform_document"><span className="flex items-center gap-1.5"><Paperclip className="h-3 w-3" /> {t('actions.deliverablePlatform', 'Doc. Plataforma')}</span></SelectItem>
+                  {platformDocuments.length === 0 ? (
+                    <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem documentos disponíveis')}</div>
+                  ) : (
+                    platformDocuments.map(doc => (
+                      <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
-
-            {newDeliverable.type === 'platform_document' ? (
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t('actions.selectDocument', 'Documento')} *</Label>
-                <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable(d => ({ ...d, document_id: v }))}>
-                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar documento...')} /></SelectTrigger>
-                  <SelectContent>
-                    {platformDocuments.length === 0 ? (
-                      <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem documentos disponíveis')}</div>
-                    ) : (
-                      platformDocuments.map(doc => (
-                        <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">{t('actions.deliverableTitle', 'Título')} *</Label>
-                  <Input value={newDeliverable.title} onChange={e => setNewDeliverable(d => ({ ...d, title: e.target.value }))} placeholder={t('actions.deliverableTitlePlaceholder', 'Ex: Business Model Canvas')} className="h-8 text-sm" />
-                </div>
-                {newDeliverable.type === 'link' && (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">URL</Label>
-                    <Input value={newDeliverable.external_url} onChange={e => setNewDeliverable(d => ({ ...d, external_url: e.target.value }))} placeholder="https://..." className="h-8 text-sm" />
-                  </div>
-                )}
-              </>
-            )}
+            <p className="text-xs text-muted-foreground">
+              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o template.')}
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => setAddDeliverableOpen(false)}>{t('common.cancel')}</Button>
