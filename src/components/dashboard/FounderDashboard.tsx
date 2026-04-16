@@ -260,7 +260,10 @@ export function FounderDashboard({
       <QuickGuideBanner />
 
       {/* Startup Card - Journey-first */}
-      <Card className="overflow-hidden border-border/60 rounded-2xl shadow-sm">
+      <Card 
+        className="overflow-hidden border-border/60 rounded-2xl shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => navigate(`/workspace/${workspace.id}`)}
+      >
         <div className="bg-muted/40 p-4 sm:p-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12 rounded-xl border border-border/50">
@@ -284,7 +287,7 @@ export function FounderDashboard({
             <Button 
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/workspace/${workspace.id}`)}
+              onClick={(e) => { e.stopPropagation(); navigate(`/workspace/${workspace.id}`); }}
               className="text-xs shrink-0"
             >
               {t('founder.openWorkspace')}
