@@ -223,12 +223,18 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                       const weekDone = week > gw.week_number;
                       const weekCurrent = week === gw.week_number;
                       return (
-                        <motion.div
+                        <motion.button
                           key={gw.id}
                           animate={weekCurrent ? { scale: [1, 1.08, 1] } : undefined}
                           transition={weekCurrent ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (workspaceId) {
+                              navigate(`/workspace/${workspaceId}?tab=actions`);
+                            }
+                          }}
                           className={cn(
-                            'text-[10px] px-2 py-0.5 rounded-full border transition-all',
+                            'text-[10px] px-2 py-0.5 rounded-full border transition-all cursor-pointer hover:ring-1 hover:ring-primary/30',
                             weekDone && 'bg-primary/15 border-primary/20 text-primary',
                             weekCurrent && 'bg-primary text-primary-foreground border-primary font-semibold shadow-sm',
                             !weekDone && !weekCurrent && 'bg-muted/50 border-border/40 text-muted-foreground/60',
@@ -237,7 +243,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                         >
                           S{gw.week_number}
                           {weekCurrent && <ChevronRight className="inline h-2.5 w-2.5 ml-0.5" />}
-                        </motion.div>
+                        </motion.button>
                       );
                     })}
                   </div>
