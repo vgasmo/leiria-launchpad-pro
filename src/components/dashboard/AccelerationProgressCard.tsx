@@ -1,6 +1,6 @@
-import { memo, useMemo, useEffect, useRef } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';
 
 interface AccelerationProgressCardProps {
   programId: string;
@@ -82,60 +81,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
   workspaceId,
 }: AccelerationProgressCardProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { gates, weeks, isLoading } = useAccelerationStructure(programId);
-
-  // Check if milestones already exist from this program
-  const { data: hasMaterialized } = useQuery({
-    queryKey: ['acceleration-materialized', workspaceId],
-    enabled: !!workspaceId,
-    staleTime: 60_000,
-    queryFn: async () => {
-      if (!workspaceId) return false;
-      const { count } = await supabase
-        .from('milestones')
-        .select('id', { count: 'exact', head: true })
-        .eq('workspace_id', workspaceId)
-        .not('source_gate_id', 'is', null);
-      return (count ?? 0) > 0;
-    },
-  });
-
-  const materializeMutation = useMutation({
-    mutationFn: async () => {
-      if (!workspaceId) throw new Error('No workspace');
-      const { data, error } = await supabase.rpc('materialize_acceleration_deliverables', {
-        p_workspace_id: workspaceId,
-        p_program_id: programId,
-      });
-      if (error) throw error;
-      return data as { milestones_created: number; actions_created: number };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
-    },
-    onError: (err) => {
-      logger.warn('materialize_deliverables_failed', { workspaceId, programId });
-    },
-  });
-
-  // Auto-materialize deliverables when not yet done
-  const didAutoMaterialize = useRef(false);
-  useEffect(() => {
-    if (
-      workspaceId &&
-      hasMaterialized === false &&
-      gates.length > 0 &&
-      !materializeMutation.isPending &&
-      !didAutoMaterialize.current
-    ) {
-      didAutoMaterialize.current = true;
-      materializeMutation.mutate();
-    }
-  }, [workspaceId, hasMaterialized, gates.length, materializeMutation]);
 
   const week = currentWeek ?? 1;
   const totalWeeks = weeks.length > 0 ? Math.max(...weeks.map(w => w.week_number)) : 12;

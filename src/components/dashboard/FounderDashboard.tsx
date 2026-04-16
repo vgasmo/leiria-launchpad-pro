@@ -41,6 +41,7 @@ import { TransitionalFounderDashboard } from '@/components/founder/TransitionalF
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { FounderProgressRings } from '@/components/dashboard/FounderProgressRings';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -78,6 +79,9 @@ export function FounderDashboard({
   const nudges = useSmartNudges(workspace?.id);
   
   const { data: workspaceMembers } = useWorkspaceMembers(workspace?.id);
+
+  // Auto-materialize acceleration deliverables into workspace milestones/actions
+  useAutoMaterializeDeliverables(workspace?.id, workspace?.program_id, workspace?.program?.program_type ?? undefined);
   const hasMentor = useMemo(() => {
     if (!workspaceMembers) return false;
     return workspaceMembers.some(m => m.role === 'mentor_externo');
