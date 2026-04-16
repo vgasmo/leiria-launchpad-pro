@@ -362,7 +362,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Next Actions */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'actions' })}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -398,7 +398,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         </Card>
 
         {/* KPIs Snapshot */}
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'kpis' })}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -446,7 +446,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         </Card>
 
         {/* Milestones Summary */}
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'milestones' })}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -557,7 +557,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       />
 
       {/* Recent Sessions - Full Width */}
-      <Card>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'agenda' })}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -616,7 +616,7 @@ function ActionItem({ action }: { action: any }) {
   const isDueToday = action.due_date && isToday(new Date(action.due_date));
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
       <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
         action.status === 'in_progress' ? 'bg-blue-500' : 
         isOverdue ? 'bg-destructive' : 
@@ -678,7 +678,7 @@ function KpiCard({ kpi, previousValue }: { kpi: any; previousValue?: number | nu
   };
 
   return (
-    <div className="p-3 rounded-lg bg-muted/50">
+    <div className="p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
       <p className="text-xs text-muted-foreground mb-1 truncate">{definition?.name || 'KPI'}</p>
       <div className="flex items-end justify-between gap-2">
         <p className="text-xl font-bold">
@@ -697,7 +697,7 @@ function KpiCard({ kpi, previousValue }: { kpi: any; previousValue?: number | nu
 
 function MilestoneCount({ label, count, color }: { label: string; count: number; color: string }) {
   return (
-    <div className={`p-3 rounded-lg text-center ${color}`}>
+    <div className={`p-3 rounded-lg text-center cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all ${color}`}>
       <p className="text-2xl font-bold">{count}</p>
       <p className="text-xs">{label}</p>
     </div>

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
-  Lightbulb, 
+  Lightbulb,
   Search, 
   Hammer, 
   TrendingUp, 
@@ -11,6 +11,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -58,7 +59,7 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
   const CurrentIcon = currentConfig.icon;
 
   return (
-    <Card className={className}>
+    <Card className={cn('cursor-pointer hover:shadow-md transition-shadow', className)} onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
