@@ -154,7 +154,7 @@ export function FounderDashboard({
 
   const health = workspace.health_score_override || workspace.health_score;
   const handleUpdateKpis = () => navigate(`/workspace/${workspace.id}?tab=kpis`);
-  const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=actions`);
+  const handleAddAction = () => navigate(`/workspace/${workspace.id}?tab=milestones-actions-actions`);
   const handleScheduleSession = () => navigate(`/workspace/${workspace.id}?tab=agenda`);
 
   return (

@@ -59,7 +59,7 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
   const CurrentIcon = currentConfig.icon;
 
   return (
-    <Card className={cn('cursor-pointer hover:shadow-md transition-shadow', className)} onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}>
+    <Card className={cn('cursor-pointer hover:shadow-md transition-shadow', className)} onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones-actions`)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -119,7 +119,7 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
           variant="ghost" 
           size="sm" 
           className="w-full justify-between text-xs text-muted-foreground hover:text-foreground h-8"
-          onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}
+          onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones-actions`)}
         >
           <span>{t('stageProgress.viewMilestones', 'View milestones')}</span>
           <ChevronRight className="h-3 w-3" />

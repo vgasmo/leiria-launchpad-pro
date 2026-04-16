@@ -7908,7 +7908,8 @@
       "monthsCount": "{{count}} meses",
       "nextReview": "Próxima Revisão",
       "pendingMilestones": "Marcos Pendentes"
-    }
+    },
+    "milestonesActions": "Marcos e Ações"
   },
   "workspaceCard": {
     "actions": "Ações",

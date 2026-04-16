@@ -423,7 +423,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               <Button 
                 variant="outline" 
                 className="gap-2"
-                onClick={() => setSearchParams({ tab: 'milestones' })}
+                onClick={() => setSearchParams({ tab: 'milestones-actions' })}
               >
                 <Target className="h-4 w-4" />
                 {t('playbooks.reviewMilestones')}
@@ -431,7 +431,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
               <Button 
                 variant="outline"
                 className="gap-2"
-                onClick={() => setSearchParams({ tab: 'actions' })}
+                onClick={() => setSearchParams({ tab: 'milestones-actions' })}
               >
                 <ListTodo className="h-4 w-4" />
                 {t('playbooks.continueActions')}
@@ -530,7 +530,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                             variant="outline"
                             size="sm"
                             className="gap-1.5 text-xs"
-                            onClick={() => setSearchParams({ tab: 'milestones' })}
+                            onClick={() => setSearchParams({ tab: 'milestones-actions' })}
                           >
                             <Target className="h-3.5 w-3.5" />
                             {t('playbooks.reviewMilestones')}
@@ -539,7 +539,7 @@ export function PlaybooksTab({ workspaceId, currentStage, programId, canWrite }:
                             variant="outline"
                             size="sm"
                             className="gap-1.5 text-xs"
-                            onClick={() => setSearchParams({ tab: 'actions' })}
+                            onClick={() => setSearchParams({ tab: 'milestones-actions' })}
                           >
                             <ListTodo className="h-3.5 w-3.5" />
                             {t('playbooks.continueActions')}

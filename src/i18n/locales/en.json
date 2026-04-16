@@ -7908,7 +7908,8 @@
       "monthsCount": "{{count}} months",
       "nextReview": "Next Review",
       "pendingMilestones": "Pending Milestones"
-    }
+    },
+    "milestonesActions": "Milestones & Actions"
   },
   "workspaceCard": {
     "actions": "Actions",

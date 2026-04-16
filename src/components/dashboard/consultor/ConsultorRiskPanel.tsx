@@ -118,7 +118,7 @@ export const ConsultorRiskPanel = memo(function ConsultorRiskPanel({ riskItems, 
                       className="text-xs h-7 hidden sm:inline-flex"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/workspace/${item.workspace.id}?tab=milestones`);
+                        navigate(`/workspace/${item.workspace.id}?tab=milestones-actions`);
                       }}
                     >
                       <Target className="h-3 w-3 mr-1" />

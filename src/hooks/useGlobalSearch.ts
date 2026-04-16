@@ -149,7 +149,7 @@ export function useGlobalSearch(filters: SearchFilters) {
             title: a.title,
             snippet: a.description?.slice(0, 150) || '',
             updated_at: a.updated_at,
-            url: `/workspace/${a.workspace_id}?tab=actions`,
+            url: `/workspace/${a.workspace_id}?tab=milestones-actions-actions`,
             workspace_name: (a.workspaces as any)?.startup?.name,
           }));
 
@@ -262,7 +262,7 @@ export function useGlobalSearch(filters: SearchFilters) {
             title: m.title,
             snippet: m.description?.slice(0, 150) || '',
             updated_at: m.updated_at,
-            url: `/workspace/${m.workspace_id}?tab=milestones`,
+            url: `/workspace/${m.workspace_id}?tab=milestones-actions`,
             workspace_name: (m.workspaces as any)?.startup?.name,
           }));
         })());

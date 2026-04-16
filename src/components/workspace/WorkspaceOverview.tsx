@@ -362,7 +362,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Next Actions */}
-        <Card className="lg:col-span-1 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'actions' })}>
+        <Card className="lg:col-span-1 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'milestones-actions' })}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -446,7 +446,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         </Card>
 
         {/* Milestones Summary */}
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'milestones' })}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'milestones-actions' })}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -464,7 +464,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
                 value={getMilestoneStageSuggestion(workspace.stage, t)}
                 action={{
                   label: t('workspace.addFirstMilestone'),
-                  onClick: () => setSearchParams({ tab: 'milestones' }),
+                  onClick: () => setSearchParams({ tab: 'milestones-actions' }),
                   icon: Plus,
                 }}
               />
@@ -592,7 +592,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         <MobileQuickActions
           workspaceId={workspace.id}
           programId={workspace.program_id}
-          onAddAction={() => setSearchParams({ tab: 'actions' })}
+          onAddAction={() => setSearchParams({ tab: 'milestones-actions' })}
           onRequestSession={() => setSearchParams({ tab: 'agenda' })}
           className="md:hidden"
         />

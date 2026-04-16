@@ -87,7 +87,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         description: t('nextBestAction.completeOrReschedule'),
         icon: <AlertTriangle className="h-5 w-5" />,
         variant: 'destructive',
-        action: () => setSearchParams({ tab: 'actions' }),
+        action: () => setSearchParams({ tab: 'milestones-actions' }),
         actionLabel: t('nextBestAction.viewActions'),
       });
     }
@@ -169,7 +169,7 @@ export function NextBestAction({ workspaceId, programId, stage, canWrite }: Next
         description: inProgressActions[0]?.title || t('nextBestAction.continueWork'),
         icon: <CheckCircle2 className="h-5 w-5" />,
         variant: 'default',
-        action: () => setSearchParams({ tab: 'actions' }),
+        action: () => setSearchParams({ tab: 'milestones-actions' }),
         actionLabel: t('nextBestAction.continue'),
       });
     }

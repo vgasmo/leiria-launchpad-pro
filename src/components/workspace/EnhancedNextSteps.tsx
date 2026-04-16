@@ -76,7 +76,7 @@ export function EnhancedNextSteps({ workspaceId, programId, stage, canWrite }: E
           icon: <AlertTriangle className="h-5 w-5" />,
           variant: 'destructive',
           actionLabel: t('nextSteps.complete'),
-          onAction: () => setSearchParams({ tab: 'actions' }),
+          onAction: () => setSearchParams({ tab: 'milestones-actions' }),
         });
       });
     }
@@ -171,7 +171,7 @@ export function EnhancedNextSteps({ workspaceId, programId, stage, canWrite }: E
         icon: <CheckCircle2 className="h-5 w-5" />,
         variant: 'default',
         actionLabel: t('nextSteps.continue'),
-        onAction: () => setSearchParams({ tab: 'actions' }),
+        onAction: () => setSearchParams({ tab: 'milestones-actions' }),
       });
     }
 
