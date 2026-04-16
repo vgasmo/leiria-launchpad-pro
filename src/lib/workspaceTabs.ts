@@ -25,12 +25,10 @@ export interface WorkspaceTab {
  */
 export const WORKSPACE_TABS: WorkspaceTab[] = [
   // ── Primary tabs (visible in tab bar) ──
-  // Order: Overview → Milestones → Actions → KPIs → Sessions
-  // Milestones first execution tab (per role-emphasis strategy)
-  { id: 'overview',   labelKey: 'workspace.overview',   icon: LayoutDashboard, primary: true,  visibleTo: ['all'] },
-  { id: 'milestones', labelKey: 'workspace.milestones',  icon: Flag,            primary: true,  visibleTo: ['all'] },
-  { id: 'actions',    labelKey: 'workspace.actions',     icon: CheckSquare,     primary: true,  visibleTo: ['all'] },
-  { id: 'kpis',       labelKey: 'workspace.kpis',        icon: BarChart3,       primary: true,  visibleTo: ['all'] },
+  // Order: Overview → Marcos e Ações → KPIs → Sessions
+  { id: 'overview',            labelKey: 'workspace.overview',           icon: LayoutDashboard, primary: true,  visibleTo: ['all'] },
+  { id: 'milestones-actions',  labelKey: 'workspace.milestonesActions',  icon: Flag,            primary: true,  visibleTo: ['all'] },
+  { id: 'kpis',                labelKey: 'workspace.kpis',              icon: BarChart3,       primary: true,  visibleTo: ['all'] },
   { id: 'agenda',     labelKey: 'workspace.agenda',      icon: Calendar,        primary: true,  visibleTo: ['all'] },
 
   // ── Overflow tabs (inside "More" dropdown) ──

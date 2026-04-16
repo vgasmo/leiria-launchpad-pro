@@ -15,8 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { WorkspaceOverview } from '@/components/workspace/WorkspaceOverview';
 import { AgendaTab } from '@/components/workspace/AgendaTab';
-import { ActionItemsTab } from '@/components/workspace/ActionItemsTab';
-import { MilestonesTab } from '@/components/workspace/MilestonesTab';
+import { MilestonesActionsTab } from '@/components/workspace/MilestonesActionsTab';
 import { KpisTab } from '@/components/workspace/KpisTab';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 // TemplatesTab now rendered inside DocumentsTab as sub-tab
@@ -314,10 +313,10 @@ export default function WorkspaceDetail() {
               />
             </div>
           )}
-          {activeTab === 'actions' && (
-            <div role="tabpanel" id="tabpanel-actions" aria-labelledby="tab-actions">
-              <WidgetErrorBoundary name="Actions">
-                <ActionItemsTab workspaceId={workspace.id} canWrite={canWrite} />
+          {(activeTab === 'milestones-actions' || activeTab === 'milestones' || activeTab === 'actions') && (
+            <div role="tabpanel" id="tabpanel-milestones-actions" aria-labelledby="tab-milestones-actions">
+              <WidgetErrorBoundary name="MilestonesActions">
+                <MilestonesActionsTab workspaceId={workspace.id} canWrite={canWrite} />
               </WidgetErrorBoundary>
             </div>
           )}
@@ -337,13 +336,6 @@ export default function WorkspaceDetail() {
             <div role="tabpanel" id="tabpanel-kpis" aria-labelledby="tab-kpis">
               <WidgetErrorBoundary name="KPIs">
                 <KpisTab workspaceId={workspace.id} canWrite={canWrite} />
-              </WidgetErrorBoundary>
-            </div>
-          )}
-          {activeTab === 'milestones' && (
-            <div role="tabpanel" id="tabpanel-milestones" aria-labelledby="tab-milestones">
-              <WidgetErrorBoundary name="Milestones">
-                <MilestonesTab workspaceId={workspace.id} canWrite={canWrite} />
               </WidgetErrorBoundary>
             </div>
           )}
