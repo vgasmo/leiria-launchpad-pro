@@ -231,7 +231,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
               {t('milestones.addMilestone')}
             </Button>
             {milestones && milestones.length > 0 && (
-              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setNewAction(prev => ({ ...prev, owner_user_id: founderId || '' })); setCreateActionDialogOpen(true); }}>
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setCreateActionDialogOpen(true)}>
                 <Plus className="h-3.5 w-3.5 mr-1" />
                 {t('actions.addAction')}
               </Button>
@@ -239,21 +239,6 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
             <div className="h-5 w-px bg-border/60" />
           </>
         )}
-
-        <Select value={filters.owner} onValueChange={v => setFilters(f => ({ ...f, owner: v }))}>
-          <SelectTrigger className="w-[130px] h-7 text-xs border-border/50">
-            <User className="h-3 w-3 mr-1 text-muted-foreground" />
-            <SelectValue placeholder={t('actions.owner')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t('actions.allOwners')}</SelectItem>
-            {members?.map(m => (
-              <SelectItem key={m.user_id} value={m.user_id}>
-                {m.profile?.full_name || m.profile?.email || t('common.unknown')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <Select value={filters.priority} onValueChange={v => setFilters(f => ({ ...f, priority: v }))}>
           <SelectTrigger className="w-[110px] h-7 text-xs border-border/50">
@@ -273,9 +258,9 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
           {t('actions.overdue')}
         </Button>
 
-        {(filters.owner !== 'all' || filters.priority !== 'all' || filters.overdue) && (
+        {(filters.priority !== 'all' || filters.overdue) && (
           <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground px-2"
-            onClick={() => setFilters({ owner: 'all', overdue: false, priority: 'all' })}>
+            onClick={() => setFilters({ overdue: false, priority: 'all' })}>
             ✕ {t('actions.clearFilters')}
           </Button>
         )}
@@ -409,9 +394,9 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
                         </div>
                       ) : (
                         milestoneActions.map(item => (
-                          <ActionItemCard key={item.id} item={item} canWrite={canWrite} members={members || []}
+                          <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
                             onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
-                            onOwnerChange={handleOwnerChange} onDelete={(item) => setDeleteActionTarget(item)}
+                            onDelete={(item) => setDeleteActionTarget(item)}
                             isSelected={isSelected(item.id)} onToggleSelect={toggleItem}
                           />
                         ))
@@ -435,9 +420,9 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-2">
             {actionsByMilestone.unassigned.map(item => (
-              <ActionItemCard key={item.id} item={item} canWrite={canWrite} members={members || []}
+              <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
                 onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
-                onOwnerChange={handleOwnerChange} onDelete={(item) => setDeleteActionTarget(item)}
+                onDelete={(item) => setDeleteActionTarget(item)}
                 isSelected={isSelected(item.id)} onToggleSelect={toggleItem}
               />
             ))}
@@ -513,16 +498,6 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
                 </Select>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="act-owner">{t('actions.owner')}</Label>
-              <Select value={newAction.owner_user_id} onValueChange={v => setNewAction(a => ({ ...a, owner_user_id: v }))}>
-                <SelectTrigger id="act-owner"><SelectValue placeholder={t('actions.assignTo')} /></SelectTrigger>
-                <SelectContent>
-                  {members?.map(m => <SelectItem key={m.user_id} value={m.user_id}>{m.profile?.full_name || m.profile?.email || t('common.unknown')}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateActionDialogOpen(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleCreateAction} disabled={createAction.isPending || !newAction.milestone_id}>{t('common.create')}</Button>
