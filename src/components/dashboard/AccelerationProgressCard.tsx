@@ -82,6 +82,7 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
   workspaceId,
 }: AccelerationProgressCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { gates, weeks, isLoading } = useAccelerationStructure(programId);
 
   const week = currentWeek ?? 1;
