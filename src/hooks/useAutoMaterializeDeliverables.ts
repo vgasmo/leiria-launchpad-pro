@@ -40,7 +40,7 @@ export function useAutoMaterializeDeliverables(
         p_workspace_id: workspaceId,
         p_program_id: programId,
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message || JSON.stringify(error));
       return data as { milestones_created: number; actions_created: number };
     },
     onSuccess: (result) => {
