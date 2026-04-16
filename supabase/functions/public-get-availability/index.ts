@@ -203,17 +203,21 @@ serve(async (req) => {
         .eq("active", true)
         .order("scope", { ascending: true });
 
-      // Build routing options with program names
-      if (allRoutings && allRoutings.length > 0) {
-        for (const r of allRoutings) {
-          if (r.scope === 'global') {
-            routingOptions.push({ program_id: null, program_name: 'Geral', scope: 'global' });
-          } else if (r.program_id) {
-            const { data: prog } = await supabase.from("programs").select("id, name").eq("id", r.program_id).maybeSingle();
-            if (prog) {
-              routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
-            }
-          }
+      // Fetch all active programs
+      const { data: allPrograms } = await supabase
+        .from("programs")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+
+      // Build routing options: global + all active programs
+      const hasGlobalRoute = allRoutings?.some(r => r.scope === 'global');
+      if (hasGlobalRoute) {
+        routingOptions.push({ program_id: null, program_name: 'Geral', scope: 'global' });
+      }
+      if (allPrograms) {
+        for (const prog of allPrograms) {
+          routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
         }
       }
 
@@ -223,8 +227,10 @@ serve(async (req) => {
         // User selected global or default
         chosenRouting = allRoutings?.find(r => r.scope === 'global') || allRoutings?.[0] || null;
       } else if (typeof selectedProgramId === 'string') {
-        // User selected a specific program
-        chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId) || null;
+        // User selected a specific program — try program-specific, fallback to global
+        chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId)
+          || allRoutings?.find(r => r.scope === 'global')
+          || null;
         if (chosenRouting?.program_id) {
           const { data: prog } = await supabase.from("programs").select("id, name").eq("id", chosenRouting.program_id).maybeSingle();
           programId = prog?.id || null;
@@ -308,24 +314,35 @@ serve(async (req) => {
           .eq("active", true)
           .order("scope", { ascending: true });
 
-        if (allRoutings && allRoutings.length > 0) {
-          for (const r of allRoutings) {
-            if (r.scope === 'global') {
-              routingOptions.push({ program_id: null, program_name: 'Incubação Geral', scope: 'global' });
-            } else if (r.program_id) {
-              const { data: prog } = await supabase.from("programs").select("id, name").eq("id", r.program_id).maybeSingle();
-              if (prog) {
-                routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
-              }
-            }
+        // Fetch all active programs to show all options
+        const { data: allPrograms } = await supabase
+          .from("programs")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("name");
+
+        // Build routing options: global + all active programs
+        const hasGlobalRoute = allRoutings?.some(r => r.scope === 'global');
+        if (hasGlobalRoute) {
+          routingOptions.push({ program_id: null, program_name: 'Incubação Geral', scope: 'global' });
+        }
+        
+        if (allPrograms) {
+          for (const prog of allPrograms) {
+            routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
           }
         }
 
-        // Resolve consultant from selected routing
+        // Resolve consultant from selected routing (with fallback to global)
         if (routingOptions.length > 0 && typeof selectedProgramId === 'string' && selectedProgramId !== '') {
-          const chosenRouting = selectedProgramId === 'global'
+          let chosenRouting = selectedProgramId === 'global'
             ? allRoutings?.find(r => r.scope === 'global')
             : allRoutings?.find(r => r.program_id === selectedProgramId);
+          
+          // Fallback to global if no program-specific routing exists
+          if (!chosenRouting && selectedProgramId !== 'global') {
+            chosenRouting = allRoutings?.find(r => r.scope === 'global') || null;
+          }
           
           if (chosenRouting) {
             const consultant = await resolveConsultantFromRouting(supabase, chosenRouting);
