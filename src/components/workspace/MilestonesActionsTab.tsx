@@ -26,8 +26,9 @@ import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilesto
 // owner/members removed - founder is always the owner
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
+import { useTemplateInstances } from '@/hooks/useTemplates';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
-import { ActionItemCard } from './actions/ActionItemCard';
+import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
 import { toast } from 'sonner';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
 import { toTitleCase } from '@/lib/textUtils';
@@ -59,6 +60,14 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
   const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
   const createDeliverable = useCreateActionDeliverable(workspaceId);
   const completeDeliverable = useCompleteActionDeliverable(workspaceId);
+  const { data: templateInstances } = useTemplateInstances(workspaceId);
+  const platformDocuments = useMemo<PlatformDocument[]>(() => {
+    return (templateInstances || []).map(ti => ({
+      id: ti.id,
+      name: ti.template?.name || ti.template_id,
+      type: 'template_instance' as const,
+    }));
+  }, [templateInstances]);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
   const deleteMilestone = useDeleteMilestone(workspaceId);
@@ -173,9 +182,9 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
   }, [canWrite, updateAction, t]);
 
 
-  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => {
+  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string; document_id?: string }) => {
     try {
-      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null });
+      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null, document_id: deliverable.document_id || null });
       toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
     } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
   }, [createDeliverable, t]);
