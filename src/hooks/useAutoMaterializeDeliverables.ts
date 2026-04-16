@@ -53,10 +53,12 @@ export function useAutoMaterializeDeliverables(
     onError: (err: unknown) => {
       // Allow retry on next mount
       didAutoMaterialize.current = false;
+      const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error('[materialize_deliverables] Failed:', errorMsg);
       logger.warn('materialize_deliverables_failed', {
         workspaceId,
         programId,
-        error: err instanceof Error ? err.message : JSON.stringify(err),
+        error: errorMsg,
       });
     },
   });
