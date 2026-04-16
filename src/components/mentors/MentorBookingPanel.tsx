@@ -304,7 +304,7 @@ export function MentorBookingPanel({
                   <div className="flex-1 min-w-0">
                     <p className="font-medium">{booking.founder?.full_name || booking.founder?.email}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(booking.requested_date), 'EEEE, MMMM d')} at{' '}
+                      {format(new Date(booking.requested_date), 'EEEE, MMMM d')} {t('common.atTime', 'às')}{' '}
                       {booking.requested_start_time.slice(0, 5)}
                     </p>
                     {booking.message && (
@@ -357,7 +357,7 @@ export function MentorBookingPanel({
                   <div className="flex-1">
                     <p className="text-sm font-medium">{booking.founder?.full_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(booking.requested_date), 'MMM d')} at {booking.requested_start_time.slice(0, 5)}
+                      {format(new Date(booking.requested_date), 'MMM d')} {t('common.atTime', 'às')} {booking.requested_start_time.slice(0, 5)}
                     </p>
                   </div>
                   <Badge variant="outline" className="text-primary">{t('mentors.confirmed')}</Badge>
