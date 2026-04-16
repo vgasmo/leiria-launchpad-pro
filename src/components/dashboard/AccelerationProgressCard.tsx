@@ -117,8 +117,8 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
       queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
     },
-    onError: (err) => {
-      logger.warn('materialize_deliverables_failed', { workspaceId, programId });
+    onError: (err: unknown) => {
+      logger.warn('materialize_deliverables_failed', { workspaceId, programId, error: err instanceof Error ? err.message : String(err) });
     },
   });
 
