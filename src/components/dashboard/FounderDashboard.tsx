@@ -41,6 +41,7 @@ import { TransitionalFounderDashboard } from '@/components/founder/TransitionalF
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { FounderProgressRings } from '@/components/dashboard/FounderProgressRings';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
