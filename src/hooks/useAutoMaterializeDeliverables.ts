@@ -71,6 +71,7 @@ export function useAutoMaterializeDeliverables(
       !materializeMutation.isPending &&
       !didAutoMaterialize.current
     ) {
+      console.log('[materialize_deliverables] Triggering auto-materialize', { workspaceId, programId });
       didAutoMaterialize.current = true;
       materializeMutation.mutate();
     }
