@@ -3,11 +3,16 @@
  * Fetches recent emails from a consultant's Outlook mailbox via MS Graph,
  * matches them to CRM contacts/startups, and logs relevant ones to communication_log.
  *
+ * Delta sync: uses last_success_at to only fetch emails received since the last
+ * successful sync (with 1h overlap for safety). First sync fetches last 365 days.
+ * Pagination: follows @odata.nextLink to process up to 1000 emails per run.
+ *
  * Matching strategy:
  *   1. Exact contact email match in funnel_items
- *   2. Domain match against startup websites/contact emails
- *   3. Founder workspace email match
- *   4. Unmatched → needs_review = true
+ *   2. Startup main_contact_email match
+ *   3. Domain match against startup websites/contact emails
+ *   4. Founder workspace email match (profile → workspace_users)
+ *   5. Unmatched → needs_review = true
  *
  * Deduplication: uses external_id (Graph message ID) + external_source = 'outlook_email'
  */
@@ -137,9 +142,17 @@ async function matchEmailToCrm(
   consultantEmail: string,
   log: ReturnType<typeof createLogger>
 ): Promise<MatchResult> {
-  // Filter out the consultant's own email
+  // Filter out the consultant's own email and other @startupleiria.com staff
+  const consultantDomain = consultantEmail.split('@')[1]?.toLowerCase();
   const externalEmails = participantEmails
-    .filter(e => e.toLowerCase() !== consultantEmail.toLowerCase())
+    .filter(e => {
+      const lower = e.toLowerCase();
+      // Exclude consultant's own email
+      if (lower === consultantEmail.toLowerCase()) return false;
+      // Exclude other staff from the same org domain (they are not leads/founders)
+      if (consultantDomain && lower.endsWith(`@${consultantDomain}`)) return false;
+      return true;
+    })
     .map(e => e.toLowerCase());
 
   if (externalEmails.length === 0) {
@@ -285,7 +298,9 @@ async function matchEmailToCrm(
 
 /**
  * Sync emails for a single consultant.
- * Extracted to be reusable from both manual and auto_sync modes.
+ * Uses delta sync: only fetches emails received since the last successful sync.
+ * First sync fetches the last 365 days.
+ * Paginates through @odata.nextLink up to MAX_PAGES (1000 emails max).
  */
 async function syncConsultantEmails(
   supabaseAdmin: SupabaseClient,
@@ -295,6 +310,14 @@ async function syncConsultantEmails(
   log: ReturnType<typeof createLogger>
 ): Promise<{ processed: number; logged: number; unmatched: number; ignored: number; duplicates: number; error?: string }> {
   try {
+    // Get last successful sync time for delta filtering
+    const { data: syncStatus } = await supabaseAdmin
+      .from('email_sync_status')
+      .select('last_success_at')
+      .eq('consultant_user_id', consultantUserId)
+      .eq('provider', 'outlook')
+      .maybeSingle();
+
     // Update sync state
     await supabaseAdmin.from('email_sync_status').upsert({
       consultant_user_id: consultantUserId,
@@ -308,134 +331,159 @@ async function syncConsultantEmails(
     // Get access token
     const accessToken = await getGraphAccessToken(credentials, log);
 
-    // Fetch recent emails (last 365 days, max 100)
-    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
-    const graphUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(consultantEmail)}/messages?$top=100&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${oneYearAgo}&$select=id,internetMessageId,conversationId,subject,bodyPreview,sentDateTime,receivedDateTime,from,toRecipients,ccRecipients,categories,importance`;
-
-    const graphRes = await fetch(graphUrl, {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-    });
-
-    if (!graphRes.ok) {
-      const errText = await graphRes.text();
-      log.error('Graph API messages fetch failed', new Error(errText));
-
-      await supabaseAdmin.from('email_sync_status').upsert({
-        consultant_user_id: consultantUserId,
-        provider: 'outlook',
-        sync_state: 'error',
-        last_sync_error: `Graph API ${graphRes.status}: ${errText.slice(0, 200)}`,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'consultant_user_id,provider' });
-
-      return { processed: 0, logged: 0, unmatched: 0, ignored: 0, duplicates: 0, error: `Graph API ${graphRes.status}` };
+    // Delta sync: if we have a previous success, only fetch emails since then (minus 1h overlap)
+    // First sync: fetch last 365 days
+    let filterDate: string;
+    if (syncStatus?.last_success_at) {
+      const lastSync = new Date(syncStatus.last_success_at);
+      lastSync.setHours(lastSync.getHours() - 1); // 1h overlap for safety
+      filterDate = lastSync.toISOString();
+      log.info(`Delta sync since ${filterDate} for ${consultantEmail}`);
+    } else {
+      filterDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+      log.info(`Initial full sync for ${consultantEmail}`);
     }
 
-    const graphData = await graphRes.json();
-    const messages: GraphMessage[] = graphData.value || [];
-    log.info(`Fetched ${messages.length} messages for ${consultantEmail}`);
-
     let processed = 0, logged = 0, unmatched = 0, ignored = 0, duplicates = 0;
+    const MAX_PAGES = 10; // Safety limit: max ~1000 emails per sync run
+    let pageCount = 0;
 
-    for (const msg of messages) {
-      processed++;
-      const fromEmail = msg.from?.emailAddress?.address || '';
-      const subject = msg.subject || '';
+    let graphUrl: string | null = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(consultantEmail)}/messages?$top=100&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${filterDate}&$select=id,internetMessageId,conversationId,subject,bodyPreview,sentDateTime,receivedDateTime,from,toRecipients,ccRecipients,categories,importance`;
 
-      // Skip noise
-      if (isNoisyEmail(fromEmail, subject)) {
-        ignored++;
-        continue;
+    while (graphUrl && pageCount < MAX_PAGES) {
+      pageCount++;
+      const graphRes = await fetch(graphUrl, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+      });
+
+      if (!graphRes.ok) {
+        const errText = await graphRes.text();
+        log.error('Graph API messages fetch failed', new Error(errText));
+
+        await supabaseAdmin.from('email_sync_status').upsert({
+          consultant_user_id: consultantUserId,
+          provider: 'outlook',
+          sync_state: 'error',
+          last_sync_error: `Graph API ${graphRes.status}: ${errText.slice(0, 200)}`,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'consultant_user_id,provider' });
+
+        return { processed, logged, unmatched, ignored, duplicates, error: `Graph API ${graphRes.status}` };
       }
 
-      // Skip internal-only emails (consultant to consultant at same domain)
-      const consultantDomain = consultantEmail.split('@')[1]?.toLowerCase();
-      const allRecipients = [
-        ...(msg.toRecipients || []).map(r => r.emailAddress?.address || ''),
-        ...(msg.ccRecipients || []).map(r => r.emailAddress?.address || ''),
-      ];
-      const allParticipants = [fromEmail, ...allRecipients].filter(Boolean);
-      const externalParticipants = allParticipants.filter(
-        e => e.toLowerCase().split('@')[1] !== consultantDomain
-      );
+      const graphData = await graphRes.json();
+      const messages: GraphMessage[] = graphData.value || [];
+      log.info(`Fetched ${messages.length} messages for ${consultantEmail} (page ${pageCount})`);
 
-      // If no external participants, skip (internal only)
-      if (externalParticipants.length === 0 && consultantDomain) {
-        ignored++;
-        continue;
-      }
+      if (messages.length === 0) break;
 
-      // Check for duplicate
-      const { data: existing } = await supabaseAdmin
-        .from('communication_log')
-        .select('id')
-        .eq('external_id', msg.id)
-        .eq('external_source', 'outlook_email')
-        .limit(1)
-        .maybeSingle();
+      for (const msg of messages) {
+        processed++;
+        const fromEmail = msg.from?.emailAddress?.address || '';
+        const subject = msg.subject || '';
 
-      if (existing) {
-        duplicates++;
-        continue;
-      }
-
-      // Match to CRM
-      const match = await matchEmailToCrm(supabaseAdmin, allParticipants, consultantEmail, log);
-
-      const isSent = fromEmail.toLowerCase() === consultantEmail.toLowerCase();
-      const direction = isSent ? 'outbound' : 'inbound';
-      const needsReview = match.confidence === 'none' || match.confidence === 'low';
-
-      const insertData = {
-        workspace_id: match.workspaceId || null,
-        funnel_item_id: match.funnelItemId || null,
-        activity_type: 'email',
-        channel: 'outlook',
-        direction,
-        from_address: fromEmail,
-        subject: subject.slice(0, 500),
-        preview: (msg.bodyPreview || '').slice(0, 300),
-        occurred_at: msg.receivedDateTime || msg.sentDateTime || new Date().toISOString(),
-        visibility: 'staff',
-        external_source: 'outlook_email',
-        external_id: msg.id,
-        status: 'done',
-        provider_thread_id: msg.conversationId || null,
-        internet_message_id: msg.internetMessageId || null,
-        matched_contact_email: match.contactEmail,
-        matched_startup_id: match.startupId,
-        matching_confidence: match.confidence,
-        matching_method: match.method,
-        needs_review: needsReview,
-        ignored: false,
-        sync_status: 'synced',
-        last_synced_at: new Date().toISOString(),
-        consultant_user_id: consultantUserId,
-        participants_json: {
-          from: msg.from?.emailAddress || null,
-          to: (msg.toRecipients || []).map(r => r.emailAddress),
-          cc: (msg.ccRecipients || []).map(r => r.emailAddress),
-        },
-      };
-
-      const { error: insertError } = await supabaseAdmin
-        .from('communication_log')
-        .insert(insertData as Record<string, unknown>);
-
-      if (insertError) {
-        if (insertError.code === '23505') {
-          duplicates++;
-        } else {
-          log.warn('Insert failed', { error: insertError.message, msgId: msg.id });
+        // Skip noise
+        if (isNoisyEmail(fromEmail, subject)) {
+          ignored++;
+          continue;
         }
-        continue;
+
+        // Skip internal-only emails (all participants in same org domain)
+        const orgDomain = consultantEmail.split('@')[1]?.toLowerCase();
+        const allRecipients = [
+          ...(msg.toRecipients || []).map(r => r.emailAddress?.address || ''),
+          ...(msg.ccRecipients || []).map(r => r.emailAddress?.address || ''),
+        ];
+        const allParticipants = [fromEmail, ...allRecipients].filter(Boolean);
+        const externalParticipants = allParticipants.filter(
+          e => e.toLowerCase().split('@')[1] !== orgDomain
+        );
+
+        // If no external participants, skip (internal only)
+        if (externalParticipants.length === 0 && orgDomain) {
+          ignored++;
+          continue;
+        }
+
+        // Check for duplicate
+        const { data: existing } = await supabaseAdmin
+          .from('communication_log')
+          .select('id')
+          .eq('external_id', msg.id)
+          .eq('external_source', 'outlook_email')
+          .limit(1)
+          .maybeSingle();
+
+        if (existing) {
+          duplicates++;
+          continue;
+        }
+
+        // Match to CRM
+        const match = await matchEmailToCrm(supabaseAdmin, allParticipants, consultantEmail, log);
+
+        const isSent = fromEmail.toLowerCase() === consultantEmail.toLowerCase();
+        const direction = isSent ? 'outbound' : 'inbound';
+        const needsReview = match.confidence === 'none' || match.confidence === 'low';
+
+        const insertData = {
+          workspace_id: match.workspaceId || null,
+          funnel_item_id: match.funnelItemId || null,
+          activity_type: 'email',
+          channel: 'outlook',
+          direction,
+          from_address: fromEmail,
+          subject: subject.slice(0, 500),
+          preview: (msg.bodyPreview || '').slice(0, 300),
+          occurred_at: msg.receivedDateTime || msg.sentDateTime || new Date().toISOString(),
+          visibility: 'staff',
+          external_source: 'outlook_email',
+          external_id: msg.id,
+          status: 'done',
+          provider_thread_id: msg.conversationId || null,
+          internet_message_id: msg.internetMessageId || null,
+          matched_contact_email: match.contactEmail,
+          matched_startup_id: match.startupId,
+          matching_confidence: match.confidence,
+          matching_method: match.method,
+          needs_review: needsReview,
+          ignored: false,
+          sync_status: 'synced',
+          last_synced_at: new Date().toISOString(),
+          consultant_user_id: consultantUserId,
+          participants_json: {
+            from: msg.from?.emailAddress || null,
+            to: (msg.toRecipients || []).map(r => r.emailAddress),
+            cc: (msg.ccRecipients || []).map(r => r.emailAddress),
+          },
+        };
+
+        const { error: insertError } = await supabaseAdmin
+          .from('communication_log')
+          .insert(insertData as Record<string, unknown>);
+
+        if (insertError) {
+          if (insertError.code === '23505') {
+            duplicates++;
+          } else {
+            log.warn('Insert failed', { error: insertError.message, msgId: msg.id });
+          }
+          continue;
+        }
+
+        if (needsReview) {
+          unmatched++;
+        } else {
+          logged++;
+        }
       }
 
-      if (needsReview) {
-        unmatched++;
-      } else {
-        logged++;
-      }
+      // Follow pagination link for next page
+      graphUrl = graphData['@odata.nextLink'] || null;
+    }
+
+    if (pageCount >= MAX_PAGES) {
+      log.warn(`Hit max pages (${MAX_PAGES}) for ${consultantEmail}, some older emails may be pending`);
     }
 
     // Update sync status
