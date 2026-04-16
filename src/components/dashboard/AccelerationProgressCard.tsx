@@ -1,6 +1,6 @@
-import { memo, useMemo, useEffect, useRef } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/lib/logger';
 
 interface AccelerationProgressCardProps {
   programId: string;
