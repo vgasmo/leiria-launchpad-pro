@@ -321,7 +321,7 @@ export default function WorkspaceDetail() {
           {(activeTab === 'milestones-actions' || activeTab === 'milestones' || activeTab === 'actions') && (
             <div role="tabpanel" id="tabpanel-milestones-actions" aria-labelledby="tab-milestones-actions">
               <WidgetErrorBoundary name="MilestonesActions">
-                <MilestonesActionsTab workspaceId={workspace.id} canWrite={canWrite} isStaff={isStaff} />
+                <MilestonesActionsTab workspaceId={workspace.id} canWrite={canWrite} isStaff={isStaff} programId={workspace.program_id} programType={programType} currentWeek={(workspace as any).current_week ?? null} />
               </WidgetErrorBoundary>
             </div>
           )}

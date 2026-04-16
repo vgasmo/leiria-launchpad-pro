@@ -6,6 +6,7 @@ import {
   GripVertical, Clock, CheckCircle2, Circle, ChevronDown, ChevronRight,
   Flag
 } from 'lucide-react';
+import { AccelerationCalendarSection } from './AccelerationCalendarSection';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,9 @@ interface MilestonesActionsTabProps {
   workspaceId: string;
   canWrite: boolean;
   isStaff: boolean;
+  programId?: string;
+  programType?: string;
+  currentWeek?: number | null;
 }
 
 const MILESTONE_STATUS_ICONS = {
@@ -51,7 +55,7 @@ const MILESTONE_STATUS_ICONS = {
   delayed: AlertTriangle,
 } as const;
 
-export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: MilestonesActionsTabProps) {
+export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId, programType, currentWeek }: MilestonesActionsTabProps) {
   const { t } = useTranslation();
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
@@ -265,6 +269,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
 
   return (
     <div className="space-y-4">
+      {/* Acceleration Calendar */}
+      {programType === 'acceleration' && programId && (
+        <AccelerationCalendarSection programId={programId} isStaff={isStaff} currentWeek={currentWeek} />
+      )}
       {/* Compact Toolbar */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-muted/20 rounded-lg border border-border/50">
         {canWrite && (

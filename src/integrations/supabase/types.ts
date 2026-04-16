@@ -4304,7 +4304,9 @@ export type Database = {
           description: string | null
           gate_id: string | null
           id: string
+          meeting_url: string | null
           program_id: string
+          scheduled_at: string | null
           title: string
           updated_at: string
           week_number: number
@@ -4315,7 +4317,9 @@ export type Database = {
           description?: string | null
           gate_id?: string | null
           id?: string
+          meeting_url?: string | null
           program_id: string
+          scheduled_at?: string | null
           title: string
           updated_at?: string
           week_number: number
@@ -4326,7 +4330,9 @@ export type Database = {
           description?: string | null
           gate_id?: string | null
           id?: string
+          meeting_url?: string | null
           program_id?: string
+          scheduled_at?: string | null
           title?: string
           updated_at?: string
           week_number?: number
