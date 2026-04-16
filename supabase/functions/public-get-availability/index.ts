@@ -203,17 +203,21 @@ serve(async (req) => {
         .eq("active", true)
         .order("scope", { ascending: true });
 
-      // Build routing options with program names
-      if (allRoutings && allRoutings.length > 0) {
-        for (const r of allRoutings) {
-          if (r.scope === 'global') {
-            routingOptions.push({ program_id: null, program_name: 'Geral', scope: 'global' });
-          } else if (r.program_id) {
-            const { data: prog } = await supabase.from("programs").select("id, name").eq("id", r.program_id).maybeSingle();
-            if (prog) {
-              routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
-            }
-          }
+      // Fetch all active programs
+      const { data: allPrograms } = await supabase
+        .from("programs")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+
+      // Build routing options: global + all active programs
+      const hasGlobalRoute = allRoutings?.some(r => r.scope === 'global');
+      if (hasGlobalRoute) {
+        routingOptions.push({ program_id: null, program_name: 'Geral', scope: 'global' });
+      }
+      if (allPrograms) {
+        for (const prog of allPrograms) {
+          routingOptions.push({ program_id: prog.id, program_name: prog.name, scope: 'program' });
         }
       }
 
