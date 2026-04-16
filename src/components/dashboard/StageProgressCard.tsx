@@ -58,7 +58,7 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
   const CurrentIcon = currentConfig.icon;
 
   return (
-    <Card className={className}>
+    <Card className={cn('cursor-pointer hover:shadow-md transition-shadow', className)} onClick={() => navigate(`/workspace/${workspace.id}?tab=milestones`)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
