@@ -24,7 +24,8 @@ import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
-import { useTemplateInstances } from '@/hooks/useTemplates';
+import { useTemplateInstances, useTemplates } from '@/hooks/useTemplates';
+import { useDocuments } from '@/hooks/useDocuments';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
@@ -54,13 +55,24 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const createDeliverable = useCreateActionDeliverable(workspaceId);
   const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const { data: templateInstances } = useTemplateInstances(workspaceId);
+  const { data: globalTemplates } = useTemplates();
+  const { data: workspaceDocs } = useDocuments(workspaceId);
   const platformDocuments = useMemo<PlatformDocument[]>(() => {
-    return (templateInstances || []).map(ti => ({
-      id: ti.id,
-      name: ti.template?.name || ti.template_id,
-      type: 'template_instance' as const,
-    }));
-  }, [templateInstances]);
+    const docs: PlatformDocument[] = [];
+    (templateInstances || []).forEach(ti => {
+      docs.push({ id: ti.id, name: `✓ ${ti.template?.name || ti.template_id}`, type: 'template_instance' });
+    });
+    const instantiatedTemplateIds = new Set((templateInstances || []).map(ti => ti.template_id));
+    (globalTemplates || []).forEach(t => {
+      if (!instantiatedTemplateIds.has(t.id)) {
+        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template_instance' });
+      }
+    });
+    (workspaceDocs || []).forEach(d => {
+      docs.push({ id: d.id, name: d.name, type: 'document' });
+    });
+    return docs;
+  }, [templateInstances, globalTemplates, workspaceDocs]);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
