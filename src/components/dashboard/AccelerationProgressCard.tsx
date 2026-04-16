@@ -142,8 +142,13 @@ export const AccelerationProgressCard = memo(function AccelerationProgressCard({
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1, duration: 0.3 }}
+                onClick={() => {
+                  if (workspaceId) {
+                    navigate(`/workspace/${workspaceId}?tab=milestones`);
+                  }
+                }}
                 className={cn(
-                  'relative rounded-xl border p-3 transition-all',
+                  'relative rounded-xl border p-3 transition-all cursor-pointer hover:shadow-md',
                   gate.isCurrent && 'border-primary/30 bg-primary/5 shadow-sm',
                   gate.isCompleted && 'border-border/30 bg-muted/30',
                   gate.isLocked && 'border-border/20 bg-muted/10 opacity-60',
