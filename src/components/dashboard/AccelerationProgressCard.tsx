@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Flag, CalendarDays, Check, Lock, ChevronRight, Zap } from 'lucide-react';
