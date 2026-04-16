@@ -223,8 +223,10 @@ serve(async (req) => {
         // User selected global or default
         chosenRouting = allRoutings?.find(r => r.scope === 'global') || allRoutings?.[0] || null;
       } else if (typeof selectedProgramId === 'string') {
-        // User selected a specific program
-        chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId) || null;
+        // User selected a specific program — try program-specific, fallback to global
+        chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId)
+          || allRoutings?.find(r => r.scope === 'global')
+          || null;
         if (chosenRouting?.program_id) {
           const { data: prog } = await supabase.from("programs").select("id, name").eq("id", chosenRouting.program_id).maybeSingle();
           programId = prog?.id || null;
