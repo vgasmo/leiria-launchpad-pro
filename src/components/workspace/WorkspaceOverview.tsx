@@ -61,7 +61,6 @@ import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 import { toast } from 'sonner';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import type { Database } from '@/integrations/supabase/types';
@@ -103,10 +102,6 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
   const { data: workspaceTags = [] } = useWorkspaceTags(workspace.id);
   const addWorkspaceTag = useAddWorkspaceTag();
   const removeWorkspaceTag = useRemoveWorkspaceTag();
-  
-  // Auto-materialize acceleration deliverables into workspace milestones/actions
-  useAutoMaterializeDeliverables(workspace.id, workspace.program_id, workspace.program?.program_type ?? undefined);
-
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [showQuickKpiModal, setShowQuickKpiModal] = useState(false);
   const [activeSurveyId, setActiveSurveyId] = useState<string | null>(null);
