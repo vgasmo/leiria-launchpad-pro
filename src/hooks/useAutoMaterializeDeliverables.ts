@@ -18,17 +18,22 @@ export function useAutoMaterializeDeliverables(
   const enabled = !!workspaceId && !!programId && isAcceleration;
 
   // Check if milestones already exist from this program
-  const { data: hasMaterialized } = useQuery({
+  const { data: hasMaterialized, isSuccess: checkDone } = useQuery({
     queryKey: ['acceleration-materialized', workspaceId],
     enabled,
     staleTime: 60_000,
     queryFn: async () => {
       if (!workspaceId) return true;
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from('milestones')
         .select('id', { count: 'exact', head: true })
         .eq('workspace_id', workspaceId)
         .not('source_gate_id', 'is', null);
+      if (error) {
+        console.error('[materialize_deliverables] Check query failed:', error.message);
+        return true; // Assume materialized on error to avoid infinite retry
+      }
+      console.log('[materialize_deliverables] Check result:', { workspaceId, count, hasMaterialized: (count ?? 0) > 0 });
       return (count ?? 0) > 0;
     },
   });
@@ -36,11 +41,13 @@ export function useAutoMaterializeDeliverables(
   const materializeMutation = useMutation({
     mutationFn: async () => {
       if (!workspaceId || !programId) throw new Error('Missing workspace or program');
+      console.log('[materialize_deliverables] Calling RPC...', { workspaceId, programId });
       const { data, error } = await supabase.rpc('materialize_acceleration_deliverables', {
         p_workspace_id: workspaceId,
         p_program_id: programId,
       });
       if (error) throw new Error(error.message || JSON.stringify(error));
+      console.log('[materialize_deliverables] RPC result:', data);
       return data as { milestones_created: number; actions_created: number };
     },
     onSuccess: (result) => {
@@ -64,18 +71,29 @@ export function useAutoMaterializeDeliverables(
   });
 
   const didAutoMaterialize = useRef(false);
+
+  // Reset ref when workspace changes so re-materialization can happen for new workspaces
+  const lastWorkspaceId = useRef(workspaceId);
+  useEffect(() => {
+    if (workspaceId !== lastWorkspaceId.current) {
+      didAutoMaterialize.current = false;
+      lastWorkspaceId.current = workspaceId;
+    }
+  }, [workspaceId]);
+
   useEffect(() => {
     if (
       enabled &&
+      checkDone &&
       hasMaterialized === false &&
       !materializeMutation.isPending &&
       !didAutoMaterialize.current
     ) {
-      console.log('[materialize_deliverables] Triggering auto-materialize', { workspaceId, programId });
+      console.log('[materialize_deliverables] Triggering auto-materialize', { workspaceId, programId, programType });
       didAutoMaterialize.current = true;
       materializeMutation.mutate();
     }
-  }, [enabled, hasMaterialized, materializeMutation.isPending]);
+  }, [enabled, checkDone, hasMaterialized, materializeMutation.isPending, workspaceId, programId, programType]);
 
   return { hasMaterialized, isPending: materializeMutation.isPending };
 }
