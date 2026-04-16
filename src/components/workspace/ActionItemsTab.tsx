@@ -407,9 +407,12 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 onAddAction={() => openCreateDialogForMilestone(milestone.id)}
                 canWrite={canWrite}
                 isStaff={true}
+                deliverablesByAction={deliverablesByAction || {}}
                 onStatusChange={handleStatusChange}
                 onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteTarget(item)}
+                onAddDeliverable={handleAddDeliverable}
+                onCompleteDeliverable={handleCompleteDeliverable}
                 isSelected={isSelected}
                 onToggleSelect={toggleItem}
               />
@@ -431,9 +434,12 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     item={item}
                     canWrite={canWrite}
                     isStaff={true}
+                    deliverables={deliverablesByAction?.[item.id] || []}
                     onStatusChange={handleStatusChange}
                     onDueDateChange={handleDueDateChange}
                     onDelete={(item) => setDeleteTarget(item)}
+                    onAddDeliverable={handleAddDeliverable}
+                    onCompleteDeliverable={handleCompleteDeliverable}
                     isSelected={isSelected(item.id)}
                     onToggleSelect={toggleItem}
                   />
