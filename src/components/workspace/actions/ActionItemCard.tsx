@@ -58,12 +58,14 @@ export const ActionItemCard = memo(function ActionItemCard({
   onAddDeliverable, onCompleteDeliverable, isSelected, onToggleSelect,
 }: ActionItemCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
   const isOverdue = item.due_date && isPast(parseISO(item.due_date)) && !isToday(parseISO(item.due_date)) && item.status !== 'completed';
   const isDueToday = item.due_date && isToday(parseISO(item.due_date)) && item.status !== 'completed';
   const priorityConfig = PRIORITY_CONFIG[item.priority || 'medium'] || PRIORITY_CONFIG.medium;
 
   const [addDeliverableOpen, setAddDeliverableOpen] = useState(false);
-  const [newDeliverable, setNewDeliverable] = useState({ title: '', type: 'link', external_url: '', document_id: '' });
+  const [newDeliverable, setNewDeliverable] = useState({ document_id: '' });
 
   const totalDeliverables = deliverables.length;
   const completedDeliverables = deliverables.filter(d => d.completed_at).length;
@@ -94,30 +96,22 @@ export const ActionItemCard = memo(function ActionItemCard({
   };
 
   const handleAddDeliverable = () => {
-    if (newDeliverable.type === 'platform_document') {
-      if (!newDeliverable.document_id) {
-        toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
-        return;
-      }
-      const doc = platformDocuments.find(d => d.id === newDeliverable.document_id);
-      onAddDeliverable?.(item.id, {
-        title: doc?.name || 'Documento',
-        type: 'platform_document',
-        document_id: newDeliverable.document_id,
-      });
-    } else {
-      if (!newDeliverable.title.trim()) {
-        toast.error(t('actions.deliverableTitleRequired', 'O título do entregável é obrigatório'));
-        return;
-      }
-      onAddDeliverable?.(item.id, {
-        title: newDeliverable.title,
-        type: newDeliverable.type,
-        external_url: newDeliverable.type === 'link' ? newDeliverable.external_url : undefined,
-      });
+    if (!newDeliverable.document_id) {
+      toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
+      return;
     }
-    setNewDeliverable({ title: '', type: 'link', external_url: '', document_id: '' });
+    const doc = platformDocuments.find(d => d.id === newDeliverable.document_id);
+    onAddDeliverable?.(item.id, {
+      title: doc?.name || 'Documento',
+      type: 'platform_document',
+      document_id: newDeliverable.document_id,
+    });
+    setNewDeliverable({ document_id: '' });
     setAddDeliverableOpen(false);
+    // Navigate to documents tab so the founder can fill in the template
+    if (workspaceId) {
+      navigate(`/workspace/${workspaceId}?tab=documents&doc=${newDeliverable.document_id}`);
+    }
   };
 
   return (
