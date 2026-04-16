@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ActionItemCard } from './ActionItemCard';
 import type { ActionItem } from '@/hooks/useActionItems';
+import type { ActionDeliverable } from '@/hooks/useActionDeliverables';
 import type { Database } from '@/integrations/supabase/types';
 
 type ActionStatus = Database['public']['Enums']['action_status'];
@@ -21,13 +22,16 @@ export interface KanbanColumnProps {
   status: ActionStatus;
   canWrite: boolean;
   isStaff: boolean;
+  deliverablesByAction?: Record<string, ActionDeliverable[]>;
   onStatusChange: (item: ActionItem, status: ActionStatus) => void;
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
   onDelete: (item: ActionItem) => void;
+  onAddDeliverable?: (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => void;
+  onCompleteDeliverable?: (id: string, actionId: string) => void;
 }
 
 export const KanbanColumn = memo(function KanbanColumn({ 
-  title, count, items, status, canWrite, isStaff, onStatusChange, onDueDateChange, onDelete,
+  title, count, items, status, canWrite, isStaff, deliverablesByAction, onStatusChange, onDueDateChange, onDelete, onAddDeliverable, onCompleteDeliverable,
 }: KanbanColumnProps) {
   const { t } = useTranslation();
   const config = STATUS_CONFIG[status];
@@ -48,7 +52,9 @@ export const KanbanColumn = memo(function KanbanColumn({
         ) : (
           items.map(item => (
             <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
+              deliverables={deliverablesByAction?.[item.id] || []}
               onStatusChange={onStatusChange} onDueDateChange={onDueDateChange} onDelete={onDelete}
+              onAddDeliverable={onAddDeliverable} onCompleteDeliverable={onCompleteDeliverable}
             />
           ))
         )}

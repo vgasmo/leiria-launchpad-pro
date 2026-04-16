@@ -23,6 +23,7 @@ import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActi
 import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
+import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard } from './actions/ActionItemCard';
@@ -47,6 +48,10 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
   const { founderId } = useWorkspaceFounder(workspaceId);
+  const actionIds = useMemo(() => (actionItems || []).map(a => a.id), [actionItems]);
+  const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
+  const createDeliverable = useCreateActionDeliverable(workspaceId);
+  const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
@@ -151,6 +156,20 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
       toast.error(t('actions.failedToDelete'));
     }
   }, [deleteTarget, canWrite, deleteAction, t]);
+
+  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => {
+    try {
+      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null });
+      toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
+    } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
+  }, [createDeliverable, t]);
+
+  const handleCompleteDeliverable = useCallback(async (id: string, actionId: string) => {
+    try {
+      await completeDeliverable.mutateAsync({ id, actionId });
+      toast.success(t('actions.deliverableCompleted', 'Entregável validado'));
+    } catch { toast.error(t('actions.failedToCompleteDeliverable', 'Erro ao validar entregável')); }
+  }, [completeDeliverable, t]);
 
   const handleCreate = async () => {
     if (!newAction.title.trim()) {
@@ -388,9 +407,12 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 onAddAction={() => openCreateDialogForMilestone(milestone.id)}
                 canWrite={canWrite}
                 isStaff={true}
+                deliverablesByAction={deliverablesByAction || {}}
                 onStatusChange={handleStatusChange}
                 onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteTarget(item)}
+                onAddDeliverable={handleAddDeliverable}
+                onCompleteDeliverable={handleCompleteDeliverable}
                 isSelected={isSelected}
                 onToggleSelect={toggleItem}
               />
@@ -412,9 +434,12 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     item={item}
                     canWrite={canWrite}
                     isStaff={true}
+                    deliverables={deliverablesByAction?.[item.id] || []}
                     onStatusChange={handleStatusChange}
                     onDueDateChange={handleDueDateChange}
                     onDelete={(item) => setDeleteTarget(item)}
+                    onAddDeliverable={handleAddDeliverable}
+                    onCompleteDeliverable={handleCompleteDeliverable}
                     isSelected={isSelected(item.id)}
                     onToggleSelect={toggleItem}
                   />

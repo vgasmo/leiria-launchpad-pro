@@ -25,6 +25,7 @@ import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActi
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 // owner/members removed - founder is always the owner
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
+import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard } from './actions/ActionItemCard';
 import { toast } from 'sonner';
@@ -54,6 +55,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
   // members removed - owner is always founder
   const { founderId } = useWorkspaceFounder(workspaceId);
+  const actionIds = useMemo(() => (actionItems || []).map(a => a.id), [actionItems]);
+  const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
+  const createDeliverable = useCreateActionDeliverable(workspaceId);
+  const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
   const deleteMilestone = useDeleteMilestone(workspaceId);
@@ -167,6 +172,20 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
     catch { toast.error(t('actions.failedToUpdate')); }
   }, [canWrite, updateAction, t]);
 
+
+  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => {
+    try {
+      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null });
+      toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
+    } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
+  }, [createDeliverable, t]);
+
+  const handleCompleteDeliverable = useCallback(async (id: string, actionId: string) => {
+    try {
+      await completeDeliverable.mutateAsync({ id, actionId });
+      toast.success(t('actions.deliverableCompleted', 'Entregável validado'));
+    } catch { toast.error(t('actions.failedToCompleteDeliverable', 'Erro ao validar entregável')); }
+  }, [completeDeliverable, t]);
 
   const handleDeleteActionConfirm = async () => {
     if (!deleteActionTarget || !canWrite) return;
@@ -395,8 +414,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
                       ) : (
                         milestoneActions.map(item => (
                           <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
+                            deliverables={deliverablesByAction?.[item.id] || []}
                             onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
                             onDelete={(item) => setDeleteActionTarget(item)}
+                            onAddDeliverable={handleAddDeliverable} onCompleteDeliverable={handleCompleteDeliverable}
                             isSelected={isSelected(item.id)} onToggleSelect={toggleItem}
                           />
                         ))
@@ -421,8 +442,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
           <CardContent className="px-4 pb-4 space-y-2">
             {actionsByMilestone.unassigned.map(item => (
               <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
+                deliverables={deliverablesByAction?.[item.id] || []}
                 onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteActionTarget(item)}
+                onAddDeliverable={handleAddDeliverable} onCompleteDeliverable={handleCompleteDeliverable}
                 isSelected={isSelected(item.id)} onToggleSelect={toggleItem}
               />
             ))}
