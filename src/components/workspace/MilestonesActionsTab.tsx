@@ -2,9 +2,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { 
-  Plus, AlertTriangle, Calendar, User, Trash2, Target, Download, 
+  Plus, AlertTriangle, Calendar, Trash2, Target, Download, 
   GripVertical, Clock, CheckCircle2, Circle, ChevronDown, ChevronRight,
-  Flag, Edit2
+  Flag
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import { SortableList } from '@/components/ui/SortableList';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActionItemFull, useBulkUpdateActions, useBulkDeleteActions, type ActionItem } from '@/hooks/useActionItems';
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
-import { useWorkspaceMembers } from '@/hooks/useSessions';
+// owner/members removed - founder is always the owner
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard } from './actions/ActionItemCard';
