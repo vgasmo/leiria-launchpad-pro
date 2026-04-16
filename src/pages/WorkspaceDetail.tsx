@@ -3,6 +3,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Copy, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
@@ -52,6 +53,10 @@ export default function WorkspaceDetail() {
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
   const tabBadges = useWorkspaceTabBadges(id);
+
+  // Auto-materialize acceleration deliverables at page level (not tab-dependent)
+  const programType = workspace?.program ? (workspace.program as { program_type?: string }).program_type : undefined;
+  useAutoMaterializeDeliverables(workspace?.id, workspace?.program_id, programType);
   
   useEffect(() => {
     if (shouldShowOnboarding && workspace && isFounder) {
