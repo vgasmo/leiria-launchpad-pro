@@ -55,7 +55,7 @@ const MILESTONE_STATUS_ICONS = {
   delayed: AlertTriangle,
 } as const;
 
-export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: MilestonesActionsTabProps) {
+export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId, programType, currentWeek }: MilestonesActionsTabProps) {
   const { t } = useTranslation();
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
