@@ -20,15 +20,14 @@ export interface KanbanColumnProps {
   items: ActionItem[];
   status: ActionStatus;
   canWrite: boolean;
-  members: Array<{ user_id: string; profile: { id: string; full_name: string | null; email: string; avatar_url: string | null } | null }>;
+  isStaff: boolean;
   onStatusChange: (item: ActionItem, status: ActionStatus) => void;
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
-  onOwnerChange: (item: ActionItem, ownerId: string) => void;
   onDelete: (item: ActionItem) => void;
 }
 
 export const KanbanColumn = memo(function KanbanColumn({ 
-  title, count, items, status, canWrite, members, onStatusChange, onDueDateChange, onOwnerChange, onDelete,
+  title, count, items, status, canWrite, isStaff, onStatusChange, onDueDateChange, onDelete,
 }: KanbanColumnProps) {
   const { t } = useTranslation();
   const config = STATUS_CONFIG[status];
@@ -48,8 +47,8 @@ export const KanbanColumn = memo(function KanbanColumn({
           <div className="py-8 text-center text-xs text-muted-foreground">{t('actions.noItems', 'Sem ações')}</div>
         ) : (
           items.map(item => (
-            <ActionItemCard key={item.id} item={item} canWrite={canWrite} members={members}
-              onStatusChange={onStatusChange} onDueDateChange={onDueDateChange} onOwnerChange={onOwnerChange} onDelete={onDelete}
+            <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
+              onStatusChange={onStatusChange} onDueDateChange={onDueDateChange} onDelete={onDelete}
             />
           ))
         )}

@@ -22,18 +22,17 @@ export interface MilestoneActionGroupProps {
   onToggle: () => void;
   onAddAction: () => void;
   canWrite: boolean;
-  members: Array<{ user_id: string; profile: { id: string; full_name: string | null; email: string; avatar_url: string | null } | null }>;
+  isStaff: boolean;
   onStatusChange: (item: ActionItem, status: ActionStatus) => void;
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
-  onOwnerChange: (item: ActionItem, ownerId: string) => void;
   onDelete: (item: ActionItem) => void;
   isSelected: (id: string) => boolean;
   onToggleSelect: (id: string) => void;
 }
 
 export const MilestoneActionGroup = memo(function MilestoneActionGroup({
-  milestone, actions, progress, completedCount, isExpanded, onToggle, onAddAction, canWrite, members,
-  onStatusChange, onDueDateChange, onOwnerChange, onDelete, isSelected, onToggleSelect,
+  milestone, actions, progress, completedCount, isExpanded, onToggle, onAddAction, canWrite, isStaff,
+  onStatusChange, onDueDateChange, onDelete, isSelected, onToggleSelect,
 }: MilestoneActionGroupProps) {
   const { t } = useTranslation();
   return (
@@ -73,8 +72,8 @@ export const MilestoneActionGroup = memo(function MilestoneActionGroup({
               </div>
             ) : (
               actions.map(item => (
-                <ActionItemCard key={item.id} item={item} canWrite={canWrite} members={members}
-                  onStatusChange={onStatusChange} onDueDateChange={onDueDateChange} onOwnerChange={onOwnerChange}
+                <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
+                  onStatusChange={onStatusChange} onDueDateChange={onDueDateChange}
                   onDelete={onDelete} isSelected={isSelected(item.id)} onToggleSelect={onToggleSelect}
                 />
               ))
