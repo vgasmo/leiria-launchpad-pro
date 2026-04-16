@@ -65,7 +65,7 @@ export function useConversations() {
       // Get conversation details
       const { data: conversations, error: convError } = await supabase
         .from('conversations')
-        .select('*')
+        .select('id, workspace_id, title, is_group, created_at, updated_at')
         .in('id', conversationIds)
         .order('updated_at', { ascending: false });
 
@@ -75,7 +75,7 @@ export function useConversations() {
       // Get participants for each conversation
       const { data: allParticipants } = await supabase
         .from('conversation_participants')
-        .select('*')
+        .select('id, conversation_id, user_id, joined_at, last_read_at')
         .in('conversation_id', conversationIds);
 
       // Get profiles
@@ -90,7 +90,7 @@ export function useConversations() {
       // Get last message for each conversation
       const { data: lastMessages } = await supabase
         .from('messages')
-        .select('*')
+        .select('id, conversation_id, sender_id, content, created_at')
         .in('conversation_id', conversationIds)
         .order('created_at', { ascending: false });
 
@@ -170,7 +170,7 @@ export function useMessages(conversationId: string | undefined) {
 
       const { data, error } = await supabase
         .from('messages')
-        .select('*')
+        .select('id, conversation_id, sender_id, content, created_at')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
@@ -250,7 +250,7 @@ export function useCreateConversation() {
 
       const { data: conv, error: convError } = await supabase
         .from('conversations')
-        .select('*')
+        .select('id, workspace_id, title, is_group, created_at, updated_at')
         .eq('id', convId)
         .single();
 
