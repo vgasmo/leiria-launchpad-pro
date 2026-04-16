@@ -545,7 +545,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         )}
         
         {/* Progress Timeline - All roles */}
-        <ProgressTimeline workspaceId={workspace.id} />
+        <ProgressTimeline workspaceId={workspace.id} programId={workspace.program_id} programType={workspace.program?.program_type} currentWeek={(workspace as any).current_week ?? null} />
       </div>
 
       {/* Quick KPI Modal */}
