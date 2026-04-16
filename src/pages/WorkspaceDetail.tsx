@@ -3,6 +3,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Copy, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccessDenied } from '@/components/ui/AccessDenied';
