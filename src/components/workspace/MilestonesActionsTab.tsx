@@ -6,6 +6,7 @@ import {
   GripVertical, Clock, CheckCircle2, Circle, ChevronDown, ChevronRight,
   Flag
 } from 'lucide-react';
+import { AccelerationCalendarSection } from './AccelerationCalendarSection';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,9 @@ interface MilestonesActionsTabProps {
   workspaceId: string;
   canWrite: boolean;
   isStaff: boolean;
+  programId?: string;
+  programType?: string;
+  currentWeek?: number | null;
 }
 
 const MILESTONE_STATUS_ICONS = {
