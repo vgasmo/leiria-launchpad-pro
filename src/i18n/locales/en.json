@@ -7315,9 +7315,30 @@
       "value_proposition_canvas": {
         "desc": "Map customer jobs, pains and gains to your products and services",
         "title": "Value Proposition Canvas"
+      },
+      "experience_1_pager": {
+        "desc": "Summarise a tourism experience in one page: what it is, who it is for, and why Leiria is the right place",
+        "title": "Experience 1-Pager"
+      },
+      "experience_script_and_customer_journey": {
+        "desc": "Three interlinked templates: Persona, Customer Journey, and Experience Script (Story-selling)",
+        "title": "Experience Script & Customer Journey"
+      },
+      "aarrr_funnel": {
+        "desc": "Pirate metrics funnel: 5 stages with key questions, metrics, pilot targets, and improvement actions",
+        "title": "AARRR Funnel"
+      },
+      "pilot_kpis_3_axes": {
+        "desc": "Choose one KPI per axis (Environmental, Social, Experience) with measurement method, baseline, and pilot target",
+        "title": "Pilot KPIs (3 Axes)"
+      },
+      "final_deck_storyboard": {
+        "desc": "Slide-by-slide pitch deck preparation: 10-12 slides with visual content and spoken script",
+        "title": "Final Deck Storyboard"
       }
     },
     "categories": {
+      "Boost": "Boost",
       "Customer": "Customer",
       "Finance": "Finance",
       "Fundraising": "Fundraising",
@@ -7367,7 +7388,12 @@
       "Team Retrospective": "Framework for team retrospective meetings",
       "Unit Economics": "Key financial metrics per customer",
       "Value Proposition Canvas": "Map customer jobs, pains and gains to your products and services",
-      "Weekly Progress Report": "Template for weekly startup progress updates"
+      "Weekly Progress Report": "Template for weekly startup progress updates",
+      "Experience 1-Pager": "Summarise a tourism experience in one page: what it is, who it is for, and why Leiria is the right place",
+      "Experience Script & Customer Journey": "Three interlinked templates: Persona, Customer Journey, and Experience Script (Story-selling)",
+      "AARRR Funnel": "Pirate metrics funnel: 5 stages with key questions, metrics, pilot targets, and improvement actions",
+      "Pilot KPIs (3 Axes)": "Choose one KPI per axis (Environmental, Social, Experience) with measurement method, baseline, and pilot target",
+      "Final Deck Storyboard": "Slide-by-slide pitch deck preparation: 10-12 slides with visual content and spoken script"
     },
     "dueAndOwner": "{{days}} • {{owner}}",
     "dueInDaysShort": "{{count}}d",
@@ -7441,7 +7467,12 @@
       "Team Retrospective": "Team Retrospective",
       "Unit Economics": "Unit Economics",
       "Value Proposition Canvas": "Value Proposition Canvas",
-      "Weekly Progress Report": "Weekly Progress Report"
+      "Weekly Progress Report": "Weekly Progress Report",
+      "Experience 1-Pager": "Experience 1-Pager",
+      "Experience Script & Customer Journey": "Experience Script & Customer Journey",
+      "AARRR Funnel": "AARRR Funnel",
+      "Pilot KPIs (3 Axes)": "Pilot KPIs (3 Axes)",
+      "Final Deck Storyboard": "Final Deck Storyboard"
     },
     "needsChanges": "Needs Changes",
     "needsDiscussion": "Needs Discussion",

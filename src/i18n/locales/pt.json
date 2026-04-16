@@ -7315,9 +7315,30 @@
       "value_proposition_canvas": {
         "desc": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços",
         "title": "Canvas de Proposta de Valor"
+      },
+      "experience_1_pager": {
+        "desc": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
+        "title": "1-Pager da Experiência"
+      },
+      "experience_script_and_customer_journey": {
+        "desc": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência (Story-selling)",
+        "title": "Guião da Experiência e Jornada do Cliente"
+      },
+      "aarrr_funnel": {
+        "desc": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas do piloto e ações de melhoria",
+        "title": "Funil AARRR"
+      },
+      "pilot_kpis_3_axes": {
+        "desc": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição, baseline e meta do piloto",
+        "title": "KPIs do Piloto (3 Eixos)"
+      },
+      "final_deck_storyboard": {
+        "desc": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral",
+        "title": "Storyboard do Deck Final"
       }
     },
     "categories": {
+      "Boost": "Boost",
       "Customer": "Cliente",
       "Finance": "Finanças",
       "Fundraising": "Angariação de Capital",
@@ -7367,7 +7388,12 @@
       "Team Retrospective": "Framework para reuniões retrospetivas de equipa",
       "Unit Economics": "Métricas financeiras chave por cliente",
       "Value Proposition Canvas": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços",
-      "Weekly Progress Report": "Template para atualizações semanais de progresso da startup"
+      "Weekly Progress Report": "Template para atualizações semanais de progresso da startup",
+      "Experience 1-Pager": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
+      "Experience Script & Customer Journey": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência",
+      "AARRR Funnel": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas e ações",
+      "Pilot KPIs (3 Axes)": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição e meta",
+      "Final Deck Storyboard": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral"
     },
     "dueAndOwner": "{{days}} • {{owner}}",
     "dueInDaysShort": "{{count}}d",
@@ -7441,7 +7467,12 @@
       "Team Retrospective": "Retrospetiva de Equipa",
       "Unit Economics": "Economia Unitária",
       "Value Proposition Canvas": "Canvas de Proposta de Valor",
-      "Weekly Progress Report": "Relatório Semanal de Progresso"
+      "Weekly Progress Report": "Relatório Semanal de Progresso",
+      "Experience 1-Pager": "1-Pager da Experiência",
+      "Experience Script & Customer Journey": "Guião da Experiência e Jornada do Cliente",
+      "AARRR Funnel": "Funil AARRR",
+      "Pilot KPIs (3 Axes)": "KPIs do Piloto (3 Eixos)",
+      "Final Deck Storyboard": "Storyboard do Deck Final"
     },
     "needsChanges": "Precisa de Alterações",
     "needsDiscussion": "Precisa de Discussão",
