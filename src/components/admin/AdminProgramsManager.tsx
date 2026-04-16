@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit, Calendar, Flag } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, GripVertical, Wand2, FileEdit, Calendar, Flag, Video, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -165,6 +165,7 @@ function StagesManager({ programId }: { programId: string }) {
 function GatesWeeksManager({ programId }: { programId: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: gates, isLoading: gatesLoading } = useQuery({
     queryKey: ['program-gates', programId],
     queryFn: async () => {
@@ -190,6 +191,50 @@ function GatesWeeksManager({ programId }: { programId: string }) {
       return data;
     },
   });
+
+  const [editingWeekId, setEditingWeekId] = useState<string | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('10:00');
+  const [editUrl, setEditUrl] = useState('');
+
+  const updateWeek = useMutation({
+    mutationFn: async (params: { weekId: string; scheduled_at: string | null; meeting_url: string | null }) => {
+      const { error } = await supabase
+        .from('program_weeks')
+        .update({ scheduled_at: params.scheduled_at, meeting_url: params.meeting_url })
+        .eq('id', params.weekId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['program-weeks', programId] });
+      queryClient.invalidateQueries({ queryKey: ['acceleration-calendar', programId] });
+    },
+  });
+
+  const startEditing = (week: any) => {
+    setEditingWeekId(week.id);
+    if (week.scheduled_at) {
+      const d = new Date(week.scheduled_at);
+      setEditDate(format(d, 'yyyy-MM-dd'));
+      setEditTime(format(d, 'HH:mm'));
+    } else {
+      setEditDate('');
+      setEditTime('10:00');
+    }
+    setEditUrl(week.meeting_url || '');
+  };
+
+  const handleSave = async (weekId: string) => {
+    let scheduled_at: string | null = null;
+    if (editDate) {
+      const [h, m] = editTime.split(':').map(Number);
+      const d = new Date(editDate + 'T00:00:00');
+      d.setHours(h || 0, m || 0, 0, 0);
+      scheduled_at = d.toISOString();
+    }
+    await updateWeek.mutateAsync({ weekId, scheduled_at, meeting_url: editUrl.trim() || null });
+    setEditingWeekId(null);
+  };
 
   if (gatesLoading || weeksLoading) return <Skeleton className="h-20 w-full" />;
 
@@ -226,6 +271,9 @@ function GatesWeeksManager({ programId }: { programId: string }) {
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5" />
           {t('adminPrograms.weeks')} ({weeks?.length || 0})
+          <span className="text-xs text-muted-foreground/60 ml-1">
+            — {t('adminPrograms.clickToSchedule', { defaultValue: 'clique ✏️ para agendar sessões' })}
+          </span>
         </span>
         {weeks?.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-1">{t('adminPrograms.noWeeks')}</p>
@@ -233,14 +281,55 @@ function GatesWeeksManager({ programId }: { programId: string }) {
           <div className="space-y-1 mt-2">
             {weeks?.map(week => {
               const deliverables = Array.isArray(week.deliverables_json) ? week.deliverables_json as Record<string, unknown>[] : [];
+              const isEditing = editingWeekId === week.id;
+              const hasSchedule = !!(week as any).scheduled_at;
+              const hasUrl = !!(week as any).meeting_url;
+
               return (
-                <div key={week.id} className="flex items-center gap-2 p-2 rounded bg-muted/30">
-                  <span className="text-xs text-muted-foreground w-8 shrink-0">S{week.week_number}</span>
-                  <span className="flex-1 text-sm">{week.title}</span>
-                  {deliverables.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {deliverables.length} {t('adminPrograms.deliverables')}
-                    </Badge>
+                <div key={week.id} className="flex flex-col gap-1 p-2 rounded bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-8 shrink-0">S{week.week_number}</span>
+                    <span className="flex-1 text-sm">{week.title}</span>
+                    {deliverables.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {deliverables.length} {t('adminPrograms.deliverables')}
+                      </Badge>
+                    )}
+                    {hasSchedule && !isEditing && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date((week as any).scheduled_at), 'dd/MM HH:mm')}
+                      </span>
+                    )}
+                    {hasUrl && !isEditing && (
+                      <a href={(week as any).meeting_url} target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-primary flex items-center gap-0.5 hover:underline"
+                        onClick={e => e.stopPropagation()}>
+                        <Video className="h-3 w-3" />
+                        Link
+                      </a>
+                    )}
+                    {!isEditing && (
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => startEditing(week)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {isEditing && (
+                    <div className="flex items-center gap-2 ml-8">
+                      <Input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
+                        className="h-7 w-[130px] text-xs" />
+                      <Input type="time" value={editTime} onChange={e => setEditTime(e.target.value)}
+                        className="h-7 w-[80px] text-xs" />
+                      <Input type="url" placeholder="URL da sessão (Teams, Zoom...)" value={editUrl}
+                        onChange={e => setEditUrl(e.target.value)} className="h-7 flex-1 text-xs" />
+                      <Button size="sm" className="h-7 w-7 p-0" onClick={() => handleSave(week.id)} disabled={updateWeek.isPending}>
+                        <Save className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditingWeekId(null)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               );
