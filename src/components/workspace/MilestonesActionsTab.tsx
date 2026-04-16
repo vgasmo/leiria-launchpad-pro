@@ -25,6 +25,7 @@ import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActi
 import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilestone, useReorderMilestones, type Milestone } from '@/hooks/useMilestones';
 // owner/members removed - founder is always the owner
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
+import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard } from './actions/ActionItemCard';
 import { toast } from 'sonner';
