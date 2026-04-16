@@ -269,6 +269,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
 
   return (
     <div className="space-y-4">
+      {/* Acceleration Calendar */}
+      {programType === 'acceleration' && programId && (
+        <AccelerationCalendarSection programId={programId} isStaff={isStaff} currentWeek={currentWeek} />
+      )}
       {/* Compact Toolbar */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-muted/20 rounded-lg border border-border/50">
         {canWrite && (
