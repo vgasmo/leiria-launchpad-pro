@@ -38,6 +38,7 @@ type MilestoneStatus = Database['public']['Enums']['milestone_status'];
 interface MilestonesActionsTabProps {
   workspaceId: string;
   canWrite: boolean;
+  isStaff: boolean;
 }
 
 const MILESTONE_STATUS_ICONS = {
@@ -47,7 +48,7 @@ const MILESTONE_STATUS_ICONS = {
   delayed: AlertTriangle,
 } as const;
 
-export function MilestonesActionsTab({ workspaceId, canWrite }: MilestonesActionsTabProps) {
+export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: MilestonesActionsTabProps) {
   const { t } = useTranslation();
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
