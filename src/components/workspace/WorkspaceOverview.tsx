@@ -616,7 +616,7 @@ function ActionItem({ action }: { action: any }) {
   const isDueToday = action.due_date && isToday(new Date(action.due_date));
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
       <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
         action.status === 'in_progress' ? 'bg-blue-500' : 
         isOverdue ? 'bg-destructive' : 
@@ -678,7 +678,7 @@ function KpiCard({ kpi, previousValue }: { kpi: any; previousValue?: number | nu
   };
 
   return (
-    <div className="p-3 rounded-lg bg-muted/50">
+    <div className="p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
       <p className="text-xs text-muted-foreground mb-1 truncate">{definition?.name || 'KPI'}</p>
       <div className="flex items-end justify-between gap-2">
         <p className="text-xl font-bold">
@@ -697,7 +697,7 @@ function KpiCard({ kpi, previousValue }: { kpi: any; previousValue?: number | nu
 
 function MilestoneCount({ label, count, color }: { label: string; count: number; color: string }) {
   return (
-    <div className={`p-3 rounded-lg text-center ${color}`}>
+    <div className={`p-3 rounded-lg text-center cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all ${color}`}>
       <p className="text-2xl font-bold">{count}</p>
       <p className="text-xs">{label}</p>
     </div>
