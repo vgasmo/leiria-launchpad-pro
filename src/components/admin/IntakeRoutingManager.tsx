@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, RotateCcw, User, Loader2, Copy, ExternalLink, Link, Plus, Trash2 } from 'lucide-react';
+import { Users, RotateCcw, User, Loader2, Copy, ExternalLink, Link, Plus, Trash2, Building2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useIntakeRouting, useUpsertIntakeRoute, useConsultants, type IntakeRoute } from '@/hooks/useIntakeRouting';
@@ -29,18 +30,190 @@ interface IntakeRoutingManagerProps {
   showBookingLinks?: boolean;
 }
 
-export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingManagerProps) {
+interface RoutingEditorProps {
+  route: IntakeRoute | undefined;
+  consultants: Array<{ id: string; full_name: string | null; email: string | null }>;
+  scope: 'global' | 'program';
+  programId?: string | null;
+  programName?: string;
+  onSaved: () => void;
+}
+
+function RoutingEditor({ route, consultants, scope, programId, programName, onSaved }: RoutingEditorProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { data: routes, isLoading: loadingRoutes } = useIntakeRouting();
-  const { data: consultants, isLoading: loadingConsultants } = useConsultants();
   const upsertRoute = useUpsertIntakeRoute();
   
   const [mode, setMode] = useState<'single' | 'round_robin'>('single');
   const [selectedConsultants, setSelectedConsultants] = useState<string[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   
+  useEffect(() => {
+    if (route) {
+      setMode(route.mode as 'single' | 'round_robin');
+      setSelectedConsultants(route.consultant_ids || []);
+      setHasChanges(false);
+    } else {
+      setMode('single');
+      setSelectedConsultants([]);
+      setHasChanges(false);
+    }
+  }, [route]);
+  
+  const handleConsultantToggle = (consultantId: string) => {
+    setSelectedConsultants(prev => {
+      if (mode === 'single') return [consultantId];
+      if (prev.includes(consultantId)) return prev.filter(id => id !== consultantId);
+      return [...prev, consultantId];
+    });
+    setHasChanges(true);
+  };
+  
+  const handleModeChange = (newMode: 'single' | 'round_robin') => {
+    setMode(newMode);
+    if (newMode === 'single' && selectedConsultants.length > 1) {
+      setSelectedConsultants([selectedConsultants[0]]);
+    }
+    setHasChanges(true);
+  };
+  
+  const handleSave = async () => {
+    if (selectedConsultants.length === 0) {
+      toast.error(t('admin.pleaseSelectAtLeastOne'));
+      return;
+    }
+    
+    await upsertRoute.mutateAsync({
+      id: route?.id,
+      scope,
+      program_id: programId || null,
+      mode,
+      consultant_ids: selectedConsultants,
+      active: true,
+    });
+    
+    setHasChanges(false);
+    onSaved();
+  };
+  
+  return (
+    <div className="space-y-5">
+      {/* Mode Selection */}
+      <div className="space-y-3">
+        <Label>{t('admin.intakeRouting.routingMode', 'Modo de Encaminhamento')}</Label>
+        <RadioGroup value={mode} onValueChange={(v) => handleModeChange(v as 'single' | 'round_robin')}>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="single" id={`single-${scope}-${programId || 'global'}`} />
+            <Label htmlFor={`single-${scope}-${programId || 'global'}`} className="flex items-center gap-2 cursor-pointer">
+              <User className="h-4 w-4" />
+              {t('admin.intakeRouting.singleConsultant', 'Consultor Único')}
+              <span className="text-xs text-muted-foreground">
+                — {t('admin.intakeRouting.singleDesc', 'Todas as marcações vão para um calendário')}
+              </span>
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="round_robin" id={`rr-${scope}-${programId || 'global'}`} />
+            <Label htmlFor={`rr-${scope}-${programId || 'global'}`} className="flex items-center gap-2 cursor-pointer">
+              <RotateCcw className="h-4 w-4" />
+              {t('admin.intakeRouting.roundRobin', 'Round Robin')}
+              <span className="text-xs text-muted-foreground">
+                — {t('admin.intakeRouting.roundRobinDesc', 'Distribuir leads entre consultores selecionados')}
+              </span>
+            </Label>
+          </div>
+        </RadioGroup>
+      </div>
+      
+      {/* Consultant Selection */}
+      <div className="space-y-3">
+        <Label>
+          {mode === 'single'
+            ? t('admin.intakeRouting.selectConsultant', 'Selecionar Consultor')
+            : t('admin.intakeRouting.selectConsultants', 'Selecionar Consultores para Rotação')}
+        </Label>
+        <div className="grid gap-2">
+          {consultants?.map((consultant) => (
+            <div
+              key={consultant.id}
+              className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                selectedConsultants.includes(consultant.id)
+                  ? 'border-primary bg-primary/5'
+                  : 'hover:bg-muted/50'
+              }`}
+              onClick={() => handleConsultantToggle(consultant.id)}
+            >
+              <Checkbox
+                checked={selectedConsultants.includes(consultant.id)}
+                onCheckedChange={() => handleConsultantToggle(consultant.id)}
+              />
+              <div className="flex-1">
+                <div className="font-medium">{consultant.full_name || 'Unnamed'}</div>
+                <div className="text-sm text-muted-foreground">{consultant.email}</div>
+              </div>
+              {selectedConsultants.includes(consultant.id) && mode === 'round_robin' && (
+                <Badge variant="secondary">
+                  #{selectedConsultants.indexOf(consultant.id) + 1}
+                </Badge>
+              )}
+            </div>
+          ))}
+          {(!consultants || consultants.length === 0) && (
+            <div className="text-sm text-muted-foreground py-4 text-center">
+              {t('admin.intakeRouting.noConsultants', 'Nenhum consultor encontrado.')}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Current Status */}
+      {route && (
+        <div className="p-3 bg-muted/50 rounded-lg text-sm">
+          <div className="font-medium mb-1">{t('admin.intakeRouting.currentConfig', 'Configuração Atual')}</div>
+          <div className="text-muted-foreground">
+            {t('admin.intakeRouting.mode', 'Modo')}: <span className="font-medium">{route.mode === 'single' ? t('admin.intakeRouting.singleConsultant') : t('admin.intakeRouting.roundRobin')}</span>
+            {route.mode === 'round_robin' && (
+              <span> — {t('admin.intakeRouting.nextAssignment', 'Próxima atribuição')}: #{(route.round_robin_index % (route.consultant_ids?.length || 1)) + 1}</span>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Save Button */}
+      <Button
+        onClick={handleSave}
+        disabled={upsertRoute.isPending || !hasChanges || selectedConsultants.length === 0}
+      >
+        {upsertRoute.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        {t('common.saveChanges', 'Guardar Alterações')}
+      </Button>
+    </div>
+  );
+}
+
+export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingManagerProps) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data: routes, isLoading: loadingRoutes } = useIntakeRouting();
+  const { data: consultants, isLoading: loadingConsultants } = useConsultants();
+  
+  // Fetch active programs
+  const { data: programs } = useQuery({
+    queryKey: ['programs-for-routing'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name, is_active')
+        .eq('is_active', true)
+        .order('name');
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  
   const globalRoute = routes?.find(r => r.scope === 'global');
+  const programRoutes = routes?.filter(r => r.scope === 'program') || [];
+  
+  const getProgramRoute = (programId: string) => programRoutes.find(r => r.program_id === programId);
   
   // Fetch booking links
   const { data: bookingLinks, isLoading: loadingLinks } = useQuery({
@@ -59,9 +232,8 @@ export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingM
   // Create booking link mutation
   const createLinkMutation = useMutation({
     mutationFn: async () => {
-      // Generate a random token
       const token = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
-      const tokenHash = token; // In production, hash this
+      const tokenHash = token;
       
       const { data, error } = await supabase
         .from('public_booking_links')
@@ -102,51 +274,6 @@ export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingM
     },
   });
   
-  useEffect(() => {
-    if (globalRoute) {
-      setMode(globalRoute.mode as 'single' | 'round_robin');
-      setSelectedConsultants(globalRoute.consultant_ids || []);
-    }
-  }, [globalRoute]);
-  
-  const handleConsultantToggle = (consultantId: string) => {
-    setSelectedConsultants(prev => {
-      if (mode === 'single') {
-        return [consultantId];
-      }
-      if (prev.includes(consultantId)) {
-        return prev.filter(id => id !== consultantId);
-      }
-      return [...prev, consultantId];
-    });
-    setHasChanges(true);
-  };
-  
-  const handleModeChange = (newMode: 'single' | 'round_robin') => {
-    setMode(newMode);
-    if (newMode === 'single' && selectedConsultants.length > 1) {
-      setSelectedConsultants([selectedConsultants[0]]);
-    }
-    setHasChanges(true);
-  };
-  
-  const handleSave = async () => {
-    if (selectedConsultants.length === 0) {
-      toast.error(t('admin.pleaseSelectAtLeastOne'));
-      return;
-    }
-    
-    await upsertRoute.mutateAsync({
-      id: globalRoute?.id,
-      scope: 'global',
-      mode,
-      consultant_ids: selectedConsultants,
-      active: true,
-    });
-    
-    setHasChanges(false);
-  };
-  
   const handleCopyLink = (tokenHash: string) => {
     const link = `${window.location.origin}/book/${tokenHash}`;
     navigator.clipboard.writeText(link);
@@ -163,108 +290,88 @@ export function IntakeRoutingManager({ showBookingLinks = true }: IntakeRoutingM
     );
   }
   
+  const tabItems = [
+    { value: 'global', label: t('admin.intakeRouting.global', 'Geral') },
+    ...(programs || []).map(p => ({ value: p.id, label: p.name })),
+  ];
+  
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            {t('admin.intakeRouting.title', 'Intake Routing')}
+            {t('admin.intakeRouting.title', 'Encaminhamento de Intake')}
           </CardTitle>
           <CardDescription>
-            {t('admin.intakeRouting.description', 'Configure which consultant calendar is used for first-contact bookings')}
+            {t('admin.intakeRouting.perProgramDesc', 'Configure qual calendário de consultor é usado para primeiros contactos. Defina uma regra global ou personalize por programa.')}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Mode Selection */}
-          <div className="space-y-3">
-            <Label>{t('admin.intakeRouting.routingMode', 'Routing Mode')}</Label>
-            <RadioGroup value={mode} onValueChange={(v) => handleModeChange(v as 'single' | 'round_robin')}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="single" id="single" />
-                <Label htmlFor="single" className="flex items-center gap-2 cursor-pointer">
-                  <User className="h-4 w-4" />
-                  {t('admin.intakeRouting.singleConsultant', 'Single Consultant')}
-                  <span className="text-xs text-muted-foreground">
-                    — {t('admin.intakeRouting.singleDesc', 'All bookings go to one calendar')}
-                  </span>
-                </Label>
+        <CardContent>
+          <Tabs defaultValue="global" className="w-full">
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
+              {tabItems.map(tab => {
+                const isGlobal = tab.value === 'global';
+                const route = isGlobal ? globalRoute : getProgramRoute(tab.value);
+                const hasConfig = !!route;
+                return (
+                  <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
+                    {isGlobal ? <Users className="h-3.5 w-3.5" /> : <Building2 className="h-3.5 w-3.5" />}
+                    {tab.label}
+                    {hasConfig && (
+                      <span className="ml-1 h-2 w-2 rounded-full bg-primary inline-block" />
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+            
+            {/* Global tab */}
+            <TabsContent value="global">
+              <div className="p-1">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('admin.intakeRouting.globalDesc', 'Configuração padrão aplicada quando não existe regra específica para o programa selecionado pela lead.')}
+                </p>
+                <RoutingEditor
+                  route={globalRoute}
+                  consultants={consultants || []}
+                  scope="global"
+                  onSaved={() => {}}
+                />
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="round_robin" id="round_robin" />
-                <Label htmlFor="round_robin" className="flex items-center gap-2 cursor-pointer">
-                  <RotateCcw className="h-4 w-4" />
-                  {t('admin.intakeRouting.roundRobin', 'Round Robin')}
-                  <span className="text-xs text-muted-foreground">
-                    — {t('admin.intakeRouting.roundRobinDesc', 'Distribute leads across selected consultants')}
-                  </span>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-          
-          {/* Consultant Selection */}
-          <div className="space-y-3">
-            <Label>
-              {mode === 'single' 
-                ? t('admin.intakeRouting.selectConsultant', 'Select Consultant')
-                : t('admin.intakeRouting.selectConsultants', 'Select Consultants for Rotation')}
-            </Label>
-            <div className="grid gap-2">
-              {consultants?.map((consultant) => (
-                <div
-                  key={consultant.id}
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
-                    selectedConsultants.includes(consultant.id)
-                      ? 'border-primary bg-primary/5'
-                      : 'hover:bg-muted/50'
-                  }`}
-                  onClick={() => handleConsultantToggle(consultant.id)}
-                >
-                  <Checkbox
-                    checked={selectedConsultants.includes(consultant.id)}
-                    onCheckedChange={() => handleConsultantToggle(consultant.id)}
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium">{consultant.full_name || 'Unnamed'}</div>
-                    <div className="text-sm text-muted-foreground">{consultant.email}</div>
+            </TabsContent>
+            
+            {/* Per-program tabs */}
+            {(programs || []).map(program => {
+              const programRoute = getProgramRoute(program.id);
+              return (
+                <TabsContent key={program.id} value={program.id}>
+                  <div className="p-1">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {programRoute
+                        ? t('admin.intakeRouting.programConfigured', {
+                            program: program.name,
+                            defaultValue: `Regra específica para "${program.name}". Esta configuração tem prioridade sobre a regra global.`,
+                          })
+                        : t('admin.intakeRouting.programNotConfigured', {
+                            program: program.name,
+                            defaultValue: `Sem regra específica para "${program.name}". A regra global será usada. Configure abaixo para personalizar.`,
+                          })
+                      }
+                    </p>
+                    <RoutingEditor
+                      route={programRoute}
+                      consultants={consultants || []}
+                      scope="program"
+                      programId={program.id}
+                      programName={program.name}
+                      onSaved={() => {}}
+                    />
                   </div>
-                  {selectedConsultants.includes(consultant.id) && mode === 'round_robin' && (
-                    <Badge variant="secondary">
-                      #{selectedConsultants.indexOf(consultant.id) + 1}
-                    </Badge>
-                  )}
-                </div>
-              ))}
-              {(!consultants || consultants.length === 0) && (
-                <div className="text-sm text-muted-foreground py-4 text-center">
-                  {t('admin.intakeRouting.noConsultants', 'No consultants found. Add users with the consultant role first.')}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Current Status */}
-          {globalRoute && (
-            <div className="p-3 bg-muted/50 rounded-lg text-sm">
-              <div className="font-medium mb-1">{t('admin.intakeRouting.currentConfig', 'Current Configuration')}</div>
-              <div className="text-muted-foreground">
-                {t('admin.intakeRouting.mode', 'Mode')}: <span className="font-medium">{globalRoute.mode}</span>
-                {globalRoute.mode === 'round_robin' && (
-                  <span> — {t('admin.intakeRouting.nextAssignment', 'Next assignment')}: #{(globalRoute.round_robin_index % (globalRoute.consultant_ids?.length || 1)) + 1}</span>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {/* Save Button */}
-          <Button
-            onClick={handleSave}
-            disabled={upsertRoute.isPending || !hasChanges || selectedConsultants.length === 0}
-          >
-            {upsertRoute.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {t('common.saveChanges', 'Save Changes')}
-          </Button>
+                </TabsContent>
+              );
+            })}
+          </Tabs>
         </CardContent>
       </Card>
       
