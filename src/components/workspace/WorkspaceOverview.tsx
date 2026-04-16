@@ -506,6 +506,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         
         {/* === FOUNDER-FOCUSED CONTENT BELOW === */}
         
+        {/* Progress Timeline (with Acceleration Calendar) - moved up for founders */}
+        <ProgressTimeline workspaceId={workspace.id} programId={workspace.program_id} programType={workspace.program?.program_type} currentWeek={(workspace as any).current_week ?? null} />
+        
         {/* Responsible Consultant Card - PRIMARY for founders - their key contact */}
         {isFounder && (
           <ResponsibleConsultantCard workspaceId={workspace.id} />
@@ -543,9 +546,6 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         {isFounder && (
           <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
         )}
-        
-        {/* Progress Timeline - All roles */}
-        <ProgressTimeline workspaceId={workspace.id} programId={workspace.program_id} programType={workspace.program?.program_type} currentWeek={(workspace as any).current_week ?? null} />
       </div>
 
       {/* Quick KPI Modal */}
