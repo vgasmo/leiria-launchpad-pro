@@ -5,7 +5,10 @@ import { logger } from '@/lib/logger';
 
 /**
  * Automatically materializes acceleration deliverables (gates→milestones, week deliverables→actions)
- * when a workspace belongs to an acceleration program and hasn't been materialized yet.
+ * when a workspace belongs to an acceleration program.
+ *
+ * The backend function is incremental and idempotent, so we sync once per mounted workspace/program pair
+ * to ensure already-active workspaces also receive newly-added gates and deliverables.
  */
 export function useAutoMaterializeDeliverables(
   workspaceId: string | undefined,
@@ -13,11 +16,12 @@ export function useAutoMaterializeDeliverables(
   programType: string | undefined,
 ) {
   const queryClient = useQueryClient();
+  const lastSyncKeyRef = useRef<string | null>(null);
 
   const isAcceleration = programType === 'acceleration';
   const enabled = !!workspaceId && !!programId && isAcceleration;
+  const syncKey = enabled ? `${workspaceId}:${programId}` : null;
 
-  // Check if milestones already exist from this program
   const { data: hasMaterialized } = useQuery({
     queryKey: ['acceleration-materialized', workspaceId],
     enabled,
@@ -47,12 +51,13 @@ export function useAutoMaterializeDeliverables(
       logger.info('materialize_deliverables_success', { workspaceId, programId, result });
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-actions', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['action-items', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-tab-badges', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['acceleration-materialized', workspaceId] });
     },
     onError: (err: unknown) => {
-      // Allow retry on next mount
-      didAutoMaterialize.current = false;
+      lastSyncKeyRef.current = null;
       logger.warn('materialize_deliverables_failed', {
         workspaceId,
         programId,
@@ -61,18 +66,13 @@ export function useAutoMaterializeDeliverables(
     },
   });
 
-  const didAutoMaterialize = useRef(false);
   useEffect(() => {
-    if (
-      enabled &&
-      hasMaterialized === false &&
-      !materializeMutation.isPending &&
-      !didAutoMaterialize.current
-    ) {
-      didAutoMaterialize.current = true;
-      materializeMutation.mutate();
-    }
-  }, [enabled, hasMaterialized, materializeMutation.isPending]);
+    if (!enabled || !syncKey || materializeMutation.isPending) return;
+    if (lastSyncKeyRef.current === syncKey) return;
+
+    lastSyncKeyRef.current = syncKey;
+    materializeMutation.mutate();
+  }, [enabled, syncKey, materializeMutation.isPending]);
 
   return { hasMaterialized, isPending: materializeMutation.isPending };
 }
