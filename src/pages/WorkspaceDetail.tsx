@@ -52,6 +52,10 @@ export default function WorkspaceDetail() {
   const shouldShowOnboarding = searchParams.get('onboarding') === 'true';
   const canWrite = isAdmin || isConsultor || isMentor || isFounder;
   const tabBadges = useWorkspaceTabBadges(id);
+
+  // Auto-materialize acceleration deliverables at page level (not tab-dependent)
+  const programType = workspace?.program ? (workspace.program as { program_type?: string }).program_type : undefined;
+  useAutoMaterializeDeliverables(workspace?.id, workspace?.program_id, programType);
   
   useEffect(() => {
     if (shouldShowOnboarding && workspace && isFounder) {
