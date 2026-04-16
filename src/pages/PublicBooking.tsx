@@ -45,6 +45,7 @@ export default function PublicBooking() {
   const [step, setStep] = useState<'loading' | 'program_select' | 'slots' | 'form' | 'success' | 'error'>('loading');
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [selectedProgramName, setSelectedProgramName] = useState<string | null>(null);
   const [pitchFile, setPitchFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +112,7 @@ export default function PublicBooking() {
   });
 
   const slots = slotsData?.slots;
-  const activeProgramName = slotsData?.programName || tokenData?.program_name;
+  const activeProgramName = selectedProgramName || slotsData?.programName || tokenData?.program_name;
 
   // Book mutation
   const bookMutation = useMutation({
@@ -192,8 +193,9 @@ export default function PublicBooking() {
     }
   };
 
-  const handleProgramSelect = (programId: string) => {
+  const handleProgramSelect = (programId: string, programName: string) => {
     setSelectedProgramId(programId);
+    setSelectedProgramName(programName);
     setSelectedSlot(null);
   };
 
@@ -293,6 +295,7 @@ export default function PublicBooking() {
                   className="p-0 h-auto ml-2 text-xs"
                   onClick={() => {
                     setSelectedProgramId(null);
+                    setSelectedProgramName(null);
                     setSelectedSlot(null);
                     setStep('program_select');
                   }}
@@ -322,7 +325,7 @@ export default function PublicBooking() {
                     key={option.program_id || 'global'}
                     variant="outline"
                     className="w-full justify-start h-auto py-4 px-4"
-                    onClick={() => handleProgramSelect(option.program_id || 'global')}
+                    onClick={() => handleProgramSelect(option.program_id || 'global', option.program_name)}
                   >
                     <Building2 className="h-5 w-5 mr-3 text-primary shrink-0" />
                     <div className="text-left">

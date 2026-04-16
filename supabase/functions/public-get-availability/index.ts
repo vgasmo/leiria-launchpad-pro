@@ -219,7 +219,10 @@ serve(async (req) => {
 
       // Determine which routing to use for slots
       let chosenRouting = null;
-      if (typeof selectedProgramId === 'string' && selectedProgramId !== '') {
+      if (selectedProgramId === 'global' || selectedProgramId === null || selectedProgramId === '') {
+        // User selected global or default
+        chosenRouting = allRoutings?.find(r => r.scope === 'global') || allRoutings?.[0] || null;
+      } else if (typeof selectedProgramId === 'string') {
         // User selected a specific program
         chosenRouting = allRoutings?.find(r => r.program_id === selectedProgramId) || null;
         if (chosenRouting?.program_id) {
@@ -227,9 +230,6 @@ serve(async (req) => {
           programId = prog?.id || null;
           programName = prog?.name || null;
         }
-      } else if (selectedProgramId === 'global' || selectedProgramId === null) {
-        // User selected global or default
-        chosenRouting = allRoutings?.find(r => r.scope === 'global') || allRoutings?.[0] || null;
       } else {
         // No selection yet — use first routing
         chosenRouting = allRoutings?.[0] || null;
