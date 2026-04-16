@@ -112,7 +112,7 @@ export default function PublicBooking() {
   });
 
   const slots = slotsData?.slots;
-  const activeProgramName = slotsData?.programName || tokenData?.program_name;
+  const activeProgramName = selectedProgramName || slotsData?.programName || tokenData?.program_name;
 
   // Book mutation
   const bookMutation = useMutation({
@@ -193,8 +193,9 @@ export default function PublicBooking() {
     }
   };
 
-  const handleProgramSelect = (programId: string) => {
+  const handleProgramSelect = (programId: string, programName: string) => {
     setSelectedProgramId(programId);
+    setSelectedProgramName(programName);
     setSelectedSlot(null);
   };
 
