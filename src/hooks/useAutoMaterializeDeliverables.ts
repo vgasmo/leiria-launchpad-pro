@@ -30,10 +30,10 @@ export function useAutoMaterializeDeliverables(
         .eq('workspace_id', workspaceId)
         .not('source_gate_id', 'is', null);
       if (error) {
-        console.error('[materialize_deliverables] Check query failed:', error.message);
+        logger.error('materialize_deliverables_check_failed', { workspaceId, error: error.message });
         return true; // Assume materialized on error to avoid infinite retry
       }
-      console.log('[materialize_deliverables] Check result:', { workspaceId, count, hasMaterialized: (count ?? 0) > 0 });
+      logger.debug('materialize_deliverables_check_result', { workspaceId, count, hasMaterialized: (count ?? 0) > 0 });
       return (count ?? 0) > 0;
     },
   });
@@ -41,13 +41,13 @@ export function useAutoMaterializeDeliverables(
   const materializeMutation = useMutation({
     mutationFn: async () => {
       if (!workspaceId || !programId) throw new Error('Missing workspace or program');
-      console.log('[materialize_deliverables] Calling RPC...', { workspaceId, programId });
+      logger.debug('materialize_deliverables_rpc_start', { workspaceId, programId });
       const { data, error } = await supabase.rpc('materialize_acceleration_deliverables', {
         p_workspace_id: workspaceId,
         p_program_id: programId,
       });
       if (error) throw new Error(error.message || JSON.stringify(error));
-      console.log('[materialize_deliverables] RPC result:', data);
+      logger.debug('materialize_deliverables_rpc_result', { data });
       return data as { milestones_created: number; actions_created: number };
     },
     onSuccess: (result) => {
@@ -61,7 +61,7 @@ export function useAutoMaterializeDeliverables(
       // Allow retry on next mount
       didAutoMaterialize.current = false;
       const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
-      console.error('[materialize_deliverables] Failed:', errorMsg);
+      logger.error('materialize_deliverables_rpc_failed', { workspaceId, programId, error: errorMsg });
       logger.warn('materialize_deliverables_failed', {
         workspaceId,
         programId,
@@ -89,7 +89,7 @@ export function useAutoMaterializeDeliverables(
       !materializeMutation.isPending &&
       !didAutoMaterialize.current
     ) {
-      console.log('[materialize_deliverables] Triggering auto-materialize', { workspaceId, programId, programType });
+      logger.debug('materialize_deliverables_trigger', { workspaceId, programId, programType });
       didAutoMaterialize.current = true;
       materializeMutation.mutate();
     }
