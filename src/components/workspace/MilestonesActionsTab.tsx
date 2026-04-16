@@ -55,6 +55,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
   // members removed - owner is always founder
   const { founderId } = useWorkspaceFounder(workspaceId);
+  const actionIds = useMemo(() => (actionItems || []).map(a => a.id), [actionItems]);
+  const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
+  const createDeliverable = useCreateActionDeliverable(workspaceId);
+  const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
   const deleteMilestone = useDeleteMilestone(workspaceId);
