@@ -424,6 +424,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
                         milestoneActions.map(item => (
                           <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
                             deliverables={deliverablesByAction?.[item.id] || []}
+                            platformDocuments={platformDocuments}
                             onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
                             onDelete={(item) => setDeleteActionTarget(item)}
                             onAddDeliverable={handleAddDeliverable} onCompleteDeliverable={handleCompleteDeliverable}
@@ -452,6 +453,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
             {actionsByMilestone.unassigned.map(item => (
               <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
                 deliverables={deliverablesByAction?.[item.id] || []}
+                platformDocuments={platformDocuments}
                 onStatusChange={handleStatusChange} onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteActionTarget(item)}
                 onAddDeliverable={handleAddDeliverable} onCompleteDeliverable={handleCompleteDeliverable}
