@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ActionItemCard } from './ActionItemCard';
+import { ActionItemCard, type PlatformDocument } from './ActionItemCard';
 import type { ActionItem } from '@/hooks/useActionItems';
 import type { ActionDeliverable } from '@/hooks/useActionDeliverables';
 import type { Milestone } from '@/hooks/useMilestones';
@@ -25,10 +25,11 @@ export interface MilestoneActionGroupProps {
   canWrite: boolean;
   isStaff: boolean;
   deliverablesByAction?: Record<string, ActionDeliverable[]>;
+  platformDocuments?: PlatformDocument[];
   onStatusChange: (item: ActionItem, status: ActionStatus) => void;
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
   onDelete: (item: ActionItem) => void;
-  onAddDeliverable?: (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => void;
+  onAddDeliverable?: (actionId: string, deliverable: { title: string; type: string; external_url?: string; document_id?: string }) => void;
   onCompleteDeliverable?: (id: string, actionId: string) => void;
   isSelected: (id: string) => boolean;
   onToggleSelect: (id: string) => void;
@@ -36,7 +37,7 @@ export interface MilestoneActionGroupProps {
 
 export const MilestoneActionGroup = memo(function MilestoneActionGroup({
   milestone, actions, progress, completedCount, isExpanded, onToggle, onAddAction, canWrite, isStaff,
-  deliverablesByAction, onStatusChange, onDueDateChange, onDelete, onAddDeliverable, onCompleteDeliverable, isSelected, onToggleSelect,
+  deliverablesByAction, platformDocuments, onStatusChange, onDueDateChange, onDelete, onAddDeliverable, onCompleteDeliverable, isSelected, onToggleSelect,
 }: MilestoneActionGroupProps) {
   const { t } = useTranslation();
   return (
@@ -78,6 +79,7 @@ export const MilestoneActionGroup = memo(function MilestoneActionGroup({
               actions.map(item => (
                 <ActionItemCard key={item.id} item={item} canWrite={canWrite} isStaff={isStaff}
                   deliverables={deliverablesByAction?.[item.id] || []}
+                  platformDocuments={platformDocuments}
                   onStatusChange={onStatusChange} onDueDateChange={onDueDateChange}
                   onDelete={onDelete} onAddDeliverable={onAddDeliverable} onCompleteDeliverable={onCompleteDeliverable}
                   isSelected={isSelected(item.id)} onToggleSelect={onToggleSelect}

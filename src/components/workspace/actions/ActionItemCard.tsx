@@ -31,22 +31,29 @@ const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
   high: { labelKey: 'actions.priorityHigh', color: 'text-destructive' },
 };
 
+export interface PlatformDocument {
+  id: string;
+  name: string;
+  type: 'template_instance' | 'document';
+}
+
 export interface ActionItemCardProps {
   item: ActionItem;
   canWrite: boolean;
   isStaff: boolean;
   deliverables?: ActionDeliverable[];
+  platformDocuments?: PlatformDocument[];
   onStatusChange: (item: ActionItem, status: ActionStatus) => void;
   onDueDateChange: (item: ActionItem, date: Date | undefined) => void;
   onDelete: (item: ActionItem) => void;
-  onAddDeliverable?: (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => void;
+  onAddDeliverable?: (actionId: string, deliverable: { title: string; type: string; external_url?: string; document_id?: string }) => void;
   onCompleteDeliverable?: (id: string, actionId: string) => void;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
 export const ActionItemCard = memo(function ActionItemCard({ 
-  item, canWrite, isStaff, deliverables = [], onStatusChange, onDueDateChange, onDelete,
+  item, canWrite, isStaff, deliverables = [], platformDocuments = [], onStatusChange, onDueDateChange, onDelete,
   onAddDeliverable, onCompleteDeliverable, isSelected, onToggleSelect,
 }: ActionItemCardProps) {
   const { t } = useTranslation();
@@ -55,7 +62,7 @@ export const ActionItemCard = memo(function ActionItemCard({
   const priorityConfig = PRIORITY_CONFIG[item.priority || 'medium'] || PRIORITY_CONFIG.medium;
 
   const [addDeliverableOpen, setAddDeliverableOpen] = useState(false);
-  const [newDeliverable, setNewDeliverable] = useState({ title: '', type: 'link', external_url: '' });
+  const [newDeliverable, setNewDeliverable] = useState({ title: '', type: 'link', external_url: '', document_id: '' });
 
   const totalDeliverables = deliverables.length;
   const completedDeliverables = deliverables.filter(d => d.completed_at).length;
@@ -86,16 +93,29 @@ export const ActionItemCard = memo(function ActionItemCard({
   };
 
   const handleAddDeliverable = () => {
-    if (!newDeliverable.title.trim()) {
-      toast.error(t('actions.deliverableTitleRequired', 'O título do entregável é obrigatório'));
-      return;
+    if (newDeliverable.type === 'platform_document') {
+      if (!newDeliverable.document_id) {
+        toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
+        return;
+      }
+      const doc = platformDocuments.find(d => d.id === newDeliverable.document_id);
+      onAddDeliverable?.(item.id, {
+        title: doc?.name || 'Documento',
+        type: 'platform_document',
+        document_id: newDeliverable.document_id,
+      });
+    } else {
+      if (!newDeliverable.title.trim()) {
+        toast.error(t('actions.deliverableTitleRequired', 'O título do entregável é obrigatório'));
+        return;
+      }
+      onAddDeliverable?.(item.id, {
+        title: newDeliverable.title,
+        type: newDeliverable.type,
+        external_url: newDeliverable.type === 'link' ? newDeliverable.external_url : undefined,
+      });
     }
-    onAddDeliverable?.(item.id, {
-      title: newDeliverable.title,
-      type: newDeliverable.type,
-      external_url: newDeliverable.type === 'link' ? newDeliverable.external_url : undefined,
-    });
-    setNewDeliverable({ title: '', type: 'link', external_url: '' });
+    setNewDeliverable({ title: '', type: 'link', external_url: '', document_id: '' });
     setAddDeliverableOpen(false);
   };
 
@@ -182,7 +202,9 @@ export const ActionItemCard = memo(function ActionItemCard({
           <div className="pl-10 space-y-1 pt-1">
             {deliverables.map(d => (
               <div key={d.id} className="flex items-center gap-2 text-xs group/del">
-                {d.type === 'link' ? <Link2 className="h-3 w-3 text-muted-foreground shrink-0" /> : <FileText className="h-3 w-3 text-muted-foreground shrink-0" />}
+                {d.type === 'link' ? <Link2 className="h-3 w-3 text-muted-foreground shrink-0" /> 
+                  : d.type === 'platform_document' ? <Paperclip className="h-3 w-3 text-primary shrink-0" />
+                  : <FileText className="h-3 w-3 text-muted-foreground shrink-0" />}
                 <span className={`flex-1 truncate ${d.completed_at ? 'line-through text-muted-foreground' : ''}`}>
                   {d.title}
                 </span>
@@ -218,12 +240,8 @@ export const ActionItemCard = memo(function ActionItemCard({
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('actions.deliverableTitle', 'Título')} *</Label>
-              <Input value={newDeliverable.title} onChange={e => setNewDeliverable(d => ({ ...d, title: e.target.value }))} placeholder={t('actions.deliverableTitlePlaceholder', 'Ex: Business Model Canvas')} className="h-8 text-sm" />
-            </div>
-            <div className="space-y-1.5">
               <Label className="text-xs">{t('actions.deliverableType', 'Tipo')}</Label>
-              <Select value={newDeliverable.type} onValueChange={v => setNewDeliverable(d => ({ ...d, type: v }))}>
+              <Select value={newDeliverable.type} onValueChange={v => setNewDeliverable(d => ({ ...d, type: v, title: '', document_id: '', external_url: '' }))}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="link"><span className="flex items-center gap-1.5"><Link2 className="h-3 w-3" /> Link</span></SelectItem>
@@ -232,11 +250,36 @@ export const ActionItemCard = memo(function ActionItemCard({
                 </SelectContent>
               </Select>
             </div>
-            {newDeliverable.type === 'link' && (
+
+            {newDeliverable.type === 'platform_document' ? (
               <div className="space-y-1.5">
-                <Label className="text-xs">URL</Label>
-                <Input value={newDeliverable.external_url} onChange={e => setNewDeliverable(d => ({ ...d, external_url: e.target.value }))} placeholder="https://..." className="h-8 text-sm" />
+                <Label className="text-xs">{t('actions.selectDocument', 'Documento')} *</Label>
+                <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable(d => ({ ...d, document_id: v }))}>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar documento...')} /></SelectTrigger>
+                  <SelectContent>
+                    {platformDocuments.length === 0 ? (
+                      <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem documentos disponíveis')}</div>
+                    ) : (
+                      platformDocuments.map(doc => (
+                        <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('actions.deliverableTitle', 'Título')} *</Label>
+                  <Input value={newDeliverable.title} onChange={e => setNewDeliverable(d => ({ ...d, title: e.target.value }))} placeholder={t('actions.deliverableTitlePlaceholder', 'Ex: Business Model Canvas')} className="h-8 text-sm" />
+                </div>
+                {newDeliverable.type === 'link' && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">URL</Label>
+                    <Input value={newDeliverable.external_url} onChange={e => setNewDeliverable(d => ({ ...d, external_url: e.target.value }))} placeholder="https://..." className="h-8 text-sm" />
+                  </div>
+                )}
+              </>
             )}
           </div>
           <DialogFooter>

@@ -24,9 +24,10 @@ import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
+import { useTemplateInstances } from '@/hooks/useTemplates';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
-import { ActionItemCard } from './actions/ActionItemCard';
+import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
 import { MilestoneActionGroup } from './actions/MilestoneActionGroup';
 import { KanbanColumn } from './actions/KanbanColumn';
 import { toast } from 'sonner';
@@ -52,6 +53,14 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
   const createDeliverable = useCreateActionDeliverable(workspaceId);
   const completeDeliverable = useCompleteActionDeliverable(workspaceId);
+  const { data: templateInstances } = useTemplateInstances(workspaceId);
+  const platformDocuments = useMemo<PlatformDocument[]>(() => {
+    return (templateInstances || []).map(ti => ({
+      id: ti.id,
+      name: ti.template?.name || ti.template_id,
+      type: 'template_instance' as const,
+    }));
+  }, [templateInstances]);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
@@ -157,9 +166,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     }
   }, [deleteTarget, canWrite, deleteAction, t]);
 
-  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => {
+  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string; document_id?: string }) => {
     try {
-      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null });
+      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null, document_id: deliverable.document_id || null });
       toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
     } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
   }, [createDeliverable, t]);
@@ -408,6 +417,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 canWrite={canWrite}
                 isStaff={true}
                 deliverablesByAction={deliverablesByAction || {}}
+                platformDocuments={platformDocuments}
                 onStatusChange={handleStatusChange}
                 onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteTarget(item)}
@@ -435,6 +445,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     canWrite={canWrite}
                     isStaff={true}
                     deliverables={deliverablesByAction?.[item.id] || []}
+                    platformDocuments={platformDocuments}
                     onStatusChange={handleStatusChange}
                     onDueDateChange={handleDueDateChange}
                     onDelete={(item) => setDeleteTarget(item)}
