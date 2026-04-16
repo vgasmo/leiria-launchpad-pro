@@ -321,11 +321,16 @@ serve(async (req) => {
           }
         }
 
-        // Resolve consultant from selected routing
+        // Resolve consultant from selected routing (with fallback to global)
         if (routingOptions.length > 0 && typeof selectedProgramId === 'string' && selectedProgramId !== '') {
-          const chosenRouting = selectedProgramId === 'global'
+          let chosenRouting = selectedProgramId === 'global'
             ? allRoutings?.find(r => r.scope === 'global')
             : allRoutings?.find(r => r.program_id === selectedProgramId);
+          
+          // Fallback to global if no program-specific routing exists
+          if (!chosenRouting && selectedProgramId !== 'global') {
+            chosenRouting = allRoutings?.find(r => r.scope === 'global') || null;
+          }
           
           if (chosenRouting) {
             const consultant = await resolveConsultantFromRouting(supabase, chosenRouting);
