@@ -557,7 +557,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       />
 
       {/* Recent Sessions - Full Width */}
-      <Card>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'agenda' })}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
