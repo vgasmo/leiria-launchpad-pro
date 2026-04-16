@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "npx playwright test",
+    "test:e2e": "bunx playwright test",
     "release-check": "bash scripts/release-check.sh"
   },
   "dependencies": {

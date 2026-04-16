@@ -46,27 +46,27 @@ echo "   API URL: ${SUPABASE_URL:-$VITE_SUPABASE_URL}"
 # 3. Seed test data
 echo ""
 echo "3️⃣  Seeding test data..."
-npx tsx scripts/e2e/seed-local-supabase.ts
+bunx tsx scripts/e2e/seed-local-supabase.ts
 
 # 4. Build app
 echo ""
 echo "4️⃣  Building app..."
-npm run build
+bun run build
 
 # 5. Start preview server
 echo ""
 echo "5️⃣  Starting preview server..."
-npx vite preview --port 5173 &
+bunx vite preview --port 5173 &
 SERVER_PID=$!
 trap "kill $SERVER_PID 2>/dev/null" EXIT
 
 # Wait for server
-npx wait-on http://localhost:5173 --timeout 15000
+bunx wait-on http://localhost:5173 --timeout 15000
 
 # 6. Run Playwright
 echo ""
 echo "6️⃣  Running Playwright tests..."
-PLAYWRIGHT_BASE_URL=http://localhost:5173 npx playwright test --reporter=line
+PLAYWRIGHT_BASE_URL=http://localhost:5173 bunx playwright test --reporter=line
 
 echo ""
 echo "✅ E2E tests complete"
