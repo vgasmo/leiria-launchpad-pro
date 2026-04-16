@@ -23,6 +23,7 @@ import { useActionItems, useUpdateActionItem, useDeleteActionItem, useCreateActi
 import { useMilestones, type Milestone } from '@/hooks/useMilestones';
 import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
+import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard } from './actions/ActionItemCard';
@@ -47,6 +48,10 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: members } = useWorkspaceMembers(workspaceId);
   const { founderId } = useWorkspaceFounder(workspaceId);
+  const actionIds = useMemo(() => (actionItems || []).map(a => a.id), [actionItems]);
+  const { data: deliverablesByAction } = useActionDeliverablesBatch(actionIds);
+  const createDeliverable = useCreateActionDeliverable(workspaceId);
+  const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
