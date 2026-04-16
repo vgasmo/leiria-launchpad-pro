@@ -49,6 +49,63 @@ export type Database = {
           },
         ]
       }
+      action_deliverables: {
+        Row: {
+          action_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          document_id: string | null
+          external_url: string | null
+          file_path: string | null
+          id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          action_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          document_id?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          document_id?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_deliverables_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "action_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "action_deliverables_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       action_items: {
         Row: {
           completed_at: string | null
