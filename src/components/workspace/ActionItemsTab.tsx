@@ -417,6 +417,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 canWrite={canWrite}
                 isStaff={true}
                 deliverablesByAction={deliverablesByAction || {}}
+                platformDocuments={platformDocuments}
                 onStatusChange={handleStatusChange}
                 onDueDateChange={handleDueDateChange}
                 onDelete={(item) => setDeleteTarget(item)}
@@ -444,6 +445,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     canWrite={canWrite}
                     isStaff={true}
                     deliverables={deliverablesByAction?.[item.id] || []}
+                    platformDocuments={platformDocuments}
                     onStatusChange={handleStatusChange}
                     onDueDateChange={handleDueDateChange}
                     onDelete={(item) => setDeleteTarget(item)}
