@@ -362,7 +362,7 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Next Actions */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSearchParams({ tab: 'actions' })}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
