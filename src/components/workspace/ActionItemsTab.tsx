@@ -387,10 +387,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                 onToggle={() => toggleMilestoneExpanded(milestone.id)}
                 onAddAction={() => openCreateDialogForMilestone(milestone.id)}
                 canWrite={canWrite}
-                members={members || []}
+                isStaff={true}
                 onStatusChange={handleStatusChange}
                 onDueDateChange={handleDueDateChange}
-                onOwnerChange={handleOwnerChange}
                 onDelete={(item) => setDeleteTarget(item)}
                 isSelected={isSelected}
                 onToggleSelect={toggleItem}
@@ -412,10 +411,9 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
                     key={item.id}
                     item={item}
                     canWrite={canWrite}
-                    members={members || []}
+                    isStaff={true}
                     onStatusChange={handleStatusChange}
                     onDueDateChange={handleDueDateChange}
-                    onOwnerChange={handleOwnerChange}
                     onDelete={(item) => setDeleteTarget(item)}
                     isSelected={isSelected(item.id)}
                     onToggleSelect={toggleItem}
