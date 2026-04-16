@@ -52,7 +52,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
   const { t } = useTranslation();
   const { data: milestones, isLoading: milestonesLoading } = useMilestones(workspaceId);
   const { data: actionItems, isLoading: actionsLoading } = useActionItems(workspaceId);
-  const { data: members } = useWorkspaceMembers(workspaceId);
+  // members removed - owner is always founder
   const { founderId } = useWorkspaceFounder(workspaceId);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
@@ -68,13 +68,13 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
 
   // State
   const [expandedMilestones, setExpandedMilestones] = useState<Set<string>>(() => new Set());
-  const [filters, setFilters] = useState({ owner: 'all', overdue: false, priority: 'all' });
+  const [filters, setFilters] = useState({ overdue: false, priority: 'all' });
   const [createMilestoneDialogOpen, setCreateMilestoneDialogOpen] = useState(false);
   const [createActionDialogOpen, setCreateActionDialogOpen] = useState(false);
   const [deleteMilestoneTarget, setDeleteMilestoneTarget] = useState<Milestone | null>(null);
   const [deleteActionTarget, setDeleteActionTarget] = useState<ActionItem | null>(null);
   const [newMilestone, setNewMilestone] = useState({ title: '', description: '', target_date: '' });
-  const [newAction, setNewAction] = useState({ title: '', description: '', due_date: '', priority: 'medium', owner_user_id: '', milestone_id: '' });
+  const [newAction, setNewAction] = useState({ title: '', description: '', due_date: '', priority: 'medium', milestone_id: '' });
 
   // Bulk selection
   const { selectedIds, toggleItem, selectAll, deselectAll, isSelected } = useBulkSelection(
@@ -87,7 +87,6 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
     const unassigned: ActionItem[] = [];
     (actionItems || []).forEach(item => {
       let passes = true;
-      if (filters.owner !== 'all' && item.owner_user_id !== filters.owner) passes = false;
       if (filters.priority !== 'all' && item.priority !== filters.priority) passes = false;
       if (filters.overdue) {
         const isOverdue = item.due_date && isPast(parseISO(item.due_date)) && !isToday(parseISO(item.due_date)) && item.status !== 'completed';
@@ -168,11 +167,6 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
     catch { toast.error(t('actions.failedToUpdate')); }
   }, [canWrite, updateAction, t]);
 
-  const handleOwnerChange = useCallback(async (item: ActionItem, ownerId: string) => {
-    if (!canWrite) return;
-    try { await updateAction.mutateAsync({ id: item.id, owner_user_id: ownerId === 'none' ? null : ownerId }); }
-    catch { toast.error(t('actions.failedToUpdate')); }
-  }, [canWrite, updateAction, t]);
 
   const handleDeleteActionConfirm = async () => {
     if (!deleteActionTarget || !canWrite) return;
@@ -189,17 +183,17 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff }: Milesto
         description: newAction.description || undefined,
         due_date: newAction.due_date || null,
         priority: newAction.priority,
-        owner_user_id: newAction.owner_user_id || null,
+        owner_user_id: founderId || null,
         milestone_id: newAction.milestone_id,
       });
       toast.success(t('actions.actionCreated'));
       setCreateActionDialogOpen(false);
-      setNewAction({ title: '', description: '', due_date: '', priority: 'medium', owner_user_id: '', milestone_id: '' });
+      setNewAction({ title: '', description: '', due_date: '', priority: 'medium', milestone_id: '' });
     } catch { toast.error(t('actions.failedToCreate')); }
   };
 
   const openCreateActionForMilestone = (milestoneId: string) => {
-    setNewAction(prev => ({ ...prev, milestone_id: milestoneId, owner_user_id: founderId || '' }));
+    setNewAction(prev => ({ ...prev, milestone_id: milestoneId }));
     setCreateActionDialogOpen(true);
   };
 
