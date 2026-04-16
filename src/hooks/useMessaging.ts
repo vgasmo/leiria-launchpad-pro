@@ -250,7 +250,7 @@ export function useCreateConversation() {
 
       const { data: conv, error: convError } = await supabase
         .from('conversations')
-        .select('*')
+        .select('id, workspace_id, title, is_group, created_at, updated_at')
         .eq('id', convId)
         .single();
 
