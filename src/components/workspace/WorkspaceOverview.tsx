@@ -479,6 +479,9 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
           </CardContent>
         </Card>
 
+        {/* Progress Timeline (with Acceleration Calendar) - visible to all roles immediately */}
+        <ProgressTimeline workspaceId={workspace.id} programId={workspace.program_id} programType={workspace.program?.program_type} currentWeek={(workspace as any).current_week ?? null} />
+
         {/* UX EMPHASIS by Role:
             - Staff (Consultant/Admin): See Health, Ownership, Contracts FIRST - operational focus
             - Founders: See Responsible Consultant, Playbook Progress, Investor Readiness FIRST - journey focus
@@ -503,11 +506,6 @@ export function WorkspaceOverview({ workspace, canWrite }: WorkspaceOverviewProp
         {(isConsultor || isAdmin) && (
           <WorkspaceAlertsSection workspaceId={workspace.id} canManage={canWrite} />
         )}
-        
-        {/* === FOUNDER-FOCUSED CONTENT BELOW === */}
-        
-        {/* Progress Timeline (with Acceleration Calendar) - moved up for founders */}
-        <ProgressTimeline workspaceId={workspace.id} programId={workspace.program_id} programType={workspace.program?.program_type} currentWeek={(workspace as any).current_week ?? null} />
         
         {/* Responsible Consultant Card - PRIMARY for founders - their key contact */}
         {isFounder && (
