@@ -157,6 +157,20 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     }
   }, [deleteTarget, canWrite, deleteAction, t]);
 
+  const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string }) => {
+    try {
+      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null });
+      toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
+    } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
+  }, [createDeliverable, t]);
+
+  const handleCompleteDeliverable = useCallback(async (id: string, actionId: string) => {
+    try {
+      await completeDeliverable.mutateAsync({ id, actionId });
+      toast.success(t('actions.deliverableCompleted', 'Entregável validado'));
+    } catch { toast.error(t('actions.failedToCompleteDeliverable', 'Erro ao validar entregável')); }
+  }, [completeDeliverable, t]);
+
   const handleCreate = async () => {
     if (!newAction.title.trim()) {
       toast.error(t('actions.titleRequired'));
