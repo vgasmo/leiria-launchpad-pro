@@ -61,6 +61,7 @@ import { TagPicker } from '@/components/tags/TagPicker';
 import { useWorkspaceTags, useAddWorkspaceTag, useRemoveWorkspaceTag } from '@/hooks/useGlobalSearch';
 import { supabase } from '@/lib/supabaseClient';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
 import { toast } from 'sonner';
 import { StartupStage, HealthScore, WorkspacePriority } from '@/types/database';
 import type { Database } from '@/integrations/supabase/types';
