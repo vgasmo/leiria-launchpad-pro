@@ -263,6 +263,38 @@ export function ChatTab({ workspaceId }: ChatTabProps) {
           <MessageSquare className="h-4 w-4" />
           {t('chat.title', 'Workspace Chat')}
         </CardTitle>
+        {participants.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-muted-foreground mr-1">
+              {t('chat.participants', { defaultValue: 'Participantes' })}:
+            </span>
+            {participants.map((p) => {
+              const initials =
+                p.full_name
+                  ?.split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase() || '?';
+              return (
+                <div
+                  key={p.user_id}
+                  className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 py-0.5 pl-0.5 pr-2"
+                  title={`${p.full_name || t('chat.unknown', { defaultValue: 'Desconhecido' })} · ${roleLabel(p.role)}`}
+                >
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={p.avatar_url || undefined} />
+                    <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs truncate max-w-[140px]">
+                    {p.full_name || t('chat.unknown', { defaultValue: 'Desconhecido' })}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">· {roleLabel(p.role)}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </CardHeader>
 
       {/* Messages area */}
