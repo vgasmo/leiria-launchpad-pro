@@ -8565,6 +8565,16 @@ export type Database = {
       }
       ensure_founder_role: { Args: never; Returns: undefined }
       generate_weekly_checkins: { Args: never; Returns: number }
+      get_assigned_consultant_contact: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          avatar_url: string
+          email: string
+          full_name: string
+          id: string
+          linkedin_url: string
+        }[]
+      }
       get_dataroom_workspace_id: {
         Args: { _dataroom_id: string }
         Returns: string

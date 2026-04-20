@@ -30,6 +30,13 @@ interface Profile {
   avatar_url: string | null;
 }
 
+interface Participant {
+  user_id: string;
+  role: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 export function ChatTab({ workspaceId }: ChatTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -119,6 +126,49 @@ export function ChatTab({ workspaceId }: ChatTabProps) {
   });
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+  // Fetch chat participants (workspace members) to show in header
+  const { data: participants = [] } = useQuery({
+    queryKey: ['chat-participants', workspaceId],
+    queryFn: async (): Promise<Participant[]> => {
+      const { data: members, error: mErr } = await supabase
+        .from('workspace_users')
+        .select('user_id, role')
+        .eq('workspace_id', workspaceId)
+        .eq('active', true);
+      if (mErr) throw mErr;
+      if (!members || members.length === 0) return [];
+      const ids = members.map(m => m.user_id);
+      const { data: profs, error: pErr } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', ids);
+      if (pErr) throw pErr;
+      const pMap = new Map((profs || []).map((p: any) => [p.id, p]));
+      return members.map(m => ({
+        user_id: m.user_id,
+        role: m.role,
+        full_name: (pMap.get(m.user_id) as any)?.full_name ?? null,
+        avatar_url: (pMap.get(m.user_id) as any)?.avatar_url ?? null,
+      }));
+    },
+    enabled: !!workspaceId,
+  });
+
+  const roleLabel = (role: string): string => {
+    switch (role) {
+      case 'founder':
+        return t('roles.founder', { defaultValue: 'Fundador' });
+      case 'consultor':
+        return t('roles.consultor', { defaultValue: 'Consultor' });
+      case 'mentor_externo':
+        return t('roles.mentor', { defaultValue: 'Mentor' });
+      case 'admin':
+        return t('roles.admin', { defaultValue: 'Admin' });
+      default:
+        return role;
+    }
+  };
 
   // Realtime subscription
   useEffect(() => {
@@ -213,6 +263,38 @@ export function ChatTab({ workspaceId }: ChatTabProps) {
           <MessageSquare className="h-4 w-4" />
           {t('chat.title', 'Workspace Chat')}
         </CardTitle>
+        {participants.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-muted-foreground mr-1">
+              {t('chat.participants', { defaultValue: 'Participantes' })}:
+            </span>
+            {participants.map((p) => {
+              const initials =
+                p.full_name
+                  ?.split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase() || '?';
+              return (
+                <div
+                  key={p.user_id}
+                  className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 py-0.5 pl-0.5 pr-2"
+                  title={`${p.full_name || t('chat.unknown', { defaultValue: 'Desconhecido' })} · ${roleLabel(p.role)}`}
+                >
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={p.avatar_url || undefined} />
+                    <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs truncate max-w-[140px]">
+                    {p.full_name || t('chat.unknown', { defaultValue: 'Desconhecido' })}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">· {roleLabel(p.role)}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </CardHeader>
 
       {/* Messages area */}
