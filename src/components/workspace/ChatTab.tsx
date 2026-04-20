@@ -30,6 +30,13 @@ interface Profile {
   avatar_url: string | null;
 }
 
+interface Participant {
+  user_id: string;
+  role: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 export function ChatTab({ workspaceId }: ChatTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
