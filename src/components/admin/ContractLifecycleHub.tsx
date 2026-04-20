@@ -594,7 +594,7 @@ export function ContractLifecycleHub() {
                           </div>
                           <ContractIntelligenceCard
                             contractId={contract.id}
-                            contractLabel={startupName || 'Contract'}
+                            contractLabel={displayName}
                           />
                         </div>
                       );
