@@ -36,11 +36,10 @@ export interface PlatformDocument {
   name: string;
   /**
    * Source type drives how the deliverable is persisted:
-   * - 'document'           → real row in `documents` table → use `document_id` FK
    * - 'template_instance'  → row in `template_instances` (not in `documents`) → store as link
    * - 'template'           → global template not yet instantiated → store as link
    */
-  type: 'document' | 'template_instance' | 'template';
+  type: 'template_instance' | 'template';
 }
 
 export interface ActionItemCardProps {
@@ -111,10 +110,6 @@ export const ActionItemCard = memo(function ActionItemCard({
       return;
     }
 
-    // Only real `documents` rows can satisfy the FK action_deliverables.document_id → documents.id.
-    // Templates / template instances live in different tables, so we persist them as a link
-    // pointing back to the workspace Documents tab to avoid FK violations.
-    const isRealDocument = doc.type === 'document';
     const docDeepLink = workspaceId
       ? `/workspace/${workspaceId}?tab=documents&doc=${encodeURIComponent(doc.id)}`
       : undefined;
@@ -122,9 +117,7 @@ export const ActionItemCard = memo(function ActionItemCard({
     onAddDeliverable?.(item.id, {
       title: doc.name || 'Documento',
       type: 'platform_document',
-      ...(isRealDocument
-        ? { document_id: doc.id }
-        : { external_url: docDeepLink }),
+      external_url: docDeepLink,
     });
 
     setNewDeliverable({ document_id: '' });
