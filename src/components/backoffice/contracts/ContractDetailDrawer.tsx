@@ -586,7 +586,7 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
             <TabsContent value="intelligence" className="mt-4 pb-8">
               <ContractIntelligenceCard
                 contractId={contract.id}
-                contractLabel={startup?.name || t('common.unnamed')}
+                contractLabel={startup?.name || (contract as any).organization_name || t('common.unnamed')}
               />
             </TabsContent>
 
