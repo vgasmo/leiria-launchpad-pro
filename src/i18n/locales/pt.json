@@ -6826,7 +6826,8 @@
   },
   "stageProgress": {
     "complete": "completo",
-    "milestones": "Marcos",
+    "milestones": "marcos",
+    "stages": "fases",
     "stageProgress": "Progresso de Fase",
     "viewMilestones": "Ver Marcos & Playbooks",
     "yourJourney": "A Sua Jornada"
