@@ -6825,11 +6825,11 @@
     "suggestedForStage": "Sugeridos para fase {{stage}}"
   },
   "stageProgress": {
-    "complete": "complete",
+    "complete": "completo",
     "milestones": "Marcos",
-    "stageProgress": "Stage Progress",
+    "stageProgress": "Progresso de Fase",
     "viewMilestones": "Ver Marcos & Playbooks",
-    "yourJourney": "Your Journey"
+    "yourJourney": "A Sua Jornada"
   },
   "stages": {
     "accelerating": "Em Aceleração",
