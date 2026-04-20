@@ -248,12 +248,12 @@ export const ActionItemCard = memo(function ActionItemCard({
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('actions.selectDocument', 'Documento')} *</Label>
+              <Label className="text-xs">{t('actions.selectPlatformMaterial', 'Material da plataforma')} *</Label>
               <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable({ document_id: v })}>
-                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar documento...')} /></SelectTrigger>
+                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar material...')} /></SelectTrigger>
                 <SelectContent>
                   {platformDocuments.length === 0 ? (
-                    <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem documentos disponíveis')}</div>
+                    <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem materiais disponíveis')}</div>
                   ) : (
                     platformDocuments.map(doc => (
                       <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
@@ -263,7 +263,7 @@ export const ActionItemCard = memo(function ActionItemCard({
               </Select>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o template.')}
+              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o material da plataforma.')}
             </p>
           </div>
           <DialogFooter>
