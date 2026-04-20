@@ -3284,7 +3284,15 @@
       "dataroom": "Data Room",
       "financial": "Financial Model",
       "label": "Document sections",
+      "program": "Program Materials",
       "tools": "Entrepreneur Tools"
+    },
+    "programMaterials": {
+      "title": "Program Materials",
+      "description": "Resources uploaded by consultants for founders in this program (session slides, guides, checklists).",
+      "emptyTitle": "No program materials yet",
+      "emptyDescription": "Consultants haven't published materials for this program yet. PowerPoints, PDFs and other resources will appear here once uploaded.",
+      "download": "Download"
     },
     "supportedFormats": "Supported formats: .xlsx, .xls, .csv",
     "title": "Documents",
