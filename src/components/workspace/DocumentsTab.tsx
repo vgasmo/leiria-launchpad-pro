@@ -31,7 +31,9 @@ import {
   Calculator,
   Wrench,
   FolderLock,
+  GraduationCap,
 } from 'lucide-react';
+import { ProgramMaterialsPanel } from './ProgramMaterialsPanel';
 import { DocumentFeedbackButton } from './DocumentFeedbackButton';
 import { DocumentReviewPanel, DocumentReviewBadge } from './DocumentReviewPanel';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
@@ -75,12 +77,13 @@ const CATEGORY_KEYS = [
   { key: 'other', labelKey: 'documents.categoryOther' },
 ];
 
-type DocumentSubTab = 'all' | 'financial' | 'tools' | 'dataroom';
+type DocumentSubTab = 'all' | 'financial' | 'tools' | 'program' | 'dataroom';
 
 const SUB_TABS: { id: DocumentSubTab; labelKey: string; icon: typeof FileText }[] = [
   { id: 'all', labelKey: 'documents.subTabs.all', icon: FileText },
   { id: 'financial', labelKey: 'documents.subTabs.financial', icon: Calculator },
   { id: 'tools', labelKey: 'documents.subTabs.tools', icon: Wrench },
+  { id: 'program', labelKey: 'documents.subTabs.program', icon: GraduationCap },
   { id: 'dataroom', labelKey: 'documents.subTabs.dataroom', icon: FolderLock },
 ];
 
