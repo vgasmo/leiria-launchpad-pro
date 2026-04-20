@@ -31,7 +31,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useSupportMaterials, SupportMaterial } from '@/hooks/useSupportMaterials';
+import { useSupportMaterials, useSupportMaterialDownloadUrl, SupportMaterial } from '@/hooks/useSupportMaterials';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { UploadSupportMaterialDialog } from './UploadSupportMaterialDialog';
+import { toast } from 'sonner';
+import { Download } from 'lucide-react';
 
 const STARTUP_TYPES = ['b2b', 'b2c', 'marketplace', 'deep_tech', 'impact', 'saas'];
 const STARTUP_STAGES = ['idea', 'validation', 'early_traction', 'growth', 'scale'];
@@ -46,11 +50,14 @@ const CATEGORY_ICONS: Record<string, typeof FileText> = {
 
 export function SupportMaterialsTab() {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useUserRoles();
+  const isStaff = isAdmin || isConsultor;
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [stageFilter, setStageFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [selectedMaterial, setSelectedMaterial] = useState<SupportMaterial | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: materials, isLoading } = useSupportMaterials({
     startupType: typeFilter || undefined,
