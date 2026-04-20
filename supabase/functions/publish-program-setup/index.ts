@@ -38,7 +38,7 @@ interface DraftData {
     week_number: number;
     title: string;
     description?: string;
-    deliverables_json: { title: string; description?: string }[];
+    deliverables_json: { title: string; description?: string; template_id?: string | null }[];
   }[];
   stages: {
     stage_key: string;
