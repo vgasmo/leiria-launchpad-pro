@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useQuery } from '@tanstack/react-query';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Linkedin,
