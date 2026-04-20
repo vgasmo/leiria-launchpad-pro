@@ -494,7 +494,7 @@ export default function Mentors() {
                       variant="outline"
                       size="sm"
                       className="h-8 text-xs gap-1"
-                      onClick={() => openMailTo(assignedConsultant.email)}
+                      onClick={() => openMailTo(assignedConsultant.email, t('workspace.responsibleConsultant', { defaultValue: 'Consultor Responsável' }))}
                     >
                       <Mail className="h-3.5 w-3.5" />
                       {t('mentorsPage.contact')}
@@ -575,7 +575,7 @@ export default function Mentors() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => openMailTo(mentor.profile?.email)}
+                              onClick={() => openMailTo(mentor.profile?.email, mentor.profile?.full_name || t('mentorsPage.mentor', { defaultValue: 'Mentor' }))}
                               title={t('mentorsPage.contactMentor', 'Contact mentor')}
                             >
                               <Mail className="h-3.5 w-3.5" />
