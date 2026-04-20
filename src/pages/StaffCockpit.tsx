@@ -20,11 +20,28 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function StaffCockpit() {
   const { t } = useTranslation();
   const { profile, roles } = useAuth();
-  const { data: workspaces = [] } = useWorkspaces();
+  const { data: workspaces = [], isLoading: workspacesLoading } = useWorkspaces();
+
+  // Real ecosystem-wide programs count (matches Admin Dashboard)
+  const { data: programsCount = 0, isLoading: programsLoading } = useQuery({
+    queryKey: ['active-programs-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('programs')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_active', true);
+      if (error) throw error;
+      return count ?? 0;
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const heroLoading = workspacesLoading || programsLoading;
 
   const isAdmin = roles?.includes('admin');
   const isConsultor = roles?.includes('consultor');
@@ -45,13 +62,17 @@ export default function StaffCockpit() {
             <h2 className="text-xl font-heading font-semibold text-foreground">
               {greeting}
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('staffCockpit.heroSubtitle', { 
-                defaultValue: '{{count}} startups no ecossistema · {{programs}} programas', 
-                count: workspaces.length,
-                programs: new Set(workspaces.map(w => w.program_id).filter(Boolean)).size || 0
-              })}
-            </p>
+            {heroLoading ? (
+              <Skeleton className="h-4 w-64 mt-2" />
+            ) : (
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('staffCockpit.heroSubtitle', {
+                  defaultValue: '{{count}} startups no ecossistema · {{programs}} programas',
+                  count: workspaces.length,
+                  programs: programsCount,
+                })}
+              </p>
+            )}
           </div>
           <LayoutDashboard className="h-10 w-10 text-primary/20" />
         </div>
