@@ -73,6 +73,16 @@ export function SupportMaterialsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Header actions */}
+      {isStaff && (
+        <div className="flex justify-end">
+          <Button onClick={() => setUploadOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('consultorTools.uploadMaterial', 'Carregar Material')}
+          </Button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
         <div className="relative flex-1 max-w-md">
@@ -124,6 +134,11 @@ export function SupportMaterialsTab() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Upload dialog */}
+      {isStaff && (
+        <UploadSupportMaterialDialog open={uploadOpen} onOpenChange={setUploadOpen} />
+      )}
 
       {/* Materials List */}
       {isLoading ? (
