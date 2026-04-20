@@ -31,7 +31,9 @@ import {
   Calculator,
   Wrench,
   FolderLock,
+  GraduationCap,
 } from 'lucide-react';
+import { ProgramMaterialsPanel } from './ProgramMaterialsPanel';
 import { DocumentFeedbackButton } from './DocumentFeedbackButton';
 import { DocumentReviewPanel, DocumentReviewBadge } from './DocumentReviewPanel';
 import { useQuickWinToast } from '@/hooks/useQuickWinToast';
@@ -75,12 +77,13 @@ const CATEGORY_KEYS = [
   { key: 'other', labelKey: 'documents.categoryOther' },
 ];
 
-type DocumentSubTab = 'all' | 'financial' | 'tools' | 'dataroom';
+type DocumentSubTab = 'all' | 'financial' | 'tools' | 'program' | 'dataroom';
 
 const SUB_TABS: { id: DocumentSubTab; labelKey: string; icon: typeof FileText }[] = [
   { id: 'all', labelKey: 'documents.subTabs.all', icon: FileText },
   { id: 'financial', labelKey: 'documents.subTabs.financial', icon: Calculator },
   { id: 'tools', labelKey: 'documents.subTabs.tools', icon: Wrench },
+  { id: 'program', labelKey: 'documents.subTabs.program', icon: GraduationCap },
   { id: 'dataroom', labelKey: 'documents.subTabs.dataroom', icon: FolderLock },
 ];
 
@@ -108,7 +111,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   // Sub-tab state from URL
   const subParam = (searchParams.get('sub') as DocumentSubTab) || 'all';
   const [activeSubTab, setActiveSubTab] = useState<DocumentSubTab>(
-    ['all', 'financial', 'tools', 'dataroom'].includes(subParam) ? subParam : 'all'
+    ['all', 'financial', 'tools', 'program', 'dataroom'].includes(subParam) ? subParam : 'all'
   );
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -140,7 +143,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   // Sync from URL changes
   useEffect(() => {
     const sub = searchParams.get('sub') as DocumentSubTab;
-    if (sub && ['all', 'financial', 'tools', 'dataroom'].includes(sub)) {
+    if (sub && ['all', 'financial', 'tools', 'program', 'dataroom'].includes(sub)) {
       setActiveSubTab(sub);
     } else if (!sub) {
       setActiveSubTab('all');
@@ -375,6 +378,14 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
       {activeSubTab === 'tools' && (
         <div role="tabpanel" id="doc-panel-tools" aria-labelledby="doc-tab-tools">
           <TemplatesTab workspaceId={workspaceId} canWrite={canWrite} isFounder={isFounder} />
+        </div>
+      )}
+
+      {activeSubTab === 'program' && (
+        <div role="tabpanel" id="doc-panel-program" aria-labelledby="doc-tab-program">
+          <WidgetErrorBoundary name="Program Materials">
+            <ProgramMaterialsPanel workspaceId={workspaceId} />
+          </WidgetErrorBoundary>
         </div>
       )}
 

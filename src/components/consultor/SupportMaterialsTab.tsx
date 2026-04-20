@@ -31,7 +31,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useSupportMaterials, SupportMaterial } from '@/hooks/useSupportMaterials';
+import { useSupportMaterials, useSupportMaterialDownloadUrl, SupportMaterial } from '@/hooks/useSupportMaterials';
+import { useAuth } from '@/contexts/AuthContext';
+import { UploadSupportMaterialDialog } from './UploadSupportMaterialDialog';
+import { toast } from 'sonner';
+import { Download } from 'lucide-react';
 
 const STARTUP_TYPES = ['b2b', 'b2c', 'marketplace', 'deep_tech', 'impact', 'saas'];
 const STARTUP_STAGES = ['idea', 'validation', 'early_traction', 'growth', 'scale'];
@@ -46,11 +50,14 @@ const CATEGORY_ICONS: Record<string, typeof FileText> = {
 
 export function SupportMaterialsTab() {
   const { t } = useTranslation();
+  const { isAdmin, isConsultor } = useAuth();
+  const isStaff = isAdmin || isConsultor;
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [stageFilter, setStageFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [selectedMaterial, setSelectedMaterial] = useState<SupportMaterial | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: materials, isLoading } = useSupportMaterials({
     startupType: typeFilter || undefined,
@@ -66,6 +73,16 @@ export function SupportMaterialsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Header actions */}
+      {isStaff && (
+        <div className="flex justify-end">
+          <Button onClick={() => setUploadOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('consultorTools.uploadMaterial', 'Carregar Material')}
+          </Button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
         <div className="relative flex-1 max-w-md">
@@ -117,6 +134,11 @@ export function SupportMaterialsTab() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Upload dialog */}
+      {isStaff && (
+        <UploadSupportMaterialDialog open={uploadOpen} onOpenChange={setUploadOpen} />
+      )}
 
       {/* Materials List */}
       {isLoading ? (
@@ -257,6 +279,9 @@ function MaterialDetailDialog({
               <p className="text-muted-foreground">{material.description}</p>
             )}
 
+            {/* File download */}
+            {material.file_path && <FileDownloadButton path={material.file_path} />}
+
             {/* Content */}
             {material.content_markdown && (
               <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -290,5 +315,26 @@ function MaterialDetailDialog({
         </ScrollArea>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FileDownloadButton({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const getUrl = useSupportMaterialDownloadUrl();
+  const handleClick = async () => {
+    try {
+      const url = await getUrl.mutateAsync(path);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      toast.error(t('common.error', 'Erro'), { description: (err as Error).message });
+    }
+  };
+  return (
+    <Button onClick={handleClick} disabled={getUrl.isPending} variant="default">
+      <Download className="h-4 w-4 mr-2" />
+      {getUrl.isPending
+        ? t('common.loading', 'A carregar…')
+        : t('consultorTools.downloadFile', 'Descarregar ficheiro')}
+    </Button>
   );
 }

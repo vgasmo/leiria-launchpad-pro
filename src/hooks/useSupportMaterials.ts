@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 
+export const SUPPORT_MATERIALS_BUCKET = 'support-materials';
+
 export interface SupportMaterial {
   id: string;
   title: string;
@@ -24,6 +26,9 @@ export function useSupportMaterials(filters?: {
   startupType?: string;
   startupStage?: string;
   category?: string;
+  programId?: string;
+  /** When true, requires program_id = programId (excludes globals). */
+  requireProgram?: boolean;
 }) {
   return useQuery({
     queryKey: ['support-materials', filters],
@@ -43,10 +48,58 @@ export function useSupportMaterials(filters?: {
       if (filters?.category) {
         query = query.eq('category', filters.category);
       }
+      if (filters?.programId) {
+        if (filters.requireProgram) {
+          query = query.eq('program_id', filters.programId);
+        } else {
+          // Include globals (program_id IS NULL) OR materials of this program
+          query = query.or(`program_id.is.null,program_id.eq.${filters.programId}`);
+        }
+      }
 
       const { data, error } = await query;
       if (error) throw error;
       return data as SupportMaterial[];
+    },
+  });
+}
+
+/**
+ * Upload a file to the support-materials bucket.
+ * Convention: <program_id|'global'>/<material_id>/<filename>
+ */
+export function useUploadSupportMaterialFile() {
+  return useMutation({
+    mutationFn: async ({
+      file,
+      programId,
+      materialId,
+    }: {
+      file: File;
+      programId: string | null;
+      materialId: string;
+    }) => {
+      const folder = programId ?? 'global';
+      const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+      const path = `${folder}/${materialId}/${Date.now()}_${safeName}`;
+      const { error } = await supabase.storage
+        .from(SUPPORT_MATERIALS_BUCKET)
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      return path;
+    },
+  });
+}
+
+/** Get a short-lived signed URL for downloading a support material file. */
+export function useSupportMaterialDownloadUrl() {
+  return useMutation({
+    mutationFn: async (filePath: string) => {
+      const { data, error } = await supabase.storage
+        .from(SUPPORT_MATERIALS_BUCKET)
+        .createSignedUrl(filePath, 60 * 5);
+      if (error) throw error;
+      return data.signedUrl;
     },
   });
 }
