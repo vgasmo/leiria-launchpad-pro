@@ -127,6 +127,49 @@ export function ChatTab({ workspaceId }: ChatTabProps) {
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
+  // Fetch chat participants (workspace members) to show in header
+  const { data: participants = [] } = useQuery({
+    queryKey: ['chat-participants', workspaceId],
+    queryFn: async (): Promise<Participant[]> => {
+      const { data: members, error: mErr } = await supabase
+        .from('workspace_users')
+        .select('user_id, role')
+        .eq('workspace_id', workspaceId)
+        .eq('active', true);
+      if (mErr) throw mErr;
+      if (!members || members.length === 0) return [];
+      const ids = members.map(m => m.user_id);
+      const { data: profs, error: pErr } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', ids);
+      if (pErr) throw pErr;
+      const pMap = new Map((profs || []).map((p: any) => [p.id, p]));
+      return members.map(m => ({
+        user_id: m.user_id,
+        role: m.role,
+        full_name: (pMap.get(m.user_id) as any)?.full_name ?? null,
+        avatar_url: (pMap.get(m.user_id) as any)?.avatar_url ?? null,
+      }));
+    },
+    enabled: !!workspaceId,
+  });
+
+  const roleLabel = (role: string): string => {
+    switch (role) {
+      case 'founder':
+        return t('roles.founder', { defaultValue: 'Fundador' });
+      case 'consultor':
+        return t('roles.consultor', { defaultValue: 'Consultor' });
+      case 'mentor_externo':
+        return t('roles.mentor', { defaultValue: 'Mentor' });
+      case 'admin':
+        return t('roles.admin', { defaultValue: 'Admin' });
+      default:
+        return role;
+    }
+  };
+
   // Realtime subscription
   useEffect(() => {
     if (!conversation?.id) return;
