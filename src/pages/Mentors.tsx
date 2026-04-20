@@ -281,14 +281,24 @@ export default function Mentors() {
 
       let consultant: MentorProfile | null = null;
       if (workspace?.assigned_consultor_id) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles_safe')
-          .select('id, full_name, email, avatar_url, linkedin_url, bio, expertise')
-          .eq('id', workspace.assigned_consultor_id)
-          .maybeSingle();
-
-        if (profileError) throw profileError;
-        consultant = (profile as MentorProfile | null) ?? null;
+        // Use secure RPC that reveals consultant email to workspace members (founders)
+        const { data: contactRows, error: contactError } = await (supabase as any).rpc(
+          'get_assigned_consultant_contact',
+          { p_workspace_id: membership.workspace_id }
+        );
+        if (contactError) throw contactError;
+        const contact = Array.isArray(contactRows) && contactRows.length > 0 ? contactRows[0] : null;
+        if (contact) {
+          consultant = {
+            id: contact.id,
+            full_name: contact.full_name,
+            email: contact.email,
+            avatar_url: contact.avatar_url,
+            linkedin_url: contact.linkedin_url,
+            bio: null,
+            expertise: null,
+          } as MentorProfile;
+        }
       }
 
       return {
@@ -389,9 +399,14 @@ export default function Mentors() {
       .slice(0, 2) || 'U';
   };
 
-  const openMailTo = (email?: string | null) => {
+  const openMailTo = (email?: string | null, contextLabel?: string) => {
     if (!email) {
-      toast.error(t('mentorsPage.noEmailAvailable', 'No email available for this contact'));
+      toast.error(
+        t('mentorsPage.noEmailAvailableFor', {
+          defaultValue: 'Sem email disponível para {{target}}',
+          target: contextLabel || t('mentorsPage.thisContact', { defaultValue: 'este contacto' }),
+        })
+      );
       return;
     }
 
