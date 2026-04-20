@@ -6826,7 +6826,8 @@
   },
   "stageProgress": {
     "complete": "complete",
-    "milestones": "Milestones",
+    "milestones": "milestones",
+    "stages": "stages",
     "stageProgress": "Stage Progress",
     "viewMilestones": "View milestones & playbooks",
     "yourJourney": "Your Journey"
