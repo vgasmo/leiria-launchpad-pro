@@ -317,12 +317,16 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
     }
   };
 
+  const stageLabel = workspace?.stage
+    ? t(`stages.${workspace.stage}`, { defaultValue: workspace.stage })
+    : '';
+
   const handleApplyDefaults = async () => {
     if (!workspace?.stage) return;
     try {
       const result = await applyDefaults.mutateAsync(workspace.stage);
       if (result.length > 0) {
-        toast.success(t('kpis.addedDefaults', { count: result.length, stage: workspace.stage }));
+        toast.success(t('kpis.addedDefaults', { count: result.length, stage: stageLabel }));
       } else {
         toast.info(t('kpis.allDefaultsConfigured'));
       }
