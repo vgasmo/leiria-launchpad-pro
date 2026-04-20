@@ -233,7 +233,9 @@ Deno.serve(async (req: Request) => {
       return corsJsonResponse({ error: 'Access denied', code: ErrorCode.FORBIDDEN }, req, 403);
     }
 
-    // Get workspace consultant membership (avoid embedded profile relationship dependencies)
+    // Resolve consultant: prefer workspace_users membership; fallback to assigned_consultor_id (SLA field)
+    let consultantUserId: string | null = null;
+
     const { data: consultantMembership, error: consultantErr } = await supabaseAdmin
       .from('workspace_users')
       .select('user_id')
@@ -244,19 +246,24 @@ Deno.serve(async (req: Request) => {
 
     if (consultantErr) {
       log.error('Failed to fetch consultant membership', { consultantErr });
-      return corsJsonResponse(
-        {
-          success: false,
-          reason: 'consultant_query_error',
-          message: 'Failed to load consultant for this workspace',
-          slots: [],
-        },
-        req,
-      );
+    } else if (consultantMembership?.user_id) {
+      consultantUserId = consultantMembership.user_id;
     }
 
-    if (!consultantMembership?.user_id) {
-      log.info('No consultant membership found', { workspaceId });
+    if (!consultantUserId) {
+      const { data: workspaceRow } = await supabaseAdmin
+        .from('workspaces')
+        .select('assigned_consultor_id')
+        .eq('id', workspaceId)
+        .maybeSingle();
+      if (workspaceRow?.assigned_consultor_id) {
+        consultantUserId = workspaceRow.assigned_consultor_id;
+        log.info('Using assigned_consultor_id fallback', { workspaceId, consultantUserId });
+      }
+    }
+
+    if (!consultantUserId) {
+      log.info('No consultant membership or assignment found', { workspaceId });
       return corsJsonResponse(
         {
           success: false,
@@ -271,18 +278,18 @@ Deno.serve(async (req: Request) => {
     const { data: consultantProfile, error: profileErr } = await supabaseAdmin
       .from('profiles')
       .select('email, full_name')
-      .eq('id', consultantMembership.user_id)
+      .eq('id', consultantUserId)
       .maybeSingle();
 
     if (profileErr) {
-      log.error('Failed to fetch consultant profile', { profileErr, userId: consultantMembership.user_id });
+      log.error('Failed to fetch consultant profile', { profileErr, userId: consultantUserId });
     }
 
     const consultantEmail = consultantProfile?.email;
     const consultantName = consultantProfile?.full_name;
 
     if (!consultantEmail) {
-      log.info('Consultant has no email on profile', { workspaceId, userId: consultantMembership.user_id });
+      log.info('Consultant has no email on profile', { workspaceId, userId: consultantUserId });
       return corsJsonResponse(
         {
           success: false,
