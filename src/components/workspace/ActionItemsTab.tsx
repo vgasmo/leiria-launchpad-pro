@@ -65,7 +65,7 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
     const instantiatedTemplateIds = new Set((templateInstances || []).map(ti => ti.template_id));
     (globalTemplates || []).forEach(t => {
       if (!instantiatedTemplateIds.has(t.id)) {
-        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template_instance' });
+        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template' });
       }
     });
     (workspaceDocs || []).forEach(d => {

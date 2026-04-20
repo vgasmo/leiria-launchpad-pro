@@ -34,7 +34,13 @@ const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
 export interface PlatformDocument {
   id: string;
   name: string;
-  type: 'template_instance' | 'document';
+  /**
+   * Source type drives how the deliverable is persisted:
+   * - 'document'           → real row in `documents` table → use `document_id` FK
+   * - 'template_instance'  → row in `template_instances` (not in `documents`) → store as link
+   * - 'template'           → global template not yet instantiated → store as link
+   */
+  type: 'document' | 'template_instance' | 'template';
 }
 
 export interface ActionItemCardProps {
@@ -100,16 +106,32 @@ export const ActionItemCard = memo(function ActionItemCard({
       return;
     }
     const doc = platformDocuments.find(d => d.id === newDeliverable.document_id);
+    if (!doc) {
+      toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
+      return;
+    }
+
+    // Only real `documents` rows can satisfy the FK action_deliverables.document_id → documents.id.
+    // Templates / template instances live in different tables, so we persist them as a link
+    // pointing back to the workspace Documents tab to avoid FK violations.
+    const isRealDocument = doc.type === 'document';
+    const docDeepLink = workspaceId
+      ? `/workspace/${workspaceId}?tab=documents&doc=${encodeURIComponent(doc.id)}`
+      : undefined;
+
     onAddDeliverable?.(item.id, {
-      title: doc?.name || 'Documento',
+      title: doc.name || 'Documento',
       type: 'platform_document',
-      document_id: newDeliverable.document_id,
+      ...(isRealDocument
+        ? { document_id: doc.id }
+        : { external_url: docDeepLink }),
     });
+
     setNewDeliverable({ document_id: '' });
     setAddDeliverableOpen(false);
     // Navigate to documents tab so the founder can fill in the template
-    if (workspaceId) {
-      navigate(`/workspace/${workspaceId}?tab=documents&doc=${newDeliverable.document_id}`);
+    if (docDeepLink) {
+      navigate(docDeepLink);
     }
   };
 
