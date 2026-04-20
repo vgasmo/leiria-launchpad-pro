@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { sanitizeUrl } from '@/lib/sanitizeUrl';
 import { useQuery } from '@tanstack/react-query';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Linkedin,
@@ -223,6 +223,8 @@ export default function Mentors() {
   const { user, roles, isAuthReady, isAdmin, isConsultor } = useAuth();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'requests';
 
   const isFounder = roles.includes('founder');
   const isMentor = roles.includes('mentor_externo');
@@ -715,7 +717,7 @@ export default function Mentors() {
           <FounderMentorRequestPanel />
         </div>
       ) : isMentor ? (
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs defaultValue={initialTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="requests" className="gap-2">
               <MessageSquare className="h-4 w-4" />

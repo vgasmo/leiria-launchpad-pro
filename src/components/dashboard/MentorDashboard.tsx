@@ -176,6 +176,33 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
         <span className="text-sm text-muted-foreground">{statusLabels[availabilityStatus]}</span>
       </div>
 
+      {/* No-availability banner — prevents founders from being unable to book */}
+      {slotsThisWeek === 0 && (
+        <Card className="border-amber-400/50 bg-gradient-to-r from-amber-50/60 via-yellow-50/40 to-transparent dark:from-amber-950/20 dark:via-yellow-950/10 rounded-2xl">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+              <Clock className="h-4 w-4 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">
+                {t('mentor.availability.emptyBanner.title', { defaultValue: 'Define a tua disponibilidade' })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('mentor.availability.emptyBanner.subtitle', { defaultValue: 'Sem horários definidos, os fundadores não conseguem agendar sessões contigo.' })}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate('/mentors?tab=availability')}
+              className="gap-1.5 shrink-0"
+            >
+              {t('mentor.availability.emptyBanner.cta', { defaultValue: 'Configurar agora' })}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* P0 HERO: Enhanced Session Prep */}
       <WidgetErrorBoundary name="MentorSessionPrep">
         <MentorSessionPrepEnhanced workspaces={workspaces} />
