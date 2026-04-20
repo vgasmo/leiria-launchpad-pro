@@ -365,6 +365,27 @@ export function WizardWeeksGatesStep({ gates: initialGates, weeks: initialWeeks,
                             placeholder={t('programSetup.acceleration.deliverablePlaceholder', 'Deliverable title')}
                             className="h-8 text-sm"
                           />
+                          <Select
+                            value={del.template_id || 'none'}
+                            onValueChange={(v) => updateDeliverable(originalIdx, delIdx, 'template_id', v === 'none' ? '' : v)}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <SelectValue placeholder={t('programSetup.acceleration.linkTemplate', 'Link platform template (optional)')} />
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">
+                                {t('programSetup.acceleration.noTemplate', 'No template')}
+                              </SelectItem>
+                              {templates.map((tpl) => (
+                                <SelectItem key={tpl.id} value={tpl.id}>
+                                  {tpl.category ? `${tpl.category} · ${tpl.name}` : tpl.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeDeliverable(originalIdx, delIdx)}>
                           <Trash2 className="h-3 w-3" />
