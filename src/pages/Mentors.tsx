@@ -717,7 +717,7 @@ export default function Mentors() {
           <FounderMentorRequestPanel />
         </div>
       ) : isMentor ? (
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs defaultValue={initialTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="requests" className="gap-2">
               <MessageSquare className="h-4 w-4" />
