@@ -28,7 +28,6 @@ import { useMilestones, useCreateMilestone, useUpdateMilestone, useDeleteMilesto
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { useTemplateInstances, useTemplates } from '@/hooks/useTemplates';
-import { useDocuments } from '@/hooks/useDocuments';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
 import { toast } from 'sonner';
@@ -67,7 +66,6 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
   const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const { data: templateInstances } = useTemplateInstances(workspaceId);
   const { data: globalTemplates } = useTemplates();
-  const { data: workspaceDocs } = useDocuments(workspaceId);
   const platformDocuments = useMemo<PlatformDocument[]>(() => {
     const docs: PlatformDocument[] = [];
     // Template instances already filled in by the founder (live in `template_instances`, not `documents`)
@@ -81,12 +79,8 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
         docs.push({ id: `template:${t.id}`, name: t.name, type: 'template' });
       }
     });
-    // Real workspace documents (FK-safe)
-    (workspaceDocs || []).forEach(d => {
-      docs.push({ id: d.id, name: d.name, type: 'document' });
-    });
     return docs;
-  }, [templateInstances, globalTemplates, workspaceDocs]);
+  }, [templateInstances, globalTemplates]);
   const createMilestone = useCreateMilestone(workspaceId);
   const updateMilestone = useUpdateMilestone(workspaceId);
   const deleteMilestone = useDeleteMilestone(workspaceId);

@@ -36,11 +36,10 @@ export interface PlatformDocument {
   name: string;
   /**
    * Source type drives how the deliverable is persisted:
-   * - 'document'           → real row in `documents` table → use `document_id` FK
    * - 'template_instance'  → row in `template_instances` (not in `documents`) → store as link
    * - 'template'           → global template not yet instantiated → store as link
    */
-  type: 'document' | 'template_instance' | 'template';
+  type: 'template_instance' | 'template';
 }
 
 export interface ActionItemCardProps {
@@ -111,10 +110,6 @@ export const ActionItemCard = memo(function ActionItemCard({
       return;
     }
 
-    // Only real `documents` rows can satisfy the FK action_deliverables.document_id → documents.id.
-    // Templates / template instances live in different tables, so we persist them as a link
-    // pointing back to the workspace Documents tab to avoid FK violations.
-    const isRealDocument = doc.type === 'document';
     const docDeepLink = workspaceId
       ? `/workspace/${workspaceId}?tab=documents&doc=${encodeURIComponent(doc.id)}`
       : undefined;
@@ -122,9 +117,7 @@ export const ActionItemCard = memo(function ActionItemCard({
     onAddDeliverable?.(item.id, {
       title: doc.name || 'Documento',
       type: 'platform_document',
-      ...(isRealDocument
-        ? { document_id: doc.id }
-        : { external_url: docDeepLink }),
+      external_url: docDeepLink,
     });
 
     setNewDeliverable({ document_id: '' });
@@ -255,12 +248,12 @@ export const ActionItemCard = memo(function ActionItemCard({
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('actions.selectDocument', 'Documento')} *</Label>
+              <Label className="text-xs">{t('actions.selectPlatformMaterial', 'Material da plataforma')} *</Label>
               <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable({ document_id: v })}>
-                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar documento...')} /></SelectTrigger>
+                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar material...')} /></SelectTrigger>
                 <SelectContent>
                   {platformDocuments.length === 0 ? (
-                    <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem documentos disponíveis')}</div>
+                    <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem materiais disponíveis')}</div>
                   ) : (
                     platformDocuments.map(doc => (
                       <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
@@ -270,7 +263,7 @@ export const ActionItemCard = memo(function ActionItemCard({
               </Select>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o template.')}
+              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o material da plataforma.')}
             </p>
           </div>
           <DialogFooter>
