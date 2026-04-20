@@ -19,7 +19,7 @@ export function useAdminDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<AdminDashboardStats> => {
-      const [pendingRes, renewalsRes, spacesRes, occupiedRes] = await Promise.all([
+      const [pendingRes, renewalsRes, spacesRes, activeContractsRes] = await Promise.all([
         supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
@@ -36,17 +36,19 @@ export function useAdminDashboardStats() {
           .from('rooms')
           .select('id', { count: 'exact', head: true }),
 
+        // Occupancy: count active contracts that have at least one assigned room
+        // Source of truth = startup_contracts (status='active') with linked room assignments
         supabase
-          .from('rooms')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'occupied'),
+          .from('contract_rooms' as any)
+          .select('contract_id, startup_contracts!inner(status)', { count: 'exact', head: true })
+          .eq('startup_contracts.status', 'active'),
       ]);
 
       return {
         pendingApprovalsCount: pendingRes.count ?? 0,
         contractRenewals30d: renewalsRes.count ?? 0,
         totalSpaces: spacesRes.count ?? 0,
-        occupiedSpaces: occupiedRes.count ?? 0,
+        occupiedSpaces: activeContractsRes.count ?? 0,
       };
     },
     staleTime: 60_000,
