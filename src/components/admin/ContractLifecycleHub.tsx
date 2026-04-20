@@ -577,12 +577,14 @@ export function ContractLifecycleHub() {
                   <div className="space-y-3">
                     {contracts.filter(c => c.status === 'active').slice(0, 8).map(contract => {
                       const startupName = (contract as any).workspace?.startup?.name;
+                      const orgName = (contract as any).organization_name;
+                      const displayName = startupName || orgName || t('common.unnamed', 'Sem nome');
                       const contractNumber = (contract as any).contract_number;
                       return (
                         <div key={contract.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border bg-muted/30 hover:bg-muted/50 transition-colors">
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-medium truncate">
-                              {startupName || t('common.unnamed', 'Sem nome')}
+                              {displayName}
                             </span>
                             {contractNumber && (
                               <span className="text-xs text-muted-foreground truncate">
@@ -592,7 +594,7 @@ export function ContractLifecycleHub() {
                           </div>
                           <ContractIntelligenceCard
                             contractId={contract.id}
-                            contractLabel={startupName || 'Contract'}
+                            contractLabel={displayName}
                           />
                         </div>
                       );
