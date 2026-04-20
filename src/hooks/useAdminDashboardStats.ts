@@ -36,12 +36,13 @@ export function useAdminDashboardStats() {
           .from('rooms')
           .select('id', { count: 'exact', head: true }),
 
-        // Occupancy: count active contracts that have at least one assigned room
-        // Source of truth = startup_contracts (status='active') with linked room assignments
+        // Occupancy: count rooms with currently-active allocations (start <= today, end null or >= today)
+        // Source of truth = room_allocations linked to active workspaces
         supabase
-          .from('contract_rooms' as any)
-          .select('contract_id, startup_contracts!inner(status)', { count: 'exact', head: true })
-          .eq('startup_contracts.status', 'active'),
+          .from('room_allocations')
+          .select('room_id', { count: 'exact', head: true })
+          .lte('start_date', new Date().toISOString().slice(0, 10))
+          .or(`end_date.is.null,end_date.gte.${new Date().toISOString().slice(0, 10)}`),
       ]);
 
       return {
