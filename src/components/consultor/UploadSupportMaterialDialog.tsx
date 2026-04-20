@@ -68,11 +68,11 @@ export function UploadSupportMaterialDialog({
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error(t('consultorTools.upload.titleRequired', 'Título obrigatório'));
+      toast.error(t('consultorTools.upload.titleRequired'));
       return;
     }
     if (!file) {
-      toast.error(t('consultorTools.upload.fileRequired', 'Selecione um ficheiro'));
+      toast.error(t('consultorTools.upload.fileRequired'));
       return;
     }
     setSubmitting(true);
@@ -102,13 +102,13 @@ export function UploadSupportMaterialDialog({
       // 3) Patch material row with file_path
       await updateMaterial.mutateAsync({ id: created.id, file_path: filePath });
 
-      toast.success(t('consultorTools.upload.success', 'Material carregado com sucesso'));
+      toast.success(t('consultorTools.upload.success'));
       reset();
       onOpenChange(false);
     } catch (err) {
       logger.error('Failed to upload support material', {}, err as Error);
       toast.error(
-        t('consultorTools.upload.error', 'Erro ao carregar material'),
+        t('consultorTools.upload.error'),
         { description: (err as Error).message }
       );
     } finally {
@@ -120,41 +120,41 @@ export function UploadSupportMaterialDialog({
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t('consultorTools.upload.title', 'Carregar Material de Apoio')}</DialogTitle>
+          <DialogTitle>{t('consultorTools.upload.title')}</DialogTitle>
           <DialogDescription>
-            {t('consultorTools.upload.description', 'Disponibiliza PowerPoints, PDFs e outros recursos aos founders do programa.')}
+            {t('consultorTools.upload.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>{t('consultorTools.upload.titleLabel', 'Título')} *</Label>
+            <Label>{t('consultorTools.upload.titleLabel')} *</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('consultorTools.upload.titlePlaceholder', 'Ex: PPT Sessão 3 — Customer Discovery')}
+              placeholder={t('consultorTools.upload.titlePlaceholder')}
             />
           </div>
 
           <div>
-            <Label>{t('consultorTools.upload.descriptionLabel', 'Descrição')}</Label>
+            <Label>{t('consultorTools.upload.descriptionLabel')}</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder={t('consultorTools.upload.descriptionPlaceholder', 'Resumo do conteúdo')}
+              placeholder={t('consultorTools.upload.descriptionPlaceholder')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>{t('consultorTools.upload.program', 'Programa')}</Label>
+              <Label>{t('consultorTools.upload.program')}</Label>
               <Select value={programId || 'global'} onValueChange={(v) => setProgramId(v === 'global' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="global">{t('consultorTools.upload.globalScope', 'Global (todos)')}</SelectItem>
+                  <SelectItem value="global">{t('consultorTools.upload.globalScope')}</SelectItem>
                   {programs?.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
@@ -163,7 +163,7 @@ export function UploadSupportMaterialDialog({
             </div>
 
             <div>
-              <Label>{t('consultorTools.upload.category', 'Categoria')}</Label>
+              <Label>{t('consultorTools.upload.category')}</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
                   <SelectValue />
@@ -179,13 +179,13 @@ export function UploadSupportMaterialDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>{t('consultorTools.upload.stage', 'Estágio')}</Label>
+              <Label>{t('consultorTools.upload.stage')}</Label>
               <Select value={stage || 'any'} onValueChange={(v) => setStage(v === 'any' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="any">{t('consultorTools.upload.anyStage', 'Qualquer')}</SelectItem>
+                  <SelectItem value="any">{t('consultorTools.upload.anyStage')}</SelectItem>
                   {STAGES.map((s) => (
                     <SelectItem key={s} value={s}>{s.replace('_', ' ')}</SelectItem>
                   ))}
@@ -193,7 +193,7 @@ export function UploadSupportMaterialDialog({
               </Select>
             </div>
             <div>
-              <Label>{t('consultorTools.upload.tags', 'Tags (vírgula)')}</Label>
+              <Label>{t('consultorTools.upload.tags')}</Label>
               <Input
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
@@ -203,7 +203,7 @@ export function UploadSupportMaterialDialog({
           </div>
 
           <div>
-            <Label>{t('consultorTools.upload.file', 'Ficheiro')} *</Label>
+            <Label>{t('consultorTools.upload.file')} *</Label>
             <Input
               type="file"
               accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.md,.zip,image/*"
@@ -219,13 +219,13 @@ export function UploadSupportMaterialDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            {t('common.cancel', 'Cancelar')}
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
             <Upload className="h-4 w-4 mr-2" />
             {submitting
-              ? t('consultorTools.upload.uploading', 'A carregar…')
-              : t('consultorTools.upload.submit', 'Carregar')}
+              ? t('consultorTools.upload.uploading')
+              : t('consultorTools.upload.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -244,7 +244,7 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
       try {
         const url = await getDocumentUrl(doc.file_path);
         window.open(url, '_blank');
-      } catch (error) {
+      } catch {
         toast.error(t('documents.downloadFailed'));
       }
     }
