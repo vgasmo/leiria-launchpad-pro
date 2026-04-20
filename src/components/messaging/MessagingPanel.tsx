@@ -92,7 +92,7 @@ export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelPro
               </ScrollArea>
               <div className="p-4 border-t flex gap-2">
                 <Input
-                  placeholder="Type a message..."
+                  placeholder={t('messaging.typeMessage', 'Escreva uma mensagem...')}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
