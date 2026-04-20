@@ -25,7 +25,6 @@ import { useWorkspaceMembers } from '@/hooks/useSessions';
 import { useWorkspaceFounder } from '@/hooks/useWorkspaceMembers';
 import { useActionDeliverablesBatch, useCreateActionDeliverable, useCompleteActionDeliverable } from '@/hooks/useActionDeliverables';
 import { useTemplateInstances, useTemplates } from '@/hooks/useTemplates';
-import { useDocuments } from '@/hooks/useDocuments';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
@@ -56,7 +55,6 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const completeDeliverable = useCompleteActionDeliverable(workspaceId);
   const { data: templateInstances } = useTemplateInstances(workspaceId);
   const { data: globalTemplates } = useTemplates();
-  const { data: workspaceDocs } = useDocuments(workspaceId);
   const platformDocuments = useMemo<PlatformDocument[]>(() => {
     const docs: PlatformDocument[] = [];
     (templateInstances || []).forEach(ti => {
@@ -68,11 +66,8 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
         docs.push({ id: `template:${t.id}`, name: t.name, type: 'template' });
       }
     });
-    (workspaceDocs || []).forEach(d => {
-      docs.push({ id: d.id, name: d.name, type: 'document' });
-    });
     return docs;
-  }, [templateInstances, globalTemplates, workspaceDocs]);
+  }, [templateInstances, globalTemplates]);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
