@@ -223,6 +223,8 @@ export default function Mentors() {
   const { user, roles, isAuthReady, isAdmin, isConsultor } = useAuth();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'requests';
 
   const isFounder = roles.includes('founder');
   const isMentor = roles.includes('mentor_externo');
