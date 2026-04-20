@@ -73,9 +73,9 @@ export function StageProgressCard({ workspace, className }: StageProgressCardPro
         {/* P0: Compact Stage Progress Bar */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{currentStageIndex + 1}/{STAGE_ORDER.length} stages</span>
+            <span>{currentStageIndex + 1}/{STAGE_ORDER.length} {t('stageProgress.stages', 'fases')}</span>
             {milestones && milestones.length > 0 && (
-              <span>{milestoneStats.completed}/{milestoneStats.total} milestones</span>
+              <span>{milestoneStats.completed}/{milestoneStats.total} {t('stageProgress.milestones', 'marcos')}</span>
             )}
           </div>
           <div className="relative">
