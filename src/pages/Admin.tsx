@@ -146,12 +146,12 @@ export default function Admin() {
     return labels[group] || group;
   };
 
-  const getActiveGroup = () => {
+  const activeGroup = useMemo(() => {
     for (const [group, tabs] of Object.entries(TAB_GROUPS)) {
       if (tabs.includes(activeTab as any)) return group;
     }
     return 'operations';
-  };
+  }, [TAB_GROUPS, activeTab]);
 
   return (
     <AppLayout title={t('ecosystemHub.title', { defaultValue: 'Hub de Gestão' })} subtitle={t('ecosystemHub.subtitle', { defaultValue: 'Gerir startups, mentores, programas e fluxos operacionais' })}>
@@ -160,10 +160,10 @@ export default function Admin() {
       <Tabs value={activeTab} onValueChange={setActiveTabAndUrl} className="space-y-6">
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
           {Object.entries(TAB_GROUPS).map(([group, tabs]) => (
-            <DropdownMenu key={group}>
+            <DropdownMenu key={group} modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant={getActiveGroup() === group ? 'secondary' : 'ghost'}
+                  variant={activeGroup === group ? 'secondary' : 'ghost'}
                   size="sm"
                   className="gap-1.5"
                 >
