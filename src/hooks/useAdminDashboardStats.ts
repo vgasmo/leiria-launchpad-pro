@@ -19,7 +19,7 @@ export function useAdminDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<AdminDashboardStats> => {
-      const [pendingRes, renewalsRes, spacesRes, occupiedRes] = await Promise.all([
+      const [pendingRes, renewalsRes, spacesRes, activeContractsRes] = await Promise.all([
         supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
@@ -36,17 +36,20 @@ export function useAdminDashboardStats() {
           .from('rooms')
           .select('id', { count: 'exact', head: true }),
 
+        // Occupancy: count rooms with currently-active allocations (start <= today, end null or >= today)
+        // Source of truth = room_allocations linked to active workspaces
         supabase
-          .from('rooms')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'occupied'),
+          .from('room_allocations')
+          .select('room_id', { count: 'exact', head: true })
+          .lte('start_date', new Date().toISOString().slice(0, 10))
+          .or(`end_date.is.null,end_date.gte.${new Date().toISOString().slice(0, 10)}`),
       ]);
 
       return {
         pendingApprovalsCount: pendingRes.count ?? 0,
         contractRenewals30d: renewalsRes.count ?? 0,
         totalSpaces: spacesRes.count ?? 0,
-        occupiedSpaces: occupiedRes.count ?? 0,
+        occupiedSpaces: activeContractsRes.count ?? 0,
       };
     },
     staleTime: 60_000,
