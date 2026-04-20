@@ -279,6 +279,9 @@ function MaterialDetailDialog({
               <p className="text-muted-foreground">{material.description}</p>
             )}
 
+            {/* File download */}
+            {material.file_path && <FileDownloadButton path={material.file_path} />}
+
             {/* Content */}
             {material.content_markdown && (
               <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -312,5 +315,26 @@ function MaterialDetailDialog({
         </ScrollArea>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FileDownloadButton({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const getUrl = useSupportMaterialDownloadUrl();
+  const handleClick = async () => {
+    try {
+      const url = await getUrl.mutateAsync(path);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      toast.error(t('common.error', 'Erro'), { description: (err as Error).message });
+    }
+  };
+  return (
+    <Button onClick={handleClick} disabled={getUrl.isPending} variant="default">
+      <Download className="h-4 w-4 mr-2" />
+      {getUrl.isPending
+        ? t('common.loading', 'A carregar…')
+        : t('consultorTools.downloadFile', 'Descarregar ficheiro')}
+    </Button>
   );
 }
