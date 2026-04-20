@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSupportMaterials, useSupportMaterialDownloadUrl, SupportMaterial } from '@/hooks/useSupportMaterials';
-import { useUserRoles } from '@/hooks/useUserRoles';
+import { useAuth } from '@/contexts/AuthContext';
 import { UploadSupportMaterialDialog } from './UploadSupportMaterialDialog';
 import { toast } from 'sonner';
 import { Download } from 'lucide-react';
@@ -50,7 +50,7 @@ const CATEGORY_ICONS: Record<string, typeof FileText> = {
 
 export function SupportMaterialsTab() {
   const { t } = useTranslation();
-  const { isAdmin, isConsultor } = useUserRoles();
+  const { isAdmin, isConsultor } = useAuth();
   const isStaff = isAdmin || isConsultor;
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
