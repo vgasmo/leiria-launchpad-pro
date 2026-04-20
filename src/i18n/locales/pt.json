@@ -3284,7 +3284,15 @@
       "dataroom": "Data Room",
       "financial": "Modelo Financeiro",
       "label": "Secções de documentos",
+      "program": "Materiais do Programa",
       "tools": "Ferramentas para Empreendedores"
+    },
+    "programMaterials": {
+      "title": "Materiais do Programa",
+      "description": "Recursos carregados pelos consultores para os founders deste programa (slides de sessões, guias, checklists).",
+      "emptyTitle": "Sem materiais do programa",
+      "emptyDescription": "Os consultores ainda não publicaram materiais para este programa. Vão aparecer aqui assim que carregarem PowerPoints, PDFs ou outros recursos.",
+      "download": "Descarregar"
     },
     "supportedFormats": "Formatos suportados: .xlsx, .xls, .csv",
     "title": "Documentos",
