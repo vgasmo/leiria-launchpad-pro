@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -12,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, CalendarDays, Flag } from 'lucide-react';
+import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, CalendarDays, Flag, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DraftGate, DraftWeek } from '@/hooks/useProgramSetup';
 
@@ -24,6 +26,23 @@ interface WizardWeeksGatesStepProps {
 
 export function WizardWeeksGatesStep({ gates: initialGates, weeks: initialWeeks, onUpdate }: WizardWeeksGatesStepProps) {
   const { t } = useTranslation();
+
+  // Fetch global platform templates (e.g. Lean Canvas, BMC, Pitch Deck Checklist…)
+  const { data: templates = [] } = useQuery({
+    queryKey: ['program-wizard-templates'],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('id, name, category')
+        .eq('is_global', true)
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return (data || []) as { id: string; name: string; category: string | null }[];
+    },
+  });
+
   const [gates, setGates] = useState<DraftGate[]>(initialGates.length > 0 ? initialGates : [
     { name: t('programSetup.acceleration.defaultGate1', 'Discovery'), sort_order: 0, target_start_week: 1, target_end_week: 3 },
     { name: t('programSetup.acceleration.defaultGate2', 'Build'), sort_order: 1, target_start_week: 4, target_end_week: 8 },
@@ -346,6 +365,27 @@ export function WizardWeeksGatesStep({ gates: initialGates, weeks: initialWeeks,
                             placeholder={t('programSetup.acceleration.deliverablePlaceholder', 'Deliverable title')}
                             className="h-8 text-sm"
                           />
+                          <Select
+                            value={del.template_id || 'none'}
+                            onValueChange={(v) => updateDeliverable(originalIdx, delIdx, 'template_id', v === 'none' ? '' : v)}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <SelectValue placeholder={t('programSetup.acceleration.linkTemplate', 'Link platform template (optional)')} />
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">
+                                {t('programSetup.acceleration.noTemplate', 'No template')}
+                              </SelectItem>
+                              {templates.map((tpl) => (
+                                <SelectItem key={tpl.id} value={tpl.id}>
+                                  {tpl.category ? `${tpl.category} · ${tpl.name}` : tpl.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeDeliverable(originalIdx, delIdx)}>
                           <Trash2 className="h-3 w-3" />

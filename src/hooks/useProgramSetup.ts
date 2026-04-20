@@ -105,7 +105,7 @@ export interface DraftWeek {
   week_number: number;
   title: string;
   description?: string;
-  deliverables_json: { title: string; description?: string }[];
+  deliverables_json: { title: string; description?: string; template_id?: string | null }[];
 }
 
 export interface ProgramSetupDraft {
@@ -446,7 +446,7 @@ async function loadProgramConfig(programId: string): Promise<ProgramSetupDraft['
       week_number: w.week_number,
       title: w.title,
       description: w.description || undefined,
-      deliverables_json: (w.deliverables_json as { title: string; description?: string }[]) || [],
+      deliverables_json: (w.deliverables_json as { title: string; description?: string; template_id?: string | null }[]) || [],
     }));
   }
 
