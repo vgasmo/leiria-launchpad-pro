@@ -70,7 +70,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
   const { data: workspaceDocs } = useDocuments(workspaceId);
   const platformDocuments = useMemo<PlatformDocument[]>(() => {
     const docs: PlatformDocument[] = [];
-    // Template instances already filled in by the founder
+    // Template instances already filled in by the founder (live in `template_instances`, not `documents`)
     (templateInstances || []).forEach(ti => {
       docs.push({ id: ti.id, name: `✓ ${ti.template?.name || ti.template_id}`, type: 'template_instance' });
     });
@@ -78,10 +78,10 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
     const instantiatedTemplateIds = new Set((templateInstances || []).map(ti => ti.template_id));
     (globalTemplates || []).forEach(t => {
       if (!instantiatedTemplateIds.has(t.id)) {
-        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template_instance' });
+        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template' });
       }
     });
-    // Workspace documents
+    // Real workspace documents (FK-safe)
     (workspaceDocs || []).forEach(d => {
       docs.push({ id: d.id, name: d.name, type: 'document' });
     });
