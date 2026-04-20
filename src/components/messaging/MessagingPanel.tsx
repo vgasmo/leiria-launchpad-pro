@@ -92,7 +92,7 @@ export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelPro
               </ScrollArea>
               <div className="p-4 border-t flex gap-2">
                 <Input
-                  placeholder="Type a message..."
+                  placeholder={t('messaging.typeMessage', 'Escreva uma mensagem...')}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -109,11 +109,11 @@ export const MessagingPanel = React.forwardRef<HTMLDivElement, MessagingPanelPro
               <div className="flex items-center justify-between">
                 <SheetTitle className="flex items-center gap-2">
                   <MessageCircle className="h-5 w-5" />
-                  Messages
+                  {t('messaging.title', 'Mensagens')}
                 </SheetTitle>
                 <Button size="sm" onClick={() => setShowNewConversation(true)}>
                   <Plus className="h-4 w-4 mr-1" />
-                  New
+                  {t('messaging.new', 'Nova')}
                 </Button>
               </div>
             </SheetHeader>
