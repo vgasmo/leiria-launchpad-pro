@@ -35,7 +35,7 @@ function usePrepData(workspaceId: string) {
     queryKey: ['first-contact-prep', workspaceId],
     queryFn: async () => {
       const [wsRes, docsRes, kpiRes, membersRes, actionsRes, milestonesRes, sessionsRes] = await Promise.all([
-        supabase.from('workspaces').select('id, status, stage, health_score, created_at, program_id, startup_id, programs(name), startups(name, description, main_contact_email, website, nif, sector, business_model)').eq('id', workspaceId).single(),
+        supabase.from('workspaces').select('id, status, stage, health_score, created_at, program_id, startup_id, programs(name), startups(name, description, main_contact_email, website, nif)').eq('id', workspaceId).single(),
         supabase.from('documents').select('id, name, category, document_type').eq('workspace_id', workspaceId),
         supabase.from('kpi_values').select('id, kpi_definition_id, value, period_month, kpi_definitions(name, unit)').eq('workspace_id', workspaceId).order('period_month', { ascending: false }).limit(10),
         supabase.from('workspace_users').select('user_id, role, profiles_safe(full_name, email)').eq('workspace_id', workspaceId).eq('active', true),
