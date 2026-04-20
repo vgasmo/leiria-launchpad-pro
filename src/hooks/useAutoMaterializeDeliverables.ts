@@ -17,9 +17,10 @@ export function useAutoMaterializeDeliverables(
   const isAcceleration = programType === 'acceleration';
   const enabled = !!workspaceId && !!programId && isAcceleration;
 
-  // Check if milestones already exist from this program
+  // Check if there are pending deliverables (either no milestones materialized,
+  // or some materialized actions are missing their auto-linked platform document).
   const { data: hasMaterialized, isSuccess: checkDone } = useQuery({
-    queryKey: ['acceleration-materialized', workspaceId],
+    queryKey: ['acceleration-materialized', workspaceId, programId],
     enabled,
     staleTime: 60_000,
     queryFn: async () => {
@@ -33,8 +34,11 @@ export function useAutoMaterializeDeliverables(
         logger.error('materialize_deliverables_check_failed', { workspaceId, error: error.message });
         return true; // Assume materialized on error to avoid infinite retry
       }
-      logger.debug('materialize_deliverables_check_result', { workspaceId, count, hasMaterialized: (count ?? 0) > 0 });
-      return (count ?? 0) > 0;
+      // Always re-run the RPC: it is idempotent and will only insert what is missing.
+      // Returning false here triggers the mutation, which is safe because the RPC
+      // checks for existing milestones/actions/deliverables before inserting.
+      logger.debug('materialize_deliverables_check_result', { workspaceId, count });
+      return false;
     },
   });
 
