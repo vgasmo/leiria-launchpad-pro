@@ -393,7 +393,7 @@ export function KpisTab({ workspaceId }: KpisTabProps) {
         description={t('emptyStates.kpis.description')}
         value={stageHint || undefined}
         action={canConfigureKpis ? {
-          label: t('kpis.applyDefaults', { stage: workspace?.stage }),
+          label: t('kpis.applyDefaults', { stage: stageLabel }),
           onClick: handleApplyDefaults,
           icon: Sparkles,
         } : undefined}
