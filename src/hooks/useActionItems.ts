@@ -44,6 +44,7 @@ export interface ActionItem {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  source_deliverable_key: string | null;
   owner: {
     id: string;
     full_name: string | null;
