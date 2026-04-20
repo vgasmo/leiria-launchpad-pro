@@ -419,7 +419,7 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
                               <Plus className="h-3.5 w-3.5" />
                             </Button>
                           )}
-                          {canWrite && (
+                          {canWrite && (milestone.source_gate_id === null || isStaff) && (
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteMilestoneTarget(milestone)}>
                               <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>

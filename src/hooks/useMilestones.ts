@@ -17,6 +17,8 @@ export interface Milestone {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  source_gate_id: string | null;
+  source_week_id: string | null;
   action_count?: number;
   completed_action_count?: number;
 }

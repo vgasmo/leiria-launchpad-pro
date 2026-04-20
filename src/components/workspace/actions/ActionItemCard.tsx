@@ -144,7 +144,7 @@ export const ActionItemCard = memo(function ActionItemCard({
             <GripVertical className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
             <span className={`text-sm font-medium leading-tight break-words ${item.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>{item.title}</span>
           </div>
-          {canWrite && (
+          {canWrite && (item.source_deliverable_key === null || isStaff) && (
             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0" onClick={() => onDelete(item)}>
               <Trash2 className="h-3 w-3 text-muted-foreground" />
             </Button>
