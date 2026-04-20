@@ -621,6 +621,99 @@ Deno.serve(async (req) => {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // 13. MENTOR SEM DISPONIBILIDADE (semanal — segundas-feiras)
+    // ═══════════════════════════════════════════════════════════
+    {
+      const result: AutomationResult = { type: 'mentor_no_availability', notifications: 0, emails: 0, errors: [] }
+      try {
+        // Só dispara à segunda-feira (1 = Mon em getDay)
+        if (today.getDay() === 1) {
+          // Mentores externos
+          const { data: mentorRoles } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'mentor_externo')
+
+          const mentorIds = [...new Set((mentorRoles || []).map((r: any) => r.user_id))]
+
+          for (const mentorId of mentorIds) {
+            try {
+              // Verificar se tem slots ativos
+              const { count: slotCount } = await supabase
+                .from('mentor_availability')
+                .select('id', { count: 'exact', head: true })
+                .eq('mentor_id', mentorId)
+                .eq('is_active', true)
+
+              if ((slotCount ?? 0) > 0) continue
+
+              // Dedup semanal: usa run_date como esta segunda
+              if (await wasAlreadyRun(supabase, 'mentor_no_availability', null, mentorId, todayStr)) continue
+
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('email, full_name')
+                .eq('id', mentorId)
+                .single()
+
+              if (!profile?.email) continue
+
+              const name = profile.full_name?.split(' ')[0] || 'Mentor'
+
+              // 1. Notificação in-app persistente
+              await notify(
+                supabase, mentorId, 'mentor_no_availability',
+                'Configura a tua disponibilidade',
+                'Os fundadores não te conseguem reservar uma sessão enquanto não definires horários disponíveis.',
+                '/mentors?tab=availability',
+                'mentor', mentorId,
+              )
+              result.notifications++
+
+              // 2. Email semanal
+              const emailHtml = `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
+                  <h2 style="color: #d97706; margin-bottom: 16px;">Olá ${name},</h2>
+                  <p style="font-size: 15px; line-height: 1.6;">
+                    Reparámos que ainda não tens <strong>disponibilidade configurada</strong> na plataforma da Startup Leiria.
+                  </p>
+                  <p style="font-size: 15px; line-height: 1.6;">
+                    Sem horários definidos, os fundadores não te conseguem reservar sessões de mentoria — e estamos a perder oportunidades de impacto.
+                  </p>
+                  <div style="margin: 28px 0; text-align: center;">
+                    <a href="${SITE_URL}/mentors?tab=availability"
+                       style="background: #1e40af; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                      Configurar disponibilidade
+                    </a>
+                  </div>
+                  <p style="font-size: 13px; color: #6b7280; line-height: 1.5;">
+                    Demora menos de 2 minutos. Define os teus dias e horários típicos — podes alterar a qualquer momento.
+                  </p>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                  <p style="font-size: 12px; color: #9ca3af;">
+                    Receberás este lembrete semanalmente até configurares pelo menos um horário.<br/>
+                    Equipa Startup Leiria
+                  </p>
+                </div>
+              `
+              const sent = await sendEmail(
+                profile.email,
+                'Configura a tua disponibilidade — Startup Leiria',
+                emailHtml,
+              )
+              if (sent) result.emails++
+
+              await recordRun(supabase, 'mentor_no_availability', null, 'mentor', mentorId, todayStr, sent ? 'email+app' : 'app')
+            } catch (e: any) {
+              result.errors.push(`mentor ${mentorId}: ${e.message}`)
+            }
+          }
+        }
+      } catch (e: any) { result.errors.push(e.message) }
+      results.push(result)
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // Cleanup old automation_runs (> 90 days)
     // ═══════════════════════════════════════════════════════════
     const ninetyDaysAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
