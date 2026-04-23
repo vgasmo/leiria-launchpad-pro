@@ -636,10 +636,18 @@ Deno.serve(async (req: Request) => {
           
         } else if (action === 'update' && eventId) {
           createdEvent = await updateCalendarEvent(accessToken, calendarOwnerEmail, eventId, eventData, log);
-          
-          // If update returned null (204), fetch the event to get Teams URL
-          if (!createdEvent) {
-            createdEvent = await getCalendarEvent(accessToken, calendarOwnerEmail, eventId, log);
+
+          // If update returned null (204), or if Teams URL still missing, re-fetch with retries
+          if (!createdEvent || !createdEvent.onlineMeeting?.joinUrl) {
+            for (let i = 0; i < 3; i++) {
+              const refetched = await getCalendarEvent(accessToken, calendarOwnerEmail, eventId, log);
+              if (refetched?.onlineMeeting?.joinUrl) {
+                createdEvent = refetched;
+                break;
+              }
+              createdEvent = refetched;
+              await new Promise((r) => setTimeout(r, 800));
+            }
           }
           teamsMeetingUrl = createdEvent?.onlineMeeting?.joinUrl || null;
           
