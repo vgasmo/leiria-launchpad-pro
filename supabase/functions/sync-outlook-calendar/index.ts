@@ -222,14 +222,21 @@ async function createCalendarEvent(
 ): Promise<GraphCalendarEvent> {
   // Properly encode user identifier
   const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(userId)}/events`;
-  
-  log.info('Creating calendar event via Graph', { userId, subject: event.subject });
+
+  log.info('Creating calendar event via Graph', {
+    userId,
+    subject: event.subject,
+    isOnlineMeeting: event.isOnlineMeeting,
+    onlineMeetingProvider: event.onlineMeetingProvider,
+  });
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
+      // Ask Graph to return the full body including onlineMeeting on create
+      'Prefer': 'outlook.timezone="UTC"',
     },
     body: JSON.stringify(event),
   });
@@ -237,10 +244,27 @@ async function createCalendarEvent(
   if (!response.ok) {
     const errorText = await response.text();
     log.error('Failed to create calendar event', null, { status: response.status, error: errorText.slice(0, 200) });
-    throw new Error(`Failed to create calendar event: ${response.status}`);
+    throw new Error(`Failed to create calendar event: ${response.status} ${errorText.slice(0, 200)}`);
   }
 
-  return await response.json();
+  const created = await response.json() as GraphCalendarEvent;
+
+  // Defensive re-fetch: if Teams join URL not present in create response,
+  // poll the event a couple of times to allow Graph to provision the meeting.
+  if (event.isOnlineMeeting && !created.onlineMeeting?.joinUrl && created.id) {
+    log.info('Teams URL not in create response, polling event for online meeting');
+    for (let i = 0; i < 3; i++) {
+      await new Promise((r) => setTimeout(r, 800));
+      const refetched = await getCalendarEvent(accessToken, userId, created.id, log);
+      if (refetched?.onlineMeeting?.joinUrl) {
+        log.info('Teams URL resolved after re-fetch', { attempt: i + 1 });
+        return refetched;
+      }
+    }
+    log.warn('Teams URL still missing after re-fetch attempts — check Graph permissions (Calendars.ReadWrite) and that the calendar owner has a Teams license');
+  }
+
+  return created;
 }
 
 // Update calendar event via Graph API
