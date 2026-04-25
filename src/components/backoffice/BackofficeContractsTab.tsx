@@ -311,6 +311,36 @@ export function BackofficeContractsTab() {
 
   return (
     <div className="space-y-4">
+      {/* Stream F: provenance & lifecycle truth header */}
+      <div className="flex flex-wrap items-center gap-2">
+        <ProvenanceBadge variant="contract-truth" />
+        <span className="text-[11px] text-muted-foreground">
+          {t('contracts.truthHint', {
+            defaultValue: 'Cópias derivadas (CRM, SharePoint) são informativas e não substituem este registo.',
+          })}
+        </span>
+      </div>
+
+      <LifecycleMismatchPanel
+        contracts={contracts || []}
+        intakes={intakes || []}
+        crmItems={(crmItems || []).map((i: any) => ({
+          id: i.id,
+          stage: i.stage,
+          linked_contract_id: i.linked_contract_id,
+          organization_name: i.organization_name,
+        }))}
+        workspaces={(workspaces || []).map((w: any) => ({
+          id: w.id,
+          status: w.status,
+          startup_id: w.startup_id,
+        }))}
+        onOpenContract={(id) => {
+          const c = (contracts || []).find((x) => x.id === id) || null;
+          setDetailContract(c);
+        }}
+      />
+
       {/* Upload Hero Section */}
       {flowState === 'idle' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
