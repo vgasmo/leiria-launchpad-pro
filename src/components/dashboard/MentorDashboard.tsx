@@ -39,6 +39,7 @@ import { QuickNoteDialog } from '@/components/mentor/QuickNoteDialog';
 import { useMyAvailability } from '@/hooks/useMentorAvailability';
 import { StickyNote } from 'lucide-react';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
+import { NextBestActionMentor } from '@/components/dashboard/NextBestActionPanels';
 
 interface MentorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -170,6 +171,16 @@ export const MentorDashboard = memo(function MentorDashboard({ workspaces, isLoa
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Stream F: Next Best Action (read-only, derived from sessions/requests) */}
+      <WidgetErrorBoundary name="NextBestActionMentor">
+        <NextBestActionMentor
+          upcomingSessionsCount={(workspaces || []).reduce(
+            (acc, w: any) => acc + (w?.upcomingSessions?.length || 0),
+            0
+          )}
+        />
+      </WidgetErrorBoundary>
+
       {/* Availability badge */}
       <div className="flex items-center gap-2">
         <span className={cn('h-2.5 w-2.5 rounded-full', statusColors[availabilityStatus])} />

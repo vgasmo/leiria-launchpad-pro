@@ -21,6 +21,7 @@ import { ConsultorSessionsToday } from './consultor/ConsultorSessionsToday';
 import { ConsultorCriticalActions } from './consultor/ConsultorCriticalActions';
 import { ConsultorHealthMatrix } from './consultor/ConsultorHealthMatrix';
 import { ConsultorWeeklyImpact, ConsultorDataAlerts } from './consultor/ConsultorWeeklyImpact';
+import { NextBestActionStaff } from '@/components/dashboard/NextBestActionPanels';
 
 interface ConsultorDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -169,6 +170,15 @@ function ConsultorDashboardInner({ workspaces, isLoading, programsCount }: Consu
           health: stats.healthCounts.healthy + stats.healthCounts.thriving,
         })}
       </p>
+
+      {/* Stream F: Next Best Action (read-only, derived) */}
+      <WidgetErrorBoundary name="NextBestActionStaff">
+        <NextBestActionStaff
+          unassignedActiveWorkspacesCount={(workspaces || []).filter(
+            (w: any) => w.status === 'active' && !w.assigned_consultor_id
+          ).length}
+        />
+      </WidgetErrorBoundary>
 
       <UnifiedSmartInbox overdueCount={stats.overdueActionsCount} missingKpiCount={stats.missingKpiCount} />
       <WorkQueuePanel compact={false} />
