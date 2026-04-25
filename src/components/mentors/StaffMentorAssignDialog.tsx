@@ -124,24 +124,17 @@ export function StaffMentorAssignDialog({
             { onConflict: 'mentor_id,workspace_id' },
           );
       } else {
-        // No founder yet (unclaimed/imported workspace) — still record the
-        // workspace-level connection without a fake founder_id.
-        // Skip if a row already exists for (mentor, workspace).
-        const { data: existingConn } = await supabase
-          .from('mentor_connections')
-          .select('id')
-          .eq('mentor_id', selectedMentorId)
-          .eq('workspace_id', workspaceId)
-          .maybeSingle();
-
-        if (!existingConn) {
-          await supabase.from('mentor_connections').insert({
-            mentor_id: selectedMentorId,
-            workspace_id: workspaceId,
-            status: 'connected',
-            responded_at: new Date().toISOString(),
-          });
-        }
+        // No active founder yet (unclaimed/imported workspace).
+        // The mentor↔workspace link is fully captured by workspace_users above.
+        // We intentionally do NOT insert into mentor_connections without a real
+        // founder user id — writing workspace_id into founder_id is a legacy
+        // anti-pattern that v4.0 corrects. Mentor visibility still works because
+        // it joins via workspace_users.
+        logger.warn('mentor_connection_skipped_no_founder', {
+          workspaceId,
+          mentorId: selectedMentorId,
+          reason: 'No active founder on workspace; supplementary mentor_connections row not created.',
+        });
       }
 
       // Connection insertion errors are intentionally non-fatal (supplementary record).
