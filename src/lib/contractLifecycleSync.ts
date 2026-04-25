@@ -1,11 +1,17 @@
 /**
- * Canonical Contract Lifecycle Sync
- * 
- * Ensures that when contract signature events occur (sent, signed, activated),
- * the linked contract_intakes and CRM funnel_items are kept in sync.
- * 
- * This is the SINGLE source of truth for lifecycle synchronization.
- * All manual buttons, webhooks, and bulk paths must use these helpers.
+ * Client Lifecycle Sync — UI MIRROR (NOT canonical truth)
+ *
+ * The CANONICAL source of truth for contract → intake → CRM → workspace
+ * synchronization is the SERVER helper at:
+ *   supabase/functions/_shared/lifecycleSync.ts
+ *
+ * This file exists ONLY for UI-initiated manual transitions performed by
+ * authenticated staff (e.g. "Mark as Sent" / "Mark as Signed" buttons in
+ * ContractDetailDrawer) where invoking an edge function would add latency
+ * with no extra integrity benefit (these flows are RLS-gated to staff).
+ *
+ * All webhook / automated paths (DocuSign, PandaDoc, public onboarding,
+ * bulk creation) MUST use the server helper instead.
  */
 import { supabase } from '@/lib/supabaseClient';
 import { logger } from '@/lib/logger';
