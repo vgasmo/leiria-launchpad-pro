@@ -138,6 +138,8 @@ export function BackofficeContractsTab() {
   const { data: incubationTypes } = useIncubationTypes();
   const { data: buildings } = useBuildings();
   const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
+  const { data: intakes } = useContractIntakes();
+  const { data: crmItems } = useFunnelItems();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
 
