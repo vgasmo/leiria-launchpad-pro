@@ -2507,7 +2507,8 @@
       "step4": "Guarde o contrato na base de dados",
       "tooLarge": "O ficheiro deve ter menos de 10MB.",
       "uploading": "A carregar documento..."
-    }
+    },
+    "truthHint": "Cópias derivadas (CRM, SharePoint) são informativas e não substituem este registo."
   },
   "copilot": {
     "askAnything": "Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.",
@@ -5134,31 +5135,59 @@
     "title": "Acordo de Confidencialidade"
   },
   "nextBestAction": {
-    "actionsInProgress": "{{count}} ação em progresso",
-    "actionsInProgress_plural": "{{count}} ações em progresso",
-    "addKpis": "Adicionar KPIs",
-    "allCaughtUp": "Tudo em dia!",
-    "completeCheckin": "Completar Check-in",
-    "completeOrReschedule": "Conclua ou reagende estas tarefas",
+    "title": "Próxima melhor ação",
+    "derived": "derivada do estado real",
+    "allClear": "Sem ações urgentes derivadas do estado actual.",
     "continue": "Continuar",
-    "continueWork": "Continue o seu trabalho",
-    "dueOn": "Vence {{date}}",
-    "mentorFeedbackReceived": "{{count}} feedback do mentor",
-    "mentorFeedbackReceived_plural": "{{count}} feedbacks do mentor",
-    "monthlyCheckinPending": "Check-in mensal pendente",
-    "noUrgentActions": "Não há ações urgentes de momento.",
-    "overdueActions": "{{count}} ação atrasada",
-    "overdueActions_plural": "{{count}} ações atrasadas",
-    "prepareSession": "Preparar próxima sessão",
-    "sessionOn": "{{title}} em {{date}}",
-    "title": "Próximas Ações",
-    "trackProgress": "Acompanhe o seu progresso com as métricas mais recentes",
-    "updateKpisForMonth": "Atualizar KPIs deste mês",
-    "viewActions": "Ver Ações",
-    "viewFeedback": "Ver Feedback",
-    "viewSession": "Ver Sessão",
-    "weeklyCheckinPending": "Check-in mensal pendente",
-    "weeklyWins": "Monthly Wins"
+    "open": "Abrir",
+    "openIntake": "Abrir formulário",
+    "openCheckin": "Abrir check-in",
+    "review": "Rever",
+    "assign": "Atribuir",
+    "prepare": "Preparar",
+    "acceptNda": "Aceitar NDA",
+    "founder": {
+      "onboarding": {
+        "title": "Completar onboarding do workspace",
+        "why": "O workspace está marcado como needs_onboarding=true."
+      },
+      "intake": {
+        "title": "Preencher dados de contratação",
+        "why": "Existe um intake de contrato em estado editável associado a esta startup."
+      },
+      "checkin": {
+        "title": "Submeter check-in semanal pendente",
+        "why": "{{count}} check-in(s) por submeter esta semana."
+      }
+    },
+    "staff": {
+      "intakesBlocked": {
+        "title": "Rever intakes bloqueados por dados em falta",
+        "why": "{{count}} intake(s) em review_pending ou changes_requested."
+      },
+      "signatures": {
+        "title": "Acompanhar contratos enviados para assinatura",
+        "why": "{{count}} contrato(s) com signature_status pendente."
+      },
+      "unassigned": {
+        "title": "Atribuir consultor a workspaces activos",
+        "why": "{{count}} workspace(s) activo(s) sem assigned_consultor_id."
+      }
+    },
+    "mentor": {
+      "nda": {
+        "title": "Aceitar NDA para desbloquear acesso",
+        "why": "O acesso a workspaces de mentor está bloqueado até aceitar o NDA."
+      },
+      "requests": {
+        "title": "Responder a pedidos de mentoria",
+        "why": "{{count}} pedido(s) pendente(s) na sua fila."
+      },
+      "sessions": {
+        "title": "Preparar próxima sessão",
+        "why": "{{count}} sessão(ões) marcada(s) próximas."
+      }
+    }
   },
   "nextSteps": {
     "addNow": "Adicionar",
@@ -8055,5 +8084,61 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
+  },
+  "provenance": {
+    "contractTruth": {
+      "label": "Fonte canónica: startup_contracts",
+      "desc": "Os dados financeiros e contratuais lidos aqui vêm da tabela canónica startup_contracts."
+    },
+    "intakeState": {
+      "label": "Estado intake",
+      "desc": "Estado operacional do formulário de onboarding (contract_intakes.status)."
+    },
+    "crmPhase": {
+      "label": "Fase CRM",
+      "desc": "Macro-fase comercial no pipeline (funnel_items.stage). Não substitui o estado operacional do contrato."
+    },
+    "archiveStatus": {
+      "label": "Cópia SharePoint — não canónica",
+      "desc": "Reflete o estado do arquivo de backup em SharePoint. Não é a fonte de verdade do contrato."
+    }
+  },
+  "contractReadiness": {
+    "title": "Prontidão do contrato",
+    "legalRep": "Representante legal preenchido",
+    "companyData": "NIF e morada da empresa",
+    "modality": "Modalidade, edifício e espaço",
+    "missingIncubationType": "Falta tipo de incubação",
+    "missingBuilding": "Falta edifício",
+    "pricing": "Snapshot de preço presente",
+    "document": "Documento gerado disponível",
+    "provider": "Prestador de assinatura selecionado",
+    "sentLock": "Não trocar prestador silenciosamente após envio",
+    "sentLockWarning": "Já enviado. Mudar de prestador exige cancelar e reenviar manualmente.",
+    "providerLockTitle": "Prestador bloqueado para troca silenciosa",
+    "providerLockBody": "O contrato foi enviado para assinatura. Para mudar de prestador é obrigatório cancelar o envio actual antes de selecionar outro.",
+    "notReadyHint": "Resolva os itens em falta para libertar o envio para assinatura. Esta verificação é apenas informativa."
+  },
+  "lifecycleMismatch": {
+    "title": "Inconsistências de ciclo de vida",
+    "disclaimer": "Apenas leitura. Nenhuma reparação automática. Use as acções existentes em cada registo.",
+    "allConsistent": "Estados de contrato/intake/CRM/workspace consistentes.",
+    "open": "Abrir",
+    "intakeAheadOfContract": {
+      "title": "Intake assinado mas contrato não está activo",
+      "detail": "intake.status=\"{{istate}}\" / contract.status=\"{{cstate}}\""
+    },
+    "contractActiveWorkspaceNot": {
+      "title": "Contrato activo mas workspace não está activo",
+      "detail": "workspace.status=\"{{wstate}}\""
+    },
+    "pendingSignatureNoProvider": {
+      "title": "Contrato em pending_signature sem prestador definido",
+      "detail": "signature_provider está vazio."
+    },
+    "crmContractedNoLink": {
+      "title": "Lead em fase \"contracted\" sem contrato ligado",
+      "detail": "funnel_items.linked_contract_id está vazio."
+    }
   }
 }
