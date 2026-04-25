@@ -199,6 +199,11 @@ export function FounderDashboard({
         <FounderReadinessStrip workspace={workspace} />
       </WidgetErrorBoundary>
 
+      {/* Stream F: Next Best Action (read-only, derived) */}
+      <WidgetErrorBoundary name="NextBestActionFounder">
+        <NextBestActionFounder workspace={workspace} />
+      </WidgetErrorBoundary>
+
       {/* ★ PROGRESS RINGS — Visual health at a glance ★ */}
       <WidgetErrorBoundary name="ProgressRings">
         <FounderProgressRings workspaceId={workspace.id} />
