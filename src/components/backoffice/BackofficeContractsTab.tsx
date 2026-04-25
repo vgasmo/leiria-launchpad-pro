@@ -22,6 +22,10 @@ import { ContractUploadDropzone, type AIExtractedData } from './contracts/Contra
 import { ContractReviewForm, type ContractFormValues } from './contracts/ContractReviewForm';
 import { BulkActionsBar } from './contracts/BulkActionsBar';
 import { ContractDetailDrawer } from './contracts/ContractDetailDrawer';
+import { ProvenanceBadge } from '@/components/shared/ProvenanceBadge';
+import { LifecycleMismatchPanel } from '@/components/staff/LifecycleMismatchPanel';
+import { useContractIntakes } from '@/hooks/useContractIntakes';
+import { useFunnelItems } from '@/hooks/useFunnel';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
