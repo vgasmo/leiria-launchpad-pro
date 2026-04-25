@@ -1,4 +1,12 @@
 {
+  "accelerationCalendar": {
+    "joinSession": "Entrar",
+    "pickDate": "Data",
+    "saveFailed": "Erro ao guardar",
+    "saved": "Sessão atualizada",
+    "title": "Calendário do Programa",
+    "weekRange": "Semanas {{start}}–{{end}}"
+  },
   "accessDenied": {
     "backToWorkspaces": "Voltar aos Workspaces",
     "message": "Não tem permissão para ver este conteúdo. Por favor contacte um administrador se acredita que isto é um erro.",
@@ -25,6 +33,7 @@
     "actionsLabel": "ações",
     "addAction": "Adicionar Ação",
     "addActionFromSession": "Criar uma ação a partir desta sessão",
+    "addDeliverable": "Adicionar entregável",
     "allOwners": "Todos os proprietários",
     "allPriorities": "Todas as prioridades",
     "assign": "Atribuir",
@@ -40,12 +49,18 @@
     "deleteActionConfirmation": "Tem a certeza que quer eliminar \"{{title}}\"? Esta ação não pode ser desfeita.",
     "deleteActionTitle": "Eliminar Item de Ação",
     "deletedCount": "{{count}} ações eliminadas",
+    "deliverableAdded": "Entregável adicionado",
+    "deliverableCompleted": "Entregável validado",
+    "deliverableDocHint": "Ao criar, será redirecionado para o separador de Documentos para preencher o material da plataforma.",
+    "deliverablesRequired": "Todos os entregáveis devem estar concluídos antes de concluir a ação",
     "description": "Descrição",
     "descriptionPlaceholder": "Detalhes adicionais...",
     "doing": "A Fazer",
     "done": "Feito",
     "dueDate": "Data Limite",
     "failedToAddComment": "Falha ao adicionar comentário",
+    "failedToAddDeliverable": "Erro ao adicionar entregável",
+    "failedToCompleteDeliverable": "Erro ao validar entregável",
     "failedToCreate": "Falha ao criar item de ação",
     "failedToDelete": "Falha ao eliminar item de ação",
     "failedToDeleteComment": "Falha ao eliminar comentário",
@@ -67,6 +82,8 @@
     "noCommentsYet": "Sem comentários",
     "noItems": "Sem ações",
     "noMilestones": "Sem marcos ainda. Crie marcos primeiro para adicionar ações.",
+    "noPlatformDocs": "Sem materiais disponíveis",
+    "onlyStaffCanComplete": "Apenas o consultor pode marcar como concluída",
     "open": "Aberto",
     "overdue": "Atrasada",
     "owner": "Proprietário",
@@ -80,6 +97,9 @@
     "selectMember": "Selecionar membro",
     "selectMilestone": "Selecionar marco...",
     "selectMilestoneRequired": "Por favor selecione um marco",
+    "selectPlatformDoc": "Selecione um documento da plataforma",
+    "selectPlatformDocPlaceholder": "Selecionar material...",
+    "selectPlatformMaterial": "Material da plataforma",
     "statusCancelled": "Cancelada",
     "statusDoing": "Em Progresso",
     "statusDone": "Concluída",
@@ -290,6 +310,11 @@
       "consultantAssigned": "Consultor atribuído",
       "consultantRemoved": "Consultor removido",
       "contractNumber": "Número do Contrato",
+      "contractSigners": {
+        "autoAssigned": "Será atribuído automaticamente ao enviar",
+        "firstParty": "Primeiro Outorgante",
+        "secondParty": "Segundo Outorgante"
+      },
       "contractStatus": {
         "active": "Ativo",
         "draft": "Rascunho",
@@ -636,12 +661,7 @@
       "waitlistSuggestions": "Sugestões da Lista de Espera",
       "workspaceBlocked": "Workspace bloqueado",
       "workspaceUnblocked": "Workspace desbloqueado",
-      "workspacesWithoutContracts": "Workspaces Sem Contratos",
-      "contractSigners": {
-        "firstParty": "Primeiro Outorgante",
-        "secondParty": "Segundo Outorgante",
-        "autoAssigned": "Será atribuído automaticamente ao enviar"
-      }
+      "workspacesWithoutContracts": "Workspaces Sem Contratos"
     },
     "backofficeExtended": {
       "addSpace": "Adicionar Espaço",
@@ -803,6 +823,7 @@
       "approvalsDesc": "operations",
       "backofficeDesc": "operations",
       "complianceDesc": "reports",
+      "crmLabel": "CRM & Pipeline",
       "dataQualityDesc": "reports",
       "ecosystemDesc": "Gestão do ecossistema",
       "ecosystemLabel": "Startups & Workspaces",
@@ -889,6 +910,7 @@
       "tab": "Funil",
       "title": "Funil & Entrada"
     },
+    "generalIncubation": "Incubação Geral",
     "generateAndCopy": "Gerar e Copiar Link",
     "generating": "A gerar...",
     "groups": {
@@ -965,11 +987,16 @@
       "currentConfig": "Configuração Atual",
       "description": "Configurar qual calendário de consultor é usado para primeiros contactos",
       "generateLink": "Gerar Link",
+      "global": "Geral",
+      "globalDesc": "Configuração padrão aplicada quando não existe regra específica para o programa selecionado pela Lead.",
       "link": "Link",
       "mode": "Modo",
       "nextAssignment": "Próxima atribuição",
       "noConsultants": "Nenhum consultor encontrado. Adicione utilizadores com a função consultor primeiro.",
       "noLinks": "Ainda não há links de marcação. Gere um para começar.",
+      "perProgramDesc": "Configurar qual calendário de consultor é usado para primeiros contactos. Defina uma regra global ou personalize por programa.",
+      "programConfigured": "Programa configurado",
+      "programNotConfigured": "Programa não configurado",
       "roundRobin": "Round Robin",
       "roundRobinDesc": "Distribuir leads entre consultores selecionados",
       "routingMode": "Modo de Encaminhamento",
@@ -1451,6 +1478,7 @@
     "active": "Ativo",
     "addStage": "Adicionar Etapa",
     "cancel": "Cancelar",
+    "clickToSchedule": "clique ✏️ para agendar sessões",
     "continueDraft": "Continuar Rascunho",
     "continueSetup": "Continuar Configuração",
     "create": "Criar",
@@ -1783,6 +1811,7 @@
   },
   "chat": {
     "empty": "Sem mensagens ainda. Inicie a conversa!",
+    "participants": "Participantes",
     "placeholder": "Escreva uma mensagem...",
     "sendError": "Erro ao enviar mensagem",
     "title": "Chat do Workspace",
@@ -1868,11 +1897,11 @@
     "copilotPlaceholder": "Ask the Ecosystem Copilot…",
     "copilotPreviewNote": "Modo informativo — dados ilustrativos.",
     "copilotThinking": "Analyzing ecosystem data…",
+    "copilotTitle": "Copiloto do Ecossistema",
     "navigation": "Navegação",
     "placeholder": "Pesquisar ou escrever um comando...",
     "quickActions": "Ações Rápidas",
-    "typeToSearch": "Escreva para pesquisar...",
-    "copilotTitle": "Copiloto do Ecossistema"
+    "typeToSearch": "Escreva para pesquisar..."
   },
   "common": {
     "accessDenied": "Acesso Negado",
@@ -1885,6 +1914,7 @@
     "allPrograms": "Todos os Programas",
     "allStages": "Todos os Estágios",
     "approved": "Aprovado",
+    "atTime": "às",
     "back": "Voltar",
     "backToHome": "Voltar ao Início",
     "cancel": "Cancelar",
@@ -1908,6 +1938,7 @@
     "create": "Criar",
     "created": "Criado",
     "creating": "A criar...",
+    "dataNotAvailable": "Dados não disponíveis.",
     "delete": "Eliminar",
     "deleted": "Eliminado",
     "description": "Descrição",
@@ -1934,6 +1965,7 @@
     "go": "Ir",
     "goBack": "Voltar",
     "health": "Saúde",
+    "highlights": "Destaques",
     "importCompleteResultinsertedInserted": "Import complete: ${result.inserted} inserted,{{ updated }} updated",
     "important": "Importante",
     "inactive": "Inativo",
@@ -1941,7 +1973,6 @@
     "last": "Último",
     "lastPage": "Última página",
     "later": "Mais tarde",
-    "atTime": "às",
     "lessDetails": "Menos detalhes",
     "link": "Link",
     "linkCopied": "Link copiado para a área de transferência",
@@ -1979,9 +2010,11 @@
     "other": "Outro",
     "overdue": "atrasado",
     "page": "Página",
+    "pending": "Pendente",
     "perMonth": "/mês",
     "phone": "Phone",
     "pleaseWait": "Please wait{{ remainingSeconds }}s before trying again.",
+    "preview": "Pré-visualização",
     "previous": "Anterior",
     "previousPage": "Página anterior",
     "processing": "A processar...",
@@ -2013,6 +2046,7 @@
     "start": "Iniciar",
     "startDate": "Início",
     "startup": "Startup",
+    "startups": "Startups",
     "status": "Estado",
     "submit": "Submeter",
     "submitted": "Submetido",
@@ -2041,11 +2075,7 @@
     "viewAll": "Ver todas",
     "workspace": "Workspace",
     "years": "anos",
-    "yes": "Sim",
-    "highlights": "Destaques",
-    "startups": "Startups",
-    "dataNotAvailable": "Dados não disponíveis.",
-    "preview": "Pré-visualização"
+    "yes": "Sim"
   },
   "communication": {
     "communicationLogged": "Communication logged",
@@ -2199,6 +2229,7 @@
     "copy": "Copiar",
     "copyAllQuestions": "Copiar Todas as Perguntas",
     "createFirstExercise": "Crie o seu primeiro exercício para começar",
+    "downloadFile": "Descarregar ficheiro",
     "examplePhrases": "Frases de Exemplo",
     "exercises": "Exercícios",
     "expectedOutcomes": "Resultados Esperados",
@@ -2293,6 +2324,7 @@
       "titleRequired": "Título obrigatório",
       "uploading": "A carregar…"
     },
+    "uploadMaterial": "Carregar Material",
     "vpWizard": {
       "description": "Assistente guiado para construir propostas de valor. Modo de prática - guarde a partir do espaço de trabalho.",
       "practiceMode": "Modo de prática - os resultados podem ser copiados. Para guardar permanentemente, use o assistente a partir de um espaço de trabalho específico.",
@@ -2450,6 +2482,22 @@
     "type": "Tipo:",
     "via": "via"
   },
+  "contractReadiness": {
+    "companyData": "NIF e morada da empresa",
+    "document": "Documento gerado disponível",
+    "legalRep": "Representante legal preenchido",
+    "missingBuilding": "Falta edifício",
+    "missingIncubationType": "Falta tipo de incubação",
+    "modality": "Modalidade, edifício e espaço",
+    "notReadyHint": "Resolva os itens em falta para libertar o envio para assinatura. Esta verificação é apenas informativa.",
+    "pricing": "Snapshot de preço presente",
+    "provider": "Prestador de assinatura selecionado",
+    "providerLockBody": "O contrato foi enviado para assinatura. Para mudar de prestador é obrigatório cancelar o envio actual antes de selecionar outro.",
+    "providerLockTitle": "Prestador bloqueado para troca silenciosa",
+    "sentLock": "Não trocar prestador silenciosamente após envio",
+    "sentLockWarning": "Já enviado. Mudar de prestador exige cancelar e reenviar manualmente.",
+    "title": "Prontidão do contrato"
+  },
   "contracts": {
     "aiAnalysis": "Análise IA",
     "aiInsights": "Insights de Contrato IA",
@@ -2489,6 +2537,7 @@
       "label": "risco"
     },
     "startDate": "Data de Início",
+    "truthHint": "Cópias derivadas (CRM, SharePoint) são informativas e não substituem este registo.",
     "updateFailed": "Falha ao atualizar contrato",
     "updated": "Contrato atualizado",
     "upload": {
@@ -2507,8 +2556,7 @@
       "step4": "Guarde o contrato na base de dados",
       "tooLarge": "O ficheiro deve ter menos de 10MB.",
       "uploading": "A carregar documento..."
-    },
-    "truthHint": "Cópias derivadas (CRM, SharePoint) são informativas e não substituem este registo."
+    }
   },
   "copilot": {
     "askAnything": "Pergunte sobre a sua startup, tarefas, KPIs ou ecossistema.",
@@ -2567,6 +2615,7 @@
     "addNote": "Adicionar Nota",
     "addTask": "Adicionar Tarefa",
     "aiRecap": "Resumo IA",
+    "aiSummary": "Resumo IA",
     "allAssignees": "Todos os Responsáveis",
     "allItems": "Todos os Items",
     "allPrograms": "Todos os Programas",
@@ -2597,6 +2646,7 @@
     "assignedTo": "Atribuído a",
     "assignee": "Consultor Responsável",
     "attachToCrm": "Associar",
+    "bookingLinks": "Links de Marcação",
     "bookingQuestionnaire": "Questionário de Marcação",
     "bulk": {
       "archiveConfirmDesc": "Isto irá mover todos os leads selecionados para arquivado. Pode restaurá-los mais tarde.",
@@ -2700,12 +2750,6 @@
     "edit": "Editar",
     "emailAttached": "Email associado ao CRM",
     "emailHistory": "Histórico de Email",
-    "generateSummary": "Resumo IA",
-    "aiSummary": "Resumo IA",
-    "itemsAnalyzed": "{{count}} itens analisados",
-    "keyPoints": "Pontos-chave",
-    "nextAction": "Próxima Ação",
-    "noSubject": "(sem assunto)",
     "emailReenviadoComSucesso": "Email reenviado com sucesso!",
     "emailReviewQueue": "Emails para Revisão",
     "emailSyncComplete": "Email Sincronizar Complete",
@@ -2740,6 +2784,7 @@
       "update": "Atualização"
     },
     "generateRecap": "Gerar Resumo IA",
+    "generateSummary": "Resumo IA",
     "high": "Alta",
     "ignoreEmail": "Ignorar",
     "ignoredCount": "Ignorados",
@@ -2772,6 +2817,8 @@
     "intakeCreatedNoEmail": "Intake criado mas o email não foi enviado. O link foi copiado — pode enviar manualmente.",
     "interactions": "Interações",
     "itemNotFound": "Lead não encontrado ou sem acesso",
+    "itemsAnalyzed": "{{count}} itens analisados",
+    "keyPoints": "Pontos-chave",
     "lastActivity": "Última Atividade",
     "lastSuccess": " ",
     "lastSync": " ",
@@ -2808,6 +2855,7 @@
     "nenhumContratoAssociadoAEste": "Nenhum contrato associado a este intake. Crie o contrato primeiro.",
     "neverSynced": "Nunca sincronizado",
     "newLead": "Nova Lead",
+    "nextAction": "Próxima Ação",
     "nextActionClearError": "Falha ao limpar próxima ação",
     "nextActionCleared": "Próxima ação limpa",
     "nextActionDate": "Data e Hora",
@@ -2831,6 +2879,7 @@
     "noNextAction": "Sem ação definida",
     "noNextActionSet": "Sem próxima ação definida",
     "noRecapYet": "Ainda sem resumo disponível",
+    "noSubject": "(sem assunto)",
     "noSyncConfigured": "Nenhuma sincronização configurada",
     "noTasks": "Sem tarefas",
     "noTasksHint": "Nenhuma tarefa nesta categoria.",
@@ -2906,6 +2955,12 @@
     "stage": "Fase",
     "stageMoveFailed": "Falha ao mover de fase",
     "stageMoved": "Movido para {{stage}}",
+    "stages": {
+      "firstContactBooked": "Primeiro Contacto Agendado",
+      "met": "Reunião Realizada",
+      "new": "Novo",
+      "qualified": "Qualificado"
+    },
     "stale": "Parados",
     "startFirstSync": "Iniciar primeira sincronização",
     "startupCategory": "Categoria",
@@ -2945,13 +3000,7 @@
     "viewAll": "Ver Tudo",
     "viewSession": "Ver Sessão",
     "weighted": "EUR",
-    "winProbability": "Probabilidade (%)",
-    "stages": {
-      "new": "Novo",
-      "firstContactBooked": "Primeiro Contacto Agendado",
-      "met": "Reunião Realizada",
-      "qualified": "Qualificado"
-    }
+    "winProbability": "Probabilidade (%)"
   },
   "dashboard": {
     "acrossPrograms": "Em {{count}} programa",
@@ -3187,6 +3236,22 @@
     "useTemplate": "Usar template",
     "viewReview": "Ver avaliação"
   },
+  "days": {
+    "friShort": "Sex",
+    "friday": "Sexta",
+    "monShort": "Seg",
+    "monday": "Segunda",
+    "satShort": "Sáb",
+    "saturday": "Sábado",
+    "sunShort": "Dom",
+    "sunday": "Domingo",
+    "thuShort": "Qui",
+    "thursday": "Quinta",
+    "tueShort": "Ter",
+    "tuesday": "Terça",
+    "wedShort": "Qua",
+    "wednesday": "Quarta"
+  },
   "diagnostics": {
     "allOperational": "Tudo operacional",
     "clickToStart": "Clique para iniciar os testes",
@@ -3293,6 +3358,13 @@
     "noFinancialModel": "Nenhum modelo financeiro carregado ainda",
     "openLink": "Abrir Link",
     "openingExternalLink": "A Abrir Link Externo",
+    "programMaterials": {
+      "description": "Recursos carregados pelos consultores para os founders deste programa (slides de sessões, guias, checklists).",
+      "download": "Descarregar",
+      "emptyDescription": "Os consultores ainda não publicaram materiais para este programa. Vão aparecer aqui assim que carregarem PowerPoints, PDFs ou outros recursos.",
+      "emptyTitle": "Sem materiais do programa",
+      "title": "Materiais do Programa"
+    },
     "provideNameAndUrl": "Por favor forneça nome e URL",
     "replaceModel": "Substituir Modelo",
     "sectionIntro": "Ficheiros e entregáveis específicos desta startup — pitch decks, modelos financeiros, contratos e outros documentos de trabalho.",
@@ -3308,13 +3380,6 @@
       "label": "Secções de documentos",
       "program": "Materiais do Programa",
       "tools": "Ferramentas para Empreendedores"
-    },
-    "programMaterials": {
-      "title": "Materiais do Programa",
-      "description": "Recursos carregados pelos consultores para os founders deste programa (slides de sessões, guias, checklists).",
-      "emptyTitle": "Sem materiais do programa",
-      "emptyDescription": "Os consultores ainda não publicaram materiais para este programa. Vão aparecer aqui assim que carregarem PowerPoints, PDFs ou outros recursos.",
-      "download": "Descarregar"
     },
     "supportedFormats": "Formatos suportados: .xlsx, .xls, .csv",
     "title": "Documentos",
@@ -3358,6 +3423,7 @@
     "allPrograms": "Todos os Programas",
     "allStages": "Todas as Fases",
     "allTags": "Todas as Tags",
+    "archiveError": "Erro ao arquivar workspace",
     "archiveWorkspace": "Arquivar Workspace",
     "assignConsultant": "Atribuir...",
     "byConsultantTab": "Por Consultor",
@@ -3365,15 +3431,14 @@
     "confirmDeleteDesc": "Confirmar Eliminar Desc",
     "confirmDeleteTitle": "Eliminar Lead?",
     "consultantAssigned": "Consultor atribuído com sucesso",
+    "deleteBlockedByContract": "Não é possível eliminar: existe(m) contrato(s) associado(s) a esta lead.",
+    "deleteBlockedByReferences": "Não é possível eliminar: esta lead está associada a outros registos (contrato, sala ou histórico).",
     "deleteLead": "Eliminar Lead",
+    "deleteLeadError": "Erro ao eliminar lead",
     "description": "Visão unificada de todos os workspaces e leads",
     "lastActivity": "Última Atividade",
     "lead": "Lead",
     "leadDeleted": "Lead eliminada",
-    "deleteLeadError": "Erro ao eliminar lead",
-    "deleteBlockedByContract": "Não é possível eliminar: existe(m) contrato(s) associado(s) a esta lead.",
-    "deleteBlockedByReferences": "Não é possível eliminar: esta lead está associada a outros registos (contrato, sala ou histórico).",
-    "archiveError": "Erro ao arquivar workspace",
     "leads": "Leads",
     "manageTeam": "Gerir Equipa",
     "name": "Nome",
@@ -4657,6 +4722,28 @@
     "title": "Hub do Ciclo de Contratos",
     "upcomingRenewals": "Próximas Renovações"
   },
+  "lifecycleMismatch": {
+    "allConsistent": "Estados de contrato/intake/CRM/workspace consistentes.",
+    "contractActiveWorkspaceNot": {
+      "detail": "workspace.status=\"{{wstate}}\"",
+      "title": "Contrato activo mas workspace não está activo"
+    },
+    "crmContractedNoLink": {
+      "detail": "funnel_items.linked_contract_id está vazio.",
+      "title": "Lead em fase \"contracted\" sem contrato ligado"
+    },
+    "disclaimer": "Apenas leitura. Nenhuma reparação automática. Use as acções existentes em cada registo.",
+    "intakeAheadOfContract": {
+      "detail": "intake.status=\"{{istate}}\" / contract.status=\"{{cstate}}\"",
+      "title": "Intake assinado mas contrato não está activo"
+    },
+    "open": "Abrir",
+    "pendingSignatureNoProvider": {
+      "detail": "signature_provider está vazio.",
+      "title": "Contrato em pending_signature sem prestador definido"
+    },
+    "title": "Inconsistências de ciclo de vida"
+  },
   "loading": {
     "almostThere": "Quase lá...",
     "default": "A carregar...",
@@ -4666,6 +4753,7 @@
   },
   "login": {
     "achieveGoals": "Alcançar Objetivos",
+    "backToLogin": "Voltar ao login",
     "benefitGrowth": "Crescimento Acelerado",
     "benefitGrowthDesc": "Ferramentas e métricas para escalar",
     "benefitMentorship": "Mentoria Personalizada",
@@ -4704,6 +4792,8 @@
     "signInDescription": "Entre para aceder aos seus workspaces ou crie uma nova conta",
     "signingIn": "A entrar...",
     "signupCheckError": "Unable to verify signup eligibility. Por favor tente novamente.",
+    "signupSuccessDesc": "Enviámos um Email de verificação para o seu endereço. Por favor verifique a sua caixa de correio e clique no link de confirmação.",
+    "signupSuccessTitle": "Conta criada com sucesso!",
     "startups": "Startups",
     "termsAgree": "Ao entrar, concorda com os nossos Termos de Serviço e Política de Privacidade",
     "trackProgress": "Acompanhar Progresso",
@@ -4714,8 +4804,14 @@
     "activeMentorships": "Mentorias ativas",
     "addSlots": "Adicione horários para permitir que founders agendem sessões.",
     "addTimeSlot": "Adicionar Horário",
+    "addWeekend": "Adicionar fim de semana",
     "availability": {
       "available": "Disponível",
+      "emptyBanner": {
+        "cta": "Configurar agora",
+        "subtitle": "Sem horários definidos, os fundadores não conseguem agendar sessões contigo.",
+        "title": "Define a tua disponibilidade"
+      },
       "full": "Lotado",
       "limited": "Limitado"
     },
@@ -4741,6 +4837,7 @@
     "nextSession": "Próxima Sessão",
     "noAvailability": "Sem disponibilidade configurada.",
     "noSessionsYet": "Sem sessões registadas",
+    "noSlots": "Sem disponibilidade",
     "noStartupsAssigned": "Nenhuma startup atribuída ainda",
     "noStartupsAssignedDesc": "Verá as suas startups aqui assim que for atribuído a workspaces.",
     "noteAdded": "Nota adicionada com sucesso",
@@ -4849,6 +4946,7 @@
     "mentorAssigned": "Mentor atribuído com sucesso",
     "messageOptional": "Mensagem (opcional)",
     "messagePlaceholder": "Descreva brevemente em que precisa de ajuda...",
+    "ndaNotSigned": "Este mentor ainda não assinou o NDA. O acesso aos dados do Workspace ficará bloqueado até que o NDA seja aceite.",
     "noAvailabilityYet": "Este mentor ainda não definiu a sua disponibilidade.",
     "noMatchingMentors": "No mentors match the selecionado expertise",
     "noPendingRequests": "Sem pedidos de marcação pendentes",
@@ -4903,6 +5001,7 @@
     "describeNeed": "Descreva a sua necessidade específica (opcional)",
     "describeNeedPlaceholder": "Ex: Preciso de ajuda com a minha estratégia go-to-market para o segmento B2B...",
     "expectedResponse": "A nossa equipa atribui mentores em 2-3 dias úteis.",
+    "expertise": "Áreas de especialidade",
     "failedToUpdate": "Falha ao atualizar conexão",
     "findAndAssign": "Encontrar e Atribuir Mentores",
     "findAndAssignDesc": "Procure todos os mentores e atribua-os a startups.",
@@ -4911,6 +5010,7 @@
     "impact": "Impacto",
     "industryOptional": "Industry (opcional)",
     "matchingMentors": "Mentores correspondentes",
+    "mentor": "Mentor",
     "mentorAssigned": "Mentor atribuído com sucesso!",
     "mentorGallery": "Galeria de Mentores",
     "mentorGalleryDesc": "Explore todos os mentores disponíveis no ecossistema por área de especialidade.",
@@ -4918,6 +5018,7 @@
     "myMentorsDesc": "Mentores atribuídos ao seu workspace pelo programa",
     "noCategoriesSetup": "No tag categories configured yet",
     "noEmailAvailable": "Email não disponível para este mentor",
+    "noEmailAvailableFor": "Sem Email disponível para {{target}}",
     "noMentorsAssigned": "Ainda não tem mentores atribuídos",
     "noMentorsAssignedDesc": "Os mentores serão atribuídos pela equipa do programa. Quando isso acontecer, verá aqui os seus perfis e poderá agendar sessões.",
     "noMentorsAvailable": "Nenhum mentor disponível de momento.",
@@ -4949,6 +5050,7 @@
     "submitRequest": "Enviar Pedido",
     "submitWithPreference": "Submeter com Mentor Preferido",
     "technologyOptional": "Tecnologia (opcional)",
+    "thisContact": "este contacto",
     "unknownFounder": "Fundador Desconhecido",
     "unnamedMentor": "Mentor",
     "whatNeedsHelp": "Em que precisa de ajuda?"
@@ -4956,6 +5058,7 @@
   "messaging": {
     "adjustSearch": "Tente ajustar a pesquisa ou verifique se o utilizador já está registado.",
     "conversationFailed": "Não foi possível iniciar conversa",
+    "new": "Nova",
     "newConversation": "Nova Conversa",
     "noConversations": "Sem conversas",
     "noUsersFound": "Nenhum utilizador encontrado",
@@ -4963,6 +5066,8 @@
     "startConversation": "Iniciar Conversa",
     "startConversationFailed": "Não foi possível iniciar conversa",
     "startConversationHint": "Inicie uma conversa com alguém do ecossistema usando o botão acima.",
+    "title": "Mensagens",
+    "typeMessage": "Escreva uma mensagem...",
     "usersSelected": "{{count}} utilizador(es) selecionado(s)"
   },
   "milestones": {
@@ -5135,43 +5240,30 @@
     "title": "Acordo de Confidencialidade"
   },
   "nextBestAction": {
-    "title": "Próxima melhor ação",
-    "derived": "derivada do estado real",
-    "allClear": "Sem ações urgentes derivadas do estado actual.",
-    "continue": "Continuar",
-    "open": "Abrir",
-    "openIntake": "Abrir formulário",
-    "openCheckin": "Abrir check-in",
-    "review": "Rever",
-    "assign": "Atribuir",
-    "prepare": "Preparar",
     "acceptNda": "Aceitar NDA",
+    "actionsInProgress": "Ações Em Progresso",
+    "addKpis": "Adicionar Kpis",
+    "allCaughtUp": "Tudo em dia",
+    "allClear": "Sem ações urgentes derivadas do estado actual.",
+    "assign": "Atribuir",
+    "completeCheckin": "Completar check-in",
+    "completeOrReschedule": "Completar ou reagendar",
+    "continue": "Continuar",
+    "continueWork": "Continuar Work",
+    "derived": "derivada do estado real",
+    "dueOn": "Due On",
     "founder": {
-      "onboarding": {
-        "title": "Completar onboarding do workspace",
-        "why": "O workspace está marcado como needs_onboarding=true."
+      "checkin": {
+        "title": "Submeter check-in semanal pendente",
+        "why": "{{count}} check-in(s) por submeter esta semana."
       },
       "intake": {
         "title": "Preencher dados de contratação",
         "why": "Existe um intake de contrato em estado editável associado a esta startup."
       },
-      "checkin": {
-        "title": "Submeter check-in semanal pendente",
-        "why": "{{count}} check-in(s) por submeter esta semana."
-      }
-    },
-    "staff": {
-      "intakesBlocked": {
-        "title": "Rever intakes bloqueados por dados em falta",
-        "why": "{{count}} intake(s) em review_pending ou changes_requested."
-      },
-      "signatures": {
-        "title": "Acompanhar contratos enviados para assinatura",
-        "why": "{{count}} contrato(s) com signature_status pendente."
-      },
-      "unassigned": {
-        "title": "Atribuir consultor a workspaces activos",
-        "why": "{{count}} workspace(s) activo(s) sem assigned_consultor_id."
+      "onboarding": {
+        "title": "Completar onboarding do workspace",
+        "why": "O workspace está marcado como needs_onboarding=true."
       }
     },
     "mentor": {
@@ -5187,7 +5279,38 @@
         "title": "Preparar próxima sessão",
         "why": "{{count}} sessão(ões) marcada(s) próximas."
       }
-    }
+    },
+    "mentorFeedbackReceived": "Mentor Feedback Received",
+    "noUrgentActions": "No Urgent Ações",
+    "open": "Abrir",
+    "openCheckin": "Abrir check-in",
+    "openIntake": "Abrir formulário",
+    "overdueActions": "Ações atrasadas",
+    "prepare": "Preparar",
+    "prepareSession": "Preparar sessão",
+    "review": "Rever",
+    "sessionOn": "Sessão On",
+    "staff": {
+      "intakesBlocked": {
+        "title": "Rever intakes bloqueados por dados em falta",
+        "why": "{{count}} intake(s) em review_pending ou changes_requested."
+      },
+      "signatures": {
+        "title": "Acompanhar contratos enviados para assinatura",
+        "why": "{{count}} contrato(s) com signature_status pendente."
+      },
+      "unassigned": {
+        "title": "Atribuir consultor a workspaces activos",
+        "why": "{{count}} workspace(s) activo(s) sem assigned_consultor_id."
+      }
+    },
+    "title": "Próxima melhor ação",
+    "trackProgress": "Acompanhar progresso",
+    "updateKpisForMonth": "Atualizar KPIs do mês",
+    "viewActions": "Ver Ações",
+    "viewFeedback": "Ver Feedback",
+    "viewSession": "Ver Sessão",
+    "weeklyCheckinPending": "Weekly Checkin Pendente"
   },
   "nextSteps": {
     "addNow": "Adicionar",
@@ -5847,23 +5970,47 @@
     "title": "Relatório de Progresso"
   },
   "progressTimeline": {
+    "historicalEvents": "Eventos",
     "noEvents": "Sem eventos de progresso ainda",
     "noEventsDescription": "Mudanças de fase e marcos concluídos aparecerão aqui",
+    "programSchedule": "Calendário do Programa",
     "stageTransition": "Transição de fase",
     "start": "Início",
     "title": "Linha do Tempo"
   },
+  "provenance": {
+    "archiveStatus": {
+      "desc": "Reflete o estado do arquivo de backup em SharePoint. Não é a fonte de verdade do contrato.",
+      "label": "Cópia SharePoint — não canónica"
+    },
+    "contractTruth": {
+      "desc": "Os dados financeiros e contratuais lidos aqui vêm da tabela canónica startup_contracts.",
+      "label": "Fonte canónica: startup_contracts"
+    },
+    "crmPhase": {
+      "desc": "Macro-fase comercial no pipeline (funnel_items.stage). Não substitui o estado operacional do contrato.",
+      "label": "Fase CRM"
+    },
+    "intakeState": {
+      "desc": "Estado operacional do formulário de onboarding (contract_intakes.status).",
+      "label": "Estado intake"
+    }
+  },
   "publicBooking": {
+    "backToSite": "Voltar ao site",
     "bookFirstMeeting": "Marcar Primeira Reunião",
     "bookFirstMeetingDesc": "Agende uma consulta gratuita para saber como podemos ajudar a sua startup a crescer.",
     "booking": "A marcar...",
     "bookingConfirmed": "Marcação Confirmada!",
     "bookingConfirmedDesc": "A sua sessão de primeiro contacto foi agendada. Receberá um convite de calendário em breve.",
     "change": "Alterar",
+    "changeProgram": "alterar",
     "confirmBooking": "Confirmar Marcação",
     "discussPlaceholder": "Breve descrição do seu projeto ou o que gostaria de discutir...",
+    "fileTooLarge": "Ficheiro demasiado grande (máx. 10MB)",
     "fillRequired": "Por favor preencha o seu nome e email",
     "fullName": "Nome Completo",
+    "generalIntake": "Candidatura geral",
     "hasTeam": "Tem equipa formada?",
     "hasTeamPlaceholder": "Selecione",
     "invalidLink": "Link de Marcação Inválido",
@@ -5872,6 +6019,7 @@
     "noSlotsAvailable": "Sem horários disponíveis no momento. Por favor tente novamente mais tarde.",
     "organization": "Organização / Nome da Startup",
     "organizationPlaceholder": "Nome da sua empresa ou projeto",
+    "pitchDeck": "Apresentação / Pitch Deck",
     "refEvent": "Evento",
     "refPress": "Imprensa / Media",
     "refReferral": "Recomendação",
@@ -5881,6 +6029,8 @@
     "referralSource": "Como nos conheceu?",
     "sector": "Setor / Indústria",
     "sectorPlaceholder": "Selecione o setor",
+    "selectProgram": "Selecione o Programa",
+    "selectProgramDesc": "Escolha o programa ao qual deseja candidatar-se",
     "selectTime": "Selecione um Horário",
     "selectTimeDesc": "Escolha um horário conveniente para a sua primeira reunião",
     "stage": "Fase da Startup",
@@ -5892,16 +6042,9 @@
     "subtitle": "Agende a sua primeira consulta com a nossa equipa",
     "teamForming": "Em formação",
     "title": "Marcar Reunião",
-    "whatToDiscuss": "O que gostaria de discutir?",
-    "yourDetails": "Os Seus Dados",
-    "pitchDeck": "Apresentação / Pitch Deck",
     "uploadPitch": "Carregar apresentação (PDF, PPTX, até 10MB)",
-    "fileTooLarge": "Ficheiro demasiado grande (máx. 10MB)",
-    "backToSite": "Voltar ao site",
-    "selectProgram": "Selecione o Programa",
-    "selectProgramDesc": "Escolha o programa ao qual deseja candidatar-se",
-    "changeProgram": "alterar",
-    "generalIntake": "Candidatura geral"
+    "whatToDiscuss": "O que gostaria de discutir?",
+    "yourDetails": "Os Seus Dados"
   },
   "quality": {
     "blockingWarning": "Este {{entityType}} não pode ser marcado como pronto até a pontuação atingir 70+",
@@ -6357,8 +6500,6 @@
     "joinCall": "Entrar na reunião",
     "joinTeamsMeeting": "Entrar na Reunião Teams",
     "joinUrlCopied": "Link da reunião copiado",
-    "teamsMeetingLabel": "Reunião Teams",
-    "teamsMeetingPending": "O link do Teams aparecerá aqui assim que a sincronização com o Outlook concluir.",
     "keyDecisions": "Decisões Principais",
     "keyDecisionsPlaceholder": "Decisões principais tomadas durante esta sessão...",
     "kpisToUpdate": "KPIs para Atualizar",
@@ -6474,6 +6615,8 @@
     "syncStatusSynced": "Synced",
     "syncSuccess": "Sessão synced to Outlook",
     "teamsDesc": "Conectar reuniões do Teams",
+    "teamsMeetingLabel": "Reunião Teams",
+    "teamsMeetingPending": "O link do Teams aparecerá aqui assim que a sincronização com o Outlook concluir.",
     "title": "Sessões",
     "titleLabel": "Título",
     "titlePlaceholder": "Título da sessão",
@@ -6836,6 +6979,7 @@
     "expiresOn": "Expira em {{date}}",
     "greeting": "Olá, {{name}}",
     "greetingGeneric": "Bem-vindo ao Painel",
+    "heroSubtitle": "{{count}} startups no ecossistema · {{programs}} programas",
     "intakeRouting": "Encaminhamento",
     "invoicesOverdue": "Faturas em Atraso",
     "lastSession": "Última sessão",
@@ -6894,8 +7038,8 @@
   "stageProgress": {
     "complete": "completo",
     "milestones": "marcos",
-    "stages": "fases",
     "stageProgress": "Progresso de Fase",
+    "stages": "fases",
     "viewMilestones": "Ver Marcos & Playbooks",
     "yourJourney": "A Sua Jornada"
   },
@@ -7301,6 +7445,10 @@
       "pricing": "Preços"
     },
     "catalog": {
+      "aarrr_funnel": {
+        "desc": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas do piloto e ações de melhoria",
+        "title": "Funil AARRR"
+      },
       "business_model_canvas": {
         "desc": "Visão geral do modelo de negócio",
         "title": "Canvas de Modelo de Negócio"
@@ -7308,6 +7456,18 @@
       "empathy_map": {
         "desc": "Compreenda o que os seus clientes pensam, sentem, veem, ouvem, dizem e fazem",
         "title": "Mapa de Empatia"
+      },
+      "experience_1_pager": {
+        "desc": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
+        "title": "1-Pager da Experiência"
+      },
+      "experience_script_and_customer_journey": {
+        "desc": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência (Story-selling)",
+        "title": "Guião da Experiência e Jornada do Cliente"
+      },
+      "final_deck_storyboard": {
+        "desc": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral",
+        "title": "Storyboard do Deck Final"
       },
       "fundraising_canvas": {
         "desc": "Prepare-se para levantar a sua próxima ronda",
@@ -7349,6 +7509,10 @@
         "desc": "Defina a sua métrica North Star e OKRs",
         "title": "OKRs e North Star"
       },
+      "pilot_kpis_3_axes": {
+        "desc": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição, baseline e meta do piloto",
+        "title": "KPIs do Piloto (3 Eixos)"
+      },
       "pitch_deck_checklist": {
         "desc": "Slides essenciais para o seu pitch de investidores",
         "title": "Checklist do Pitch Deck"
@@ -7384,26 +7548,6 @@
       "value_proposition_canvas": {
         "desc": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços",
         "title": "Canvas de Proposta de Valor"
-      },
-      "experience_1_pager": {
-        "desc": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
-        "title": "1-Pager da Experiência"
-      },
-      "experience_script_and_customer_journey": {
-        "desc": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência (Story-selling)",
-        "title": "Guião da Experiência e Jornada do Cliente"
-      },
-      "aarrr_funnel": {
-        "desc": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas do piloto e ações de melhoria",
-        "title": "Funil AARRR"
-      },
-      "pilot_kpis_3_axes": {
-        "desc": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição, baseline e meta do piloto",
-        "title": "KPIs do Piloto (3 Eixos)"
-      },
-      "final_deck_storyboard": {
-        "desc": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral",
-        "title": "Storyboard do Deck Final"
       }
     },
     "categories": {
@@ -7429,11 +7573,15 @@
     "createActions": "Criar Ações",
     "createNActions": "Criar {{count}} Ações",
     "descriptions": {
+      "AARRR Funnel": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas e ações",
       "Business Model Canvas": "High-level business model Visão Geral",
       "Canvas de Modelo de Negócio": "Visão geral do modelo de negócio",
       "Competitor Analysis": "Framework para analisar concorrentes diretos e indiretos",
       "Customer Persona": "Template detalhado de persona de cliente para compreender utilizadores-alvo",
       "Empathy Map": "Compreenda o que os seus clientes pensam, sentem, veem, ouvem, dizem e fazem",
+      "Experience 1-Pager": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
+      "Experience Script & Customer Journey": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência",
+      "Final Deck Storyboard": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral",
       "Fundraising Canvas": "Prepare-se para levantar a sua próxima ronda",
       "Fundraising Readiness": "Avalie a sua preparação para levantar capital",
       "Go-To-Market Canvas": "Estratégia go-to-market completa",
@@ -7445,6 +7593,7 @@
       "Lean Canvas": "Modelo de negócio de uma página para startups",
       "MVP Definition": "Framework para definir o seu Produto Mínimo Viável",
       "OKRs & North Star": "Defina a sua métrica North Star e OKRs",
+      "Pilot KPIs (3 Axes)": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição e meta",
       "Pitch Deck Checklist": "Slides essenciais para o seu pitch de investidores",
       "Pricing & Packaging": "Estratégia de preços e estrutura de planos",
       "Problem Discovery Interview": "Script para conduzir entrevistas de descoberta de clientes para validar problem-solution fit",
@@ -7457,12 +7606,7 @@
       "Team Retrospective": "Framework para reuniões retrospetivas de equipa",
       "Unit Economics": "Métricas financeiras chave por cliente",
       "Value Proposition Canvas": "Mapeie jobs, dores e ganhos dos clientes para os seus produtos e serviços",
-      "Weekly Progress Report": "Template para atualizações semanais de progresso da startup",
-      "Experience 1-Pager": "Resumir a experiência turística numa página: o que é, para quem é, e porque Leiria é o sítio certo",
-      "Experience Script & Customer Journey": "Três templates interligados: Persona, Jornada do Cliente e Guião da Experiência",
-      "AARRR Funnel": "Funil de métricas pirata: 5 etapas com perguntas-chave, métricas, metas e ações",
-      "Pilot KPIs (3 Axes)": "Escolha um KPI por eixo (Ambiental, Social, Experiência) com método de medição e meta",
-      "Final Deck Storyboard": "Preparação slide a slide do pitch deck: 10-12 slides com conteúdo visual e guião oral"
+      "Weekly Progress Report": "Template para atualizações semanais de progresso da startup"
     },
     "dueAndOwner": "{{days}} • {{owner}}",
     "dueInDaysShort": "{{count}}d",
@@ -7509,10 +7653,14 @@
     "metric": "Métrica",
     "mitigation": "Mitigação",
     "names": {
+      "AARRR Funnel": "Funil AARRR",
       "Business Model Canvas": "Canvas de Modelo de Negócio",
       "Competitor Analysis": "Análise da Concorrência",
       "Customer Persona": "Persona de Cliente",
       "Empathy Map": "Mapa de Empatia",
+      "Experience 1-Pager": "1-Pager da Experiência",
+      "Experience Script & Customer Journey": "Guião da Experiência e Jornada do Cliente",
+      "Final Deck Storyboard": "Storyboard do Deck Final",
       "Fundraising Canvas": "Canvas de Angariação de Capital",
       "Fundraising Readiness": "Preparação para Angariação de Capital",
       "Go-To-Market Canvas": "Canvas Go-to-Market",
@@ -7524,6 +7672,7 @@
       "Lean Canvas": "Lean Canvas",
       "MVP Definition": "Definição de MVP",
       "OKRs & North Star": "OKRs e North Star",
+      "Pilot KPIs (3 Axes)": "KPIs do Piloto (3 Eixos)",
       "Pitch Deck Checklist": "Checklist do Pitch Deck",
       "Pricing & Packaging": "Preços e Pacotes",
       "Problem Discovery Interview": "Entrevista de Descoberta de Problemas",
@@ -7536,12 +7685,7 @@
       "Team Retrospective": "Retrospetiva de Equipa",
       "Unit Economics": "Economia Unitária",
       "Value Proposition Canvas": "Canvas de Proposta de Valor",
-      "Weekly Progress Report": "Relatório Semanal de Progresso",
-      "Experience 1-Pager": "1-Pager da Experiência",
-      "Experience Script & Customer Journey": "Guião da Experiência e Jornada do Cliente",
-      "AARRR Funnel": "Funil AARRR",
-      "Pilot KPIs (3 Axes)": "KPIs do Piloto (3 Eixos)",
-      "Final Deck Storyboard": "Storyboard do Deck Final"
+      "Weekly Progress Report": "Relatório Semanal de Progresso"
     },
     "needsChanges": "Precisa de Alterações",
     "needsDiscussion": "Precisa de Discussão",
@@ -7802,6 +7946,7 @@
     "preference": "Preferência",
     "priority": "Prioridade",
     "privateOffice": "Gabinete Privado",
+    "request": "Pedido",
     "requested": "Pedido",
     "requests": "Pedidos",
     "startup": "Startup",
@@ -7813,8 +7958,7 @@
     "statusOffered": "Oferecido",
     "statusWaiting": "Em Espera",
     "type": "Tipo",
-    "virtualIncubation": "Incubação Virtual",
-    "request": "Pedido"
+    "virtualIncubation": "Incubação Virtual"
   },
   "weeklyWins": {
     "complete": "Completar",
@@ -7954,11 +8098,20 @@
     "healthNotesSaved": "Health notes saved",
     "healthScore": "Saúde",
     "healthScoreRecomputed": "Health score recomputed",
+    "incubationStatus": {
+      "incubationTime": "Tempo de Incubação",
+      "monthsCount": "{{count}} meses",
+      "nextReview": "Próxima Revisão",
+      "ongoing": "Em curso",
+      "pendingMilestones": "Marcos Pendentes",
+      "title": "Estado da Incubação"
+    },
     "kpiAtualizado": "KPI atualizado",
     "kpis": "KPIs",
     "locationContract": "Localização e Contrato",
     "mentor": "Mentor",
     "milestones": "Marcos",
+    "milestonesActions": "Marcos e Ações",
     "noActionableInsights": "No actionable insights",
     "noActionsYet": "Sem ações ainda",
     "noConsultantAssigned": "Nenhum consultor atribuído ainda. Um administrador irá atribuí-lo em breve.",
@@ -8000,16 +8153,7 @@
     "workspaceUpdated": "Workspace updated",
     "yourConsultant": "Seu Consultor",
     "yourMentor": "Seu Mentor",
-    "yourTeam": "A Sua Equipa",
-    "incubationStatus": {
-      "title": "Estado da Incubação",
-      "ongoing": "Em curso",
-      "incubationTime": "Tempo de Incubação",
-      "monthsCount": "{{count}} meses",
-      "nextReview": "Próxima Revisão",
-      "pendingMilestones": "Marcos Pendentes"
-    },
-    "milestonesActions": "Marcos e Ações"
+    "yourTeam": "A Sua Equipa"
   },
   "workspaceCard": {
     "actions": "Ações",
@@ -8084,61 +8228,5 @@
     "upcomingSession": "Sessão a chegar",
     "updateKpis": "Atualize os seus KPIs",
     "viewActions": "Ver Ações"
-  },
-  "provenance": {
-    "contractTruth": {
-      "label": "Fonte canónica: startup_contracts",
-      "desc": "Os dados financeiros e contratuais lidos aqui vêm da tabela canónica startup_contracts."
-    },
-    "intakeState": {
-      "label": "Estado intake",
-      "desc": "Estado operacional do formulário de onboarding (contract_intakes.status)."
-    },
-    "crmPhase": {
-      "label": "Fase CRM",
-      "desc": "Macro-fase comercial no pipeline (funnel_items.stage). Não substitui o estado operacional do contrato."
-    },
-    "archiveStatus": {
-      "label": "Cópia SharePoint — não canónica",
-      "desc": "Reflete o estado do arquivo de backup em SharePoint. Não é a fonte de verdade do contrato."
-    }
-  },
-  "contractReadiness": {
-    "title": "Prontidão do contrato",
-    "legalRep": "Representante legal preenchido",
-    "companyData": "NIF e morada da empresa",
-    "modality": "Modalidade, edifício e espaço",
-    "missingIncubationType": "Falta tipo de incubação",
-    "missingBuilding": "Falta edifício",
-    "pricing": "Snapshot de preço presente",
-    "document": "Documento gerado disponível",
-    "provider": "Prestador de assinatura selecionado",
-    "sentLock": "Não trocar prestador silenciosamente após envio",
-    "sentLockWarning": "Já enviado. Mudar de prestador exige cancelar e reenviar manualmente.",
-    "providerLockTitle": "Prestador bloqueado para troca silenciosa",
-    "providerLockBody": "O contrato foi enviado para assinatura. Para mudar de prestador é obrigatório cancelar o envio actual antes de selecionar outro.",
-    "notReadyHint": "Resolva os itens em falta para libertar o envio para assinatura. Esta verificação é apenas informativa."
-  },
-  "lifecycleMismatch": {
-    "title": "Inconsistências de ciclo de vida",
-    "disclaimer": "Apenas leitura. Nenhuma reparação automática. Use as acções existentes em cada registo.",
-    "allConsistent": "Estados de contrato/intake/CRM/workspace consistentes.",
-    "open": "Abrir",
-    "intakeAheadOfContract": {
-      "title": "Intake assinado mas contrato não está activo",
-      "detail": "intake.status=\"{{istate}}\" / contract.status=\"{{cstate}}\""
-    },
-    "contractActiveWorkspaceNot": {
-      "title": "Contrato activo mas workspace não está activo",
-      "detail": "workspace.status=\"{{wstate}}\""
-    },
-    "pendingSignatureNoProvider": {
-      "title": "Contrato em pending_signature sem prestador definido",
-      "detail": "signature_provider está vazio."
-    },
-    "crmContractedNoLink": {
-      "title": "Lead em fase \"contracted\" sem contrato ligado",
-      "detail": "funnel_items.linked_contract_id está vazio."
-    }
   }
 }
