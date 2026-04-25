@@ -93,20 +93,58 @@ export function StaffMentorAssignDialog({
 
       if (reqError) throw reqError;
 
-      // Create a mentor connection record with proper workspace_id semantics
-      const { error: connError } = await supabase
-        .from('mentor_connections')
-        .upsert({
-          mentor_id: selectedMentorId,
-          founder_id: workspaceId, // kept for unique constraint compatibility
-          workspace_id: workspaceId, // canonical workspace reference
-          status: 'connected',
-          responded_at: new Date().toISOString(),
-        }, {
-          onConflict: 'mentor_id,founder_id',
-        });
-      
-      // Ignore connection errors as it's supplementary
+      // Resolve the real founder user id for this workspace.
+      // founder_id MUST be a founder auth.users.id (not the workspace id).
+      // Pre-v4.0 code wrote workspaceId here — that legacy is now corrected.
+      const { data: founderRow } = await supabase
+        .from('workspace_users')
+        .select('user_id, created_at')
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'founder')
+        .eq('active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const founderUserId = founderRow?.user_id ?? null;
+
+      // Create/refresh a mentor_connections row keyed by (mentor_id, workspace_id).
+      // workspace_id is the canonical reference; founder_id is populated when known.
+      if (founderUserId) {
+        await supabase
+          .from('mentor_connections')
+          .upsert(
+            {
+              mentor_id: selectedMentorId,
+              founder_id: founderUserId,
+              workspace_id: workspaceId,
+              status: 'connected',
+              responded_at: new Date().toISOString(),
+            },
+            { onConflict: 'mentor_id,workspace_id' },
+          );
+      } else {
+        // No founder yet (unclaimed/imported workspace) — still record the
+        // workspace-level connection without a fake founder_id.
+        // Skip if a row already exists for (mentor, workspace).
+        const { data: existingConn } = await supabase
+          .from('mentor_connections')
+          .select('id')
+          .eq('mentor_id', selectedMentorId)
+          .eq('workspace_id', workspaceId)
+          .maybeSingle();
+
+        if (!existingConn) {
+          await supabase.from('mentor_connections').insert({
+            mentor_id: selectedMentorId,
+            workspace_id: workspaceId,
+            status: 'connected',
+            responded_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      // Connection insertion errors are intentionally non-fatal (supplementary record).
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-mentor-requests'] });
