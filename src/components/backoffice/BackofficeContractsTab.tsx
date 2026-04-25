@@ -22,6 +22,10 @@ import { ContractUploadDropzone, type AIExtractedData } from './contracts/Contra
 import { ContractReviewForm, type ContractFormValues } from './contracts/ContractReviewForm';
 import { BulkActionsBar } from './contracts/BulkActionsBar';
 import { ContractDetailDrawer } from './contracts/ContractDetailDrawer';
+import { ProvenanceBadge } from '@/components/shared/ProvenanceBadge';
+import { LifecycleMismatchPanel } from '@/components/staff/LifecycleMismatchPanel';
+import { useContractIntakes } from '@/hooks/useContractIntakes';
+import { useFunnelItems } from '@/hooks/useFunnel';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -134,6 +138,8 @@ export function BackofficeContractsTab() {
   const { data: incubationTypes } = useIncubationTypes();
   const { data: buildings } = useBuildings();
   const { data: workspaces } = useWorkspaces({}, false, ALL_WORKSPACE_STATUSES);
+  const { data: intakes } = useContractIntakes();
+  const { data: crmItems } = useFunnelItems();
   const createContract = useCreateContract();
   const updateContract = useUpdateContract();
 
@@ -305,6 +311,36 @@ export function BackofficeContractsTab() {
 
   return (
     <div className="space-y-4">
+      {/* Stream F: provenance & lifecycle truth header */}
+      <div className="flex flex-wrap items-center gap-2">
+        <ProvenanceBadge variant="contract-truth" />
+        <span className="text-[11px] text-muted-foreground">
+          {t('contracts.truthHint', {
+            defaultValue: 'Cópias derivadas (CRM, SharePoint) são informativas e não substituem este registo.',
+          })}
+        </span>
+      </div>
+
+      <LifecycleMismatchPanel
+        contracts={contracts || []}
+        intakes={intakes || []}
+        crmItems={(crmItems || []).map((i: any) => ({
+          id: i.id,
+          stage: i.stage,
+          linked_contract_id: i.linked_contract_id,
+          organization_name: i.organization_name,
+        }))}
+        workspaces={(workspaces || []).map((w: any) => ({
+          id: w.id,
+          status: w.status,
+          startup_id: w.startup_id,
+        }))}
+        onOpenContract={(id) => {
+          const c = (contracts || []).find((x) => x.id === id) || null;
+          setDetailContract(c);
+        }}
+      />
+
       {/* Upload Hero Section */}
       {flowState === 'idle' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -24,6 +24,8 @@ import { ContractDiscountsPanel } from '@/components/contracts/ContractDiscounts
 import { ContractIntelligenceCard } from '@/components/contracts/ContractIntelligenceCard';
 import { PricingBreakdown } from '@/components/contracts/PricingBreakdown';
 import { ContractLifecycleStepper } from '@/components/contracts/ContractLifecycleStepper';
+import { ContractReadinessChecklist } from '@/components/contracts/ContractReadinessChecklist';
+import { ProvenanceBadge } from '@/components/shared/ProvenanceBadge';
 import { calculateContractPricing, type PricingInput } from '@/lib/pricingEngine';
 import { supabase } from '@/lib/supabaseClient';
 import { canonicalMarkAsSent, canonicalMarkAsSigned } from '@/lib/contractLifecycleSync';
@@ -77,6 +79,20 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     enabled: !!contract?.id,
   });
 
+  // Stream F: Fetch linked intake (read-only) for readiness checklist + provenance
+  const { data: linkedIntake } = useQuery({
+    queryKey: ['contract-linked-intake', contract?.id],
+    queryFn: async () => {
+      if (!contract?.id) return null;
+      const { data } = await supabase
+        .from('contract_intakes')
+        .select('*')
+        .eq('contract_id', contract.id)
+        .maybeSingle();
+      return data || null;
+    },
+    enabled: !!contract?.id,
+  });
 
   // Fetch linked funnel item
   const { data: linkedFunnelItem } = useQuery({
@@ -242,6 +258,16 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                     {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: contract.status })}
                   </Badge>
                 </SheetDescription>
+                {/* Stream F: provenance badges */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <ProvenanceBadge variant="contract-truth" />
+                  {linkedIntake && (
+                    <ProvenanceBadge variant="intake-state" value={linkedIntake.status} />
+                  )}
+                  {linkedFunnelItem?.stage && (
+                    <ProvenanceBadge variant="crm-phase" value={linkedFunnelItem.stage} />
+                  )}
+                </div>
               </div>
               <div className="flex gap-1.5 shrink-0 ml-3">
                 {isEditing ? (
@@ -394,6 +420,8 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
 
             {/* Details Tab */}
             <TabsContent value="details" className="mt-4 space-y-5 pb-8">
+              {/* Stream F: Contract readiness checklist (read-only) */}
+              <ContractReadinessChecklist contract={contract} intake={linkedIntake as any} />
               {/* Status (editable) */}
               {isEditing && (
                 <div className="space-y-1.5">

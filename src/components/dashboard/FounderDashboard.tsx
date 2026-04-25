@@ -42,6 +42,7 @@ import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStri
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { FounderProgressRings } from '@/components/dashboard/FounderProgressRings';
 import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
+import { NextBestActionFounder } from '@/components/dashboard/NextBestActionPanels';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
@@ -196,6 +197,11 @@ export function FounderDashboard({
       {/* ★ READINESS STRIP — Quick status overview ★ */}
       <WidgetErrorBoundary name="ReadinessStrip">
         <FounderReadinessStrip workspace={workspace} />
+      </WidgetErrorBoundary>
+
+      {/* Stream F: Next Best Action (read-only, derived) */}
+      <WidgetErrorBoundary name="NextBestActionFounder">
+        <NextBestActionFounder workspace={workspace} />
       </WidgetErrorBoundary>
 
       {/* ★ PROGRESS RINGS — Visual health at a glance ★ */}
