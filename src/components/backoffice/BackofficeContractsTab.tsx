@@ -476,7 +476,7 @@ export function BackofficeContractsTab() {
               </Badge>
             </CardTitle>
             <CardDescription>
-              {t('admin.backoffice.bulkCreateDescription', { defaultValue: 'Select workspaces and create contracts in bulk' })}
+              {t('admin.backoffice.bulkCreateDescription', { defaultValue: 'Select workspaces and create internal draft contracts in bulk. Drafts are not sent to founders until you explicitly send each one for signature.' })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

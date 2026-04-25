@@ -93,20 +93,51 @@ export function StaffMentorAssignDialog({
 
       if (reqError) throw reqError;
 
-      // Create a mentor connection record with proper workspace_id semantics
-      const { error: connError } = await supabase
-        .from('mentor_connections')
-        .upsert({
-          mentor_id: selectedMentorId,
-          founder_id: workspaceId, // kept for unique constraint compatibility
-          workspace_id: workspaceId, // canonical workspace reference
-          status: 'connected',
-          responded_at: new Date().toISOString(),
-        }, {
-          onConflict: 'mentor_id,founder_id',
+      // Resolve the real founder user id for this workspace.
+      // founder_id MUST be a founder auth.users.id (not the workspace id).
+      // Pre-v4.0 code wrote workspaceId here — that legacy is now corrected.
+      const { data: founderRow } = await supabase
+        .from('workspace_users')
+        .select('user_id, created_at')
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'founder')
+        .eq('active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const founderUserId = founderRow?.user_id ?? null;
+
+      // Create/refresh a mentor_connections row keyed by (mentor_id, workspace_id).
+      // workspace_id is the canonical reference; founder_id is populated when known.
+      if (founderUserId) {
+        await supabase
+          .from('mentor_connections')
+          .upsert(
+            {
+              mentor_id: selectedMentorId,
+              founder_id: founderUserId,
+              workspace_id: workspaceId,
+              status: 'connected',
+              responded_at: new Date().toISOString(),
+            },
+            { onConflict: 'mentor_id,workspace_id' },
+          );
+      } else {
+        // No active founder yet (unclaimed/imported workspace).
+        // The mentor↔workspace link is fully captured by workspace_users above.
+        // We intentionally do NOT insert into mentor_connections without a real
+        // founder user id — writing workspace_id into founder_id is a legacy
+        // anti-pattern that v4.0 corrects. Mentor visibility still works because
+        // it joins via workspace_users.
+        logger.warn('mentor_connection_skipped_no_founder', {
+          workspaceId,
+          mentorId: selectedMentorId,
+          reason: 'No active founder on workspace; supplementary mentor_connections row not created.',
         });
-      
-      // Ignore connection errors as it's supplementary
+      }
+
+      // Connection insertion errors are intentionally non-fatal (supplementary record).
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-mentor-requests'] });

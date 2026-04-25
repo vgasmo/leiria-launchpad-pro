@@ -51,7 +51,11 @@ interface MentorProfile {
 
 interface MentorConnection {
   id: string;
-  /** NOTE: founder_id actually stores workspace_id in this table (legacy schema naming) */
+  /**
+   * v4.0: founder_id stores the founder auth.users.id.
+   * Legacy rows (pre-v4.0) may incorrectly contain a workspace_id — read paths
+   * prefer `workspace_id` and fall back to `founder_id` only when missing.
+   */
   founder_id: string;
   mentor_id: string;
   status: string;
