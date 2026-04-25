@@ -42,6 +42,7 @@ import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStri
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { FounderProgressRings } from '@/components/dashboard/FounderProgressRings';
 import { useAutoMaterializeDeliverables } from '@/hooks/useAutoMaterializeDeliverables';
+import { NextBestActionFounder } from '@/components/dashboard/NextBestActionPanels';
 
 interface FounderDashboardProps {
   workspaces: WorkspaceWithDetails[];
