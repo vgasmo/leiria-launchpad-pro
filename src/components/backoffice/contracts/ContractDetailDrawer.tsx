@@ -79,6 +79,20 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
     enabled: !!contract?.id,
   });
 
+  // Stream F: Fetch linked intake (read-only) for readiness checklist + provenance
+  const { data: linkedIntake } = useQuery({
+    queryKey: ['contract-linked-intake', contract?.id],
+    queryFn: async () => {
+      if (!contract?.id) return null;
+      const { data } = await supabase
+        .from('contract_intakes')
+        .select('*')
+        .eq('contract_id', contract.id)
+        .maybeSingle();
+      return data || null;
+    },
+    enabled: !!contract?.id,
+  });
 
   // Fetch linked funnel item
   const { data: linkedFunnelItem } = useQuery({
