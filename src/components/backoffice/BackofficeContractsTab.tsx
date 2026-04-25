@@ -199,9 +199,9 @@ export function BackofficeContractsTab() {
     setIsBulkCreating(false);
     setSelectedWorkspaces(new Set());
     if (errors > 0) {
-      toast.warning(t('admin.backoffice.bulkCreatePartial', { created, errors, defaultValue: 'Created {{created}} contracts, {{errors}} failed' }));
+      toast.warning(t('admin.backoffice.bulkCreatePartial', { created, errors, defaultValue: 'Created {{created}} draft contracts, {{errors}} failed' }));
     } else {
-      toast.success(t('admin.backoffice.bulkCreateSuccess', { count: created, defaultValue: 'Created {{count}} contracts successfully' }));
+      toast.success(t('admin.backoffice.bulkCreateSuccess', { count: created, defaultValue: 'Created {{count}} draft contracts successfully' }));
     }
   };
 

@@ -84,7 +84,7 @@ export function ClaimedWorkspaceBanner({ founderState }: ClaimedWorkspaceBannerP
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {t('founder.claimed.claimDesc', {
-                defaultValue: 'O seu pedido de associação está a ser verificado pela equipa. Isto pode demorar 1-2 dias úteis.',
+                defaultValue: 'O seu pedido de associação aguarda revisão pela equipa. Receberá uma notificação assim que for processado.',
               })}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
@@ -103,7 +103,7 @@ export function ClaimedWorkspaceBanner({ founderState }: ClaimedWorkspaceBannerP
                 {t('founder.claimed.nextSteps', { defaultValue: 'Próximos passos' })}
               </p>
               <p className="text-[11px] text-muted-foreground mt-1">
-                {t('founder.claimed.nextStepsDesc', { defaultValue: 'Enquanto aguarda, pode explorar a plataforma e preparar documentação.' })}
+                {t('founder.claimed.nextStepsDesc', { defaultValue: 'Enquanto aguarda, pode explorar a plataforma e organizar documentação relevante.' })}
               </p>
             </div>
           </div>

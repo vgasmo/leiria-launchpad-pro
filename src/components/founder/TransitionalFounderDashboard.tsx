@@ -284,9 +284,9 @@ function getStatusConfig(status: string, t: (key: string, opts?: any) => string)
         iconClass: 'text-muted-foreground',
         borderClass: 'border-muted',
         badgeClass: '',
-        title: t('founder.transitional.titleDefault', { defaultValue: 'A sua startup está a ser preparada' }),
-        description: t('founder.transitional.descDefault', { defaultValue: 'A equipa está a preparar o seu espaço. Receberá uma notificação quando estiver pronto.' }),
-        badge: t('founder.transitional.badgeDefault', { defaultValue: 'Em preparação' }),
+        title: t('founder.transitional.titleDefault', { defaultValue: 'Aguarda ativação do espaço' }),
+        description: t('founder.transitional.descDefault', { defaultValue: 'O seu espaço aguarda ativação pela equipa. Receberá uma notificação quando estiver disponível.' }),
+        badge: t('founder.transitional.badgeDefault', { defaultValue: 'Aguarda ativação' }),
       };
   }
 }

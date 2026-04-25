@@ -10,6 +10,11 @@
  * ContractDetailDrawer) where invoking an edge function would add latency
  * with no extra integrity benefit (these flows are RLS-gated to staff).
  *
+ * IMPORTANT: These helpers MUST surface intake/CRM/workspace sync failures
+ * back to the UI so a manual action cannot be reported as success when a
+ * downstream sync silently failed. Callers must check `success === true`
+ * AND the absence of `syncError` before toasting success.
+ *
  * All webhook / automated paths (DocuSign, PandaDoc, public onboarding,
  * bulk creation) MUST use the server helper instead.
  */
@@ -92,9 +97,16 @@ export async function syncIntakeOnContractEvent(
     if (intake.funnel_item_id) {
       const crmStage = INTAKE_TO_CRM_STAGE[targetIntakeStatus];
       if (crmStage) {
-        await supabase.from('funnel_items')
+        const { error: crmErr } = await supabase.from('funnel_items')
           .update({ stage: crmStage })
           .eq('id', intake.funnel_item_id);
+        if (crmErr) {
+          logger.warn('lifecycle_sync_crm_failed', {
+            funnelItemId: intake.funnel_item_id, error: crmErr.message,
+          });
+          // Surface CRM failure — caller should treat as partial sync error
+          return { synced: false, intakeId: intake.id, error: `crm_sync: ${crmErr.message}` };
+        }
         logger.info('lifecycle_sync_crm_updated', {
           funnelItemId: intake.funnel_item_id, crmStage,
         });
@@ -114,18 +126,30 @@ export async function syncIntakeOnContractEvent(
 }
 
 /**
- * Full canonical "mark as signed" flow:
+ * Treat a sync result as a real failure (caller should not toast success).
+ * "no_linked_intake" and "would_regress" are benign skips, not failures.
+ */
+function isRealSyncFailure(syncRes: { synced: boolean; error?: string }): boolean {
+  if (syncRes.synced) return false;
+  const benign = new Set(['no_linked_intake', 'would_regress']);
+  return !!syncRes.error && !benign.has(syncRes.error);
+}
+
+/**
+ * Full "mark as signed" flow (UI-initiated, staff only):
  * 1. Update startup_contracts (signed_at, signature_status, status)
  * 2. Sync intake to 'signed'
  * 3. Activate workspace (only if contract is truly signed)
  * 4. Sync intake to 'activated'
- * 5. Sync CRM stage
+ *
+ * Returns syncError when any downstream sync (intake/CRM/workspace) failed,
+ * so the UI does NOT toast success on partial failure.
  */
 export async function canonicalMarkAsSigned(
   contractId: string,
   workspaceId: string | null,
   userId?: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; syncError?: string }> {
   try {
     // 1. Update contract to signed
     const { error: contractErr } = await supabase
@@ -139,20 +163,29 @@ export async function canonicalMarkAsSigned(
 
     if (contractErr) throw contractErr;
 
+    const syncErrors: string[] = [];
+
     // 2. Sync intake to 'signed'
-    await syncIntakeOnContractEvent(contractId, 'signed', userId);
+    const signedRes = await syncIntakeOnContractEvent(contractId, 'signed', userId);
+    if (isRealSyncFailure(signedRes)) syncErrors.push(`intake_signed: ${signedRes.error}`);
 
     // 3. Activate workspace only if contract is truly signed
     if (workspaceId) {
-      // Only activate workspaces that are in pre-active states
-      await supabase.from('workspaces')
+      const { error: wsErr } = await supabase.from('workspaces')
         .update({ status: 'active', updated_at: new Date().toISOString() } as any)
         .eq('id', workspaceId)
         .in('status', ['pending', 'claimed', 'imported_unclaimed']);
+      if (wsErr) syncErrors.push(`workspace_activate: ${wsErr.message}`);
     }
 
     // 4. Sync intake to 'activated'
-    await syncIntakeOnContractEvent(contractId, 'activated', userId);
+    const activatedRes = await syncIntakeOnContractEvent(contractId, 'activated', userId);
+    if (isRealSyncFailure(activatedRes)) syncErrors.push(`intake_activated: ${activatedRes.error}`);
+
+    if (syncErrors.length > 0) {
+      logger.warn('canonical_mark_signed_partial', { contractId, syncErrors });
+      return { success: false, syncError: syncErrors.join('; ') };
+    }
 
     return { success: true };
   } catch (err: any) {
@@ -162,30 +195,65 @@ export async function canonicalMarkAsSigned(
 }
 
 /**
- * Canonical "mark as sent for signature" flow:
- * 1. Update startup_contracts signature fields
+ * "Mark as sent for signature" flow (UI-initiated, staff only):
+ * 1. Update startup_contracts signature fields (preserving provider if already sent)
  * 2. Sync intake to 'signature_sent'
+ *
+ * Provider preservation: if a contract already has a signature_provider AND is
+ * already past 'draft' (i.e. sent_for_signature/signed), we do NOT overwrite the
+ * provider. This prevents silently switching providers mid-flight.
+ *
+ * Returns syncError when intake/CRM sync failed so UI does not falsely toast success.
  */
 export async function canonicalMarkAsSent(
   contractId: string,
   provider: string,
   userId?: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; syncError?: string }> {
   try {
+    // Read current state to enforce provider preservation
+    const { data: current, error: readErr } = await supabase
+      .from('startup_contracts')
+      .select('signature_provider, signature_status')
+      .eq('id', contractId)
+      .maybeSingle();
+
+    if (readErr) throw readErr;
+
+    const alreadySent =
+      current?.signature_provider &&
+      current.signature_status &&
+      ['sent_for_signature', 'signed'].includes(current.signature_status as string);
+
+    const updatePayload: Record<string, any> = {
+      status: 'pending_signature',
+      signature_status: 'sent_for_signature',
+      signature_requested_at: new Date().toISOString(),
+    };
+    // Only set provider if it was not already set on a sent contract
+    if (!alreadySent) {
+      updatePayload.signature_provider = provider;
+    } else if (current?.signature_provider !== provider) {
+      logger.warn('canonical_mark_sent_provider_preserved', {
+        contractId,
+        existingProvider: current?.signature_provider,
+        attemptedProvider: provider,
+      });
+    }
+
     const { error } = await supabase
       .from('startup_contracts')
-      .update({
-        status: 'pending_signature',
-        signature_provider: provider,
-        signature_status: 'sent_for_signature',
-        signature_requested_at: new Date().toISOString(),
-      } as any)
+      .update(updatePayload as any)
       .eq('id', contractId);
 
     if (error) throw error;
 
-    // Sync intake
-    await syncIntakeOnContractEvent(contractId, 'signature_sent', userId);
+    // Sync intake — surface failure
+    const syncRes = await syncIntakeOnContractEvent(contractId, 'signature_sent', userId);
+    if (isRealSyncFailure(syncRes)) {
+      logger.warn('canonical_mark_sent_partial', { contractId, syncError: syncRes.error });
+      return { success: false, syncError: syncRes.error };
+    }
 
     return { success: true };
   } catch (err: any) {
