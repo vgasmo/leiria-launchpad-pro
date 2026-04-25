@@ -1,10 +1,18 @@
 /**
- * Shared Canonical Lifecycle Sync — Server-Side
- * 
- * Single source of truth for contract lifecycle synchronization across ALL edge functions.
+ * Shared Canonical Lifecycle Sync — Server-Side (CANONICAL TRUTH)
+ *
+ * SINGLE source of truth for contract lifecycle synchronization across ALL edge functions.
  * All webhook handlers and signing paths MUST use these helpers instead of inline sync logic.
- * 
+ *
  * Synchronizes: startup_contracts → contract_intakes → funnel_items (CRM) → workspaces
+ *
+ * CRM stages used here MUST be valid values from public.funnel_items.stage
+ * (fine-grained DB stages — see src/constants/funnelStages.ts FUNNEL_STAGES).
+ * The 7 macro pipeline columns (lead/qualified/proposal_negotiation/...) are a
+ * UI grouping and are NEVER written to the DB directly.
+ *
+ * Note: src/lib/contractLifecycleSync.ts is a CLIENT MIRROR for UI-initiated
+ * manual transitions only — server is canonical.
  */
 
 /**
