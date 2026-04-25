@@ -258,6 +258,16 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
                     {t(`admin.backoffice.contractStatus.${contract.status}`, { defaultValue: contract.status })}
                   </Badge>
                 </SheetDescription>
+                {/* Stream F: provenance badges */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <ProvenanceBadge variant="contract-truth" />
+                  {linkedIntake && (
+                    <ProvenanceBadge variant="intake-state" value={linkedIntake.status} />
+                  )}
+                  {linkedFunnelItem?.stage && (
+                    <ProvenanceBadge variant="crm-phase" value={linkedFunnelItem.stage} />
+                  )}
+                </div>
               </div>
               <div className="flex gap-1.5 shrink-0 ml-3">
                 {isEditing ? (
