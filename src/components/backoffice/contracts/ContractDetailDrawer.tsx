@@ -420,6 +420,8 @@ export function ContractDetailDrawer({ contract, incubationTypes, buildings, ope
 
             {/* Details Tab */}
             <TabsContent value="details" className="mt-4 space-y-5 pb-8">
+              {/* Stream F: Contract readiness checklist (read-only) */}
+              <ContractReadinessChecklist contract={contract} intake={linkedIntake as any} />
               {/* Status (editable) */}
               {isEditing && (
                 <div className="space-y-1.5">
