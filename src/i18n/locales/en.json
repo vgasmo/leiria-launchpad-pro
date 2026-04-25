@@ -2507,7 +2507,8 @@
       "step4": "Save the contract to the database",
       "tooLarge": "File must be under 10MB.",
       "uploading": "Uploading document..."
-    }
+    },
+    "truthHint": "Derived copies (CRM, SharePoint) are informational and do not replace this record."
   },
   "copilot": {
     "askAnything": "Ask me anything about your startup, tasks, KPIs, or ecosystem.",
@@ -5134,31 +5135,59 @@
     "title": "Confidentiality Agreement"
   },
   "nextBestAction": {
-    "actionsInProgress": "{{count}} action in progress",
-    "actionsInProgress_plural": "{{count}} actions in progress",
-    "addKpis": "Add KPIs",
-    "allCaughtUp": "All caught up!",
-    "completeCheckin": "Complete Check-in",
-    "completeOrReschedule": "Complete or reschedule these tasks",
+    "title": "Next best action",
+    "derived": "derived from real state",
+    "allClear": "No urgent actions derived from current state.",
     "continue": "Continue",
-    "continueWork": "Continue your work",
-    "dueOn": "Due {{date}}",
-    "mentorFeedbackReceived": "{{count}} mentor feedback",
-    "mentorFeedbackReceived_plural": "{{count}} mentor feedbacks",
-    "monthlyCheckinPending": "Monthly check-in pending",
-    "noUrgentActions": "No urgent actions needed right now.",
-    "overdueActions": "{{count}} overdue action",
-    "overdueActions_plural": "{{count}} overdue actions",
-    "prepareSession": "Prepare for upcoming session",
-    "sessionOn": "{{title}} on {{date}}",
-    "title": "Next Best Actions",
-    "trackProgress": "Track your progress with latest metrics",
-    "updateKpisForMonth": "Update KPIs for this month",
-    "viewActions": "View Actions",
-    "viewFeedback": "View Feedback",
-    "viewSession": "View Session",
-    "weeklyCheckinPending": "Monthly check-in pending",
-    "weeklyWins": "Monthly Wins"
+    "open": "Open",
+    "openIntake": "Open form",
+    "openCheckin": "Open check-in",
+    "review": "Review",
+    "assign": "Assign",
+    "prepare": "Prepare",
+    "acceptNda": "Accept NDA",
+    "founder": {
+      "onboarding": {
+        "title": "Complete workspace onboarding",
+        "why": "Workspace is flagged needs_onboarding=true."
+      },
+      "intake": {
+        "title": "Fill contract onboarding data",
+        "why": "There is a contract intake in editable state linked to this startup."
+      },
+      "checkin": {
+        "title": "Submit pending weekly check-in",
+        "why": "{{count}} check-in(s) pending this week."
+      }
+    },
+    "staff": {
+      "intakesBlocked": {
+        "title": "Review intakes blocked by missing data",
+        "why": "{{count}} intake(s) in review_pending or changes_requested."
+      },
+      "signatures": {
+        "title": "Follow up on contracts sent for signature",
+        "why": "{{count}} contract(s) with pending signature_status."
+      },
+      "unassigned": {
+        "title": "Assign consultant to active workspaces",
+        "why": "{{count}} active workspace(s) without assigned_consultor_id."
+      }
+    },
+    "mentor": {
+      "nda": {
+        "title": "Accept NDA to unlock access",
+        "why": "Mentor workspace access is blocked until NDA is accepted."
+      },
+      "requests": {
+        "title": "Respond to mentoring requests",
+        "why": "{{count}} pending request(s) in your queue."
+      },
+      "sessions": {
+        "title": "Prepare upcoming session",
+        "why": "{{count}} upcoming session(s) scheduled."
+      }
+    }
   },
   "nextSteps": {
     "addNow": "Add Now",
@@ -8055,5 +8084,61 @@
     "upcomingSession": "Session coming up",
     "updateKpis": "Update your KPIs",
     "viewActions": "View Actions"
+  },
+  "provenance": {
+    "contractTruth": {
+      "label": "Source of truth: startup_contracts",
+      "desc": "Financial and contractual data shown here comes from the canonical startup_contracts table."
+    },
+    "intakeState": {
+      "label": "Intake state",
+      "desc": "Operational state of the onboarding form (contract_intakes.status)."
+    },
+    "crmPhase": {
+      "label": "CRM phase",
+      "desc": "Commercial macro-stage in the pipeline (funnel_items.stage). Does not replace the contract operational state."
+    },
+    "archiveStatus": {
+      "label": "SharePoint copy — non-canonical",
+      "desc": "Reflects the SharePoint backup archive state. Not the source of truth for the contract."
+    }
+  },
+  "contractReadiness": {
+    "title": "Contract readiness",
+    "legalRep": "Legal representative present",
+    "companyData": "Company NIF and address",
+    "modality": "Modality, building and space",
+    "missingIncubationType": "Missing incubation type",
+    "missingBuilding": "Missing building",
+    "pricing": "Pricing snapshot present",
+    "document": "Generated document available",
+    "provider": "Signature provider selected",
+    "sentLock": "Do not silently switch provider after sending",
+    "sentLockWarning": "Already sent. Switching provider requires cancelling and resending manually.",
+    "providerLockTitle": "Provider locked against silent switch",
+    "providerLockBody": "The contract has been sent for signature. Switching providers requires cancelling the current envelope first.",
+    "notReadyHint": "Resolve the missing items to unlock sending for signature. This check is informational only."
+  },
+  "lifecycleMismatch": {
+    "title": "Lifecycle inconsistencies",
+    "disclaimer": "Read-only. No automatic repair. Use existing actions on each record.",
+    "allConsistent": "Contract / intake / CRM / workspace states are consistent.",
+    "open": "Open",
+    "intakeAheadOfContract": {
+      "title": "Intake signed but contract not active",
+      "detail": "intake.status=\"{{istate}}\" / contract.status=\"{{cstate}}\""
+    },
+    "contractActiveWorkspaceNot": {
+      "title": "Contract active but workspace is not active",
+      "detail": "workspace.status=\"{{wstate}}\""
+    },
+    "pendingSignatureNoProvider": {
+      "title": "Contract in pending_signature without a defined provider",
+      "detail": "signature_provider is empty."
+    },
+    "crmContractedNoLink": {
+      "title": "Lead in \"contracted\" phase without linked contract",
+      "detail": "funnel_items.linked_contract_id is empty."
+    }
   }
 }
