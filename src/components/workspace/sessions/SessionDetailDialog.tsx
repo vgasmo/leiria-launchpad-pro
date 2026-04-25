@@ -9,6 +9,9 @@ import {
   Play,
   CheckCircle2,
   Mail,
+  Video,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -166,9 +169,19 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
       description: session.agenda || session.notes || '',
       startDate: new Date(session.scheduled_at),
       durationMinutes: session.duration || 60,
-      meetingLink: session.meeting_url || undefined,
+      meetingLink: session.join_url || undefined,
     });
     toast.success(t('sessions.icsExported', { defaultValue: 'Sessão exportada para calendário' }));
+  };
+
+  const handleCopyJoinUrl = async () => {
+    if (!session.join_url) return;
+    try {
+      await navigator.clipboard.writeText(session.join_url);
+      toast.success(t('sessions.joinUrlCopied'));
+    } catch {
+      toast.error(t('common.error'));
+    }
   };
 
   return (
@@ -239,6 +252,55 @@ export function SessionDetailDialog({ workspaceId, session, canWrite, open, onOp
                     <Mail className="h-4 w-4 mr-1" />
                     {isResending ? t('common.sending', 'Sending...') : t('sessions.resendInvites', 'Resend Invites')}
                   </Button>
+                </div>
+              )}
+
+              {/* Teams / online meeting join URL — populated by Outlook sync */}
+              {session.join_url ? (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      <Video className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium">{t('sessions.teamsMeetingLabel')}</p>
+                        <a
+                          href={session.join_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline break-all block mt-0.5"
+                        >
+                          {session.join_url}
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button variant="ghost" size="sm" onClick={handleCopyJoinUrl} title={t('common.copy', 'Copy')}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button asChild size="sm">
+                        <a href={session.join_url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          {t('sessions.joinCall', 'Join meeting')}
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                isStaff && (
+                  <div className="rounded-lg border border-dashed border-muted-foreground/30 p-3 flex items-center gap-2">
+                    <Video className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">
+                      {t('sessions.teamsMeetingPending')}
+                    </p>
+                  </div>
+                )
+              )}
+
+              {session.location && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="font-medium">{t('sessions.locationLabel', 'Local')}:</span>
+                  <span>{session.location}</span>
                 </div>
               )}
 
