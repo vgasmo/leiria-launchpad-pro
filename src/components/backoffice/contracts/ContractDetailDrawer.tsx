@@ -975,7 +975,13 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
                   
                   // 3. Update contract status via canonical helper
                   const sentResult = await canonicalMarkAsSent(contract.id, 'assinatura_digital');
-                  if (!sentResult.success) throw new Error(sentResult.error || 'Erro ao marcar como enviado');
+                  if (!sentResult.success) {
+                    throw new Error(
+                      sentResult.error
+                        || (sentResult.syncError && `Sincronização parcial: ${sentResult.syncError}`)
+                        || 'Erro ao marcar como enviado'
+                    );
+                  }
                   
                   // 4. Copy link
                   const url = tokenResult.data?.url || `${window.location.origin}/contract-signing/${tokenResult.data?.token}`;
@@ -1036,7 +1042,11 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
               onClick={async () => {
                 const result = await canonicalMarkAsSent(contract.id, 'pandadoc_manual');
                 if (!result.success) {
-                  toast.error(result.error || 'Erro ao marcar como enviado');
+                  toast.error(
+                    result.error
+                      || (result.syncError && `Sincronização parcial: ${result.syncError}`)
+                      || 'Erro ao marcar como enviado'
+                  );
                   return;
                 }
                 queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -1060,7 +1070,11 @@ function SignatureProviderPanel({ contract }: { contract: StartupContract }) {
             onClick={async () => {
               const result = await canonicalMarkAsSigned(contract.id, contract.workspace_id || null);
               if (!result.success) {
-                toast.error(result.error || 'Erro ao marcar como assinado');
+                toast.error(
+                  result.error
+                    || (result.syncError && `Sincronização parcial: ${result.syncError}`)
+                    || 'Erro ao marcar como assinado'
+                );
                 return;
               }
               queryClient.invalidateQueries({ queryKey: ['contracts'] });
