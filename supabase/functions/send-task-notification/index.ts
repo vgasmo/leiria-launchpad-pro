@@ -297,11 +297,11 @@ interface OverdueEmailData {
 }
 
 function buildOverdueEmail(data: OverdueEmailData): string {
+  const taskAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
   const tasksList = data.tasks.map(t => {
     const daysOverdue = Math.floor(
       (new Date().getTime() - new Date(t.dueDate).getTime()) / (1000 * 60 * 60 * 24)
     );
-    const taskAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://fb.startupleiria.com";
     const workspaceUrl = t.workspaceId 
       ? `${taskAppUrl}/workspace/${t.workspaceId}?tab=notes`
       : "#";
