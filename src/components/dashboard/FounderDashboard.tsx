@@ -38,6 +38,7 @@ import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { FounderJourneyMap } from '@/components/dashboard/FounderJourneyMap';
 import { AccelerationProgressCard } from '@/components/dashboard/AccelerationProgressCard';
 import { TransitionalFounderDashboard } from '@/components/founder/TransitionalFounderDashboard';
+import { FounderWelcomeWizard } from '@/components/founder/FounderWelcomeWizard';
 import { FounderReadinessStrip } from '@/components/founder/FounderReadinessStrip';
 import { PendingContractBanner } from '@/components/founder/PendingContractBanner';
 import { FounderProgressRings } from '@/components/dashboard/FounderProgressRings';
@@ -160,6 +161,7 @@ export function FounderDashboard({
 
   return (
     <div className="space-y-6 max-w-5xl">
+      <FounderWelcomeWizard workspaceId={workspace?.id ?? null} />
       {/* Multi-workspace notice */}
       {workspaces.length > 1 && (
         <Card className="border-primary/20 bg-primary/5 rounded-2xl">

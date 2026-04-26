@@ -35,6 +35,7 @@ const AdminDatarooms = lazy(lazyWithRetry(() => import("./pages/AdminDatarooms")
 const ProgramSetupWizard = lazy(lazyWithRetry(() => import("./pages/ProgramSetupWizard"), "lazy:program-setup-wizard"));
 const Settings = lazy(lazyWithRetry(() => import("./pages/Settings"), "lazy:settings"));
 const Mentors = lazy(lazyWithRetry(() => import("./pages/Mentors"), "lazy:mentors"));
+const MentorImpact = lazy(lazyWithRetry(() => import("./pages/MentorImpact"), "lazy:mentor-impact"));
 const Search = lazy(lazyWithRetry(() => import("./pages/Search"), "lazy:search"));
 const SharedWorkspace = lazy(lazyWithRetry(() => import("./pages/SharedWorkspace"), "lazy:shared-workspace"));
 const SharedDataroom = lazy(lazyWithRetry(() => import("./pages/SharedDataroom"), "lazy:shared-dataroom"));
@@ -161,6 +162,7 @@ function AppRoutes() {
         <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/mentors" element={<ProtectedRoute><Mentors /></ProtectedRoute>} />
+        <Route path="/mentors/impact" element={<ProtectedRoute><MentorImpact /></ProtectedRoute>} />
         <Route path="/consultor-tools" element={<ProtectedRoute staffOnly><ConsultorTools /></ProtectedRoute>} />
         <Route path="/workspace/:workspaceId/value-prop" element={<ProtectedRoute><ValuePropWizardPage /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />

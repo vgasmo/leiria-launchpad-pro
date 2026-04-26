@@ -4022,6 +4022,7 @@ export type Database = {
           email: string
           expertise: string[] | null
           full_name: string | null
+          has_seen_welcome_wizard: boolean
           id: string
           linkedin_url: string | null
           phone: string | null
@@ -4037,6 +4038,7 @@ export type Database = {
           email: string
           expertise?: string[] | null
           full_name?: string | null
+          has_seen_welcome_wizard?: boolean
           id: string
           linkedin_url?: string | null
           phone?: string | null
@@ -4052,6 +4054,7 @@ export type Database = {
           email?: string
           expertise?: string[] | null
           full_name?: string | null
+          has_seen_welcome_wizard?: boolean
           id?: string
           linkedin_url?: string | null
           phone?: string | null
@@ -7215,6 +7218,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "workspace_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_celebrations: {
+        Row: {
+          event_key: string
+          fired_at: string
+          id: string
+          metadata: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          event_key: string
+          fired_at?: string
+          id?: string
+          metadata?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          event_key?: string
+          fired_at?: string
+          id?: string
+          metadata?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_celebrations_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"

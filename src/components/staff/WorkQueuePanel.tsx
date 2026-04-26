@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { format, isPast, isToday, addDays } from 'date-fns';
@@ -125,7 +126,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
 
   // Stats
   const openCount = workQueueItems?.filter(i => i.status === 'open').length || 0;
-  const overdueCount = workQueueItems?.filter(i => 
+  const overdueCount = workQueueItems?.filter(i =>
     i.status === 'open' && i.due_at && isPast(new Date(i.due_at))
   ).length || 0;
   const dueThisWeekCount = workQueueItems?.filter(i => {
@@ -134,6 +135,48 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
     const weekFromNow = addDays(new Date(), 7);
     return dueDate <= weekFromNow && !isPast(dueDate);
   }).length || 0;
+
+  // ⌨️ Keyboard navigation: j/k move focus, e opens detail, c marks done
+  const [focusIdx, setFocusIdx] = useState(0);
+
+  useEffect(() => {
+    if (focusIdx >= filteredItems.length) setFocusIdx(Math.max(0, filteredItems.length - 1));
+  }, [filteredItems.length, focusIdx]);
+
+  const skipInInput = (e: KeyboardEvent) => {
+    const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || (e.target as HTMLElement | null)?.isContentEditable;
+  };
+
+  useHotkeys('j', (e) => {
+    if (skipInInput(e)) return;
+    e.preventDefault();
+    setFocusIdx((i) => Math.min(filteredItems.length - 1, i + 1));
+  }, [filteredItems.length]);
+
+  useHotkeys('k', (e) => {
+    if (skipInInput(e)) return;
+    e.preventDefault();
+    setFocusIdx((i) => Math.max(0, i - 1));
+  }, [filteredItems.length]);
+
+  useHotkeys('e', (e) => {
+    if (skipInInput(e)) return;
+    const item = filteredItems[focusIdx];
+    if (item?.workspace_id) {
+      e.preventDefault();
+      navigate(`/workspace/${item.workspace_id}`);
+    }
+  }, [filteredItems, focusIdx, navigate]);
+
+  useHotkeys('c', (e) => {
+    if (skipInInput(e)) return;
+    const item = filteredItems[focusIdx];
+    if (item) {
+      e.preventDefault();
+      handleMarkDone(item.id);
+    }
+  }, [filteredItems, focusIdx]);
 
   if (isLoading) {
     return (
@@ -231,16 +274,17 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            {displayItems.map((item) => {
+            {displayItems.map((item, idx) => {
               const isOverdue = item.due_at && isPast(new Date(item.due_at));
               const isDueToday = item.due_at && isToday(new Date(item.due_at));
+              const isFocused = idx === focusIdx;
 
               return (
-                <div 
+                <div
                   key={item.id}
                   className={`p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${
                     isOverdue ? 'border-destructive/30 bg-destructive/5' : ''
-                  }`}
+                  } ${isFocused ? 'ring-2 ring-primary/60' : ''}`}
                   onClick={() => item.workspace_id && navigate(`/workspace/${item.workspace_id}`)}
                 >
                   <div className="flex items-start justify-between gap-3">
