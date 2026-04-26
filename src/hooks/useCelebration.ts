@@ -73,7 +73,6 @@ export function useCelebration() {
       // 23505 = unique violation → already fired, do nothing.
       if (error && (error as any).code !== '23505') {
         // Swallow — celebrations are non-critical visibility, not core flow.
-        // eslint-disable-next-line no-console
         console.warn('[celebration] insert failed', error);
         return;
       }
