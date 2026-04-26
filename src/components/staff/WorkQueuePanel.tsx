@@ -275,16 +275,17 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            {displayItems.map((item) => {
+            {displayItems.map((item, idx) => {
               const isOverdue = item.due_at && isPast(new Date(item.due_at));
               const isDueToday = item.due_at && isToday(new Date(item.due_at));
+              const isFocused = idx === focusIdx;
 
               return (
-                <div 
+                <div
                   key={item.id}
                   className={`p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${
                     isOverdue ? 'border-destructive/30 bg-destructive/5' : ''
-                  }`}
+                  } ${isFocused ? 'ring-2 ring-primary/60' : ''}`}
                   onClick={() => item.workspace_id && navigate(`/workspace/${item.workspace_id}`)}
                 >
                   <div className="flex items-start justify-between gap-3">
