@@ -6,7 +6,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Resend } from "npm:resend";
+import { Resend } from "npm:resend@4.0.0";
 import { requireCronOrStaff } from "../_shared/security.ts";
 import { handleCorsOptions, corsJsonResponse } from '../_shared/cors.ts';
 
