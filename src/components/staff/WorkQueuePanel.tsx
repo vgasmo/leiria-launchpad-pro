@@ -126,7 +126,7 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
 
   // Stats
   const openCount = workQueueItems?.filter(i => i.status === 'open').length || 0;
-  const overdueCount = workQueueItems?.filter(i => 
+  const overdueCount = workQueueItems?.filter(i =>
     i.status === 'open' && i.due_at && isPast(new Date(i.due_at))
   ).length || 0;
   const dueThisWeekCount = workQueueItems?.filter(i => {
@@ -135,6 +135,49 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
     const weekFromNow = addDays(new Date(), 7);
     return dueDate <= weekFromNow && !isPast(dueDate);
   }).length || 0;
+
+  // ⌨️ Keyboard navigation: j/k move focus, e opens detail, c marks done
+  const [focusIdx, setFocusIdx] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (focusIdx >= filteredItems.length) setFocusIdx(Math.max(0, filteredItems.length - 1));
+  }, [filteredItems.length, focusIdx]);
+
+  const skipInInput = (e: KeyboardEvent) => {
+    const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || (e.target as HTMLElement | null)?.isContentEditable;
+  };
+
+  useHotkeys('j', (e) => {
+    if (skipInInput(e)) return;
+    e.preventDefault();
+    setFocusIdx((i) => Math.min(filteredItems.length - 1, i + 1));
+  }, [filteredItems.length]);
+
+  useHotkeys('k', (e) => {
+    if (skipInInput(e)) return;
+    e.preventDefault();
+    setFocusIdx((i) => Math.max(0, i - 1));
+  }, [filteredItems.length]);
+
+  useHotkeys('e', (e) => {
+    if (skipInInput(e)) return;
+    const item = filteredItems[focusIdx];
+    if (item?.workspace_id) {
+      e.preventDefault();
+      navigate(`/workspace/${item.workspace_id}`);
+    }
+  }, [filteredItems, focusIdx, navigate]);
+
+  useHotkeys('c', (e) => {
+    if (skipInInput(e)) return;
+    const item = filteredItems[focusIdx];
+    if (item) {
+      e.preventDefault();
+      handleMarkDone(item.id);
+    }
+  }, [filteredItems, focusIdx]);
 
   if (isLoading) {
     return (
