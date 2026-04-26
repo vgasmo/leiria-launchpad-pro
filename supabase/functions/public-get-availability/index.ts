@@ -341,7 +341,7 @@ serve(async (req) => {
           
           // Fallback to global if no program-specific routing exists
           if (!chosenRouting && selectedProgramId !== 'global') {
-            chosenRouting = allRoutings?.find(r => r.scope === 'global') || null;
+            chosenRouting = allRoutings?.find(r => r.scope === 'global') ?? undefined;
           }
           
           if (chosenRouting) {

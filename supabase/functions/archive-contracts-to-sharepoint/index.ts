@@ -201,7 +201,7 @@ async function archiveContract(
     }
 
     // Compute SHA-256 checksum
-    const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes.buffer as ArrayBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const checksum = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -226,7 +226,7 @@ async function archiveContract(
     const uploadResponse = await callGraphWithRetry(accessToken, uploadUrl, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/pdf' },
-      body: pdfBytes,
+      body: pdfBytes as BodyInit,
     });
 
     if (!uploadResponse.ok) {

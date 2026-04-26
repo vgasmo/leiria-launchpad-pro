@@ -701,17 +701,19 @@ Deno.serve(async (req) => {
       
       if (staffUsers?.length) {
         const startupName = (contract as any).workspace?.startup?.name || 'Startup'
-        await supabase.from('notifications').insert(
-          staffUsers.map((s: any) => ({
-            user_id: s.user_id,
-            type: 'contract_signed',
-            title: `Contrato assinado: ${startupName}`,
-            message: `${signatureData.typed_name} assinou digitalmente o contrato.`,
-            entity_type: 'contract',
-            entity_id: contract.id,
-            link: '/admin?tab=backoffice&subtab=contracts',
-          }))
-        ).catch(() => {})
+        try {
+          await supabase.from('notifications').insert(
+            staffUsers.map((s: any) => ({
+              user_id: s.user_id,
+              type: 'contract_signed',
+              title: `Contrato assinado: ${startupName}`,
+              message: `${signatureData.typed_name} assinou digitalmente o contrato.`,
+              entity_type: 'contract',
+              entity_id: contract.id,
+              link: '/admin?tab=backoffice&subtab=contracts',
+            }))
+          )
+        } catch (_) { /* non-fatal */ }
       }
       
       return new Response(JSON.stringify({ 
@@ -755,7 +757,7 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error('Public contract onboarding error:', err)
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
