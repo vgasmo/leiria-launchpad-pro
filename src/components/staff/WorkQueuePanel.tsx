@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -138,7 +138,6 @@ export function WorkQueuePanel({ compact = false }: WorkQueuePanelProps) {
 
   // ⌨️ Keyboard navigation: j/k move focus, e opens detail, c marks done
   const [focusIdx, setFocusIdx] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (focusIdx >= filteredItems.length) setFocusIdx(Math.max(0, filteredItems.length - 1));
