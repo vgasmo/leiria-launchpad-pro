@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { MentorImpactDashboard } from '@/components/mentors/MentorImpactDashboard';
 import { MentorOpenLoops } from '@/components/mentor/MentorOpenLoops';
 import { useWorkspaces } from '@/hooks/useWorkspaces';
-import { BackToHomeLink } from '@/components/layout/BackToHomeLink';
+import { BackToHomeLink } from '@/components/ui/BackToHomeLink';
 import { supabase } from '@/lib/supabaseClient';
 
 function MentorFeedbackCard({ mentorId }: { mentorId: string }) {
