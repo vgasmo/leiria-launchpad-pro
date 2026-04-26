@@ -34,18 +34,60 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // ═══ WEBHOOK AUTHENTICITY VERIFICATION ═══
+    // ═══ WEBHOOK AUTHENTICITY VERIFICATION (FAIL-CLOSED + HMAC) ═══
     const webhookSecret = Deno.env.get('WEBHOOK_SECRET')
-    if (webhookSecret) {
-      const signature = req.headers.get('x-docusign-signature-1')
-      const authHeader = req.headers.get('x-webhook-secret')
-      if (!signature && authHeader !== webhookSecret) {
-        console.warn('DocuSign webhook: authenticity verification failed')
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
+    if (!webhookSecret) {
+      console.error('DocuSign webhook: WEBHOOK_SECRET not configured — REJECTING (fail-closed)')
+      return new Response(JSON.stringify({ error: 'Server misconfigured: webhook secret missing' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Read raw body so we can both verify HMAC and parse it
+    const rawBody = await req.text()
+
+    const signatureHeader = req.headers.get('x-docusign-signature-1')
+    const sharedSecretHeader = req.headers.get('x-webhook-secret')
+
+    let authenticated = false
+
+    // Path 1: Shared secret header — must match exactly
+    if (sharedSecretHeader && sharedSecretHeader === webhookSecret) {
+      authenticated = true
+    }
+
+    // Path 2: HMAC-SHA256 signature verification (DocuSign Connect)
+    if (!authenticated && signatureHeader) {
+      try {
+        const key = await crypto.subtle.importKey(
+          'raw',
+          new TextEncoder().encode(webhookSecret),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        )
+        const sigBytes = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(rawBody))
+        const expected = btoa(String.fromCharCode(...new Uint8Array(sigBytes)))
+        // Constant-time-ish comparison
+        if (expected.length === signatureHeader.length) {
+          let diff = 0
+          for (let i = 0; i < expected.length; i++) {
+            diff |= expected.charCodeAt(i) ^ signatureHeader.charCodeAt(i)
+          }
+          if (diff === 0) authenticated = true
+        }
+      } catch (hmacErr) {
+        console.error('DocuSign HMAC verification error:', hmacErr)
       }
+    }
+
+    if (!authenticated) {
+      console.warn('DocuSign webhook: authenticity verification failed')
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     // Parse DocuSign payload (JSON or XML)
@@ -56,7 +98,7 @@ Deno.serve(async (req) => {
     let eventId: string | null = null
 
     if (contentType.includes('application/json')) {
-      const body = await req.json()
+      const body = JSON.parse(rawBody)
       rawPayload = body
       envelopeId = body.data?.envelopeId || body.envelopeId
       status = body.data?.envelopeSummary?.status || body.event
