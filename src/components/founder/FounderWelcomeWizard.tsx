@@ -24,18 +24,17 @@ interface Props {
 }
 
 export function FounderWelcomeWizard({ workspaceId }: Props) {
-  const { user, profile, refreshAuth } = useAuth() as any;
+  const auth = useAuth() as any;
+  const user = auth?.user;
+  const isFounder: boolean = !!auth?.roles?.includes?.('founder');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
 
-  const hasSeen = (profile as any)?.has_seen_welcome_wizard ?? true;
-  const isFounder = (useAuth() as any).roles?.includes?.('founder');
-
   const { data: shouldShow } = useQuery({
     queryKey: ['welcome-wizard-eligibility', user?.id],
-    enabled: !!user?.id && !hasSeen && !!isFounder && !!workspaceId,
+    enabled: !!user?.id && isFounder && !!workspaceId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
@@ -43,8 +42,9 @@ export function FounderWelcomeWizard({ workspaceId }: Props) {
         .eq('id', user!.id)
         .maybeSingle();
       if (error) return false;
-      return data && !data.has_seen_welcome_wizard;
+      return !!data && (data as any).has_seen_welcome_wizard === false;
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const dismiss = useMutation({
@@ -58,12 +58,11 @@ export function FounderWelcomeWizard({ workspaceId }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['welcome-wizard-eligibility'] });
-      refreshAuth?.();
     },
     onError: (e: any) => toast.error(e?.message ?? t('common.error', 'Erro')),
   });
 
-  const open = !!shouldShow && !hasSeen;
+  const open = !!shouldShow;
   if (!open) return null;
 
   const totalSteps = 3;
