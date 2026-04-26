@@ -382,11 +382,48 @@ Deno.serve(async (req) => {
         })
       }
 
-      const ext = fileExt || 'pdf'
+      // Validate docKey: alphanumeric + underscore/hyphen, max 100 chars
+      const SAFE_KEY_REGEX = /^[a-zA-Z0-9_-]{1,100}$/
+      if (!SAFE_KEY_REGEX.test(docKey)) {
+        return new Response(JSON.stringify({ error: 'Invalid document key' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Whitelist allowed file extensions and derive mime type server-side
+      const ALLOWED_EXTS: Record<string, string> = {
+        pdf: 'application/pdf',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+      }
+      const requestedExt = (fileExt || 'pdf').toString().toLowerCase()
+      if (!ALLOWED_EXTS[requestedExt]) {
+        return new Response(JSON.stringify({ error: 'Unsupported file type' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const ext = requestedExt
+      const safeContentType = ALLOWED_EXTS[ext]
+
+      // Enforce server-side size limit (~10MB)
+      const MAX_BYTES = 10 * 1024 * 1024
+      // base64 is ~4/3 of decoded size — approximate check before decode
+      if (typeof fileBase64 !== 'string' || fileBase64.length > MAX_BYTES * 1.4) {
+        return new Response(JSON.stringify({ error: 'File too large (max 10MB)' }), {
+          status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
       const path = `onboarding/${contract.id}/${docKey}.${ext}`
 
       // Decode base64 to bytes
       const binaryStr = atob(fileBase64)
+      if (binaryStr.length > MAX_BYTES) {
+        return new Response(JSON.stringify({ error: 'File too large (max 10MB)' }), {
+          status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
       const bytes = new Uint8Array(binaryStr.length)
       for (let i = 0; i < binaryStr.length; i++) {
         bytes[i] = binaryStr.charCodeAt(i)
@@ -396,7 +433,7 @@ Deno.serve(async (req) => {
         .from('contract-documents')
         .upload(path, bytes, { 
           upsert: true,
-          contentType: mimeType || 'application/octet-stream',
+          contentType: safeContentType,
         })
 
       if (uploadErr) throw uploadErr
