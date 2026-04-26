@@ -178,10 +178,17 @@ export function useUpdateMilestone(workspaceId: string) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['milestones', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['workspace-milestones', workspaceId] });
-      
-      // 🎉 Celebrate milestone completion
+
+      // 🎉 Per-completion confetti (existing behaviour)
       if (data.status === 'completed') {
         triggerMilestoneCelebration();
+
+        // 🏆 First-milestone-ever celebration (idempotent via workspace_celebrations).
+        // Fire-and-forget — failures are non-critical.
+        void supabase
+          .from('workspace_celebrations')
+          .insert({ workspace_id: workspaceId, event_key: 'first_milestone_completed' })
+          .then(() => {/* no-op; UI listener handled elsewhere if needed */});
       }
     },
   });
