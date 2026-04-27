@@ -46,6 +46,7 @@ import {
   useGetDocumentUrl,
   Document 
 } from '@/hooks/useDocuments';
+import { useTemplateInstances, useTemplates } from '@/hooks/useTemplates';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -102,6 +103,8 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: documents, isLoading } = useDocuments(workspaceId);
+  const { data: templateInstances = [] } = useTemplateInstances(workspaceId);
+  const { data: templates = [] } = useTemplates();
   const uploadMutation = useUploadDocument();
   const addLinkMutation = useAddExternalLink();
   const deleteMutation = useDeleteDocument();
@@ -182,6 +185,22 @@ export function DocumentsTab({ workspaceId, canWrite, isFounder = false, isStaff
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams, canWrite]);
+
+  useEffect(() => {
+    const legacyDocId = searchParams.get('doc');
+    if (!legacyDocId) return;
+
+    const matchedInstance = templateInstances.find((instance) => instance.id === legacyDocId);
+    const matchedTemplateId = matchedInstance?.template_id || templates.find((template) => template.id === legacyDocId)?.id;
+    if (!matchedTemplateId) return;
+
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('sub', 'tools');
+    newParams.set('openTemplate', matchedTemplateId);
+    newParams.delete('doc');
+    setActiveSubTab('tools');
+    setSearchParams(newParams, { replace: true });
+  }, [searchParams, setSearchParams, templateInstances, templates]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
