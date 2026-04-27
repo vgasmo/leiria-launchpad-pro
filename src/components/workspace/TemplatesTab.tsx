@@ -104,6 +104,14 @@ export function TemplatesTab({ workspaceId, canWrite, isFounder = false }: Templ
     setSelectedInstance(existingInstance || null);
   }, [templates, loadingTemplates, loadingInstances, searchParams, setSearchParams, instancesByTemplateId]);
 
+  useEffect(() => {
+    if (loadingTemplates || loadingInstances) return;
+    const openTemplateId = searchParams.get('openTemplate');
+    if (!openTemplateId) {
+      hasAutoOpened.current = false;
+    }
+  }, [loadingTemplates, loadingInstances, searchParams]);
+
   const handleOpenTemplate = (template: Template) => {
     // If it's a canvas template, switch to the appropriate tab instead of opening dialog
     const canvasType = getCanvasType(template.name);
@@ -567,13 +575,21 @@ function TemplateEditorDialog({
   };
 
   const handleMarkComplete = async () => {
-    if (!instance) {
-      await handleSave();
-    }
     try {
-      if (instance?.id) {
-        await completeInstance.mutateAsync(instance.id);
+      let targetInstanceId = instance?.id;
+      if (!targetInstanceId && template) {
+        const saved = await upsertInstance.mutateAsync({
+          template_id: template.id,
+          data_json: formData,
+          existingId: instance?.id,
+        });
+        targetInstanceId = saved?.id;
+      }
+
+      if (targetInstanceId) {
+        await completeInstance.mutateAsync(targetInstanceId);
         toast.success(t('templates.completed'));
+        setHasChanges(false);
       }
     } catch {
       toast.error(t('templates.submitFailed'));
@@ -581,13 +597,21 @@ function TemplateEditorDialog({
   };
 
   const handleSubmitForReview = async () => {
-    if (!instance) {
-      await handleSave();
-    }
     try {
-      if (instance?.id) {
-        await submitForReview.mutateAsync(instance.id);
+      let targetInstanceId = instance?.id;
+      if (!targetInstanceId && template) {
+        const saved = await upsertInstance.mutateAsync({
+          template_id: template.id,
+          data_json: formData,
+          existingId: instance?.id,
+        });
+        targetInstanceId = saved?.id;
+      }
+
+      if (targetInstanceId) {
+        await submitForReview.mutateAsync(targetInstanceId);
         toast.success(t('templates.submittedForReview'));
+        setHasChanges(false);
       }
     } catch {
       toast.error(t('templates.submitFailed'));
