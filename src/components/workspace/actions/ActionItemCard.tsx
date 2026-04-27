@@ -32,6 +32,7 @@ const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
 };
 
 import type { PlatformDocumentOption as PlatformDocument } from '@/lib/platformDocuments';
+export type { PlatformDocument };
 
 export interface ActionItemCardProps {
   item: ActionItem;
