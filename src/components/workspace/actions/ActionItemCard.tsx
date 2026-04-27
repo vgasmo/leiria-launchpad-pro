@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, isPast, isToday, parseISO } from 'date-fns';
@@ -31,16 +31,7 @@ const PRIORITY_CONFIG: Record<string, { labelKey: string; color: string }> = {
   high: { labelKey: 'actions.priorityHigh', color: 'text-destructive' },
 };
 
-export interface PlatformDocument {
-  id: string;
-  name: string;
-  /**
-   * Source type drives how the deliverable is persisted:
-   * - 'template_instance'  → row in `template_instances` (not in `documents`) → store as link
-   * - 'template'           → global template not yet instantiated → store as link
-   */
-  type: 'template_instance' | 'template';
-}
+import type { PlatformDocumentOption as PlatformDocument } from '@/lib/platformDocuments';
 
 export interface ActionItemCardProps {
   item: ActionItem;
@@ -99,33 +90,42 @@ export const ActionItemCard = memo(function ActionItemCard({
     onStatusChange(item, newStatus as ActionStatus);
   };
 
+  const existingDeliverableLinks = useMemo(
+    () => new Set(deliverables.map((deliverable) => deliverable.external_url).filter(Boolean)),
+    [deliverables],
+  );
+
+  const selectedDoc = platformDocuments.find(d => d.id === newDeliverable.document_id);
+  const selectedDocAlreadyLinked = !!selectedDoc && existingDeliverableLinks.has(selectedDoc.deeplink);
+
   const handleAddDeliverable = () => {
     if (!newDeliverable.document_id) {
       toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
       return;
     }
-    const doc = platformDocuments.find(d => d.id === newDeliverable.document_id);
+    const doc = selectedDoc;
     if (!doc) {
       toast.error(t('actions.selectPlatformDoc', 'Selecione um documento da plataforma'));
       return;
     }
 
-    const docDeepLink = workspaceId
-      ? `/workspace/${workspaceId}?tab=documents&doc=${encodeURIComponent(doc.id)}`
-      : undefined;
+    if (doc.isReadyToAttach) {
+      if (selectedDocAlreadyLinked) {
+        toast.error(t('actions.deliverableAlreadyLinked', 'Este documento já está ligado a esta ação'));
+        return;
+      }
 
-    onAddDeliverable?.(item.id, {
-      title: doc.name || 'Documento',
-      type: 'platform_document',
-      external_url: docDeepLink,
-    });
+      onAddDeliverable?.(item.id, {
+        title: doc.name || 'Documento',
+        type: 'platform_document',
+        external_url: doc.deeplink,
+      });
+    }
 
     setNewDeliverable({ document_id: '' });
     setAddDeliverableOpen(false);
-    // Navigate to documents tab so the founder can fill in the template
-    if (docDeepLink) {
-      navigate(docDeepLink);
-    }
+
+    navigate(doc.deeplink);
   };
 
   return (
@@ -249,21 +249,25 @@ export const ActionItemCard = memo(function ActionItemCard({
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
               <Label className="text-xs">{t('actions.selectPlatformMaterial', 'Material da plataforma')} *</Label>
-              <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable({ document_id: v })}>
+                <Select value={newDeliverable.document_id} onValueChange={v => setNewDeliverable({ document_id: v })}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('actions.selectPlatformDocPlaceholder', 'Selecionar material...')} /></SelectTrigger>
                 <SelectContent>
                   {platformDocuments.length === 0 ? (
                     <div className="px-2 py-3 text-xs text-muted-foreground text-center">{t('actions.noPlatformDocs', 'Sem materiais disponíveis')}</div>
                   ) : (
                     platformDocuments.map(doc => (
-                      <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                        <SelectItem key={doc.id} value={doc.id}>
+                          {doc.isReadyToAttach ? `✓ ${doc.name}` : doc.name}
+                        </SelectItem>
                     ))
                   )}
                 </SelectContent>
               </Select>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('actions.deliverableDocHint', 'Ao criar, será redirecionado para o separador de Documentos para preencher o material da plataforma.')}
+                {selectedDoc?.isReadyToAttach
+                  ? t('actions.deliverableDocExistingHint', 'Se o documento já estiver concluído, será ligado a esta ação e aberto na base de documentos.')
+                  : t('actions.deliverableDocHint', 'Ao escolher, será redirecionado para o separador de Documentos para preencher e submeter o material da plataforma.')}
             </p>
           </div>
           <DialogFooter>
