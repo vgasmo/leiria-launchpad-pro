@@ -197,10 +197,27 @@ export function MilestonesActionsTab({ workspaceId, canWrite, isStaff, programId
 
   const handleAddDeliverable = useCallback(async (actionId: string, deliverable: { title: string; type: string; external_url?: string; document_id?: string }) => {
     try {
-      await createDeliverable.mutateAsync({ action_id: actionId, title: deliverable.title, type: deliverable.type, external_url: deliverable.external_url || null, document_id: deliverable.document_id || null });
+      // Guard: deliverable must carry at least one source (file_path / external_url / document_id) to satisfy DB CHECK
+      const fallbackUrl = workspaceId ? `/workspace/${workspaceId}?tab=documents` : null;
+      const externalUrl = deliverable.external_url || fallbackUrl;
+      const documentId = deliverable.document_id && /^[0-9a-f-]{36}$/i.test(deliverable.document_id) ? deliverable.document_id : null;
+      if (!externalUrl && !documentId) {
+        toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável'));
+        return;
+      }
+      await createDeliverable.mutateAsync({
+        action_id: actionId,
+        title: deliverable.title,
+        type: deliverable.type,
+        external_url: externalUrl,
+        document_id: documentId,
+      });
       toast.success(t('actions.deliverableAdded', 'Entregável adicionado'));
-    } catch { toast.error(t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável')); }
-  }, [createDeliverable, t]);
+    } catch (err: any) {
+      console.error('[handleAddDeliverable] failed', err);
+      toast.error(err?.message || t('actions.failedToAddDeliverable', 'Erro ao adicionar entregável'));
+    }
+  }, [createDeliverable, t, workspaceId]);
 
   const handleCompleteDeliverable = useCallback(async (id: string, actionId: string) => {
     try {
