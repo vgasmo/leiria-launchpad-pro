@@ -28,6 +28,7 @@ import { useTemplateInstances, useTemplates } from '@/hooks/useTemplates';
 import { BulkActionsBar, useBulkSelection } from '@/components/ui/BulkActionsBar';
 import { useExportActions, exportActionsToCsv } from '@/hooks/useExportData';
 import { ActionItemCard, type PlatformDocument } from './actions/ActionItemCard';
+import { buildPlatformDocumentOptions } from '@/lib/platformDocuments';
 import { MilestoneActionGroup } from './actions/MilestoneActionGroup';
 import { KanbanColumn } from './actions/KanbanColumn';
 import { toast } from 'sonner';
@@ -56,18 +57,8 @@ export function ActionItemsTab({ workspaceId, canWrite }: ActionItemsTabProps) {
   const { data: templateInstances } = useTemplateInstances(workspaceId);
   const { data: globalTemplates } = useTemplates();
   const platformDocuments = useMemo<PlatformDocument[]>(() => {
-    const docs: PlatformDocument[] = [];
-    (templateInstances || []).forEach(ti => {
-      docs.push({ id: ti.id, name: `✓ ${ti.template?.name || ti.template_id}`, type: 'template_instance' });
-    });
-    const instantiatedTemplateIds = new Set((templateInstances || []).map(ti => ti.template_id));
-    (globalTemplates || []).forEach(t => {
-      if (!instantiatedTemplateIds.has(t.id)) {
-        docs.push({ id: `template:${t.id}`, name: t.name, type: 'template' });
-      }
-    });
-    return docs;
-  }, [templateInstances, globalTemplates]);
+    return buildPlatformDocumentOptions(workspaceId, templateInstances || [], globalTemplates || []);
+  }, [workspaceId, templateInstances, globalTemplates]);
   const updateAction = useUpdateActionItem(workspaceId);
   const deleteAction = useDeleteActionItem(workspaceId);
   const createAction = useCreateActionItemFull(workspaceId);
