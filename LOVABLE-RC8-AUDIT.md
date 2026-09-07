@@ -58,6 +58,8 @@ Não aplicados (24): P0.1, P0.2 (BD), P1.3 (edge), P2.1, P2.2, P3.1, P3.2 (parci
 | N14 | LOW | `sweep-session-transcripts/index.ts:24,39-53` | duas linhas em `cron_job_runs` por corrida |
 | N15 | LOW | `20260903135424` | seed com UUID fixo → `migration-scan` vermelho; allowlist "baseline-frozen" |
 | N16 | LOW | `WorkQueueBulkActions.tsx:78` vs `pt.json:10026` | `{{ok}}`/`{{failed}}` literais |
+| N17 | MED | `src/hooks/useGovernance.ts:150-160`; `GovernanceTab.tsx:250` | founder pede revisão de stage gate → insert na fila de staff rejeitado pela RLS (provado) e não verificado → item nunca criado |
+| N18 | LOW | 12 edge functions sem chamador (`analyze-template`, `bulk-create-workspaces`, `commit-hubspot-*`, `export-cohort-health-pdf`, `generate-first-contact-brief`, `generate-invoices`, `generate-session-suggestions`, `graph-config-status`, `run-workflow-rules`, `send-whatsapp-reminder`, `validate-booking-slot`) | superfície e manutenção; `generate-invoices` desagendada por governança em 20260715 |
 
 ## Verificado e OK
 
@@ -69,6 +71,8 @@ Não aplicados (24): P0.1, P0.2 (BD), P1.3 (edge), P2.1, P2.2, P3.1, P3.2 (parci
 - **`startup_contracts.status`** é `text` com CHECK vivo (draft, pending_signature, active, suspended, terminated, expired); `'signed'` só é escrito em `contract_intakes`.
 - `approve_user_account` verifica admin no corpo; `has_program_access` dá acesso aos founders dos programas dos seus workspaces.
 - `'consultant'` como role: zero. `staff_work_queue_items.status = 'pending'`, `startup_stage = 'product_development'`, `action_status = 'todo'`: não encontrados nas migrações novas.
+- **SECURITY DEFINER recentes (≥ 20/jul) executáveis por `authenticated`:** as 20 candidatas têm verificação de papel no corpo (`is_staff`/`has_role`/`42501`), exceto `serialize_program_tree` (P0.1) e o oráculo `founder_notifications_blocked` (N13).
+- **RPCs chamadas vs `types.ts`:** 68 nomes chamados, todos existem (o único desvio é um comentário em `bulk-import-extract`). **IA:** as 16 funções usam `ai.gateway.lovable.dev` com `google/gemini-*`. Sem `<SelectItem value="">`. `format()` sem `locale` só em formatos numéricos. Faturação mensal desligada por decisão (`20260715222852`), não é bug.
 - i18n: paridade PT/EN 9053 chaves (gate do vendor passa); famílias `inbox.tab.*`, `story.kind.*`, `privateDocs.source.*` já não são usadas; `contracts.risk.*` e `oauthConsent.*` presentes.
 
 ## CI em `main` (`vgasmo/remix-of-startup-companion`)
