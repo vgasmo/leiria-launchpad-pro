@@ -1,4 +1,4 @@
-# PROMPT LOVABLE — RC13 · P00 — Resíduos da RC12: link que aceita `javascript:`, staff suspenso em 5 funções e no Storage, reparações de dados sem migração, gate i18n vermelho [resíduos de 2 HIGH, 4 MED, 2 LOW e 3 regressões]
+# PROMPT LOVABLE — RC13 · P00 — Resíduos da RC12: link que aceita `javascript:`, staff suspenso em 5 funções e no Storage, avisos que abrem o separador errado, reparações de dados sem migração, gate i18n vermelho [resíduos de 2 HIGH, 4 MED, 2 LOW e 3 regressões]
 
 **Contexto.** A RC12 foi aplicada (Partes 1 a 15 e opcionais 1 a 3, drizzle 0019 a 0036). Verifiquei os 236 achados contra o snapshot de 10 nov 2026 e contra uma réplica PostgreSQL 16 construída com `supabase/migrations` mais `drizzle/migrations`. Ficaram 215 fechados. Esta parte fecha o que sobrou e tem correção de código ou de SQL. Todos os diffs abaixo foram aplicados numa cópia do snapshot e passaram `tsc`, `eslint`, `vitest` (51 ficheiros, 331 testes), `i18n:lint`, `i18n:check` e `deno check`; o SQL das secções 3 e 7 foi provado na réplica dentro de transações desfeitas, aplicado duas vezes seguidas.
 
@@ -7,10 +7,10 @@
 2. Cada secção traz o diff exato (`diff -U2`, números de linha do ficheiro ATUAL, que é o snapshot de 10 nov 2026). Se um diff não aplicar porque o ficheiro já mudou, **pare nessa secção e diga qual**; não improvise outra solução.
 3. SQL: há dois blocos, um na secção 3 e outro na secção 7. Aplique-os pela ferramenta de migrações do projeto, a seguir à `0036_rc12_intake_reminders_reset`, **em duas migrações separadas e por esta ordem**, como fez com as partes RC12. São idempotentes, não redefinem nenhuma função e por isso não têm guardas md5. Se a ferramenta recusar o bloco da secção 7 por tocar em `storage.objects`, **pare nessa secção e diga-o**; não o contorne e não desfaça o resto.
 4. Nunca edite migrações que já existem, nem `src/integrations/supabase/types.ts`.
-5. Edge functions: depois de aplicar, publique as cinco alteradas (`get-global-integrations`, `generate-relationship-recap`, `publish-program-setup`, `sync-outlook-emails`, `teams-notify`). Nenhum ficheiro `_shared` muda.
+5. Edge functions: depois de aplicar, publique as seis alteradas (`get-global-integrations`, `generate-relationship-recap`, `publish-program-setup`, `sync-outlook-emails`, `teams-notify`, `automation-engine`). Nenhum ficheiro `_shared` muda.
 6. No fim, responda com: (a) a lista de secções aplicadas, (b) o que não aplicou e porquê, (c) qualquer erro de compilação ou de migração, com o texto exato.
 
-*(Para o responsável, não para o Lovable: antes de mandar aplicar a secção 2, corra o bloco 4 de `LOVABLE-RC13-VERIFICACAO-BASE-VIVA.sql`. Se houver contas de staff com `account_status = 'pending'`, aprove-as primeiro. As cinco funções passam a responder 403 a quem não esteja aprovado, tal como já fazem as funções corrigidas na Parte 2 da RC12. A secção 7 só afeta contas suspensas.)*
+*(Para o responsável, não para o Lovable: a secção 2 passa a recusar staff que não esteja aprovado. O bloco 4 de `LOVABLE-RC13-VERIFICACAO-BASE-VIVA.sql`, corrido na base real a 11 nov 2026, veio vazio: não há nenhuma conta de staff pendente nem suspensa, por isso ninguém fica bloqueado e não há nada a aprovar antes.)*
 
 ---
 
@@ -184,9 +184,9 @@ O SQL desta secção está no bloco único da secção 3 (ponto 4 do ficheiro).
 
 **Ficheiros e linhas:** `drizzle/migrations/0028_rc12_funnel_promote_operational.sql` (acaba na linha 11, sem a UPDATE de reparação); `drizzle/migrations/0030_rc12_log_retention.sql` (acaba na linha 27, sem a INSERT no monitor); nenhuma migração contém os UPDATE a `notifications.link`.
 
-**O que acontece hoje.** A Parte 6 da RC12 trazia três instruções de dados dentro das migrações. No snapshot as migrações ficaram sem elas e o registo `docs/RC12-APPLIED.md` diz que correram "pela ferramenta de dados". Não há prova disso no repositório e o próprio registo contradiz-se (linha 52 diz que correu, linha 119 diz que a purga não tem expectativa de saúde; `docs/rc5/automation-manifest.md:23` declara `no_health_expectation`). Consequências se não correram: (E2E-04) leads contratadas antes da RC12 continuam com `type = 'lead'` e aparecem como "parada" e "sem próxima ação" na Inbox do CRM; (FEX-05) notificações antigas apontam para `/dashboard` e `/admin?tab=contracts`, que não existem; (DBP-07, OPS-12) se a purga diária deixar de correr, o monitor de saúde não avisa. Além disso, um ambiente reconstruído do repositório nasce sem estas correções. Uma das 108 asserções das suites pgTAP do Anexo T falha na réplica precisamente por isto ("DBP-07: monitor de saude conhece a purga").
+**O que acontece hoje.** A Parte 6 da RC12 trazia três instruções de dados dentro das migrações. No snapshot as migrações ficaram sem elas e o registo `docs/RC12-APPLIED.md` diz que correram "pela ferramenta de dados". As consultas na base real, a 11 nov 2026, mostram que duas correram mesmo e uma ficou a meio: leads contratadas por reparar, 0; expectativa de saúde da purga, presente; notificações com link `/dashboard`, 0; **notificações com link `/admin?tab=contracts`, 24**. Essas 24 continuam a nascer porque um gerador ficou por corrigir (secção 8). Além disso, um ambiente reconstruído do repositório nasce sem nenhuma destas correções, e uma das 108 asserções das suites pgTAP do Anexo T falha na réplica precisamente por isso ("DBP-07: monitor de saude conhece a purga").
 
-**O que passa a acontecer.** Uma migração nova repete as três instruções (não fazem nada se já tiverem corrido) e acrescenta a constraint da secção 1. Com ela aplicada, as 24 asserções da suite de retenção passam.
+**O que passa a acontecer.** Uma migração nova repete as três instruções, que não fazem nada onde já correram, repara as 24 notificações e as de lead parada, e acrescenta a constraint da secção 1. Os avisos de intake parado passam a abrir a lead no CRM quando o intake a tem; os restantes abrem os contratos do backoffice. Com ela aplicada, as 24 asserções da suite de retenção passam.
 
 **Aplicar pela ferramenta de migrações (conteúdo exato):**
 
@@ -202,13 +202,24 @@ UPDATE public.funnel_items
    SET type = 'startup_active', converted_at = COALESCE(converted_at, updated_at, now())
  WHERE type = 'lead' AND linked_workspace_id IS NOT NULL AND stage IN ('contracted', 'incubating', 'accelerating');
 
--- 3) FEX-05: notificações antigas com links para rotas que não existem.
+-- 3) FEX-05: notificações já criadas com links para rotas ou separadores que não existem.
 UPDATE public.notifications
    SET link = '/my-workspaces' || substr(link, length('/dashboard') + 1)
  WHERE link = '/dashboard' OR link LIKE '/dashboard?%';
+--    avisos de intake parado: vão para a lead no CRM quando o intake a tem...
+UPDATE public.notifications n
+   SET link = '/crm?open=' || ci.funnel_item_id
+  FROM public.contract_intakes ci
+ WHERE n.link = '/admin?tab=contracts' AND n.entity_type = 'contract_intake'
+   AND n.entity_id = ci.id AND ci.funnel_item_id IS NOT NULL;
+--    ...e os restantes para os contratos do backoffice
 UPDATE public.notifications
    SET link = '/admin?tab=backoffice&subtab=contracts'
  WHERE link = '/admin?tab=contracts';
+--    avisos de lead parada: vão para a própria lead
+UPDATE public.notifications
+   SET link = '/crm?open=' || entity_id
+ WHERE link = '/admin?tab=crm' AND entity_type = 'funnel_item' AND entity_id IS NOT NULL;
 
 -- 4) FEB-01 (família): startups.startup_portugal_document_path é escrito pelo founder e aberto pelo staff com um clique.
 --    Mesma regra das 7 colunas da RC12 (drizzle 0020): NULL, http(s):// ou valor sem ':'. Idempotente.
@@ -368,6 +379,59 @@ CREATE POLICY rc12_suspended_block ON storage.objects
   AS RESTRICTIVE FOR ALL TO authenticated
   USING ((SELECT public.account_not_suspended((SELECT auth.uid()))))
   WITH CHECK ((SELECT public.account_not_suspended((SELECT auth.uid()))));
+```
+
+---
+
+## 8. Avisos de intake parado e de lead parada abrem o separador errado (id: FEX-05, resíduo)
+**Gravidade:** MED. **Impacto na Estrela-Guia:** direto no caminho até à 1.ª sessão: são os dois avisos que empurram uma lead ou um intake parados, e hoje levam a um ecrã que não tem nada a ver. **Esforço:** baixo, 1 ficheiro. **Risco:** baixo.
+
+**Ficheiros e linhas:** `supabase/functions/automation-engine/index.ts:513` (lead parada), `:603` (consulta dos intakes), `:615` (link da notificação) e `:624` (link do email).
+
+**O que acontece hoje.** O motor de automações corre de hora a hora. Quando uma lead está parada há 14 dias avisa o consultor com o link `/admin?tab=crm`; quando um intake está parado há 7 dias avisa o responsável, uma vez por dia, com o link `/admin?tab=contracts`, na notificação e no email. Nenhum dos dois separadores existe em `src/pages/Admin.tsx:49-54`, por isso quem clica cai no separador Aprovações (`Admin.tsx:81`). Na base real havia 24 notificações com o segundo link a 11 nov 2026. A origem é o meu próprio pacote: a Parte 10 da RC12 tocou nestas linhas para escapar o HTML e deixou o link como estava. Os outros geradores já usam os destinos certos: `/crm?open=<lead>` em `generate-crm-notifications/index.ts:181` e `public-contract-onboarding/index.ts:795-797`.
+
+**O que passa a acontecer.** O aviso de lead parada abre a própria lead no CRM. O aviso de intake parado abre a lead do intake no CRM ou, se o intake não tiver lead, os contratos do backoffice; o email leva o mesmo link. As notificações já criadas são reparadas pelo ponto 3 da migração da secção 3.
+
+**Alterar `supabase/functions/automation-engine/index.ts`:**
+
+```diff
+--- a/supabase/functions/automation-engine/index.ts
++++ b/supabase/functions/automation-engine/index.ts
+@@ -511,5 +511,5 @@
+             `Lead parada há 14+ dias — ${lead.organization_name || lead.contact_name || 'Lead'}`,
+             `Sem atividade na lead desde ${new Date(lastActivity).toLocaleDateString('pt-PT')}.`,
+-            `/admin?tab=crm`,
++            `/crm?open=${lead.id}`,
+             'funnel_item', lead.id)
+           await recordRun(supabase, 'crm_lead_stale', lead.id, 'funnel_item', lead.owner_consultant_id, todayStr, 'app')
+@@ -601,5 +601,5 @@
+         const { data: intakes, error: intakesErr } = await supabase
+           .from('contract_intakes')
+-          .select('id, organization_name, status, created_at, assigned_to, legal_representative_email')
++          .select('id, organization_name, status, created_at, assigned_to, legal_representative_email, funnel_item_id')
+           .in('status', ['draft_internal', 'intake_requested', 'intake_in_progress', 'changes_requested'])
+           .lt('created_at', sevenDaysAgo)
+@@ -610,8 +610,12 @@
+           if (intake.assigned_to) {
+             if (!(await wasAlreadyRun(supabase, 'intake_stale', intake.id, intake.assigned_to, todayStr))) {
++              // Mesmo destino dos outros avisos de intake: a lead no CRM, ou os contratos do backoffice se não houver lead.
++              const intakeLink = intake.funnel_item_id
++                ? `/crm?open=${intake.funnel_item_id}`
++                : '/admin?tab=backoffice&subtab=contracts'
+               await notify(supabase, intake.assigned_to, 'intake_stale',
+                 `Intake incompleto há 7+ dias — ${intake.organization_name || 'Sem nome'}`,
+                 `O processo de intake está pendente há mais de 7 dias.`,
+-                `/admin?tab=contracts`,
++                intakeLink,
+                 'contract_intake', intake.id)
+               const claimed = await recordRun(supabase, 'intake_stale', intake.id, 'contract_intake', intake.assigned_to, todayStr, 'both')
+@@ -622,5 +626,5 @@
+                 if (await sendEmail(email,
+                   `[Startup Leiria] Intake incompleto — ${intake.organization_name || 'Processo'}`,
+-                  `<p>O intake de <strong>${escapeHtml(intake.organization_name || 'um processo')}</strong> está pendente há mais de 7 dias.</p><p><a href="${SITE_URL}/admin?tab=contracts">Ver intakes</a></p>`)) {
++                  `<p>O intake de <strong>${escapeHtml(intake.organization_name || 'um processo')}</strong> está pendente há mais de 7 dias.</p><p><a href="${SITE_URL}${intakeLink}">Ver intakes</a></p>`)) {
+                   result.emails++
+                 }
 ```
 
 ---

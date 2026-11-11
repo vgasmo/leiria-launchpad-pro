@@ -3,11 +3,34 @@
 **Veredicto.** Tinha razão: quase todos ficaram fechados. Dos 236 achados da RC12, **215 estão fechados (91%)**, verificados um a um no código novo e, onde toca à base, numa réplica PostgreSQL 16 reconstruída a partir do snapshot. **Os 4 HIGH estão corrigidos no que a RC12 prescrevia**, com prova de comportamento na réplica; dois deles têm superfícies que a RC12 deixou de fora e que continuam abertas: um staff suspenso ainda passa em 5 Edge Functions e no Storage (ONB-02), e há um link que aceita `javascript:` (FEB-01). **Ficam 21 por fechar**: esses 2 HIGH com resíduos, 7 MED e 12 LOW. Oito dos 21 fecham com o prompt `LOVABLE-RC13-P00-RESIDUOS-RC12.md`, já validado; os outros 13 são decisões suas, CI ou documentação. Há ainda um ponto que não é defeito mas pesa: **segundo o registo do próprio Lovable, o frontend não foi publicado**, ou seja, as correções de cliente da RC12 podem ainda não estar em produção.
 
 ### O que fazer, por ordem
-1. **Hoje, sem alterar nada:** correr `LOVABLE-RC13-VERIFICACAO-BASE-VIVA.sql` na base real. São 13 blocos só de leitura; cada um diz o resultado esperado. Confirma o que o snapshot não mostra: se as reparações de dados correram, se os hashes das funções batem com a réplica e se há contas de staff por aprovar.
+1. **Feito a 11 nov:** correu `LOVABLE-RC13-VERIFICACAO-BASE-VIVA.sql` na base real. O resultado está na secção "Atualização de 11 nov", logo abaixo.
 2. **Confirmar se o frontend já foi publicado** depois de 9 nov. `docs/RC12-APPLIED.md` diz cinco vezes que não, a última na linha 144. Sem publicação, o que os utilizadores usam ainda é o cliente anterior à RC12.
-3. **Colar `LOVABLE-RC13-P00-RESIDUOS-RC12.md` no Lovable.** Sete secções, 12 ficheiros, 2 migrações. Fecha o link `javascript:` que sobrou, o staff suspenso em 5 funções e no Storage, as reparações de dados sem migração e o gate i18n vermelho.
+3. **Colar `LOVABLE-RC13-P00-RESIDUOS-RC12.md` no Lovable.** Oito secções, 13 ficheiros, 2 migrações. Fecha o link `javascript:` que sobrou, o staff suspenso em 5 funções e no Storage, os avisos que abrem o separador errado, as reparações de dados sem migração e o gate i18n vermelho.
 4. **Decidir os 5 pontos da secção 8.** O mais importante é o das contas de staff pendentes.
 5. **Só depois abrir a RC13.** Os achados novos da secção 7 já são matéria-prima para ela.
+
+## Atualização de 11 nov · O que a base viva respondeu
+
+Correu os 13 blocos na base real. **Doze vieram como esperado e um não.**
+
+| Bloco | Resultado | Leitura |
+|---|---|---|
+| 1 | 37 migrações no histórico drizzle | As 18 migrações RC12 estão aplicadas |
+| 2 | Os 9 hashes são iguais aos da réplica | A réplica é fiel à base viva nas funções centrais. Os guardas md5 de patches futuros podem partir destes valores |
+| 3 | Só `profiles` e `user_roles` sem a política; nenhuma tabela sem RLS | ONB-02 confirmado nas 204 tabelas |
+| 4 | Vazio | **Não existe nenhuma conta de staff pendente nem suspensa.** Ninguém está hoje a explorar os resíduos do ONB-02, e fechar o bypass do staff pendente não bloqueia ninguém |
+| 5 | 7 constraints; 0 linhas a violá-las | FEB-01 confirmado; não há URLs perigosos guardados |
+| 6 | Purga agendada, com expectativa de saúde e a correr com sucesso a 10 e 11 nov | **DBP-07 e OPS-12 estão fechados na base viva.** O Lovable inseriu mesmo a expectativa à mão; falta só no repositório |
+| 7 | 0 leads por reparar | **E2E-04 está fechado na base viva** |
+| 8 | 0 links `/dashboard`; **24 links `/admin?tab=contracts`** | **O único fora do esperado.** Ver abaixo |
+| 9, 10 | Vazios | Nenhuma linha do importador presa; nenhuma ativação de contrato pendente |
+| 11 | 25 jobs ativos, cadências certas, 0 falhas em 24 horas | O agendador está saudável. Atenção ao que isto não prova: o pg_cron só regista que o pedido foi disparado, não que a Edge Function respondeu bem. Validar a resposta HTTP é um dos pontos da RC13 |
+| 12 | 0 política no Storage; RLS ligada; as 7 políticas previstas | Tal como previsto antes do P00. Confirma que o teste que fiz na réplica reproduz a base real |
+| 13 | 0 valores perigosos; 0 constraint | Tal como previsto antes do P00. A migração não vai anular nenhum dado |
+
+**O bloco 8.** As 24 notificações não são restos antigos: há um gerador que ainda as cria. O motor de automações (`supabase/functions/automation-engine/index.ts:615` e `:624`) avisa o responsável, uma vez por dia, de cada intake parado há mais de 7 dias, com o link `/admin?tab=contracts`, na notificação e no email. Esse separador não existe e quem clica cai em Aprovações. O mesmo ficheiro, na linha 513, faz igual com as leads paradas há 14 dias e o link `/admin?tab=crm`. A falha é do meu pacote: a Parte 10 da RC12 tocou nessas linhas para escapar o HTML e deixou os links. Corrigi no P00, secção 8, e a migração da secção 3 repara as que já existem. São precisamente os dois avisos que empurram uma lead ou um intake parados em direção à 1.ª sessão.
+
+**Contas atualizadas.** Na base viva estão fechados 218 dos 236. Dos 18 que sobram, 5 fecham com o P00 e 13 são decisões suas, CI ou documentação. No repositório continuam por fechar os 21, porque as três reparações feitas à mão não estão em nenhuma migração; o P00 também resolve isso.
 
 ## 1. Como verifiquei
 
@@ -51,13 +74,13 @@ Com o P00 aplicado numa cópia: `tsc`, `eslint`, `vitest`, `i18n:lint`, `i18n:ch
 | **FEB-01** (link novo) | HIGH | `src/components/workspace/StartupSettingsTab.tsx:437` desenha o link "Ver documento" com o valor cru de `startups.startup_portugal_document_path`. Provei na réplica que um founder grava lá `javascript:alert(document.domain)`. Quem clica é o admin ou o consultor | P00, secções 1 e 3 |
 | **ONB-02** (Storage e funções) | HIGH | Sete políticas de `storage.objects` leem `user_roles` diretamente. Provei na réplica que um backoffice suspenso lê e apaga um ficheiro do bucket `contract-documents`. As 5 Edge Functions são as do HRD-02, na linha seguinte | P00, secções 2 e 7 |
 | **HRD-02** | MED | `get-global-integrations` e mais 4 funções autorizam pelo papel sem olhar ao estado da conta. Um staff suspenso com sessão válida ainda publica nos canais do Teams, lê integrações, gera resumos do CRM, dispara sincronizações e grava em `programs` antes de a RPC recusar | P00, secção 2 |
-| **E2E-04** | MED | O trigger novo trata as leads novas; a reparação das leads já contratadas não está em nenhuma migração | P00, secção 3; bloco 7 das consultas |
-| **FEX-05** | MED | Os dois UPDATE aos links antigos das notificações não estão em nenhuma migração. Por confirmar na base viva | P00, secção 3; bloco 8 |
-| **DBP-07** | MED | A purga corre e está agendada, mas o monitor de saúde não a conhece: se parar, ninguém é avisado | P00, secção 3; bloco 6 |
+| **E2E-04** | MED | O trigger novo trata as leads novas; a reparação das leads já contratadas não está em nenhuma migração. **Fechado na base viva a 11 nov**; falta só no repositório | P00, secção 3 |
+| **FEX-05** | MED | Os links `/dashboard` foram reparados. Ficam 24 notificações com `/admin?tab=contracts` na base viva e um gerador que as continua a criar, mais o link `/admin?tab=crm` das leads paradas | P00, secções 3 e 8 |
+| **DBP-07** | MED | A purga corre e está agendada, mas no repositório o monitor de saúde não a conhece. **Fechado na base viva a 11 nov**; falta só no repositório | P00, secção 3 |
 | **FEF-04** | MED | O bloco "Insight IA" foi escondido na UI, mas `workspaces.health_notes` e `priority_notes` continuam legíveis pelo founder por API. Provei na réplica: um founder lê as notas internas do staff sobre o seu próprio workspace. O servidor MCP também as devolve (`src/lib/mcp/tools/get-workspace-overview.ts:27`) | RC13, módulo próprio. Decisão 3 |
 | **OPS-06** | MED | O job `db-tests` do CI, que corre no main, só aplica `supabase/migrations` e tem suites que dependem de objetos que só existem no drizzle. Fica vermelho | Decisão 2 |
 | **DRF-01** | MED | O Lovable não espelhou o drizzle em `supabase/migrations`. Mitigou com o job `db-pgtap-local`, que reconstrói a cadeia completa. `supabase start` continua a nascer sem as proteções | Decisão 2 |
-| **OPS-12** | LOW | Mesma lacuna única do DBP-07 | P00, secção 3 |
+| **OPS-12** | LOW | Mesma lacuna única do DBP-07. **Fechado na base viva a 11 nov** | P00, secção 3 |
 | **FEX-16** | LOW | `PublicContractSigning.tsx:184` e `PublicSurvey.tsx:224` ainda mudam de idioma sem carregar a tradução primeiro | P00, secção 5 |
 | **FEX-08** | LOW | O anexo i18n foi aplicado a 100%, mas o `en.json` ainda tem cerca de 150 valores em português fora desse anexo | Anexo i18n na RC13 |
 | **FEB-09** | LOW | Seis chaves de `admin.userManagement` em português no `en.json`, no diálogo de suspensão | Anexo i18n na RC13 |
@@ -93,7 +116,7 @@ O Lovable declarou várias diferenças face ao que a RC12 prescrevia. Conferi-as
 - **Dois endurecimentos além do pedido:** sem segredo HMAC a prova de NDA devolve erro em vez de usar um segredo previsível; sem leitura da prova não inventa data.
 - **Testes escritos a partir da descrição** quando o anexo não trazia o conteúdo. Passam e cobrem o descrito, mas são 30 ficheiros a menos do que o Anexo T previa.
 - **O que o Lovable não aplicou e declarou:** buckets (SCH-16), `config.toml` (DRF-03), espelho do drizzle (DRF-01).
-- **O que o registo afirma e o snapshot contradiz:** diz que a expectativa da purga foi inserida (linha 52) e, mais abaixo, que a purga não tem expectativa (linha 119). Diz que o `i18n:lint` passa com zero problemas; no snapshot falha. Diz que `LOVABLE-RC12-DADOS-AFETADOS.sql` não lhe foi entregue.
+- **Onde o registo não bate com o snapshot:** diz que a expectativa da purga foi inserida (linha 52) e, mais abaixo, que a purga não tem expectativa (linha 119). A base viva dá razão à linha 52. Diz que o `i18n:lint` passa com zero problemas; no snapshot falha. Diz que `LOVABLE-RC12-DADOS-AFETADOS.sql` não lhe foi entregue.
 
 ## 7. Achados novos, fora da RC12
 
@@ -104,11 +127,12 @@ Apareceram ao validar os HIGH. Entram na RC13.
 3. **Atribuir um utilizador a um workspace faz 4 escritas sem transação** (`src/hooks/useAdminData.ts:221-246`): insere em `workspace_users`, faz upsert em `user_roles` sem ler o erro, aprova a conta e ativa o workspace sem ler erro nem contagem. Viola a regra 3 do projeto. Uma falha a meio deixa papel sem aprovação, que é exatamente o estado do ponto 1.
 4. **A página da métrica Norte está escondida.** `/staff/impact` (`src/pages/StaffImpact.tsx`) mostra sessões concluídas, agendadas, canceladas e faltas, horas, startups apoiadas e startups sem contacto há 30 dias, via `get_impact_aggregates`. Só se lá chega escrevendo o endereço. É o candidato mais óbvio a ganho rápido da RC13.
 5. **Colunas de URL sem regra na base.** As 7 constraints da RC12 cobrem as colunas onde havia `href` por sanitizar. Ficam sem regra, entre outras, `contract_intakes.website` (escrita por anónimos no formulário público), `startups.website`, `investors.website`, `dataroom_items.url`, `resources.url` e `notifications.link`. Hoje todos os pontos onde são desenhadas passam pelo sanitizador, por isso é defesa em profundidade e não um defeito ativo.
-6. **Sessão de conta suspensa continua válida.** Já estava na sua lista da RC13. O P00 tapa as 5 funções e o Storage; a revogação imediata do refresh token é o que fecha a raiz.
+6. **Dois avisos automáticos abrem o separador errado.** Intake parado e lead parada, no motor de automações. Descrito na atualização de 11 nov e corrigido no P00, secção 8. O aviso de intake repete-se todos os dias sem limite enquanto o intake estiver parado; se isso é útil ou ruído é matéria para a RC13.
+7. **Sessão de conta suspensa continua válida.** Já estava na sua lista da RC13. O P00 tapa as 5 funções e o Storage; a revogação imediata do refresh token é o que fecha a raiz.
 
 ## 8. Decisões que são suas
 
-1. **Staff pendente.** Recomendo fechar o bypass: papel de staff só vale com conta aprovada, na base, no cliente e nas funções. É a leitura mais simples da sua invariante e elimina a divergência entre camadas. Pré-condição: o bloco 4 devolver zero pendentes, ou aprovar primeiro quem lá aparecer. O risco de o fazer às cegas é bloquear pessoas reais da equipa. A alternativa é manter o bypass e alinhar as Edge Functions com ele; não a recomendo.
+1. **Staff pendente.** Recomendo fechar o bypass: papel de staff só vale com conta aprovada, na base, no cliente e nas funções. É a leitura mais simples da sua invariante e elimina a divergência entre camadas. A pré-condição está cumprida: o bloco 4 veio vazio a 11 nov, por isso ninguém fica bloqueado. A alternativa é manter o bypass e alinhar as Edge Functions com ele; não a recomendo.
 2. **CI.** Os jobs `db-tests` e `e2e` usam `supabase start`, que só conhece `supabase/migrations`. Recomendo aplicar a fixture e `drizzle/migrations/*.sql` logo a seguir ao `supabase start` nesses dois jobs. Não consigo correr um workflow do GitHub aqui, por isso só entrego esse diff se quiser e com a nota de que precisa de uma corrida real para validar. A alternativa de menor esforço é retirar o `supabase test db` desses jobs, porque o `db-pgtap-local` já cobre as 38 suites sobre a cadeia completa.
 3. **Notas internas do staff (FEF-04).** Recomendo tirá-las de `workspaces` para uma tabela só de staff, com RLS por `is_staff()`. Revogar a leitura por coluna parte os `select *` do cliente. Mexe em `PrioritySelector`, `useHealthScore`, na RPC de conversão e na ferramenta MCP. É um módulo da RC13.
 4. **`/staff/impact`.** Recomendo ligá-la na barra lateral de admin e consultor em vez de retirar a rota. É a página que mede a estrela-guia.
@@ -128,7 +152,7 @@ Apareceram ao validar os HIGH. Entram na RC13.
 | Ficheiro | Para quê |
 |---|---|
 | `LOVABLE-RC13-FECHO-RC12.md` | Este relatório |
-| `LOVABLE-RC13-P00-RESIDUOS-RC12.md` | Prompt pronto a colar no Lovable: 7 secções, 12 diffs, 2 migrações |
+| `LOVABLE-RC13-P00-RESIDUOS-RC12.md` | Prompt pronto a colar no Lovable: 8 secções, 13 diffs, 2 migrações |
 | `LOVABLE-RC13-VERIFICACAO-BASE-VIVA.sql` | 13 blocos só de leitura para correr na base real |
 | `LOVABLE-RC13-FECHO-RC12-EVIDENCIAS.csv` | Uma linha por evidência: achado, parte, estado, ficheiro, linha, excerto, o que falta e adaptação |
 

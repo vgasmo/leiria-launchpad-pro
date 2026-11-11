@@ -97,8 +97,16 @@ SELECT count(*) AS leads_contratadas_por_reparar
 -- ============ 8. FEX-05 · notificações com links para rotas que não existem ============
 -- Esperado: 0. Se for maior que 0, quem clica nessas notificações cai numa página inexistente.
 SELECT count(*) FILTER (WHERE link = '/dashboard' OR link LIKE '/dashboard?%') AS links_dashboard,
-       count(*) FILTER (WHERE link = '/admin?tab=contracts') AS links_admin_contracts
+       count(*) FILTER (WHERE link = '/admin?tab=contracts') AS links_admin_contracts,
+       count(*) FILTER (WHERE link = '/admin?tab=crm') AS links_admin_crm
   FROM public.notifications;
+-- A 11 nov 2026 a base real tinha 24 em links_admin_contracts: o motor de automações ainda os gerava (P00, secção 8).
+-- De onde vêm e desde quando (ajuda a confirmar que param de nascer depois do P00):
+SELECT type, link, count(*) AS quantas, min(created_at) AS primeira, max(created_at) AS ultima
+  FROM public.notifications
+ WHERE link IN ('/admin?tab=contracts', '/admin?tab=crm')
+ GROUP BY type, link
+ ORDER BY ultima DESC;
 
 -- ============ 9. Importador em massa · linhas presas a meio ============
 -- Esperado: 0 linhas. Uma linha em 'applying' há mais de 30 minutos ficou presa por a função ter expirado.
